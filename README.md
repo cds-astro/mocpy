@@ -1,7 +1,7 @@
-PyMOC
+MOCPy
 =====
 
-PyMOC is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).
+MOCPy is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).
 
 Introduction
 ------------
