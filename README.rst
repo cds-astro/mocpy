@@ -31,6 +31,8 @@ MOCPy runs under Python 2 and Python 3.
 Installation
 ============
 
+``pip install mocpy``
+
 ===========
 Using MOCPy
 ===========
