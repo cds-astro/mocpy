@@ -22,7 +22,7 @@ from astropy.io import fits
 from astropy.table import Table
 
 
-import utils
+from . import utils
 import math
 
 import sys
@@ -280,7 +280,7 @@ class MOC:
         max_res_order = MOC.HPY_MAX_NORDER
         
         
-        for order in xrange(0, max_res_order):
+        for order in range(0, max_res_order):
             if r2.empty():
                 return res
             
@@ -324,7 +324,7 @@ class MOC:
         max_res_order = MOC.HPY_MAX_NORDER
         diff_order = max_res_order
         for interval in intervals:
-            for j in xrange(interval[0], interval[1]):
+            for j in range(interval[0], interval[1]):
                 order, ipix = utils.uniq2orderipix(j)
                 
                 if order != last_order:
@@ -380,13 +380,13 @@ class MOC:
     
     def uniq_pixels_iterator(self):
         for uniq_iv in self.to_uniq_interval_set().intervals:
-            for uniq in xrange(uniq_iv[0], uniq_iv[1]):
+            for uniq in range(uniq_iv[0], uniq_iv[1]):
                 yield uniq
                 
     def best_res_pixels_iterator(self):
         factor = 4**(MOC.HPY_MAX_NORDER - self.max_order)
         for iv in self._interval_set.intervals:
-            for val in xrange(iv[0] / factor, iv[1] / factor):
+            for val in range(int(iv[0] / factor), int(iv[1] / factor)):
                 yield val
     
     def filter_table(self, table, ra_column, dec_column, keep_inside=True):
@@ -447,7 +447,7 @@ class MOC:
             tbhdu.header['PIXTYPE']  = 'HEALPIX'
             tbhdu.header['ORDERING'] = 'NUNIQ'
             tbhdu.header['COORDSYS'] = 'C'
-            tbhdu.header['MOCORDER'] = moc_order
+            tbhdu.header['MOCORDER'] = int(moc_order)
             tbhdu.header['MOCTOOL']  = 'PyMOC'
             if optional_kw_dict:
                 for key in optional_kw_dict:
@@ -499,7 +499,7 @@ class MOC_io:
         foo = []
         with fits.open(path) as hdulist:
             data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
-            for x in xrange(0, len(hdulist[1].data)):
+            for x in range(0, len(hdulist[1].data)):
                 interval_set.add(data[x][0])
         
         
