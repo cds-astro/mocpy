@@ -17,17 +17,24 @@ except NameError:
     from sets import Set as set
 import numpy as np
 from .interval_set import IntervalSet
+from . import utils
 from astropy.io import fits
 
 from astropy.table import Table
 
 
-import utils
 import math
 
 import sys
 if sys.version > '3':
     long = int
+
+# Python 3 support
+try:
+    xrange
+except NameError:
+    xrange = range
+
     
     
 def bin(s):
@@ -144,7 +151,7 @@ class MOC:
         
         hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False)
         hp.graticule()
-        plt.show(block=False)
+        plt.show()
 
     def query_simbad(self, max_rows=10000):
         """
@@ -432,9 +439,6 @@ class MOC:
         uniq_array = []
         for uniq in self.uniq_pixels_iterator():
             uniq_array.append(uniq)
-#        for uniq_iv in self.to_uniq_interval_set().intervals:
-#            for uniq in xrange(uniq_iv[0], uniq_iv[1]):
-#                uniq_array.append(uniq)
         
         if format=='fits':
             moc_order = self.max_order
