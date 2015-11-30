@@ -2,7 +2,7 @@
 MOCPy
 *****
 
-MOCPy is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).
+MOCPy is a Python library allowing easy creation, parsing and manipulation of MOCs (Multi-Order Coverage maps).
 
 ============
 Introduction
@@ -23,7 +23,7 @@ Requirements
 ============
 
 ``numpy`` and ``astropy`` are required.
-``matplotlib`` is also required is you want to plot a MOC object.
+``matplotlib`` is also required if you want to plot a MOC object.
 
 MOCPy runs under Python 2 and Python 3.
 
@@ -31,9 +31,18 @@ MOCPy runs under Python 2 and Python 3.
 Installation
 ============
 
+``pip install mocpy``
+
 ===========
 Using MOCPy
 ===========
 
+-------------
+Reading a MOC
+-------------
+
+===========
+Examples
+===========
 
 Different examples on how to use MOCPy can be found in the notebooks directory.
