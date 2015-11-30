@@ -143,7 +143,7 @@ class IntervalSet:
         """Convert a list of endpoints, with an optional terminating sentinel,
          into a list of intervals"""
         return [(list_of_endpoints[i], list_of_endpoints[i + 1])
-                 for i in range(0, len(list_of_endpoints) - 1, 2)]
+                 for i in xrange(0, len(list_of_endpoints) - 1, 2)]
 
     @staticmethod
     def merge(a_intervals, b_intervals, op):
