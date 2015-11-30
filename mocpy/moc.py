@@ -74,7 +74,7 @@ class MOC:
         for iv in self._interval_set.intervals:
             combo |= iv[0] | iv[1]
 
-        ret = MOC.HPY_MAX_NORDER - number_trailing_zeros(combo)/2
+        ret = MOC.HPY_MAX_NORDER - int(number_trailing_zeros(combo)/2)
         if ret<0:
             ret = 0
             
