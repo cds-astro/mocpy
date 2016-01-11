@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-version = '0.1.5'
+version = '0.1.9'
 
 setup(name='MOCPy',
       version=version,
@@ -12,7 +12,6 @@ setup(name='MOCPy',
       license='GPL v3',
       url='https://github.com/tboch/mocpy',
       packages=['mocpy'],
-      #package_data={'mocpy.tests':['data/*.fits']},
       requires=['astropy', 'numpy', 'matplotlib'],
       provides=['mocpy'],
       long_description="MOCPy is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).MOC is an `IVOA standard <http://ivoa.net/documents/MOC/>` enabling description of arbitrary sky regions. Based on the HEALPix sky tessellation, it maps regions on the sky into hierarchically grouped predefined cells.",
