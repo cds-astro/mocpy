@@ -58,7 +58,9 @@ class IntervalSet:
                 if itv[1] > stop:
                     stop = itv[1]
            
-        ret.append((start, stop))
+        if start is not None and stop is not None:
+            ret.append((start, stop))
+
         return ret
                 
 
@@ -82,6 +84,7 @@ class IntervalSet:
             if item[0]>item[1]:
                 return
             self._intervals.append(item)
+
         else:
             self._intervals.append((item, item+1))
             
