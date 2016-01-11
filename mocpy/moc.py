@@ -74,7 +74,7 @@ class MOC:
         for iv in self._interval_set.intervals:
             combo |= iv[0] | iv[1]
 
-        ret = MOC.HPY_MAX_NORDER - int(number_trailing_zeros(combo)/2)
+        ret = MOC.HPY_MAX_NORDER - int(number_trailing_zeros(combo)//2)
         if ret<0:
             ret = 0
             
@@ -392,7 +392,7 @@ class MOC:
     def best_res_pixels_iterator(self):
         factor = 4**(MOC.HPY_MAX_NORDER - self.max_order)
         for iv in self._interval_set.intervals:
-            for val in xrange(iv[0] / factor, iv[1] / factor):
+            for val in xrange(iv[0] // factor, iv[1] // factor):
                 yield val
     
     def filter_table(self, table, ra_column, dec_column, keep_inside=True):
