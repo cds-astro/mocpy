@@ -12,7 +12,7 @@ def uniq2orderipix(uniq):
     convert a HEALPix pixel coded as a NUNIQ number
     to a (norder, ipix) tuple
     """
-    order = (int) (math.log(uniq/4, 2)) / 2
+    order =  int( (math.log(uniq//4, 2)) // 2 )
     ipix = uniq - 4 * (4**order)
     
     return (order, ipix) 
