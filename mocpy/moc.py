@@ -97,7 +97,6 @@ class MOC:
         
         return MOC.from_interval_set(iv_set_union)
         
-        return moc
     
     def degrade_to_order(self, new_order):    
         shift = 2 * (MOC.HPY_MAX_NORDER - new_order)
@@ -500,7 +499,6 @@ class MOC_io:
     def __parse(path):
         moc = MOC()
         interval_set = IntervalSet()
-        foo = []
         with fits.open(path) as hdulist:
             data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
             for x in xrange(0, len(hdulist[1].data)):
