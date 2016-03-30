@@ -2,10 +2,12 @@
 
 from distutils.core import setup
 
-version = '0.2.2'
+
+exec(open('mocpy/version.py').read())
+
 
 setup(name='MOCPy',
-      version=version,
+      version=__version__,
       description='MOC parsing and manipulation in Python',
       author='Thomas Boch',
       author_email='thomas.boch@astro.unistra.fr',
