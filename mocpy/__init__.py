@@ -18,3 +18,5 @@
 #
 
 from .moc import MOC
+from .version import __version__
+
