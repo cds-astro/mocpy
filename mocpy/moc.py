@@ -247,7 +247,14 @@ class MOC:
         """
         for ipix in ipix_list:
             self.add_pix(order, ipix, nest)
- 
+
+    def _ensure_consistency(self):
+        """
+        Force IntervalSet internal consistency
+        """
+        self._interval_set.intervals
+
+
     def add_pix(self, order, ipix, nest=True):
         """
         add a given HEALPix pixel number to the current object
@@ -255,7 +262,7 @@ class MOC:
         self._counter += 1
         # force consistency to prevent too large interval array
         if self._counter==1000:
-            self._interval_set.intervals # this will force IntervalSet internal consistency
+            self._ensure_consistency()
             self._counter = 0
         from healpy import pixelfunc
 
@@ -268,6 +275,7 @@ class MOC:
         p1 = ipix
         p2 = ipix + 1
         shift= 2 * (MOC.HPY_MAX_NORDER-order);
+
         self._interval_set.add( ( p1 << shift, p2 << shift) )
 
     def to_uniq_interval_set(self):
@@ -364,10 +372,12 @@ class MOC:
         The user has to specify the columns holding ra and dec (in ICRS)
         """
         moc = MOC()
-        
+      
         for row in table:
             moc.add_position(row[ra_column], row[dec_column], moc_order)
         
+        moc._ensure_consistency()
+
         return moc 
     
     @classmethod
@@ -435,6 +445,7 @@ class MOC:
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
         
+        self._ensure_consistency()
         uniq_array = []
         for uniq in self.uniq_pixels_iterator():
             uniq_array.append(uniq)
