@@ -222,7 +222,10 @@ class MOC:
         """
         return the MOC for a given IVORN
         """
-        from urllib import urlencode
+        try:
+            from urllib import urlencode
+        except ImportError:
+            from urllib.parse import urlencode
 
         return cls.from_url('%s?%s' % (MOC.MOC_SERVER_ROOT_URL, urlencode({'ivorn': ivorn, 'get': 'moc', 'order': int(np.log2(nside))})))
 
