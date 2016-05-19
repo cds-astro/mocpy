@@ -187,7 +187,7 @@ class MOC:
         with open(tmp_vot.name, 'w') as h:
             for line in r.iter_lines():
                 if line:
-                    h.write(line+'\n')
+                    h.write(line.decode(r.encoding)+'\n')
 
         from astropy.io.votable import parse_single_table
         table = parse_single_table(tmp_vot.name).to_table()
@@ -465,7 +465,7 @@ class MOC:
             tbhdu.header['ORDERING'] = 'NUNIQ'
             tbhdu.header['COORDSYS'] = 'C'
             tbhdu.header['MOCORDER'] = moc_order
-            tbhdu.header['MOCTOOL']  = 'PyMOC'
+            tbhdu.header['MOCTOOL']  = 'MOCPy'
             if optional_kw_dict:
                 for key in optional_kw_dict:
                     tbdu.header[key] = optional_kw_dict[key]
