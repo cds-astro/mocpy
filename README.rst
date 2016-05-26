@@ -22,8 +22,8 @@ MOCPy is distributed under GPLv3 license.
 Requirements
 ============
 
-``numpy`` and ``astropy`` are required.
-``matplotlib`` is also required if you want to plot a MOC object.
+``numpy``, ``healpy`` and ``astropy`` are required.
+``matplotlib`` is also needed if you want to plot a MOC object.
 
 MOCPy runs under Python 2 and Python 3.
 
