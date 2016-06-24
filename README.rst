@@ -1,6 +1,3 @@
-.. image:: http://mybinder.org/badge.svg :target: http://mybinder.org/repo/tboch/mocpy
-
-
 *****
 MOCPy
 *****
@@ -50,7 +47,8 @@ Examples
 
 Different examples on how to use MOCPy can be found in the notebooks directory.
 
-.. image:: http://mybinder.org/badge.svg :target: http://mybinder.org/repo/tboch/mocpy
+.. image:: http://mybinder.org/badge.svg
+    :target: http://mybinder.org/repo/tboch/mocpy/notebooks
 
-Launch the Binder to execute and interact with the notebooks examples.  
+Launch the Binder to execute live and interact with the notebooks examples.  
 
