@@ -3,6 +3,5 @@ healpy
 astropy
 matplotlib
 mocpy
-# astroquery is needed for one of the notebook example
 astroquery
 
