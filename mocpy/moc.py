@@ -139,14 +139,9 @@ class MOC:
         else:
             plotted_moc = self
             
-        m = {} # partial HEALPix map
+        m = np.zeros(hp.nside2npix(2 ** plotted_moc.max_order))
         for val in plotted_moc.best_res_pixels_iterator():
             m[val] = 1
-        
-        # ensure the map is at the correct nside
-        max_ipix = hp.nside2npix(2 ** plotted_moc.max_order) - 1
-        if not max_ipix in m:
-            m[max_ipix] = hp.pixelfunc.UNSEEN
         
         hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False)
         hp.graticule()
@@ -181,7 +176,7 @@ class MOC:
 
         tmp_moc = tempfile.NamedTemporaryFile(delete = False)
         self.write(tmp_moc.name)
-        r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat', data={'mode': 'mocfile' , 'catName': resource_id, 'format': 'votable', 'limit': max_rows_str}, files={'moc': open(tmp_moc.name, 'rb')}, stream=True)
+        r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat', data={'mode': 'mocfile' , 'catName': resource_id, 'format': 'votable', 'limit': max_rows_str}, files={'moc': open(tmp_moc.name, 'rb')}, headers={'User-Agent': 'MOCPy'}, stream=True)
         
         tmp_vot = tempfile.NamedTemporaryFile(delete = False)
         with open(tmp_vot.name, 'w') as h:
