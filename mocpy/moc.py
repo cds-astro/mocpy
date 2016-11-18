@@ -143,7 +143,11 @@ class MOC:
         for val in plotted_moc.best_res_pixels_iterator():
             m[val] = 1
         
-        hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False)
+        from matplotlib.colors import LinearSegmentedColormap
+        cmap = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#ff0000'])
+        cmap.set_under('w') 
+        cmap.set_bad('gray')
+        hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap = cmap)
         hp.graticule()
         plt.show()
 
