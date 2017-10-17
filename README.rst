@@ -52,3 +52,11 @@ Different examples on how to use MOCPy can be found in the notebooks directory.
 
 Launch the Binder to execute live and interact with the notebooks examples.  
 
+
+=====
+Tests
+=====
+
+To run the automated tests of ``mocpy`` you can use ``pytest`` and this command:
+
+    python -m pytest mocpy
