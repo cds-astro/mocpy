@@ -467,7 +467,7 @@ class MOC:
             tbhdu.header['MOCTOOL']  = 'MOCPy'
             if optional_kw_dict:
                 for key in optional_kw_dict:
-                    tbdu.header[key] = optional_kw_dict[key]
+                    tbhdu.header[key] = optional_kw_dict[key]
                     
             thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
             thdulist.writeto(path, clobber=True)
