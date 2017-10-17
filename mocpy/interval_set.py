@@ -183,32 +183,3 @@ class IntervalSet:
 
         
         
-        
-            
-if __name__=='__main__':
-    iset = IntervalSet()
-    import random
-    for x in xrange(0, 10):
-        start = random.randint(0, 100)
-        iset.add((start, start+random.randint(0, 30)))
-
-    another_iset = IntervalSet()
-    for x in xrange(0, 10):
-        start = random.randint(0, 100)
-        another_iset.add((start, start+random.randint(0, 30)))
-
-    print('A', iset.intervals)
-
-    print('B', another_iset.intervals)
-                     
-    print('A union B', iset.union(another_iset).intervals)
-    
-    print('A - B', iset.difference(another_iset).intervals)
-    
-    print('B - A', another_iset.difference(iset).intervals)
-    
-    print('A intersection B', iset.intersection(another_iset).intervals)
-    
-    print(IntervalSet.flatten(iset.intervals))
-    
-    
