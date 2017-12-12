@@ -61,8 +61,8 @@ class MOC:
     
     def __init__(self):
         self._interval_set = IntervalSet() # set of intervals at HPY_MAX_NORDER norder
-        # TODO: how to define MOC_ORDER ?
         self._counter = 0
+        self._order = None
 
     @property
     def max_order(self):
@@ -110,8 +110,10 @@ class MOC:
             b = (iv[1] + addb)&mask
             if b>a:
                 iv_set.add((a, b))
-                
-        return MOC.from_interval_set(iv_set) 
+               
+        m = MOC.from_interval_set(iv_set)
+        m._order = new_order
+        return m
 
     @property
     def sky_fraction(self):
@@ -326,6 +328,7 @@ class MOC:
         theta, phi = utils.radec2thetaphi(ra, dec)
         ipix = pixelfunc.ang2pix(2**max_norder, theta, phi, nest=True)
         self.add_pix(max_norder, ipix)
+        self._order = max_norder
         
     @classmethod
     def from_uniq_interval_set(cls, uniq_is):
@@ -374,6 +377,7 @@ class MOC:
         The user has to specify the columns holding ra and dec (in ICRS)
         """
         moc = MOC()
+        moc._order = moc_order
       
         for row in table:
             moc.add_position(row[ra_column], row[dec_column], moc_order)
@@ -388,6 +392,7 @@ class MOC:
         Create a MOC from a list of SkyCoord
         """
         moc = MOC()
+        moc._order = max_norder
         
         # very very slow :(, don't really know why
         # Using 
@@ -453,7 +458,10 @@ class MOC:
             uniq_array.append(uniq)
         
         if format=='fits':
-            moc_order = self.max_order
+            if self._order is not None:
+                moc_order = self._order
+            else:
+                moc_order = self.max_order
             if moc_order<=13:
                 format = '1J'
             else:
