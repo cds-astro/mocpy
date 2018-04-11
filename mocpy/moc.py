@@ -332,7 +332,18 @@ class MOC:
             self.add_pix(max_norder, ipix)
 
         self._order = max_norder
-        
+
+    @classmethod
+    def from_json(cls, json_moc):
+        uniq_interval = IntervalSet()
+        for n_order, n_pix_l in json_moc.items():
+            n_order = int(n_order)
+
+            for n_pix in n_pix_l:
+                uniq_interval.add(__class__.orderipix2uniq(n_order, n_pix))
+
+        return MOC.from_uniq_interval_set(uniq_interval)
+
     @classmethod
     def from_uniq_interval_set(cls, uniq_is):
         """
