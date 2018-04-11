@@ -13,11 +13,20 @@ try:
 except NameError:
     xrange = range
 
+
 class IntervalSet:
     def __init__(self, interval_set=None):
         self.clear()
         if interval_set:
             self._intervals = list(interval_set._intervals)
+
+    def __repr__(self):
+        return "{0}".format(self._intervals)
+
+    def __eq__(self, another_is):
+        if not isinstance(another_is, IntervalSet):
+            raise TypeError
+        return self._intervals == another_is._intervals
 
     def clear(self):
         """
@@ -31,7 +40,7 @@ class IntervalSet:
         Return True if the set is empty
         False otherwise
         """
-        return len(self._intervals)==0
+        return len(self._intervals) == 0
     
     def n_intervals(self):
         """
@@ -93,16 +102,15 @@ class IntervalSet:
         return the union between 2 IntervalSet
         """
         res = IntervalSet()
-        if self.n_intervals()==0:
+        if self.n_intervals() == 0:
             res._intervals = another_is.intervals
-        elif another_is.n_intervals()==0:
+        elif another_is.n_intervals() == 0:
             res._intervals = self.intervals
         else:
-            res._intervals =  IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a or in_b)
+            res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a or in_b)
         
         return res
-    
-    
+
     def union(self, another_is):
         """
         return the union between 2 IntervalSet
@@ -117,16 +125,16 @@ class IntervalSet:
         return the difference between the current instance and another_is
         """
         res = IntervalSet()
-        res._intervals =  IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and not in_b)
+        res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and not in_b)
         
         return res
     
-    def intersection(self,another_is):
+    def intersection(self, another_is):
         """
         return the intersection between the current instance and another_is
         """
         res = IntervalSet()
-        res._intervals =  IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and in_b)
+        res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and in_b)
         
         return res
 
@@ -146,7 +154,7 @@ class IntervalSet:
         """Convert a list of endpoints, with an optional terminating sentinel,
          into a list of intervals"""
         return [(list_of_endpoints[i], list_of_endpoints[i + 1])
-                 for i in xrange(0, len(list_of_endpoints) - 1, 2)]
+                for i in xrange(0, len(list_of_endpoints) - 1, 2)]
 
     @staticmethod
     def merge(a_intervals, b_intervals, op):
@@ -179,7 +187,3 @@ class IntervalSet:
             scan = min(a_endpoints[a_index], b_endpoints[b_index])
 
         return IntervalSet.unflatten(res)
-
-
-        
-        

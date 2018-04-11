@@ -1,6 +1,7 @@
 numpy
 healpy
 astropy
+astropy_healpix
 matplotlib
 mocpy
 astroquery

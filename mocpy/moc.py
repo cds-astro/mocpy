@@ -21,9 +21,9 @@ from . import utils
 from astropy.io import fits
 
 from astropy.table import Table
-
-
-import math
+from astropy.coordinates import SkyCoord
+from astropy_healpix.healpy import ang2pix
+from astropy_healpix.healpy import ring2nest
 
 import sys
 if sys.version > '3':
@@ -36,12 +36,12 @@ except NameError:
     xrange = range
 
     
-    
 def bin(s):
     """
     return the binary string representation of an integer
     """
     return str(s) if s<=1 else bin(s>>1) + str(s&1)
+
 
 def number_trailing_zeros(i):
     # TODO : there must be a smarter way of doing that
@@ -54,6 +54,7 @@ def number_trailing_zeros(i):
 
     return nb
 
+
 class MOC:
     HPY_MAX_NORDER = 29 # upper norder limit for healpy
     VIZ_TABLE_MOC_ROOT_URL = ''
@@ -63,6 +64,15 @@ class MOC:
         self._interval_set = IntervalSet() # set of intervals at HPY_MAX_NORDER norder
         self._counter = 0
         self._order = None
+
+    def __repr__(self):
+        return self._interval_set.__repr__()
+
+    def __eq__(self, another_moc):
+        if not isinstance(another_moc, MOC):
+            raise TypeError
+        return self._interval_set == another_moc._interval_set and\
+               self._order == another_moc._order
 
     @property
     def max_order(self):
@@ -79,8 +89,7 @@ class MOC:
             ret = 0
             
         return ret 
-    
-    
+
     def intersection(self, another_moc):
         """
         intersection with another MOC
@@ -96,8 +105,7 @@ class MOC:
         iv_set_union = self._interval_set.union(another_moc._interval_set)
         
         return MOC.from_interval_set(iv_set_union)
-        
-    
+
     def degrade_to_order(self, new_order):    
         shift = 2 * (MOC.HPY_MAX_NORDER - new_order)
         ofs = (long(1) << shift) - 1
@@ -126,8 +134,6 @@ class MOC:
 
         return nb_pix_filled / float(12 * 4**self.max_order)
 
-        
-    
     def plot(self, title='MOC', coord='C'):
         """
         plot current instance using matplotlib
@@ -149,7 +155,7 @@ class MOC:
         cmap = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#ff0000'])
         cmap.set_under('w') 
         cmap.set_bad('gray')
-        hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap = cmap)
+        hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap=cmap)
         hp.graticule()
         plt.show()
 
@@ -199,13 +205,10 @@ class MOC:
 
         return table
 
-
-     
     @classmethod
     def from_file(cls, local_path):
         return MOC_io.read_local(local_path)
 
-        
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
         """
@@ -258,27 +261,25 @@ class MOC:
         """
         self._interval_set.intervals
 
-
     def add_pix(self, order, ipix, nest=True):
         """
         add a given HEALPix pixel number to the current object
         """
         self._counter += 1
         # force consistency to prevent too large interval array
-        if self._counter==1000:
+        if self._counter == 1000:
             self._ensure_consistency()
             self._counter = 0
-        from healpy import pixelfunc
 
-        if order>MOC.HPY_MAX_NORDER:
+        if order > MOC.HPY_MAX_NORDER:
             raise Exception('norder can not be greater than MOC max norder')
         
         if not nest:
-            ipix = pixelfunc.ring2nest(ipix)
+            ipix = ring2nest(1 << order, ipix)
 
         p1 = ipix
         p2 = ipix + 1
-        shift= 2 * (MOC.HPY_MAX_NORDER-order);
+        shift = 2 * (MOC.HPY_MAX_NORDER - order)
 
         self._interval_set.add( ( p1 << shift, p2 << shift) )
 
@@ -296,8 +297,7 @@ class MOC:
             return res
         
         max_res_order = MOC.HPY_MAX_NORDER
-        
-        
+
         for order in xrange(0, max_res_order):
             if r2.empty():
                 return res
@@ -317,17 +317,20 @@ class MOC:
                 r2 = r2.difference(r3)
       
         return res
-    
-    
+
     def add_position(self, ra, dec, max_norder):
         """
         add the HEALPix bin containing the (ra, dec) position
         """
-        from healpy import pixelfunc
-
         theta, phi = utils.radec2thetaphi(ra, dec)
-        ipix = pixelfunc.ang2pix(2**max_norder, theta, phi, nest=True)
-        self.add_pix(max_norder, ipix)
+        ipix = ang2pix(2**max_norder, theta, phi, nest=True)
+
+        if isinstance(ipix, np.ndarray):
+            for i in range(ipix.shape[0]):
+                self.add_pix(max_norder, ipix[i])
+        else:
+            self.add_pix(max_norder, ipix)
+
         self._order = max_norder
         
     @classmethod
@@ -376,11 +379,13 @@ class MOC:
         Create a MOC from a astropy.table.Table
         The user has to specify the columns holding ra and dec (in ICRS)
         """
+        if not isinstance(ra_column, str) or not isinstance(dec_column, str):
+            raise TypeError
+
         moc = MOC()
         moc._order = moc_order
-      
-        for row in table:
-            moc.add_position(row[ra_column], row[dec_column], moc_order)
+
+        moc.add_position(table[ra_column], table[dec_column], moc_order)
         
         moc._ensure_consistency()
 
@@ -395,12 +400,27 @@ class MOC:
         moc._order = max_norder
         
         # very very slow :(, don't really know why
-        # Using 
+        # Using
         for skycoord in skycoord_list:
             moc.add_position(skycoord.icrs.ra.deg, skycoord.icrs.dec.deg, max_norder)
-        
-        return moc 
-    
+
+        return moc
+
+    @classmethod
+    def from_coo_list_no_iteration(cls, skycoords, max_norder):
+        """
+        Create a MOC from a list of SkyCoord
+        """
+        if not isinstance(skycoords, SkyCoord):
+            raise TypeError
+
+        moc = MOC()
+        moc._order = max_norder
+
+        moc.add_position(skycoords.icrs.ra.deg, skycoords.icrs.dec.deg, max_norder)
+
+        return moc
+
     def uniq_pixels_iterator(self):
         for uniq_iv in self.to_uniq_interval_set().intervals:
             for uniq in xrange(uniq_iv[0], uniq_iv[1]):
@@ -417,31 +437,26 @@ class MOC:
         Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
         Return the (newly created) filtered Table
         """
-        from healpy import pixelfunc
         filtered_table = Table()
         
         kept_rows = []
         pixels_best_res = set()
         for val in self.best_res_pixels_iterator():
             pixels_best_res.add(val)
-            
-        
+
         max_order = self.max_order
         nside = 2**max_order
         for row in table:
             theta, phi = utils.radec2thetaphi(row[ra_column], row[dec_column])
-            ipix = pixelfunc.ang2pix(nside, theta, phi, nest=True)
+            ipix = ang2pix(nside, theta, phi, nest=True)
             if (ipix in pixels_best_res) == keep_inside:
                 kept_rows.append(row)
-        
-        
-        if len(kept_rows)==0:
+
+        if len(kept_rows) == 0:
             return Table(names=table.colnames)
         else:
             return Table(rows=kept_rows, names=table.colnames)
-        
-            
-    
+
     def write(self, path, format='fits', optional_kw_dict = None):
         """
         Serialize a moc in FITS in a given path
@@ -457,7 +472,7 @@ class MOC:
         for uniq in self.uniq_pixels_iterator():
             uniq_array.append(uniq)
         
-        if format=='fits':
+        if format == 'fits':
             if self._order is not None:
                 moc_order = self._order
             else:
@@ -468,11 +483,11 @@ class MOC:
                 format = '1K'
             
             tbhdu = fits.BinTableHDU.from_columns(fits.ColDefs([fits.Column(name='UNIQ', format=format, array=np.array(uniq_array))]))
-            tbhdu.header['PIXTYPE']  = 'HEALPIX'
+            tbhdu.header['PIXTYPE'] = 'HEALPIX'
             tbhdu.header['ORDERING'] = 'NUNIQ'
             tbhdu.header['COORDSYS'] = 'C'
             tbhdu.header['MOCORDER'] = moc_order
-            tbhdu.header['MOCTOOL']  = 'MOCPy'
+            tbhdu.header['MOCTOOL'] = 'MOCPy'
             if optional_kw_dict:
                 for key in optional_kw_dict:
                     tbhdu.header[key] = optional_kw_dict[key]
@@ -480,7 +495,7 @@ class MOC:
             thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
             thdulist.writeto(path, clobber=True)
             
-        elif format=='json':
+        elif format == 'json':
             import json
             
             json_moc = {}
@@ -498,11 +513,6 @@ class MOC:
             json_moc[str(o_order)] = pix_list
             with open(path, 'w') as h:
                 h.write(json.dumps(json_moc, sort_keys=True, indent=2))
-        
-                
-            
-            
-    
 
         
 class MOC_io:
@@ -512,20 +522,15 @@ class MOC_io:
         Read a MOC on the local file system
         """
         return MOC_io.__parse(path)
-    
-    
-        
-        
+
     @staticmethod
     def __parse(path):
         moc = MOC()
         interval_set = IntervalSet()
         with fits.open(path) as hdulist:
             data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
+
             for x in xrange(0, len(hdulist[1].data)):
                 interval_set.add(data[x][0])
-        
-        
-        return MOC.from_uniq_interval_set(interval_set)
-    
 
+        return MOC.from_uniq_interval_set(interval_set)
