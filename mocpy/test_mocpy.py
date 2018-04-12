@@ -51,8 +51,8 @@ skycoords3 = get_random_skycoords(size=5000)
 
 
 def test_compare_the_two_from_coo_list_methods():
-    moc_fast = MOC.from_coo_list_no_iteration(skycoords1, max_norder=23)
-    moc_slow = MOC.from_coo_list(skycoords1, max_norder=23)
+    moc_fast = MOC.from_coo_list_no_iteration(skycoords1, max_norder=14)
+    moc_slow = MOC.from_coo_list(skycoords1, max_norder=14)
     assert moc_fast == moc_slow
 
 
@@ -62,7 +62,7 @@ def test_compare_the_two_from_coo_list_methods():
     skycoords3
 ])
 def test_mocpy_from_coo_no_iteration(skycoords):
-    moc = MOC.from_coo_list_no_iteration(skycoords, max_norder=23)
+    moc = MOC.from_coo_list_no_iteration(skycoords, max_norder=14)
 
 
 @pytest.mark.parametrize("skycoords", [
@@ -71,12 +71,4 @@ def test_mocpy_from_coo_no_iteration(skycoords):
     skycoords3
 ])
 def test_mocpy_from_coo_list(skycoords):
-    moc = MOC.from_coo_list(skycoords, max_norder=23)
-
-
-
-"""
-def test_mocpy_from_coo_list2():
-    aaa = [SkyCoord(ra=random.uniform(0, 1) * 360, dec=random.uniform(0, 1) * 180 - 90, unit="deg") for i in range(n_skycoord)]
-    moc = MOC.from_coo_list(aaa, max_norder=14)
-"""
+    moc = MOC.from_coo_list(skycoords, max_norder=14)

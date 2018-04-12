@@ -18,3 +18,7 @@ def uniq2orderipix(uniq):
     ipix = uniq - 4 * (4**order)
     
     return order, ipix
+
+
+def orderipix2uniq(n_order, n_pix):
+    return n_pix + ((4**n_order) << 2)

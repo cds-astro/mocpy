@@ -18,12 +18,15 @@ except NameError:
 import numpy as np
 from .interval_set import IntervalSet
 from . import utils
-from astropy.io import fits
 
 from astropy.table import Table
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, ICRS
 from astropy_healpix.healpy import ang2pix
 from astropy_healpix.healpy import ring2nest
+from astropy.io import fits
+from astropy import wcs
+from astropy_healpix import HEALPix
+from astropy import units as u
 
 import sys
 if sys.version > '3':
@@ -206,8 +209,8 @@ class MOC:
         return table
 
     @classmethod
-    def from_file(cls, local_path):
-        return MOC_io.read_local(local_path)
+    def from_file(cls, local_path, moc_order=None):
+        return MOC_io.read_local(path=local_path, moc_order=moc_order)
 
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
@@ -339,8 +342,8 @@ class MOC:
         for n_order, n_pix_l in json_moc.items():
             n_order = int(n_order)
 
-            for n_pix in n_pix_l:
-                uniq_interval.add(__class__.orderipix2uniq(n_order, n_pix))
+            uniq_interval_add = np.vectorize(uniq_interval.add)
+            uniq_interval_add(utils.orderipix2uniq(n_order, np.array(n_pix_l)))
 
         return MOC.from_uniq_interval_set(uniq_interval)
 
@@ -367,7 +370,6 @@ class MOC:
                     diff_order = max_res_order - order
 
                 rtmp.add( ( ipix * 4**(diff_order), (ipix+1) * 4**(diff_order) ) )
-                
 
             first = False
 
@@ -528,20 +530,51 @@ class MOC:
         
 class MOC_io:
     @staticmethod
-    def read_local(path):
+    def read_local(path, moc_order=None):
         """
         Read a MOC on the local file system
         """
-        return MOC_io.__parse(path)
+        return MOC_io.__parse(path, moc_order=moc_order)
 
     @staticmethod
-    def __parse(path):
-        moc = MOC()
+    def __parse(path, moc_order=None):
+        moc = None
         interval_set = IntervalSet()
         with fits.open(path) as hdulist:
-            data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
+            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+                data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
+                for x in xrange(0, len(hdulist[1].data)):
+                    interval_set.add(data[x][0])
 
-            for x in xrange(0, len(hdulist[1].data)):
-                interval_set.add(data[x][0])
+                moc = MOC.from_uniq_interval_set(interval_set)
+            elif isinstance(hdulist[1], fits.hdu.ImageHDU):
+                if not moc_order:
+                    print('An order must be specified when building a moc from a'
+                          'fits image.')
+                    raise ValueError
+                # load the image data
+                data_image = fits.getdata(path, ext=0)
+                header = fits.getheader(path)
+                height = header['NAXIS2']
+                width = header['NAXIS1']
 
-        return MOC.from_uniq_interval_set(interval_set)
+                # use wcs from astropy to locate the image in the world coordinates
+                w = wcs.WCS(header)
+
+                d_pix = 1
+                X, Y = np.mgrid[0:width + 1:d_pix, 0:height + 1:d_pix]
+                pix_crd = np.dstack((X.ravel(), Y.ravel()))[0]
+
+                world_pix_crd = w.wcs_pix2world(pix_crd, 1)
+                hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
+
+                ipix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
+                                              world_pix_crd[:, 1] * u.deg)
+                # remove doubles
+                ipix_l = list(set(ipix_l))
+
+                moc = MOC.from_json({str(moc_order): ipix_l})
+                moc._ensure_consistency()
+
+        return moc
+
