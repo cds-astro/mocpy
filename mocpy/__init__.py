@@ -18,5 +18,6 @@
 #
 
 from .moc import MOC
+from .tmoc import TimeMoc
 from .version import __version__
 
