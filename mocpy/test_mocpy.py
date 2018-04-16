@@ -2,8 +2,9 @@ import pytest
 import random
 from .interval_set import IntervalSet
 from .moc import MOC
+from .tmoc import TimeMoc
 from astropy.coordinates import SkyCoord
-
+from astropy.time import Time
 
 @pytest.fixture()
 def isets():
@@ -36,22 +37,7 @@ def get_random_skycoords(size):
 
 skycoords1 = get_random_skycoords(size=1000)
 skycoords2 = get_random_skycoords(size=2000)
-skycoords3 = get_random_skycoords(size=5000)
-
-
-def test_compare_the_two_from_coo_list_methods():
-    moc_fast = MOC.from_coo_list_no_iteration(skycoords1, max_norder=14)
-    moc_slow = MOC.from_coo_list(skycoords1, max_norder=14)
-    assert moc_fast == moc_slow
-
-
-@pytest.mark.parametrize("skycoords", [
-    skycoords1,
-    skycoords2,
-    skycoords3
-])
-def test_mocpy_from_coo_no_iteration(skycoords):
-    moc = MOC.from_coo_list_no_iteration(skycoords, max_norder=14)
+skycoords3 = get_random_skycoords(size=50000)
 
 
 @pytest.mark.parametrize("skycoords", [
@@ -61,3 +47,15 @@ def test_mocpy_from_coo_no_iteration(skycoords):
 ])
 def test_mocpy_from_coo_list(skycoords):
     moc = MOC.from_coo_list(skycoords, max_norder=14)
+
+
+def test_simple_test_t_moc():
+    t_moc = TimeMoc()
+    s_time = Time(2 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    e_time = Time(7 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    t_moc.add_time_interval(s_time, e_time)
+    assert t_moc.total_duration == 5
+    assert t_moc.max_order == 29
+
+    t_moc.write('tmoc.txt', format='json')
+

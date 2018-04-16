@@ -38,22 +38,13 @@ try:
 except NameError:
     xrange = range
 
-    
-def bin(s):
-    """
-    return the binary string representation of an integer
-    """
-    return str(s) if s<=1 else bin(s>>1) + str(s&1)
-
 
 def number_trailing_zeros(i):
     # TODO : there must be a smarter way of doing that
     nb = 0
-    i_string = bin(i)
-    idx = len(i_string) - 1
-    while idx>=0 and i_string[idx]=='0':
+    while (i & 1) == 0:
         nb += 1
-        idx -= 1
+        i >>= 1
 
     return nb
 
@@ -88,10 +79,10 @@ class MOC:
             combo |= iv[0] | iv[1]
 
         ret = MOC.HPY_MAX_NORDER - int(number_trailing_zeros(combo)//2)
-        if ret<0:
+        if ret < 0:
             ret = 0
-            
-        return ret 
+
+        return ret
 
     def intersection(self, another_moc):
         """
@@ -117,9 +108,9 @@ class MOC:
         addb = ofs
         iv_set = IntervalSet()
         for iv in self._interval_set.intervals:
-            a = (iv[0] + adda)&mask
-            b = (iv[1] + addb)&mask
-            if b>a:
+            a = (iv[0] + adda) & mask
+            b = (iv[1] + addb) & mask
+            if b > a:
                 iv_set.add((a, b))
                
         m = MOC.from_interval_set(iv_set)
@@ -284,7 +275,7 @@ class MOC:
         p2 = ipix + 1
         shift = 2 * (MOC.HPY_MAX_NORDER - order)
 
-        self._interval_set.add( ( p1 << shift, p2 << shift) )
+        self._interval_set.add((p1 << shift, p2 << shift))
 
     def to_uniq_interval_set(self):
         """
@@ -296,7 +287,7 @@ class MOC:
         res = IntervalSet()
 
         intervals = self._interval_set.intervals
-        if len(intervals)==0:
+        if len(intervals) == 0:
             return res
         
         max_res_order = MOC.HPY_MAX_NORDER
@@ -306,15 +297,15 @@ class MOC:
                 return res
             
             shift = long(2 * (max_res_order - order))
-            ofs  = (long(1)<<shift)-1
-            ofs2 = long(1)<<(2*order+2)
+            ofs = (long(1) << shift)-1
+            ofs2 = long(1) << (2*order+2)
             
             r3.clear()
             for iv in r2.intervals:
-                a = (long(iv[0])+ofs)>>shift
-                b= iv[1]>>shift
-                r3.add((a<<shift, b<<shift))
-                res.add((a+ofs2,b+ofs2))
+                a = (long(iv[0]) + ofs) >> shift
+                b = iv[1] >> shift
+                r3.add((a << shift, b << shift))
+                res.add((a + ofs2, b + ofs2))
             
             if not r3.empty():
                 r2 = r2.difference(r3)
@@ -359,6 +350,7 @@ class MOC:
         intervals = uniq_is.intervals
         max_res_order = MOC.HPY_MAX_NORDER
         diff_order = max_res_order
+        shift_order = 2 * diff_order
         for interval in intervals:
             for j in xrange(interval[0], interval[1]):
                 order, ipix = utils.uniq2orderipix(j)
@@ -368,10 +360,9 @@ class MOC:
                     rtmp.clear()
                     last_order = order
                     diff_order = max_res_order - order
+                    shift_order = 2 * diff_order
 
-                rtmp.add( ( ipix * 4**(diff_order), (ipix+1) * 4**(diff_order) ) )
-
-            first = False
+                rtmp.add((ipix << shift_order, (ipix+1) << shift_order))
 
         r = r.union(rtmp)
         return cls.from_interval_set(r)
@@ -404,6 +395,7 @@ class MOC:
 
         return moc 
     
+    '''
     @classmethod
     def from_coo_list(cls, skycoord_list, max_norder):
         """
@@ -418,9 +410,10 @@ class MOC:
             moc.add_position(skycoord.icrs.ra.deg, skycoord.icrs.dec.deg, max_norder)
 
         return moc
+    '''
 
     @classmethod
-    def from_coo_list_no_iteration(cls, skycoords, max_norder):
+    def from_coo_list(cls, skycoords, max_norder):
         """
         Create a MOC from a list of SkyCoord
         """
@@ -431,6 +424,7 @@ class MOC:
         moc._order = max_norder
 
         moc.add_position(skycoords.icrs.ra.deg, skycoords.icrs.dec.deg, max_norder)
+        moc._ensure_consistency()
 
         return moc
 
@@ -490,7 +484,7 @@ class MOC:
                 moc_order = self._order
             else:
                 moc_order = self.max_order
-            if moc_order<=13:
+            if moc_order <= 13:
                 format = '1J'
             else:
                 format = '1K'
@@ -537,44 +531,58 @@ class MOC_io:
         return MOC_io.__parse(path, moc_order=moc_order)
 
     @staticmethod
-    def __parse(path, moc_order=None):
-        moc = None
-        interval_set = IntervalSet()
-        with fits.open(path) as hdulist:
-            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
-                data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
-                for x in xrange(0, len(hdulist[1].data)):
-                    interval_set.add(data[x][0])
+    def __parse(path_l, moc_order=None):
+        result = MOC()
 
-                moc = MOC.from_uniq_interval_set(interval_set)
-            elif isinstance(hdulist[1], fits.hdu.ImageHDU):
-                if not moc_order:
-                    print('An order must be specified when building a moc from a'
-                          'fits image.')
-                    raise ValueError
-                # load the image data
-                data_image = fits.getdata(path, ext=0)
-                header = fits.getheader(path)
-                height = header['NAXIS2']
-                width = header['NAXIS1']
+        if not isinstance(path_l, list):
+            path_l = [path_l]
 
-                # use wcs from astropy to locate the image in the world coordinates
-                w = wcs.WCS(header)
+        for path in path_l:
+            moc = None
+            with fits.open(path) as hdulist:
+                if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+                    interval_set = IntervalSet()
+                    data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
+                    for x in xrange(0, len(hdulist[1].data)):
+                        interval_set.add(data[x][0])
 
-                d_pix = 1
-                X, Y = np.mgrid[0:width + 1:d_pix, 0:height + 1:d_pix]
-                pix_crd = np.dstack((X.ravel(), Y.ravel()))[0]
+                    moc = MOC.from_uniq_interval_set(interval_set)
+                elif isinstance(hdulist[1], fits.hdu.ImageHDU):
+                    if not moc_order:
+                        print('An order must be specified when building a moc from a'
+                              'fits image.')
+                        raise ValueError
+                    # load the image data
+                    data_image = fits.getdata(path, ext=0)
+                    header = fits.getheader(path)
+                    height = header['NAXIS2']
+                    width = header['NAXIS1']
+                    print(height, width)
 
-                world_pix_crd = w.wcs_pix2world(pix_crd, 1)
-                hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
+                    # use wcs from astropy to locate the image in the world coordinates
+                    w = wcs.WCS(header)
 
-                ipix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
-                                              world_pix_crd[:, 1] * u.deg)
-                # remove doubles
-                ipix_l = list(set(ipix_l))
+                    d_pix = 1
+                    X, Y = np.mgrid[0:width:d_pix, 0:height:d_pix]
 
-                moc = MOC.from_json({str(moc_order): ipix_l})
-                moc._ensure_consistency()
+                    pix_crd = np.dstack((X.ravel(), Y.ravel()))[0]
 
-        return moc
+                    world_pix_crd = w.wcs_pix2world(pix_crd, 1)
+                    hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
+
+                    print(world_pix_crd)
+
+                    ipix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
+                                                  world_pix_crd[:, 1] * u.deg)
+                    # remove doubles
+                    ipix_l = list(set(ipix_l))
+
+                    moc = MOC.from_json({str(moc_order): ipix_l})
+                    # the moc computed from the image is not consistent because it is defined
+                    # only at the moc order
+                    moc._ensure_consistency()
+
+                result = result.union(moc)
+
+        return result
 
