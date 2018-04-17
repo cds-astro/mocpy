@@ -16,8 +16,6 @@ except NameError:
 
 
 class IntervalSet:
-    DAY_MICRO_SEC = 86400000000.
-
     def __init__(self, interval_set=None, intervals_l=None):
         self.clear()
         if interval_set:
@@ -50,19 +48,13 @@ class IntervalSet:
         """
         self._intervals = []
         self.__must_check_consistency = False
-        
+
     def empty(self):
         """
         Return True if the set is empty
         False otherwise
         """
         return len(self._intervals) == 0
-
-    def n_intervals(self):
-        """
-        Return the number of intervals in the set
-        """
-        return len(self._intervals)
 
     @staticmethod
     def merge_intervals(intervals):
@@ -119,9 +111,9 @@ class IntervalSet:
         return the union between 2 IntervalSet
         """
         res = IntervalSet()
-        if self.n_intervals() == 0:
+        if self.empty():
             res._intervals = another_is.intervals
-        elif another_is.n_intervals() == 0:
+        elif another_is.empty():
             res._intervals = self.intervals
         else:
             res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a or in_b)
@@ -173,12 +165,7 @@ class IntervalSet:
         a_endpoints = IntervalSet.flatten(a_intervals)
         b_endpoints = IntervalSet.flatten(b_intervals)
 
-        sentinel = None
-        if isinstance(a_endpoints[-1], Time):
-            sentinel = max(a_endpoints[-1], b_endpoints[-1]) +\
-                       TimeDelta(1/IntervalSet.DAY_MICRO_SEC, format='jd', scale='tt')
-        else:
-            sentinel = max(a_endpoints[-1], b_endpoints[-1]) + 1
+        sentinel = max(a_endpoints[-1], b_endpoints[-1]) + 1
 
         a_endpoints += [sentinel]
         b_endpoints += [sentinel]

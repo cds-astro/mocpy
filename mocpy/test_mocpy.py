@@ -37,7 +37,7 @@ def get_random_skycoords(size):
 
 skycoords1 = get_random_skycoords(size=1000)
 skycoords2 = get_random_skycoords(size=2000)
-skycoords3 = get_random_skycoords(size=50000)
+skycoords3 = get_random_skycoords(size=500000)
 
 
 @pytest.mark.parametrize("skycoords", [
@@ -47,6 +47,11 @@ skycoords3 = get_random_skycoords(size=50000)
 ])
 def test_mocpy_from_coo_list(skycoords):
     moc = MOC.from_coo_list(skycoords, max_norder=14)
+
+
+def test_moc_from_fits_image():
+    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', max_order=16)
+    moc.write('moc3.fits')
 
 
 def test_simple_test_t_moc():
@@ -59,3 +64,16 @@ def test_simple_test_t_moc():
 
     t_moc.write('tmoc.txt', format='json')
 
+
+def test_max_order_t_moc():
+    t_moc = TimeMoc()
+    s_time = Time(0 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    e_time = Time(1 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    t_moc.add_time_interval(s_time, e_time)
+
+    s_time2 = Time(3 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    e_time2 = Time(10 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
+    t_moc.add_time_interval(s_time2, e_time2)
+
+    t_moc.write('tmoc2.txt', format='json')
+    assert t_moc.max_order == 29
