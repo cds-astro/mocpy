@@ -37,7 +37,6 @@ class TimeMoc(AbstractMoc):
 
     def __init__(self):
         AbstractMoc.__init__(self)
-        self.__counter = 0
 
     def add_time_interval(self, time_start, time_end):
         if not isinstance(time_start, Time) or not isinstance(time_end, Time):
@@ -47,11 +46,13 @@ class TimeMoc(AbstractMoc):
         if time_start >= time_end:
             raise ValueError('Starting time must be < to ending time')
 
+        """
         self.__counter += 1
         # force consistency to prevent too large interval array
         if self.__counter == 1000:
             self._ensure_consistency()
             self.__counter = 0
+        """
 
         time_us_start = long(time_start.jd * TimeMoc.DAY_MICRO_SEC)
         time_us_end = time_end.jd * TimeMoc.DAY_MICRO_SEC

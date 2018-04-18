@@ -50,7 +50,6 @@ class MOC(AbstractMoc):
     
     def __init__(self):
         AbstractMoc.__init__(self)
-        self.__counter = 0
 
     def add_position(self, ra, dec, max_norder):
         """
@@ -60,7 +59,7 @@ class MOC(AbstractMoc):
         ipix = ang2pix(2**max_norder, theta, phi, nest=True)
 
         if isinstance(ipix, np.ndarray):
-            self.add_pix_list(order=max_norder, ipix_list=ipix)
+            self.add_pix_list(order=max_norder, i_pix_l=ipix)
         else:
             self.add_pix(max_norder, ipix)
 
@@ -93,7 +92,7 @@ class MOC(AbstractMoc):
         # remove doubles
         ipix_l = list(set(ipix_l))
         moc = MOC()
-        moc.add_pix_list(order=max_order, ipix_list=ipix_l)
+        moc.add_pix_list(order=max_order, i_pix_l=ipix_l)
 
         return moc
 

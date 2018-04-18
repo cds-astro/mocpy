@@ -37,7 +37,7 @@ def get_random_skycoords(size):
 
 skycoords1 = get_random_skycoords(size=1000)
 skycoords2 = get_random_skycoords(size=2000)
-skycoords3 = get_random_skycoords(size=500000)
+skycoords3 = get_random_skycoords(size=50000)
 
 
 @pytest.mark.parametrize("skycoords", [
@@ -77,3 +77,14 @@ def test_max_order_t_moc():
 
     t_moc.write('tmoc2.txt', format='json')
     assert t_moc.max_order == 29
+
+
+def test_from_json():
+    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', max_order=16)
+    moc.write('moc3.txt', format='json')
+
+    with open('moc3.txt', 'r') as moc_file:
+        import json
+        moc_d = json.load(moc_file)
+        moc2 = MOC.from_json(json_moc=moc_d)
+        assert moc == moc2

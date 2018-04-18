@@ -45,18 +45,19 @@ class AbstractMoc:
 
     def __eq__(self, another_moc):
         if not isinstance(another_moc, AbstractMoc):
-            raise TypeError
-        return self._interval_set == another_moc._interval_set
+            raise TypeError('Cannot compare an AbstractMoc with a {0}'.format(type(another_moc)))
 
-    def add_pix_list(self, order, ipix_list, nest=True):
+        return self._interval_set.intervals == another_moc._interval_set.intervals
+
+    def add_pix_list(self, order, i_pix_l, nest=True):
         """
         add a list of HEALPix pixel number at a given order
         to the current object. This uses numpy vectorization
         """
         add_pix_vect = np.vectorize(self.add_pix)
-        add_pix_vect(order, ipix_list)
+        add_pix_vect(order, i_pix_l, nest=nest)
 
-    def add_pix(self, order, ipix, nest=True):
+    def add_pix(self, order, i_pix, nest=True):
         """
         add a given HEALPix pixel number to the current object
         """
@@ -74,10 +75,10 @@ class AbstractMoc:
             raise Exception('norder can not be greater than MOC max norder')
 
         if not nest:
-            ipix = ring2nest(1 << order, ipix)
+            i_pix = ring2nest(1 << order, i_pix)
 
-        p1 = ipix
-        p2 = ipix + 1
+        p1 = i_pix
+        p2 = i_pix + 1
         shift = 2 * (AbstractMoc.HPY_MAX_NORDER - order)
 
         self._interval_set.add((p1 << shift, p2 << shift))
@@ -132,14 +133,11 @@ class AbstractMoc:
 
     @classmethod
     def from_json(cls, json_moc):
-        uniq_interval = IntervalSet()
-        for n_order, n_pix_l in json_moc.items():
-            n_order = int(n_order)
+        moc = AbstractMoc()
+        for order, i_pix_l in json_moc.items():
+            moc.add_pix_list(order=int(order), i_pix_l=i_pix_l, nest=True)
 
-            uniq_interval_add = np.vectorize(uniq_interval.add)
-            uniq_interval_add(utils.orderipix2uniq(n_order, np.array(n_pix_l)))
-
-        return AbstractMoc.from_uniq_interval_set(uniq_interval)
+        return moc
 
     @classmethod
     def from_uniq_interval_set(cls, uniq_is):
@@ -224,7 +222,6 @@ class AbstractMoc:
             interval_set.add(data[x][0])
 
         return AbstractMoc.from_uniq_interval_set(interval_set)
-
 
     def write(self, path, format='fits', optional_kw_dict=None):
         """
