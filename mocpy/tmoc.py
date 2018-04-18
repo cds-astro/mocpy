@@ -44,7 +44,7 @@ class TimeMoc(AbstractMoc):
                             "method")
 
         if time_start >= time_end:
-            raise ValueError('Starting time must be < to ending time')
+            raise ValueError('time_start must be < compared to the time_end')
 
         """
         self.__counter += 1
@@ -78,6 +78,16 @@ class TimeMoc(AbstractMoc):
         return total_time_us
 
     @property
+    def consistency(self):
+        """
+        :return: a percentage of fill between the min and max time the moc is defined.
+        A value near 0 shows a sparse temporal moc (i.e. the moc does not cover a lot
+        of time and covers very distant times. A value near 1 means that the moc covers
+        a lot of time without big pauses.
+        """
+        return self.total_duration / float(self.max_time - self.min_time)
+
+    @property
     def min_time(self):
         """Get the min time of the temporal moc in jd"""
         return self._interval_set.min / TimeMoc.DAY_MICRO_SEC
@@ -86,4 +96,22 @@ class TimeMoc(AbstractMoc):
     def max_time(self):
         """Get the min time of the temporal moc in jd"""
         return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
+
+    def filter_table(self, table, keep_inside=True, format='decimalyear', *args):
+        return self._filter(table,
+                            keep_inside,
+                            format,
+                            *args)
+
+    def _get_pix(self, row_values_l, n_side, format=None):
+        assert len(row_values_l) == 1, ValueError('Filtering a table by a temporal moc is done on time'
+                                                  ' columns such as u, g, r.. date')
+        time = Time(row_values_l[0], format=format, scale='tai')
+
+        i_pix = time.jd * TimeMoc.DAY_MICRO_SEC
+        if not i_pix.is_integer():
+            i_pix += 1
+
+        return int(i_pix)
+
 
