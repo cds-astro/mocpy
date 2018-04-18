@@ -14,6 +14,8 @@ __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 import sys
 import numpy as np
 from astropy.io import fits
+from astropy.table import Table
+
 from astropy_healpix.healpy import ring2nest
 
 from .interval_set import IntervalSet
@@ -111,7 +113,7 @@ class AbstractMoc:
         """
         iv_set_intersection = self._interval_set.intersection(another_moc._interval_set)
 
-        return AbstractMoc.from_interval_set(iv_set_intersection)
+        return self.__class__.from_interval_set(iv_set_intersection)
 
     def union(self, another_moc):
         """
@@ -119,21 +121,31 @@ class AbstractMoc:
         """
         iv_set_union = self._interval_set.union(another_moc._interval_set)
 
-        return AbstractMoc.from_interval_set(iv_set_union)
+        return self.__class__.from_interval_set(iv_set_union)
+
+    def difference(self, moc):
+        """
+        difference of self and moc
+        :param moc: the moc to subtract from self
+        :return: the result of the difference : self - moc
+        """
+        iv_set_difference = self._interval_set.difference(moc._interval_set)
+
+        return self.__class__.from_interval_set(iv_set_difference)
 
     @classmethod
     def from_interval_set(cls, interval_set):
         """
         Create a MOC from an IntervalSet (all intervals at deepest norder)
         """
-        moc = AbstractMoc()
+        moc = cls()
         moc._interval_set = interval_set
 
         return moc
 
     @classmethod
     def from_json(cls, json_moc):
-        moc = AbstractMoc()
+        moc = cls()
         for order, i_pix_l in json_moc.items():
             moc.add_pix_list(order=int(order), i_pix_l=i_pix_l, nest=True)
 
@@ -214,14 +226,47 @@ class AbstractMoc:
         Load a moc from a fits file
 
         :param path: the path to the fits file
-        :return: a moc object corresponding to the passed fits file
+        :return: the interval set describing the moc corresponding to the passed fits file
         """
         interval_set = IntervalSet()
-        data = hdulist[1].data.view(np.recarray)  # accessing directly recarray dramatically speed up the reading
+        data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
         for x in xrange(0, len(hdulist[1].data)):
             interval_set.add(data[x][0])
 
-        return AbstractMoc.from_uniq_interval_set(interval_set)
+        return interval_set
+
+    def best_res_pixels_iterator(self):
+        factor = 4 ** (AbstractMoc.HPY_MAX_NORDER - self.max_order)
+        for iv in self._interval_set.intervals:
+            for val in xrange(iv[0] // factor, iv[1] // factor):
+                yield val
+
+    def _get_pix(self, row_values_l, n_side, format=None):
+        pass
+
+    def _filter(self, table, keep_inside=True, format=None, *args):
+        """
+        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
+        Return the (newly created) filtered Table
+        """
+        kept_rows = []
+        pixels_best_res = set()
+        for val in self.best_res_pixels_iterator():
+            pixels_best_res.add(val)
+
+        max_order = self.max_order
+        n_side = 2 ** max_order
+        for row in table:
+            i_pix = self._get_pix(row_values_l=[row[arg] for arg in args],
+                                  n_side=n_side,
+                                  format=format)
+            if (i_pix in pixels_best_res) == keep_inside:
+                kept_rows.append(row)
+
+        if len(kept_rows) == 0:
+            return Table(names=table.colnames)
+        else:
+            return Table(rows=kept_rows, names=table.colnames)
 
     def write(self, path, format='fits', optional_kw_dict=None):
         """

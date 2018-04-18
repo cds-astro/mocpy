@@ -21,7 +21,6 @@ import sys
 import numpy as np
 
 from astropy import units as u
-from astropy.table import Table
 from astropy.coordinates import SkyCoord, ICRS
 from astropy.io import fits
 from astropy import wcs
@@ -56,43 +55,57 @@ class MOC(AbstractMoc):
         add the HEALPix bin containing the (ra, dec) position
         """
         theta, phi = utils.radec2thetaphi(ra, dec)
-        ipix = ang2pix(2**max_norder, theta, phi, nest=True)
+        i_pix = ang2pix(2**max_norder, theta, phi, nest=True)
 
-        if isinstance(ipix, np.ndarray):
-            self.add_pix_list(order=max_norder, i_pix_l=ipix)
+        if isinstance(i_pix, np.ndarray):
+            self.add_pix_list(order=max_norder, i_pix_l=i_pix)
         else:
-            self.add_pix(max_norder, ipix)
+            self.add_pix(max_norder, i_pix)
+
+    def filter_table(self, table, ra_column, dec_column, keep_inside=True):
+        return self._filter(table,
+                            keep_inside,
+                            None,
+                            ra_column,
+                            dec_column)
+
+    def _get_pix(self, row_values_l, n_side, format=None):
+        assert len(row_values_l) == 2, ValueError('Cannot filter following non spatial columns type.'
+                                                  'ra and dec column are required')
+        ra = row_values_l[0]
+        dec = row_values_l[1]
+
+        theta, phi = utils.radec2thetaphi(ra, dec)
+        return ang2pix(n_side, theta, phi, nest=True)
 
     @classmethod
     def __from_fits_image(cls, path, max_order=None):
         assert max_order, ValueError('An order must be specified when'
                                      ' building a moc from a fits image.')
         # load the image data
-        data_image = fits.getdata(path, ext=0)
         header = fits.getheader(path)
         height = header['NAXIS2']
         width = header['NAXIS1']
-        print(height, width)
 
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
 
         d_pix = 1
-        X, Y = np.mgrid[0:(width + 1):d_pix, 0:(height + 1):d_pix]
+        x, y = np.mgrid[-0.25:(width + 1.25):d_pix, -0.25:(height + 1.25):d_pix]
 
-        pix_crd = np.dstack((X.ravel(), Y.ravel()))[0]
+        pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
         hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
 
-        print(world_pix_crd)
-
-        ipix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
-                                      world_pix_crd[:, 1] * u.deg)
+        i_pix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
+                                       world_pix_crd[:, 1] * u.deg)
         # remove doubles
-        ipix_l = list(set(ipix_l))
+        i_pix_l = list(set(i_pix_l))
         moc = MOC()
-        moc.add_pix_list(order=max_order, i_pix_l=ipix_l)
+        moc.add_pix_list(order=max_order, i_pix_l=i_pix_l)
+        # this will be consistent when one will do operations on the moc (union, inter, ...) or
+        # simply write it to a fits or json file
 
         return moc
 
@@ -107,7 +120,7 @@ class MOC(AbstractMoc):
         """
         with fits.open(path) as hdulist:
             if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
-                return AbstractMoc.from_file(hdulist=hdulist)
+                return MOC.from_uniq_interval_set(AbstractMoc.from_file(hdulist=hdulist))
 
             assert isinstance(hdulist[1], fits.hdu.ImageHDU), ValueError('Cannot extract the moc'
                                                                          ' from the {0:s} fits file'.format(path))
@@ -189,7 +202,7 @@ class MOC(AbstractMoc):
         for val in self.best_res_pixels_iterator():
             nb_pix_filled += 1
 
-        return nb_pix_filled / float(12 * 4**self.max_order)
+        return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     def query_simbad(self, max_rows=10000):
         """
@@ -214,16 +227,23 @@ class MOC(AbstractMoc):
         import tempfile
         import os
 
-        if max_rows is not None and max_rows>=0:
+        if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)
         else:
             max_rows_str = str(9999999999)
 
-        tmp_moc = tempfile.NamedTemporaryFile(delete = False)
+        tmp_moc = tempfile.NamedTemporaryFile(delete=False)
         self.write(tmp_moc.name)
-        r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat', data={'mode': 'mocfile' , 'catName': resource_id, 'format': 'votable', 'limit': max_rows_str}, files={'moc': open(tmp_moc.name, 'rb')}, headers={'User-Agent': 'MOCPy'}, stream=True)
+        r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat',
+                          data={'mode': 'mocfile',
+                                'catName': resource_id,
+                                'format': 'votable',
+                                'limit': max_rows_str},
+                          files={'moc': open(tmp_moc.name, 'rb')},
+                          headers={'User-Agent': 'MOCPy'},
+                          stream=True)
         
-        tmp_vot = tempfile.NamedTemporaryFile(delete = False)
+        tmp_vot = tempfile.NamedTemporaryFile(delete=False)
         with open(tmp_vot.name, 'w') as h:
             for line in r.iter_lines():
                 if line:
@@ -237,38 +257,6 @@ class MOC(AbstractMoc):
         os.unlink(tmp_vot.name)
 
         return table
-
-    def best_res_pixels_iterator(self):
-        factor = 4**(MOC.HPY_MAX_NORDER - self.max_order)
-        for iv in self._interval_set.intervals:
-            for val in xrange(iv[0] // factor, iv[1] // factor):
-                yield val
-    
-    def filter_table(self, table, ra_column, dec_column, keep_inside=True):
-        """
-        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
-        Return the (newly created) filtered Table
-        """
-        filtered_table = Table()
-        
-        kept_rows = []
-        pixels_best_res = set()
-        for val in self.best_res_pixels_iterator():
-            pixels_best_res.add(val)
-
-        max_order = self.max_order
-        nside = 2**max_order
-        for row in table:
-            theta, phi = utils.radec2thetaphi(row[ra_column], row[dec_column])
-            ipix = ang2pix(nside, theta, phi, nest=True)
-            if (ipix in pixels_best_res) == keep_inside:
-                kept_rows.append(row)
-
-        if len(kept_rows) == 0:
-            return Table(names=table.colnames)
-        else:
-            return Table(rows=kept_rows, names=table.colnames)
-
 
     """
     Plot a spatial moc using matplotlib and healpy 
@@ -291,6 +279,7 @@ class MOC(AbstractMoc):
         m._order = new_order
         return m
 
+    '''
     def plot(self, title='MOC', coord='C'):
         import matplotlib.pyplot as plt
 
@@ -324,8 +313,8 @@ class MOC(AbstractMoc):
         plt.grid(True)
 
         plt.show()
-
     '''
+
     def plot(self, title='MOC', coord='C'):
         """
         plot current instance using matplotlib
@@ -338,7 +327,7 @@ class MOC(AbstractMoc):
             plotted_moc = self.degrade_to_order(8)
         else:
             plotted_moc = self
-        import pdb; pdb.set_trace()
+
         m = np.zeros(hp.nside2npix(2 ** plotted_moc.max_order))
         for val in plotted_moc.best_res_pixels_iterator():
             m[val] = 1
@@ -350,4 +339,3 @@ class MOC(AbstractMoc):
         hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap=cmap)
         hp.graticule()
         plt.show()
-    '''
