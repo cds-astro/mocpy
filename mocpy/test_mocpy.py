@@ -50,9 +50,10 @@ def test_mocpy_from_coo_list(skycoords):
 
 
 def test_moc_from_fits_image():
-    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', max_order=16)
-    moc.write('moc3.fits')
-
+    import tempfile
+    tmp_file = tempfile.NamedTemporaryFile()
+    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', moc_order=16)
+    moc.write(tmp_file.name)
 
 def test_simple_test_t_moc():
     t_moc = TimeMoc()
@@ -80,10 +81,12 @@ def test_max_order_t_moc():
 
 
 def test_from_json():
-    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', max_order=16)
-    moc.write('moc3.txt', format='json')
+    import tempfile
+    tmp_file = tempfile.NamedTemporaryFile()
+    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', moc_order=16)
+    moc.write(tmp_file.name, format='json')
 
-    with open('moc3.txt', 'r') as moc_file:
+    with open(tmp_file.name, 'r') as moc_file:
         import json
         moc_d = json.load(moc_file)
         moc2 = MOC.from_json(json_moc=moc_d)

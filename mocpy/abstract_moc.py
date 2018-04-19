@@ -225,8 +225,8 @@ class AbstractMoc:
         """
         Load a moc from a fits file
 
-        :param path: the path to the fits file
-        :return: the interval set describing the moc corresponding to the passed fits file
+        :param hdulist: the parsed fits file
+        :return: the interval set of NUNIQ describing the moc corresponding to the fits file
         """
         interval_set = IntervalSet()
         data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading

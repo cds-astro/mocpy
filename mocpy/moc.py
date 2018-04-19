@@ -96,35 +96,52 @@ class MOC(AbstractMoc):
         pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
-        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
+        hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
 
         i_pix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
                                        world_pix_crd[:, 1] * u.deg)
         # remove doubles
         i_pix_l = list(set(i_pix_l))
         moc = MOC()
-        moc.add_pix_list(order=max_order, i_pix_l=i_pix_l)
+        moc.add_pix_list(order=moc_order, i_pix_l=i_pix_l)
         # this will be consistent when one will do operations on the moc (union, inter, ...) or
         # simply write it to a fits or json file
 
         return moc
 
     @classmethod
-    def from_file(cls, path, max_order=None):
+    def from_file(cls, path, moc_order=None):
         """
-        Load a moc from a fits file
+        Load a moc from a fits file (image or binary table)
 
         :param path: the path to the fits file
-        :param max_order: the max order in case one wants to create a moc from a fits image
+        :param moc_order: the max order in case one wants to create a moc from a fits image
         :return: a moc object corresponding to the passed fits file
         """
         with fits.open(path) as hdulist:
             if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+                # AbstractMoc returns a IntervalSet made of uniq
                 return MOC.from_uniq_interval_set(AbstractMoc.from_file(hdulist=hdulist))
 
             assert isinstance(hdulist[1], fits.hdu.ImageHDU), ValueError('Cannot extract the moc'
                                                                          ' from the {0:s} fits file'.format(path))
-            return MOC.__from_fits_image(path=path, max_order=max_order)
+            return MOC.__from_fits_image(path=path, moc_order=moc_order)
+
+    @classmethod
+    def from_fits_images(cls, path_l, moc_order):
+        """
+        Load a moc from a set of fits images
+
+        :param path_l: the list of path where the fits image are located
+        :param moc_order: the order one wants to build the moc
+        :return: the union of all the moc from path_l
+        """
+        moc = MOC()
+        for path in path_l:
+            current_moc = MOC.from_file(path=path, moc_order=moc_order)
+            moc = moc.union(current_moc)
+
+        return moc
 
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
