@@ -114,4 +114,22 @@ class TimeMoc(AbstractMoc):
 
         return int(i_pix)
 
+    def plot(self):
+        import matplotlib.pyplot as plt
+        import matplotlib.patches as patches
+
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1.set_xlim(self.min_time * TimeMoc.DAY_MICRO_SEC, self.max_time * TimeMoc.DAY_MICRO_SEC)
+        duration = (self.max_time - self.min_time) * TimeMoc.DAY_MICRO_SEC
+        for (s_time_us, e_time_us) in self._interval_set.intervals:
+            ax1.add_patch(
+                patches.Rectangle(
+                    (s_time_us, 0),  # (x,y)
+                    e_time_us - s_time_us,  # width
+                    0.1 * duration,  # height
+                )
+            )
+        fig1.show()
+
 

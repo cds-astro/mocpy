@@ -28,6 +28,8 @@ from astropy import wcs
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import ang2pix
 
+import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
 from .abstract_moc import AbstractMoc
 from .interval_set import IntervalSet
@@ -79,8 +81,8 @@ class MOC(AbstractMoc):
         return ang2pix(n_side, theta, phi, nest=True)
 
     @classmethod
-    def __from_fits_image(cls, path, max_order=None):
-        assert max_order, ValueError('An order must be specified when'
+    def __from_fits_image(cls, path, moc_order):
+        assert moc_order, ValueError('An order must be specified when'
                                      ' building a moc from a fits image.')
         # load the image data
         header = fits.getheader(path)
@@ -296,42 +298,51 @@ class MOC(AbstractMoc):
         m._order = new_order
         return m
 
-    '''
     def plot(self, title='MOC', coord='C'):
-        import matplotlib.pyplot as plt
-
-        import numpy as np
-        from astropy_healpix import HEALPix
-        from astropy.coordinates import ICRS, Galactic
-
         if self.max_order > 4:
             plotted_moc = self.degrade_to_order(4)
         else:
             plotted_moc = self
 
-        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=Galactic())
+        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
         pix_best_res_l = list(plotted_moc.best_res_pixels_iterator())
 
-        lon, lat = hp.boundaries_lonlat(pix_best_res_l, step=1)
-        print(lon.to(u.deg).value)
-        print(lat.to(u.deg).value)
-        deg_to_rad = np.pi / 180
-        lon = (lon.to(u.deg).value - 180) * deg_to_rad
-        lat = lat.to(u.deg).value * deg_to_rad
+        skycoords = hp.boundaries_skycoord(pix_best_res_l, step=1)
 
-        print('max', lon.max())
+        deg_to_rad = np.pi / 180
+
+        lon = (((180.0 - skycoords.ra.deg) % 360.0) - 180.0)
+        lat = skycoords.dec.deg
+
+        sky_lon_l = []
+        sky_lat_l = []
+
+        for i in range(skycoords.ra.deg.shape[0]):
+            ra_min = lon[i] < 150
+            ra_max = lon[i] > -150
+            if np.all(ra_min) or np.all(ra_max):
+                sky_lon_l.append(lon[i])
+                sky_lat_l.append(lat[i])
+
+        sky_lon_arr = np.array(sky_lon_l)
+        sky_lat_arr = np.array(sky_lat_l)
+
+        sky_lon_arr = sky_lon_arr * deg_to_rad
+        sky_lat_arr = sky_lat_arr * deg_to_rad
 
         plt.figure()
         ax = plt.subplot(111, projection="mollweide")
-        for i in range(len(lon)):
-            ax.fill(lon[i], lat[i], 'r')
+
+        for i in range(sky_lon_arr.shape[0]):
+            vertices = np.vstack([sky_lon_arr[i], sky_lat_arr[i]]).transpose()
+            p = Polygon(vertices, closed=True, edgecolor=None, facecolor='red')
+            ax.add_patch(p)
 
         plt.title("Mollweide")
         plt.grid(True)
 
         plt.show()
     '''
-
     def plot(self, title='MOC', coord='C'):
         """
         plot current instance using matplotlib
@@ -356,3 +367,4 @@ class MOC(AbstractMoc):
         hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap=cmap)
         hp.graticule()
         plt.show()
+    '''
