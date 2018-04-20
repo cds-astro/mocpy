@@ -27,6 +27,7 @@ from astropy import wcs
 
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import ang2pix
+from astropy_healpix.healpy import nside2npix
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
@@ -299,72 +300,38 @@ class MOC(AbstractMoc):
         return m
 
     def plot(self, title='MOC', coord='C'):
-        if self.max_order > 4:
-            plotted_moc = self.degrade_to_order(4)
+        plot_order = 8
+        if self.max_order > plot_order:
+            plotted_moc = self.degrade_to_order(plot_order)
         else:
             plotted_moc = self
 
-        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
-        pix_best_res_l = list(plotted_moc.best_res_pixels_iterator())
+        num_pixels_map = 768
+        delta = 2 * np.pi / num_pixels_map
 
-        skycoords = hp.boundaries_skycoord(pix_best_res_l, step=1)
+        x = np.arange(-np.pi, np.pi, delta)
+        y = np.arange(-np.pi/2, np.pi/2, delta)
+        lon_rad, lat_rad = np.meshgrid(x, y)
 
-        deg_to_rad = np.pi / 180
-
-        lon = (((180.0 - skycoords.ra.deg) % 360.0) - 180.0)
-        lat = skycoords.dec.deg
-
-        sky_lon_l = []
-        sky_lat_l = []
-
-        for i in range(skycoords.ra.deg.shape[0]):
-            ra_min = lon[i] < 150
-            ra_max = lon[i] > -150
-            if np.all(ra_min) or np.all(ra_max):
-                sky_lon_l.append(lon[i])
-                sky_lat_l.append(lat[i])
-
-        sky_lon_arr = np.array(sky_lon_l)
-        sky_lat_arr = np.array(sky_lat_l)
-
-        sky_lon_arr = sky_lon_arr * deg_to_rad
-        sky_lat_arr = sky_lat_arr * deg_to_rad
-
-        plt.figure()
-        ax = plt.subplot(111, projection="mollweide")
-
-        for i in range(sky_lon_arr.shape[0]):
-            vertices = np.vstack([sky_lon_arr[i], sky_lat_arr[i]]).transpose()
-            p = Polygon(vertices, closed=True, edgecolor=None, facecolor='red')
-            ax.add_patch(p)
-
-        plt.title("Mollweide")
-        plt.grid(True)
-
-        plt.show()
-    '''
-    def plot(self, title='MOC', coord='C'):
-        """
-        plot current instance using matplotlib
-        coord can be 'C', 'G' or 'E' (respectively celestial, galactic or ecliptic)
-        """
-        from matplotlib import pyplot as plt
-        import healpy as hp
-        # degrade to NORDER 8 if norder is greater
-        if self.max_order > 8:
-            plotted_moc = self.degrade_to_order(8)
-        else:
-            plotted_moc = self
-
-        m = np.zeros(hp.nside2npix(2 ** plotted_moc.max_order))
+        m = np.zeros(nside2npix(2 ** plotted_moc.max_order))
         for val in plotted_moc.best_res_pixels_iterator():
             m[val] = 1
 
+        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
+
+        pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
+        map = np.flip(m[pix_map], axis=1)
+
+        plt.figure(figsize=(10, 10))
+        ax = plt.subplot(111, projection='mollweide')
         from matplotlib.colors import LinearSegmentedColormap
-        cmap = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#ff0000'])
-        cmap.set_under('w') 
-        cmap.set_bad('gray')
-        hp.mollview(m, nest=True, coord=['C', coord], title=title, cbar=False, cmap=cmap)
-        hp.graticule()
+        color_map = LinearSegmentedColormap.from_list('w2r', ['#eeeeee', '#ee0000'])
+        color_map.set_under('w')
+        color_map.set_bad('gray')
+
+        ax.pcolormesh(x, y, map, cmap=color_map, vmin=0, vmax=1)
+        ax.tick_params(labelsize=13)
+        plt.title('moc plot:')
+        plt.grid(True, linestyle='--', linewidth=1, color='#555555')
+
         plt.show()
-    '''
