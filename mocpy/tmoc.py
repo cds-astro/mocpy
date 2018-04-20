@@ -19,6 +19,7 @@ except NameError:
 import sys
 
 from astropy.time import Time
+from astropy.io import fits
 
 from .abstract_moc import AbstractMoc
 
@@ -37,6 +38,21 @@ class TimeMoc(AbstractMoc):
 
     def __init__(self):
         AbstractMoc.__init__(self)
+
+    @classmethod
+    def from_file(cls, path):
+        """
+        Load a moc from a fits file (image or binary table)
+
+        :param path: the path to the fits file
+        :return: a moc object corresponding to the passed fits file
+        """
+        with fits.open(path) as hdulist:
+            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+                # AbstractMoc returns a IntervalSet made of uniq
+                return TimeMoc.from_uniq_interval_set(AbstractMoc.from_file(hdulist=hdulist))
+
+        raise FileNotFoundError('Error founding/opening file {0:s}'.format(path))
 
     def add_time_interval(self, time_start, time_end):
         if not isinstance(time_start, Time) or not isinstance(time_end, Time):
@@ -120,16 +136,19 @@ class TimeMoc(AbstractMoc):
 
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111, aspect='equal')
-        ax1.set_xlim(self.min_time * TimeMoc.DAY_MICRO_SEC, self.max_time * TimeMoc.DAY_MICRO_SEC)
+
         duration = (self.max_time - self.min_time) * TimeMoc.DAY_MICRO_SEC
+        ax1.set_xlim(self.min_time * TimeMoc.DAY_MICRO_SEC, self.max_time * TimeMoc.DAY_MICRO_SEC)
+        ax1.set_ylim(0, duration * 0.05)
         for (s_time_us, e_time_us) in self._interval_set.intervals:
             ax1.add_patch(
                 patches.Rectangle(
                     (s_time_us, 0),  # (x,y)
                     e_time_us - s_time_us,  # width
                     0.1 * duration,  # height
+                    edgecolor='red'
                 )
             )
-        fig1.show()
+        plt.show()
 
 

@@ -325,12 +325,12 @@ class MOC(AbstractMoc):
         plt.figure(figsize=(10, 10))
         ax = plt.subplot(111, projection='mollweide')
         from matplotlib.colors import LinearSegmentedColormap
-        color_map = LinearSegmentedColormap.from_list('w2r', ['#eeeeee', '#ee0000'])
+        color_map = LinearSegmentedColormap.from_list('w2r', ['#eeeeee', '#aa0000'])
         color_map.set_under('w')
         color_map.set_bad('gray')
 
         ax.pcolormesh(x, y, map, cmap=color_map, vmin=0, vmax=1)
-        ax.tick_params(labelsize=13)
+        ax.tick_params(labelsize=14, labelcolor='#000000')
         plt.title('moc plot:')
         plt.grid(True, linestyle='--', linewidth=1, color='#555555')
 
