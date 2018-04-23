@@ -277,7 +277,6 @@ class AbstractMoc:
         else:
             return Table(rows=kept_rows, names=table.colnames)
 
-
     def add_fits_header(self, tbhdu):
         """ This method must be implemented in each class derived from AbstractMoc """
         pass

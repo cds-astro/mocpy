@@ -42,6 +42,32 @@ class TimeMoc(AbstractMoc):
         AbstractMoc.__init__(self)
 
     @classmethod
+    def from_csv_file(cls, path, **kwargs):
+        """
+        Load a time moc from a CSV file containing two columns (t_min, t_max)
+
+        :param path: path of the CSV file
+        :param kwargs: args that will be passed to the astropy.time.Time objects (e.g. format, scale)
+        :return: a time_moc
+        """
+        import csv
+
+        time_moc = TimeMoc()
+
+        with open(path, 'r') as csv_file:
+            spam_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+            row_num = 0
+            for row in spam_reader:
+                if row_num > 0:
+                    t_min = Time(float(row[0]), **kwargs)
+                    t_max = Time(float(row[1]), **kwargs)
+                    time_moc.add_time_interval(t_min, t_max)
+
+                row_num += 1
+
+        return time_moc
+
+    @classmethod
     def _from_specific_file(cls, hdulist, moc_order, path):
         # Entering this method triggers an error for TimeMoc because TimeMoc can only
         # be load from a set of nuniq intervals (as defined in the method from_file of AbstractMoc cls)
@@ -64,12 +90,9 @@ class TimeMoc(AbstractMoc):
         """
 
         time_us_start = long(time_start.jd * TimeMoc.DAY_MICRO_SEC)
-        time_us_end = time_end.jd * TimeMoc.DAY_MICRO_SEC
-        if not time_us_end.is_integer():
-            time_us_end += 1
+        time_us_end = long(time_end.jd * TimeMoc.DAY_MICRO_SEC) + 1
 
-        self._interval_set.add((time_us_start,
-                                long(time_us_end)))
+        self._interval_set.add((time_us_start, time_us_end))
 
     @property
     def total_duration(self):
@@ -117,16 +140,15 @@ class TimeMoc(AbstractMoc):
                                                   ' columns such as u, g, r.. date')
         time = Time(row_values_l[0], format=format, scale='tai')
 
-        i_pix = time.jd * TimeMoc.DAY_MICRO_SEC
-        if not i_pix.is_integer():
-            i_pix += 1
-
-        return int(i_pix)
+        i_pix = long(time.jd * TimeMoc.DAY_MICRO_SEC)
+        return i_pix
 
     def add_fits_header(self, tbhdu):
         tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
 
     def plot(self):
+        assert not self._interval_set.empty(), ValueError('Empty time moc instance')
+
         plot_order = 15
         if self.max_order > plot_order:
             plotted_moc = self.degrade_to_order(plot_order)
