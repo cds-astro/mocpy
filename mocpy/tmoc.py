@@ -146,7 +146,7 @@ class TimeMoc(AbstractMoc):
     def add_fits_header(self, tbhdu):
         tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
 
-    def plot(self):
+    def plot(self, title='TimeMoc'):
         assert not self._interval_set.empty(), ValueError('Empty time moc instance')
 
         plot_order = 15
@@ -156,7 +156,7 @@ class TimeMoc(AbstractMoc):
             plotted_moc = self
 
         plotted_moc._interval_set.intervals
-        fig1 = plt.figure()
+        fig1 = plt.figure(figsize=(15, 20))
         ax = fig1.add_subplot(111)
 
         ax.set_xlabel('jd')
@@ -178,6 +178,7 @@ class TimeMoc(AbstractMoc):
 
         z = np.tile(y, (int(size//10), 1))
 
+        plt.title(title)
         plt.imshow(z, interpolation='nearest')
         plt.show()
 

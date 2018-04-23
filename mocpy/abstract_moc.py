@@ -259,17 +259,23 @@ class AbstractMoc:
         Return the (newly created) filtered Table
         """
         kept_rows = []
-        pixels_best_res = set()
+        '''pixels_best_res = set()
         for val in self.best_res_pixels_iterator():
             pixels_best_res.add(val)
-
+        print('jj')
+        '''
+        from astropy_healpix.healpy import nside2npix
         max_order = self.max_order
         n_side = 2 ** max_order
+        m = np.zeros(nside2npix(n_side))
+        for val in self.best_res_pixels_iterator():
+            m[val] = 1
+
         for row in table:
             i_pix = self._get_pix(row_values_l=[row[arg] for arg in args],
                                   n_side=n_side,
                                   format=format)
-            if (i_pix in pixels_best_res) == keep_inside:
+            if m[i_pix] == keep_inside:
                 kept_rows.append(row)
 
         if len(kept_rows) == 0:

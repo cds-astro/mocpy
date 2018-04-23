@@ -21,7 +21,8 @@ import sys
 import numpy as np
 
 from astropy import units as u
-from astropy.coordinates import SkyCoord, ICRS
+from astropy.coordinates import SkyCoord
+from astropy.coordinates import ICRS, Galactic
 from astropy.io import fits
 from astropy import wcs
 
@@ -265,10 +266,16 @@ class MOC(AbstractMoc):
     def add_fits_header(self, tbhdu):
         tbhdu.header['COORDSYS'] = ('C', 'reference frame (C=ICRS)')
 
-    """
-    Plot a spatial moc using matplotlib and healpy 
-    """
     def plot(self, title='MOC', coord='C'):
+        """
+        Plot a moc object using matplotlib
+
+        :param title: the title of the plot
+        :param coord: type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
+        #TODO handle Galactic coordinates
+        :return: plot the moc in a mollweide view
+
+        """
         plot_order = 8
         if self.max_order > plot_order:
             plotted_moc = self.degrade_to_order(plot_order)
@@ -300,7 +307,7 @@ class MOC(AbstractMoc):
 
         ax.pcolormesh(x, y, map, cmap=color_map, vmin=0, vmax=1)
         ax.tick_params(labelsize=14, labelcolor='#000000')
-        plt.title('moc plot:')
+        plt.title(title)
         plt.grid(True, linestyle='--', linewidth=1, color='#555555')
 
         plt.show()
