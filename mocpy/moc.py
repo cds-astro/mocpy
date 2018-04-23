@@ -82,7 +82,9 @@ class MOC(AbstractMoc):
         return ang2pix(n_side, theta, phi, nest=True)
 
     @classmethod
-    def __from_fits_image(cls, path, moc_order):
+    def _from_specific_file(cls, hdulist, moc_order, path):
+        assert isinstance(hdulist[1], fits.hdu.ImageHDU), ValueError('Cannot extract the moc'
+                                                                     ' from the {0:s} fits file'.format(path))
         assert moc_order, ValueError('An order must be specified when'
                                      ' building a moc from a fits image.')
         # load the image data
@@ -111,24 +113,6 @@ class MOC(AbstractMoc):
         # simply write it to a fits or json file
 
         return moc
-
-    @classmethod
-    def from_file(cls, path, moc_order=None):
-        """
-        Load a moc from a fits file (image or binary table)
-
-        :param path: the path to the fits file
-        :param moc_order: the max order in case one wants to create a moc from a fits image
-        :return: a moc object corresponding to the passed fits file
-        """
-        with fits.open(path) as hdulist:
-            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
-                # AbstractMoc returns a IntervalSet made of uniq
-                return MOC.from_uniq_interval_set(AbstractMoc.from_file(hdulist=hdulist))
-
-            assert isinstance(hdulist[1], fits.hdu.ImageHDU), ValueError('Cannot extract the moc'
-                                                                         ' from the {0:s} fits file'.format(path))
-            return MOC.__from_fits_image(path=path, moc_order=moc_order)
 
     @classmethod
     def from_fits_images(cls, path_l, moc_order):
@@ -278,27 +262,12 @@ class MOC(AbstractMoc):
 
         return table
 
+    def add_fits_header(self, tbhdu):
+        tbhdu.header['COORDSYS'] = ('C', 'reference frame (C=ICRS)')
+
     """
     Plot a spatial moc using matplotlib and healpy 
     """
-    # TODO : remove all healpy dependencies (e.g. mollview and graticule)
-    def degrade_to_order(self, new_order):
-        shift = 2 * (MOC.HPY_MAX_NORDER - new_order)
-        ofs = (long(1) << shift) - 1
-        mask = ~ofs
-        adda = long(0)
-        addb = ofs
-        iv_set = IntervalSet()
-        for iv in self._interval_set.intervals:
-            a = (iv[0] + adda) & mask
-            b = (iv[1] + addb) & mask
-            if b > a:
-                iv_set.add((a, b))
-
-        m = MOC.from_interval_set(iv_set)
-        m._order = new_order
-        return m
-
     def plot(self, title='MOC', coord='C'):
         plot_order = 8
         if self.max_order > plot_order:
