@@ -60,7 +60,7 @@ def test_simple_test_t_moc():
     s_time = Time(2 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
     e_time = Time(7 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
     t_moc.add_time_interval(s_time, e_time)
-    assert t_moc.total_duration == 5
+    assert t_moc.total_duration == 6
     assert t_moc.max_order == 29
 
     t_moc.write('tmoc.txt', format='json')
@@ -91,3 +91,16 @@ def test_from_json():
         moc_d = json.load(moc_file)
         moc2 = MOC.from_json(json_moc=moc_d)
         assert moc == moc2
+
+
+def test_tmoc_construction():
+    """
+    Assert a correct t_moc loaded from a fits file is equal to the t_moc built from a CSV file
+    containing a list of time intervals
+    """
+    time_moc = TimeMoc.from_file('notebooks/demo-data/TMOC/HST_SDSSg/TMoc.fits')
+    time_moc2 = TimeMoc.from_csv_file(path='notebooks/demo-data/TMOC/HST_SDSSg/uniq-times.csv',
+                                      format='mjd',
+                                      scale='tai')
+
+    assert time_moc == time_moc2, 'bad tmoc construction'
