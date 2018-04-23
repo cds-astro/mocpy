@@ -1,5 +1,4 @@
 numpy
-healpy
 astropy
 astropy_healpix
 matplotlib
