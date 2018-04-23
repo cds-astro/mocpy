@@ -17,6 +17,8 @@ except NameError:
     from sets import Set as set
 
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
 from astropy.time import Time
 from astropy.io import fits
@@ -40,18 +42,9 @@ class TimeMoc(AbstractMoc):
         AbstractMoc.__init__(self)
 
     @classmethod
-    def from_file(cls, path):
-        """
-        Load a moc from a fits file (image or binary table)
-
-        :param path: the path to the fits file
-        :return: a moc object corresponding to the passed fits file
-        """
-        with fits.open(path) as hdulist:
-            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
-                # AbstractMoc returns a IntervalSet made of uniq
-                return TimeMoc.from_uniq_interval_set(AbstractMoc.from_file(hdulist=hdulist))
-
+    def _from_specific_file(cls, hdulist, moc_order, path):
+        # Entering this method triggers an error for TimeMoc because TimeMoc can only
+        # be load from a set of nuniq intervals (as defined in the method from_file of AbstractMoc cls)
         raise FileNotFoundError('Error founding/opening file {0:s}'.format(path))
 
     def add_time_interval(self, time_start, time_end):
@@ -130,25 +123,39 @@ class TimeMoc(AbstractMoc):
 
         return int(i_pix)
 
+    def add_fits_header(self, tbhdu):
+        tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
+
     def plot(self):
-        import matplotlib.pyplot as plt
-        import matplotlib.patches as patches
+        plot_order = 15
+        if self.max_order > plot_order:
+            plotted_moc = self.degrade_to_order(plot_order)
+        else:
+            plotted_moc = self
 
+        plotted_moc._interval_set.intervals
         fig1 = plt.figure()
-        ax1 = fig1.add_subplot(111, aspect='equal')
+        ax = fig1.add_subplot(111)
 
-        duration = (self.max_time - self.min_time) * TimeMoc.DAY_MICRO_SEC
-        ax1.set_xlim(self.min_time * TimeMoc.DAY_MICRO_SEC, self.max_time * TimeMoc.DAY_MICRO_SEC)
-        ax1.set_ylim(0, duration * 0.05)
-        for (s_time_us, e_time_us) in self._interval_set.intervals:
-            ax1.add_patch(
-                patches.Rectangle(
-                    (s_time_us, 0),  # (x,y)
-                    e_time_us - s_time_us,  # width
-                    0.1 * duration,  # height
-                    edgecolor='red'
-                )
-            )
+        ax.set_xlabel('jd')
+        ax.get_yaxis().set_visible(False)
+
+        size = 1000
+        delta = (plotted_moc.max_time - plotted_moc.min_time) / size
+        min_jd_time = plotted_moc.min_time
+
+        num_ticks = 5
+        ax.set_xticks([x for x in range(0, size+1, int(size/num_ticks))])
+        ax.set_xticklabels([str(int(x * delta + min_jd_time)) for x in range(0, size+1, int(size/num_ticks))])
+
+        y = np.zeros(size)
+        for (s_time_us, e_time_us) in plotted_moc._interval_set.intervals:
+            s_index = int((s_time_us / TimeMoc.DAY_MICRO_SEC - min_jd_time) / delta)
+            e_index = int((e_time_us / TimeMoc.DAY_MICRO_SEC - min_jd_time) / delta)
+            y[s_index:(e_index+1)] = 1.0
+
+        z = np.tile(y, (int(size//10), 1))
+
+        plt.imshow(z, interpolation='nearest')
         plt.show()
-
 

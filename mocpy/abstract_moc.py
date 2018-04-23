@@ -221,19 +221,28 @@ class AbstractMoc:
         return res
 
     @classmethod
-    def from_file(cls, hdulist):
-        """
-        Load a moc from a fits file
+    def _from_specific_file(cls, hdulist, moc_order, path):
+        pass
 
-        :param hdulist: the parsed fits file
-        :return: the interval set of NUNIQ describing the moc corresponding to the fits file
+    @classmethod
+    def from_file(cls, path, moc_order=None):
         """
-        interval_set = IntervalSet()
-        data = hdulist[1].data.view(np.recarray) # accessing directly recarray dramatically speed up the reading
-        for x in xrange(0, len(hdulist[1].data)):
-            interval_set.add(data[x][0])
+        Load a moc from a fits file (image or binary table)
 
-        return interval_set
+        :param path: the path to the fits file
+        :param moc_order: the max order in case one wants to create a moc from a fits image
+        :return: a moc object corresponding to the passed fits file
+        """
+        with fits.open(path) as hdulist:
+            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+                interval_set = IntervalSet()
+                # accessing directly recarray dramatically speed up the reading
+                data = hdulist[1].data.view(np.recarray)
+                for x in xrange(0, len(hdulist[1].data)):
+                    interval_set.add(data[x][0])
+                return cls.from_uniq_interval_set(interval_set)
+
+            return cls._from_specific_file(hdulist=hdulist, path=path, moc_order=moc_order)
 
     def best_res_pixels_iterator(self):
         factor = 4 ** (AbstractMoc.HPY_MAX_NORDER - self.max_order)
@@ -268,6 +277,11 @@ class AbstractMoc:
         else:
             return Table(rows=kept_rows, names=table.colnames)
 
+
+    def add_fits_header(self, tbhdu):
+        """ This method must be implemented in each class derived from AbstractMoc """
+        pass
+
     def write(self, path, format='fits', optional_kw_dict=None):
         """
         Serialize a moc in FITS in a given path
@@ -294,7 +308,7 @@ class AbstractMoc:
                 fits.ColDefs([fits.Column(name='UNIQ', format=format, array=np.array(uniq_array))]))
             tbhdu.header['PIXTYPE'] = 'HEALPIX'
             tbhdu.header['ORDERING'] = 'NUNIQ'
-            tbhdu.header['COORDSYS'] = 'C'
+            self.add_fits_header(tbhdu)
             tbhdu.header['MOCORDER'] = moc_order
             tbhdu.header['MOCTOOL'] = 'MOCPy'
             if optional_kw_dict:
@@ -321,3 +335,20 @@ class AbstractMoc:
             json_moc[str(o_order)] = pix_l
             with open(path, 'w') as h:
                 h.write(json.dumps(json_moc, sort_keys=True, indent=2))
+
+    def degrade_to_order(self, new_order):
+        shift = 2 * (AbstractMoc.HPY_MAX_NORDER - new_order)
+        ofs = (long(1) << shift) - 1
+        mask = ~ofs
+        adda = long(0)
+        addb = ofs
+        iv_set = IntervalSet()
+        for iv in self._interval_set.intervals:
+            a = (iv[0] + adda) & mask
+            b = (iv[1] + addb) & mask
+            if b > a:
+                iv_set.add((a, b))
+
+        m = self.__class__.from_interval_set(iv_set)
+        m._order = new_order
+        return m
