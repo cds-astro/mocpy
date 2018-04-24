@@ -17,13 +17,15 @@ except NameError:
     from sets import Set as set
 
 import sys
+import requests
+import tempfile
+import os
 
 import numpy as np
 
 from astropy import units as u
-from astropy.table import Table
 from astropy.coordinates import SkyCoord
-from astropy.coordinates import ICRS, Galactic
+from astropy.coordinates import ICRS
 from astropy.io import fits
 from astropy import wcs
 
@@ -32,10 +34,8 @@ from astropy_healpix.healpy import ang2pix
 from astropy_healpix.healpy import nside2npix
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
 
 from .abstract_moc import AbstractMoc
-from .interval_set import IntervalSet
 from . import utils
 
 if sys.version > '3':
@@ -201,10 +201,8 @@ class MOC(AbstractMoc):
         """
         return the sky fraction (between 0 and 1) covered by the MOC
         """
-        nb_pix_filled = 0
-        for val in self.best_res_pixels_iterator():
-            nb_pix_filled += 1
 
+        nb_pix_filled = len(list(self.best_res_pixels_iterator()))
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     def query_simbad(self, max_rows=10000):
@@ -226,9 +224,6 @@ class MOC(AbstractMoc):
         internal method to query Simbad or a VizieR table
         for sources in the coverage of the MOC instance
         """
-        import requests
-        import tempfile
-        import os
 
         if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)
@@ -266,10 +261,11 @@ class MOC(AbstractMoc):
 
     def plot(self, title='MOC', coord='C'):
         """
-        Plot a moc object using matplotlib
+        Plot the moc instance using matplotlib
 
         :param title: the title of the plot
         :param coord: type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
+        only ICRS coordinates are supported for the moment.
         #TODO handle Galactic coordinates
         :return: plot the moc in a mollweide view
 
@@ -294,7 +290,7 @@ class MOC(AbstractMoc):
         hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
 
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
-        map = np.flip(m[pix_map], axis=1)
+        z = np.flip(m[pix_map], axis=1)
 
         plt.figure(figsize=(10, 10))
         ax = plt.subplot(111, projection='mollweide')
@@ -303,7 +299,7 @@ class MOC(AbstractMoc):
         color_map.set_under('w')
         color_map.set_bad('gray')
 
-        ax.pcolormesh(x, y, map, cmap=color_map, vmin=0, vmax=1)
+        ax.pcolormesh(x, y, z, cmap=color_map, vmin=0, vmax=1)
         ax.tick_params(labelsize=14, labelcolor='#000000')
         plt.title(title)
         plt.grid(True, linestyle='--', linewidth=1, color='#555555')

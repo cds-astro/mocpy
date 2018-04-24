@@ -19,9 +19,9 @@ except NameError:
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 
 from astropy.time import Time
-from astropy.io import fits
 
 from .abstract_moc import AbstractMoc
 
@@ -44,13 +44,14 @@ class TimeMoc(AbstractMoc):
     @classmethod
     def from_table(cls, table, t_column, format='decimalyear'):
         """
-        Create a TimeMoc from an astropy.table.Table object
-        The user has to specify the column holding the time
+        Create a tmoc instance from an astropy.table.Table object. The user has to specify the name of the time column
+        to consider.
 
         :param table: the table containing all the sources we want to build the TimeMoc
         :param t_column: the name of the column to consider for building the TimeMoc
-        :param format: the format of the times written in this column
-        :return: the TimeMoc object resulting from the sources of the table
+        :param format: the format of the times written in this column. See astropy.time.Time
+        for the list of all available formats.
+        :return: the tmoc instance resulting from the sources of the table
         """
         if not isinstance(t_column, str):
             raise TypeError
@@ -67,11 +68,11 @@ class TimeMoc(AbstractMoc):
     @classmethod
     def from_csv_file(cls, path, **kwargs):
         """
-        Load a time moc from a CSV file containing two columns (t_min, t_max)
+        Load a tmoc from a CSV file containing two columns (t_min, t_max)
 
-        :param path: path of the CSV file
-        :param kwargs: args that will be passed to the astropy.time.Time objects (e.g. format, scale)
-        :return: a time_moc
+        :param path: path leading to the CSV file
+        :param kwargs: options that will be passed to the astropy.time.Time instances (e.g. format, scale options)
+        :return: a newly created tmoc built from the given csv file
         """
         import csv
 
@@ -97,6 +98,12 @@ class TimeMoc(AbstractMoc):
         raise FileNotFoundError('Error founding/opening file {0:s}'.format(path))
 
     def add_time(self, time):
+        """
+        Add a single time observation to the current tmoc
+
+        :param time: time observation (astropy.time.Time instance)
+        :return:
+        """
         if not isinstance(time, Time):
             raise TypeError("You must pass astropy.time.Time instances to the add_time_interval"
                             "method")
@@ -106,6 +113,13 @@ class TimeMoc(AbstractMoc):
         self._interval_set.add((time_us_start, time_us_end))
 
     def add_time_interval(self, time_start, time_end):
+        """
+        Add a time interval of observation to the current tmoc
+
+        :param time_start: starting time of the observation (astropy.time.Time instance)
+        :param time_end: ending time of the observation (astropy.time.Time instance)
+        :return:
+        """
         if not isinstance(time_start, Time) or not isinstance(time_end, Time):
             raise TypeError("You must pass astropy.time.Time instances to the add_time_interval"
                             "method")
@@ -121,7 +135,7 @@ class TimeMoc(AbstractMoc):
     @property
     def total_duration(self):
         """
-        :return: the total duration covered by the temporal moc in us
+        Return the total duration covered by the temporal moc in us
         """
         if self._interval_set.empty():
             return 0
@@ -136,7 +150,7 @@ class TimeMoc(AbstractMoc):
     @property
     def consistency(self):
         """
-        :return: a percentage of fill between the min and max time the moc is defined.
+        Return a percentage of fill between the min and max time the moc is defined.
         A value near 0 shows a sparse temporal moc (i.e. the moc does not cover a lot
         of time and covers very distant times. A value near 1 means that the moc covers
         a lot of time without big pauses.
@@ -145,26 +159,36 @@ class TimeMoc(AbstractMoc):
 
     @property
     def min_time(self):
-        """Get the min time of the temporal moc in jd"""
+        """
+        Return the min time of the tmoc in jd
+        """
         return self._interval_set.min / TimeMoc.DAY_MICRO_SEC
 
     @property
     def max_time(self):
-        """Get the min time of the temporal moc in jd"""
+        """
+        Return the max time of the tmoc in jd
+        """
         return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
 
     def filter_table(self, table, t_column, format='decimalyear', keep_inside=True):
         """
-        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
-        Return the (newly created) filtered Table
+        Filter an astropy.table.Table to keep only rows inside (or outside) the tmoc instance
+
+        :param table: the full astropy table to filter
+        :param t_column: the name of the time column to consider for filtering the table
+        :param format: the format of the time column
+        :param keep_inside: boolean describing if we want to keep rows inside or outside the tmoc
+        :return: the filtered Table (astropy.table)
         """
+
         time_arr = Time(table[t_column], format=format, scale='tai')
         pix_arr = (time_arr.jd * TimeMoc.DAY_MICRO_SEC)
         pix_arr = pix_arr.astype(int)
 
-        itvs = np.array(self._interval_set.intervals)
-        inf_arr = np.vstack([pix_arr[i] >= itvs[:, 0] for i in range(pix_arr.shape[0])])
-        sup_arr = np.vstack([pix_arr[i] <= itvs[:, 1] for i in range(pix_arr.shape[0])])
+        intervals_arr = np.array(self._interval_set.intervals)
+        inf_arr = np.vstack([pix_arr[i] >= intervals_arr[:, 0] for i in range(pix_arr.shape[0])])
+        sup_arr = np.vstack([pix_arr[i] <= intervals_arr[:, 1] for i in range(pix_arr.shape[0])])
 
         if keep_inside:
             res = inf_arr & sup_arr
@@ -176,9 +200,20 @@ class TimeMoc(AbstractMoc):
         return table[filtered_rows]
 
     def add_fits_header(self, tbhdu):
+        """
+        Add TIMESYS to the header of the fits describing the tmoc
+
+        :param tbhdu: fits python object
+        """
         tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
 
-    def plot(self, title='TimeMoc', min_jd=None, max_jd=None):
+    def plot(self, title='TimeMoc', view=(None, None)):
+        """
+        Plot the tmoc with matplotlib
+
+        :param title: the title of the plot
+        :param view: a tuple (x_min, x_max) defining the time window of the plot
+        """
         assert not self._interval_set.empty(), ValueError('Empty time moc instance')
 
         plot_order = 15
@@ -188,6 +223,8 @@ class TimeMoc(AbstractMoc):
             plotted_moc = self
 
         plotted_moc._interval_set.intervals
+
+        min_jd, max_jd = view
 
         if not min_jd:
             min_jd = plotted_moc.min_time
@@ -219,11 +256,10 @@ class TimeMoc(AbstractMoc):
         z = np.tile(y, (int(size//10), 1))
 
         plt.title(title)
-        from matplotlib.colors import LinearSegmentedColormap
+
         color_map = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#aa0000'])
         color_map.set_under('w')
         color_map.set_bad('gray')
 
         plt.imshow(z, interpolation='bilinear', cmap=color_map)
         plt.show()
-
