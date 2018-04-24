@@ -6,7 +6,6 @@ Manages a set of intervals
 """
 
 from __future__ import print_function, division
-from astropy.time import Time, TimeDelta
 
 # Python 3 support
 try:
@@ -76,12 +75,12 @@ class IntervalSet:
                 #  merge intervals
                 if itv[1] > stop:
                     stop = itv[1]
-           
+
         if start is not None and stop is not None:
             ret.append((start, stop))
 
         return ret
-                
+
     @property
     def intervals(self):
         """
@@ -105,7 +104,7 @@ class IntervalSet:
 
         else:
             self._intervals.append((item, item+1))
-            
+
     def union(self, another_is):
         """
         return the union between 2 IntervalSet
@@ -117,7 +116,7 @@ class IntervalSet:
             res._intervals = self.intervals
         else:
             res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a or in_b)
-        
+
         return res
 
     def difference(self, another_is):
@@ -129,9 +128,9 @@ class IntervalSet:
             res._intervals = self.intervals
         else:
             res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and not in_b)
-        
+
         return res
-    
+
     def intersection(self, another_is):
         """
         return the intersection between the current instance and another_is
@@ -139,7 +138,7 @@ class IntervalSet:
         res = IntervalSet()
         if not another_is.empty() and not self.empty():
             res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and in_b)
-        
+
         return res
 
     @staticmethod
@@ -187,7 +186,8 @@ class IntervalSet:
                 a_index += 1
             if scan == b_endpoints[b_index]:
                 b_index += 1
-                
+
             scan = min(a_endpoints[a_index], b_endpoints[b_index])
 
         return IntervalSet.unflatten(res)
+
