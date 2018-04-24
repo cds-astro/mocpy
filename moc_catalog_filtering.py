@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from mocpy import MOC
+from mocpy import MOC, TimeMoc
 from astroquery.vizier import Vizier
-from astropy.io import ascii
 
 from optparse import OptionParser
+from os import path
+from os import remove
 
 
 def main():
@@ -23,6 +24,18 @@ def main():
                       default='moc',
                       choices=['moc', 'time_moc'],
                       help="Specify the type of moc")
+    parser.add_option("-n", "--time_column_name",
+                      action="store",
+                      dest='t_column',
+                      type=str,
+                      default=None,
+                      help="The name of the time column ")
+    parser.add_option("-q", "--time_format",
+                      action="store",
+                      dest='time_format',
+                      type=str,
+                      default=None,
+                      help="The time format used by the table")
     parser.add_option("-t", "--table_index",
                       action="store",
                       dest="table_index",
@@ -49,28 +62,34 @@ def main():
                       help="Path to the fits output file containing the filtering table",)
     (options, args) = parser.parse_args()
 
-    moc = MOC.from_file(options.filename)
     viz = Vizier(columns=['*', '_RAJ2000', '_DEJ2000'])
     viz.ROW_LIMIT = -1
     table = viz.get_catalogs(options.catalog_index)[options.table_index - 1]
 
-    filtered_table = None
-    result_moc = None
-
-    import pdb;
-    pdb.set_trace()
-
     if options.type_moc is 'moc':
-        print('beginning of the filtering process')
-        filtered_table = moc.filter_table(table=table, ra_column='_RAJ2000', dec_column='_DEJ2000')
-        print('beginning of the moc creation process')
-        result_moc = MOC.from_table(filtered_table, ra_column='_RAJ2000', dec_column='_DEJ2000', moc_order=6)
+        moc = MOC.from_file(options.filename)
+        filtered_table = moc.filter_table(table=table,
+                                          ra_column='_RAJ2000',
+                                          dec_column='_DEJ2000')
+        result_moc = MOC.from_table(filtered_table,
+                                    ra_column='_RAJ2000',
+                                    dec_column='_DEJ2000',
+                                    moc_order=6)
     else:
-        pass
+        moc = TimeMoc.from_file(options.filename)
+        filtered_table = moc.filter_table(table=table,
+                                          t_column=options.t_column,
+                                          format=options.time_format)
+        result_moc = TimeMoc.from_table(filtered_table,
+                                        t_column=options.t_column,
+                                        format=options.time_format)
 
-    print('Filtered table :\n {0}'.format(filtered_table))
+    print('Filtered table :\n{0}'.format(filtered_table))
     if options.plot:
-        result_moc.plot()
+        result_moc.plot(title='filtered moc')
+
+    if path.isfile(options.output_file):
+        remove(options.output_file)
 
     filtered_table.write(options.output_file, format='votable')
 
