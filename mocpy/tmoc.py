@@ -42,6 +42,28 @@ class TimeMoc(AbstractMoc):
         AbstractMoc.__init__(self)
 
     @classmethod
+    def from_table(cls, table, t_column, format='decimalyear'):
+        """
+        Create a TimeMoc from an astropy.table.Table object
+        The user has to specify the column holding the time
+
+        :param table: the table containing all the sources we want to build the TimeMoc
+        :param t_column: the name of the column to consider for building the TimeMoc
+        :param format: the format of the times written in this column
+        :return: the TimeMoc object resulting from the sources of the table
+        """
+        if not isinstance(t_column, str):
+            raise TypeError
+
+        moc = TimeMoc()
+
+        for t in table[t_column]:
+            time_start = Time(t, format=format, scale='tai')
+            moc.add_time(time_start)
+
+        return moc
+
+    @classmethod
     def from_csv_file(cls, path, **kwargs):
         """
         Load a time moc from a CSV file containing two columns (t_min, t_max)
@@ -73,6 +95,15 @@ class TimeMoc(AbstractMoc):
         # be load from a set of nuniq intervals (as defined in the method from_file of AbstractMoc cls)
         raise FileNotFoundError('Error founding/opening file {0:s}'.format(path))
 
+    def add_time(self, time):
+        if not isinstance(time, Time):
+            raise TypeError("You must pass astropy.time.Time instances to the add_time_interval"
+                            "method")
+        time_us_start = long(time.jd * TimeMoc.DAY_MICRO_SEC)
+        time_us_end = time_us_start + 1
+
+        self._interval_set.add((time_us_start, time_us_end))
+
     def add_time_interval(self, time_start, time_end):
         if not isinstance(time_start, Time) or not isinstance(time_end, Time):
             raise TypeError("You must pass astropy.time.Time instances to the add_time_interval"
@@ -80,14 +111,6 @@ class TimeMoc(AbstractMoc):
 
         if time_start >= time_end:
             raise ValueError('time_start must be < compared to the time_end')
-
-        """
-        self.__counter += 1
-        # force consistency to prevent too large interval array
-        if self.__counter == 1000:
-            self._ensure_consistency()
-            self.__counter = 0
-        """
 
         time_us_start = long(time_start.jd * TimeMoc.DAY_MICRO_SEC)
         time_us_end = long(time_end.jd * TimeMoc.DAY_MICRO_SEC) + 1
@@ -129,31 +152,31 @@ class TimeMoc(AbstractMoc):
         """Get the min time of the temporal moc in jd"""
         return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
 
-    def _get_pix(self, row_values_l, n_side, format=None):
-        assert len(row_values_l) == 1, ValueError('Filtering a table by a temporal moc is done on time'
-                                                  ' columns such as u, g, r.. date')
-        time = Time(row_values_l[0], format=format, scale='tai')
-
-        i_pix = long(time.jd * TimeMoc.DAY_MICRO_SEC)
-        return i_pix
-
     def filter_table(self, table, t_column, format='decimalyear', keep_inside=True):
         """
         Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
         Return the (newly created) filtered Table
         """
-        m = self._get_max_order_pix(keep_inside=keep_inside)
-
         time_arr = Time(table[t_column], format=format, scale='tai')
-        pix_arr = time_arr.jd * TimeMoc.DAY_MICRO_SEC
+        pix_arr = (time_arr.jd * TimeMoc.DAY_MICRO_SEC)
         pix_arr = pix_arr.astype(int)
-        filtered_rows = m[pix_arr]
+
+        itvs = np.array(self._interval_set.intervals)
+        inf_arr = np.vstack([pix_arr[i] >= itvs[:, 0] for i in range(pix_arr.shape[0])])
+        sup_arr = np.vstack([pix_arr[i] <= itvs[:, 1] for i in range(pix_arr.shape[0])])
+
+        res = inf_arr & sup_arr
+        if not keep_inside:
+            res = np.logical_not(res)
+
+        filtered_rows = np.any(res, axis=1)
+
         return table[filtered_rows]
 
     def add_fits_header(self, tbhdu):
         tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
 
-    def plot(self, title='TimeMoc'):
+    def plot(self, title='TimeMoc', min_jd=None, max_jd=None):
         assert not self._interval_set.empty(), ValueError('Empty time moc instance')
 
         plot_order = 15
@@ -163,15 +186,23 @@ class TimeMoc(AbstractMoc):
             plotted_moc = self
 
         plotted_moc._interval_set.intervals
+
+        if not min_jd:
+            min_jd = plotted_moc.min_time
+        if not max_jd:
+            max_jd = plotted_moc.max_time
+
+        assert max_jd > min_jd, ValueError('max_jd must be > to min_jd')
+
         fig1 = plt.figure(figsize=(15, 20))
         ax = fig1.add_subplot(111)
 
         ax.set_xlabel('jd')
         ax.get_yaxis().set_visible(False)
 
-        size = 1000
-        delta = (plotted_moc.max_time - plotted_moc.min_time) / size
-        min_jd_time = plotted_moc.min_time
+        size = 2000
+        delta = (max_jd - min_jd) / size
+        min_jd_time = min_jd
 
         num_ticks = 5
         ax.set_xticks([x for x in range(0, size+1, int(size/num_ticks))])
@@ -186,6 +217,11 @@ class TimeMoc(AbstractMoc):
         z = np.tile(y, (int(size//10), 1))
 
         plt.title(title)
-        plt.imshow(z, interpolation='nearest')
+        from matplotlib.colors import LinearSegmentedColormap
+        color_map = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#aa0000'])
+        color_map.set_under('w')
+        color_map.set_bad('gray')
+
+        plt.imshow(z, interpolation='bilinear', cmap=color_map)
         plt.show()
 

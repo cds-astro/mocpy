@@ -253,6 +253,7 @@ class AbstractMoc:
         from astropy_healpix.healpy import nside2npix
         max_order = self.max_order
         n_side = 2 ** max_order
+
         m = np.zeros(nside2npix(n_side), dtype=bool)
         for val in self.best_res_pixels_iterator():
             m[val] = True
