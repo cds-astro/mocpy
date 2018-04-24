@@ -57,8 +57,9 @@ class TimeMoc(AbstractMoc):
 
         moc = TimeMoc()
 
-        for t in table[t_column]:
-            time_start = Time(t, format=format, scale='tai')
+        times = Time(table[t_column], format=format, scale='tai')
+
+        for time_start in times:
             moc.add_time(time_start)
 
         return moc
