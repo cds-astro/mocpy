@@ -14,7 +14,6 @@ __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 import sys
 import numpy as np
 from astropy.io import fits
-from astropy.table import Table
 
 from astropy_healpix.healpy import ring2nest
 
@@ -250,38 +249,18 @@ class AbstractMoc:
             for val in xrange(iv[0] // factor, iv[1] // factor):
                 yield val
 
-    def _get_pix(self, row_values_l, n_side, format=None):
-        pass
-
-    def _filter(self, table, keep_inside=True, format=None, *args):
-        """
-        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
-        Return the (newly created) filtered Table
-        """
-        kept_rows = []
-        '''pixels_best_res = set()
-        for val in self.best_res_pixels_iterator():
-            pixels_best_res.add(val)
-        print('jj')
-        '''
+    def _get_max_order_pix(self, keep_inside):
         from astropy_healpix.healpy import nside2npix
         max_order = self.max_order
         n_side = 2 ** max_order
-        m = np.zeros(nside2npix(n_side))
+        m = np.zeros(nside2npix(n_side), dtype=bool)
         for val in self.best_res_pixels_iterator():
-            m[val] = 1
+            m[val] = True
 
-        for row in table:
-            i_pix = self._get_pix(row_values_l=[row[arg] for arg in args],
-                                  n_side=n_side,
-                                  format=format)
-            if m[i_pix] == keep_inside:
-                kept_rows.append(row)
+        if not keep_inside:
+            m = np.logical_not(m)
 
-        if len(kept_rows) == 0:
-            return Table(names=table.colnames)
-        else:
-            return Table(rows=kept_rows, names=table.colnames)
+        return m
 
     def add_fits_header(self, tbhdu):
         """ This method must be implemented in each class derived from AbstractMoc """

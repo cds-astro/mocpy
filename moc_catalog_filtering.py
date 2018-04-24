@@ -2,6 +2,7 @@
 
 from mocpy import MOC
 from astroquery.vizier import Vizier
+from astropy.io import ascii
 
 from optparse import OptionParser
 
@@ -56,6 +57,9 @@ def main():
     filtered_table = None
     result_moc = None
 
+    import pdb;
+    pdb.set_trace()
+
     if options.type_moc is 'moc':
         print('beginning of the filtering process')
         filtered_table = moc.filter_table(table=table, ra_column='_RAJ2000', dec_column='_DEJ2000')
@@ -64,11 +68,11 @@ def main():
     else:
         pass
 
-    print(filtered_table)
+    print('Filtered table :\n {0}'.format(filtered_table))
     if options.plot:
         result_moc.plot()
 
-    filtered_table.write(options.output_file)
+    filtered_table.write(options.output_file, format='votable')
 
 
 if __name__ == '__main__':

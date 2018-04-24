@@ -129,12 +129,6 @@ class TimeMoc(AbstractMoc):
         """Get the min time of the temporal moc in jd"""
         return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
 
-    def filter_table(self, table, keep_inside=True, format='decimalyear', *args):
-        return self._filter(table,
-                            keep_inside,
-                            format,
-                            *args)
-
     def _get_pix(self, row_values_l, n_side, format=None):
         assert len(row_values_l) == 1, ValueError('Filtering a table by a temporal moc is done on time'
                                                   ' columns such as u, g, r.. date')
@@ -142,6 +136,19 @@ class TimeMoc(AbstractMoc):
 
         i_pix = long(time.jd * TimeMoc.DAY_MICRO_SEC)
         return i_pix
+
+    def filter_table(self, table, t_column, format='decimalyear', keep_inside=True):
+        """
+        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
+        Return the (newly created) filtered Table
+        """
+        m = self._get_max_order_pix(keep_inside=keep_inside)
+
+        time_arr = Time(table[t_column], format=format, scale='tai')
+        pix_arr = time_arr.jd * TimeMoc.DAY_MICRO_SEC
+        pix_arr = pix_arr.astype(int)
+        filtered_rows = m[pix_arr]
+        return table[filtered_rows]
 
     def add_fits_header(self, tbhdu):
         tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
