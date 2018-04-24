@@ -166,11 +166,12 @@ class TimeMoc(AbstractMoc):
         inf_arr = np.vstack([pix_arr[i] >= itvs[:, 0] for i in range(pix_arr.shape[0])])
         sup_arr = np.vstack([pix_arr[i] <= itvs[:, 1] for i in range(pix_arr.shape[0])])
 
-        res = inf_arr & sup_arr
-        if not keep_inside:
-            res = np.logical_not(res)
-
-        filtered_rows = np.any(res, axis=1)
+        if keep_inside:
+            res = inf_arr & sup_arr
+            filtered_rows = np.any(res, axis=1)
+        else:
+            res = ~inf_arr | ~sup_arr
+            filtered_rows = np.all(res, axis=1)
 
         return table[filtered_rows]
 
