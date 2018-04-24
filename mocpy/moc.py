@@ -21,6 +21,7 @@ import sys
 import numpy as np
 
 from astropy import units as u
+from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS, Galactic
 from astropy.io import fits
@@ -67,20 +68,17 @@ class MOC(AbstractMoc):
             self.add_pix(max_norder, i_pix)
 
     def filter_table(self, table, ra_column, dec_column, keep_inside=True):
-        return self._filter(table,
-                            keep_inside,
-                            None,
-                            ra_column,
-                            dec_column)
+        """
+        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
+        Return the (newly created) filtered Table
+        """
 
-    def _get_pix(self, row_values_l, n_side, format=None):
-        assert len(row_values_l) == 2, ValueError('Cannot filter following non spatial columns type.'
-                                                  'ra and dec column are required')
-        ra = row_values_l[0]
-        dec = row_values_l[1]
+        m = self._get_max_order_pix(keep_inside=keep_inside)
+        theta, phi = utils.radec2thetaphi(table[ra_column], table[dec_column])
+        pix_arr = ang2pix(2 ** self.max_order, theta, phi, nest=True)
 
-        theta, phi = utils.radec2thetaphi(ra, dec)
-        return ang2pix(n_side, theta, phi, nest=True)
+        filtered_rows = m[pix_arr]
+        return table[filtered_rows]
 
     @classmethod
     def _from_specific_file(cls, hdulist, moc_order, path):
