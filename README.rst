@@ -23,7 +23,7 @@ Requirements
 ============
 
 ``numpy``, ``astropy_healpix`` and ``astropy`` are required.
-``matplotlib`` and ``healpy`` are also needed if you want to plot a MOC object.
+``matplotlib`` is also needed if you want to plot MOC objects.
 
 MOCPy runs under Python 2 and Python 3.
 
@@ -48,7 +48,7 @@ Examples
 Different examples on how to use MOCPy can be found in the notebooks directory.
 
 .. image:: http://mybinder.org/badge.svg
-    :target: http://mybinder.org/repo/tboch/mocpy/notebooks
+    :target: https://mybinder.org/v2/gh/cds-astro/mocpy/tmoc
 
 Launch the Binder to execute live and interact with the notebooks examples.  
 
