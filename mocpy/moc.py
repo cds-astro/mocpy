@@ -81,9 +81,7 @@ class MOC(AbstractMoc):
         return table[filtered_rows]
 
     @classmethod
-    def _from_specific_file(cls, hdulist, moc_order, path):
-        assert isinstance(hdulist[1], fits.hdu.ImageHDU), ValueError('Cannot extract the moc'
-                                                                     ' from the {0:s} fits file'.format(path))
+    def _from_specific_file(cls, moc_order, path, mask_array=None):
         assert moc_order, ValueError('An order must be specified when'
                                      ' building a moc from a fits image.')
         # load the image data
@@ -94,10 +92,13 @@ class MOC(AbstractMoc):
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
 
-        d_pix = 1
-        x, y = np.mgrid[-0.25:(width + 1.25):d_pix, -0.25:(height + 1.25):d_pix]
-
-        pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
+        if mask_array is None:
+            d_pix = 1.0
+            x, y = np.mgrid[-0.5:(width + 0.5):d_pix, -0.5:(height + 0.5):d_pix]
+            pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
+        else:
+            y, x = np.where(mask_array)
+            pix_crd = np.dstack((x, y))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
         hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
