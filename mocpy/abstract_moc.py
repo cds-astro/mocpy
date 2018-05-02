@@ -220,38 +220,35 @@ class AbstractMoc:
         return res
 
     @classmethod
-    def _from_specific_file(cls, moc_order, path, mask_array=None):
-        pass
-
-    @classmethod
-    def from_file(cls, path, moc_order=None):
+    def from_moc_fits_file(cls, path):
         """
-        Load a moc from a fits file (image or binary table)
+        Load a MOC from a MOC fits file (i.e. a fits file in which pix are stored as a list of nuniq
+        in a binary table HDU).
 
-        :param path: the path to the fits file
-        :param moc_order: the max order in case one wants to create a moc from a fits image
-        :return: a moc object corresponding to the passed fits file
+        It corresponds to the type of file in which the MOCs/TMOCs are stored when writing them
+        in a fits file with the method `mocpy.AbstractMoc.write`.
+
+        Parameters
+        ----------
+        path : str
+            the path to the moc fits file
+
+        Returns
+        -------
+            a mocpy.MOC/TimeMoc object
+
         """
+
         with fits.open(path) as hdulist:
             # Case of a moc written in a fits file. Moc fits file stores the nuniq items in a
             # BinTableHDU usually at index 1
-            if len(hdulist) > 1 and isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
                 interval_set = IntervalSet()
                 # accessing directly recarray dramatically speed up the reading
                 data = hdulist[1].data.view(np.recarray)
                 for x in xrange(0, len(hdulist[1].data)):
                     interval_set.add(data[x][0])
                 return cls.from_uniq_interval_set(interval_set)
-
-            # Case of a fits image
-            # 1 : the image can have a mask referring the survey areas
-            if len(hdulist) == 1:
-                assert len(hdulist[0].shape) == 2, ValueError('HDUPrimary must contain a 2D array')
-                return cls._from_specific_file(path=path,
-                                               moc_order=moc_order,
-                                               mask_array=hdulist[0].data)
-            # 2 : otherwise we consider the full image without any mask survey
-            return cls._from_specific_file(path=path, moc_order=moc_order)
 
     def best_res_pixels_iterator(self):
         factor = 4 ** (AbstractMoc.HPY_MAX_NORDER - self.max_order)
