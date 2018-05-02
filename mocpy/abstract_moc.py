@@ -220,7 +220,7 @@ class AbstractMoc:
         return res
 
     @classmethod
-    def _from_specific_file(cls, hdulist, moc_order, path):
+    def _from_specific_file(cls, moc_order, path, mask_array=None):
         pass
 
     @classmethod
@@ -233,7 +233,9 @@ class AbstractMoc:
         :return: a moc object corresponding to the passed fits file
         """
         with fits.open(path) as hdulist:
-            if isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
+            # Case of a moc written in a fits file. Moc fits file stores the nuniq items in a
+            # BinTableHDU usually at index 1
+            if len(hdulist) > 1 and isinstance(hdulist[1], fits.hdu.table.BinTableHDU):
                 interval_set = IntervalSet()
                 # accessing directly recarray dramatically speed up the reading
                 data = hdulist[1].data.view(np.recarray)
@@ -241,7 +243,15 @@ class AbstractMoc:
                     interval_set.add(data[x][0])
                 return cls.from_uniq_interval_set(interval_set)
 
-            return cls._from_specific_file(hdulist=hdulist, path=path, moc_order=moc_order)
+            # Case of a fits image
+            # 1 : the image can have a mask referring the survey areas
+            if len(hdulist) == 1:
+                assert len(hdulist[0].shape) == 2, ValueError('HDUPrimary must contain a 2D array')
+                return cls._from_specific_file(path=path,
+                                               moc_order=moc_order,
+                                               mask_array=hdulist[0].data)
+            # 2 : otherwise we consider the full image without any mask survey
+            return cls._from_specific_file(path=path, moc_order=moc_order)
 
     def best_res_pixels_iterator(self):
         factor = 4 ** (AbstractMoc.HPY_MAX_NORDER - self.max_order)
