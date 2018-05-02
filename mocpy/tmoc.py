@@ -91,12 +91,6 @@ class TimeMoc(AbstractMoc):
 
         return time_moc
 
-    @classmethod
-    def _from_specific_file(cls, moc_order, path, mask_array=None):
-        # Entering this method triggers an error for TimeMoc because TimeMoc can only
-        # be load from a set of nuniq intervals (as defined in the method from_file of AbstractMoc cls)
-        raise FileNotFoundError('Error founding/opening file {0:s}'.format(path))
-
     def add_time(self, time):
         """
         Add a single time observation to the current tmoc

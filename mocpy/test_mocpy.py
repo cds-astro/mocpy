@@ -51,8 +51,14 @@ def test_mocpy_from_coo_list(skycoords):
 
 def test_moc_from_fits_image():
     import tempfile
+    from astropy.io import fits
     tmp_file = tempfile.NamedTemporaryFile()
-    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', moc_order=16)
+    image_path = 'notebooks/demo-data/image_with_mask.fits.gz'
+
+    with fits.open(image_path) as hdulist:
+        moc = MOC.from_image(header=fits.getheader(image_path),
+                        moc_order=10, mask_arr=hdulist[0].data)
+
     moc.write(tmp_file.name)
 
 def test_simple_test_t_moc():
@@ -82,8 +88,15 @@ def test_max_order_t_moc():
 
 def test_from_json():
     import tempfile
+    from astropy.io import fits
+
     tmp_file = tempfile.NamedTemporaryFile()
-    moc = MOC.from_file('notebooks/demo-data/frame-g-006122-1-0013.fits', moc_order=16)
+    image_path = 'notebooks/demo-data/image_with_mask.fits.gz'
+
+    with fits.open(image_path) as hdulist:
+        moc = MOC.from_image(header=fits.getheader(image_path),
+                        moc_order=10)
+
     moc.write(tmp_file.name, format='json')
 
     with open(tmp_file.name, 'r') as moc_file:
@@ -98,7 +111,7 @@ def test_tmoc_construction():
     Assert a correct t_moc loaded from a fits file is equal to the t_moc built from a CSV file
     containing a list of time intervals
     """
-    time_moc = TimeMoc.from_file('notebooks/demo-data/TMOC/HST_SDSSg/TMoc.fits')
+    time_moc = TimeMoc.from_moc_fits_file('notebooks/demo-data/TMOC/HST_SDSSg/TMoc.fits')
     time_moc2 = TimeMoc.from_csv_file(path='notebooks/demo-data/TMOC/HST_SDSSg/uniq-times.csv',
                                       format='mjd',
                                       scale='tai')

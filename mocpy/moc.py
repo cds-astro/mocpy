@@ -26,7 +26,6 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
-from astropy.io import fits
 from astropy import wcs
 
 from astropy_healpix import HEALPix
@@ -81,28 +80,53 @@ class MOC(AbstractMoc):
         return table[filtered_rows]
 
     @classmethod
-    def _from_specific_file(cls, moc_order, path, mask_array=None):
-        assert moc_order, ValueError('An order must be specified when'
-                                     ' building a moc from a fits image.')
+    def from_image(cls, header, moc_order, mask_arr=None):
+        """
+        Create a MOC from an image stored as a fits file
+
+        Parameters
+        ----------
+        header :
+            fits header containing all the info of where the image is located, its size...
+        moc_order : int
+            order of the smallest tiles in the MOC (i.e. MOC resolution).
+        mask_arr : numpy.array, optional
+            a 2D boolean array of the same size of the image where pixels having the value 1 are part of
+            the survey and pixels having the value 0 are not part of the survey.
+
+        Returns
+        -------
+            a mocpy.MOC object corresponding to the image passed as an argument
+        """
         # load the image data
-        header = fits.getheader(path)
         height = header['NAXIS2']
         width = header['NAXIS1']
 
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
 
-        if mask_array is None:
-            d_pix = 1.0
-            x, y = np.mgrid[-0.5:(width + 0.5):d_pix, -0.5:(height + 0.5):d_pix]
-            pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
-        else:
-            y, x = np.where(mask_array)
+        if mask_arr is not None:
+            # We have an array of pixels that are part of of survey
+            y, x = np.where(mask_arr)
             pix_crd = np.dstack((x, y))[0]
+        else:
+            # If we do not have a mask array we create the moc of all the image
+            #
+            step_pix = 1
+            """
+            Coords returned by wcs_pix2world method correspond to pixel centers. We want to retrieve the moc pix
+            crossing the borders of the image so we have to add 1/2 to the pixels coords before computing the lonlat.
+            
+            The step between two pix_crd is set to `step_pix` but can be diminished to have a better precision at the 
+            borders so that all the image is covered (a too big step does not retrieve all
+            the moc pix crossing the borders of the image).
+            """
+            x, y = np.mgrid[0.5:(width + 0.5 + step_pix):step_pix, 0.5:(height + 0.5 + step_pix):step_pix]
+            pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
-        hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
 
+        hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
         i_pix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
                                        world_pix_crd[:, 1] * u.deg)
         # remove doubles
@@ -123,9 +147,11 @@ class MOC(AbstractMoc):
         :param moc_order: the order one wants to build the moc
         :return: the union of all the moc from path_l
         """
+        from astropy.io import fits
         moc = MOC()
         for path in path_l:
-            current_moc = MOC.from_file(path=path, moc_order=moc_order)
+            header = fits.getheader(path)
+            current_moc = MOC.from_image(header=header, moc_order=moc_order)
             moc = moc.union(current_moc)
 
         return moc
@@ -164,7 +190,7 @@ class MOC(AbstractMoc):
         from astropy.utils.data import download_file
 
         path = download_file(url, show_progress=False, timeout=60)
-        return cls.from_file(path)
+        return cls.from_moc_fits_file(path)
 
     @classmethod
     def from_table(cls, table, ra_column, dec_column, moc_order):
