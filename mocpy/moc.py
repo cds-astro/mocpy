@@ -73,7 +73,7 @@ class MOC(AbstractMoc):
 
         Parameters
         ----------
-        header :
+        header : `~astropy.io.fits.Header`
             fits header containing all the info of where the image is located, its size...
         moc_order : int
             order of the smallest tiles in the MOC (i.e. MOC resolution).
@@ -231,6 +231,7 @@ class MOC(AbstractMoc):
         """
         query a VizieR table
         for sources in the coverage of the MOC instance
+
         """
         return self._query(table_id, max_rows)
 
@@ -238,14 +239,13 @@ class MOC(AbstractMoc):
         """
         internal method to query Simbad or a VizieR table
         for sources in the coverage of the MOC instance
-        """
 
+        """
         if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)
         else:
             max_rows_str = str(9999999999)
 
-        from six import BytesIO
         tmp_moc = tempfile.NamedTemporaryFile(delete=False)
 
         self.write(tmp_moc.name)
@@ -258,6 +258,7 @@ class MOC(AbstractMoc):
                           headers={'User-Agent': 'MOCPy'},
                           stream=True)
 
+        from six import BytesIO
         tmp_vot = BytesIO()
         tmp_vot.write(r.content)
 
