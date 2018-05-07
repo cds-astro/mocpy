@@ -148,8 +148,9 @@ class MOC(AbstractMoc):
         """
         return the MOC for a given VizieR table
         """
-        if nside not in (8, 16, 32, 64, 128, 256, 512):
-            raise Exception('Bad value for nside')
+        nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
+        if nside not in nside_possible_values:
+            raise ValueError('Bad value for nside. Must be in {0}'.format(nside_possible_values))
 
         return cls.from_ivorn('ivo://CDS/' + table_id, nside)
 
