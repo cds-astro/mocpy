@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from astropy.time import Time
+from astropy.table import Table
 
 from .abstract_moc import AbstractMoc
 
@@ -58,27 +59,28 @@ class TimeMoc(AbstractMoc):
     @classmethod
     def from_csv_file(cls, path, **kwargs):
         """
-        Load a tmoc from a CSV file containing two columns (t_min, t_max)
+        Load a tmoc from a CSV/ascii file containing two columns (t_min, t_max)
 
-        :param path: path leading to the CSV file
+        This method uses astropy.table.Table class and its read method to parse CSV/Ascii files.
+
+        :param path: path leading to the CSV/ascii formatted file.
+        This file must contains two columns whose names are t_min and t_max.
         :param kwargs: options that will be passed to the astropy.time.Time instances (e.g. format, scale options)
         :return: a newly created tmoc built from the given csv file
         """
-        import csv
 
         time_moc = TimeMoc()
 
-        with open(path, 'r') as csv_file:
-            spam_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
-            row_num = 0
-            for row in spam_reader:
-                if row_num > 0:
-                    t_min = Time(float(row[0]), **kwargs)
-                    t_max = Time(float(row[1]), **kwargs)
-                    time_moc.add_time_interval(t_min, t_max)
+        table = Table.read(path)
+        try:
+            t_min = Time(table['t_min'], **kwargs)
+            t_max = Time(table['t_max'], **kwargs)
+        except KeyError:
+            raise KeyError("'t_min' or 't_max' are not part of the table columns : {0}".format(table.info()))
 
-                row_num += 1
-
+        add_all_time_intervals = np.vectorize(time_moc.add_time_interval)
+        add_all_time_intervals(time_start=t_min,
+                               time_end=t_max)
         return time_moc
 
     def add_time(self, time):
