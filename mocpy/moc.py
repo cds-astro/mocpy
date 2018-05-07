@@ -245,7 +245,9 @@ class MOC(AbstractMoc):
         else:
             max_rows_str = str(9999999999)
 
+        from six import BytesIO
         tmp_moc = tempfile.NamedTemporaryFile(delete=False)
+
         self.write(tmp_moc.name)
         r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat',
                           data={'mode': 'mocfile',
@@ -255,19 +257,15 @@ class MOC(AbstractMoc):
                           files={'moc': open(tmp_moc.name, 'rb')},
                           headers={'User-Agent': 'MOCPy'},
                           stream=True)
-        
-        tmp_vot = tempfile.NamedTemporaryFile(delete=False)
-        with open(tmp_vot.name, 'w') as h:
-            for line in r.iter_lines():
-                if line:
-                    h.write(line.decode(r.encoding)+'\n')
+
+        tmp_vot = BytesIO()
+        tmp_vot.write(r.content)
 
         from astropy.io.votable import parse_single_table
-        table = parse_single_table(tmp_vot.name).to_table()
+        table = parse_single_table(tmp_vot).to_table()
 
         # finally delete temp files
         os.unlink(tmp_moc.name)
-        os.unlink(tmp_vot.name)
 
         return table
 
