@@ -198,7 +198,9 @@ class TimeMoc(AbstractMoc):
         :param title: the title of the plot
         :param view: a tuple (x_min, x_max) defining the time window of the plot
         """
-        assert not self._interval_set.empty(), ValueError('Empty time moc instance')
+        if self._interval_set.empty():
+            print('Nothing to print. This TimeMoc object is empty.')
+            return
 
         plot_order = 15
         if self.max_order > plot_order:
@@ -215,7 +217,8 @@ class TimeMoc(AbstractMoc):
         if not max_jd:
             max_jd = plotted_moc.max_time
 
-        assert max_jd > min_jd, ValueError('max_jd must be > to min_jd')
+        if max_jd < min_jd:
+            raise ValueError('max_jd must be > to min_jd.')
 
         fig1 = plt.figure(figsize=(15, 20))
         ax = fig1.add_subplot(111)
