@@ -63,6 +63,7 @@ def test_moc_from_fits_image():
 
     moc.write(tmp_file.name)
 
+
 def test_simple_test_t_moc():
     t_moc = TimeMoc()
     s_time = Time(2 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
@@ -97,9 +98,9 @@ def test_from_json():
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=fits.getheader(image_path),
-                        moc_order=10)
+                             moc_order=10)
 
-    moc.write(tmp_file.name, format='json')
+    moc.write(tmp_file.name, format='json', write_to_file=True)
 
     with open(tmp_file.name, 'r') as moc_file:
         import json
