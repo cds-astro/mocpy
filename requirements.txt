@@ -5,4 +5,5 @@ astropy_healpix
 matplotlib
 mocpy
 astroquery
+six
 
