@@ -2,49 +2,36 @@
 # -*- coding: utf-8 -*
 
 """
+moc.py
 
-moc.py:
-  functions to read/write and manipulate MOCs
+functions to read/write and manipulate MOCs
 
 """
 
-__author__ = "Thomas Boch"
-__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
+from __future__ import absolute_import, division, print_function, unicode_literals
+from . import py23_compat
 
-try:
-    set
-except NameError:
-    from sets import Set as set
-
-import sys
 import requests
 import tempfile
 import os
-
 import numpy as np
-
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 from astropy import wcs
-
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import ang2pix
 from astropy_healpix.healpy import nside2npix
-
 import matplotlib.pyplot as plt
 
 from .abstract_moc import AbstractMoc
 from . import utils
 
-if sys.version > '3':
-    long = int
+__author__ = "Thomas Boch, Matthieu Baumann"
+__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
-# Python 3 support
-try:
-    xrange
-except NameError:
-    xrange = range
+__license__ = "BSD 3-Clause License"
+__email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
 class MOC(AbstractMoc):

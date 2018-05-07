@@ -1,10 +1,12 @@
 import pytest
 import random
+from astropy.coordinates import SkyCoord
+from astropy.time import Time
+
 from .interval_set import IntervalSet
 from .moc import MOC
 from .tmoc import TimeMoc
-from astropy.coordinates import SkyCoord
-from astropy.time import Time
+
 
 @pytest.fixture()
 def isets():
