@@ -51,6 +51,7 @@ class AbstractMoc:
     def add_pix(self, order, i_pix, nest=True):
         """
         add a given HEALPix pixel number to the current object
+
         """
 
         """
@@ -144,7 +145,9 @@ class AbstractMoc:
     def from_uniq_interval_set(cls, uniq_is):
         """
         Create a MOC from an IntervalSet of NUNIQ HEALPix pixels
+
         """
+
         r = IntervalSet()
         rtmp = IntervalSet()
         last_order = 0
@@ -264,59 +267,129 @@ class AbstractMoc:
         """ This method must be implemented in each class derived from AbstractMoc """
         pass
 
-    def write(self, path, format='fits', optional_kw_dict=None):
+    @staticmethod
+    def _to_json(uniq_arr):
         """
-        Serialize a moc in FITS in a given path
-        Format can be 'fits' or 'json', though only the fits format is
-        officially supported by the IVOA
+        Serialize a mocpy object (array of uniq) to json
+
+        Parameters
+        ----------
+        uniq_arr : `~numpy.ndarray`
+            the array of uniq reprensenting the mocpy object to serialize
+
+        Returns
+        -------
+        result_json : {str : [int]}
+            a dictionary of pixel list each indexed by their order
+
         """
+
+        result_json = {}
+
+        order_arr, ipix_arr = utils.uniq2orderipix(uniq_arr)
+        min_order = order_arr[0]
+        max_order = order_arr[-1]
+
+        for order in range(min_order, max_order+1):
+            pix_index = np.where(order_arr == order)[0]
+            if pix_index.size:
+                # there are pixels belonging to the current order
+                ipix_order_arr = ipix_arr[pix_index]
+                result_json[str(order)] = ipix_order_arr.tolist()
+
+        return result_json
+
+    def _to_fits(self, uniq_arr, optional_kw_dict=None):
+        """
+        Serialize a mocpy object (array of uniq) to a fits format
+
+        Parameters
+        ----------
+        uniq_arr : `~numpy.ndarray`
+            the array of uniq representing the mocpy object to serialize
+        optional_kw_dict : dict
+            optional keywords arguments added to the fits header
+
+        Returns
+        -------
+        thdulist : `~astropy.io.fits.HDUList`
+            the fits serialization of the MOC/TimeMoc object
+
+        """
+
+        moc_order = self.max_order
+        if moc_order <= 13:
+            fits_format = '1J'
+        else:
+            fits_format = '1K'
+
+        tbhdu = fits.BinTableHDU.from_columns(
+            fits.ColDefs([fits.Column(name='UNIQ', format=fits_format, array=uniq_arr)]))
+        tbhdu.header['PIXTYPE'] = 'HEALPIX'
+        tbhdu.header['ORDERING'] = 'NUNIQ'
+        self.add_fits_header(tbhdu)
+        tbhdu.header['MOCORDER'] = moc_order
+        tbhdu.header['MOCTOOL'] = 'MOCPy'
+        if optional_kw_dict:
+            for key in optional_kw_dict:
+                tbhdu.header[key] = optional_kw_dict[key]
+
+        thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
+        return thdulist
+
+    def write(self, path=None, format='fits', optional_kw_dict=None, write_to_file=False):
+        """
+        Serialize a MOC/TimeMoc object.
+
+        Possibility to write it to a file at ``path``. Format can be 'fits' or 'json',
+        though only the fits format is officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str, optional
+            path to save the MOC object. The mocpy is written to path only if ``serialize`` is False. None by default
+        format : str, optional
+            format in which the mocpy object will be serialized. Constraint to takes its value
+            among "fits" or "json". By default, ``format`` is set to "fits".
+        optional_kw_dict : {str, _}, optional
+            optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
+        write_to_file : bool, optional
+            Set to False by default. In this case, this method does not write to a file but returns the serialized form
+            of the MOC/TimeMoc object to the user. If you want to write to a file
+
+        Returns
+        -------
+        result : a `~astropy.io.fits.HDUList` if ``format`` is set to "fits" or {str, [int]} otherwise
+            The serialization of the MOC/TimeMoc object
+
+        """
+
         formats = ('fits', 'json')
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
 
         self._ensure_consistency()
-        uniq_array = []
+        uniq_l = []
+
         for uniq in self.uniq_pixels_iterator():
-            uniq_array.append(uniq)
+            uniq_l.append(uniq)
+
+        uniq_arr = np.array(uniq_l)
 
         if format == 'fits':
-            moc_order = self.max_order
-            if moc_order <= 13:
-                format = '1J'
-            else:
-                format = '1K'
+            result = self._to_fits(uniq_arr=uniq_arr,
+                                   optional_kw_dict=optional_kw_dict)
+            if write_to_file:
+                result.writeto(path, overwrite=True)
+        else:
+            # json format serialization
+            result = self.__class__._to_json(uniq_arr=uniq_arr)
+            if write_to_file:
+                import json
+                with open(path, 'w') as h:
+                    h.write(json.dumps(result, sort_keys=True, indent=2))
 
-            tbhdu = fits.BinTableHDU.from_columns(
-                fits.ColDefs([fits.Column(name='UNIQ', format=format, array=np.array(uniq_array))]))
-            tbhdu.header['PIXTYPE'] = 'HEALPIX'
-            tbhdu.header['ORDERING'] = 'NUNIQ'
-            self.add_fits_header(tbhdu)
-            tbhdu.header['MOCORDER'] = moc_order
-            tbhdu.header['MOCTOOL'] = 'MOCPy'
-            if optional_kw_dict:
-                for key in optional_kw_dict:
-                    tbhdu.header[key] = optional_kw_dict[key]
-
-            thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
-            thdulist.writeto(path, overwrite=True)
-        elif format == 'json':
-            import json
-
-            json_moc = {}
-            pix_l = []
-            o_order = -1
-            for uniq in uniq_array:
-                order, i_pix = utils.uniq2orderipix(uniq)
-                if order != o_order and o_order > 0:
-                    json_moc[str(o_order)] = pix_l
-                    pix_l = []
-
-                o_order = order
-                pix_l.append(i_pix)
-
-            json_moc[str(o_order)] = pix_l
-            with open(path, 'w') as h:
-                h.write(json.dumps(json_moc, sort_keys=True, indent=2))
+        return result
 
     def degrade_to_order(self, new_order):
         shift = 2 * (AbstractMoc.HPY_MAX_NORDER - new_order)
