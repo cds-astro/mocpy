@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 
 """
+interval_set.py
+
 Manages a set of intervals
+
 """
 
-from __future__ import print_function, division
+from __future__ import absolute_import, division, print_function, unicode_literals
+from .import py23_compat
 
-# Python 3 support
-try:
-    xrange
-except NameError:
-    xrange = range
+__author__ = "Thomas Boch"
+__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
+
+__license__ = "BSD 3-Clause License"
+__email__ = "thomas.boch@astro.unistra.fr"
 
 
 class IntervalSet:
@@ -156,7 +160,7 @@ class IntervalSet:
         """Convert a list of endpoints, with an optional terminating sentinel,
          into a list of intervals"""
         return [(list_of_endpoints[i], list_of_endpoints[i + 1])
-                for i in xrange(0, len(list_of_endpoints) - 1, 2)]
+                for i in range(0, len(list_of_endpoints) - 1, 2)]
 
     @staticmethod
     def merge(a_intervals, b_intervals, op):

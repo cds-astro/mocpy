@@ -2,37 +2,27 @@
 # -*- coding: utf-8 -*
 
 """
+abstract_moc.py
 
-abstract_moc.py:
-  basic functions for manipulating mocs
+basic functions for manipulating mocs
 
 """
 
-__author__ = "Baumann Matthieu"
-__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
+from __future__ import absolute_import, division, print_function, unicode_literals
+from . import py23_compat
 
-import sys
 import numpy as np
 from astropy.io import fits
-
 from astropy_healpix.healpy import ring2nest
 
 from .interval_set import IntervalSet
 from . import utils
 
-if sys.version > '3':
-    long = int
+__author__ = "Thomas Boch, Matthieu Baumann"
+__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
-# Python 3 support
-try:
-    xrange
-except NameError:
-    xrange = range
-
-try:
-    set
-except NameError:
-    from sets import Set as set
+__license__ = "BSD 3-Clause License"
+__email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
 class AbstractMoc:
@@ -73,7 +63,7 @@ class AbstractMoc:
         """
 
         if order > AbstractMoc.HPY_MAX_NORDER:
-            raise Exception('norder can not be greater than MOC max norder')
+            raise ValueError('order can not be greater than AbstractMoc.HPY_MAX_NORDER')
 
         if not nest:
             i_pix = ring2nest(1 << order, i_pix)
@@ -90,7 +80,7 @@ class AbstractMoc:
         This returns the deepest order needed to describe the current _interval_set
         """
         #  TODO: cache value
-        combo = long(0)
+        combo = int(0)
         for iv in self._interval_set.intervals:
             combo |= iv[0] | iv[1]
 
@@ -163,7 +153,7 @@ class AbstractMoc:
         diff_order = AbstractMoc.HPY_MAX_NORDER
         shift_order = 2 * diff_order
         for interval in intervals:
-            for j in xrange(interval[0], interval[1]):
+            for j in range(interval[0], interval[1]):
                 order, i_pix = utils.uniq2orderipix(j)
 
                 if order != last_order:
@@ -180,7 +170,7 @@ class AbstractMoc:
 
     def uniq_pixels_iterator(self):
         for uniq_iv in self.to_uniq_interval_set().intervals:
-            for uniq in xrange(uniq_iv[0], uniq_iv[1]):
+            for uniq in range(uniq_iv[0], uniq_iv[1]):
                 yield uniq
 
     def to_uniq_interval_set(self):
@@ -201,14 +191,14 @@ class AbstractMoc:
         max_res_order = AbstractMoc.HPY_MAX_NORDER
         order = 0
         while not r2.empty():
-            shift = long(2 * (max_res_order - order))
-            ofs = (long(1) << shift) - 1
-            ofs2 = long(1) << (2 * order + 2)
+            shift = int(2 * (max_res_order - order))
+            ofs = (int(1) << shift) - 1
+            ofs2 = int(1) << (2 * order + 2)
 
             r3.clear()
             for iv in r2.intervals:
-                a = (long(iv[0]) + ofs) >> shift
-                b = iv[1] >> shift
+                a = (int(iv[0]) + ofs) >> shift
+                b = int(iv[1]) >> shift
                 r3.add((a << shift, b << shift))
                 res.add((a + ofs2, b + ofs2))
 
@@ -246,14 +236,14 @@ class AbstractMoc:
                 interval_set = IntervalSet()
                 # accessing directly recarray dramatically speed up the reading
                 data = hdulist[1].data.view(np.recarray)
-                for x in xrange(0, len(hdulist[1].data)):
+                for x in range(0, len(hdulist[1].data)):
                     interval_set.add(data[x][0])
                 return cls.from_uniq_interval_set(interval_set)
 
     def best_res_pixels_iterator(self):
         factor = 4 ** (AbstractMoc.HPY_MAX_NORDER - self.max_order)
         for iv in self._interval_set.intervals:
-            for val in xrange(iv[0] // factor, iv[1] // factor):
+            for val in range(iv[0] // factor, iv[1] // factor):
                 yield val
 
     def _get_max_order_pix(self, keep_inside):
@@ -330,9 +320,9 @@ class AbstractMoc:
 
     def degrade_to_order(self, new_order):
         shift = 2 * (AbstractMoc.HPY_MAX_NORDER - new_order)
-        ofs = (long(1) << shift) - 1
+        ofs = (int(1) << shift) - 1
         mask = ~ofs
-        adda = long(0)
+        adda = int(0)
         addb = ofs
         iv_set = IntervalSet()
         for iv in self._interval_set.intervals:

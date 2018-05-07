@@ -2,37 +2,27 @@
 # -*- coding: utf-8 -*
 
 """
+tmoc.py
 
-tmoc.py:
-  functions to read/write and manipulate TimeMocs
+functions to read/write and manipulate TimeMocs
 
 """
 
-__author__ = "Baumann Matthieu"
-__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
+from __future__ import absolute_import, division, print_function, unicode_literals
+from . import py23_compat
 
-try:
-    set
-except NameError:
-    from sets import Set as set
-
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-
 from astropy.time import Time
 
 from .abstract_moc import AbstractMoc
 
-if sys.version > '3':
-    long = int
+__author__ = "Matthieu Baumann"
+__copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
-# Python 3 support
-try:
-    xrange
-except NameError:
-    xrange = range
+__license__ = "BSD 3-Clause License"
+__email__ = "matthieu.baumann@astro.unistra.fr"
 
 
 class TimeMoc(AbstractMoc):
@@ -101,7 +91,7 @@ class TimeMoc(AbstractMoc):
         if not isinstance(time, Time):
             raise TypeError("You must pass astropy.time.Time instances to the add_time_interval"
                             "method")
-        time_us_start = long(time.jd * TimeMoc.DAY_MICRO_SEC)
+        time_us_start = int(time.jd * TimeMoc.DAY_MICRO_SEC)
         time_us_end = time_us_start + 1
 
         self._interval_set.add((time_us_start, time_us_end))
@@ -121,8 +111,8 @@ class TimeMoc(AbstractMoc):
         if time_start >= time_end:
             raise ValueError('time_start must be < compared to the time_end')
 
-        time_us_start = long(time_start.jd * TimeMoc.DAY_MICRO_SEC)
-        time_us_end = long(time_end.jd * TimeMoc.DAY_MICRO_SEC) + 1
+        time_us_start = int(time_start.jd * TimeMoc.DAY_MICRO_SEC)
+        time_us_end = int(time_end.jd * TimeMoc.DAY_MICRO_SEC) + 1
 
         self._interval_set.add((time_us_start, time_us_end))
 
