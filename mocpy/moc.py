@@ -77,13 +77,15 @@ class MOC(AbstractMoc):
             fits header containing all the info of where the image is located, its size...
         moc_order : int
             order of the smallest tiles in the MOC (i.e. MOC resolution).
-        mask_arr : numpy.array, optional
+        mask_arr : `~numpy.ndarray`, optional
             a 2D boolean array of the same size of the image where pixels having the value 1 are part of
             the survey and pixels having the value 0 are not part of the survey.
 
         Returns
         -------
-            a mocpy.MOC object corresponding to the image passed as an argument
+        moc : mocpy.MOC
+            the MOC object loaded from the ``mask_arr`` and ``header`` extracted from the image
+
         """
         # load the image data
         height = header['NAXIS2']
@@ -117,7 +119,7 @@ class MOC(AbstractMoc):
         i_pix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
                                        world_pix_crd[:, 1] * u.deg)
         # remove doubles
-        i_pix_l = list(set(i_pix_l))
+        i_pix_l = np.unique(i_pix_l)
         moc = MOC()
         moc.add_pix_list(order=moc_order, i_pix_l=i_pix_l)
         # this will be consistent when one will do operations on the moc (union, inter, ...) or
