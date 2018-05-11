@@ -220,21 +220,20 @@ class TimeMoc(AbstractMoc):
             max_jd = plotted_moc.max_time
 
         if max_jd < min_jd:
-            raise ValueError('max_jd must be > to min_jd.')
+            raise ValueError("Invalid selection: max_jd = {0} must be > to min_jd = {1}".format(max_jd, min_jd))
 
-        fig1 = plt.figure(figsize=(15, 20))
+        fig1 = plt.figure(figsize=(9.5, 5))
         ax = fig1.add_subplot(111)
 
-        ax.set_xlabel('jd')
+        ax.set_xlabel('iso')
         ax.get_yaxis().set_visible(False)
 
         size = 2000
         delta = (max_jd - min_jd) / size
         min_jd_time = min_jd
 
-        num_ticks = 5
-        ax.set_xticks([x for x in range(0, size+1, int(size/num_ticks))])
-        ax.set_xticklabels([str(int(x * delta + min_jd_time)) for x in range(0, size+1, int(size/num_ticks))])
+        ax.set_xticks([0, size])
+        ax.set_xticklabels(Time([min_jd_time, max_jd], format='jd', scale='tdb').iso, rotation=70)
 
         y = np.zeros(size)
         for (s_time_us, e_time_us) in plotted_moc._interval_set.intervals:
@@ -242,13 +241,33 @@ class TimeMoc(AbstractMoc):
             e_index = int((e_time_us / TimeMoc.DAY_MICRO_SEC - min_jd_time) / delta)
             y[s_index:(e_index+1)] = 1.0
 
+        # hack in case of full time mocs.
+        if np.all(y):
+            y[0] = 0
+
         z = np.tile(y, (int(size//10), 1))
 
         plt.title(title)
 
-        color_map = LinearSegmentedColormap.from_list('w2r', ['#ffffff', '#aa0000'])
+        color_map = LinearSegmentedColormap.from_list('w2r', ['#fffff0', '#aa0000'])
         color_map.set_under('w')
         color_map.set_bad('gray')
 
         plt.imshow(z, interpolation='bilinear', cmap=color_map)
+
+        def on_mouse_motion(event):
+            for txt in ax.texts:
+                txt.set_visible(False)
+
+            text = ax.text(0, 0, "", va="bottom", ha="left")
+
+            time = Time(event.xdata * delta + min_jd_time, format='jd', scale='tdb')
+
+            tx = '{0}'.format(time.iso)
+            text.set_position((event.xdata - 50, 700))
+            text.set_rotation(70)
+            text.set_text(tx)
+
+        cid = fig1.canvas.mpl_connect('motion_notify_event', on_mouse_motion)
+
         plt.show()
