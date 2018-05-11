@@ -11,10 +11,11 @@ functions to read/write and manipulate TimeMocs
 from __future__ import absolute_import, division, print_function, unicode_literals
 from . import py23_compat
 
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from astropy.table import Table
 
 from .abstract_moc import AbstractMoc
@@ -28,60 +29,107 @@ __email__ = "matthieu.baumann@astro.unistra.fr"
 
 class TimeMoc(AbstractMoc):
     DAY_MICRO_SEC = 86400000000.
+    # default observation time : 30 min
+    DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
     def __init__(self):
         AbstractMoc.__init__(self)
 
     @classmethod
-    def from_table(cls, table, t_column, format='decimalyear'):
+    def from_table(cls, table, t_column, delta_t=DEFAULT_OBSERVATION_TIME, **kwargs):
         """
-        Create a tmoc instance from an astropy.table.Table object. The user has to specify the name of the time column
-        to consider.
+        Create a TimeMoc instance from an `~astropy.table.Table` object.
 
-        :param table: the table containing all the sources we want to build the TimeMoc
-        :param t_column: the name of the column to consider for building the TimeMoc
-        :param format: the format of the times written in this column. See astropy.time.Time
-        for the list of all available formats.
-        :return: the tmoc instance resulting from the sources of the table
+        The user has to specify the name of the time column ``t_column`` to consider,
+        the time ``format`` of this column, and its ``scale``.
+
+        Parameters
+        ----------
+        table : `~astropy.table.Table`
+            the astropy table from which the TimeMoc will be created
+        t_column : str
+            the name of the column in ``table`` containing the observation times
+        delta_t : `~astropy.time.TimeDelta`, optional
+            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
+            is able to discriminate two observations separated by ``delta_t``)
+        format : str, optional
+            ``decimalyear`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``format`` parameter is passed to the `~astropy.time.Time` time instantiations.
+        scale : str, optional
+            ``tdb`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``scale`` parameter is passed to the `~astropy.time.Time` time instantiations.
+
+        Returns
+        -------
+        moc : `~mocpy.tmoc.TimeMoc`
+            the TimeMoc instance referring to the observations contained in ``table``
+
         """
+
         if not isinstance(t_column, str):
             raise TypeError
 
         moc = TimeMoc()
 
-        times = Time(table[t_column], format=format, scale='tai')
+        times = Time(table[t_column],
+                     format=kwargs.get('format', 'decimalyear'),
+                     scale=kwargs.get('scale', 'tdb'))
 
         for time_start in times:
             moc.add_time(time_start)
 
+        # degrade the TimeMoc to the order computer from ``delta_t``
+        moc = moc.degrade_to_order(TimeMoc.time_resolution_to_order(delta_t))
+
         return moc
 
     @classmethod
-    def from_csv_file(cls, path, **kwargs):
+    def from_csv_file(cls, path, delta_t=DEFAULT_OBSERVATION_TIME, **kwargs):
         """
-        Load a tmoc from a CSV/ascii file containing two columns (t_min, t_max)
+        Load a TimeMoc from a CSV/ascii file containing two columns (t_min, t_max)
 
-        This method uses astropy.table.Table class and its read method to parse CSV/Ascii files.
+        Parameters
+        ----------
+        path : str
+            CSV/ASCII path file
+        delta_t : `~astropy.time.TimeDelta`, optional
+            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
+            is able to discriminate two observations separated by ``delta_t``)
+        format : str, optional
+            ``decimalyear`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``format`` parameter is passed to the `~astropy.time.Time` time instantiations.
+        scale : str, optional
+            ``tdb`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``scale`` parameter is passed to the `~astropy.time.Time` time instantiations.
 
-        :param path: path leading to the CSV/ascii formatted file.
-        This file must contains two columns whose names are t_min and t_max.
-        :param kwargs: options that will be passed to the astropy.time.Time instances (e.g. format, scale options)
-        :return: a newly created tmoc built from the given csv file
+        Returns
+        -------
+        moc : `~mocpy.tmoc.TimeMoc`
+            the TimeMoc instance referring to the observations contained in the CSV file
+
         """
 
-        time_moc = TimeMoc()
+        moc = TimeMoc()
 
         table = Table.read(path)
         try:
-            t_min = Time(table['t_min'], **kwargs)
-            t_max = Time(table['t_max'], **kwargs)
+            t_min = Time(table['t_min'],
+                         format=kwargs.get('format', 'decimalyear'),
+                         scale=kwargs.get('scale', 'tdb'))
+            t_max = Time(table['t_max'],
+                         format=kwargs.get('format', 'decimalyear'),
+                         scale=kwargs.get('scale', 'tdb'))
         except KeyError:
             raise KeyError("'t_min' or 't_max' are not part of the table columns : {0}".format(table.info()))
 
-        add_all_time_intervals = np.vectorize(time_moc.add_time_interval)
+        add_all_time_intervals = np.vectorize(moc.add_time_interval)
         add_all_time_intervals(time_start=t_min,
                                time_end=t_max)
-        return time_moc
+
+        moc = moc.degrade_to_order(TimeMoc.time_resolution_to_order(delta_t))
+        return moc
 
     def add_time(self, time):
         """
@@ -117,6 +165,37 @@ class TimeMoc(AbstractMoc):
         time_us_end = int(time_end.jd * TimeMoc.DAY_MICRO_SEC) + 1
 
         self._interval_set.add((time_us_start, time_us_end))
+
+    def _process_degradation(self, another_moc, order_op):
+        max_order = max(self.max_order, another_moc.max_order)
+        if order_op > max_order:
+            message = 'Requested time resolution for the operation cannot be applied.\n' \
+                      'The TimeMoc object resulting from the operation is of time resolution {0} sec.'.format(
+                TimeMoc.order_to_time_resolution(max_order).sec)
+            warnings.warn(message, UserWarning)
+
+        self_degradation = self.degrade_to_order(order_op)
+        another_moc_degradation = another_moc.degrade_to_order(order_op)
+
+        return self_degradation, another_moc_degradation
+
+    def intersection(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+        order_op = TimeMoc.time_resolution_to_order(delta_t)
+
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        return super(TimeMoc, self_degraded).intersection(moc_degraded)
+
+    def union(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+        order_op = TimeMoc.time_resolution_to_order(delta_t)
+
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        return super(TimeMoc, self_degraded).union(moc_degraded)
+
+    def difference(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+        order_op = TimeMoc.time_resolution_to_order(delta_t)
+
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        return super(TimeMoc, self_degraded).difference(moc_degraded)
 
     @property
     def total_duration(self):
@@ -157,22 +236,56 @@ class TimeMoc(AbstractMoc):
         """
         return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
 
-    def filter_table(self, table, t_column, format='decimalyear', keep_inside=True):
+    def filter_table(self, table, column_name, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME, **kwargs):
         """
         Filter an astropy.table.Table to keep only rows inside (or outside) the tmoc instance
 
-        :param table: the full astropy table to filter
-        :param t_column: the name of the time column to consider for filtering the table
-        :param format: the format of the time column
-        :param keep_inside: boolean describing if we want to keep rows inside or outside the tmoc
-        :return: the filtered Table (astropy.table)
+        Parameters
+        ----------
+        table : `~astropy.table.Table`
+            the observations to filter
+        column_name : str
+            the name of the time column to consider for filtering the table.
+        keep_inside : bool, optional
+            describes if we want to keep rows inside or outside the time moc. True by default.
+        delta_t : `~astropy.time.TimeDelta`, optional
+            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            more efficient TimeMoc order to represent the observations (i.e. the less precise order which
+            is able to discriminate two observations separated by ``delta_t``)
+        format : str, optional
+            ``decimalyear`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``format`` parameter is passed to the `~astropy.time.Time` time instantiations.
+        scale : str, optional
+            ``tdb`` by default. See `~astropy.time.Time` to know more about time scales and formats.
+            ``scale`` parameter is passed to the `~astropy.time.Time` time instantiations.
+
+        Returns
+        -------
+        result : `~astropy.table.Table`
+            the filtered table (contains observations that are inside or outside the tmoc
+            depending on the ``keep_inside`` parameter)
+
         """
 
-        time_arr = Time(table[t_column], format=format, scale='tai')
+        # the requested order for filtering the astropy observations table is more precise than the order
+        # of the TimeMoc object
+        current_max_order = self.max_order
+        new_max_order = TimeMoc.time_resolution_to_order(delta_t)
+        if new_max_order > current_max_order:
+            message = 'Requested time resolution filtering cannot be applied.\n' \
+                      'Filtering is applied with a time resolution of {0} sec.'.format(
+                TimeMoc.order_to_time_resolution(current_max_order).sec)
+            warnings.warn(message, UserWarning)
+
+        rough_tmoc = self.degrade_to_order(new_max_order)
+
+        time_arr = Time(table[column_name],
+                        format=kwargs.get('format', 'decimalyear'),
+                        scale=kwargs.get('scale', 'tdb'))
         pix_arr = (time_arr.jd * TimeMoc.DAY_MICRO_SEC)
         pix_arr = pix_arr.astype(int)
 
-        intervals_arr = np.array(self._interval_set.intervals)
+        intervals_arr = np.array(rough_tmoc._interval_set.intervals)
         inf_arr = np.vstack([pix_arr[i] >= intervals_arr[:, 0] for i in range(pix_arr.shape[0])])
         sup_arr = np.vstack([pix_arr[i] <= intervals_arr[:, 1] for i in range(pix_arr.shape[0])])
 
@@ -183,7 +296,8 @@ class TimeMoc(AbstractMoc):
             res = ~inf_arr | ~sup_arr
             filtered_rows = np.all(res, axis=1)
 
-        return table[filtered_rows]
+        result = table[filtered_rows]
+        return result
 
     def add_fits_header(self, tbhdu):
         """
@@ -191,7 +305,17 @@ class TimeMoc(AbstractMoc):
 
         :param tbhdu: fits python object
         """
-        tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 microsec level 29')
+        tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')
+
+    @staticmethod
+    def order_to_time_resolution(order):
+        delta_t = TimeDelta(4**(29 - order) / 1e6, format='sec', scale='tdb')
+        return delta_t
+
+    @staticmethod
+    def time_resolution_to_order(delta_time):
+        order = 29 - int(np.log2(delta_time.sec * 1e6) / 2)
+        return order
 
     def plot(self, title='TimeMoc', view=(None, None)):
         """
