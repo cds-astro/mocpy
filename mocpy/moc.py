@@ -43,8 +43,19 @@ class MOC(AbstractMoc):
 
     def add_position(self, ra, dec, max_norder):
         """
-        add the HEALPix bin containing the (ra, dec) position
+        Add the HEALPix bin containing the (ra, dec) position
+
+        Parameters
+        ----------
+        ra : `~astropy.coordinates.angles.Longitude`
+            the longitude of the pixel to add
+        dec : `~astropy.coordinates.angles.Latitude`
+            the latitude of the pixel to add
+        max_norder : int
+            the moc order resolution
+
         """
+
         theta, phi = utils.radec2thetaphi(ra, dec)
         i_pix = ang2pix(2**max_norder, theta, phi, nest=True)
 
@@ -55,8 +66,25 @@ class MOC(AbstractMoc):
 
     def filter_table(self, table, ra_column, dec_column, keep_inside=True):
         """
-        Filter an astropy.table.Table to keep only rows inside (or outside) the MOC instance
-        Return the (newly created) filtered Table
+        Filter an `~astropy.table.Table` to keep only rows inside (or outside) the mocpy object instance
+
+        Parameters
+        ----------
+        table : `~astropy.table.Table`
+        ra_column : str
+            name of the RA column to consider in the table
+        dec_column : str
+            name of the DEC column to consider in the table
+        keep_inside : bool, optional
+            True by default. In this case, the filtered table contains only observations that are located into
+            the mocpy object. If ``keep_inside`` is False, the filtered table contains all observations lying outside
+            the mocpy object.
+
+        Returns
+        -------
+        table : `~astropy.table.Table`
+            The (newly created) filtered Table
+
         """
 
         m = self._get_max_order_pix(keep_inside=keep_inside)
@@ -69,21 +97,21 @@ class MOC(AbstractMoc):
     @classmethod
     def from_image(cls, header, moc_order, mask_arr=None):
         """
-        Create a MOC from an image stored as a fits file
+        Create a `~mocpy.moc.MOC` from an image stored as a fits file
 
         Parameters
         ----------
         header : `~astropy.io.fits.Header`
-            fits header containing all the info of where the image is located, its size...
+            fits header containing all the info of where the image is located (position, size, etc...)
         moc_order : int
-            order of the smallest tiles in the MOC (i.e. MOC resolution).
+            the moc resolution
         mask_arr : `~numpy.ndarray`, optional
             a 2D boolean array of the same size of the image where pixels having the value 1 are part of
             the survey and pixels having the value 0 are not part of the survey.
 
         Returns
         -------
-        moc : mocpy.MOC
+        moc : `~mocpy.moc.MOC`
             the MOC object loaded from the ``mask_arr`` and ``header`` extracted from the image
 
         """
@@ -132,10 +160,20 @@ class MOC(AbstractMoc):
         """
         Load a moc from a set of fits images
 
-        :param path_l: the list of path where the fits image are located
-        :param moc_order: the order one wants to build the moc
-        :return: the union of all the moc from path_l
+        Parameters
+        ----------
+        path_l : [str]
+            the path list where the fits image are located
+        moc_order : int
+            moc resolution
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            the union of all the moc from path_l
+
         """
+
         from astropy.io import fits
         moc = MOC()
         for path in path_l:
@@ -148,21 +186,49 @@ class MOC(AbstractMoc):
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
         """
-        return the MOC for a given VizieR table
+        Create a `~mocpy.moc.MOC` object from a VizieR table
+
+        Parameters
+        ----------
+        table_id : int
+            table index
+        nside : int, optional
+            256 by default
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            the created moc
+
         """
+
         nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
         if nside not in nside_possible_values:
             raise ValueError('Bad value for nside. Must be in {0}'.format(nside_possible_values))
 
-        return cls.from_ivorn('ivo://CDS/' + table_id, nside)
+        result = cls.from_ivorn('ivo://CDS/' + table_id, nside)
+        return result
 
     MOC_SERVER_ROOT_URL = 'http://alasky.unistra.fr/MocServer/query'
 
     @classmethod
     def from_ivorn(cls, ivorn, nside=256):
         """
-        return the MOC for a given IVORN
+        Create a `~mocpy.moc.MOC` object from a given ivorn
+
+        Parameters
+        ----------
+        ivorn : str
+        nside : int, optional
+            256 by default
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            the created moc
+
         """
+
         try:
             from urllib import urlencode
         except ImportError:
@@ -177,10 +243,26 @@ class MOC(AbstractMoc):
 
     @classmethod
     def from_url(cls, url):
+        """
+        Create a `~mocpy.moc.MOC` object from a given url
+
+        Parameters
+        ----------
+        url : str
+            the url where the fits file representing a moc is available
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            the created moc
+
+        """
+
         from astropy.utils.data import download_file
 
         path = download_file(url, show_progress=False, timeout=60)
-        return cls.from_moc_fits_file(path)
+        result = cls.from_moc_fits_file(path)
+        return result
 
     @classmethod
     def from_table(cls, table, ra_column, dec_column, moc_order):
@@ -189,7 +271,8 @@ class MOC(AbstractMoc):
         The user has to specify the columns holding ra and dec (in ICRS)
         """
         if not isinstance(ra_column, str) or not isinstance(dec_column, str):
-            raise TypeError
+            raise TypeError('`ra_column` whose type is {0} or `dec_column` whose type is {1} must be of string type'
+                            .format())
 
         moc = MOC()
         moc._order = moc_order
