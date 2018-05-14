@@ -194,6 +194,25 @@ class AbstractMoc:
         result = self.__class__.from_interval_set(iv_set_difference)
         return result
 
+    def complement(self):
+        """
+        Create a mocpy object being the complemented of self
+
+        Returns
+        -------
+        result : `~mocpy.AbstractMoc`
+            the complemented moc
+        """
+        res = IntervalSet()
+        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        for pix in self.best_res_pixels_iterator():
+            res.add((pix * factor, (pix+1) * factor))
+
+        res = self._complement_interval(self.max_order)
+
+        result = self.__class__.from_interval_set(res)
+        return result
+
     def _complement_interval(self, order):
         from .interval_set import IntervalSet
         res = IntervalSet()
@@ -218,16 +237,27 @@ class AbstractMoc:
     def _get_max_pix(self, order):
         pass
 
-    def complement(self):
-        res = IntervalSet()
-        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
-        for pix in self.best_res_pixels_iterator():
-            res.add((pix * factor, (pix+1) * factor))
+    @staticmethod
+    def _neighbour_pixels(hp, pix_arr):
+        """
+        Get all the pixels neighbours of ``pix_arr``
 
-        res = self._complement_interval(self.max_order)
+        Parameters
+        ----------
+        hp : `~astropy_healpix.HEALPix`
+            the HEALPix context
+        pix_arr : `~numpy.ndarray`
+            the input array of pixels
+        Returns
+        -------
+        neighbour_pix_arr : `~numpy.ndarray`
+            an array of pixels containing the neighbours of the pixels in ``pix_arr``
 
-        result = self.__class__.from_interval_set(res)
-        return result
+        """
+        neighbour_pix_arr = np.unique(hp.neighbours(pix_arr).ravel())
+        # Remove negative pixel values returned by `~astropy_healpix.HEALPix.neighbours`
+        neighbour_pix_arr = neighbour_pix_arr[np.where(neighbour_pix_arr >= 0)]
+        return neighbour_pix_arr
 
     @classmethod
     def from_interval_set(cls, interval_set):

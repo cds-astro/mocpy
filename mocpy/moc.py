@@ -97,6 +97,46 @@ class MOC(AbstractMoc):
     def _get_max_pix(self, order):
         return 12 * (4 ** order) - 1
 
+    def add_neighbours(self):
+        """
+        Add all the pixels at max order in the neighbourhood of the moc
+
+        """
+        from astropy_healpix import HEALPix
+
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+
+        pix_arr = np.array(list(self.best_res_pixels_iterator()))
+        neighbour_pix_arr = AbstractMoc._neighbour_pixels(hp, pix_arr)
+
+        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        for pix in neighbour_pix_arr:
+            self._interval_set.add((pix * factor, (pix + 1) * factor))
+
+    def remove_neighbours(self):
+        """
+        Remove all the pixels at max order located at the bound of the moc
+
+        """
+        from astropy_healpix import HEALPix
+
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+
+        pix_arr = np.array(list(self.best_res_pixels_iterator()))
+
+        neighbour_pix_arr = AbstractMoc._neighbour_pixels(hp, pix_arr)
+
+        only_neighbour_arr = np.setxor1d(neighbour_pix_arr, pix_arr)
+
+        bound_pix_arr = AbstractMoc._neighbour_pixels(hp, only_neighbour_arr)
+
+        result_pix_arr = np.setdiff1d(pix_arr, bound_pix_arr)
+
+        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        self._interval_set.clear()
+        for pix in result_pix_arr:
+            self._interval_set.add((pix * factor, (pix + 1) * factor))
+
     @classmethod
     def from_image(cls, header, moc_order, mask_arr=None):
         """
