@@ -482,7 +482,13 @@ class AbstractMoc:
         return result
 
     def add_fits_header(self, tbhdu):
-        """ This method must be implemented in each class derived from AbstractMoc """
+        """
+        This method must be implemented in each class derived from AbstractMoc
+
+        tbhdu : `~astropy.fits.BinTableHDU`
+            fits HDU binary table
+
+        """
         pass
 
     @staticmethod
