@@ -166,6 +166,33 @@ class TimeMoc(AbstractMoc):
 
         self._interval_set.add((time_us_start, time_us_end))
 
+    def add_neighbours(self):
+        """
+        Add all the pixels at max order in the neighbourhood of the moc
+
+        """
+        import sys
+        time_delta = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+
+        for itv in sorted(self._interval_set.intervals):
+            self._interval_set.add((max(itv[0] - time_delta, 0),
+                                    min(itv[1] + time_delta, sys.maxsize)))
+
+    def remove_neighbours(self):
+        """
+        Remove all the pixels at max order located at the bound of the moc
+
+        """
+        time_delta = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        import sys
+
+        intervals = sorted(self._interval_set.intervals)
+
+        self._interval_set.clear()
+        for itv in intervals:
+            self._interval_set.add((min(itv[0] + time_delta, sys.maxsize),
+                                    max(itv[1] - time_delta, 0)))
+
     def _get_max_pix(self, order):
         from sys import maxsize
         return maxsize
