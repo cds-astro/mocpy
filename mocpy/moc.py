@@ -312,9 +312,28 @@ class MOC(AbstractMoc):
     @classmethod
     def from_table(cls, table, ra_column, dec_column, moc_order):
         """
-        Create a MOC from a astropy.table.Table
-        The user has to specify the columns holding ra and dec (in ICRS)
+        Create a `~mocpy.moc.MOC` object from a `~astropy.table.Table`
+
+        The user has to specify the columns holding the ra and dec (in ICRS) data in ``table``
+
+        Parameters
+        ----------
+        table : `~astropy.table.Table`
+            the observations astropy table
+        ra_column : str
+            the name of the column referring to the right ascension of the observations
+        dec_column : str
+            the name of the column referring to the declination of the observations
+        moc_order : int
+            the max order of the MOC that will be created
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            the created moc
+
         """
+
         if not isinstance(ra_column, str) or not isinstance(dec_column, str):
             raise TypeError('`ra_column` whose type is {0} or `dec_column` whose type is {1} must be of string type'
                             .format())
@@ -330,6 +349,7 @@ class MOC(AbstractMoc):
     def from_coo_list(cls, skycoords, max_norder):
         """
         Create a MOC from a list of SkyCoord
+
         """
         if not isinstance(skycoords, SkyCoord):
             raise TypeError
@@ -345,6 +365,7 @@ class MOC(AbstractMoc):
     def sky_fraction(self):
         """
         return the sky fraction (between 0 and 1) covered by the MOC
+
         """
 
         nb_pix_filled = len(list(self.best_res_pixels_iterator()))
@@ -352,17 +373,18 @@ class MOC(AbstractMoc):
 
     def query_simbad(self, max_rows=10000):
         """
-        query a view of SIMBAD data
-        for SIMBAD objects in the coverage of the MOC instance
+        query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
+
         """
+
         return self._query('SIMBAD', max_rows)
 
     def query_vizier_table(self, table_id, max_rows=10000):
         """
-        query a VizieR table
-        for sources in the coverage of the MOC instance
+        query a VizieR table for sources in the coverage of the MOC instance
 
         """
+
         return self._query(table_id, max_rows)
 
     def _query(self, resource_id, max_rows):
@@ -371,6 +393,7 @@ class MOC(AbstractMoc):
         for sources in the coverage of the MOC instance
 
         """
+
         if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)
         else:
@@ -405,15 +428,21 @@ class MOC(AbstractMoc):
 
     def plot(self, title='MOC', coord='C'):
         """
-        Plot the moc instance using matplotlib
+        Plot the MOC object in a mollweide view
 
-        :param title: the title of the plot
-        :param coord: type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
-        only ICRS coordinates are supported for the moment.
-        #TODO handle Galactic coordinates
-        :return: plot the moc in a mollweide view
+        This method uses matplotlib.
+
+        Parameters
+        ----------
+        title : str
+            the title of the plot
+        coord : str
+            type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
+            only ICRS coordinates are supported for the moment.
+            #TODO handle Galactic coordinates
 
         """
+
         plot_order = 8
         if self.max_order > plot_order:
             plotted_moc = self.degrade_to_order(plot_order)

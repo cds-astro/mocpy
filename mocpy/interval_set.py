@@ -112,6 +112,7 @@ class IntervalSet:
     def union(self, another_is):
         """
         return the union between 2 IntervalSet
+
         """
         res = IntervalSet()
         if self.empty():
