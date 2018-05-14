@@ -194,6 +194,41 @@ class AbstractMoc:
         result = self.__class__.from_interval_set(iv_set_difference)
         return result
 
+    def _complement_interval(self, order):
+        from .interval_set import IntervalSet
+        res = IntervalSet()
+
+        interval_set = sorted(self._interval_set._intervals)
+
+        if interval_set[0][0] > 0:
+            res.add((0, interval_set[0][0]))
+
+        last = interval_set[0][1]
+
+        for itv in interval_set[1:]:
+            res.add((last, itv[0]))
+            last = itv[1]
+
+        max_pix_order = self._get_max_pix(order)
+        if last < max_pix_order:
+            res.add((last, max_pix_order))
+
+        return res
+
+    def _get_max_pix(self, order):
+        pass
+
+    def complement(self):
+        res = IntervalSet()
+        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        for pix in self.best_res_pixels_iterator():
+            res.add((pix * factor, (pix+1) * factor))
+
+        res = self._complement_interval(self.max_order)
+
+        result = self.__class__.from_interval_set(res)
+        return result
+
     @classmethod
     def from_interval_set(cls, interval_set):
         """
