@@ -166,6 +166,10 @@ class TimeMoc(AbstractMoc):
 
         self._interval_set.add((time_us_start, time_us_end))
 
+    def _get_max_pix(self, order):
+        from sys import maxsize
+        return maxsize
+
     def _process_degradation(self, another_moc, order_op):
         max_order = max(self.max_order, another_moc.max_order)
         if order_op > max_order:

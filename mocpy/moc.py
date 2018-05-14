@@ -94,6 +94,9 @@ class MOC(AbstractMoc):
         filtered_rows = m[pix_arr]
         return table[filtered_rows]
 
+    def _get_max_pix(self, order):
+        return 12 * (4 ** order) - 1
+
     @classmethod
     def from_image(cls, header, moc_order, mask_arr=None):
         """
