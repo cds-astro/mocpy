@@ -109,6 +109,8 @@ class MOC(AbstractMoc):
         pix_arr = np.array(list(self.best_res_pixels_iterator()))
         neighbour_pix_arr = AbstractMoc._neighbour_pixels(hp, pix_arr)
 
+        neighbour_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_arr)
+
         factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
         for pix in neighbour_pix_arr:
             self._interval_set.add((pix * factor, (pix + 1) * factor))
