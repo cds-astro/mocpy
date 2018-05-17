@@ -59,4 +59,10 @@ Tests
 
 To run the automated tests of ``mocpy`` you can use ``pytest`` and this command:
 
-    python -m pytest mocpy
+    python -m pytest -v mocpy
+
+Continuous integration test status:
+
+* .. image:: http://img.shields.io/travis/cds-astro/mocpy.svg?branch=master
+    :target: https://travis-ci.org/cds-astro/mocpy
+    :alt: Test Status Travis-CI
