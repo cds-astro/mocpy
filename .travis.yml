@@ -10,8 +10,11 @@ python:
   # so testing on newer ones is almost never useful.
   - "3.5"
 
+addons:
+  apt:
+    update: true
+
 install:
-  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -24,12 +27,13 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
+  - conda config --add channels conda-forge
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy matplotlib astropy
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy matplotlib astropy astropy-healpix
   - source activate test-environment
 
 script:
 #  - python setup.py install
-  - python -m pytest -v
+  - python -m pytest -v mocpy
