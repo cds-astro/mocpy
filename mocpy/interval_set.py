@@ -15,10 +15,13 @@ except NameError:
 
 
 class IntervalSet:
-    def __init__(self, interval_set=None):
+    def __init__(self, interval_set=None, intervals_l=None):
         self.clear()
         if interval_set:
             self._intervals = list(interval_set._intervals)
+        if intervals_l:
+            for item in intervals_l:
+                self.add(item)
 
     def __repr__(self):
         return "{0}".format(self._intervals)
@@ -41,7 +44,7 @@ class IntervalSet:
         False otherwise
         """
         return len(self._intervals) == 0
-    
+
     def n_intervals(self):
         """
         Return the number of intervals in the set

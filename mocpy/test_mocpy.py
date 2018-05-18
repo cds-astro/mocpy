@@ -7,23 +7,12 @@ from astropy.coordinates import SkyCoord
 
 @pytest.fixture()
 def isets():
-    random.seed(0)
-
-    a = IntervalSet()
-    for x in range(0, 10):
-        start = random.randint(0, 100)
-        a.add((start, start + random.randint(0, 30)))
-
-    b = IntervalSet()
-    for x in range(0, 10):
-        start = random.randint(0, 100)
-        b.add((start, start + random.randint(0, 30)))
-
+    a = IntervalSet(intervals_l=[(49, 73), (53, 54), (33, 63), (65, 80), (51, 80), (100, 126), (38, 68), (61, 72), (74, 102), (27, 43)])
+    b = IntervalSet(intervals_l=[(17, 26), (17, 41), (12, 31), (32, 61), (68, 90), (77, 105), (18, 27), (12, 35), (9, 37), (87, 97)])
     return dict(a=a, b=b)
 
 
 def test_interval_set(isets):
-
     assert isets['a'].intervals == [(27, 126)]
 
     assert isets['b'].intervals == [(9, 61), (68, 105)]
