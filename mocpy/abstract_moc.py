@@ -202,22 +202,19 @@ class AbstractMoc:
         -------
         result : `~mocpy.AbstractMoc`
             the complemented moc
+
         """
-        res = IntervalSet()
-        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
-        for pix in self.best_res_pixels_iterator():
-            res.add((pix * factor, (pix+1) * factor))
 
-        res = self._complement_interval(self.max_order)
+        complement_interval = self._complement_interval()
 
-        result = self.__class__.from_interval_set(res)
+        result = self.__class__.from_interval_set(complement_interval)
         return result
 
-    def _complement_interval(self, order):
+    def _complement_interval(self):
         from .interval_set import IntervalSet
         res = IntervalSet()
 
-        interval_set = sorted(self._interval_set._intervals)
+        interval_set = sorted(self._interval_set.intervals)
 
         if interval_set[0][0] > 0:
             res.add((0, interval_set[0][0]))
@@ -228,13 +225,14 @@ class AbstractMoc:
             res.add((last, itv[0]))
             last = itv[1]
 
-        max_pix_order = self._get_max_pix(order)
+        max_pix_order = self._get_max_pix()
+
         if last < max_pix_order:
             res.add((last, max_pix_order))
 
         return res
 
-    def _get_max_pix(self, order):
+    def _get_max_pix(self):
         pass
 
     @staticmethod

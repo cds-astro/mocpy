@@ -108,6 +108,10 @@ def test_from_json():
         moc2 = MOC.from_json(json_moc=moc_d)
         assert moc == moc2
 
+def test_complement_mocs():
+    moc = MOC.from_moc_fits_file('notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits');
+    
+    assert moc.complement().complement() == moc
 
 def test_tmoc_construction():
     """
@@ -116,7 +120,9 @@ def test_tmoc_construction():
     """
     time_moc = TimeMoc.from_moc_fits_file('notebooks/demo-data/TMOC/HST_SDSSg/TMoc.fits')
     time_moc2 = TimeMoc.from_csv_file(path='notebooks/demo-data/TMOC/HST_SDSSg/uniq-times.csv',
+                                      delta_t=TimeMoc.order_to_time_resolution(29),
+
                                       format='mjd',
-                                      scale='tai')
+                                      scale='tdb')
 
     assert time_moc == time_moc2, 'bad tmoc construction'
