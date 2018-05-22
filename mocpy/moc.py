@@ -8,7 +8,7 @@ functions to read/write and manipulate MOCs
 
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 from . import py23_compat
 
 import requests
@@ -189,8 +189,8 @@ class MOC(AbstractMoc):
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
 
         hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
-        i_pix_l = hp.lonlat_to_healpix(world_pix_crd[:, 0] * u.deg,
-                                       world_pix_crd[:, 1] * u.deg)
+        i_pix_l = hp.lonlat_to_healpix(lon=world_pix_crd[:, 0] * u.deg,
+                                       lat=world_pix_crd[:, 1] * u.deg)
         # remove doubles
         i_pix_l = np.unique(i_pix_l)
         moc = MOC()
