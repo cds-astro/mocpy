@@ -467,6 +467,8 @@ class MOC(AbstractMoc):
 
         plt.figure(figsize=(10, 10))
         ax = plt.subplot(111, projection='mollweide')
+        ax.set_xticklabels(['150°', '120°', '90°', '60°', '30°', '0°', '330°', '300°', '270°', '240°', '210°', '180°'])
+
         from matplotlib.colors import LinearSegmentedColormap
         color_map = LinearSegmentedColormap.from_list('w2r', ['#eeeeee', '#aa0000'])
         color_map.set_under('w')
