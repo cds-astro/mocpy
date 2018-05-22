@@ -202,14 +202,9 @@ class TimeMoc(AbstractMoc):
             self._interval_set.add((min(itv[0] + time_delta, sys.maxsize),
                                     max(itv[1] - time_delta, 0)))
 
-    def _get_max_pix(self, order):
+    def _get_max_pix(self):
         """
         Max time pixel is set to the max number one can code into a 64 bit int i.e. 2**64 - 1
-
-        Parameters
-        ----------
-        order : int
-            order considered
 
         Returns
         -------

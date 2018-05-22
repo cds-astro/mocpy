@@ -94,8 +94,8 @@ class MOC(AbstractMoc):
         filtered_rows = m[pix_arr]
         return table[filtered_rows]
 
-    def _get_max_pix(self, order):
-        return 12 * (4 ** order) - 1
+    def _get_max_pix(self):
+        return 3*(2**60)
 
     def add_neighbours(self):
         """
