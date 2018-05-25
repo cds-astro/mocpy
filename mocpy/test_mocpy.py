@@ -59,7 +59,9 @@ def test_moc_from_fits_image():
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=fits.getheader(image_path),
-                        moc_order=10, mask_arr=hdulist[0].data)
+                             hdu=hdulist[0],
+                             moc_order=10,
+                             mask_arr=hdulist[0].data)
 
     moc.write(tmp_file.name)
 
@@ -69,7 +71,7 @@ def test_simple_test_t_moc():
     s_time = Time(2 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
     e_time = Time(7 / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tai')
     t_moc.add_time_interval(s_time, e_time)
-    assert t_moc.total_duration == 6
+    assert t_moc.total_duration.sec == 6 * 1e-6
     assert t_moc.max_order == 29
 
     t_moc.write('tmoc.txt', format='json')
@@ -98,6 +100,7 @@ def test_from_json():
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=fits.getheader(image_path),
+                             hdu=hdulist[0],
                              moc_order=10)
 
     moc.write(tmp_file.name, format='json', write_to_file=True)

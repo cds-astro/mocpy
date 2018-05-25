@@ -324,12 +324,12 @@ class TimeMoc(AbstractMoc):
     @property
     def total_duration(self):
         """
-        Get the total duration covered by the temporal moc in us
+        Get the total duration covered by the temporal moc
 
         Returns
         -------
-        total_time_us : int
-            total duration
+        duration : `~astropy.time.TimeDelta`
+            total duration of all the observation times of the tmoc
 
         """
 
@@ -341,7 +341,8 @@ class TimeMoc(AbstractMoc):
         for (start_time, stop_time) in self._interval_set.intervals:
             total_time_us = total_time_us + (stop_time - start_time)
 
-        return total_time_us
+        duration = TimeDelta(total_time_us / 1e6, format='sec', scale='tdb')
+        return duration
 
     @property
     def consistency(self):
@@ -359,36 +360,38 @@ class TimeMoc(AbstractMoc):
 
         """
 
-        return self.total_duration / float(self.max_time - self.min_time)
+        result = self.total_duration.jd / (self.max_time - self.min_time).jd
+        return result
 
     @property
     def min_time(self):
         """
-        Get the min time of the tmoc in jd
+        Get the `~astropy.time.Time` time of the tmoc first observation
 
         Returns
         -------
-        min_time : float
+        min_time : `~astropy.time.Time`
             time of the first observation
 
         """
 
-        min_time = self._interval_set.min / TimeMoc.DAY_MICRO_SEC
+        min_time = Time(self._interval_set.min / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tdb')
         return min_time
 
     @property
     def max_time(self):
         """
-        Get the max time of the tmoc in jd
+        Get the `~astropy.time.Time` time of the tmoc last observation
 
         Returns
         -------
-        max_time : float
+        max_time : `~astropy.time.Time`
             time of the last observation
 
         """
 
-        return self._interval_set.max / TimeMoc.DAY_MICRO_SEC
+        max_time = Time(self._interval_set.max / TimeMoc.DAY_MICRO_SEC, format='jd', scale='tdb')
+        return max_time
 
     def filter_table(self, table, column_name, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME, **kwargs):
         """
@@ -516,7 +519,7 @@ class TimeMoc(AbstractMoc):
         ----------
         title : str, optional
             The title of the plot. Set to 'TimeMoc' by default.
-        view : (int, int), optional
+        view : (`~astropy.time.Time`, `~astropy.time.Time`), optional
             Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
             all the observation time window is rendered).
 
@@ -534,12 +537,8 @@ class TimeMoc(AbstractMoc):
 
         plotted_moc._interval_set.intervals
 
-        min_jd, max_jd = view
-
-        if not min_jd:
-            min_jd = plotted_moc.min_time
-        if not max_jd:
-            max_jd = plotted_moc.max_time
+        min_jd = plotted_moc.min_time.jd if not view[0] else view[0].jd
+        max_jd = plotted_moc.max_time.jd if not view[1] else view[1].jd
 
         if max_jd < min_jd:
             raise ValueError("Invalid selection: max_jd = {0} must be > to min_jd = {1}".format(max_jd, min_jd))

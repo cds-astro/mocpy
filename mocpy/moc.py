@@ -140,7 +140,7 @@ class MOC(AbstractMoc):
             self._interval_set.add((pix * factor, (pix + 1) * factor))
 
     @classmethod
-    def from_image(cls, header, moc_order, mask_arr=None):
+    def from_image(cls, header, hdu, moc_order, mask_arr=None):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a fits file
 
@@ -166,6 +166,12 @@ class MOC(AbstractMoc):
 
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
+
+        try:
+            if header['BLANK']:
+                mask_arr = np.isfinite(hdu)
+        except KeyError:
+            pass
 
         if mask_arr is not None:
             # We have an array of pixels that are part of of survey
@@ -466,7 +472,7 @@ class MOC(AbstractMoc):
         z = np.flip(m[pix_map], axis=1)
 
         plt.figure(figsize=(10, 10))
-        ax = plt.subplot(111, projection='mollweide')
+        ax = plt.subplot(111, projection="mollweide")
         ax.set_xticklabels(['150°', '120°', '90°', '60°', '30°', '0°', '330°', '300°', '270°', '240°', '210°', '180°'])
 
         from matplotlib.colors import LinearSegmentedColormap
