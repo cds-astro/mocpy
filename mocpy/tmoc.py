@@ -302,7 +302,7 @@ class TimeMoc(AbstractMoc):
 
         Parameters
         ----------
-        moc : `~mocpy.abstract_moc.AbstractMoc`
+        another_moc : `~mocpy.abstract_moc.AbstractMoc`
             the MOC/TimeMoc to substract from self
         delta_t : `~astropy.time.TimeDelta`, optional
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
