@@ -59,7 +59,6 @@ def test_moc_from_fits_image():
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=fits.getheader(image_path),
-                             hdu=hdulist[0],
                              moc_order=10,
                              mask_arr=hdulist[0].data)
 
@@ -100,7 +99,6 @@ def test_from_json():
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=fits.getheader(image_path),
-                             hdu=hdulist[0],
                              moc_order=10)
 
     moc.write(tmp_file.name, format='json', write_to_file=True)
