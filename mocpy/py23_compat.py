@@ -8,12 +8,16 @@ try:
     int = long
     range = xrange
 except NameError:
-    pass
+    int = int
+    range = range
 
 try:
     from sets import Set as set
 except ImportError:
     pass
 
-
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 

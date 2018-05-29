@@ -9,7 +9,7 @@ functions to read/write and manipulate MOCs
 """
 
 from __future__ import absolute_import, division, print_function
-from . import py23_compat
+from .py23_compat import urlencode, int
 
 import requests
 import tempfile

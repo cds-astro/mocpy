@@ -9,7 +9,7 @@ functions to read/write and manipulate TimeMocs
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-from . import py23_compat
+from .py23_compat import range, int
 
 import warnings
 import numpy as np
