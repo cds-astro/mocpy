@@ -241,7 +241,7 @@ class MOC(AbstractMoc):
 
         Parameters
         ----------
-        table_id : int
+        table_id : str
             table index
         nside : int, optional
             256 by default
@@ -339,10 +339,6 @@ class MOC(AbstractMoc):
             the created moc
 
         """
-
-        if not isinstance(ra_column, str) or not isinstance(dec_column, str):
-            raise TypeError('`ra_column` whose type is {0} or `dec_column` whose type is {1} must be of string type'
-                            .format())
 
         moc = MOC()
         moc._order = moc_order
