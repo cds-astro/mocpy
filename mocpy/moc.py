@@ -16,6 +16,7 @@ import tempfile
 import os
 import numpy as np
 from astropy import units as u
+from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 from astropy import wcs
@@ -140,7 +141,7 @@ class MOC(AbstractMoc):
             self._interval_set.add((pix * factor, (pix + 1) * factor))
 
     @classmethod
-    def from_image(cls, header, hdu, moc_order, mask_arr=None):
+    def from_image(cls, header, moc_order, mask_arr=None):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a fits file
 
@@ -152,7 +153,7 @@ class MOC(AbstractMoc):
             the moc resolution
         mask_arr : `~numpy.ndarray`, optional
             a 2D boolean array of the same size of the image where pixels having the value 1 are part of
-            the survey and pixels having the value 0 are not part of the survey.
+            the final MOC and pixels having the value 0 are not.
 
         Returns
         -------
@@ -166,12 +167,6 @@ class MOC(AbstractMoc):
 
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
-
-        try:
-            if header['BLANK']:
-                mask_arr = np.isfinite(hdu)
-        except KeyError:
-            pass
 
         if mask_arr is not None:
             # We have an array of pixels that are part of of survey
@@ -225,7 +220,6 @@ class MOC(AbstractMoc):
 
         """
 
-        from astropy.io import fits
         moc = MOC()
         for path in path_l:
             header = fits.getheader(path)
@@ -279,11 +273,6 @@ class MOC(AbstractMoc):
             the created moc
 
         """
-
-        try:
-            from urllib import urlencode
-        except ImportError:
-            from urllib.parse import urlencode
 
         return cls.from_url('%s?%s' % (MOC.MOC_SERVER_ROOT_URL,
                                        urlencode({
