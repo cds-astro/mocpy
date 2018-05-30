@@ -48,7 +48,7 @@ Examples
 Different examples on how to use MOCPy can be found in the notebooks directory.
 
 .. image:: http://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/cds-astro/mocpy/tmoc
+    :target: https://mybinder.org/v2/gh/cds-astro/mocpy/master
 
 Launch the Binder to execute live and interact with the notebooks examples.  
 
