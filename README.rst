@@ -16,7 +16,7 @@ regions on the sky into hierarchically grouped predefined cells.
 License
 =======
 
-MOCPy is distributed under GPLv3 license.
+MOCPy is distributed under BSD-3 license.
 
 ============
 Requirements
