@@ -204,16 +204,14 @@ class TimeMoc(AbstractMoc):
 
     def _get_max_pix(self):
         """
-        Max time pixel is set to the max number one can code into a 64 bit int i.e. 2**64 - 1
+        Max time pixel : 4**29 - 1 us
 
         Returns
         -------
-        sys.maxsize : int
-            2**64 - 1
+            4**29 - 1
 
         """
-        from sys import maxsize
-        return maxsize
+        return 4**(29) - 1
 
     def _process_degradation(self, another_moc, order_op):
         """
