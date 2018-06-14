@@ -5,28 +5,22 @@
 moc.py
 
 functions to read/write and manipulate MOCs
-
 """
-
 from __future__ import absolute_import, division, print_function
-from .py23_compat import urlencode, int
-
+from .py23_compat import urlencode, int, BytesIO
 import requests
 import tempfile
 import os
 import numpy as np
+from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 from astropy import wcs
 from astropy_healpix import HEALPix
-from astropy_healpix.healpy import ang2pix
 from astropy_healpix.healpy import nside2npix
-import matplotlib.pyplot as plt
-
 from .abstract_moc import AbstractMoc
-from . import utils
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -54,11 +48,9 @@ class MOC(AbstractMoc):
             the latitude of the pixel to add
         max_norder : int
             the moc order resolution
-
         """
-
-        theta, phi = utils.radec2thetaphi(ra, dec)
-        i_pix = ang2pix(2**max_norder, theta, phi, nest=True)
+        hp = HEALPix(nside=(1 << max_norder), order='nested')
+        i_pix = hp.lonlat_to_healpix(ra * u.deg, dec * u.deg)
 
         if isinstance(i_pix, np.ndarray):
             self.add_pix_list(order=max_norder, i_pix_l=i_pix)
@@ -85,12 +77,10 @@ class MOC(AbstractMoc):
         -------
         table : `~astropy.table.Table`
             The (newly created) filtered Table
-
         """
-
         m = self._get_max_order_pix(keep_inside=keep_inside)
-        theta, phi = utils.radec2thetaphi(table[ra_column], table[dec_column])
-        pix_arr = ang2pix(2 ** self.max_order, theta, phi, nest=True)
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        pix_arr = hp.lonlat_to_healpix(table[ra_column] * u.deg, table[dec_column] * u.deg)
 
         filtered_rows = m[pix_arr]
         return table[filtered_rows]
@@ -101,10 +91,7 @@ class MOC(AbstractMoc):
     def add_neighbours(self):
         """
         Add all the pixels at max order in the neighbourhood of the moc
-
         """
-        from astropy_healpix import HEALPix
-
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
 
         pix_arr = np.array(list(self.best_res_pixels_iterator()))
@@ -119,10 +106,7 @@ class MOC(AbstractMoc):
     def remove_neighbours(self):
         """
         Remove all the pixels at max order located at the bound of the moc
-
         """
-        from astropy_healpix import HEALPix
-
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
 
         pix_arr = np.array(list(self.best_res_pixels_iterator()))
@@ -295,14 +279,9 @@ class MOC(AbstractMoc):
         -------
         result : `~mocpy.moc.MOC`
             the created moc
-
         """
-
-        from astropy.utils.data import download_file
-
         path = download_file(url, show_progress=False, timeout=60)
-        result = cls.from_moc_fits_file(path)
-        return result
+        return cls.from_moc_fits_file(path)
 
     @classmethod
     def from_table(cls, table, ra_column, dec_column, moc_order):
@@ -382,8 +361,8 @@ class MOC(AbstractMoc):
         """
         internal method to query Simbad or a VizieR table
         for sources in the coverage of the MOC instance
-
         """
+        from astropy.io.votable import parse_single_table
 
         if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)
@@ -402,11 +381,9 @@ class MOC(AbstractMoc):
                           headers={'User-Agent': 'MOCPy'},
                           stream=True)
 
-        from six import BytesIO
         tmp_vot = BytesIO()
         tmp_vot.write(r.content)
 
-        from astropy.io.votable import parse_single_table
         table = parse_single_table(tmp_vot).to_table()
 
         # finally delete temp files
@@ -431,8 +408,9 @@ class MOC(AbstractMoc):
             type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
             only ICRS coordinates are supported for the moment.
             #TODO handle Galactic coordinates
-
         """
+        from matplotlib.colors import LinearSegmentedColormap
+        import matplotlib.pyplot as plt
 
         plot_order = 8
         if self.max_order > plot_order:
@@ -460,7 +438,6 @@ class MOC(AbstractMoc):
         ax = plt.subplot(111, projection="mollweide")
         ax.set_xticklabels(['150°', '120°', '90°', '60°', '30°', '0°', '330°', '300°', '270°', '240°', '210°', '180°'])
 
-        from matplotlib.colors import LinearSegmentedColormap
         color_map = LinearSegmentedColormap.from_list('w2r', ['#eeeeee', '#aa0000'])
         color_map.set_under('w')
         color_map.set_bad('gray')

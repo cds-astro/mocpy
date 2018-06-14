@@ -1,13 +1,5 @@
 import numpy as np
 
-def radec2thetaphi(ra, dec):
-    """
-    convert equatorial ra, dec in degrees
-    to polar theta, phi in radians
-
-    """
-    return np.pi/2 - np.radians(dec), np.radians(ra)
-
 
 def uniq2orderipix(uniq):
     """

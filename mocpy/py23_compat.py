@@ -2,22 +2,38 @@
 py23_compat.py
 
 Python 2 / 3 compatibility layer.
-
 """
-try:
+import sys
+
+__all__ = [
+    'int', 'range', 'set', 'urlencode', 'BytesIO',
+]
+
+PY2 = (sys.version_info.major == 2)
+
+if PY2:
     int = long
     range = xrange
-except NameError:
+else:
     int = int
     range = range
 
-try:
+if PY2:
     from sets import Set as set
-except ImportError:
-    pass
+else:
+    set = set
 
-try:
+if PY2:
     from urllib import urlencode
-except ImportError:
+else:
     from urllib.parse import urlencode
 
+# https://pythonhosted.org/six/#six.BytesIO
+if PY2:
+    import StringIO
+
+    BytesIO = StringIO.StringIO
+else:
+    import io
+
+    BytesIO = io.BytesIO
