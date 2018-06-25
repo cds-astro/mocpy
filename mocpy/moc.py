@@ -36,21 +36,21 @@ class MOC(AbstractMoc):
     def __init__(self):
         AbstractMoc.__init__(self)
 
-    def add_position(self, ra, dec, max_norder):
+    def add_position(self, lon, lat, max_norder):
         """
         Add the HEALPix bin containing the (ra, dec) position
 
         Parameters
         ----------
-        ra : `~astropy.coordinates.angles.Longitude`
+        lon : `~astropy.units.Quantity`
             the longitude of the pixel to add
-        dec : `~astropy.coordinates.angles.Latitude`
+        lat : `~astropy.units.Quantity`
             the latitude of the pixel to add
         max_norder : int
             the moc order resolution
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
-        i_pix = hp.lonlat_to_healpix(ra * u.deg, dec * u.deg)
+        i_pix = hp.lonlat_to_healpix(lon, lat)
 
         if isinstance(i_pix, np.ndarray):
             self.add_pix_list(order=max_norder, i_pix_l=i_pix)
@@ -80,7 +80,7 @@ class MOC(AbstractMoc):
         """
         m = self._get_max_order_pix(keep_inside=keep_inside)
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        pix_arr = hp.lonlat_to_healpix(table[ra_column] * u.deg, table[dec_column] * u.deg)
+        pix_arr = hp.lonlat_to_healpix(table[ra_column], table[dec_column])
 
         filtered_rows = m[pix_arr]
         return table[filtered_rows]
@@ -172,7 +172,6 @@ class MOC(AbstractMoc):
             pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
-
         hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
         i_pix_l = hp.lonlat_to_healpix(lon=world_pix_crd[:, 0] * u.deg,
                                        lat=world_pix_crd[:, 1] * u.deg)
@@ -327,7 +326,7 @@ class MOC(AbstractMoc):
         moc = MOC()
         moc._order = max_norder
 
-        moc.add_position(skycoords.icrs.ra.deg, skycoords.icrs.dec.deg, max_norder)
+        moc.add_position(skycoords.icrs.ra, skycoords.icrs.dec, max_norder)
 
         return moc
 
