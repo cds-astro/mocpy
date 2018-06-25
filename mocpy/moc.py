@@ -371,7 +371,7 @@ class MOC(AbstractMoc):
 
         tmp_moc = tempfile.NamedTemporaryFile(delete=False)
 
-        self.write(tmp_moc.name)
+        self.write(tmp_moc.name, write_to_file=True)
         r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat',
                           data={'mode': 'mocfile',
                                 'catName': resource_id,
