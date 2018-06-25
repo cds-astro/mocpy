@@ -27,13 +27,16 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda config --add channels conda-forge
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy matplotlib astropy astropy-healpix six requests
+  - conda env create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -f environment.yml
   - source activate test-environment
 
 script:
 #  - python setup.py install
   - python -m pytest -v mocpy
+# install mocpy in the conda env so that the notebooks
+# can import it
+  - pip install .
+  - python test_notebooks.py
