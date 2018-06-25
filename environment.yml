@@ -1,0 +1,19 @@
+name: travis_anaconda_jupyter
+channels:
+- defaults
+- conda-forge
+dependencies:
+- astropy
+- astropy-healpix
+- astroquery
+- jupyter
+- matplotlib
+- nbconvert
+- nbformat
+- numpy
+- pytest
+- requests
+- six
+
+
+
