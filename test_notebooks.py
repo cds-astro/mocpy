@@ -4,12 +4,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from glob import glob
 
-class bcolors:
-    OKGREEN = '\033[92m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-
 notebook_filenames_l = glob("notebooks/*.ipynb")
 
 for notebook_filename in notebook_filenames_l:
@@ -20,8 +14,8 @@ for notebook_filename in notebook_filenames_l:
         try:
             ep.preprocess(nb, {'metadata': {'path': 'notebooks/'}})
         except CellExecutionError as e:
-            print(("{0} " + bcolors.FAIL + "[FAILED]" + bcolors.ENDC + "\n{1}").format(notebook_filename, e))
+            print("{0} [FAILED]\n{1}".format(notebook_filename, e))
             # exit with error status code
             exit(1)
-        print(("{0} " + bcolors.OKGREEN + "[PASSED]" + bcolors.ENDC).format(notebook_filename))
+        print("{0} [PASSED]".format(notebook_filename))
 
