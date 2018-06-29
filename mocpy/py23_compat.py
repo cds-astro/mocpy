@@ -6,7 +6,7 @@ Python 2 / 3 compatibility layer.
 import sys
 
 __all__ = [
-    'int', 'range', 'set', 'urlencode', 'BytesIO',
+    'int', 'range', 'urlencode', 'BytesIO',
 ]
 
 PY2 = (sys.version_info.major == 2)
@@ -17,11 +17,6 @@ if PY2:
 else:
     int = int
     range = range
-
-if PY2:
-    from sets import Set as set
-else:
-    set = set
 
 if PY2:
     from urllib import urlencode
