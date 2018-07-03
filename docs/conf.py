@@ -12,10 +12,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
+import mocpy
 
 # -- Project information -----------------------------------------------------
 
@@ -24,9 +25,9 @@ copyright = '2018, Thomas Boch, Matthieu Baumann'
 author = 'Thomas Boch, Matthieu Baumann'
 
 # The short X.Y version
-version = ''
+version = mocpy.__version__
 # The full version, including alpha/beta/rc tags
-release = '42'
+release = mocpy.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,9 +41,16 @@ release = '42'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    # To support Numpy docstrings, we use this extension:
+    # see https://numpydoc.readthedocs.io/en/latest/install.html
+    'numpydoc',
 ]
+
+default_role = 'py:obj'
+numpydoc_class_members_toctree = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -78,6 +86,7 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
+html_show_sphinx = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -163,4 +172,7 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/', None),
+    'astropy': ('http://docs.astropy.org/en/stable/', None),
+}
