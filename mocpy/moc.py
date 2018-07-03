@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*
-
-"""
-moc.py
-
-functions to read/write and manipulate MOCs
-"""
 from __future__ import absolute_import, division, print_function
 from .py23_compat import urlencode, int, BytesIO
 import requests
@@ -30,6 +22,10 @@ __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
 class MOC(AbstractMoc):
+    """Multi-order Spatial Coverage.
+
+    TODO: describe a bit more. Link to docs examples.
+    """
     VIZ_TABLE_MOC_ROOT_URL = ''
     VIZ_CAT_MOC_ROOT_URL = ''
     
@@ -141,7 +137,7 @@ class MOC(AbstractMoc):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        moc : `mocpy.MOC`
             the MOC object loaded from the ``mask_arr`` and ``header`` extracted from the image
 
         """
@@ -198,11 +194,9 @@ class MOC(AbstractMoc):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        moc : `~mocpy.MOC`
             the union of all the moc from path_l
-
         """
-
         moc = MOC()
         for path in path_l:
             header = fits.getheader(path)
