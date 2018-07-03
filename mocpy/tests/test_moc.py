@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
-from .moc import MOC
-from .tmoc import TimeMoc
+from ..moc import MOC
+from ..tmoc import TimeMoc
 
 
 def get_random_skycoords(size):
