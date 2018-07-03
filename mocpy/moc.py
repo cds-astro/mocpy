@@ -54,33 +54,31 @@ class MOC(AbstractMoc):
         else:
             self.add_pix(max_norder, i_pix)
 
-    def filter_table(self, table, ra_column, dec_column, keep_inside=True):
+    def contains(self, ra, dec, keep_inside=True):
         """
-        Filter an `~astropy.table.Table` to keep only rows inside (or outside) the mocpy object instance
+        Get a mask array (e.g. numpy boolean array) of positions being inside (or outside) the mocpy object instance.
 
         Parameters
         ----------
-        table : `~astropy.table.Table`
-        ra_column : str
-            name of the RA column to consider in the table
-        dec_column : str
-            name of the DEC column to consider in the table
+        ra : `~astropy.units.Quantity`
+            right ascension array
+        dec: `~astropy.units.Quantity`
+            declination array
         keep_inside : bool, optional
-            True by default. In this case, the filtered table contains only observations that are located into
+            True by default. If so the filtered table contains only observations that are located into
             the mocpy object. If ``keep_inside`` is False, the filtered table contains all observations lying outside
             the mocpy object.
 
         Returns
         -------
-        table : `~astropy.table.Table`
-            The (newly created) filtered Table
+        array : `~numpy.darray`
+            A mask boolean array
         """
         m = self._get_max_order_pix(keep_inside=keep_inside)
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        pix_arr = hp.lonlat_to_healpix(table[ra_column], table[dec_column])
+        pix_arr = hp.lonlat_to_healpix(ra, dec)
 
-        filtered_rows = m[pix_arr]
-        return table[filtered_rows]
+        return m[pix_arr]
 
     def _get_max_pix(self):
         return 3*(2**60)
