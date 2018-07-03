@@ -30,13 +30,15 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda env create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -f environment.yml
-  - source activate test-environment
+  - conda env create -q python=$TRAVIS_PYTHON_VERSION -f environment.yml
+  - source activate mocpy-dev
 
 script:
-#  - python setup.py install
-  - python -m pytest -v mocpy
-# install mocpy in the conda env so that the notebooks
-# can import it
+  - python -m pytest -v mocpy --cov-report=html --cov=mocpy
+  # Test notebooks
   - pip install .
   - python test_notebooks.py
+  # Test docs build:
+  - cd docs
+  - make html
+  - cd ..
