@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*
-
-"""
-tmoc.py
-
-functions to read/write and manipulate TimeMocs
-
-"""
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 from .py23_compat import range, int
 
@@ -28,6 +18,10 @@ __email__ = "matthieu.baumann@astro.unistra.fr"
 
 
 class TimeMoc(AbstractMoc):
+    """Multi-order Time Coverage.
+
+    TODO: describe a bit more. Link to docs examples.
+    """
     DAY_MICRO_SEC = 86400000000.
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
@@ -45,17 +39,17 @@ class TimeMoc(AbstractMoc):
 
         Parameters
         ----------
-        table : `~astropy.table.Table`
+        table : `astropy.table.Table`
             the astropy table from which the TimeMoc will be created
         t_column : str
             the name of the column in ``table`` containing the observation times
-        delta_t : `~astropy.time.TimeDelta`, optional
+        delta_t : `astropy.time.TimeDelta`, optional
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``)
         format : str, optional
-            ``decimalyear`` by default. See `~astropy.time.Time` to know more about time scales and formats.
-            ``format`` parameter is passed to the `~astropy.time.Time` time instantiations.
+            ``decimalyear`` by default. See `astropy.time.Time` to know more about time scales and formats.
+            ``format`` parameter is passed to the `astropy.time.Time` time instantiations.
         scale : str, optional
             ``tdb`` by default. See `~astropy.time.Time` to know more about time scales and formats.
             ``scale`` parameter is passed to the `~astropy.time.Time` time instantiations.
@@ -368,7 +362,7 @@ class TimeMoc(AbstractMoc):
 
         Returns
         -------
-        min_time : `~astropy.time.Time`
+        min_time : `astropy.time.Time`
             time of the first observation
 
         """
