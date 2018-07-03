@@ -27,9 +27,6 @@ class TimeMoc(AbstractMoc):
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
-    def __init__(self):
-        AbstractMoc.__init__(self)
-
     @classmethod
     def from_table(cls, table, t_column, delta_t=DEFAULT_OBSERVATION_TIME, **kwargs):
         """
