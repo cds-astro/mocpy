@@ -8,3 +8,5 @@ MOCPy.egg-info
 build
 dist
 docs/_build
+.coverage
+htmlcov

@@ -1,7 +1,9 @@
-name: travis_anaconda_jupyter
+name: mocpy-dev
+
 channels:
 - defaults
 - conda-forge
+
 dependencies:
 - astropy
 - astropy-healpix
@@ -12,6 +14,7 @@ dependencies:
 - nbformat
 - numpy
 - pytest
+- pytest-cov
 - requests
 - six
 - sphinx
