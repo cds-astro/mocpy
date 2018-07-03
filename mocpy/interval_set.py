@@ -1,14 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-"""
-interval_set.py
-
-Manages a set of intervals
-
-"""
-
 from __future__ import absolute_import, division, print_function, unicode_literals
+import copy
 from .py23_compat import range
 
 __author__ = "Thomas Boch"
@@ -19,13 +11,19 @@ __email__ = "thomas.boch@astro.unistra.fr"
 
 
 class IntervalSet:
-    def __init__(self, interval_set=None, intervals_l=None):
-        self.clear()
-        if interval_set:
-            self._intervals = list(interval_set._intervals)
-        if intervals_l:
-            for item in intervals_l:
-                self.add(item)
+    """Manages a set of intervals.
+
+    TODO: describe this data structure,
+    especially how things are stored.
+    """
+    def __init__(self, intervals=None):
+        intervals = [] if intervals is None else intervals
+        self._intervals = intervals
+        self.__must_check_consistency = True
+
+    def copy(self):
+        """Make a copy."""
+        return copy.deepcopy(self)
 
     def __repr__(self):
         return "{0}".format(self._intervals)
@@ -112,7 +110,6 @@ class IntervalSet:
     def union(self, another_is):
         """
         return the union between 2 IntervalSet
-
         """
         res = IntervalSet()
         if self.empty():
