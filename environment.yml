@@ -14,3 +14,6 @@ dependencies:
 - pytest
 - requests
 - six
+- sphinx
+- pip:
+  - numpydoc
