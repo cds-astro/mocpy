@@ -29,9 +29,6 @@ class MOC(AbstractMoc):
     """
     VIZ_TABLE_MOC_ROOT_URL = ''
     VIZ_CAT_MOC_ROOT_URL = ''
-    
-    def __init__(self):
-        AbstractMoc.__init__(self)
 
     def add_position(self, lon, lat, max_norder):
         """
