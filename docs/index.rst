@@ -1,7 +1,3 @@
-.. mocpy documentation master file, created by
-   sphinx-quickstart on Tue Jul  3 09:47:22 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to mocpy's documentation!
 =================================
@@ -10,6 +6,9 @@ Welcome to mocpy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   install
+
+MOCPy is a Python library allowing easy creation, parsing and manipulation of MOCs (Multi-Order Coverage maps).
 
 
 Indices and tables
