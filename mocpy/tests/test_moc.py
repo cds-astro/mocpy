@@ -4,7 +4,6 @@ from astropy.coordinates import SkyCoord
 
 from ..moc import MOC
 
-
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
                     dec=np.random.uniform(-90, 90, size),
