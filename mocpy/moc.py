@@ -5,15 +5,17 @@ import requests
 import tempfile
 import os
 import numpy as np
+
 from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
-from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 from astropy import wcs
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
-from .abstract_moc import AbstractMoc
+
+from .abstract_moc import AbstractMOC
+from .interval_set import IntervalSet
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -22,7 +24,7 @@ __license__ = "BSD 3-Clause License"
 __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
-class MOC(AbstractMoc):
+class MOC(AbstractMOC):
     """Multi-order Spatial Coverage.
 
     TODO: describe a bit more. Link to docs examples.
@@ -30,36 +32,16 @@ class MOC(AbstractMoc):
     VIZ_TABLE_MOC_ROOT_URL = ''
     VIZ_CAT_MOC_ROOT_URL = ''
 
-    def add_position(self, lon, lat, max_norder):
-        """
-        Add the HEALPix bin containing the (ra, dec) position
-
-        Parameters
-        ----------
-        lon : `~astropy.units.Quantity`
-            the longitude of the pixel to add
-        lat : `~astropy.units.Quantity`
-            the latitude of the pixel to add
-        max_norder : int
-            the moc order resolution
-        """
-        hp = HEALPix(nside=(1 << max_norder), order='nested')
-        i_pix = hp.lonlat_to_healpix(lon, lat)
-
-        if isinstance(i_pix, np.ndarray):
-            self.add_pix_list(order=max_norder, i_pix_l=i_pix)
-        else:
-            self.add_pix(max_norder, i_pix)
-
     def contains(self, ra, dec, keep_inside=True):
         """
-        Get a mask array (e.g. numpy boolean array) of positions being inside (or outside) the mocpy object instance.
+        Get a mask array (e.g. a numpy boolean array) of positions being inside (or outside) the
+        mocpy object instance.
 
         Parameters
         ----------
-        ra : `~astropy.units.Quantity`
+        ra : `astropy.units.Quantity`
             right ascension array
-        dec: `~astropy.units.Quantity`
+        dec: `astropy.units.Quantity`
             declination array
         keep_inside : bool, optional
             True by default. If so the filtered table contains only observations that are located into
@@ -82,12 +64,19 @@ class MOC(AbstractMoc):
 
     def add_neighbours(self):
         """
-        Add all the pixels at max order in the neighbourhood of the moc
-        """
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        Add all the pixels at max order in the neighbourhood of the MOC:
 
+        1. Get the HEALPix array of the MOC at the its max order.
+        2. Get the HEALPix array containing the neighbors of the first array (it consists of an ``extended`` HEALPix
+           array containing the first one).
+        3. Compute the difference between the second and the first HEALPix array to get only the neighboring pixels
+           located at the border of the MOC.
+        4. This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
+        """
         pix_arr = np.array(list(self.best_res_pixels_iterator()))
-        neighbour_pix_arr = AbstractMoc._neighbour_pixels(hp, pix_arr)
+
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
 
         neighbour_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_arr)
 
@@ -97,17 +86,24 @@ class MOC(AbstractMoc):
 
     def remove_neighbours(self):
         """
-        Remove all the pixels at max order located at the bound of the moc
-        """
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        Remove all the pixels at max order located at the bound of the moc:
 
+        1. Get the HEALPix array of the MOC at the its max order.
+        2. Get the HEALPix array containing the neighbors of the first array (it consists of an ``extended`` HEALPix
+           array containing the first one).
+        3. Compute the difference between the second and the first HEALPix array to get only the neighboring pixels
+           located at the border of the MOC.
+        4. Same as step 2 to get the HEALPix neighbors of the last computed array.
+        5. The difference between the original MOC HEALPix array and this one gives a new MOC whose borders are removed.
+        """
         pix_arr = np.array(list(self.best_res_pixels_iterator()))
 
-        neighbour_pix_arr = AbstractMoc._neighbour_pixels(hp, pix_arr)
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
 
         only_neighbour_arr = np.setxor1d(neighbour_pix_arr, pix_arr)
 
-        bound_pix_arr = AbstractMoc._neighbour_pixels(hp, only_neighbour_arr)
+        bound_pix_arr = AbstractMOC._neighbour_pixels(hp, only_neighbour_arr)
 
         result_pix_arr = np.setdiff1d(pix_arr, bound_pix_arr)
 
@@ -117,7 +113,7 @@ class MOC(AbstractMoc):
             self._interval_set.add((pix * factor, (pix + 1) * factor))
 
     @classmethod
-    def from_image(cls, header, moc_order, mask_arr=None):
+    def from_image(cls, header, max_norder, mask_arr=None):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a fits file
 
@@ -125,7 +121,7 @@ class MOC(AbstractMoc):
         ----------
         header : `~astropy.io.fits.Header`
             fits header containing all the info of where the image is located (position, size, etc...)
-        moc_order : int
+        max_norder : int
             the moc resolution
         mask_arr : `~numpy.ndarray`, optional
             a 2D boolean array of the same size of the image where pixels having the value 1 are part of
@@ -135,7 +131,6 @@ class MOC(AbstractMoc):
         -------
         moc : `mocpy.MOC`
             the MOC object loaded from the ``mask_arr`` and ``header`` extracted from the image
-
         """
         # load the image data
         height = header['NAXIS2']
@@ -164,20 +159,23 @@ class MOC(AbstractMoc):
             pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         world_pix_crd = w.wcs_pix2world(pix_crd, 1)
-        hp = HEALPix(nside=(1 << moc_order), order='nested', frame=ICRS())
-        i_pix_l = hp.lonlat_to_healpix(lon=world_pix_crd[:, 0] * u.deg,
-                                       lat=world_pix_crd[:, 1] * u.deg)
-        # remove doubles
-        i_pix_l = np.unique(i_pix_l)
-        moc = MOC()
-        moc.add_pix_list(order=moc_order, i_pix_l=i_pix_l)
-        # this will be consistent when one will do operations on the moc (union, inter, ...) or
-        # simply write it to a fits or json file
 
-        return moc
+        hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
+        ipix = hp.lonlat_to_healpix(lon=world_pix_crd[:, 0] * u.deg,
+                                    lat=world_pix_crd[:, 1] * u.deg)
+        # remove doubles
+        ipix = np.unique(ipix)
+
+        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
+        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+
+        # This MOC will be consistent when one will do operations on the moc (union, inter, ...) or
+        # simply write it to a fits or json file
+        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        return cls(interval_set)
 
     @classmethod
-    def from_fits_images(cls, path_l, moc_order):
+    def from_fits_images(cls, path_l, max_norder):
         """
         Load a moc from a set of fits images
 
@@ -185,7 +183,7 @@ class MOC(AbstractMoc):
         ----------
         path_l : [str]
             the path list where the fits image are located
-        moc_order : int
+        max_norder : int
             moc resolution
 
         Returns
@@ -196,7 +194,7 @@ class MOC(AbstractMoc):
         moc = MOC()
         for path in path_l:
             header = fits.getheader(path)
-            current_moc = MOC.from_image(header=header, moc_order=moc_order)
+            current_moc = MOC.from_image(header=header, max_norder=max_norder)
             moc = moc.union(current_moc)
 
         return moc
@@ -217,9 +215,7 @@ class MOC(AbstractMoc):
         -------
         result : `~mocpy.moc.MOC`
             the created moc
-
         """
-
         nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
         if nside not in nside_possible_values:
             raise ValueError('Bad value for nside. Must be in {0}'.format(nside_possible_values))
@@ -244,9 +240,7 @@ class MOC(AbstractMoc):
         -------
         result : `~mocpy.moc.MOC`
             the created moc
-
         """
-
         return cls.from_url('%s?%s' % (MOC.MOC_SERVER_ROOT_URL,
                                        urlencode({
                                            'ivorn': ivorn,
@@ -270,80 +264,54 @@ class MOC(AbstractMoc):
             the created moc
         """
         path = download_file(url, show_progress=False, timeout=60)
-        return cls.from_moc_fits_file(path)
+        return cls.from_fits(path)
 
     @classmethod
-    def from_table(cls, table, ra_column, dec_column, moc_order):
+    def from_skycoords(cls, skycoords, max_norder):
         """
-        Create a `~mocpy.moc.MOC` object from a `~astropy.table.Table`
-
-        The user has to specify the columns holding the ra and dec (in ICRS) data in ``table``
-
-        Parameters
-        ----------
-        table : `~astropy.table.Table`
-            the observations astropy table
-        ra_column : str
-            the name of the column referring to the right ascension of the observations
-        dec_column : str
-            the name of the column referring to the declination of the observations
-        moc_order : int
-            the max order of the MOC that will be created
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            the created moc
-
+        Create a MOC from astropy skycoords
         """
+        hp = HEALPix(nside=(1 << max_norder), order='nested')
+        ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
 
-        moc = MOC()
-        moc._order = moc_order
+        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
+        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        moc.add_position(table[ra_column], table[dec_column], moc_order)
-
-        return moc
+        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        return cls(interval_set)
 
     @classmethod
-    def from_coo_list(cls, skycoords, max_norder):
+    def from_lonlat(cls, lon, lat, max_norder):
         """
-        Create a MOC from a list of SkyCoord
-
+        Create a MOC from astropy lon, lat quantities
         """
-        if not isinstance(skycoords, SkyCoord):
-            raise TypeError
+        hp = HEALPix(nside=(1 << max_norder), order='nested')
+        ipix = hp.lonlat_to_healpix(lon, lat)
 
-        moc = MOC()
-        moc._order = max_norder
+        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
+        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        moc.add_position(skycoords.icrs.ra, skycoords.icrs.dec, max_norder)
-
-        return moc
+        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        return cls(interval_set)
 
     @property
     def sky_fraction(self):
         """
         return the sky fraction (between 0 and 1) covered by the MOC
-
         """
-
         nb_pix_filled = len(list(self.best_res_pixels_iterator()))
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     def query_simbad(self, max_rows=10000):
         """
         query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
-
         """
-
         return self._query('SIMBAD', max_rows)
 
     def query_vizier_table(self, table_id, max_rows=10000):
         """
         query a VizieR table for sources in the coverage of the MOC instance
-
         """
-
         return self._query(table_id, max_rows)
 
     def _query(self, resource_id, max_rows):

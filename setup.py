@@ -9,7 +9,7 @@ exec(open('mocpy/version.py').read())
 setup(name='MOCPy',
       version=__version__,
       description='MOC parsing and manipulation in Python',
-      author='Thomas Boch / Matthieu Baumann',
+      author='Thomas Boch, Matthieu Baumann',
       author_email='thomas.boch@astro.unistra.fr',
       license='BSD',
       url='https://github.com/cds-astro/mocpy',

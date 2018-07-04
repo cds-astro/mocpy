@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 import copy
+import numpy as np
+
 from .py23_compat import range
+from .utils import uniq2orderipix
 
 __author__ = "Thomas Boch"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -20,6 +23,11 @@ class IntervalSet:
         intervals = [] if intervals is None else intervals
         self._intervals = intervals
         self.__must_check_consistency = True
+
+    # TODO: from a Nx2 numpy array. To be removed lated
+    @classmethod
+    def from_numpy_array(cls, arr):
+        return cls(arr.tolist())
 
     def copy(self):
         """Make a copy."""
@@ -159,6 +167,75 @@ class IntervalSet:
          into a list of intervals"""
         return [(list_of_endpoints[i], list_of_endpoints[i + 1])
                 for i in range(0, len(list_of_endpoints) - 1, 2)]
+
+    @classmethod
+    def to_nuniq_interval_set(cls, orderipix_itv):
+        HPY_MAX_NORDER = 29
+
+        r2 = orderipix_itv.copy()
+        r3 = IntervalSet()
+        res = IntervalSet()
+
+        if r2.empty():
+            return res
+
+        order = 0
+        while not r2.empty():
+            shift = int(2 * (HPY_MAX_NORDER - order))
+            ofs = (int(1) << shift) - 1
+            ofs2 = int(1) << (2 * order + 2)
+
+            r3.clear()
+            for iv in r2.intervals:
+                a = (int(iv[0]) + ofs) >> shift
+                b = int(iv[1]) >> shift
+                r3.add((a << shift, b << shift))
+                res.add((a + ofs2, b + ofs2))
+
+            if not r3.empty():
+                r2 = r2.difference(r3)
+
+            order += 1
+
+        return res
+
+    @classmethod
+    def from_nuniq_interval_set(cls, nuniq_itv):
+        """
+        Convert a nuniq interval set to a order/ipix interval set
+
+        Parameters
+        ----------
+        nuniq_itv: `mocpy.interval_set.IntervalSet`
+            a interval set object containing nuniq numbers
+
+        Returns
+        -------
+        orderipix_itv: `mocpy.interval_set.IntervalSet`
+            An order/ipix interval set
+        """
+        orderipix_itv = IntervalSet()
+        rtmp = IntervalSet()
+        last_order = 0
+        HPY_MAX_NORDER = 29
+        intervals = nuniq_itv.intervals
+        diff_order = HPY_MAX_NORDER
+        shift_order = 2 * diff_order
+        for interval in intervals:
+            for j in range(interval[0], interval[1]):
+                order, i_pix = uniq2orderipix(j)
+
+                if order != last_order:
+                    orderipix_itv = orderipix_itv.union(rtmp)
+                    rtmp.clear()
+                    last_order = order
+                    diff_order = HPY_MAX_NORDER - order
+                    shift_order = 2 * diff_order
+
+                rtmp.add((i_pix << shift_order, (i_pix + 1) << shift_order))
+
+        orderipix_itv = orderipix_itv.union(rtmp)
+        return orderipix_itv
 
     @staticmethod
     def merge(a_intervals, b_intervals, op):

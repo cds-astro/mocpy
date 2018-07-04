@@ -9,7 +9,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from astropy.time import Time, TimeDelta
 from astropy.table import Table
 
-from .abstract_moc import AbstractMoc
+from .abstract_moc import AbstractMOC
 
 __author__ = "Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -18,7 +18,7 @@ __license__ = "BSD 3-Clause License"
 __email__ = "matthieu.baumann@astro.unistra.fr"
 
 
-class TimeMoc(AbstractMoc):
+class TimeMoc(AbstractMOC):
     """Multi-order Time Coverage.
 
     TODO: describe a bit more. Link to docs examples.
