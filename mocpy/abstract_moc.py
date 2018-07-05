@@ -49,8 +49,9 @@ class AbstractMOC:
         if not isinstance(another_moc, AbstractMOC):
             raise TypeError('Cannot compare an AbstractMOC with a {0}'.format(type(another_moc)))
 
-        result = (self._interval_set.intervals == another_moc._interval_set.intervals)
-        return result
+        self._ensure_consistency()
+        another_moc._ensure_consistency()
+        return self._interval_set == another_moc._interval_set
 
     @property
     def max_order(self):
@@ -145,17 +146,16 @@ class AbstractMOC:
         return self.__class__(complement_interval)
 
     def _complement_interval(self):
-        from .interval_set import IntervalSet
         res = IntervalSet()
 
-        interval_set = sorted(self._interval_set.intervals)
+        intervals_l = sorted(self._interval_set.intervals.tolist())
 
-        if interval_set[0][0] > 0:
-            res.add((0, interval_set[0][0]))
+        if intervals_l[0][0] > 0:
+            res.add((0, intervals_l[0][0]))
 
-        last = interval_set[0][1]
+        last = intervals_l[0][1]
 
-        for itv in interval_set[1:]:
+        for itv in intervals_l[1:]:
             res.add((last, itv[0]))
             last = itv[1]
 
@@ -197,6 +197,7 @@ class AbstractMOC:
     def from_interval_set(cls, interval_set):
         '''
         Create a MOC/TimeMoc from an `~mocpy.interval_set.IntervalSet` object (all intervals at deepest norder)
+        Create a MOC/TimeMoc from an `~mocpy.interval_set.IntervalSet` object (all intervals at deepest norder)
 
         Parameters
         ----------
@@ -229,17 +230,18 @@ class AbstractMOC:
             the MOC/TimeMoc object reflecting ``json_moc``.
 
         """
-        intervals = []
+        interval_set = IntervalSet()
+
         for order, pix_l in json_moc.items():
             pix_arr = np.array(pix_l)
             p1 = pix_arr
             p2 = pix_arr + 1
             shift = 2 * (AbstractMOC.HPY_MAX_NORDER - int(order))
 
-            itv_arr = np.array([p1 << shift, p2 << shift]).transpose()
-            intervals.extend(itv_arr.tolist())
+            itv_arr = np.vstack((p1 << shift, p2 << shift)).T
+            interval_set.add_numpy_arr(itv_arr)
 
-        return cls(IntervalSet(intervals))
+        return cls(interval_set)
 
     def uniq_pixels_iterator(self):
         """
@@ -250,7 +252,8 @@ class AbstractMOC:
         uniq :
             the NUNIQ HEALPix pixels iterator
         """
-        for uniq_iv in IntervalSet.to_nuniq_interval_set(self._interval_set).intervals:
+        intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set).intervals
+        for uniq_iv in intervals_uniq_l:
             for uniq in range(uniq_iv[0], uniq_iv[1]):
                 yield uniq
 
@@ -265,7 +268,7 @@ class AbstractMOC:
 
         Parameters
         ----------
-        path : str
+        filename : str
             the path to the moc fits file
 
         Returns
@@ -277,7 +280,7 @@ class AbstractMOC:
 
         intervals = np.vstack((table['UNIQ'], table['UNIQ']+1)).T
 
-        nuniq_interval_set = IntervalSet(intervals.tolist())
+        nuniq_interval_set = IntervalSet.from_numpy_array(intervals)
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
         return cls(interval_set)
 

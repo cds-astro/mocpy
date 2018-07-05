@@ -20,14 +20,14 @@ class IntervalSet:
     especially how things are stored.
     """
     def __init__(self, intervals=None):
-        intervals = [] if intervals is None else intervals
+        intervals = np.array([]) if intervals is None else intervals
         self._intervals = intervals
         self.__must_check_consistency = True
 
     # TODO: from a Nx2 numpy array. To be removed lated
     @classmethod
     def from_numpy_array(cls, arr):
-        return cls(arr.tolist())
+        return cls(arr)
 
     def copy(self):
         """Make a copy."""
@@ -39,8 +39,9 @@ class IntervalSet:
     def __eq__(self, another_is):
         if not isinstance(another_is, IntervalSet):
             raise TypeError
-        return self._intervals == another_is._intervals
+        return np.all(self._intervals == another_is._intervals)
 
+    """
     @property
     def max(self):
         sorted_intervals = sorted(self._intervals, key=lambda interval: interval[1])
@@ -50,12 +51,12 @@ class IntervalSet:
     def min(self):
         sorted_intervals = sorted(self._intervals, key=lambda interval: interval[0])
         return (sorted_intervals[0])[0]
-
+    """
     def clear(self):
         """
         Remove all entries
         """
-        self._intervals = []
+        self._intervals = np.array([])
         self.__must_check_consistency = False
 
     def empty(self):
@@ -63,13 +64,15 @@ class IntervalSet:
         Return True if the set is empty
         False otherwise
         """
-        return len(self._intervals) == 0
+        return self._intervals.size == 0
 
     @staticmethod
-    def merge_intervals(intervals):
+    def merge_intervals(intervals_arr):
         """
         Merge adjacent intervals
         """
+        intervals = intervals_arr.tolist()
+
         ret = []
         start = stop = None
         for itv in sorted(intervals):
@@ -89,7 +92,7 @@ class IntervalSet:
         if start is not None and stop is not None:
             ret.append((start, stop))
 
-        return ret
+        return np.asarray(ret)
 
     @property
     def intervals(self):
@@ -102,18 +105,24 @@ class IntervalSet:
 
         return self._intervals
 
+    def add_numpy_arr(self, np_arr):
+        self.__must_check_consistency = True
+        if self.empty():
+            self._intervals = np_arr
+            return
+        self._intervals = np.vstack((self._intervals, np_arr))
+
     def add(self, item):
         """
-        add a new item (integer or interval)
+        add a new item (i.e. interval)
         """
         self.__must_check_consistency = True
-        if isinstance(item, tuple):
-            if item[0] > item[1]:
-                return
-            self._intervals.append(item)
-
-        else:
-            self._intervals.append((item, item+1))
+        if item[0] > item[1]:
+            return
+        if self.empty():
+            self._intervals = np.array(item)
+            return
+        self._intervals = np.vstack((self._intervals, item))
 
     def union(self, another_is):
         """
@@ -151,23 +160,6 @@ class IntervalSet:
 
         return res
 
-    @staticmethod
-    def flatten(interval_set):
-        """Convert a list of intervals to a list of endpoints"""
-        res = []
-        for iv in interval_set:
-            res.append(iv[0])
-            res.append(iv[1])
-
-        return res
-
-    @staticmethod
-    def unflatten(list_of_endpoints):
-        """Convert a list of endpoints, with an optional terminating sentinel,
-         into a list of intervals"""
-        return [(list_of_endpoints[i], list_of_endpoints[i + 1])
-                for i in range(0, len(list_of_endpoints) - 1, 2)]
-
     @classmethod
     def to_nuniq_interval_set(cls, orderipix_itv):
         HPY_MAX_NORDER = 29
@@ -180,6 +172,7 @@ class IntervalSet:
             return res
 
         order = 0
+
         while not r2.empty():
             shift = int(2 * (HPY_MAX_NORDER - order))
             ofs = (int(1) << shift) - 1
@@ -240,8 +233,8 @@ class IntervalSet:
     @staticmethod
     def merge(a_intervals, b_intervals, op):
         """Merge two lists of intervals according to the boolean function op"""
-        a_endpoints = IntervalSet.flatten(a_intervals)
-        b_endpoints = IntervalSet.flatten(b_intervals)
+        a_endpoints = a_intervals.flatten().tolist()
+        b_endpoints = b_intervals.flatten().tolist()
 
         sentinel = max(a_endpoints[-1], b_endpoints[-1]) + 1
 
@@ -268,5 +261,5 @@ class IntervalSet:
 
             scan = min(a_endpoints[a_index], b_endpoints[b_index])
 
-        return IntervalSet.unflatten(res)
+        return np.asarray(res).reshape((-1, 2))
 

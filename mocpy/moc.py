@@ -78,11 +78,12 @@ class MOC(AbstractMOC):
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
 
-        neighbour_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_arr)
+        augmented_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_arr)
 
-        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
-        for pix in neighbour_pix_arr:
-            self._interval_set.add((pix * factor, (pix + 1) * factor))
+        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        intervals_arr = np.vstack((augmented_pix_arr << shift, (augmented_pix_arr + 1) << shift)).T
+
+        self._interval_set.add_numpy_arr(intervals_arr)
 
     def remove_neighbours(self):
         """
@@ -105,12 +106,12 @@ class MOC(AbstractMOC):
 
         bound_pix_arr = AbstractMOC._neighbour_pixels(hp, only_neighbour_arr)
 
-        result_pix_arr = np.setdiff1d(pix_arr, bound_pix_arr)
+        diminished_pix_arr = np.setdiff1d(pix_arr, bound_pix_arr)
 
-        factor = 4 ** (self.HPY_MAX_NORDER - self.max_order)
+        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        intervals_arr = np.vstack((diminished_pix_arr << shift, (diminished_pix_arr + 1) << shift)).T
         self._interval_set.clear()
-        for pix in result_pix_arr:
-            self._interval_set.add((pix * factor, (pix + 1) * factor))
+        self._interval_set = IntervalSet.from_numpy_array(intervals_arr)
 
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
