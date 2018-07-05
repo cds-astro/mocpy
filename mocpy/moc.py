@@ -83,7 +83,7 @@ class MOC(AbstractMOC):
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         intervals_arr = np.vstack((augmented_pix_arr << shift, (augmented_pix_arr + 1) << shift)).T
 
-        self._interval_set.add_numpy_arr(intervals_arr)
+        self._interval_set.union(IntervalSet.from_numpy_array(intervals_arr))
 
     def remove_neighbours(self):
         """
@@ -110,7 +110,6 @@ class MOC(AbstractMOC):
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         intervals_arr = np.vstack((diminished_pix_arr << shift, (diminished_pix_arr + 1) << shift)).T
-        self._interval_set.clear()
         self._interval_set = IntervalSet.from_numpy_array(intervals_arr)
 
     @classmethod
@@ -205,6 +204,9 @@ class MOC(AbstractMOC):
         """
         Create a `~mocpy.moc.MOC` object from a VizieR table
 
+        TODO already implemented in astroquery.cds (asking the MOCServer for an ID).
+        TODO a astroquery.cds.query_object(ID) should return a Dataset object containing the field ``moc_access_url``
+
         Parameters
         ----------
         table_id : str
@@ -231,6 +233,9 @@ class MOC(AbstractMOC):
         """
         Create a `~mocpy.moc.MOC` object from a given ivorn
 
+        TODO already implemented in astroquery.cds (asking the MOCServer for an ID).
+        TODO a astroquery.cds.query_object(ID) should return a Dataset object containing the field ``moc_access_url``
+
         Parameters
         ----------
         ivorn : str
@@ -253,6 +258,8 @@ class MOC(AbstractMOC):
     def from_url(cls, url):
         """
         Create a `~mocpy.moc.MOC` object from a given url
+
+        TODO : should be implemented in astroquery ?
 
         Parameters
         ----------
@@ -303,18 +310,21 @@ class MOC(AbstractMOC):
         nb_pix_filled = len(list(self.best_res_pixels_iterator()))
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
+    # TODO : move this in astroquery.Simbad.query_region
     def query_simbad(self, max_rows=10000):
         """
         query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
         """
         return self._query('SIMBAD', max_rows)
 
+    # TODO : move this in astroquery.Vizier.query_region
     def query_vizier_table(self, table_id, max_rows=10000):
         """
         query a VizieR table for sources in the coverage of the MOC instance
         """
         return self._query(table_id, max_rows)
 
+    # TODO : move this in astroquery
     def _query(self, resource_id, max_rows):
         """
         internal method to query Simbad or a VizieR table
@@ -365,7 +375,7 @@ class MOC(AbstractMOC):
         coord : str
             type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
             only ICRS coordinates are supported for the moment.
-            #TODO handle Galactic coordinates
+            TODO handle Galactic coordinates
         """
         from matplotlib.colors import LinearSegmentedColormap
         import matplotlib.pyplot as plt

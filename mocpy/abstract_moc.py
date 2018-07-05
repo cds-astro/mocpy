@@ -49,8 +49,6 @@ class AbstractMOC:
         if not isinstance(another_moc, AbstractMOC):
             raise TypeError('Cannot compare an AbstractMOC with a {0}'.format(type(another_moc)))
 
-        self._ensure_consistency()
-        another_moc._ensure_consistency()
         return self._interval_set == another_moc._interval_set
 
     @property
@@ -60,7 +58,7 @@ class AbstractMOC:
         """
         # TODO: cache value
         combo = int(0)
-        for iv in self._interval_set.intervals:
+        for iv in self._interval_set._intervals:
             combo |= iv[0] | iv[1]
 
         ret = AbstractMOC.HPY_MAX_NORDER - (utils.number_trailing_zeros(combo) // 2)
@@ -69,17 +67,18 @@ class AbstractMOC:
 
         return ret
 
+    """
     def _ensure_consistency(self):
-        """
+        '''
         Internal operation on the interval set of the mocpy object ensuring its consistency
 
         This private method is called when the user asks for :
         * plotting the moc
         * performing simple operations on it : intersection, union, difference of mocs
         * serializing the moc into json/fits format
-        """
+        '''
         self._interval_set.intervals
-
+    """
     def intersection(self, another_moc):
         """
         Intersection between self and moc
@@ -146,25 +145,24 @@ class AbstractMOC:
         return self.__class__(complement_interval)
 
     def _complement_interval(self):
-        res = IntervalSet()
-
-        intervals_l = sorted(self._interval_set.intervals.tolist())
+        res = []
+        intervals_l = sorted(self._interval_set._intervals.tolist())
 
         if intervals_l[0][0] > 0:
-            res.add((0, intervals_l[0][0]))
+            res.append((0, intervals_l[0][0]))
 
         last = intervals_l[0][1]
 
         for itv in intervals_l[1:]:
-            res.add((last, itv[0]))
+            res.append((last, itv[0]))
             last = itv[1]
 
         max_pix_order = self._get_max_pix()
 
         if last < max_pix_order:
-            res.add((last, max_pix_order))
+            res.append((last, max_pix_order))
 
-        return res
+        return IntervalSet.from_numpy_array(np.asarray(res))
 
     def _get_max_pix(self):
         pass
@@ -230,8 +228,7 @@ class AbstractMOC:
             the MOC/TimeMoc object reflecting ``json_moc``.
 
         """
-        interval_set = IntervalSet()
-
+        intervals_arr = np.array([])
         for order, pix_l in json_moc.items():
             pix_arr = np.array(pix_l)
             p1 = pix_arr
@@ -239,9 +236,12 @@ class AbstractMOC:
             shift = 2 * (AbstractMOC.HPY_MAX_NORDER - int(order))
 
             itv_arr = np.vstack((p1 << shift, p2 << shift)).T
-            interval_set.add_numpy_arr(itv_arr)
+            if intervals_arr.size == 0:
+                intervals_arr = itv_arr
+            else:
+                intervals_arr = np.vstack((intervals_arr, itv_arr))
 
-        return cls(interval_set)
+        return cls(IntervalSet.from_numpy_array(intervals_arr))
 
     def uniq_pixels_iterator(self):
         """
@@ -252,7 +252,7 @@ class AbstractMOC:
         uniq :
             the NUNIQ HEALPix pixels iterator
         """
-        intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set).intervals
+        intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set)._intervals
         for uniq_iv in intervals_uniq_l:
             for uniq in range(uniq_iv[0], uniq_iv[1]):
                 yield uniq
@@ -294,7 +294,7 @@ class AbstractMOC:
             the pixel iterator
         """
         factor = 4 ** (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        for iv in self._interval_set.intervals:
+        for iv in self._interval_set._intervals:
             for val in range(iv[0] // factor, iv[1] // factor):
                 yield val
 
@@ -430,8 +430,6 @@ class AbstractMOC:
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
 
-        self._ensure_consistency()
-
         uniq_l = []
         for uniq in self.uniq_pixels_iterator():
             uniq_l.append(uniq)
@@ -471,11 +469,11 @@ class AbstractMOC:
         mask = ~ofs
         adda = int(0)
         addb = ofs
-        iv_set = IntervalSet()
-        for iv in self._interval_set.intervals:
+        iv_set = []
+        for iv in self._interval_set._intervals:
             a = (iv[0] + adda) & mask
             b = (iv[1] + addb) & mask
             if b > a:
-                iv_set.add((a, b))
+                iv_set.append((a, b))
 
-        return self.__class__(iv_set)
+        return self.__class__(IntervalSet.from_numpy_array(np.asarray(iv_set)))

@@ -9,9 +9,11 @@ It allows creation, parsing and comparison of TMOCs.
 
 from .moc import MOC
 from .tmoc import TimeMoc
+from .interval_set import IntervalSet
 from .version import __version__
 
 __all__ = [
     'MOC',
     'TimeMoc',
+    'IntervalSet',
 ]

@@ -22,7 +22,7 @@ class IntervalSet:
     def __init__(self, intervals=None):
         intervals = np.array([]) if intervals is None else intervals
         self._intervals = intervals
-        self.__must_check_consistency = True
+        self._merge_intervals()
 
     # TODO: from a Nx2 numpy array. To be removed lated
     @classmethod
@@ -41,24 +41,6 @@ class IntervalSet:
             raise TypeError
         return np.all(self._intervals == another_is._intervals)
 
-    """
-    @property
-    def max(self):
-        sorted_intervals = sorted(self._intervals, key=lambda interval: interval[1])
-        return (sorted_intervals[-1])[1]
-
-    @property
-    def min(self):
-        sorted_intervals = sorted(self._intervals, key=lambda interval: interval[0])
-        return (sorted_intervals[0])[0]
-    """
-    def clear(self):
-        """
-        Remove all entries
-        """
-        self._intervals = np.array([])
-        self.__must_check_consistency = False
-
     def empty(self):
         """
         Return True if the set is empty
@@ -66,16 +48,14 @@ class IntervalSet:
         """
         return self._intervals.size == 0
 
-    @staticmethod
-    def merge_intervals(intervals_arr):
+    def _merge_intervals(self):
         """
         Merge adjacent intervals
         """
-        intervals = intervals_arr.tolist()
 
         ret = []
         start = stop = None
-        for itv in sorted(intervals):
+        for itv in sorted(self._intervals.tolist()):
             if start is None:
                 start, stop = itv
                 continue
@@ -92,37 +72,19 @@ class IntervalSet:
         if start is not None and stop is not None:
             ret.append((start, stop))
 
-        return np.asarray(ret)
+        self._intervals = np.asarray(ret)
 
-    @property
+    """@property
     def intervals(self):
-        """
+        '''
         return the sorted list of intervals (merged if needed)
-        """
+        '''
         if self.__must_check_consistency:
             self._intervals = IntervalSet.merge_intervals(self._intervals)
             self.__must_check_consistency = False
 
         return self._intervals
-
-    def add_numpy_arr(self, np_arr):
-        self.__must_check_consistency = True
-        if self.empty():
-            self._intervals = np_arr
-            return
-        self._intervals = np.vstack((self._intervals, np_arr))
-
-    def add(self, item):
-        """
-        add a new item (i.e. interval)
-        """
-        self.__must_check_consistency = True
-        if item[0] > item[1]:
-            return
-        if self.empty():
-            self._intervals = np.array(item)
-            return
-        self._intervals = np.vstack((self._intervals, item))
+    """
 
     def union(self, another_is):
         """
@@ -130,12 +92,17 @@ class IntervalSet:
         """
         res = IntervalSet()
         if self.empty():
-            res._intervals = another_is.intervals
+            another_is._merge_intervals()
+            res._intervals = another_is._intervals
         elif another_is.empty():
-            res._intervals = self.intervals
+            self._merge_intervals()
+            res._intervals = self._intervals
         else:
-            res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a or in_b)
+            self._merge_intervals()
+            another_is._merge_intervals()
+            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a or in_b)
 
+        # res has no overlapping intervals
         return res
 
     def difference(self, another_is):
@@ -144,9 +111,12 @@ class IntervalSet:
         """
         res = IntervalSet()
         if another_is.empty() or self.empty():
-            res._intervals = self.intervals
+            self._merge_intervals()
+            res._intervals = self._intervals
         else:
-            res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and not in_b)
+            self._merge_intervals()
+            another_is._merge_intervals()
+            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a and not in_b)
 
         return res
 
@@ -156,7 +126,9 @@ class IntervalSet:
         """
         res = IntervalSet()
         if not another_is.empty() and not self.empty():
-            res._intervals = IntervalSet.merge(self.intervals, another_is.intervals, lambda in_a, in_b: in_a and in_b)
+            self._merge_intervals()
+            another_is._merge_intervals()
+            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a and in_b)
 
         return res
 
@@ -165,32 +137,36 @@ class IntervalSet:
         HPY_MAX_NORDER = 29
 
         r2 = orderipix_itv.copy()
-        r3 = IntervalSet()
-        res = IntervalSet()
+        res = []
 
         if r2.empty():
             return res
 
         order = 0
-
         while not r2.empty():
             shift = int(2 * (HPY_MAX_NORDER - order))
             ofs = (int(1) << shift) - 1
             ofs2 = int(1) << (2 * order + 2)
 
-            r3.clear()
-            for iv in r2.intervals:
+            r4 = []
+            for iv in r2._intervals:
                 a = (int(iv[0]) + ofs) >> shift
                 b = int(iv[1]) >> shift
-                r3.add((a << shift, b << shift))
-                res.add((a + ofs2, b + ofs2))
 
-            if not r3.empty():
-                r2 = r2.difference(r3)
+                c = a << shift
+                d = b << shift
+                if d > c:
+                    r4.append((c, d))
+
+                res.append((a + ofs2, b + ofs2))
+
+            if len(r4) > 0:
+                r4_is = IntervalSet.from_numpy_array(np.asarray(r4))
+                r2 = r2.difference(r4_is)
 
             order += 1
 
-        return res
+        return IntervalSet.from_numpy_array(np.asarray(res))
 
     @classmethod
     def from_nuniq_interval_set(cls, nuniq_itv):
@@ -208,10 +184,12 @@ class IntervalSet:
             An order/ipix interval set
         """
         orderipix_itv = IntervalSet()
-        rtmp = IntervalSet()
+        # Appending a list is faster than appending a numpy array
+        # For these algorithms we append a list and create the interval set from the finished list
+        rtmp = []
         last_order = 0
         HPY_MAX_NORDER = 29
-        intervals = nuniq_itv.intervals
+        intervals = nuniq_itv._intervals
         diff_order = HPY_MAX_NORDER
         shift_order = 2 * diff_order
         for interval in intervals:
@@ -219,15 +197,15 @@ class IntervalSet:
                 order, i_pix = uniq2orderipix(j)
 
                 if order != last_order:
-                    orderipix_itv = orderipix_itv.union(rtmp)
-                    rtmp.clear()
+                    orderipix_itv = orderipix_itv.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
+                    rtmp = []
                     last_order = order
                     diff_order = HPY_MAX_NORDER - order
                     shift_order = 2 * diff_order
 
-                rtmp.add((i_pix << shift_order, (i_pix + 1) << shift_order))
+                rtmp.append((i_pix << shift_order, (i_pix + 1) << shift_order))
 
-        orderipix_itv = orderipix_itv.union(rtmp)
+        orderipix_itv = orderipix_itv.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
         return orderipix_itv
 
     @staticmethod
@@ -262,4 +240,3 @@ class IntervalSet:
             scan = min(a_endpoints[a_index], b_endpoints[b_index])
 
         return np.asarray(res).reshape((-1, 2))
-
