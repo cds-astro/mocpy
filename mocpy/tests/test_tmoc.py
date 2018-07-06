@@ -1,5 +1,3 @@
-import pytest
-
 from astropy.time import Time
 from ..tmoc import TimeMoc
 

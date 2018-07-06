@@ -14,23 +14,56 @@ __email__ = "thomas.boch@astro.unistra.fr"
 
 
 class IntervalSet:
-    """Manages a set of intervals.
+    """Internal data structure for representing a MOC using the NESTED numbering scheme.
 
-    TODO: describe this data structure,
-    especially how things are stored.
+    A MOC object is a set of HEALPix cells at different orders (tuple (ipix, order)).
+    MOC uses the NESTED numbering scheme and thus each HEALPix cell can be
+    stored as one interval : [ipix*4^(29-order), (ipix+1)*4^(29-order)[ - 29 being the maximum order of HEALPix cells
+    one can encode in a 64 bit signed integer. See the `MOC IVOA standard paper <http://www.ivoa.net/documents/MOC/>`__
+    for more explanations about how the NESTED numbering scheme works (i.e. how it is considered as hierarchical
+    numbering scheme).
+
+    The key point is that a MOC can be represented by only one set of intervals (property of the NESTED scheme) that we
+    are calling a consistent form i.e. such that it remains no overlapping intervals.
+    An IntervalSet object must therefore keep its internal structure as a consistent set of intervals.
+    For simplicity, the consistency step (i.e. the merge of the overlapping intervals) is done only once
+    in the constructor. As there are no ways of modifying an IntervalSet object (e.g. add new HEALPix cells) then we are
+    sure an IntervalSet is consistent when manipulating it for intersecting MOCs, doing their union etc...
     """
-    def __init__(self, intervals=None):
+    HPY_MAX_ORDER = 29
+
+    def __init__(self, intervals=None, make_consistent=True):
+        """
+        IntervalSet constructor.
+
+        The merging step of the overlapping intervals is done here.
+
+        Parameters
+        ----------
+        intervals : `~numpy.ndarray`
+            a N x 2 numpy array representing the set of intervals.
+        make_consistent : bool, optional
+            True by default. Remove the overlapping intervals that makes
+            a valid MOC (i.e. can be plot, serialized, manipulated).
+        """
         intervals = np.array([]) if intervals is None else intervals
         self._intervals = intervals
-        self._merge_intervals()
+        if make_consistent:
+            self._merge_intervals()
 
-    # TODO: from a Nx2 numpy array. To be removed lated
     @classmethod
     def from_numpy_array(cls, arr):
         return cls(arr)
 
     def copy(self):
-        """Make a copy."""
+        """
+        Deepcopy of self.
+
+        Returns
+        -------
+        interval : `IntervalSet`
+            a copy of self
+        """
         return copy.deepcopy(self)
 
     def __repr__(self):
@@ -43,16 +76,16 @@ class IntervalSet:
 
     def empty(self):
         """
-        Return True if the set is empty
-        False otherwise
+        Return True if the set is empty False otherwise
         """
         return self._intervals.size == 0
 
     def _merge_intervals(self):
         """
-        Merge adjacent intervals
-        """
+        Merge overlapping intervals.
 
+        This method is called only once in the constructor.
+        """
         ret = []
         start = stop = None
         for itv in sorted(self._intervals.tolist()):
@@ -74,69 +107,93 @@ class IntervalSet:
 
         self._intervals = np.asarray(ret)
 
-    """@property
-    def intervals(self):
-        '''
-        return the sorted list of intervals (merged if needed)
-        '''
-        if self.__must_check_consistency:
-            self._intervals = IntervalSet.merge_intervals(self._intervals)
-            self.__must_check_consistency = False
-
-        return self._intervals
-    """
-
     def union(self, another_is):
         """
-        return the union between 2 IntervalSet
+        Return the union between self and ``another_is``.
+
+        Parameters
+        ----------
+        another_is : `IntervalSet`
+            an IntervalSet object.
+        Returns
+        -------
+        interval : `IntervalSet`
+            the union of self with ``another_is``.
         """
         res = IntervalSet()
         if self.empty():
-            another_is._merge_intervals()
             res._intervals = another_is._intervals
         elif another_is.empty():
-            self._merge_intervals()
             res._intervals = self._intervals
         else:
-            self._merge_intervals()
-            another_is._merge_intervals()
-            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a or in_b)
+            res._intervals = IntervalSet.merge(self._intervals,
+                                               another_is._intervals,
+                                               lambda in_a, in_b: in_a or in_b)
 
         # res has no overlapping intervals
         return res
 
     def difference(self, another_is):
         """
-        return the difference between the current instance and another_is
+        Return the difference between self and ``another_is``.
+
+        Parameters
+        ----------
+        another_is : `IntervalSet`
+            an IntervalSet object.
+        Returns
+        -------
+        interval : `IntervalSet`
+            the difference of self with ``another_is``.
         """
         res = IntervalSet()
         if another_is.empty() or self.empty():
-            self._merge_intervals()
             res._intervals = self._intervals
         else:
-            self._merge_intervals()
-            another_is._merge_intervals()
-            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a and not in_b)
+            res._intervals = IntervalSet.merge(self._intervals,
+                                               another_is._intervals,
+                                               lambda in_a, in_b: in_a and not in_b)
 
         return res
 
     def intersection(self, another_is):
         """
-        return the intersection between the current instance and another_is
+        Return the intersection between self and ``another_is``.
+
+        Parameters
+        ----------
+        another_is : `IntervalSet`
+            an IntervalSet object.
+        Returns
+        -------
+        interval : `IntervalSet`
+            the intersection of self with ``another_is``.
         """
         res = IntervalSet()
         if not another_is.empty() and not self.empty():
-            self._merge_intervals()
-            another_is._merge_intervals()
-            res._intervals = IntervalSet.merge(self._intervals, another_is._intervals, lambda in_a, in_b: in_a and in_b)
+            res._intervals = IntervalSet.merge(self._intervals,
+                                               another_is._intervals,
+                                               lambda in_a, in_b: in_a and in_b)
 
         return res
 
     @classmethod
-    def to_nuniq_interval_set(cls, orderipix_itv):
-        HPY_MAX_NORDER = 29
+    def to_nuniq_interval_set(cls, nested_is):
+        """
+        Convert an IntervalSet using the NESTED numbering scheme to an IntervalSet containing UNIQ numbers for HEALPix
+        cells.
 
-        r2 = orderipix_itv.copy()
+        Parameters
+        ----------
+        nested_is : `IntervalSet`
+            IntervalSet object storing HEALPix cells as [ipix*4^(29-order), (ipix+1)*4^(29-order)[ intervals.
+
+        Returns
+        -------
+        interval : `IntervalSet`
+            IntervalSet object storing HEALPix cells as [ipix + 4*4^(order), ipix+1 + 4*4^(order)[ intervals.
+        """
+        r2 = nested_is.copy()
         res = []
 
         if r2.empty():
@@ -144,7 +201,7 @@ class IntervalSet:
 
         order = 0
         while not r2.empty():
-            shift = int(2 * (HPY_MAX_NORDER - order))
+            shift = int(2 * (IntervalSet.HPY_MAX_ORDER - order))
             ofs = (int(1) << shift) - 1
             ofs2 = int(1) << (2 * order + 2)
 
@@ -169,48 +226,71 @@ class IntervalSet:
         return IntervalSet.from_numpy_array(np.asarray(res))
 
     @classmethod
-    def from_nuniq_interval_set(cls, nuniq_itv):
+    def from_nuniq_interval_set(cls, nuniq_is):
         """
-        Convert a nuniq interval set to a order/ipix interval set
+        Convert an IntervalSet containing NUNIQ intervals to an IntervalSet representing HEALPix
+        cells following the NESTED numbering scheme.
 
         Parameters
         ----------
-        nuniq_itv: `mocpy.interval_set.IntervalSet`
-            a interval set object containing nuniq numbers
+        nuniq_is : `IntervalSet`
+            IntervalSet object storing HEALPix cells as [ipix + 4*4^(order), ipix+1 + 4*4^(order)[ intervals.
 
         Returns
         -------
-        orderipix_itv: `mocpy.interval_set.IntervalSet`
-            An order/ipix interval set
+        interval : `IntervalSet`
+            IntervalSet object storing HEALPix cells as [ipix*4^(29-order), (ipix+1)*4^(29-order)[ intervals.
         """
-        orderipix_itv = IntervalSet()
+        nested_is = IntervalSet()
         # Appending a list is faster than appending a numpy array
         # For these algorithms we append a list and create the interval set from the finished list
         rtmp = []
         last_order = 0
-        HPY_MAX_NORDER = 29
-        intervals = nuniq_itv._intervals
-        diff_order = HPY_MAX_NORDER
+        intervals = nuniq_is._intervals
+        diff_order = IntervalSet.HPY_MAX_ORDER
         shift_order = 2 * diff_order
         for interval in intervals:
             for j in range(interval[0], interval[1]):
                 order, i_pix = uniq2orderipix(j)
 
                 if order != last_order:
-                    orderipix_itv = orderipix_itv.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
+                    nested_is = nested_is.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
                     rtmp = []
                     last_order = order
-                    diff_order = HPY_MAX_NORDER - order
+                    diff_order = IntervalSet.HPY_MAX_ORDER - order
                     shift_order = 2 * diff_order
 
                 rtmp.append((i_pix << shift_order, (i_pix + 1) << shift_order))
 
-        orderipix_itv = orderipix_itv.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
-        return orderipix_itv
+        nested_is = nested_is.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
+        return nested_is
 
     @staticmethod
     def merge(a_intervals, b_intervals, op):
-        """Merge two lists of intervals according to the boolean function op"""
+        """
+        Merge two lists of intervals according to the boolean function op
+
+        ``a_intervals`` and ``b_intervals`` need to be sorted and consistent (no overlapping intervals).
+        This operation keeps the resulting interval set consistent.
+
+        Parameters
+        ----------
+        a_intervals : `~numpy.ndarray`
+            A sorted merged list of intervals represented as a N x 2 numpy array
+        b_intervals : `~numpy.ndarray`
+            A sorted merged list of intervals represented as a N x 2 numpy array
+        op : `function`
+            Lambda function taking two params and returning the result of the operation between
+            these two params.
+            Exemple : lambda in_a, in_b: in_a and in_b describes the intersection of ``a_intervals`` and
+            ``b_intervals`` whereas lambda in_a, in_b: in_a or in_b describes the union of ``a_intervals`` and
+            ``b_intervals``.
+
+        Returns
+        -------
+        array : `numpy.ndarray`
+            a N x 2 numpy containing intervals resulting from the op between ``a_intervals`` and ``b_intervals``.
+        """
         a_endpoints = a_intervals.flatten().tolist()
         b_endpoints = b_intervals.flatten().tolist()
 
