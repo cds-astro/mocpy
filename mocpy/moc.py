@@ -32,6 +32,10 @@ class MOC(AbstractMOC):
     VIZ_TABLE_MOC_ROOT_URL = ''
     VIZ_CAT_MOC_ROOT_URL = ''
 
+    def __init__(self, interval_set=None):
+        super(MOC, self).__init__(interval_set)
+        self._fits_header_keywords = {'COORDSYS': ('C', 'reference frame (C=ICRS)')}
+
     def contains(self, ra, dec, keep_inside=True):
         """
         Get a mask array (e.g. a numpy boolean array) of positions being inside (or outside) the
@@ -73,7 +77,7 @@ class MOC(AbstractMOC):
            located at the border of the MOC.
         4. This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
         """
-        pix_arr = np.array(list(self.best_res_pixels_iterator()))
+        pix_arr = np.array(list(self._best_res_pixels_iterator()))
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
@@ -97,7 +101,7 @@ class MOC(AbstractMOC):
         4. Same as step 2 to get the HEALPix neighbors of the last computed array.
         5. The difference between the original MOC HEALPix array and this one gives a new MOC whose borders are removed.
         """
-        pix_arr = np.array(list(self.best_res_pixels_iterator()))
+        pix_arr = np.array(list(self._best_res_pixels_iterator()))
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
@@ -307,7 +311,7 @@ class MOC(AbstractMOC):
         """
         return the sky fraction (between 0 and 1) covered by the MOC
         """
-        nb_pix_filled = len(list(self.best_res_pixels_iterator()))
+        nb_pix_filled = len(list(self._best_res_pixels_iterator()))
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     # TODO : move this in astroquery.Simbad.query_region
@@ -359,9 +363,6 @@ class MOC(AbstractMOC):
 
         return table
 
-    def add_fits_header(self, tbhdu):
-        tbhdu.header['COORDSYS'] = ('C', 'reference frame (C=ICRS)')
-
     def plot(self, title='MOC', coord='C'):
         """
         Plot the MOC object in a mollweide view
@@ -394,7 +395,7 @@ class MOC(AbstractMOC):
         lon_rad, lat_rad = np.meshgrid(x, y)
 
         m = np.zeros(nside2npix(2 ** plotted_moc.max_order))
-        for val in plotted_moc.best_res_pixels_iterator():
+        for val in plotted_moc._best_res_pixels_iterator():
             m[val] = 1
 
         hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())

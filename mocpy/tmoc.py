@@ -27,6 +27,10 @@ class TimeMOC(AbstractMOC):
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
+    def __init__(self, interval_set=None):
+        super(TimeMOC, self).__init__(interval_set)
+        self._fits_header_keywords = {'TIMESYS': ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')}
+
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
         """
@@ -89,8 +93,8 @@ class TimeMOC(AbstractMOC):
         time_delta = 1 << (2*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = max(intervals_arr[:, 0] - time_delta, 0)
-        intervals_arr[:, 1] = min(intervals_arr[:, 1] + time_delta, (1 << 58) - 1)
+        intervals_arr[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, 0)
+        intervals_arr[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, (1 << 58) - 1)
 
         self._interval_set = IntervalSet(intervals_arr)
 
@@ -102,8 +106,8 @@ class TimeMOC(AbstractMOC):
         time_delta = 1 << (2*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = min(intervals_arr[:, 0] + time_delta, (1 << 58) - 1)
-        intervals_arr[:, 1] = max(intervals_arr[:, 1] - time_delta, 0)
+        intervals_arr[:, 0] = np.minimum(intervals_arr[:, 0] + time_delta, (1 << 58) - 1)
+        intervals_arr[:, 1] = np.maximum(intervals_arr[:, 1] - time_delta, 0)
 
         good_intervals = intervals_arr[:, 1] > intervals_arr[:, 0]
 
@@ -301,15 +305,25 @@ class TimeMOC(AbstractMOC):
 
     def contains(self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME):
         """
+        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the
+        TMOC instance.
 
         Parameters
         ----------
-        times
-        keep_inside
+        times : `astropy.time.Time`
+            astropy times to check whether they are contained in the TMOC or not.
+        keep_inside : bool, optional
+            True by default. If so the filtered table contains only observations that are located the MOC.
+            If ``keep_inside`` is False, the filtered table contains all observations lying outside the MOC.
+        delta_t : `astropy.time.TimeDelta`, optional
+            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+            is able to discriminate two observations separated by ``delta_t``).
 
         Returns
         -------
-
+        array : `~numpy.darray`
+            A mask boolean array
         """
         # the requested order for filtering the astropy observations table is more precise than the order
         # of the TimeMoc object
@@ -326,7 +340,7 @@ class TimeMOC(AbstractMOC):
         pix_arr = (times.jd * TimeMOC.DAY_MICRO_SEC)
         pix_arr = pix_arr.astype(int)
 
-        intervals_arr = np.array(rough_tmoc._interval_set._intervals)
+        intervals_arr = rough_tmoc._interval_set._intervals
         inf_arr = np.vstack([pix_arr[i] >= intervals_arr[:, 0] for i in range(pix_arr.shape[0])])
         sup_arr = np.vstack([pix_arr[i] <= intervals_arr[:, 1] for i in range(pix_arr.shape[0])])
 
@@ -338,19 +352,6 @@ class TimeMOC(AbstractMOC):
             filtered_rows = np.all(res, axis=1)
 
         return filtered_rows
-
-    def add_fits_header(self, tbhdu):
-        """
-        Add TIMESYS to the header of the fits describing the TimeMoc object
-
-        Parameters
-        ----------
-        tbhdu : `~astropy.fits.BinTableHDU`
-            fits HDU binary table
-
-        """
-
-        tbhdu.header['TIMESYS'] = ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')
 
     @staticmethod
     def order_to_time_resolution(order):

@@ -27,6 +27,8 @@ class AbstractMOC:
     def __init__(self, interval_set=None):
         interval = IntervalSet() if interval_set is None else interval_set
         self._interval_set = interval
+        # Must be overridden in subclasses
+        self._fits_header_keywords = None
 
     def __repr__(self):
         return self._interval_set.__repr__()
@@ -67,18 +69,6 @@ class AbstractMOC:
 
         return ret
 
-    """
-    def _ensure_consistency(self):
-        '''
-        Internal operation on the interval set of the mocpy object ensuring its consistency
-
-        This private method is called when the user asks for :
-        * plotting the moc
-        * performing simple operations on it : intersection, union, difference of mocs
-        * serializing the moc into json/fits format
-        '''
-        self._interval_set.intervals
-    """
     def intersection(self, another_moc, *args):
         """
         Intersection between self and other mocs.
@@ -200,31 +190,6 @@ class AbstractMOC:
         # Remove negative pixel values returned by `~astropy_healpix.HEALPix.neighbours`
         return neighbour_pix_arr[np.where(neighbour_pix_arr >= 0)]
 
-    """
-    IntervalSet should not be used by any user because it is the internal structure
-    of MOCs.
-
-    @classmethod
-    def from_interval_set(cls, interval_set):
-        '''
-        Create a MOC/TimeMoc from an `~mocpy.interval_set.IntervalSet` object (all intervals at deepest norder)
-        Create a MOC/TimeMoc from an `~mocpy.interval_set.IntervalSet` object (all intervals at deepest norder)
-
-        Parameters
-        ----------
-        interval_set : `~mocpy.interval_set.IntervalSet`
-            a set of intervals representing a MOC/TimeMoc
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
-            the MOC/TimeMoc object reflecting ``interval_set``.
-        '''
-        interval_set
-        moc = cls(interval_set)
-        return moc
-    """
-
     @classmethod
     def from_json(cls, json_moc):
         """
@@ -256,7 +221,7 @@ class AbstractMOC:
 
         return cls(IntervalSet.from_numpy_array(intervals_arr))
 
-    def uniq_pixels_iterator(self):
+    def _uniq_pixels_iterator(self):
         """
         Generator giving the NUNIQ HEALPix pixels of the Moc/TimeMoc
 
@@ -297,7 +262,7 @@ class AbstractMOC:
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
         return cls(interval_set)
 
-    def best_res_pixels_iterator(self):
+    def _best_res_pixels_iterator(self):
         """
         Generator giving the pixels at the max order
 
@@ -331,22 +296,13 @@ class AbstractMOC:
         n_side = 2 ** max_order
 
         result = np.zeros(nside2npix(n_side), dtype=bool)
-        for val in self.best_res_pixels_iterator():
+        for val in self._best_res_pixels_iterator():
             result[val] = True
 
         if not keep_inside:
             result = np.logical_not(result)
 
         return result
-
-    def add_fits_header(self, tbhdu):
-        """
-        This method must be implemented in each class derived from AbstractMoc
-
-        tbhdu : `~astropy.fits.BinTableHDU`
-            fits HDU binary table
-        """
-        pass
 
     @staticmethod
     def _to_json(uniq_arr):
@@ -404,7 +360,7 @@ class AbstractMOC:
             fits.ColDefs([fits.Column(name='UNIQ', format=fits_format, array=uniq_arr)]))
         tbhdu.header['PIXTYPE'] = 'HEALPIX'
         tbhdu.header['ORDERING'] = 'NUNIQ'
-        self.add_fits_header(tbhdu)
+        tbhdu.header.update(self._fits_header_keywords)
         tbhdu.header['MOCORDER'] = moc_order
         tbhdu.header['MOCTOOL'] = 'MOCPy'
         if optional_kw_dict:
@@ -444,7 +400,7 @@ class AbstractMOC:
             raise ValueError('format should be one of %s' % (str(formats)))
 
         uniq_l = []
-        for uniq in self.uniq_pixels_iterator():
+        for uniq in self._uniq_pixels_iterator():
             uniq_l.append(uniq)
 
         uniq_arr = np.array(uniq_l)

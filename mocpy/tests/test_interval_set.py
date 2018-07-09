@@ -67,13 +67,13 @@ def test_from_to_interval_set(isets2):
     ) == isets2['nested1']
 
 
-def test_min(isets):
+def test_interval_set_min(isets):
     assert isets['a'].min == 27
     assert isets['b'].min == 9
     assert isets['a'].union(isets['b']).min == 9
 
 
-def test_max(isets):
+def test_interval_set_max(isets):
     assert isets['a'].max == 126
     assert isets['b'].max == 105
     assert isets['a'].union(isets['b']).max == 126
