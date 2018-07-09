@@ -6,7 +6,6 @@ import numpy as np
 
 from astropy.io import fits
 from astropy.table import Table
-from astropy_healpix.healpy import ring2nest, nside2npix
 
 from .interval_set import IntervalSet
 from . import utils
@@ -261,48 +260,6 @@ class AbstractMOC:
         nuniq_interval_set = IntervalSet.from_numpy_array(intervals)
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
         return cls(interval_set)
-
-    def _best_res_pixels_iterator(self):
-        """
-        Generator giving the pixels at the max order
-
-        Returns
-        -------
-        val :
-            the pixel iterator
-        """
-        factor = 4 ** (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        for iv in self._interval_set._intervals:
-            for val in range(iv[0] // factor, iv[1] // factor):
-                yield val
-
-    def _get_max_order_pix(self, keep_inside):
-        """
-        Get a boolean numpy array of size the number of pix in the max_order of the MOC object
-        The ith element of this array equals to True if the corresponding pix is in the MOC for this order
-        If it is not, the element is set to False
-
-        Parameters
-        ----------
-        keep_inside : bool
-            ``keep_inside`` boolean value is associated with pix that are in the MOC
-
-        Returns
-        -------
-        result : `~numpy.ndarray`
-            boolean array telling which pix at the max_order are in the MOC
-        """
-        max_order = self.max_order
-        n_side = 2 ** max_order
-
-        result = np.zeros(nside2npix(n_side), dtype=bool)
-        for val in self._best_res_pixels_iterator():
-            result[val] = True
-
-        if not keep_inside:
-            result = np.logical_not(result)
-
-        return result
 
     @staticmethod
     def _to_json(uniq_arr):

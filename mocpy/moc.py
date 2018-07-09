@@ -29,12 +29,27 @@ class MOC(AbstractMOC):
 
     TODO: describe a bit more. Link to docs examples.
     """
-    VIZ_TABLE_MOC_ROOT_URL = ''
-    VIZ_CAT_MOC_ROOT_URL = ''
 
     def __init__(self, interval_set=None):
         super(MOC, self).__init__(interval_set)
         self._fits_header_keywords = {'COORDSYS': ('C', 'reference frame (C=ICRS)')}
+
+    def _best_res_pixels(self):
+        """
+        Get a numpy array of all the HEALPix indexes contained in the MOC at its max order.
+
+        Returns
+        -------
+        array : `numpy.ndarray`
+            the array of HEALPix at ``max_order``
+        """
+        factor = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        pix_l = []
+        for iv in self._interval_set._intervals:
+            for val in range(iv[0] >> factor, iv[1] >> factor):
+                pix_l.append(val)
+
+        return np.asarray(pix_l)
 
     def contains(self, ra, dec, keep_inside=True):
         """
@@ -57,7 +72,15 @@ class MOC(AbstractMOC):
         array : `~numpy.darray`
             A mask boolean array
         """
-        m = self._get_max_order_pix(keep_inside=keep_inside)
+        max_order = self.max_order
+        m = np.zeros(nside2npix(1 << max_order), dtype=bool)
+
+        pix_id_arr = self._best_res_pixels()
+        m[pix_id_arr] = True
+
+        if not keep_inside:
+            m = np.logical_not(m)
+
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         pix_arr = hp.lonlat_to_healpix(ra, dec)
 
@@ -76,18 +99,24 @@ class MOC(AbstractMOC):
         3. Compute the difference between the second and the first HEALPix array to get only the neighboring pixels
            located at the border of the MOC.
         4. This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            self
         """
-        pix_arr = np.array(list(self._best_res_pixels_iterator()))
+        pix_id_arr = self._best_res_pixels()
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
+        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_id_arr)
 
-        augmented_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_arr)
+        augmented_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_id_arr)
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         intervals_arr = np.vstack((augmented_pix_arr << shift, (augmented_pix_arr + 1) << shift)).T
 
         self._interval_set = self._interval_set.union(IntervalSet.from_numpy_array(intervals_arr))
+        return self
 
     def remove_neighbours(self):
         """
@@ -100,21 +129,27 @@ class MOC(AbstractMOC):
            located at the border of the MOC.
         4. Same as step 2 to get the HEALPix neighbors of the last computed array.
         5. The difference between the original MOC HEALPix array and this one gives a new MOC whose borders are removed.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            self
         """
-        pix_arr = np.array(list(self._best_res_pixels_iterator()))
+        pix_id_arr = self._best_res_pixels()
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_arr)
+        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_id_arr)
 
-        only_neighbour_arr = np.setxor1d(neighbour_pix_arr, pix_arr)
+        only_neighbour_arr = np.setxor1d(neighbour_pix_arr, pix_id_arr)
 
         bound_pix_arr = AbstractMOC._neighbour_pixels(hp, only_neighbour_arr)
 
-        diminished_pix_arr = np.setdiff1d(pix_arr, bound_pix_arr)
+        diminished_pix_arr = np.setdiff1d(pix_id_arr, bound_pix_arr)
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         intervals_arr = np.vstack((diminished_pix_arr << shift, (diminished_pix_arr + 1) << shift)).T
         self._interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        return self
 
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
@@ -311,7 +346,8 @@ class MOC(AbstractMOC):
         """
         return the sky fraction (between 0 and 1) covered by the MOC
         """
-        nb_pix_filled = len(list(self._best_res_pixels_iterator()))
+        pix_id_arr = self._best_res_pixels()
+        nb_pix_filled = pix_id_arr.size
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     # TODO : move this in astroquery.Simbad.query_region
@@ -394,9 +430,9 @@ class MOC(AbstractMOC):
         y = np.arange(-np.pi/2, np.pi/2, delta)
         lon_rad, lat_rad = np.meshgrid(x, y)
 
-        m = np.zeros(nside2npix(2 ** plotted_moc.max_order))
-        for val in plotted_moc._best_res_pixels_iterator():
-            m[val] = 1
+        pix_id_arr = plotted_moc._best_res_pixels()
+        m = np.zeros(nside2npix(1 << plotted_moc.max_order))
+        m[pix_id_arr] = 1
 
         hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
 
