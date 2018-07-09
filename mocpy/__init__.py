@@ -8,10 +8,10 @@ It allows creation, parsing and comparison of TMOCs.
 """
 
 from .moc import MOC
-from .tmoc import TimeMoc
+from .tmoc import TimeMOC
 from .version import __version__
 
 __all__ = [
     'MOC',
-    'TimeMoc',
+    'TimeMOC',
 ]

@@ -18,9 +18,9 @@ class IntervalSet:
 
     A MOC object is a set of HEALPix cells at different orders (tuple (ipix, order)).
     MOC uses the NESTED numbering scheme and thus each HEALPix cell can be
-    stored as one interval : [ipix*4^(29-order), (ipix+1)*4^(29-order)[ - 29 being the maximum order of HEALPix cells
+    stored as one interval : [ipix*4^(29-order), (ipix+1)*4^(29-order)] - 29 being the maximum order of HEALPix cells
     one can encode in a 64 bit signed integer. See the `MOC IVOA standard paper <http://www.ivoa.net/documents/MOC/>`__
-    for more explanations about how the NESTED numbering scheme works (i.e. how it is considered as hierarchical
+    for more explanations about how the NESTED numbering scheme works (i.e. how it is considered as a hierarchical
     numbering scheme).
 
     The key point is that a MOC can be represented by only one set of intervals (property of the NESTED scheme) that we
@@ -70,9 +70,28 @@ class IntervalSet:
         return "{0}".format(self._intervals)
 
     def __eq__(self, another_is):
-        if not isinstance(another_is, IntervalSet):
-            raise TypeError
+        """
+        Equality operator override
+
+        Parameters
+        ----------
+        another_is : `IntervalSet`
+            IntervalSet object at the right of the equal operator
+
+        Returns
+        -------
+        is_equal : bool
+            boolean telling if self and ``another_is`` are equal or not.
+        """
         return np.all(self._intervals == another_is._intervals)
+
+    @property
+    def min(self):
+        return self._intervals.min()
+
+    @property
+    def max(self):
+        return self._intervals.max()
 
     def empty(self):
         """
@@ -120,18 +139,17 @@ class IntervalSet:
         interval : `IntervalSet`
             the union of self with ``another_is``.
         """
-        res = IntervalSet()
-        if self.empty():
-            res._intervals = another_is._intervals
-        elif another_is.empty():
-            res._intervals = self._intervals
+        result = IntervalSet()
+        if another_is.empty():
+            result._intervals = self._intervals
+        elif self.empty():
+            result._intervals = another_is._intervals
         else:
-            res._intervals = IntervalSet.merge(self._intervals,
-                                               another_is._intervals,
-                                               lambda in_a, in_b: in_a or in_b)
-
-        # res has no overlapping intervals
-        return res
+            # res has no overlapping intervals
+            result._intervals = IntervalSet.merge(self._intervals,
+                                                  another_is._intervals,
+                                                  lambda in_a, in_b: in_a or in_b)
+        return result
 
     def difference(self, another_is):
         """
@@ -146,15 +164,14 @@ class IntervalSet:
         interval : `IntervalSet`
             the difference of self with ``another_is``.
         """
-        res = IntervalSet()
+        result = IntervalSet()
         if another_is.empty() or self.empty():
-            res._intervals = self._intervals
+            result._intervals = self._intervals
         else:
-            res._intervals = IntervalSet.merge(self._intervals,
-                                               another_is._intervals,
-                                               lambda in_a, in_b: in_a and not in_b)
-
-        return res
+            result._intervals = IntervalSet.merge(self._intervals,
+                                                  another_is._intervals,
+                                                  lambda in_a, in_b: in_a and not in_b)
+        return result
 
     def intersection(self, another_is):
         """
@@ -169,13 +186,12 @@ class IntervalSet:
         interval : `IntervalSet`
             the intersection of self with ``another_is``.
         """
-        res = IntervalSet()
+        result = IntervalSet()
         if not another_is.empty() and not self.empty():
-            res._intervals = IntervalSet.merge(self._intervals,
-                                               another_is._intervals,
-                                               lambda in_a, in_b: in_a and in_b)
-
-        return res
+            result._intervals = IntervalSet.merge(self._intervals,
+                                                  another_is._intervals,
+                                                  lambda in_a, in_b: in_a and in_b)
+        return result
 
     @classmethod
     def to_nuniq_interval_set(cls, nested_is):
@@ -197,7 +213,7 @@ class IntervalSet:
         res = []
 
         if r2.empty():
-            return res
+            return IntervalSet()
 
         order = 0
         while not r2.empty():
@@ -214,8 +230,7 @@ class IntervalSet:
                 d = b << shift
                 if d > c:
                     r4.append((c, d))
-
-                res.append((a + ofs2, b + ofs2))
+                    res.append((a + ofs2, b + ofs2))
 
             if len(r4) > 0:
                 r4_is = IntervalSet.from_numpy_array(np.asarray(r4))

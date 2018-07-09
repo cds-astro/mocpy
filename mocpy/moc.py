@@ -83,7 +83,7 @@ class MOC(AbstractMOC):
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         intervals_arr = np.vstack((augmented_pix_arr << shift, (augmented_pix_arr + 1) << shift)).T
 
-        self._interval_set.union(IntervalSet.from_numpy_array(intervals_arr))
+        self._interval_set = self._interval_set.union(IntervalSet.from_numpy_array(intervals_arr))
 
     def remove_neighbours(self):
         """

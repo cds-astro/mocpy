@@ -79,58 +79,71 @@ class AbstractMOC:
         '''
         self._interval_set.intervals
     """
-    def intersection(self, another_moc):
+    def intersection(self, another_moc, *args):
         """
-        Intersection between self and moc
+        Intersection between self and other mocs.
 
         Parameters
         ----------
-        another_moc : `mocpy.abstract_moc.AbstractMOC`
+        another_moc : `~mocpy.abstract_moc.AbstractMOC`
             the MOC/TimeMoc used for performing the intersection with self
+        args : `~mocpy.abstract_moc.AbstractMOC`
+            other MOCs
 
         Returns
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
             MOC object whose interval set corresponds to : self & ``moc``
         """
-        iv_set_intersection = self._interval_set.intersection(another_moc._interval_set)
-        result = self.__class__(iv_set_intersection)
+        interval_set = self._interval_set.intersection(another_moc._interval_set)
+        for moc in args:
+            interval_set = interval_set.intersection(moc._interval_set)
 
-        return result
+        return self.__class__(interval_set)
 
-    def union(self, another_moc):
+    def union(self, another_moc, *args):
         """
-        Union between self and moc
+        Union between self and other mocs.
 
         Parameters
         ----------
         another_moc : `mocpy.abstract_moc.AbstractMOC`
             the MOC/TimeMoc to bind to self
+        args : `~mocpy.abstract_moc.AbstractMOC`
+            other MOCs
 
         Returns
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
             MOC object whose interval set corresponds to : self | ``moc``
         """
-        iv_set_union = self._interval_set.union(another_moc._interval_set)
-        return self.__class__(iv_set_union)
+        interval_set = self._interval_set.union(another_moc._interval_set)
+        for moc in args:
+            interval_set = interval_set.union(moc._interval_set)
 
-    def difference(self, moc):
+        return self.__class__(interval_set)
+
+    def difference(self, another_moc, *args):
         """
-        Difference between self and moc
+        Difference between self and other mocs.
 
         Parameters
         ----------
         moc : `mocpy.abstract_moc.AbstractMOC`
             the MOC/TimeMoc to substract from self
+        args : `~mocpy.abstract_moc.AbstractMOC`
+            other MOCs
 
         Returns
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
             MOC object whose interval set corresponds to : self - ``moc``
         """
-        iv_set_difference = self._interval_set.difference(moc._interval_set)
-        return self.__class__(iv_set_difference)
+        interval_set = self._interval_set.difference(another_moc._interval_set)
+        for moc in args:
+            interval_set = interval_set.difference(moc._interval_set)
+
+        return self.__class__(interval_set)
 
     def complement(self):
         """
@@ -470,6 +483,7 @@ class AbstractMOC:
         adda = int(0)
         addb = ofs
         iv_set = []
+
         for iv in self._interval_set._intervals:
             a = (iv[0] + adda) & mask
             b = (iv[1] + addb) & mask
