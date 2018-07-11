@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Install the MOCPy version from the remote repo
+pip install .
+
+
