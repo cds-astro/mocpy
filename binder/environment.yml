@@ -1,0 +1,14 @@
+name: mocpy-dev
+
+channels:
+- defaults
+- conda-forge
+
+dependencies:
+- astropy
+- astropy-healpix
+- astroquery
+- matplotlib
+- numpy
+- requests
+- six
