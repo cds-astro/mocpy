@@ -27,7 +27,7 @@ class TimeMOC(AbstractMOC):
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
     def __init__(self, interval_set=None):
-        super(TimeMOC, self).__init__(interval_set)
+        AbstractMOC.__init__(self, interval_set)
         self._fits_header_keywords = {'TIMESYS': ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')}
 
     @classmethod

@@ -31,7 +31,7 @@ class MOC(AbstractMOC):
     """
 
     def __init__(self, interval_set=None):
-        super(MOC, self).__init__(interval_set)
+        AbstractMOC.__init__(self, interval_set)
         self._fits_header_keywords = {'COORDSYS': ('C', 'reference frame (C=ICRS)')}
 
     def _best_res_pixels(self):
