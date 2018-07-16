@@ -207,6 +207,8 @@ class AbstractMOC:
         """
         intervals_arr = np.array([])
         for order, pix_l in json_moc.items():
+            if len(pix_l) == 0:
+                continue
             pix_arr = np.array(pix_l)
             p1 = pix_arr
             p2 = pix_arr + 1

@@ -4,8 +4,7 @@ from .py23_compat import range, int
 
 import warnings
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
+
 from astropy.time import Time, TimeDelta
 
 from .interval_set import IntervalSet
@@ -408,6 +407,8 @@ class TimeMOC(AbstractMOC):
             all the observation time window is rendered).
 
         """
+        from matplotlib.colors import LinearSegmentedColormap
+        import matplotlib.pyplot as plt
 
         if self._interval_set.empty():
             print('Nothing to print. This TimeMoc object is empty.')
