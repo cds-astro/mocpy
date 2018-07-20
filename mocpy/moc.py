@@ -9,7 +9,8 @@ import numpy as np
 from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
-from astropy.coordinates import ICRS
+from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
+from astropy.coordinates import SkyCoord
 from astropy import wcs
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
@@ -197,11 +198,11 @@ class MOC(AbstractMOC):
             x, y = np.mgrid[0.5:(width + 0.5 + step_pix):step_pix, 0.5:(height + 0.5 + step_pix):step_pix]
             pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
-        world_pix_crd = w.wcs_pix2world(pix_crd, 1)
+        frame = wcs.utils.wcs_to_celestial_frame(w)
+        world_pix_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit='deg', frame=frame)
 
         hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
-        ipix = hp.lonlat_to_healpix(lon=world_pix_crd[:, 0] * u.deg,
-                                    lat=world_pix_crd[:, 1] * u.deg)
+        ipix = hp.skycoord_to_healpix(world_pix_crd)
         # remove doubles
         ipix = np.unique(ipix)
 
@@ -211,7 +212,8 @@ class MOC(AbstractMOC):
         # This MOC will be consistent when one will do operations on the moc (union, inter, ...) or
         # simply write it to a fits or json file
         interval_set = IntervalSet.from_numpy_array(intervals_arr)
-        return cls(interval_set)
+
+        return cls(interval_set=interval_set)
 
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
@@ -316,7 +318,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
         """
-        Create a MOC from astropy skycoords
+        Create a MOC from astropy skycoords. The ICRS coordinate system is used for representing HEALPix cells.
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
@@ -330,7 +332,8 @@ class MOC(AbstractMOC):
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
         """
-        Create a MOC from astropy lon, lat quantities
+        Create a MOC from astropy lon, lat quantities. lon and lat must be expressed in ICRS because the HEALPix frame
+        used is in ICRS.
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(lon, lat)
@@ -399,7 +402,7 @@ class MOC(AbstractMOC):
 
         return table
 
-    def plot(self, title='MOC', coord='C'):
+    def plot(self, title='MOC', frame=None):
         """
         Plot the MOC object in a mollweide view
 
@@ -409,11 +412,11 @@ class MOC(AbstractMOC):
         ----------
         title : str
             the title of the plot
-        coord : str
-            type of coord (ICRS, Galactic, ...) in which the moc pix will be plotted.
-            only ICRS coordinates are supported for the moment.
-            TODO handle Galactic coordinates
+        frame : `astropy.coordinates.BaseCoordinateFrame`, optional
+            Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
+        frame = ICRS() if frame is None else frame
+
         from matplotlib.colors import LinearSegmentedColormap
         import matplotlib.pyplot as plt
 
@@ -423,23 +426,35 @@ class MOC(AbstractMOC):
         else:
             plotted_moc = self
 
-        num_pixels_map = 768
+        num_pixels_map = 1024
         delta = 2 * np.pi / num_pixels_map
 
         x = np.arange(-np.pi, np.pi, delta)
         y = np.arange(-np.pi/2, np.pi/2, delta)
         lon_rad, lat_rad = np.meshgrid(x, y)
+        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested')
 
-        pix_id_arr = plotted_moc._best_res_pixels()
-        m = np.zeros(nside2npix(1 << plotted_moc.max_order))
-        m[pix_id_arr] = 1
-
-        hp = HEALPix(nside=(1 << plotted_moc.max_order), order='nested', frame=ICRS())
+        if frame and not isinstance(frame, BaseCoordinateFrame):
+            raise ValueError("Only Galactic/ICRS coordinate systems are supported."
+                             "Please set `coord` to either 'C' or 'G'.")
 
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
+
+        m = np.zeros(nside2npix(1 << plotted_moc.max_order))
+        pix_id_arr = plotted_moc._best_res_pixels()
+
+        # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.
+        if isinstance(frame, Galactic):
+            lon, lat = hp.boundaries_lonlat(pix_id_arr, step=2)
+            sky_crd = SkyCoord(lon, lat, unit='deg')
+            pix_id_arr = hp.lonlat_to_healpix(sky_crd.galactic.l, sky_crd.galactic.b)
+
+        m[pix_id_arr] = 1
+
         z = np.flip(m[pix_map], axis=1)
 
         plt.figure(figsize=(10, 10))
+
         ax = plt.subplot(111, projection="mollweide")
         ax.set_xticklabels(['150°', '120°', '90°', '60°', '30°', '0°', '330°', '300°', '270°', '240°', '210°', '180°'])
 

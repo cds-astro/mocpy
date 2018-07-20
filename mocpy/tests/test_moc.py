@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.coordinates import ICRS
+from astropy.coordinates import ICRS, Galactic
 from astroquery.vizier import Vizier
 from astropy.io import fits
 from astropy_healpix import HEALPix
@@ -64,7 +64,6 @@ def test_moc_from_fits():
     moc = MOC.from_fits(fits_path)
 
 
-
 def test_moc_from_fits_images():
     image_path = 'notebooks/demo-data/image_with_mask.fits.gz'
 
@@ -80,6 +79,7 @@ def moc_from_fits_image():
         moc = MOC.from_image(header=hdulist[0].header,
                              max_norder=7,
                              mask_arr=hdulist[0].data)
+
     return moc
 
 
