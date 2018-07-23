@@ -30,7 +30,7 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda env create -q python=$TRAVIS_PYTHON_VERSION -f environment.yml
+  - travis_wait conda env create -q python=$TRAVIS_PYTHON_VERSION -f environment.yml
   - source activate mocpy-dev
 
 script:
