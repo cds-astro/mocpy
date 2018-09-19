@@ -6,12 +6,17 @@ import tempfile
 import os
 import numpy as np
 
+# Draw these pixels as a mpl path patch
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+
 from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
 from astropy.coordinates import SkyCoord
 from astropy import wcs
+from astropy.wcs.utils import skycoord_to_pixel
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
 
@@ -152,6 +157,93 @@ class MOC(AbstractMOC):
         self._interval_set = IntervalSet.from_numpy_array(intervals_arr)
         return self
 
+    def _backface_culling(self, xp, yp):
+        # Remove cells crossing the MOC after projection
+        # The remaining HEALPix cells are used for computing the patch of the MOC
+        vx = xp
+        vy = yp
+
+        def cross_product(vx, vy, i):
+            cur = i
+            prev = (i - 1) % 4
+            next = (i + 1) % 4
+
+            # Construct the first vector from A to B
+            x1 = vx[:, cur] - vx[:, prev]
+            y1 = vy[:, cur] - vy[:, prev]
+            z1 = np.zeros(x1.shape)
+
+            v1 = np.vstack((x1, y1, z1)).T
+            # Construct the second vector from B to C
+            x2 = vx[:, next] - vx[:, cur]
+            y2 = vy[:, next] - vy[:, cur]
+            z2 = np.zeros(x2.shape)
+
+            v2 = np.vstack((x2, y2, z2)).T
+            # Compute the cross product between the two
+            return np.cross(v1, v2)
+
+        # A ----- B
+        #  \      |
+        #   D-----C
+        # Compute the cross product between AB and BC
+        # and the cross product between BC and CD
+        ABC = cross_product(vx, vy, 1)
+        CDA = cross_product(vx, vy, 3)
+
+        frontface_cells  = (ABC[:, 2] < 0) & (CDA[:, 2] < 0)
+
+        vx = vx[frontface_cells]
+        vy = vy[frontface_cells]
+
+        return vx, vy, frontface_cells
+
+    def fill(self, ax, wcs, **kw_mpl_pathpatch):
+        """
+        Add the MOC to a matplotlib axis
+
+        Parameters
+        ----------
+        ax : `astropy.units.Quantity`
+            Matplotlib axis
+        wcs: `astropy.wcs.WCS`
+            World coordinate system in which the MOC is projeted
+        kw_mpl_pathpatch
+            Plotting arguments for `matplotlib.patches.PathPatch`
+        """
+        moc = self
+
+        if moc.max_order > 8:
+            moc = self.degrade_to_order(8)
+
+        max_order = moc.max_order
+        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
+        ipixels_open = moc._best_res_pixels()
+
+        ipix_boundaries = hp.boundaries_skycoord(ipixels_open, step=1)
+        # Projection on the given WCS
+        xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+        xp, yp, _ = moc._backface_culling(xp, yp)
+
+        # Build the patch using numpy's broadcasting feature
+        # as much as possible
+        c1=np.vstack((xp[:, 0], yp[:, 0])).T
+        c2=np.vstack((xp[:, 1], yp[:, 1])).T
+        c3=np.vstack((xp[:, 2], yp[:, 2])).T
+        c4=np.vstack((xp[:, 3], yp[:, 3])).T
+
+        cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+
+        path_vertices = cells.reshape((5*c1.shape[0], 2))
+        single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+        codes = np.tile(single_code, c1.shape[0])
+
+        # Cast to a numpy array
+        path = Path(path_vertices, codes)
+        patch = PathPatch(path, linewidth=0, **kw_mpl_pathpatch)
+
+        # Add the patch to the mpl axis
+        ax.add_patch(patch)
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
         """
