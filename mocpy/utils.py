@@ -1,4 +1,5 @@
 import numpy as np
+from astropy import wcs
 
 LogTable256 = np.array([
     -1,
@@ -121,13 +122,12 @@ def number_trailing_zeros(x):
 
     return bits
 
-"""
-def number_trailing_zeros(i):
-    # O(log(i)) complexity here. Can be done in O(1) using more low-level algo
-    nb = 0
-    while (i & 1) == 0 and i > 0:
-        nb += 1
-        i = i >> 1
+def make_wcs(crpix, crval, cdelt, ctype):
+    world_coord_sys = wcs.WCS(naxis=2)
 
-    return nb
-"""
+    world_coord_sys.wcs.crpix = crpix
+    world_coord_sys.wcs.cdelt = cdelt
+    world_coord_sys.wcs.crval = crval
+    world_coord_sys.wcs.ctype = ctype
+
+    return world_coord_sys

@@ -244,6 +244,97 @@ class MOC(AbstractMOC):
 
         # Add the patch to the mpl axis
         ax.add_patch(patch)
+
+    def perimeter(self, ax, wcs, **kw_mpl_pathpatch):
+        """
+        Add the MOC perimeter to a matplotlib axis
+
+        Parameters
+        ----------
+        ax : `astropy.units.Quantity`
+            Matplotlib axis
+        wcs: `astropy.wcs.WCS`
+            World coordinate system in which the MOC is projeted
+        kw_mpl_pathpatch
+            Plotting arguments for `matplotlib.patches.PathPatch`
+        """
+        moc = self
+
+        if moc.max_order > 8:
+            moc = self.degrade_to_order(8)
+
+        max_order = moc.max_order
+        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
+        ipixels_open = moc._best_res_pixels()
+
+        # Take the complement if the MOC covers more than half of the sky
+        num_ipixels = 3 << (2*(max_order + 1))
+        sky_fraction = ipixels_open.shape[0] / float(num_ipixels)
+
+        if sky_fraction > 0.5:
+            ipixels_all = np.arange(num_ipixels)
+            ipixels_open = np.setdiff1d(ipixels_all, ipixels_open, assume_unique=True)
+
+        neighbors = hp.neighbours(ipixels_open)
+        # Select the direct neighbors (i.e. those in WEST, NORTH, EAST and SOUTH directions)
+        neighbors = neighbors[[0, 2, 4, 6], :]
+
+        ipix_moc = np.isin(neighbors, ipixels_open)
+
+        west_edge = ipix_moc[0, :]
+        south_edge = ipix_moc[1, :]
+        east_edge = ipix_moc[2, :]
+        north_edge = ipix_moc[3, :]
+
+        num_ipix_moc = ipix_moc.sum(axis=0)
+
+        ipixels_border_id = (num_ipix_moc < 4)
+
+        ipixels_border = ipixels_open[ipixels_border_id]
+        west_border = west_edge[ipixels_border_id]
+        south_border = south_edge[ipixels_border_id]
+        east_border = east_edge[ipixels_border_id]
+        north_border = north_edge[ipixels_border_id]
+
+        # The border of each HEALPix cells is drawn one at a time
+        path_vertices_l = []
+        codes = []
+
+        ipix_boundaries = hp.boundaries_skycoord(ipixels_border, step=1)
+        # Projection on the given WCS
+        xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+        xp, yp, frontface_id = moc._backface_culling(xp, yp)
+        west_border = west_border[frontface_id]
+        south_border = south_border[frontface_id]
+        east_border = east_border[frontface_id]
+        north_border = north_border[frontface_id]
+
+        for i in range(xp.shape[0]):
+            vx = xp[i]
+            vy = yp[i]
+            if not south_border[i]:
+                path_vertices_l += [(vx[0], vy[0]), (vx[1], vy[1]), (0, 0)]
+                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+
+            if not west_border[i]:
+                path_vertices_l += [(vx[1], vy[1]), (vx[2], vy[2]), (0, 0)]
+                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+
+            if not north_border[i]:
+                path_vertices_l += [(vx[2], vy[2]), (vx[3], vy[3]), (0, 0)]
+                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+
+            if not east_border[i]:
+                path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
+                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+
+        # Cast to a numpy array
+        path_vertices_arr = np.array(path_vertices_l)
+        path = Path(path_vertices_arr, codes)
+        perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
+
+        ax.add_patch(perimeter_patch)
+
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
         """

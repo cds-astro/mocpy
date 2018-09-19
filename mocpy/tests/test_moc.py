@@ -7,9 +7,11 @@ from astropy.coordinates import ICRS, Galactic
 from astroquery.vizier import Vizier
 from astropy.io import fits
 from astropy_healpix import HEALPix
+from astropy import wcs
 import copy
 
 from ..moc import MOC
+from ..utils import make_wcs
 
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
@@ -117,10 +119,6 @@ def test_moc_contains():
 
     moc = MOC.from_json(json_moc={str(order): list(healpix_arr)})
 
-    #viz = Vizier(columns=['*', '_RAJ2000', '_DEJ2000'])
-    #viz.ROW_LIMIT = -1
-    #table = viz.get_catalogs('I/293/npm2cros')[0]
-
     hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
     lon, lat = hp.healpix_to_lonlat(healpix_arr)
     lon_out, lat_out = hp.healpix_to_lonlat(healpix_outside_arr)
@@ -136,6 +134,23 @@ def test_moc_contains():
     should_be_inside_arr = moc.contains(ra=lon_out, dec=lat_out, keep_inside=False)
     assert should_be_inside_arr.all()
 
+
+def test_perimeter():
+    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
+
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
+    moc.perimeter(ax=ax, wcs=wcs, color='g')
+
+    plt.axis('equal')
+    plt.xlabel('ra')
+    plt.ylabel('dec')
+    plt.title('P-GALEXGR6-AIS-FUV')
+    plt.grid(True)
 
 @pytest.fixture()
 def mocs():
