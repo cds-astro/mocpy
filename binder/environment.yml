@@ -12,3 +12,4 @@ dependencies:
 - numpy
 - requests
 - six
+- networkx
