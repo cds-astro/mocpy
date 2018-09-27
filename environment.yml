@@ -21,3 +21,4 @@ dependencies:
 - pip:
   - numpydoc
   - pytest-profiling
+  - networkx
