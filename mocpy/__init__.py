@@ -9,9 +9,13 @@ It allows creation, parsing and comparison of TMOCs.
 
 from .moc import MOC
 from .tmoc import TimeMOC
+
+from .moc import make_wcs
+
 from .version import __version__
 
 __all__ = [
     'MOC',
     'TimeMOC',
+    'make_wcs'
 ]

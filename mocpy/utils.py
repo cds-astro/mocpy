@@ -1,5 +1,4 @@
 import numpy as np
-from astropy import wcs
 
 LogTable256 = np.array([
     -1,
@@ -121,13 +120,3 @@ def number_trailing_zeros(x):
         x >>= 1
 
     return bits
-
-def make_wcs(crpix, crval, cdelt, ctype):
-    world_coord_sys = wcs.WCS(naxis=2)
-
-    world_coord_sys.wcs.crpix = crpix
-    world_coord_sys.wcs.cdelt = cdelt
-    world_coord_sys.wcs.crval = crval
-    world_coord_sys.wcs.ctype = ctype
-
-    return world_coord_sys

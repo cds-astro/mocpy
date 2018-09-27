@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-from .py23_compat import urlencode, int, BytesIO
+from ..py23_compat import urlencode, int, BytesIO
 import requests
 import tempfile
 import os
@@ -20,8 +20,9 @@ from astropy.wcs.utils import skycoord_to_pixel
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
 
-from .abstract_moc import AbstractMOC
-from .interval_set import IntervalSet
+from ..abstract_moc import AbstractMOC
+from ..interval_set import IntervalSet
+from .perimeter import Boundaries
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -245,6 +246,30 @@ class MOC(AbstractMOC):
         # Add the patch to the mpl axis
         ax.add_patch(patch)
 
+    def get_boundaries(self, order=None):
+        """
+        Return the boundaries of the MOC
+
+        The returned boundaries are expressed as a list of SkyCoord.
+        Each SkyCoord refers to the coordinates of one border of the MOC (i.e. 
+        either a border of a connexe MOC component or a border of a hole
+        located in a connexe MOC component).
+
+        Parameters
+        ----------
+        order: int
+            The order of the MOC before computing its boundaries.
+            A shallow order leads to a faster computation.
+            By default the current max order of the MOC is taken.
+
+        Return
+        ------
+        boundaries: [`~astropy.coordinates.SkyCoord`]
+            A list of SkyCoords each describing one border.
+        """
+
+        return Boundaries.get(self, order)
+
     def perimeter(self, ax, wcs, **kw_mpl_pathpatch):
         """
         Add the MOC perimeter to a matplotlib axis
@@ -289,17 +314,15 @@ class MOC(AbstractMOC):
         num_ipix_moc = ipix_moc.sum(axis=0)
 
         ipixels_border_id = (num_ipix_moc < 4)
-
-        ipixels_border = ipixels_open[ipixels_border_id]
+        # The border of each HEALPix cells is drawn one at a time
+        path_vertices_l = []
+        codes = []
+        
         west_border = west_edge[ipixels_border_id]
         south_border = south_edge[ipixels_border_id]
         east_border = east_edge[ipixels_border_id]
         north_border = north_edge[ipixels_border_id]
-
-        # The border of each HEALPix cells is drawn one at a time
-        path_vertices_l = []
-        codes = []
-
+        ipixels_border = ipixels_open[ipixels_border_id]
         ipix_boundaries = hp.boundaries_skycoord(ipixels_border, step=1)
         # Projection on the given WCS
         xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
@@ -308,7 +331,7 @@ class MOC(AbstractMOC):
         south_border = south_border[frontface_id]
         east_border = east_border[frontface_id]
         north_border = north_border[frontface_id]
-
+        
         for i in range(xp.shape[0]):
             vx = xp[i]
             vy = yp[i]
@@ -327,12 +350,10 @@ class MOC(AbstractMOC):
             if not east_border[i]:
                 path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
                 codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-
         # Cast to a numpy array
-        path_vertices_arr = np.array(path_vertices_l)
-        path = Path(path_vertices_arr, codes)
+        #path_vertices_arr = np.array(path_vertices_l)
+        path = Path(path_vertices_l, codes)
         perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
-
         ax.add_patch(perimeter_patch)
 
     @classmethod
