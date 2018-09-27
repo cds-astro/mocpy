@@ -15,20 +15,20 @@ class Boundaries():
         boundaries_l = []
 
         # Get the ipixels of the MOC at the deepest order
-        hp, ipixels = Boundaries.compute_HEALPix_indices(moc, order)
+        hp, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
         # Compute a graph of the MOC where each node is an ipix belonging to the MOC
-        G = Boundaries.build_graph_from_ipixels(hp, ipixels)
+        G = Boundaries._build_graph_from_ipixels(hp, ipixels)
         
         # Split the global MOC graph into all its non connected subgraphs.
         G_subgraphs = nx.connected_components(G)
         for g in G_subgraphs:
-            graph_boundaries = Boundaries.compute_graph_HEALPix_boundaries(hp, g)
-            boundaries_l.extend(Boundaries.retrieve_skycoords(graph_boundaries))
+            graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, g)
+            boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
         return boundaries_l
 
     @staticmethod
-    def compute_HEALPix_indices(m, order):
+    def _compute_HEALPix_indices(m, order):
         moc = m
         if order:
             if m.max_order > order:
@@ -51,7 +51,7 @@ class Boundaries():
 
     @staticmethod
     # Faster version for computing the graph of all the connected ipixels
-    def build_graph_from_ipixels(hp, ipixels, dir_connected=[0, 2, 4, 6]):
+    def _build_graph_from_ipixels(hp, ipixels, dir_connected=[0, 2, 4, 6]):
         """
         Build a graph from a list of ipixels
         
@@ -90,7 +90,7 @@ class Boundaries():
         return G
 
     @staticmethod
-    def compute_graph_HEALPix_boundaries(hp, g):
+    def _compute_graph_HEALPix_boundaries(hp, g):
         def insert_edge(G, l1, l2, p1, p2):
             # Nodes are indexed by str(skycoord). When getting ordered nodes, one can retrieve back the skycoord instance
             # by accessing the python dict `pts_d`.
@@ -168,7 +168,7 @@ class Boundaries():
         return V
 
     @staticmethod
-    def retrieve_skycoords(V):
+    def _retrieve_skycoords(V):
         coords_l = []
         # Accessing the borders one by one. At this step, V_subgraphs contains a list of cycles
         # (i.e. one describing the external border of the MOC component and several describing the holes
