@@ -16,8 +16,8 @@ from astropy_healpix import HEALPix
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-from ..moc import MOC
-from ..moc import make_wcs
+from ..spatial import MOC
+from ..spatial.utils import make_wcs
 
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),

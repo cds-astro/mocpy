@@ -7,15 +7,13 @@ An experimental support for TMOC (temporal MOC) has been added since version 0.4
 It allows creation, parsing and comparison of TMOCs.
 """
 
-from .moc import MOC
-from .tmoc import TimeMOC
+from .spatial import MOC
 
-from .moc import make_wcs
+from .tmoc import TimeMOC
 
 from .version import __version__
 
 __all__ = [
     'MOC',
     'TimeMOC',
-    'make_wcs'
 ]

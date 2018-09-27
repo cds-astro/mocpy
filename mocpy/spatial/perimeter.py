@@ -18,7 +18,7 @@ class Boundaries():
         hp, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
         # Compute a graph of the MOC where each node is an ipix belonging to the MOC
         G = Boundaries._build_graph_from_ipixels(hp, ipixels)
-        
+
         # Split the global MOC graph into all its non connected subgraphs.
         G_subgraphs = nx.connected_components(G)
         for g in G_subgraphs:
@@ -54,9 +54,9 @@ class Boundaries():
     def _build_graph_from_ipixels(hp, ipixels, dir_connected=[0, 2, 4, 6]):
         """
         Build a graph from a list of ipixels
-        
+
         The connexion relation between a node and its neighbours can be specified.
-        By default, each ipix is only connected to its direct neighbours (e.g. 
+        By default, each ipix is only connected to its direct neighbours (e.g.
         west, south, east and north)
         """
         neighbours = hp.neighbours(ipixels)
@@ -80,7 +80,7 @@ class Boundaries():
 
         edges = edges.T
         ipix_alone = ipixels[alone_id]
-        
+
         # Graph instanciation
         G = nx.Graph()
         # Add the edges giving the interaction between all the ipixel nodes
@@ -100,7 +100,7 @@ class Boundaries():
                 # ' ' is part of the holes in the MOC
                 #    |xxx
                 #    |xxx
-                # ---A--- 
+                # ---A---
                 # xxx|
                 # xxx|
                 #
@@ -122,7 +122,7 @@ class Boundaries():
             G.add_node(l2, ra=p2.ra.deg, dec=p2.dec.deg)
             G.add_edge(l1, l2)
 
-        # Phase 1: Retrieve the ipixels located at the border of 
+        # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
         ipixels = np.asarray(list(g))
 
@@ -132,14 +132,14 @@ class Boundaries():
 
         ipixels_border = ipixels[border]
         isin_border = isin[:, border]
-        
+
         # Phase 2: Build the graph from the positions of the ipixels boundaries
         ipixels_border_bounds = hp.boundaries_skycoord(ipixels_border, step=1)
         V = nx.Graph()
         for i in range(ipixels_border.shape[0]):
             ipix = ipixels_border[i]
             ipix_bound = ipixels_border_bounds[i]
-            
+
             p0 = ipix_bound[0]
             p1 = ipix_bound[1]
             p2 = ipix_bound[2]
@@ -148,19 +148,19 @@ class Boundaries():
             s1 = str(p1)
             s2 = str(p2)
             s3 = str(p3)
-            
+
             # WEST border
             if not isin_border[0, i]:
                 insert_edge(V, s1, s2, p1, p2)
-                
+
             # NORTH border
             if not isin_border[3, i]:
                 insert_edge(V, s2, s3, p2, p3)
-                
+
             # EAST border
             if not isin_border[2, i]:
                 insert_edge(V, s3, s0, p3, p0)
-                
+
             # SOUTH border
             if not isin_border[1, i]:
                 insert_edge(V, s0, s1, p0, p1)
@@ -185,15 +185,15 @@ class Boundaries():
                     src = node
                     break
 
-            # Get the unordered coords
+            # Get the unordered lon and lat
             ra = np.asarray(list(nx.get_node_attributes(v, 'ra').values()))
             dec = np.asarray(list(nx.get_node_attributes(v, 'dec').values()))
             coords = np.vstack((ra, dec)).T
-            # Get the ordered nodes
+            # Get the ordering from the MST
             ordering = np.asarray(list(nx.dfs_preorder_nodes(mst, src)))
             # Order the coords
             coords = coords[ordering]
-            # Convert them to a unique skycoord because it is currently a list of Skycoord
+            # Get a skycoord containing N coordinates computed from the Nx2 `coords` array
             coords = SkyCoord(coords, unit="deg")
             coords_l.append(coords)
 
