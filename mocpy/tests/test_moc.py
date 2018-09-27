@@ -140,59 +140,45 @@ def test_moc_contains():
     should_be_inside_arr = moc.contains(ra=lon_out, dec=lat_out, keep_inside=False)
     assert should_be_inside_arr.all()
 
-
-def test_perimeter():
+def test_mpl_fill():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
+    # WCS used : ICRS & aitoff projection
     wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
 
+    # Init MPL axis
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
+    # Python 2.7 RuntimeError.
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+
+    # Call to method we want to test
     moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
+
+def test_mpl_perimeter():
+    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    # WCS used : ICRS & aitoff projection
+    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
+
+    # Init MPL axis
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
+    # Python 2.7 RuntimeError.
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+
+    # Call to method we want to test
     moc.perimeter(ax=ax, wcs=wcs, color='g')
 
-    plt.axis('equal')
-    plt.xlabel('ra')
-    plt.ylabel('dec')
-    plt.title('P-GALEXGR6-AIS-FUV')
-    plt.grid(True)
-    #plt.show()
-
 def test_boundaries():
-    def add_patch_path(ax, wcs, coords, **kw_mpl_pathpatch):
-        from astropy.wcs.utils import skycoord_to_pixel
-
-        xp, yp = skycoord_to_pixel(coords=coords, wcs=wcs)
-        xp = xp.flatten()
-        yp = yp.flatten()
-        codes = np.ones(shape=(xp.shape[0]+1,))*Path.LINETO
-        codes[0] = Path.MOVETO
-        codes[-1] = Path.CLOSEPOLY
-
-        vertices = np.vstack((xp, yp)).T.tolist()
-        vertices.append(vertices[0])
-
-        path = Path(vertices, codes)
-
-        patch = PathPatch(path, **kw_mpl_pathpatch)
-        ax.add_patch(patch)
-
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
-
-    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
-
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
-
-    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
-    # Draw the borders, each plotted in a different color.
-    for border_coords in boundaries_l:
-        add_patch_path(ax=ax, wcs=wcs, coords=border_coords,
-                       fill=False, color='red')
 
 @pytest.fixture()
 def mocs():
