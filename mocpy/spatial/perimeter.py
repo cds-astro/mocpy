@@ -20,10 +20,10 @@ class Boundaries():
         G = Boundaries._build_graph_from_ipixels(hp, ipixels)
 
         # Split the global MOC graph into all its non connected subgraphs.
-        G_subgraphs = nx.connected_components(G)
-        for g in G_subgraphs:
-            graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, g)
-            boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
+        #G_subgraphs = nx.connected_components(G)
+        #for g in G_subgraphs:
+        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, G)
+        boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
         return boundaries_l
 
@@ -43,9 +43,9 @@ class Boundaries():
         num_ipixels = 3 << (2*(max_order + 1))
         sky_fraction = ipixels.shape[0] / float(num_ipixels)
 
-        if sky_fraction > 0.5:
-            ipixels_all = np.arange(num_ipixels)
-            ipixels = np.setdiff1d(ipixels_all, ipixels, assume_unique=True)
+        #if sky_fraction > 0.5:
+        #    ipixels_all = np.arange(num_ipixels)
+        #    ipixels = np.setdiff1d(ipixels_all, ipixels, assume_unique=True)
 
         return hp, ipixels
 
@@ -91,7 +91,7 @@ class Boundaries():
 
     @staticmethod
     def _compute_graph_HEALPix_boundaries(hp, g):
-        def insert_edge(G, l1, l2, p1, p2):
+        def insert_edge(G, l1, l2, p1_lon, p1_lat, p2_lon, p2_lat):
             # Nodes are indexed by str(skycoord). When getting ordered nodes, one can retrieve back the skycoord instance
             # by accessing the python dict `pts_d`.
             try:
@@ -118,8 +118,8 @@ class Boundaries():
             except:
                 pass
             # Set the skycoord instance as an attribute of the nodes
-            G.add_node(l1, ra=p1.ra.deg, dec=p1.dec.deg)
-            G.add_node(l2, ra=p2.ra.deg, dec=p2.dec.deg)
+            G.add_node(l1, ra=p1_lon, dec=p1_lat)
+            G.add_node(l2, ra=p2_lon, dec=p2_lat)
             G.add_edge(l1, l2)
 
         # Phase 1: Retrieve the ipixels located at the border of
@@ -134,36 +134,57 @@ class Boundaries():
         isin_border = isin[:, border]
 
         # Phase 2: Build the graph from the positions of the ipixels boundaries
-        ipixels_border_bounds = hp.boundaries_skycoord(ipixels_border, step=1)
+        ipix_lon, ipix_lat = hp.boundaries_lonlat(ipixels_border, step=1)
+
+        ipix_lon_deg = ipix_lon.deg
+        ipix_lat_deg = ipix_lat.deg
+
+        ipix_lon_repr = \
+         np.around(np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=6).tolist()
+        ipix_lat_repr = \
+         np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=6).tolist()
+
         V = nx.Graph()
         for i in range(ipixels_border.shape[0]):
             ipix = ipixels_border[i]
-            ipix_bound = ipixels_border_bounds[i]
+            lon_deg = ipix_lon_deg[i]
+            lat_deg = ipix_lat_deg[i]
 
-            p0 = ipix_bound[0]
-            p1 = ipix_bound[1]
-            p2 = ipix_bound[2]
-            p3 = ipix_bound[3]
-            s0 = str(p0)
-            s1 = str(p1)
-            s2 = str(p2)
-            s3 = str(p3)
+            p0_lon = lon_deg[0]
+            p1_lon = lon_deg[1]
+            p2_lon = lon_deg[2]
+            p3_lon = lon_deg[3]
+
+            p0_lat = lat_deg[0]
+            p1_lat = lat_deg[1]
+            p2_lat = lat_deg[2]
+            p3_lat = lat_deg[3]
+
+            off = 4*i
+            off2 = 4*(i + 1)
+            repr_lon = ipix_lon_repr[off:off2]
+            repr_lat = ipix_lat_repr[off:off2]
+
+            s0 = str(repr_lon[0]) + ' ' + str(repr_lat[0])
+            s1 = str(repr_lon[1]) + ' ' + str(repr_lat[1])
+            s2 = str(repr_lon[2]) + ' ' + str(repr_lat[2])
+            s3 = str(repr_lon[3]) + ' ' + str(repr_lat[3])
 
             # WEST border
             if not isin_border[0, i]:
-                insert_edge(V, s1, s2, p1, p2)
+                insert_edge(V, s1, s2, p1_lon, p1_lat, p2_lon, p2_lat)
 
             # NORTH border
             if not isin_border[3, i]:
-                insert_edge(V, s2, s3, p2, p3)
+                insert_edge(V, s2, s3, p2_lon, p2_lat, p3_lon, p3_lat)
 
             # EAST border
             if not isin_border[2, i]:
-                insert_edge(V, s3, s0, p3, p0)
+                insert_edge(V, s3, s0, p3_lon, p3_lat, p0_lon, p0_lat)
 
             # SOUTH border
             if not isin_border[1, i]:
-                insert_edge(V, s0, s1, p0, p1)
+                insert_edge(V, s0, s1, p0_lon, p0_lat, p1_lon, p1_lat)
 
         return V
 
