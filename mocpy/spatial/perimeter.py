@@ -16,12 +16,8 @@ class Boundaries():
 
         # Get the ipixels of the MOC at the deepest order
         hp, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
-        # Compute a graph of the MOC where each node is an ipix belonging to the MOC
-        #G = Boundaries._build_graph_from_ipixels(hp, ipixels)
 
         # Split the global MOC graph into all its non connected subgraphs.
-        #G_subgraphs = nx.connected_components(G)
-        #for g in G_subgraphs:
         graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, ipixels)
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
@@ -48,46 +44,6 @@ class Boundaries():
         #    ipixels = np.setdiff1d(ipixels_all, ipixels, assume_unique=True)
 
         return hp, ipixels
-
-    @staticmethod
-    # Faster version for computing the graph of all the connected ipixels
-    def _build_graph_from_ipixels(hp, ipixels, dir_connected=[0, 2, 4, 6]):
-        """
-        Build a graph from a list of ipixels
-
-        The connexion relation between a node and its neighbours can be specified.
-        By default, each ipix is only connected to its direct neighbours (e.g.
-        west, south, east and north)
-        """
-        neighbours = hp.neighbours(ipixels)
-        # Select only the WEST, SOUTH, EAST and NORTH neighbours (i.e. the direct ones)
-        neighbours = neighbours[dir_connected, :]
-
-        # Select only neighbours lying in the ipixels ensemble
-        mask = np.isin(neighbours, ipixels)
-        edges = np.array([])
-        i = 0
-        for k in dir_connected:
-            mask_k = mask[i, :]
-            new_edges = np.vstack((ipixels, neighbours[i, :]))[:, mask_k]
-            if edges.size == 0:
-                edges = new_edges
-                alone_id = ~mask_k
-            else:
-                edges = np.hstack((edges, new_edges))
-                alone_id &= ~mask_k
-            i += 1
-
-        edges = edges.T
-        ipix_alone = ipixels[alone_id]
-
-        # Graph instanciation
-        G = nx.Graph()
-        # Add the edges giving the interaction between all the ipixel nodes
-        G.add_edges_from(edges)
-        # Add nodes connected to nothing
-        G.add_nodes_from(ipix_alone)
-        return G
 
     @staticmethod
     def _compute_graph_HEALPix_boundaries(hp, ipixels):
@@ -124,8 +80,6 @@ class Boundaries():
 
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
-        #ipixels = np.asarray(list(g))
-
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
         isin = np.isin(neighbours, ipixels)
         border = isin.sum(axis=0) < 4
@@ -144,13 +98,13 @@ class Boundaries():
         ipix_lat_repr = \
          np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=6).tolist()
 
-        V = nx.Graph()
         west_border = ~isin_border[0, :]
         south_border = ~isin_border[1, :]
         east_border = ~isin_border[2, :]
         north_border = ~isin_border[3, :]
 
         E = nx.Graph()
+
         for i in range(ipixels_border.shape[0]):
             lon_deg = ipix_lon_deg[i]
             lat_deg = ipix_lat_deg[i]
