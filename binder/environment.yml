@@ -8,7 +8,7 @@ dependencies:
 - astropy
 - astropy-healpix
 - astroquery
-- matplotlib
+- matplotlib=2.2.2
 - numpy
 - requests
 - six

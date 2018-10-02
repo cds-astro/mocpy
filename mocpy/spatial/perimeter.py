@@ -17,12 +17,12 @@ class Boundaries():
         # Get the ipixels of the MOC at the deepest order
         hp, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
         # Compute a graph of the MOC where each node is an ipix belonging to the MOC
-        G = Boundaries._build_graph_from_ipixels(hp, ipixels)
+        #G = Boundaries._build_graph_from_ipixels(hp, ipixels)
 
         # Split the global MOC graph into all its non connected subgraphs.
         #G_subgraphs = nx.connected_components(G)
         #for g in G_subgraphs:
-        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, G)
+        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, ipixels)
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
         return boundaries_l
@@ -90,7 +90,7 @@ class Boundaries():
         return G
 
     @staticmethod
-    def _compute_graph_HEALPix_boundaries(hp, g):
+    def _compute_graph_HEALPix_boundaries(hp, ipixels):
         def insert_edge(G, l1, l2, p1_lon, p1_lat, p2_lon, p2_lat):
             # Nodes are indexed by str(skycoord). When getting ordered nodes, one can retrieve back the skycoord instance
             # by accessing the python dict `pts_d`.
@@ -124,7 +124,7 @@ class Boundaries():
 
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
-        ipixels = np.asarray(list(g))
+        #ipixels = np.asarray(list(g))
 
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
         isin = np.isin(neighbours, ipixels)
@@ -145,8 +145,13 @@ class Boundaries():
          np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=6).tolist()
 
         V = nx.Graph()
+        west_border = ~isin_border[0, :]
+        south_border = ~isin_border[1, :]
+        east_border = ~isin_border[2, :]
+        north_border = ~isin_border[3, :]
+
+        E = nx.Graph()
         for i in range(ipixels_border.shape[0]):
-            ipix = ipixels_border[i]
             lon_deg = ipix_lon_deg[i]
             lat_deg = ipix_lat_deg[i]
 
@@ -171,22 +176,22 @@ class Boundaries():
             s3 = str(repr_lon[3]) + ' ' + str(repr_lat[3])
 
             # WEST border
-            if not isin_border[0, i]:
-                insert_edge(V, s1, s2, p1_lon, p1_lat, p2_lon, p2_lat)
+            if west_border[i]:
+                insert_edge(E, s1, s2, p1_lon, p1_lat, p2_lon, p2_lat)
 
             # NORTH border
-            if not isin_border[3, i]:
-                insert_edge(V, s2, s3, p2_lon, p2_lat, p3_lon, p3_lat)
+            if north_border[i]:
+                insert_edge(E, s2, s3, p2_lon, p2_lat, p3_lon, p3_lat)
 
             # EAST border
-            if not isin_border[2, i]:
-                insert_edge(V, s3, s0, p3_lon, p3_lat, p0_lon, p0_lat)
+            if east_border[i]:
+                insert_edge(E, s3, s0, p3_lon, p3_lat, p0_lon, p0_lat)
 
             # SOUTH border
-            if not isin_border[1, i]:
-                insert_edge(V, s0, s1, p0_lon, p0_lat, p1_lon, p1_lat)
+            if south_border[i]:
+                insert_edge(E, s0, s1, p0_lon, p0_lat, p1_lon, p1_lat)
 
-        return V
+        return E
 
     @staticmethod
     def _retrieve_skycoords(V):
