@@ -214,34 +214,46 @@ class MOC(AbstractMOC):
         """
         moc = self
 
-        if moc.max_order > 8:
-            moc = self.degrade_to_order(8)
+        if moc.max_order > 10:
+            moc = self.degrade_to_order(10)
 
         max_order = moc.max_order
-        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
-        ipixels_open = moc._best_res_pixels()
 
-        ipix_boundaries = hp.boundaries_skycoord(ipixels_open, step=1)
-        # Projection on the given WCS
-        xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-        xp, yp, _ = moc._backface_culling(xp, yp)
+        # ipixels_open = moc._best_res_pixels()
+        order_ipix = moc.serialize(format='json')
 
-        # Build the patch using numpy's broadcasting feature
-        # as much as possible
-        c1=np.vstack((xp[:, 0], yp[:, 0])).T
-        c2=np.vstack((xp[:, 1], yp[:, 1])).T
-        c3=np.vstack((xp[:, 2], yp[:, 2])).T
-        c4=np.vstack((xp[:, 3], yp[:, 3])).T
+        path_vertices = np.array([])
+        codes = np.array([])
 
-        cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+        for order, ipixels in order_ipix.items():
+            hp = HEALPix(nside=(1 << int(order)), order='nested', frame=ICRS())
 
-        path_vertices = cells.reshape((5*c1.shape[0], 2))
-        single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
-        codes = np.tile(single_code, c1.shape[0])
+            ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
+            # Projection on the given WCS
+            xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+            xp, yp, _ = moc._backface_culling(xp, yp)
+
+            c1=np.vstack((xp[:, 0], yp[:, 0])).T
+            c2=np.vstack((xp[:, 1], yp[:, 1])).T
+            c3=np.vstack((xp[:, 2], yp[:, 2])).T
+            c4=np.vstack((xp[:, 3], yp[:, 3])).T
+
+            cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+
+            path_vertices_cur = cells.reshape((5*c1.shape[0], 2))
+            single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+            codes_cur = np.tile(single_code, c1.shape[0])
+
+            if path_vertices.size == 0:
+                path_vertices = path_vertices_cur
+                codes = codes_cur
+            else:
+                path_vertices = np.vstack((path_vertices, path_vertices_cur))
+                codes = np.hstack((codes, codes_cur))
 
         # Cast to a numpy array
         path = Path(path_vertices, codes)
-        patch = PathPatch(path, linewidth=0, **kw_mpl_pathpatch)
+        patch = PathPatch(path, **kw_mpl_pathpatch)
 
         # Add the patch to the mpl axis
         ax.add_patch(patch)
