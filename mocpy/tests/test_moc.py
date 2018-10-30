@@ -97,7 +97,7 @@ def test_moc_from_fits_image(moc_from_fits_image):
 
 def test_moc_write_and_from_json(moc_from_fits_image):
     tmp_file = tempfile.NamedTemporaryFile()
-    moc_from_fits_image.write(tmp_file.name, format='json', write_to_file=True)
+    moc_from_fits_image.write(tmp_file.name, format='json')
 
     with open(tmp_file.name, 'r') as moc_file:
         import json
@@ -107,12 +107,12 @@ def test_moc_write_and_from_json(moc_from_fits_image):
 
 
 def test_moc_write_to_fits(moc_from_fits_image):
-    hdulist = moc_from_fits_image.write(format='fits')
+    hdulist = moc_from_fits_image.serialize(format='fits')
     assert isinstance(hdulist, fits.hdu.hdulist.HDUList)
 
 
 def test_moc_write_to_json(moc_from_fits_image):
-    moc_json = moc_from_fits_image.write(format='json')
+    moc_json = moc_from_fits_image.serialize(format='json')
     assert isinstance(moc_json, dict)
 
 

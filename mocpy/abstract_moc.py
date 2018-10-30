@@ -329,7 +329,27 @@ class AbstractMOC:
         thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
         return thdulist
 
-    def write(self, path=None, format='fits', optional_kw_dict=None, write_to_file=False):
+    def serialize(self, format='fits', optional_kw_dict=None):
+        formats = ('fits', 'json')
+        if format not in formats:
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+        uniq_l = []
+        for uniq in self._uniq_pixels_iterator():
+            uniq_l.append(uniq)
+
+        uniq_arr = np.array(uniq_l)
+
+        if format == 'fits':
+            result = self._to_fits(uniq_arr=uniq_arr,
+                                   optional_kw_dict=optional_kw_dict)
+        else:
+            # json format serialization
+            result = self.__class__._to_json(uniq_arr=uniq_arr)
+
+        return result
+
+    def write(self, path, format='fits', optional_kw_dict=None):
         """
         Serialize a MOC/TimeMoc object.
 
@@ -354,30 +374,13 @@ class AbstractMOC:
         result : a `astropy.io.fits.HDUList` if ``format`` is set to "fits" or {str, [int]} otherwise
             The serialization of the MOC/TimeMoc object
         """
-        formats = ('fits', 'json')
-        if format not in formats:
-            raise ValueError('format should be one of %s' % (str(formats)))
-
-        uniq_l = []
-        for uniq in self._uniq_pixels_iterator():
-            uniq_l.append(uniq)
-
-        uniq_arr = np.array(uniq_l)
-
+        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
         if format == 'fits':
-            result = self._to_fits(uniq_arr=uniq_arr,
-                                   optional_kw_dict=optional_kw_dict)
-            if write_to_file:
-                result.writeto(path, overwrite=True)
+            serialization.writeto(path, overwrite=True)
         else:
-            # json format serialization
-            result = self.__class__._to_json(uniq_arr=uniq_arr)
-            if write_to_file:
-                import json
-                with open(path, 'w') as h:
-                    h.write(json.dumps(result, sort_keys=True, indent=2))
-
-        return result
+            import json
+            with open(path, 'w') as h:
+                h.write(json.dumps(serialization, sort_keys=True, indent=2))
 
     def degrade_to_order(self, new_order):
         """
