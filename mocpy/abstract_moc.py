@@ -381,7 +381,7 @@ class AbstractMOC:
         format : str, optional
             format in which the mocpy object will be serialized. Constraint to takes its value
             among "fits" or "json". By default, ``format`` is set to "fits".
-        optional_kw_dict : {str, _}, optional
+        optional_kw_dict : optional
             optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
         write_to_file : bool, optional
             Set to False by default. In this case, this method does not write to a file but returns the serialized form
@@ -389,8 +389,8 @@ class AbstractMOC:
 
         Returns
         -------
-        result : a `astropy.io.fits.HDUList` if ``format`` is set to "fits" or {str, [int]} otherwise
-            The serialization of the MOC/TimeMoc object
+        result : `astropy.io.fits.HDUList` or JSON dict
+            The serialization depending on the value of ``format``.
         """
         serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
         if format == 'fits':

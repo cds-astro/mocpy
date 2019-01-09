@@ -197,9 +197,9 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        ax : `astropy.units.Quantity`
+        ax : `~astropy.units.Quantity`
             Matplotlib axis
-        wcs: `astropy.wcs.WCS`
+        wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
@@ -285,9 +285,9 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        ax : `astropy.units.Quantity`
+        ax : `~astropy.units.Quantity`
             Matplotlib axis
-        wcs: `astropy.wcs.WCS`
+        wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
