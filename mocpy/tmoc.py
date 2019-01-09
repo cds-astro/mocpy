@@ -18,10 +18,7 @@ __email__ = "matthieu.baumann@astro.unistra.fr"
 
 
 class TimeMOC(AbstractMOC):
-    """Multi-order Time Coverage.
-
-    TODO: describe a bit more. Link to docs examples.
-    """
+    """Multi-order time coverage class. Experimental"""
     DAY_MICRO_SEC = 86400000000.
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')

@@ -55,7 +55,10 @@ class AbstractMOC:
     @property
     def max_order(self):
         """
-        This returns the deepest order needed to describe the current _interval_set
+        Returns the max depth of the MOC.
+
+        The max depth of a MOC is the depth of the smallest HEALPix cells that are contained
+        in the MOC.
         """
         # TODO: cache value
         combo = int(0)
@@ -70,7 +73,7 @@ class AbstractMOC:
 
     def intersection(self, another_moc, *args):
         """
-        Intersection between self and other mocs.
+        Intersection between self and other MOCs.
 
         Parameters
         ----------
@@ -92,7 +95,7 @@ class AbstractMOC:
 
     def union(self, another_moc, *args):
         """
-        Union between self and other mocs.
+        Union between self and other MOCs.
 
         Parameters
         ----------
@@ -114,7 +117,7 @@ class AbstractMOC:
 
     def difference(self, another_moc, *args):
         """
-        Difference between self and other mocs.
+        Difference between self and other MOCs.
 
         Parameters
         ----------
@@ -136,7 +139,7 @@ class AbstractMOC:
 
     def complement(self):
         """
-        Create a mocpy object being the complemented of self
+        Return the complement of the MOC.
 
         Returns
         -------
@@ -170,29 +173,29 @@ class AbstractMOC:
         pass
 
     @staticmethod
-    def _neighbour_pixels(hp, pix_arr):
+    def _neighbour_pixels(hp, ipix):
         """
-        Get all the pixels neighbours of ``pix_arr``
+        Get all the pixels neighbours of ``ipix``
 
         Parameters
         ----------
         hp : `~astropy_healpix.HEALPix`
             the HEALPix context
-        pix_arr : `~numpy.ndarray`
+        ipix : `~numpy.ndarray`
             the input array of pixels
         Returns
         -------
-        neighbour_pix_arr : `~numpy.ndarray`
-            an array of pixels containing the neighbours of the pixels in ``pix_arr``
+        result : `~numpy.ndarray`
+            an array of pixels containing the neighbours of the pixels in ``ipix``
         """
-        neighbour_pix_arr = np.unique(hp.neighbours(pix_arr).ravel())
+        neigh_ipix = np.unique(hp.neighbours(ipix).ravel())
         # Remove negative pixel values returned by `~astropy_healpix.HEALPix.neighbours`
-        return neighbour_pix_arr[np.where(neighbour_pix_arr >= 0)]
+        return neigh_ipix[np.where(neigh_ipix >= 0)]
 
     @classmethod
     def from_json(cls, json_moc):
         """
-        Create a MOC from a dictionary of HEALPix arrays indexed by their order (in json format)
+        Creates a MOC from a dictionary of HEALPix arrays indexed by their depth.
 
         Parameters
         ----------
@@ -239,21 +242,21 @@ class AbstractMOC:
     @classmethod
     def from_fits(cls, filename):
         """
-        Load a MOC from a MOC fits file (i.e. a fits file in which pix are stored as a list of NUNIQ HEALPix pixels
-        in a binary table HDU).
+        Load a MOC from a MOC fits file.
 
-        It corresponds to the type of file in which the MOCs/TMOCs are stored when writing them
-        in a fits file with the method `mocpy.AbstractMoc.write`.
+        It corresponds to the default type of file in which the MOCs/TMOCs are stored when using
+        the method `mocpy.AbstractMoc.write`. 
+        A fits file stores the list of NUNIQ HEALPix cells describing the MOC in a binary HDU table.
 
         Parameters
         ----------
         filename : str
-            the path to the moc fits file
+            The path to the moc fits file
 
         Returns
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
-            the mocpy object having as interval set the one stored in the fits file located at ``path``
+            The resulting MOC.
         """
         table = Table.read(filename)
 
@@ -329,30 +332,21 @@ class AbstractMOC:
         thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
         return thdulist
 
-    def write(self, path=None, format='fits', optional_kw_dict=None, write_to_file=False):
+    def serialize(self, format='fits', optional_kw_dict=None):
         """
-        Serialize a MOC/TimeMoc object.
-
-        Possibility to write it to a file at ``path``. Format can be 'fits' or 'json',
-        though only the fits format is officially supported by the IVOA.
+        Serialize the MOC into a specific format.
 
         Parameters
         ----------
-        path : str, optional
-            path to save the MOC object. The mocpy is written to path only if ``serialize`` is False. None by default
-        format : str, optional
-            format in which the mocpy object will be serialized. Constraint to takes its value
-            among "fits" or "json". By default, ``format`` is set to "fits".
-        optional_kw_dict : {str, _}, optional
-            optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
-        write_to_file : bool, optional
-            Set to False by default. In this case, this method does not write to a file but returns the serialized form
-            of the MOC/TimeMoc object to the user. If you want to write to a file
+        format : str
+            'fits' by default. Other choice possible is 'json'.
+        optional_kw_dict : dict
+            optional keywords arguments added to the fits header
 
         Returns
         -------
-        result : a `astropy.io.fits.HDUList` if ``format`` is set to "fits" or {str, [int]} otherwise
-            The serialization of the MOC/TimeMoc object
+        result : `astropy.io.fits.HDUList` or json dictionary
+            Serialized MOC.
         """
         formats = ('fits', 'json')
         if format not in formats:
@@ -367,17 +361,44 @@ class AbstractMOC:
         if format == 'fits':
             result = self._to_fits(uniq_arr=uniq_arr,
                                    optional_kw_dict=optional_kw_dict)
-            if write_to_file:
-                result.writeto(path, overwrite=True)
         else:
             # json format serialization
             result = self.__class__._to_json(uniq_arr=uniq_arr)
-            if write_to_file:
-                import json
-                with open(path, 'w') as h:
-                    h.write(json.dumps(result, sort_keys=True, indent=2))
 
         return result
+
+    def write(self, path, format='fits', optional_kw_dict=None):
+        """
+        Serialize a MOC/TimeMoc object.
+
+        Possibility to write it to a file at ``path``. Format can be 'fits' or 'json',
+        though only the fits format is officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str, optional
+            path to save the MOC object. The mocpy is written to path only if ``serialize`` is False. None by default
+        format : str, optional
+            format in which the mocpy object will be serialized. Constraint to takes its value
+            among "fits" or "json". By default, ``format`` is set to "fits".
+        optional_kw_dict : optional
+            optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
+        write_to_file : bool, optional
+            Set to False by default. In this case, this method does not write to a file but returns the serialized form
+            of the MOC/TimeMoc object to the user. If you want to write to a file
+
+        Returns
+        -------
+        result : `astropy.io.fits.HDUList` or JSON dict
+            The serialization depending on the value of ``format``.
+        """
+        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
+        if format == 'fits':
+            serialization.writeto(path, overwrite=True)
+        else:
+            import json
+            with open(path, 'w') as h:
+                h.write(json.dumps(serialization, sort_keys=True, indent=2))
 
     def degrade_to_order(self, new_order):
         """

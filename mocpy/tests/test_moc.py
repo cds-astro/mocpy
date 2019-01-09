@@ -1,15 +1,29 @@
 import pytest
 import tempfile
+import copy
+
 import numpy as np
+
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.coordinates import ICRS, Galactic
 from astroquery.vizier import Vizier
 from astropy.io import fits
-from astropy_healpix import HEALPix
-import copy
+from astropy import wcs
 
-from ..moc import MOC
+from astropy_healpix import HEALPix
+
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+
+try:
+    import networkx
+    HAS_NETWORKX = True
+except ImportError:
+    HAS_NETWORKX = False
+
+from ..spatial import MOC
+from ..spatial.utils import make_wcs
 
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
@@ -89,7 +103,7 @@ def test_moc_from_fits_image(moc_from_fits_image):
 
 def test_moc_write_and_from_json(moc_from_fits_image):
     tmp_file = tempfile.NamedTemporaryFile()
-    moc_from_fits_image.write(tmp_file.name, format='json', write_to_file=True)
+    moc_from_fits_image.write(tmp_file.name, format='json')
 
     with open(tmp_file.name, 'r') as moc_file:
         import json
@@ -99,12 +113,12 @@ def test_moc_write_and_from_json(moc_from_fits_image):
 
 
 def test_moc_write_to_fits(moc_from_fits_image):
-    hdulist = moc_from_fits_image.write(format='fits')
+    hdulist = moc_from_fits_image.serialize(format='fits')
     assert isinstance(hdulist, fits.hdu.hdulist.HDUList)
 
 
 def test_moc_write_to_json(moc_from_fits_image):
-    moc_json = moc_from_fits_image.write(format='json')
+    moc_json = moc_from_fits_image.serialize(format='json')
     assert isinstance(moc_json, dict)
 
 
@@ -116,10 +130,6 @@ def test_moc_contains():
     healpix_outside_arr = np.setdiff1d(all_healpix_arr, healpix_arr)
 
     moc = MOC.from_json(json_moc={str(order): list(healpix_arr)})
-
-    #viz = Vizier(columns=['*', '_RAJ2000', '_DEJ2000'])
-    #viz.ROW_LIMIT = -1
-    #table = viz.get_catalogs('I/293/npm2cros')[0]
 
     hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
     lon, lat = hp.healpix_to_lonlat(healpix_arr)
@@ -136,6 +146,46 @@ def test_moc_contains():
     should_be_inside_arr = moc.contains(ra=lon_out, dec=lat_out, keep_inside=False)
     assert should_be_inside_arr.all()
 
+def test_mpl_fill():
+    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    # WCS used : ICRS & aitoff projection
+    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
+
+    # Init MPL axis
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
+    # Python 2.7 RuntimeError.
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+
+    # Call to method we want to test
+    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
+
+def test_mpl_border():
+    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    # WCS used : ICRS & aitoff projection
+    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
+
+    # Init MPL axis
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
+    # Python 2.7 RuntimeError.
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+
+    # Call to method we want to test
+    moc.border(ax=ax, wcs=wcs, color='g')
+
+@pytest.mark.skipif('not HAS_NETWORKX')
+def test_boundaries():
+    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+    moc = moc.degrade_to_order(6)
+    boundaries_l = moc.get_boundaries()
 
 @pytest.fixture()
 def mocs():

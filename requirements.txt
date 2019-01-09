@@ -2,7 +2,7 @@ numpy
 requests
 astropy
 astropy_healpix
-matplotlib
+matplotlib==2.2.2
 mocpy
 astroquery
 six

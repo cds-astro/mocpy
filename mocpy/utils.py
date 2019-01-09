@@ -120,14 +120,3 @@ def number_trailing_zeros(x):
         x >>= 1
 
     return bits
-
-"""
-def number_trailing_zeros(i):
-    # O(log(i)) complexity here. Can be done in O(1) using more low-level algo
-    nb = 0
-    while (i & 1) == 0 and i > 0:
-        nb += 1
-        i = i >> 1
-
-    return nb
-"""

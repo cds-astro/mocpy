@@ -10,3 +10,6 @@ dist
 docs/_build
 .coverage
 htmlcov
+prof/
+*.java
+.vscode/
