@@ -22,3 +22,4 @@ dependencies:
   - numpydoc
   - pytest-profiling
   - networkx
+  - spherical_geometry

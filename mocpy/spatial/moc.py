@@ -23,6 +23,9 @@ from astropy_healpix.healpy import nside2npix
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
+from spherical_geometry.polygon import SphericalPolygon
+from spherical_geometry import great_circle_arc
+
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
@@ -618,6 +621,108 @@ class MOC(AbstractMOC):
 
         interval_set = IntervalSet.from_numpy_array(intervals_arr)
         return cls(interval_set)
+
+    @classmethod
+    def from_polygon(cls, vertices, inside=None, max_depth=10):
+        """
+        Create a MOC from a polygon sky region
+
+        Parameters
+        ----------
+        vertices : `~astropy.coordinates.SkyCoord`
+            The polygon that will be considered. Concave and self intersecting polygons are accepted.
+        inside : `~astropy.coordinates.SkyCoord`, optional
+            A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
+            on the unit sphere (there is no infinite area that can be considered as the outside.
+            On the sphere, a polygon delimits two finite areas.).
+            Possible improvement: take the inside area as the one covering the less of the sphere.
+
+            If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
+            concave polygons.
+        max_depth: int, optional
+            The resolution of the MOC. Set to 10 by default.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        def polygon_contains_ipix(poly, ipix):
+            # ipix and poly are spherical shapes
+            poly_points = list(poly.points)[0]
+            x_poly, y_poly, z_poly = (poly_points[:, 0], poly_points[:, 1], poly_points[:, 2])
+
+            ipix_points = list(ipix.points)[0]
+            x_ipix, y_ipix, z_ipix = (ipix_points[:, 0], ipix_points[:, 1], ipix_points[:, 2])
+
+            A_poly = np.stack((x_poly, y_poly, z_poly)).T
+            B_poly = A_poly
+            B_poly = np.append(B_poly, [B_poly[1]], axis=0)
+            B_poly = B_poly[1:]
+
+            A_poly = A_poly[:-1]
+            B_poly = B_poly[:-1]
+
+            for i in range(len(ipix_points) - 1):
+                A_ipix = (x_ipix[i], y_ipix[i], z_ipix[i])
+                B_ipix = (x_ipix[i+1], y_ipix[i+1], z_ipix[i+1])
+
+                inter = great_circle_arc.intersects(A_poly, B_poly, A_ipix, B_ipix)
+                if inter.any():
+                    return False
+
+            return poly.intersects_poly(ipix) and poly.area() > ipix.area()
+
+        ipix_inter_polygon = np.arange(12)
+        ipix_d = {}
+
+        ra = vertices.icrs.ra.deg
+        dec = vertices.icrs.dec.deg
+        # TODO: Check if the vertices form a closed polygon
+        if ra[0] != ra[-1] or dec[0] != dec[-1]:
+            # If not, append the first vertex to ``vertices``
+            ra = np.append(ra, ra[0])
+            dec = np.append(dec, dec[0])
+            vertices = SkyCoord(ra=ra, dec=dec, unit="deg", frame="icrs")
+
+        polygon = SphericalPolygon.from_radec(lon=vertices.icrs.ra.deg, lat=vertices.icrs.dec.deg, degrees=True, center=inside)
+
+        for order in range(max_depth + 1):
+            hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
+
+            lon, lat = hp.boundaries_lonlat(ipix_inter_polygon, step=1)
+            lon = lon.to(u.deg).value
+            lat = lat.to(u.deg).value
+
+            shapes = np.vstack((lon.ravel(), lat.ravel())).T.reshape(ipix_inter_polygon.shape[0], 4, -1)
+            ipix_in_polygon_l = []
+            ipix_l = []
+            for i in range(ipix_inter_polygon.shape[0]):
+                # Spherical polygon asks for a closed list of vertices. We add its first vertex to the end.
+                shape = shapes[i]
+                shape = np.append(shape, [shape[0]], axis=0)
+
+                ipix_shape = SphericalPolygon.from_radec(lon=shape[:, 0], lat=shape[:, 1], degrees=True)
+
+                ipix = ipix_inter_polygon[i]
+                if polygon.intersects_poly(ipix_shape):
+                    # If we are at the max depth then we direcly add to the MOC the intersecting ipixels
+                    if order == max_depth:
+                        ipix_in_polygon_l.append(ipix)
+                    else:
+                        # Check whether polygon contains ipix or not
+                        if polygon_contains_ipix(polygon, ipix_shape):
+                            ipix_in_polygon_l.append(ipix)
+                        else:
+                            # The ipix is just intersecting without being contained in the polygon
+                            # We split it in its 4 children
+                            offset = ipix << 2
+                            ipix_l.extend([offset, offset+1, offset+2, offset+3])
+
+            ipix_d.update({str(order): ipix_in_polygon_l})
+            ipix_inter_polygon = np.asarray(ipix_l)
+
+        return MOC.from_json(ipix_d)
 
     @property
     def sky_fraction(self):

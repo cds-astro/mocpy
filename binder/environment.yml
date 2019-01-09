@@ -13,3 +13,4 @@ dependencies:
 - requests
 - six
 - networkx
+- spherical_geometry

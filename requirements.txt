@@ -6,4 +6,6 @@ matplotlib==2.2.2
 mocpy
 astroquery
 six
+networkx
+spherical_geometry
 
