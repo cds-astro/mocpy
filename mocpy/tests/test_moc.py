@@ -16,6 +16,12 @@ from astropy_healpix import HEALPix
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
+try:
+    import networkx
+    HAS_NETWORKX = True
+except ImportError:
+    HAS_NETWORKX = False
+
 from ..spatial import MOC
 from ..spatial.utils import make_wcs
 
@@ -157,7 +163,7 @@ def test_mpl_fill():
     # Call to method we want to test
     moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
 
-def test_mpl_perimeter():
+def test_mpl_border():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
@@ -172,8 +178,9 @@ def test_mpl_perimeter():
     fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
 
     # Call to method we want to test
-    moc.perimeter(ax=ax, wcs=wcs, color='g')
+    moc.border(ax=ax, wcs=wcs, color='g')
 
+@pytest.mark.skipif('not HAS_NETWORKX')
 def test_boundaries():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)

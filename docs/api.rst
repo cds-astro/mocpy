@@ -3,5 +3,12 @@ API
 
 Auto-generated API documentation for MOCpy.
 
-.. automodule:: mocpy
-   :members:
+Class overview
+--------------
+
+.. autosummary::
+   :toctree: stubs
+   
+   mocpy.MOC
+   mocpy.TimeMOC
+

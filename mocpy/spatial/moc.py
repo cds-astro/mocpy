@@ -22,7 +22,6 @@ from astropy_healpix.healpy import nside2npix
 
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
-from .perimeter import Boundaries
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -32,10 +31,7 @@ __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
 class MOC(AbstractMOC):
-    """Multi-order Spatial Coverage.
-
-    TODO: describe a bit more. Link to docs examples.
-    """
+    """Multi-order spatial coverage class"""
 
     def __init__(self, interval_set=None):
         AbstractMOC.__init__(self, interval_set)
@@ -60,8 +56,7 @@ class MOC(AbstractMOC):
 
     def contains(self, ra, dec, keep_inside=True):
         """
-        Get a mask array (e.g. a numpy boolean array) of positions being inside (or outside) the
-        mocpy object instance.
+        Get a boolean mask array of the positions lying inside (or outside) the MOC.
 
         Parameters
         ----------
@@ -70,9 +65,8 @@ class MOC(AbstractMOC):
         dec: `astropy.units.Quantity`
             declination array
         keep_inside : bool, optional
-            True by default. If so the filtered table contains only observations that are located into
-            the mocpy object. If ``keep_inside`` is False, the filtered table contains all observations lying outside
-            the mocpy object.
+            True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
+            is false, the mask indicates the coordinates lying outside the MOC. 
 
         Returns
         -------
@@ -98,64 +92,62 @@ class MOC(AbstractMOC):
 
     def add_neighbours(self):
         """
-        Add all the pixels at max order in the neighbourhood of the MOC:
+        Extends the MOC so that it includes the HEALPix cells touching the border of the MOC.
 
-        1. Get the HEALPix array of the MOC at the its max order.
-        2. Get the HEALPix array containing the neighbors of the first array (it consists of an ``extended`` HEALPix
-           array containing the first one).
-        3. Compute the difference between the second and the first HEALPix array to get only the neighboring pixels
-           located at the border of the MOC.
-        4. This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
+        This operation is done at the max depth of the MOC.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
-            self
+            self extended by one degree of neighbors
         """
-        pix_id_arr = self._best_res_pixels()
+        # Get the pixels array of the MOC at the its max order.
+        ipix = self._best_res_pixels()
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_id_arr)
-
-        augmented_pix_arr = np.setdiff1d(neighbour_pix_arr, pix_id_arr)
+        # Get the HEALPix array containing the neighbors of ``ipix``.
+        # This array "extends" ``ipix`` by one degree of neighbors. 
+        extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
+        
+        # Compute the difference between ``extend_ipix`` and ``ipix`` to get only the neighboring pixels
+        # located at the border of the MOC.
+        neigh_ipix = np.setdiff1d(extend_ipix, ipix)
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        intervals_arr = np.vstack((augmented_pix_arr << shift, (augmented_pix_arr + 1) << shift)).T
-
-        self._interval_set = self._interval_set.union(IntervalSet.from_numpy_array(intervals_arr))
+        neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + 1) << shift)).T
+        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
+        self._interval_set = self._interval_set.union(IntervalSet.from_numpy_array(neigh_itv))
         return self
 
     def remove_neighbours(self):
         """
-        Remove all the pixels at max order located at the bound of the moc:
+        Remove from the MOC the HEALPix cells located at the border of the MOC.
 
-        1. Get the HEALPix array of the MOC at the its max order.
-        2. Get the HEALPix array containing the neighbors of the first array (it consists of an ``extended`` HEALPix
-           array containing the first one).
-        3. Compute the difference between the second and the first HEALPix array to get only the neighboring pixels
-           located at the border of the MOC.
-        4. Same as step 2 to get the HEALPix neighbors of the last computed array.
-        5. The difference between the original MOC HEALPix array and this one gives a new MOC whose borders are removed.
+        This operation is done at the max depth of the MOC.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
             self
         """
-        pix_id_arr = self._best_res_pixels()
+        # Get the HEALPix cells of the MOC at its max depth
+        ipix = self._best_res_pixels()
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        neighbour_pix_arr = AbstractMOC._neighbour_pixels(hp, pix_id_arr)
+        # Extend it to include the max depth neighbor cells.
+        extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
 
-        only_neighbour_arr = np.setxor1d(neighbour_pix_arr, pix_id_arr)
+        # Get only the max depth HEALPix cells lying at the border of the MOC
+        neigh_ipix = np.setxor1d(extend_ipix, ipix)
 
-        bound_pix_arr = AbstractMOC._neighbour_pixels(hp, only_neighbour_arr)
+        # Remove these pixels from ``ipix``
+        border_ipix = AbstractMOC._neighbour_pixels(hp, neigh_ipix)
+        reduced_ipix = np.setdiff1d(ipix, border_ipix)
 
-        diminished_pix_arr = np.setdiff1d(pix_id_arr, bound_pix_arr)
-
+        # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        intervals_arr = np.vstack((diminished_pix_arr << shift, (diminished_pix_arr + 1) << shift)).T
-        self._interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + 1) << shift)).T
+        self._interval_set = IntervalSet.from_numpy_array(reduced_itv)
         return self
 
     def _backface_culling(self, xp, yp):
@@ -279,12 +271,17 @@ class MOC(AbstractMOC):
         boundaries: [`~astropy.coordinates.SkyCoord`]
             A list of SkyCoords each describing one border.
         """
+        try:
+            from .boundaries import Boundaries
+        except ImportError:
+            print('Please install `networkx` package using: pip install networkx')
+            return
 
         return Boundaries.get(self, order)
 
-    def perimeter(self, ax, wcs, **kw_mpl_pathpatch):
+    def border(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Add the MOC perimeter to a matplotlib axis
+        Add the MOC border to a matplotlib axis
 
         Parameters
         ----------
@@ -362,8 +359,7 @@ class MOC(AbstractMOC):
             if not east_border[i]:
                 path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
                 codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-        # Cast to a numpy array
-        #path_vertices_arr = np.array(path_vertices_l)
+
         path = Path(path_vertices_l, codes)
         perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
         ax.add_patch(perimeter_patch)
@@ -516,8 +512,6 @@ class MOC(AbstractMOC):
         """
         Create a `~mocpy.moc.MOC` object from a given url
 
-        TODO : should be implemented in astroquery ?
-
         Parameters
         ----------
         url : str
@@ -534,7 +528,19 @@ class MOC(AbstractMOC):
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
         """
-        Create a MOC from astropy skycoords. The ICRS coordinate system is used for representing HEALPix cells.
+        Create a MOC from an astropy skycoord.
+
+        Parameters
+        ----------
+        skycoords : `~astropy.coordinates.SkyCoord`
+            Must be expressed using the ICRS coordinate system.
+        max_norder : int
+            The depth of the smallest HEALPix cells contained in the MOC.
+        
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
@@ -548,8 +554,20 @@ class MOC(AbstractMOC):
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
         """
-        Create a MOC from astropy lon, lat quantities. lon and lat must be expressed in ICRS because the HEALPix frame
-        used is in ICRS.
+        Create a MOC from astropy lon, lat quantities.
+        
+        Parameters
+        ----------
+        skycoords : `~astropy.coordinates.SkyCoord`
+            Must be expressed in ICRS because the astropy-HEALPix frame used here
+            is in ICRS.
+        max_norder : int
+            The depth of the smallest HEALPix cells contained in the MOC.
+        
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(lon, lat)
@@ -563,7 +581,7 @@ class MOC(AbstractMOC):
     @property
     def sky_fraction(self):
         """
-        return the sky fraction (between 0 and 1) covered by the MOC
+        Return the sky fraction covered by the MOC
         """
         pix_id_arr = self._best_res_pixels()
         nb_pix_filled = pix_id_arr.size
@@ -572,21 +590,21 @@ class MOC(AbstractMOC):
     # TODO : move this in astroquery.Simbad.query_region
     def query_simbad(self, max_rows=10000):
         """
-        query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
+        Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
         """
         return self._query('SIMBAD', max_rows)
 
     # TODO : move this in astroquery.Vizier.query_region
     def query_vizier_table(self, table_id, max_rows=10000):
         """
-        query a VizieR table for sources in the coverage of the MOC instance
+        Query a VizieR table for sources in the coverage of the MOC instance
         """
         return self._query(table_id, max_rows)
 
     # TODO : move this in astroquery
     def _query(self, resource_id, max_rows):
         """
-        internal method to query Simbad or a VizieR table
+        Internal method to query Simbad or a VizieR table
         for sources in the coverage of the MOC instance
         """
         from astropy.io.votable import parse_single_table
@@ -620,9 +638,11 @@ class MOC(AbstractMOC):
 
     def plot(self, title='MOC', frame=None):
         """
-        Plot the MOC object in a mollweide view
+        Plot the MOC object using a mollweide projection.
 
-        This method uses matplotlib.
+        This method uses matplotlib. New `fill` and `border` methods tend to replace
+        this one, produce more reliable results and allow you to specify additional 
+        matplotlib style rendering parameters.
 
         Parameters
         ----------
