@@ -284,8 +284,8 @@ class AbstractMOC:
         result_json = {}
 
         order_arr, ipix_arr = utils.uniq2orderipix(uniq_arr)
-        min_order = order_arr[0]
-        max_order = order_arr[-1]
+        min_order = np.min(order_arr[0])
+        max_order = np.max(order_arr[-1])
 
         for order in range(min_order, max_order+1):
             pix_index = np.where(order_arr == order)[0]

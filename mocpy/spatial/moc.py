@@ -185,11 +185,56 @@ class MOC(AbstractMOC):
         CDA = cross_product(vx, vy, 3)
 
         frontface_cells  = (ABC[:, 2] < 0) & (CDA[:, 2] < 0)
+        frontface_cells = np.asarray(frontface_cells)
 
         vx = vx[frontface_cells]
         vy = vy[frontface_cells]
 
         return vx, vy, frontface_cells
+
+    def _remove_backfacing_cells_from_moc(moc, wcs):
+        order_ipix = moc.serialize(format='json')
+
+        # We set the max_depth to the max order but any order between [1, max_order] may work
+        # depending on the time we except to get a result.
+        max_depth = moc.max_order
+        # Create a new MOC that do not contain the HEALPix
+        # cells that are backfacing the projection
+        orders = [int(order) for order in order_ipix.keys()]
+        min_order = min(orders)
+        max_order = max(orders)
+        ipixels = np.asarray(order_ipix[str(min_order)])
+
+        ipix_d = {}
+        for order in range(min_order, max_depth+1):
+            hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
+
+            ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
+            # Projection on the given WCS
+            xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+            xp, yp, frontface_id = moc._backface_culling(xp, yp)
+
+            # Get the pixels which are backfacing the projection
+            backfacing_ipix = ipixels[~frontface_id]
+            frontface_ipix = ipixels[frontface_id]
+
+            ipix_d.update({str(order): frontface_ipix})
+
+            if order < max_depth:
+                ipixels = order_ipix[str(order+1)]
+                for bf_ipix in backfacing_ipix:
+                    child_bf_ipix = bf_ipix << 2
+                    ipixels.extend([child_bf_ipix,
+                        child_bf_ipix + 1,
+                        child_bf_ipix + 2,
+                        child_bf_ipix + 3])
+
+                ipixels = np.asarray(ipixels)
+
+        for order in range(max_depth+1, max_order+1):
+            ipix_d.update({str(order): order_ipix[str(order)]})
+
+        return MOC.from_json(ipix_d), ipix_d
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
@@ -204,26 +249,22 @@ class MOC(AbstractMOC):
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
         """
+        # Plot the moc whose backfacing cells have been removed
         moc = self
-
         if moc.max_order > 10:
-            moc = self.degrade_to_order(10)
-
-        max_order = moc.max_order
-
-        # ipixels_open = moc._best_res_pixels()
-        order_ipix = moc.serialize(format='json')
+            moc = moc.degrade_to_order(10)
+        
+        moc_to_plot, order_ipix = MOC._remove_backfacing_cells_from_moc(moc=moc, wcs=wcs)
 
         path_vertices = np.array([])
         codes = np.array([])
-
         for order, ipixels in order_ipix.items():
             hp = HEALPix(nside=(1 << int(order)), order='nested', frame=ICRS())
 
             ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
             # Projection on the given WCS
             xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-            xp, yp, _ = moc._backface_culling(xp, yp)
+            #xp, yp, frontface_id = moc_to_plot._backface_culling(xp, yp)
 
             c1=np.vstack((xp[:, 0], yp[:, 0])).T
             c2=np.vstack((xp[:, 1], yp[:, 1])).T
