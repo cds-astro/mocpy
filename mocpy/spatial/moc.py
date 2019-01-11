@@ -25,6 +25,7 @@ from ..interval_set import IntervalSet
 
 from spherical_geometry.polygon import SphericalPolygon
 from spherical_geometry import great_circle_arc
+from spherical_geometry import vector
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -224,7 +225,11 @@ class MOC(AbstractMOC):
             ipix_d.update({str(order): frontface_ipix})
 
             if order < max_depth:
-                ipixels = order_ipix[str(order+1)]
+                next_order = str(order+1)
+                ipixels = []
+                if next_order in order_ipix:
+                    ipixels = order_ipix[next_order]
+                
                 for bf_ipix in backfacing_ipix:
                     child_bf_ipix = bf_ipix << 2
                     ipixels.extend([child_bf_ipix,
@@ -254,8 +259,8 @@ class MOC(AbstractMOC):
         """
         # Plot the moc whose backfacing cells have been removed
         moc = self
-        if moc.max_order > 10:
-            moc = moc.degrade_to_order(10)
+        #if moc.max_order > 10:
+        #    moc = moc.degrade_to_order(10)
         
         moc_to_plot, order_ipix = MOC._remove_backfacing_cells_from_moc(moc=moc, wcs=wcs)
 
@@ -647,7 +652,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        def polygon_contains_ipix(poly, ipix):
+        def poly_crossing_ipix(poly, ipix):
             # ipix and poly are spherical shapes
             poly_points = list(poly.points)[0]
             x_poly, y_poly, z_poly = (poly_points[:, 0], poly_points[:, 1], poly_points[:, 2])
@@ -669,23 +674,48 @@ class MOC(AbstractMOC):
 
                 inter = great_circle_arc.intersects(A_poly, B_poly, A_ipix, B_ipix)
                 if inter.any():
-                    return False
+                    return True
 
-            return poly.intersects_poly(ipix) and poly.area() > ipix.area()
+            return False
+
+        def getStartingDepth(poly):
+            poly_points = np.asarray(list(poly.points))[0]
+            
+            center = poly_points.mean(axis=0)
+
+            vector.normalize_vector(center, output=center)
+            print("center: ", center)
+
+            dist_from_center = poly_points - center
+            print("dist", dist_from_center)
+
+
+
+        def polygon_contains_ipix(poly, ipix):
+            return poly.area() > ipix.area() and \
+             poly.intersects_poly(ipix) and \
+             not poly_crossing_ipix(poly_ipix)
 
         ipix_inter_polygon = np.arange(12)
         ipix_d = {}
 
         ra = vertices.icrs.ra.deg
         dec = vertices.icrs.dec.deg
-        # TODO: Check if the vertices form a closed polygon
+        # Check if the vertices form a closed polygon
         if ra[0] != ra[-1] or dec[0] != dec[-1]:
             # If not, append the first vertex to ``vertices``
             ra = np.append(ra, ra[0])
             dec = np.append(dec, dec[0])
             vertices = SkyCoord(ra=ra, dec=dec, unit="deg", frame="icrs")
 
-        polygon = SphericalPolygon.from_radec(lon=vertices.icrs.ra.deg, lat=vertices.icrs.dec.deg, degrees=True, center=inside)
+        if inside:
+            # Convert it to (x, y, z) cartesian coordinates on the sphere
+            inside = (inside.icrs.ra.deg, inside.icrs.dec.deg)
+            print('babou')
+
+        polygon = SphericalPolygon.from_lonlat(lon=vertices.icrs.ra.deg, lat=vertices.icrs.dec.deg, center=inside, degrees=True)
+        getStartingDepth(polygon)
+
 
         for order in range(max_depth + 1):
             hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
