@@ -267,22 +267,44 @@ class MOC(AbstractMOC):
         path_vertices = np.array([])
         codes = np.array([])
         for order, ipixels in order_ipix.items():
-            hp = HEALPix(nside=(1 << int(order)), order='nested', frame=ICRS())
+            o = int(order)
+            hp = HEALPix(nside=(1 << o), order='nested', frame=ICRS())
 
-            ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
+            if o < 3:
+                ipix_boundaries = hp.boundaries_skycoord(ipixels, step=2)
+            else:
+                ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
+
             # Projection on the given WCS
             xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
             #xp, yp, frontface_id = moc_to_plot._backface_culling(xp, yp)
 
-            c1=np.vstack((xp[:, 0], yp[:, 0])).T
-            c2=np.vstack((xp[:, 1], yp[:, 1])).T
-            c3=np.vstack((xp[:, 2], yp[:, 2])).T
-            c4=np.vstack((xp[:, 3], yp[:, 3])).T
+            if o < 3:
+                c1=np.vstack((xp[:, 0], yp[:, 0])).T
+                c2=np.vstack((xp[:, 1], yp[:, 1])).T
+                c3=np.vstack((xp[:, 2], yp[:, 2])).T
+                c4=np.vstack((xp[:, 3], yp[:, 3])).T
+                
+                c5=np.vstack((xp[:, 4], yp[:, 4])).T
+                c6=np.vstack((xp[:, 5], yp[:, 5])).T
+                c7=np.vstack((xp[:, 6], yp[:, 6])).T
+                c8=np.vstack((xp[:, 7], yp[:, 7])).T
+                
+                cells=np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
 
-            cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+                path_vertices_cur = cells.reshape((9*c1.shape[0], 2))
+                single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+            else:
+                c1=np.vstack((xp[:, 0], yp[:, 0])).T
+                c2=np.vstack((xp[:, 1], yp[:, 1])).T
+                c3=np.vstack((xp[:, 2], yp[:, 2])).T
+                c4=np.vstack((xp[:, 3], yp[:, 3])).T
 
-            path_vertices_cur = cells.reshape((5*c1.shape[0], 2))
-            single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+                cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+
+                path_vertices_cur = cells.reshape((5*c1.shape[0], 2))
+                single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+
             codes_cur = np.tile(single_code, c1.shape[0])
 
             if path_vertices.size == 0:
@@ -715,7 +737,6 @@ class MOC(AbstractMOC):
 
         polygon = SphericalPolygon.from_lonlat(lon=vertices.icrs.ra.deg, lat=vertices.icrs.dec.deg, center=inside, degrees=True)
         getStartingDepth(polygon)
-
 
         for order in range(max_depth + 1):
             hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
