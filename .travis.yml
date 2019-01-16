@@ -43,7 +43,7 @@ script:
   - make html
   - cd ..
 
-# Deployment and upload to PyPI if a commit is tagged
+# Deployment and upload to PyPI if a commit is tagged and only on the master branch
 # https://docs.travis-ci.com/user/deployment/pypi/#deploying-tags
 deploy:
   provider: pypi
@@ -52,10 +52,9 @@ deploy:
   # https://docs.travis-ci.com/user/encryption-keys/
   password:
     secure: "ANSPnsNPAV3hqUG34IrPwc44qQlHw8VxyhdupzjSNi+pCVN8DIgPelVxocj89IhM5s4FyuGRjPOum+dUneKKRYWW7Yi0wK5nK0fp6DX97y/7JvxqZVAso0lZjzUvp6UVcYnyqpuwVE0es2oIZLS3BcX7p9+zr9K9Dy5k5SJrdppT2DmC5SguHE0RPT8Fx1IllKREnNqmFB6lhJsu9sdJ9QH14IdRGwNyhvK3tBAg+Sy/tsDb01LXNedU+wk/KzAc+ylKNoYMCyUizqx4Kqq+tKPPKSPMxCxUKV0ktAGRlgqAn/K+VXtwCBuD4dyvgWAG5u7+OBsE49tP2JMazTUHa6wcDq35XthXKqchp1+tljw8WCnisExEvDs5IEyWVlvW46v3kLPkmbCE1LUDwWlU0HnVfXCpbXHzv4Z5koMGRzWi98m64Z6t95NDM515j9vNHgEPnZXm9i/JDfHYGHEMmOZ1AXgVreQ1fwmh1+pmI7V6KOvNNNSghbVJH+hxNzXGtg12Q3qZANRj8V6hmM1PfrRBltS+r9sKdViUwQSycOSlyL6lkdaHtogbaEPIpGPq5obCFr21S+up4FJ48a0CCUZWdF2qMrbwhTSPquGCfQzU32EQnr8qb1Ol4NNjN84EIlHBhBCcAF157kl3JlFRHY8i38t87tAIHeU/gkEBmx0="
-  # Upload for source and wheel distributions
+  # Upload a source and a wheel distribution
   distributions: "sdist bdist_wheel"
   # Avoid the PyPI error message: HTTPError: 400 Client Error: File already exists.
   skip_existing: true
   on:
-    all_branches: true
     tags: true
