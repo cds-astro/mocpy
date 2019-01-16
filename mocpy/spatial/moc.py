@@ -23,9 +23,7 @@ from astropy_healpix.healpy import nside2npix
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
-from spherical_geometry.polygon import SphericalPolygon
-from spherical_geometry import great_circle_arc
-from spherical_geometry import vector
+from .polygon import PolygonComputer
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -244,7 +242,7 @@ class MOC(AbstractMOC):
 
         return MOC.from_json(ipix_d), ipix_d
 
-    def fill(self, ax, wcs, **kw_mpl_pathpatch):
+    def fill(self, ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None, **kw_mpl_pathpatch):
         """
         Add the MOC to a matplotlib axis
 
@@ -254,14 +252,19 @@ class MOC(AbstractMOC):
             Matplotlib axis
         wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
+        lon1: `~astropy.coordinates.Quantity`
+            Longitude of the first coordinate of the viewport
+        lat1: `~astropy.coordinates.Quantity`
+            Latitude of the first coordinate of the viewport
+        lon2: `~astropy.coordinates.Quantity`
+            Longitude of the second coordinate of the viewport
+        lat2: `~astropy.coordinates.Quantity`
+            Latitude of the second coordinate of the viewport
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
         """
         # Plot the moc whose backfacing cells have been removed
         moc = self
-        #if moc.max_order > 10:
-        #    moc = moc.degrade_to_order(10)
-        
         moc_to_plot, order_ipix = MOC._remove_backfacing_cells_from_moc(moc=moc, wcs=wcs)
 
         path_vertices = np.array([])
@@ -321,6 +324,8 @@ class MOC(AbstractMOC):
         # Add the patch to the mpl axis
         ax.add_patch(patch)
 
+        MOC._set_axis_viewport(ax, wcs, lon1, lat1, lon2, lat2)
+
     def get_boundaries(self, order=None):
         """
         Return the boundaries of the MOC
@@ -350,7 +355,7 @@ class MOC(AbstractMOC):
 
         return Boundaries.get(self, order)
 
-    def border(self, ax, wcs, **kw_mpl_pathpatch):
+    def border(self, ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None, **kw_mpl_pathpatch):
         """
         Add the MOC border to a matplotlib axis
 
@@ -360,13 +365,18 @@ class MOC(AbstractMOC):
             Matplotlib axis
         wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
+        lon1: `~astropy.coordinates.Quantity`
+            Longitude of the first coordinate of the viewport
+        lat1: `~astropy.coordinates.Quantity`
+            Latitude of the first coordinate of the viewport
+        lon2: `~astropy.coordinates.Quantity`
+            Longitude of the second coordinate of the viewport
+        lat2: `~astropy.coordinates.Quantity`
+            Latitude of the second coordinate of the viewport
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
         """
         moc = self
-
-        if moc.max_order > 8:
-            moc = self.degrade_to_order(8)
 
         max_order = moc.max_order
         hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
@@ -434,6 +444,41 @@ class MOC(AbstractMOC):
         path = Path(path_vertices_l, codes)
         perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
         ax.add_patch(perimeter_patch)
+
+        MOC._set_axis_viewport(ax, wcs, lon1, lat1, lon2, lat2)
+
+    @staticmethod
+    def _set_axis_viewport(ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None):
+        # Set the viewport to the MOC area
+        if lon1 is not None and lat1 is not None and \
+            lon2 is not None and lat2 is not None:
+            # A viewport is defined by two points defining a rectangle on the unit sphere
+            #     c1
+            #       +---------------+
+            #       |               |
+            #       |               |
+            #       +---------------+
+            #                        c2
+            c1 = SkyCoord(ra=lon1, dec=lat1, frame="icrs")
+            c2 = SkyCoord(ra=lon2, dec=lat2, frame="icrs")
+
+            # Project these 2 coordinates of the viewport using the wcs
+            x1, y1 = skycoord_to_pixel(c1, wcs)
+            x2, y2 = skycoord_to_pixel(c2, wcs)
+
+            x_min = min(x1, x2)
+            x_max = max(x1, x2)
+
+            y_min = min(y1, y2)
+            y_max = max(y1, y2)
+
+            # Define an offset being equal to 5% of the length of the projeted viewport
+            off_x = (x_max - x_min) * 0.05
+            off_y = (y_max - y_min) * 0.05
+
+            # Update the axis
+            ax.set_xlim([x_min - off_x, x_max + off_x])
+            ax.set_ylim([y_min - off_y, y_max + off_y])
 
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
@@ -650,14 +695,16 @@ class MOC(AbstractMOC):
         return cls(interval_set)
 
     @classmethod
-    def from_polygon(cls, vertices, inside=None, max_depth=10):
+    def from_polygon(cls, lon, lat, inside=None, max_depth=10):
         """
-        Create a MOC from a polygon sky region
+        Create a MOC from a polygon
 
         Parameters
         ----------
-        vertices : `~astropy.coordinates.SkyCoord`
-            The polygon that will be considered. Concave and self intersecting polygons are accepted.
+        lon : `~astropy.units.Quantity`
+            The longitudes defining the polygon. Can describe convex and concave polygons but no self-intersecting ones.
+        lat : `~astropy.units.Quantity`
+            The latitudes defining the polygon. Can describe convex and concave polygons but no self-intersecting ones.
         inside : `~astropy.coordinates.SkyCoord`, optional
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
             on the unit sphere (there is no infinite area that can be considered as the outside.
@@ -674,106 +721,15 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        def poly_crossing_ipix(poly, ipix):
-            # ipix and poly are spherical shapes
-            poly_points = list(poly.points)[0]
-            x_poly, y_poly, z_poly = (poly_points[:, 0], poly_points[:, 1], poly_points[:, 2])
+        polygon_computer = PolygonComputer(lon, lat, inside, max_depth)
+        # Create the moc from the python dictionary
 
-            ipix_points = list(ipix.points)[0]
-            x_ipix, y_ipix, z_ipix = (ipix_points[:, 0], ipix_points[:, 1], ipix_points[:, 2])
+        moc = MOC.from_json(polygon_computer.ipix)
+        # We degrade it to the user-requested order
+        if polygon_computer.degrade_to_max_depth:
+            moc = moc.degrade_to_order(max_depth)
 
-            A_poly = np.stack((x_poly, y_poly, z_poly)).T
-            B_poly = A_poly
-            B_poly = np.append(B_poly, [B_poly[1]], axis=0)
-            B_poly = B_poly[1:]
-
-            A_poly = A_poly[:-1]
-            B_poly = B_poly[:-1]
-
-            for i in range(len(ipix_points) - 1):
-                A_ipix = (x_ipix[i], y_ipix[i], z_ipix[i])
-                B_ipix = (x_ipix[i+1], y_ipix[i+1], z_ipix[i+1])
-
-                inter = great_circle_arc.intersects(A_poly, B_poly, A_ipix, B_ipix)
-                if inter.any():
-                    return True
-
-            return False
-
-        def getStartingDepth(poly):
-            poly_points = np.asarray(list(poly.points))[0]
-            
-            center = poly_points.mean(axis=0)
-
-            vector.normalize_vector(center, output=center)
-            print("center: ", center)
-
-            dist_from_center = poly_points - center
-            print("dist", dist_from_center)
-
-
-
-        def polygon_contains_ipix(poly, ipix):
-            return poly.area() > ipix.area() and \
-             poly.intersects_poly(ipix) and \
-             not poly_crossing_ipix(poly_ipix)
-
-        ipix_inter_polygon = np.arange(12)
-        ipix_d = {}
-
-        ra = vertices.icrs.ra.deg
-        dec = vertices.icrs.dec.deg
-        # Check if the vertices form a closed polygon
-        if ra[0] != ra[-1] or dec[0] != dec[-1]:
-            # If not, append the first vertex to ``vertices``
-            ra = np.append(ra, ra[0])
-            dec = np.append(dec, dec[0])
-            vertices = SkyCoord(ra=ra, dec=dec, unit="deg", frame="icrs")
-
-        if inside:
-            # Convert it to (x, y, z) cartesian coordinates on the sphere
-            inside = (inside.icrs.ra.deg, inside.icrs.dec.deg)
-            print('babou')
-
-        polygon = SphericalPolygon.from_lonlat(lon=vertices.icrs.ra.deg, lat=vertices.icrs.dec.deg, center=inside, degrees=True)
-        getStartingDepth(polygon)
-
-        for order in range(max_depth + 1):
-            hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
-
-            lon, lat = hp.boundaries_lonlat(ipix_inter_polygon, step=1)
-            lon = lon.to(u.deg).value
-            lat = lat.to(u.deg).value
-
-            shapes = np.vstack((lon.ravel(), lat.ravel())).T.reshape(ipix_inter_polygon.shape[0], 4, -1)
-            ipix_in_polygon_l = []
-            ipix_l = []
-            for i in range(ipix_inter_polygon.shape[0]):
-                # Spherical polygon asks for a closed list of vertices. We add its first vertex to the end.
-                shape = shapes[i]
-                shape = np.append(shape, [shape[0]], axis=0)
-
-                ipix_shape = SphericalPolygon.from_radec(lon=shape[:, 0], lat=shape[:, 1], degrees=True)
-
-                ipix = ipix_inter_polygon[i]
-                if polygon.intersects_poly(ipix_shape):
-                    # If we are at the max depth then we direcly add to the MOC the intersecting ipixels
-                    if order == max_depth:
-                        ipix_in_polygon_l.append(ipix)
-                    else:
-                        # Check whether polygon contains ipix or not
-                        if polygon_contains_ipix(polygon, ipix_shape):
-                            ipix_in_polygon_l.append(ipix)
-                        else:
-                            # The ipix is just intersecting without being contained in the polygon
-                            # We split it in its 4 children
-                            offset = ipix << 2
-                            ipix_l.extend([offset, offset+1, offset+2, offset+3])
-
-            ipix_d.update({str(order): ipix_in_polygon_l})
-            ipix_inter_polygon = np.asarray(ipix_l)
-
-        return MOC.from_json(ipix_d)
+        return moc
 
     @property
     def sky_fraction(self):

@@ -6,15 +6,10 @@ import numpy as np
 
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.coordinates import ICRS, Galactic
-from astroquery.vizier import Vizier
+from astropy.coordinates import ICRS
 from astropy.io import fits
-from astropy import wcs
 
 from astropy_healpix import HEALPix
-
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
 
 try:
     import networkx
@@ -99,6 +94,12 @@ def moc_from_fits_image():
 
 def test_moc_from_fits_image(moc_from_fits_image):
     assert moc_from_fits_image
+
+
+def test_moc_serialize_and_from_json(moc_from_fits_image):
+    ipix_d = moc_from_fits_image.serialize(format="json")
+    moc2 = MOC.from_json(ipix_d)
+    assert moc_from_fits_image == moc2
 
 
 def test_moc_write_and_from_json(moc_from_fits_image):
