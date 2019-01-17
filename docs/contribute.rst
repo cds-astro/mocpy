@@ -34,8 +34,8 @@ Using virtualenv
 
     virtualenv -p /usr/bin/python3 mocpy-venv
 
- Virtualenv will create a directory named mocpy-venv in your home. This directory contains a new 
- independent python interpreter (in this case, a python3 one, instanciated from /usr/bin/python3) along with a new empty pip package manager.
+Virtualenv will create a directory named mocpy-venv in your home. This directory contains a new 
+independent python interpreter (in this case, a python3 one, instanciated from /usr/bin/python3) along with a new empty pip package manager.
 
 - Activate your virtual environment::
 
