@@ -8,8 +8,9 @@ MOCPy needs the following external dependencies :
 - `astropy <http://docs.astropy.org/en/stable/>`__
 - `matplotlib <https://matplotlib.org/>`__
 - `networkx <http://networkx.github.io/>`__ For the use of `~mocpy.MOC.get_boundaries`
+- `spherical-geometry <https://github.com/spacetelescope/spherical_geometry>`__
 
-To update the ``mocpy`` package version::
+To upgrade the ``mocpy`` package to the latest version::
 
     pip install mocpy -U
 

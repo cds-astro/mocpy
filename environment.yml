@@ -1,5 +1,3 @@
-name: mocpy-dev
-
 channels:
 - defaults
 - conda-forge

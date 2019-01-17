@@ -1,11 +1,17 @@
+# This file is used for setting up an virtualenv environment
+# for people wishing to contribute to MOCPy.
+# See https://mocpy.readthedocs.io/en/latest/contribute.html for more details.
+
+# Mandatory packages for MOCPy to work 
 numpy
 requests
 astropy
 astropy_healpix
-matplotlib==2.2.2
-mocpy
-astroquery
-six
+matplotlib
 networkx
 spherical_geometry
 
+# Package for basic testing purposes
+pytest
+# Pytest extension package enabling test coverage
+pytest-cov

@@ -3,12 +3,59 @@
 Contribute
 ==========
 
-TODO: describe how to hack on mocpy.
+For contribution purposes the best thing to do is setting up a python dev environment that will act independently from your current
+installed interpreter and package manager.
 
-- Set up the conda environment::
+Setting up the environment
+--------------------------
 
-    conda env create -q python=3.5 -f environment.yml
-    source activate mocpy-dev
+There is two ways to set up an environment. Using conda (installed from miniconda or anaconda) or using the pip package called `virtualenv <https://python-guide-pt-br.readthedocs.io/fr/latest/dev/virtualenvs.html>`__ .
+
+Using conda
+~~~~~~~~~~~
+
+- Set up the conda environment and activate it::
+
+    conda env create -q python=3.5 -f <path_to_mocpy_repo>/environment.yml -n mocpy-env
+    source activate mocpy-env
+
+- Once you are done with your developments you can deactivate your conda environment::
+
+    source deactivate
+
+Using virtualenv
+~~~~~~~~~~~~~~~~
+
+- Go to your home location::
+
+    cd ~
+
+- Set up the virtual environment there::
+
+    virtualenv -p /usr/bin/python3 mocpy-venv
+
+ Virtualenv will create a directory named mocpy-venv in your home. This directory contains a new 
+ independent python interpreter (in this case, a python3 one, instanciated from /usr/bin/python3) along with a new empty pip package manager.
+
+- Activate your virtual environment::
+
+    source ~/mocpy-venv/bin/activate
+
+`pip list` will tell you there is no package installed and `python` opens a session with the interpreter associated to the virtualenv.
+
+- You can now install all the necessary pip packages for developping and testing MOCpy::
+
+    pip install -r <path_to_mocpy_repo>/requirements.txt
+
+- Once you are done with your development you can deactivate the virtual env::
+
+    deactivate
+
+
+Running the tests
+-----------------
+
+Once your environment is set up and activated you can run the tests
 
 - To run the automated tests go to the repo folder and type::
 
@@ -16,13 +63,18 @@ TODO: describe how to hack on mocpy.
 
 - To run the tests with coverage report locally::
 
-    pytest -v mocpy --cov-report=term --cov=mocpy mocpy
+    python -m pytest -v mocpy --cov-report=term --cov=mocpy mocpy
 
 - If you want to do some profiling on a specific test use the following command::
 
-    pytest mocpy -v -k <your_test_name>  --profile-svg
+    python -m pytest mocpy -v -k <your_test_name> --profile-svg
 
-This will generate for you a nice SVG graph telling you how much time functions in your test take
+This will generate for you a nice SVG tree graph.
+
+
+Building the documentation
+--------------------------
+
 - To build the docs from the repo directory::
 
     cd docs
@@ -30,4 +82,3 @@ This will generate for you a nice SVG graph telling you how much time functions 
     cd ..
 
 You will find the html index file in the :file:`docs/_build/html` folder.
-
