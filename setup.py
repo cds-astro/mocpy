@@ -18,7 +18,6 @@ setup(name='MOCPy',
         'numpy',
         'matplotlib', # Used in fill and border
         'networkx', # Used in get_boundaries
-        'spherical_geometry' # Used in from_polygon
     ],
     provides=['mocpy'],
     long_description="MOCPy is a Python library allowing easy creation \

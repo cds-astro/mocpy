@@ -23,8 +23,6 @@ from astropy_healpix.healpy import nside2npix
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
-from .polygon import PolygonComputer
-
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
@@ -695,16 +693,15 @@ class MOC(AbstractMOC):
         return cls(interval_set)
 
     @classmethod
-    def from_polygon(cls, lon, lat, inside=None, max_depth=10):
+    def from_polygon_skycoord(cls, skycoord, inside=None, max_depth=10):
         """
         Create a MOC from a polygon
 
         Parameters
         ----------
-        lon : `~astropy.units.Quantity`
-            The longitudes defining the polygon. Can describe convex and concave polygons but no self-intersecting ones.
-        lat : `~astropy.units.Quantity`
-            The latitudes defining the polygon. Can describe convex and concave polygons but no self-intersecting ones.
+        skycoord : `~astropy.coordinates.SkyCoord`
+            The sky coordinates defining the polygon. Can describe convex and
+            concave polygons but not self-intersecting ones.
         inside : `~astropy.coordinates.SkyCoord`, optional
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
             on the unit sphere (there is no infinite area that can be considered as the outside.
@@ -721,6 +718,40 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
+        return MOC.from_polygon(lon=skycoord.ra, lat=skycoord.dec,
+                                inside=inside, max_depth=max_depth)
+
+    @classmethod
+    def from_polygon(cls, lon, lat, inside=None, max_depth=10):
+        """
+        Create a MOC from a polygon
+
+        Parameters
+        ----------
+        lon : `~astropy.units.Quantity`
+            The longitudes defining the polygon. Can describe convex and
+            concave polygons but not self-intersecting ones.
+        lat : `~astropy.units.Quantity`
+            The latitudes defining the polygon. Can describe convex and concave
+            polygons but not self-intersecting ones.
+        inside : `~astropy.coordinates.SkyCoord`, optional
+            A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
+            on the unit sphere (there is no infinite area that can be considered as the outside.
+            On the sphere, a polygon delimits two finite areas.).
+            Possible improvement: take the inside area as the one covering the less of the sphere.
+
+            If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
+            concave polygons.
+        max_depth: int, optional
+            The resolution of the MOC. Set to 10 by default.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        from .polygon import PolygonComputer
+
         polygon_computer = PolygonComputer(lon, lat, inside, max_depth)
         # Create the moc from the python dictionary
 

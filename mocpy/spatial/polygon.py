@@ -7,9 +7,13 @@ from astropy.coordinates import SkyCoord
 from astropy_healpix import HEALPix
 from astropy_healpix.core import boundaries_lonlat
 
-from spherical_geometry.polygon import SphericalPolygon
-from spherical_geometry import great_circle_arc
-from spherical_geometry import vector
+try:
+    from spherical_geometry.polygon import SphericalPolygon
+    from spherical_geometry import great_circle_arc
+    from spherical_geometry import vector
+except ImportError as e:
+    print("Unable to find spherical-geometry package installed. See https://github.com/spacetelescope/spherical_geometry")
+    raise
 
 class PolygonComputer:
     def polygon_contains_ipix(self, ipix):
