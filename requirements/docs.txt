@@ -1,0 +1,5 @@
+- sphinx
+- numpydoc
+- astropy
+- matplotlib
+- astropy_healpix

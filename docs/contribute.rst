@@ -45,7 +45,7 @@ independent python interpreter (in this case, a python3 one, instanciated from /
 
 - You can now install all the necessary pip packages for developping and testing MOCpy::
 
-    pip install -r <path_to_mocpy_repo>/requirements.txt
+    pip install -r <path_to_mocpy_repo>/requirements/contributing.txt
 
 - Once you are done with your development you can deactivate the virtual env::
 
