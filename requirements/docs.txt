@@ -1,6 +1,8 @@
-- astropy
-- numpy  
-- sphinx
-- numpydoc
-- matplotlib
-- astropy_healpix
+numpy
+requests
+astropy
+astropy_healpix
+matplotlib
+networkx
+sphinx
+numpydoc
