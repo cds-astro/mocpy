@@ -246,17 +246,17 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        ax : `~astropy.units.Quantity`
+        ax : `~matplotlib.axes.Axes`
             Matplotlib axis
         wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
-        lon1: `~astropy.coordinates.Quantity`
+        lon1: `~astropy.units.Quantity`
             Longitude of the first coordinate of the viewport
-        lat1: `~astropy.coordinates.Quantity`
+        lat1: `~astropy.units.Quantity`
             Latitude of the first coordinate of the viewport
-        lon2: `~astropy.coordinates.Quantity`
+        lon2: `~astropy.units.Quantity`
             Longitude of the second coordinate of the viewport
-        lat2: `~astropy.coordinates.Quantity`
+        lat2: `~astropy.units.Quantity`
             Latitude of the second coordinate of the viewport
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
@@ -359,17 +359,17 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        ax : `~astropy.units.Quantity`
+        ax : `~matplotlib.axes.Axes`
             Matplotlib axis
         wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
-        lon1: `~astropy.coordinates.Quantity`
+        lon1: `~astropy.units.Quantity`
             Longitude of the first coordinate of the viewport
-        lat1: `~astropy.coordinates.Quantity`
+        lat1: `~astropy.units.Quantity`
             Latitude of the first coordinate of the viewport
-        lon2: `~astropy.coordinates.Quantity`
+        lon2: `~astropy.units.Quantity`
             Longitude of the second coordinate of the viewport
-        lat2: `~astropy.coordinates.Quantity`
+        lat2: `~astropy.units.Quantity`
             Latitude of the second coordinate of the viewport
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
