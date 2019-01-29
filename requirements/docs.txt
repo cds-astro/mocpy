@@ -3,5 +3,6 @@ astropy
 astropy_healpix
 matplotlib
 networkx
+spherical_geometry
 sphinx
 numpydoc
