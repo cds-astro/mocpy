@@ -1,4 +1,5 @@
 - astropy
+- numpy  
 - sphinx
 - numpydoc
 - matplotlib
