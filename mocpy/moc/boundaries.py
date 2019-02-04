@@ -2,8 +2,6 @@ import numpy as np
 # A python module handling graph manipulations
 import networkx as nx
 
-from .utils import make_wcs
-
 from astropy_healpix import HEALPix
 
 from astropy.coordinates import ICRS, SkyCoord

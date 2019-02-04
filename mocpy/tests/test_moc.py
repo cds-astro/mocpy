@@ -4,21 +4,17 @@ import copy
 
 import numpy as np
 
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, ICRS, Angle
 import astropy.units as u
-from astropy.coordinates import ICRS
 from astropy.io import fits
 
 from astropy_healpix import HEALPix
 
-try:
-    import networkx
-    HAS_NETWORKX = True
-except ImportError:
-    HAS_NETWORKX = False
+import matplotlib
+matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+                      # Python 2.7 RuntimeError.
 
-from ..spatial import MOC
-from ..spatial.utils import make_wcs
+from ..moc import MOC, WCS
 
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
@@ -29,7 +25,6 @@ def get_random_skycoords(size):
 skycoords1 = get_random_skycoords(size=1000)
 skycoords2 = get_random_skycoords(size=2000)
 skycoords3 = get_random_skycoords(size=50000)
-
 
 @pytest.fixture()
 def skycoords_gen_f():
@@ -151,37 +146,32 @@ def test_mpl_fill():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
-    # WCS used : ICRS & aitoff projection
-    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
-
-    # Init MPL axis
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
-    # Python 2.7 RuntimeError.
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
-
-    # Call to method we want to test
-    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
+    fig = plt.figure(111, figsize=(10, 10))
+    with WCS(fig, 
+         fov=50 * u.deg,
+         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+         coordsys="icrs",
+         rotation=Angle(0, u.degree),
+         projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
 
 def test_mpl_border():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
-    # WCS used : ICRS & aitoff projection
-    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=['RA---AIT', 'DEC--AIT'])
-
-    # Init MPL axis
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of the
-    # Python 2.7 RuntimeError.
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, subplot_kw={"projection": wcs})
+    fig = plt.figure(111, figsize=(10, 10))
+    with WCS(fig, 
+         fov=50 * u.deg,
+         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+         coordsys="icrs",
+         rotation=Angle(0, u.degree),
+         projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        moc.border(ax=ax, wcs=wcs, color='g')
 
-    # Call to method we want to test
-    moc.border(ax=ax, wcs=wcs, color='g')
-
-@pytest.mark.skipif('not HAS_NETWORKX')
 def test_boundaries():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from .py23_compat import range, int
+from ..py23_compat import range, int
 
 import warnings
 import numpy as np
 
 from astropy.time import Time, TimeDelta
 
-from .interval_set import IntervalSet
-from .abstract_moc import AbstractMOC
+from ..interval_set import IntervalSet
+from ..abstract_moc import AbstractMOC
 
 __author__ = "Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"

@@ -1,7 +1,7 @@
 from .moc import MOC
-from .utils import make_wcs
+from .plot.wcs import WCS
 
 __all__ = [
     'MOC',
-    'make_wcs'
+    'WCS'
 ]

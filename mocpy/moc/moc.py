@@ -6,29 +6,28 @@ import tempfile
 import os
 import numpy as np
 
-# Draw these pixels as a mpl path patch
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-
 from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
 from astropy.coordinates import SkyCoord
 from astropy import wcs
-from astropy.wcs.utils import skycoord_to_pixel
+
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
 
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
+
+from .boundaries import Boundaries
+from .plot import fill, border
+
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
 __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
-
 
 class MOC(AbstractMOC):
     """Multi-order spatial coverage class"""
@@ -150,97 +149,7 @@ class MOC(AbstractMOC):
         self._interval_set = IntervalSet.from_numpy_array(reduced_itv)
         return self
 
-    def _backface_culling(self, xp, yp):
-        # Remove cells crossing the MOC after projection
-        # The remaining HEALPix cells are used for computing the patch of the MOC
-        vx = xp
-        vy = yp
-
-        def cross_product(vx, vy, i):
-            cur = i
-            prev = (i - 1) % 4
-            next = (i + 1) % 4
-
-            # Construct the first vector from A to B
-            x1 = vx[:, cur] - vx[:, prev]
-            y1 = vy[:, cur] - vy[:, prev]
-            z1 = np.zeros(x1.shape)
-
-            v1 = np.vstack((x1, y1, z1)).T
-            # Construct the second vector from B to C
-            x2 = vx[:, next] - vx[:, cur]
-            y2 = vy[:, next] - vy[:, cur]
-            z2 = np.zeros(x2.shape)
-
-            v2 = np.vstack((x2, y2, z2)).T
-            # Compute the cross product between the two
-            return np.cross(v1, v2)
-
-        # A ----- B
-        #  \      |
-        #   D-----C
-        # Compute the cross product between AB and BC
-        # and the cross product between BC and CD
-        ABC = cross_product(vx, vy, 1)
-        CDA = cross_product(vx, vy, 3)
-
-        frontface_cells  = (ABC[:, 2] < 0) & (CDA[:, 2] < 0)
-        frontface_cells = np.asarray(frontface_cells)
-
-        vx = vx[frontface_cells]
-        vy = vy[frontface_cells]
-
-        return vx, vy, frontface_cells
-
-    def _remove_backfacing_cells_from_moc(moc, wcs):
-        order_ipix = moc.serialize(format='json')
-
-        # We set the max_depth to the max order but any order between [1, max_order] may work
-        # depending on the time we except to get a result.
-        max_depth = moc.max_order
-        # Create a new MOC that do not contain the HEALPix
-        # cells that are backfacing the projection
-        orders = [int(order) for order in order_ipix.keys()]
-        min_order = min(orders)
-        max_order = max(orders)
-        ipixels = np.asarray(order_ipix[str(min_order)])
-
-        ipix_d = {}
-        for order in range(min_order, max_depth+1):
-            hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
-
-            ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
-            # Projection on the given WCS
-            xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-            xp, yp, frontface_id = moc._backface_culling(xp, yp)
-
-            # Get the pixels which are backfacing the projection
-            backfacing_ipix = ipixels[~frontface_id]
-            frontface_ipix = ipixels[frontface_id]
-
-            ipix_d.update({str(order): frontface_ipix})
-
-            if order < max_depth:
-                next_order = str(order+1)
-                ipixels = []
-                if next_order in order_ipix:
-                    ipixels = order_ipix[next_order]
-                
-                for bf_ipix in backfacing_ipix:
-                    child_bf_ipix = bf_ipix << 2
-                    ipixels.extend([child_bf_ipix,
-                        child_bf_ipix + 1,
-                        child_bf_ipix + 2,
-                        child_bf_ipix + 3])
-
-                ipixels = np.asarray(ipixels)
-
-        for order in range(max_depth+1, max_order+1):
-            ipix_d.update({str(order): order_ipix[str(order)]})
-
-        return MOC.from_json(ipix_d), ipix_d
-
-    def fill(self, ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None, **kw_mpl_pathpatch):
+    def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
         Add the MOC to a matplotlib axis
 
@@ -250,79 +159,25 @@ class MOC(AbstractMOC):
             Matplotlib axis
         wcs: `~astropy.wcs.WCS`
             World coordinate system in which the MOC is projeted
-        lon1: `~astropy.units.Quantity`
-            Longitude of the first coordinate of the viewport
-        lat1: `~astropy.units.Quantity`
-            Latitude of the first coordinate of the viewport
-        lon2: `~astropy.units.Quantity`
-            Longitude of the second coordinate of the viewport
-        lat2: `~astropy.units.Quantity`
-            Latitude of the second coordinate of the viewport
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
         """
-        # Plot the moc whose backfacing cells have been removed
-        moc = self
-        moc_to_plot, order_ipix = MOC._remove_backfacing_cells_from_moc(moc=moc, wcs=wcs)
+        fill.fill(self, ax, wcs, **kw_mpl_pathpatch)
 
-        path_vertices = np.array([])
-        codes = np.array([])
-        for order, ipixels in order_ipix.items():
-            o = int(order)
-            hp = HEALPix(nside=(1 << o), order='nested', frame=ICRS())
+    def border(self, ax, wcs, **kw_mpl_pathpatch):
+        """
+        Add the MOC border to a matplotlib axis
 
-            if o < 3:
-                ipix_boundaries = hp.boundaries_skycoord(ipixels, step=2)
-            else:
-                ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
-
-            # Projection on the given WCS
-            xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-            #xp, yp, frontface_id = moc_to_plot._backface_culling(xp, yp)
-
-            if o < 3:
-                c1=np.vstack((xp[:, 0], yp[:, 0])).T
-                c2=np.vstack((xp[:, 1], yp[:, 1])).T
-                c3=np.vstack((xp[:, 2], yp[:, 2])).T
-                c4=np.vstack((xp[:, 3], yp[:, 3])).T
-                
-                c5=np.vstack((xp[:, 4], yp[:, 4])).T
-                c6=np.vstack((xp[:, 5], yp[:, 5])).T
-                c7=np.vstack((xp[:, 6], yp[:, 6])).T
-                c8=np.vstack((xp[:, 7], yp[:, 7])).T
-                
-                cells=np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
-
-                path_vertices_cur = cells.reshape((9*c1.shape[0], 2))
-                single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
-            else:
-                c1=np.vstack((xp[:, 0], yp[:, 0])).T
-                c2=np.vstack((xp[:, 1], yp[:, 1])).T
-                c3=np.vstack((xp[:, 2], yp[:, 2])).T
-                c4=np.vstack((xp[:, 3], yp[:, 3])).T
-
-                cells=np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
-
-                path_vertices_cur = cells.reshape((5*c1.shape[0], 2))
-                single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
-
-            codes_cur = np.tile(single_code, c1.shape[0])
-
-            if path_vertices.size == 0:
-                path_vertices = path_vertices_cur
-                codes = codes_cur
-            else:
-                path_vertices = np.vstack((path_vertices, path_vertices_cur))
-                codes = np.hstack((codes, codes_cur))
-
-        # Cast to a numpy array
-        path = Path(path_vertices, codes)
-        patch = PathPatch(path, **kw_mpl_pathpatch)
-
-        # Add the patch to the mpl axis
-        ax.add_patch(patch)
-
-        MOC._set_axis_viewport(ax, wcs, lon1, lat1, lon2, lat2)
+        Parameters
+        ----------
+        ax : `~matplotlib.axes.Axes`
+            Matplotlib axis
+        wcs: `~astropy.wcs.WCS`
+            World coordinate system in which the MOC is projeted
+        kw_mpl_pathpatch
+            Plotting arguments for `matplotlib.patches.PathPatch`
+        """
+        border.border(self, ax, wcs, **kw_mpl_pathpatch)
 
     def get_boundaries(self, order=None):
         """
@@ -345,138 +200,7 @@ class MOC(AbstractMOC):
         boundaries: [`~astropy.coordinates.SkyCoord`]
             A list of SkyCoords each describing one border.
         """
-        try:
-            from .boundaries import Boundaries
-        except ImportError:
-            print('Please install `networkx` package using: pip install networkx')
-            return
-
         return Boundaries.get(self, order)
-
-    def border(self, ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None, **kw_mpl_pathpatch):
-        """
-        Add the MOC border to a matplotlib axis
-
-        Parameters
-        ----------
-        ax : `~matplotlib.axes.Axes`
-            Matplotlib axis
-        wcs: `~astropy.wcs.WCS`
-            World coordinate system in which the MOC is projeted
-        lon1: `~astropy.units.Quantity`
-            Longitude of the first coordinate of the viewport
-        lat1: `~astropy.units.Quantity`
-            Latitude of the first coordinate of the viewport
-        lon2: `~astropy.units.Quantity`
-            Longitude of the second coordinate of the viewport
-        lat2: `~astropy.units.Quantity`
-            Latitude of the second coordinate of the viewport
-        kw_mpl_pathpatch
-            Plotting arguments for `matplotlib.patches.PathPatch`
-        """
-        moc = self
-
-        max_order = moc.max_order
-        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
-        ipixels_open = moc._best_res_pixels()
-
-        # Take the complement if the MOC covers more than half of the sky
-        num_ipixels = 3 << (2*(max_order + 1))
-        sky_fraction = ipixels_open.shape[0] / float(num_ipixels)
-
-        if sky_fraction > 0.5:
-            ipixels_all = np.arange(num_ipixels)
-            ipixels_open = np.setdiff1d(ipixels_all, ipixels_open, assume_unique=True)
-
-        neighbors = hp.neighbours(ipixels_open)
-        # Select the direct neighbors (i.e. those in WEST, NORTH, EAST and SOUTH directions)
-        neighbors = neighbors[[0, 2, 4, 6], :]
-
-        ipix_moc = np.isin(neighbors, ipixels_open)
-
-        west_edge = ipix_moc[0, :]
-        south_edge = ipix_moc[1, :]
-        east_edge = ipix_moc[2, :]
-        north_edge = ipix_moc[3, :]
-
-        num_ipix_moc = ipix_moc.sum(axis=0)
-
-        ipixels_border_id = (num_ipix_moc < 4)
-        # The border of each HEALPix cells is drawn one at a time
-        path_vertices_l = []
-        codes = []
-        
-        west_border = west_edge[ipixels_border_id]
-        south_border = south_edge[ipixels_border_id]
-        east_border = east_edge[ipixels_border_id]
-        north_border = north_edge[ipixels_border_id]
-        ipixels_border = ipixels_open[ipixels_border_id]
-        ipix_boundaries = hp.boundaries_skycoord(ipixels_border, step=1)
-        # Projection on the given WCS
-        xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-        xp, yp, frontface_id = moc._backface_culling(xp, yp)
-        west_border = west_border[frontface_id]
-        south_border = south_border[frontface_id]
-        east_border = east_border[frontface_id]
-        north_border = north_border[frontface_id]
-        
-        for i in range(xp.shape[0]):
-            vx = xp[i]
-            vy = yp[i]
-            if not south_border[i]:
-                path_vertices_l += [(vx[0], vy[0]), (vx[1], vy[1]), (0, 0)]
-                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-
-            if not west_border[i]:
-                path_vertices_l += [(vx[1], vy[1]), (vx[2], vy[2]), (0, 0)]
-                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-
-            if not north_border[i]:
-                path_vertices_l += [(vx[2], vy[2]), (vx[3], vy[3]), (0, 0)]
-                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-
-            if not east_border[i]:
-                path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
-                codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
-
-        path = Path(path_vertices_l, codes)
-        perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
-        ax.add_patch(perimeter_patch)
-
-        MOC._set_axis_viewport(ax, wcs, lon1, lat1, lon2, lat2)
-
-    @staticmethod
-    def _set_axis_viewport(ax, wcs, lon1=None, lat1=None, lon2=None, lat2=None):
-        # Set the viewport to the MOC area
-        if lon1 is not None and lat1 is not None and \
-            lon2 is not None and lat2 is not None:
-            # A viewport is defined by two points defining a rectangle on the unit sphere
-            #     c1
-            #       +---------------+
-            #       |               |
-            #       |               |
-            #       +---------------+
-            #                        c2
-            c1 = SkyCoord(ra=lon1, dec=lat1, frame="icrs")
-            c2 = SkyCoord(ra=lon2, dec=lat2, frame="icrs")
-
-            # Project these 2 coordinates of the viewport using the wcs
-            x1, y1 = skycoord_to_pixel(c1, wcs)
-            x2, y2 = skycoord_to_pixel(c2, wcs)
-
-            x_min = min(x1, x2)
-            x_max = max(x1, x2)
-
-            y_min = min(y1, y2)
-            y_max = max(y1, y2)
-
-            # Define an offset being equal to 5% of the length of the projeted viewport
-            off_x = (x_max - x_min) * 0.05
-            off_y = (y_max - y_min) * 0.05
-
-            # Update the axis
-            ax.set_xlim([x_min - off_x, x_max + off_x])
-            ax.set_ylim([y_min - off_y, y_max + off_y])
 
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):

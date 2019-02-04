@@ -1,4 +1,4 @@
-from ..spatial import MOC
+from ..moc import MOC, WCS
 
 from astropy import units as u
 from astropy.coordinates import SkyCoord
@@ -8,26 +8,17 @@ import numpy as np
 def plot(moc, lon, lat):
     import matplotlib.pyplot as plt
     from astropy.wcs.utils import skycoord_to_pixel
-    from ..spatial.utils import make_wcs
-
-    # MOCPy offers a way to easily create an `astropy.wcs.WCS` object.
-    # This define an ICRS aitoff projection.
-    wcs = make_wcs(crpix=[0, 0], crval=[0, 0], cdelt=[-5, 5], ctype=["RA---AIT", "DEC--AIT"])
 
     fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(1, 1, 1, projection=wcs)
-
-    # Calls to `mocpy.MOC.fill` for each of the three MOCs with various mpl styling keywords
-    # to differentiate them from each other.
-    lon_min = np.min(lon)
-    lon_max = np.max(lon)
-    lat_min = np.min(lat)
-    lat_max = np.max(lat)
-    moc.fill(ax=ax,
-     wcs=wcs,
-     lon1=lon_min, lat1=lat_min,
-     lon2=lon_max, lat2=lat_max,
-     edgecolor='g', facecolor='g', linewidth=1.0, fill=True, alpha=0.5)
+    
+    with WCS(fig, 
+         fov=50 * u.deg,
+         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+         coordsys="icrs",
+         rotation=Angle(0, u.degree),
+         projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        moc.fill(ax=ax, wcs=wcs, edgecolor='g', facecolor='g', linewidth=1.0, fill=True, alpha=0.5)
 
     plt.xlabel('ra')
     plt.ylabel('dec')

@@ -18,6 +18,9 @@ setup(name='MOCPy',
         'numpy',
         'matplotlib', # Used in fill and border
         'networkx', # Used in get_boundaries
+        # Disable the installation of spherical-geometry as it
+        # fails the appveyor tests for python 3 of astroquery. See https://github.com/astropy/astroquery/pull/1343
+        # 'spherical-geometry',
     ],
     provides=['mocpy'],
     long_description="MOCPy is a Python library allowing easy creation \
