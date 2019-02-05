@@ -58,25 +58,31 @@ class PolygonComputer:
          (not poly_crossing_ipix(self.polygon, ipix))
 
     def _get_starting_depth(self):
-        def compute_angular_distance(n1, n2, normalize=True):
-            if normalize:
-                vector.normalize_vector(n1, output=n1)
-                vector.normalize_vector(n2, output=n2)
-
+        def compute_angular_distance(n1, n2):
             return np.arctan(np.linalg.norm(np.cross(n1, n2))/np.dot(n1, n2))
 
-        def max_distance_center_to_vertex(depth):
-            nside = (1 << depth)
+        def to_xyz(lon, lat):
+            x = np.cos(lon) * np.cos(lat)
+            y = np.cos(lat) * np.sin(lon)
+            z = np.sin(lat)
 
-            lat1 = np.arcsin(2/3)
-            lat2 = np.arcsin(1 - ((1 - 1/nside)**2 / 3))
-            lon1 = np.pi/4 * 1 / nside
+            return np.array([x, y, z], dtype=np.float64)
+
+        def max_distance_center_to_vertex(depth):
+            nside = 1 << depth
+
+            lat1 = np.arcsin(2 / 3.0)
+            lat2 = np.arcsin(1 - ((1 - 1.0/nside)**2 / 3.0))
+            lon1 = np.pi/(4 * nside)
             lon2 = 0
 
-            n1 = np.asarray(vector.lonlat_to_vector(lon=lon1, lat=lat1, degrees=False))
-            n2 = np.asarray(vector.lonlat_to_vector(lon=lon2, lat=lat2, degrees=False))
+            # Convert lon, lat to xyz, vector
+            n1 = to_xyz(lon=lon1, lat=lat1)
+            n2 = to_xyz(lon=lon2, lat=lat2)
 
-            return compute_angular_distance(n1, n2) # in rad
+            dist = compute_angular_distance(n1, n2)
+            print(dist, lon1, lat1, lon2, lat2)
+            return dist # in rad
 
         # Get the polygon vertices as a Nx3 numpy array
         # Remove the last vertex as it counts double (closed polygon)
@@ -107,7 +113,9 @@ class PolygonComputer:
 
         # Return the min depth so that max_d > max_center_to_vertex_ipix(depth)
         depth = 0
+        print('max_d', max_d)
         while max_distance_center_to_vertex(depth) >= max_d:
+            print(depth)
             depth = depth + 1
 
         # Get the ipixels from astropy_healpix covering the cone of (center, radius) = (center, max_d)

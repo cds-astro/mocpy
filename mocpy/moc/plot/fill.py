@@ -60,7 +60,7 @@ def compute_healpix_vertices(x):
 
 def fill(moc, ax, wcs, **kw_mpl_pathpatch):
     from . import culling_backfacing_cells
-    from ...multiprocessing import multiprocessing
+    from ...parallel_task import send_to_multiple_processes
     
     depth_ipix_d = moc.serialize(format="json")
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(depth_ipix_d=depth_ipix_d, wcs=wcs)
@@ -70,7 +70,7 @@ def fill(moc, ax, wcs, **kw_mpl_pathpatch):
 
     # Use multiprocessing for computing the healpix vertices of the cells
     # cleaned from those backfacing the viewport.
-    res = multiprocessing(compute_healpix_vertices, args, 4)
+    res = send_to_multiple_processes(compute_healpix_vertices, args, 4)
     
     path_vertices = np.array(res[0][0])
     codes = np.array(res[0][1])
