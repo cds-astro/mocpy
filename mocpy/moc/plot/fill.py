@@ -16,29 +16,29 @@ def compute_healpix_vertices(x):
     order_str = x[0]
     ipixels = x[1]
     wcs = x[2]
-    
+
     order = int(order_str)
+
     hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
     step = 1
     if order < 3:
         step = 2
 
     ipix_boundaries = hp.boundaries_skycoord(ipixels, step=step)
-
     # Projection on the given WCS
-    xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+    xp, yp = skycoord_to_pixel(ipix_boundaries, wcs=wcs)
 
     if order < 3:
         c1 = np.vstack((xp[:, 0], yp[:, 0])).T
         c2 = np.vstack((xp[:, 1], yp[:, 1])).T
         c3 = np.vstack((xp[:, 2], yp[:, 2])).T
         c4 = np.vstack((xp[:, 3], yp[:, 3])).T
-        
+
         c5 = np.vstack((xp[:, 4], yp[:, 4])).T
         c6 = np.vstack((xp[:, 5], yp[:, 5])).T
         c7 = np.vstack((xp[:, 6], yp[:, 6])).T
         c8 = np.vstack((xp[:, 7], yp[:, 7])).T
-        
+
         cells = np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
 
         path_vertices = cells.reshape((9*c1.shape[0], 2))
@@ -53,6 +53,7 @@ def compute_healpix_vertices(x):
 
         path_vertices = cells.reshape((5*c1.shape[0], 2))
         single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+    
 
     codes = np.tile(single_code, c1.shape[0])
 
@@ -70,7 +71,7 @@ def fill(moc, ax, wcs, **kw_mpl_pathpatch):
 
     # Use multiprocessing for computing the healpix vertices of the cells
     # cleaned from those backfacing the viewport.
-    res = send_to_multiple_processes(compute_healpix_vertices, args, 4)
+    res = send_to_multiple_processes(func=compute_healpix_vertices, args=args, workers=4)
     
     path_vertices = np.array(res[0][0])
     codes = np.array(res[0][1])

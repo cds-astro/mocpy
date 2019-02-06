@@ -10,10 +10,6 @@ from astropy.io import fits
 
 from astropy_healpix import HEALPix
 
-import matplotlib
-matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
-                      # Python 2.7 RuntimeError.
-
 from ..moc import MOC, WCS
 
 def get_random_skycoords(size):
@@ -146,24 +142,32 @@ def test_mpl_fill():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
+    #import matplotlib
+    #matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+                          # Python 2.7 RuntimeError.
+
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig, 
+    with WCS(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",
          rotation=Angle(0, u.degree),
          projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color='r')
+        moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
 def test_mpl_border():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
+    #import matplotlib
+    #matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+                          # Python 2.7 RuntimeError.
+
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig, 
+    with WCS(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",

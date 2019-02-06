@@ -81,7 +81,6 @@ class PolygonComputer:
             n2 = to_xyz(lon=lon2, lat=lat2)
 
             dist = compute_angular_distance(n1, n2)
-            print(dist, lon1, lat1, lon2, lat2)
             return dist # in rad
 
         # Get the polygon vertices as a Nx3 numpy array
@@ -113,9 +112,7 @@ class PolygonComputer:
 
         # Return the min depth so that max_d > max_center_to_vertex_ipix(depth)
         depth = 0
-        print('max_d', max_d)
         while max_distance_center_to_vertex(depth) >= max_d:
-            print(depth)
             depth = depth + 1
 
         # Get the ipixels from astropy_healpix covering the cone of (center, radius) = (center, max_d)

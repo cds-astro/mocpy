@@ -571,7 +571,7 @@ class MOC(AbstractMOC):
             plotted_moc = self
 
         num_pixels_map = 1024
-        delta = 2 * np.pi / num_pixels_map
+        delta = 2. * np.pi / num_pixels_map
 
         x = np.arange(-np.pi, np.pi, delta)
         y = np.arange(-np.pi/2, np.pi/2, delta)
