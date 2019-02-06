@@ -142,8 +142,8 @@ def test_mpl_fill():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
-    #import matplotlib
-    #matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
                           # Python 2.7 RuntimeError.
 
     import matplotlib.pyplot as plt
@@ -161,8 +161,8 @@ def test_mpl_border():
     fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
-    #import matplotlib
-    #matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
                           # Python 2.7 RuntimeError.
 
     import matplotlib.pyplot as plt
