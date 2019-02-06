@@ -41,6 +41,8 @@ script:
   # Test docs build:
   - cd docs
   - make html
+  # Execute the tests found in the doc
+  - make doctest
   - cd ..
 
 # Deployment and upload to PyPI if a commit is tagged and only on the master branch
