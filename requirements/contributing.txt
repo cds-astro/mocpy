@@ -15,3 +15,7 @@ spherical_geometry
 pytest
 # Pytest extension package enabling test coverage
 pytest-cov
+
+# Packages for updating the docs
+sphinx
+numpydoc

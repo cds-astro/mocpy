@@ -30,7 +30,7 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - travis_wait conda env create -q python=$TRAVIS_PYTHON_VERSION -f environment.yml -n mocpy-env
+  - travis_wait conda env create -q python=$HOME/miniconda/bin/python -f environment.yml -n mocpy-env
   - source activate mocpy-env
 
 script:
