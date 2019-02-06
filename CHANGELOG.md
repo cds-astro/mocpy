@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2019-02-06
+### Added
+- Novel python file hierarchy. moc/ and tmoc/ containing the sources for MOC (resp. TMOC) classes.
+- A new mocpy.WCS object type that must be declared in a context (with WCS(...) as wcs:) for use. This facilitates the creation of an astropy.wcs.WCS object for plotting a MOC in a matplotlib axes. This replaces the wcs.spatial.utils.make_wcs method that returned an astropy.wcs.WCS object.
+- Use of multiprocessing.Pool in **mocpy.MOC.fill**
+
+### Removed
+- **wcs.spatial.utils.make_wcs** has been removed. See **mocpy.WCS** as replacement.
+
 ## [0.5.3] - 2019-01-30
 ### Added
 - A new constructor from_cells. It returns a new MOC instance from a numpy structured array representing the cells of a MOC. The structured array passed must contains 3 attributes: "ipix": np.uint64, "depth": np.uint32, "fully_covered": np.uint8 (a flag bit. For the moment its value has no effect for the newly created MOC).
