@@ -34,10 +34,10 @@ install:
   - source activate mocpy-env
 
 script:
-  - $HOME/miniconda/bin/python -m pytest -v mocpy --cov-report=term --cov=mocpy
+  - python -m pytest -v mocpy --cov-report=term --cov=mocpy
   # Test notebooks
   - pip install .
-  - $HOME/miniconda/bin/python test_notebooks.py
+  - python test_notebooks.py
   # Test docs build:
   - cd docs
   - make html
