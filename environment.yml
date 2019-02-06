@@ -7,7 +7,7 @@ dependencies:
 - astropy-healpix
 - astroquery
 - jupyter
-- matplotlib=2.2.2
+- matplotlib
 - nbconvert
 - nbformat
 - numpy
