@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.doctest',
     # To support Numpy docstrings, we use this extension:
     # see https://numpydoc.readthedocs.io/en/latest/install.html
     'numpydoc',
@@ -175,4 +176,6 @@ texinfo_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'astropy': ('http://docs.astropy.org/en/stable/', None),
+    'matplotlib': ('https://matplotlib.org/' ,None),
+    'networkx': ('https://networkx.github.io/documentation/stable/', None),
 }

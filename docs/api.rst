@@ -11,4 +11,5 @@ Class overview
    
    mocpy.MOC
    mocpy.TimeMOC
+   mocpy.WCS
 
