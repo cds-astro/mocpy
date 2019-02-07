@@ -60,12 +60,12 @@ def test_moc_from_lonlat(lonlat_gen_f, size):
 
 
 def test_moc_from_fits():
-    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
 
 def test_moc_from_fits_images():
-    image_path = 'notebooks/demo-data/image_with_mask.fits.gz'
+    image_path = 'resources/image_with_mask.fits.gz'
 
     moc = MOC.from_fits_images([image_path],
                                 max_norder=10)
@@ -73,7 +73,7 @@ def test_moc_from_fits_images():
 
 @pytest.fixture()
 def moc_from_fits_image():
-    image_path = 'notebooks/demo-data/image_with_mask.fits.gz'
+    image_path = 'resources/image_with_mask.fits.gz'
 
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=hdulist[0].header,
@@ -139,7 +139,7 @@ def test_moc_contains():
     assert should_be_inside_arr.all()
 
 def test_mpl_fill():
-    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
     import matplotlib
@@ -158,7 +158,7 @@ def test_mpl_fill():
         moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
 def test_mpl_border():
-    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
     import matplotlib
@@ -177,7 +177,7 @@ def test_mpl_border():
         moc.border(ax=ax, wcs=wcs, color='g')
 
 def test_boundaries():
-    fits_path = 'notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
@@ -256,5 +256,5 @@ def test_moc_difference(mocs_op):
 
 
 def test_moc_complement():
-    moc = MOC.from_fits('notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits')
+    moc = MOC.from_fits('resources/P-GALEXGR6-AIS-FUV.fits')
     assert moc.complement().complement() == moc

@@ -38,7 +38,7 @@ class AbstractMOC:
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMoc`
+        another_moc : `~mocpy.abstract_moc.AbstractMOC`
             the moc object to test the equality with
 
         Returns
@@ -78,13 +78,13 @@ class AbstractMOC:
         Parameters
         ----------
         another_moc : `~mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMoc used for performing the intersection with self
+            the MOC/TimeMOC used for performing the intersection with self
         args : `~mocpy.abstract_moc.AbstractMOC`
             other MOCs
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             MOC object whose interval set corresponds to : self & ``moc``
         """
         interval_set = self._interval_set.intersection(another_moc._interval_set)
@@ -100,13 +100,13 @@ class AbstractMOC:
         Parameters
         ----------
         another_moc : `mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMoc to bind to self
+            the MOC/TimeMOC to bind to self
         args : `~mocpy.abstract_moc.AbstractMOC`
             other MOCs
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             MOC object whose interval set corresponds to : self | ``moc``
         """
         interval_set = self._interval_set.union(another_moc._interval_set)
@@ -122,13 +122,13 @@ class AbstractMOC:
         Parameters
         ----------
         moc : `mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMoc to substract from self
+            the MOC/TimeMOC to substract from self
         args : `~mocpy.abstract_moc.AbstractMOC`
             other MOCs
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             MOC object whose interval set corresponds to : self - ``moc``
         """
         interval_set = self._interval_set.difference(another_moc._interval_set)
@@ -232,8 +232,8 @@ class AbstractMOC:
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
-            the MOC/TimeMoc object reflecting ``json_moc``.
+        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+            the MOC/TimeMOC object reflecting ``json_moc``.
 
         """
         intervals_arr = np.array([])
@@ -255,7 +255,7 @@ class AbstractMOC:
 
     def _uniq_pixels_iterator(self):
         """
-        Generator giving the NUNIQ HEALPix pixels of the Moc/TimeMoc
+        Generator giving the NUNIQ HEALPix pixels of the Moc/TimeMOC
 
         Returns
         -------
@@ -273,7 +273,7 @@ class AbstractMOC:
         Load a MOC from a MOC fits file.
 
         It corresponds to the default type of file in which the MOCs/TMOCs are stored when using
-        the method `mocpy.AbstractMoc.write`. 
+        the method `mocpy.abstract_moc.AbstractMOC.write`. 
         A fits file stores the list of NUNIQ HEALPix cells describing the MOC in a binary HDU table.
 
         Parameters
@@ -283,7 +283,7 @@ class AbstractMOC:
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
         table = Table.read(filename)
@@ -338,7 +338,7 @@ class AbstractMOC:
         Returns
         -------
         thdulist : `astropy.io.fits.HDUList`
-            the fits serialization of the MOC/TimeMoc object
+            the fits serialization of the MOC/TimeMOC object
         """
         moc_order = self.max_order
         if moc_order <= 13:
@@ -397,7 +397,7 @@ class AbstractMOC:
 
     def write(self, path, format='fits', optional_kw_dict=None):
         """
-        Serialize a MOC/TimeMoc object.
+        Serialize a MOC/TimeMOC object.
 
         Possibility to write it to a file at ``path``. Format can be 'fits' or 'json',
         though only the fits format is officially supported by the IVOA.
@@ -413,7 +413,7 @@ class AbstractMOC:
             optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
         write_to_file : bool, optional
             Set to False by default. In this case, this method does not write to a file but returns the serialized form
-            of the MOC/TimeMoc object to the user. If you want to write to a file
+            of the MOC/TimeMOC object to the user. If you want to write to a file
 
         Returns
         -------
@@ -438,7 +438,7 @@ class AbstractMOC:
 
         Returns
         -------
-        moc : `mocpy.moc.MOC` or `mocpy.tmoc.TimeMoc`
+        moc : `mocpy.moc.MOC` or `mocpy.tmoc.TimeMOC`
             the res decreased mocpy object
         """
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - new_order)

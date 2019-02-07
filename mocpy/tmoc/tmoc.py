@@ -156,8 +156,8 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMoc`
-            the MOC/TimeMoc used for performing the intersection with self
+        another_moc : `~mocpy.abstract_moc.AbstractMOC`
+            the MOC/TimeMOC used for performing the intersection with self
         delta_t : `~astropy.time.TimeDelta`, optional
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
@@ -165,7 +165,7 @@ class TimeMOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             MOC object whose interval set corresponds to : self & ``moc``
 
         """
@@ -182,7 +182,7 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMoc`
+        another_moc : `~mocpy.abstract_moc.AbstractMOC`
             the MOC/TimeMoc to bind to self
         delta_t : `~astropy.time.TimeDelta`, optional
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
@@ -207,7 +207,7 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMoc`
+        another_moc : `~mocpy.abstract_moc.AbstractMOC`
             the MOC/TimeMoc to substract from self
         delta_t : `~astropy.time.TimeDelta`, optional
             the duration of one observation. It is set to 30 min by default. This data is used to compute the

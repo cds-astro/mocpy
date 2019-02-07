@@ -39,7 +39,7 @@ class WCS:
     >>> from astropy.coordinates import Angle, SkyCoord
     >>> import astropy.units as u
     >>> # Load a MOC
-    >>> filename = './../notebooks/demo-data/P-GALEXGR6-AIS-FUV.fits'
+    >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
     >>> moc = MOC.from_fits(filename)
     >>> # Plot the MOC using matplotlib
     >>> import matplotlib.pyplot as plt
