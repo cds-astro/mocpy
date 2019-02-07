@@ -6,11 +6,9 @@ channels:
 
 dependencies:
 - astropy
-- astropy-healpix
 - astroquery
-- matplotlib=2.2.2
-- numpy
+- astropy_healpix
 - requests
-- six
-- networkx
-- spherical_geometry
+- matplotlib # Used in fill and border
+- networkx # Used in get_boundaries
+- spherical-geometry
