@@ -100,12 +100,12 @@ class PolygonComputer:
         max_d = -1
 
         # Check if the polygon covers more than an hemisphere
-        covers_more_than_one_hemisphere = (self.polygon.area() > 2 * np.pi)
+        #covers_more_than_one_hemisphere = (self.polygon.area() > 2 * np.pi)
 
         for vertex in p_vertices:
             d = compute_angular_distance(center, vertex)
-            if covers_more_than_one_hemisphere:
-                d = np.pi - d
+            #if covers_more_than_one_hemisphere:
+            #    d = np.pi - d
 
             if d > max_d:
                 max_d = d

@@ -8,6 +8,11 @@ from astropy.wcs.utils import skycoord_to_pixel
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
+from .utils import build_plotting_moc
+from . import culling_backfacing_cells
+from ...parallel_task import send_to_multiple_processes
+from . import axis_viewport
+
 #This method is multiprocessed using the concurrent.futures python package.
 def compute_healpix_vertices(x):
     path_vertices = np.array([])
@@ -59,10 +64,7 @@ def compute_healpix_vertices(x):
 
     return path_vertices, codes
 
-def fill(moc, ax, wcs, **kw_mpl_pathpatch):
-    from . import culling_backfacing_cells
-    from ...parallel_task import send_to_multiple_processes
-    
+def compute_the_patches(moc, wcs):
     depth_ipix_d = moc.serialize(format="json")
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(depth_ipix_d=depth_ipix_d, wcs=wcs)
 
@@ -71,21 +73,32 @@ def fill(moc, ax, wcs, **kw_mpl_pathpatch):
 
     # Use multiprocessing for computing the healpix vertices of the cells
     # cleaned from those backfacing the viewport.
-    res = send_to_multiple_processes(func=compute_healpix_vertices, args=args, workers=4)
-    
-    path_vertices = np.array(res[0][0])
-    codes = np.array(res[0][1])
+    return send_to_multiple_processes(func=compute_healpix_vertices, args=args, workers=4)
 
-    for p, c in res[1:]:
-        path_vertices = np.vstack((path_vertices, p))
-        codes = np.hstack((codes, c))
+def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
+    first_patch = patches[0]
+    vertices_first_patch, codes_first_patch = first_patch
+    path_vertices = np.array(vertices_first_patch)
+    path_codes = np.array(codes_first_patch)
 
-    # Cast to a numpy array
-    path = Path(path_vertices, codes)
-    patch = PathPatch(path, **kw_mpl_pathpatch)
+    for vertices, codes in patches[1:]:
+        path_vertices = np.vstack((path_vertices, vertices))
+        path_codes = np.hstack((path_codes, codes))
 
-    # Add the patch to the mpl axis
-    ax.add_patch(patch)
+    path = Path(path_vertices, path_codes)
+    patches_mpl = PathPatch(path, **kw_mpl_pathpatch)
 
-    from . import axis_viewport
+    # Add the patches to the mpl axis
+    ax.add_patch(patches_mpl)
+
     axis_viewport.set(ax, wcs)
+
+def fill(moc, ax, wcs, **kw_mpl_pathpatch):
+    # Simplify the MOC for plotting purposes:
+    # 1. Degrade the MOC if the FOV is enough big so that we cannot see the smallest HEALPix cells.
+    # 2. For small FOVs, plot the MOC & POLYGONAL_MOC_FROM_FOV.
+    moc_to_plot = build_plotting_moc(moc=moc, wcs=wcs)
+
+    if not moc_to_plot.empty():
+        patches = compute_the_patches(moc=moc_to_plot, wcs=wcs)
+        add_patches_to_mpl_axe(patches=patches, ax=ax, wcs=wcs, **kw_mpl_pathpatch)

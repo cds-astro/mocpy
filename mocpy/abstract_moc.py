@@ -52,6 +52,9 @@ class AbstractMOC:
 
         return self._interval_set == another_moc._interval_set
 
+    def empty(self):
+        return self._interval_set.empty()
+
     @property
     def max_order(self):
         """
