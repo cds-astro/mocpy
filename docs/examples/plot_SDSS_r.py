@@ -2,7 +2,7 @@ from mocpy import MOC, WCS
 from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
 # Load a MOC
-filename = './../../notebooks/demo-data/P-SDSS9-r.fits'
+filename = './../../resources/P-SDSS9-r.fits'
 moc = MOC.from_fits(filename)
 # Plot the MOC using matplotlib
 import matplotlib.pyplot as plt

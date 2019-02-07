@@ -45,8 +45,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
-    # Extensions for plotting image in the doc
-    'matplotlib.sphinxext.only_directives',
+    # Extension for plotting image in the doc
     'matplotlib.sphinxext.plot_directive',
     # To support Numpy docstrings, we use this extension:
     # see https://numpydoc.readthedocs.io/en/latest/install.html
