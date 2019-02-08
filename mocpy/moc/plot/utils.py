@@ -2,6 +2,10 @@ import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 
+from astropy.wcs.utils import pixel_to_skycoord
+
+import warnings
+
 def build_plotting_moc(moc, wcs):
     # Get the WCS cdelt giving the deg.px^(-1) resolution.
     cdelt = wcs.wcs.cdelt
@@ -30,30 +34,30 @@ def build_plotting_moc(moc, wcs):
     X_px = np.append(X[0, :-1], X[:-1, -1])
     X_px = np.append(X_px, np.flip(X[-1, 1:]))
     X_px = np.append(X_px, X[:-1, 0])
-    
+
     Y_px = np.append(Y[0, :-1], Y[:-1, -1])
     Y_px = np.append(Y_px, Y[-1, :-1])
     Y_px = np.append(Y_px, np.flip(Y[1:, 0]))
 
-    assert(X_px.shape == Y_px.shape)
+    # Disable the output of warnings when encoutering NaNs.
+    warnings.filterwarnings("ignore")
     # Inverse projection from pixel coordinate space to the world coordinate space
-    radec = wcs.all_pix2world(np.vstack((X_px, Y_px)).T, 0)
-    ra, dec = radec[:, 0], radec[:, 1]
+    viewport = pixel_to_skycoord(X_px, Y_px, wcs)
     # If one coordinate is a NaN we exit the function and do not go further
-    if np.isnan(ra).any() or np.isnan(dec).any():
+    ra_deg, dec_deg = viewport.icrs.ra.deg, viewport.icrs.dec.deg
+    warnings.filterwarnings("default")
+
+    if np.isnan(ra_deg).any() or np.isnan(dec_deg).any():
         return moc_plot
 
     center_x_px, center_y_px = wcs.wcs.crpix[0], wcs.wcs.crpix[1]
-    ra_center, dec_center = wcs.all_pix2world(center_x_px, center_y_px, 0)
+    inside = pixel_to_skycoord(center_x_px, center_y_px, wcs)
 
-    frame = "icrs" if wcs.is_celestial else "galactic"
-    viewport = SkyCoord(ra, dec, unit="deg", frame=frame)
-    inside = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame=frame, unit="deg")
-
+    # Import MOC here to avoid circular imports
     from ..moc import MOC
     # Create a rough MOC (depth=3 is sufficient) from the viewport
     moc_viewport = MOC.from_polygon_skycoord(viewport, max_depth=3, inside=inside)
-    
+
     # The moc to plot is the INPUT_MOC & MOC_VIEWPORT. For small FOVs this can reduce
     # a lot the time to draw the MOC along with its borders.
     moc_plot = moc_plot.intersection(moc_viewport)

@@ -442,7 +442,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        return MOC.from_polygon(lon=skycoord.ra, lat=skycoord.dec,
+        return MOC.from_polygon(lon=skycoord.icrs.ra, lat=skycoord.icrs.dec,
                                 inside=inside, max_depth=max_depth)
 
     @classmethod
