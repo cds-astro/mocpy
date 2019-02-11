@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2019-02-08
+### Added
+- Plotting a moc with matplotlib axes is faster (concers **fill** and **border** methods). The level of detail of the plotted MOC is function of the FoV. The MOC is degraded to the minimum depth so that a cell of this depth can be contained in 1px at the center of the projection. For small FoVs, we only plot the part of MOC contained in the view (thanks to the speed of logical operation between MOCs).
+
 ## [0.5.4] - 2019-02-06
 ### Added
 - Novel python file hierarchy. moc/ and tmoc/ containing the sources for MOC (resp. TMOC) classes.
