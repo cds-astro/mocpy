@@ -34,12 +34,12 @@ class AbstractMOC:
 
     def __eq__(self, another_moc):
         """
-        Test equality between self and ``another_moc``
+        Test equality between thr MOC instance and ``another_moc``
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMOC`
-            the moc object to test the equality with
+        another_moc : `~mocpy.moc.MOC`
+            The moc object to test the equality with
 
         Returns
         -------
@@ -53,15 +53,22 @@ class AbstractMOC:
         return self._interval_set == another_moc._interval_set
 
     def empty(self):
+        """
+        Check whether the MOC is empty.
+
+        A MOC is empty when its list of HEALPix cell ranges is empty.
+
+        Returns
+        -------
+        result: bool
+            True if the MOC instance is empty.
+        """
         return self._interval_set.empty()
 
     @property
     def max_order(self):
         """
-        Returns the max depth of the MOC.
-
-        The max depth of a MOC is the depth of the smallest HEALPix cells that are contained
-        in the MOC.
+        Returns the depth of the smallest HEALPix cells found in the MOC.
         """
         # TODO: cache value
         combo = int(0)
@@ -76,19 +83,19 @@ class AbstractMOC:
 
     def intersection(self, another_moc, *args):
         """
-        Intersection between self and other MOCs.
+        Intersection between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        another_moc : `~mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMOC used for performing the intersection with self
-        args : `~mocpy.abstract_moc.AbstractMOC`
-            other MOCs
+        another_moc : `~mocpy.moc.MOC`
+            The MOC used for performing the intersection with self.
+        args : `~mocpy.moc.MOC`
+            Other additional MOCs to perform the intersection with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
-            MOC object whose interval set corresponds to : self & ``moc``
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The resulting MOC.
         """
         interval_set = self._interval_set.intersection(another_moc._interval_set)
         for moc in args:
@@ -98,19 +105,19 @@ class AbstractMOC:
 
     def union(self, another_moc, *args):
         """
-        Union between self and other MOCs.
+        Union between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        another_moc : `mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMOC to bind to self
-        args : `~mocpy.abstract_moc.AbstractMOC`
-            other MOCs
+        another_moc : `~mocpy.moc.MOC`
+            The MOC used for performing the union with self.
+        args : `~mocpy.moc.MOC`
+            Other additional MOCs to perform the union with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
-            MOC object whose interval set corresponds to : self | ``moc``
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The resulting MOC.
         """
         interval_set = self._interval_set.union(another_moc._interval_set)
         for moc in args:
@@ -120,19 +127,19 @@ class AbstractMOC:
 
     def difference(self, another_moc, *args):
         """
-        Difference between self and other MOCs.
+        Difference between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        moc : `mocpy.abstract_moc.AbstractMOC`
-            the MOC/TimeMOC to substract from self
-        args : `~mocpy.abstract_moc.AbstractMOC`
-            other MOCs
+        another_moc : `~mocpy.moc.MOC`
+            The MOC used that will be substracted to self.
+        args : `~mocpy.moc.MOC`
+            Other additional MOCs to perform the difference with.
 
         Returns
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
-            MOC object whose interval set corresponds to : self - ``moc``
+            The resulting MOC.
         """
         interval_set = self._interval_set.difference(another_moc._interval_set)
         for moc in args:
@@ -142,12 +149,12 @@ class AbstractMOC:
 
     def complement(self):
         """
-        Return the complement of the MOC.
+        Return the complement of the MOC instance.
 
         Returns
         -------
-        complement : `~mocpy.AbstractMoc`
-            the complemented moc
+        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+            The resulting MOC.
         """
         complement_interval = self._complement_interval()
         return self.__class__(complement_interval)
@@ -179,17 +186,6 @@ class AbstractMOC:
     def _neighbour_pixels(hp, ipix):
         """
         Get all the pixels neighbours of ``ipix``
-
-        Parameters
-        ----------
-        hp : `~astropy_healpix.HEALPix`
-            the HEALPix context
-        ipix : `~numpy.ndarray`
-            the input array of pixels
-        Returns
-        -------
-        result : `~numpy.ndarray`
-            an array of pixels containing the neighbours of the pixels in ``ipix``
         """
         neigh_ipix = np.unique(hp.neighbours(ipix).ravel())
         # Remove negative pixel values returned by `~astropy_healpix.HEALPix.neighbours`
@@ -198,13 +194,14 @@ class AbstractMOC:
     @classmethod
     def from_cells(cls, cells):
         """
-        Creates a MOC from a numpy array representing the cells
+        Creates a MOC from a numpy array representing the cells.
 
         Parameters
         ----------
-        cells: `~numpy.array`
+        cells : `numpy.ndarray`
             Must be a numpy structured array (See https://docs.scipy.org/doc/numpy-1.15.0/user/basics.rec.html).
             The structure of a cell contains 3 attributes:
+
             - A `ipix` value being a np.uint64
             - A `depth` value being a np.uint32
             - A `fully_covered` flag bit stored in a np.uint8
@@ -212,7 +209,7 @@ class AbstractMOC:
         Returns
         -------
         moc : `~mocpy.moc.MOC`
-            The MOC
+            The MOC.
         """
         shift = (AbstractMOC.HPY_MAX_NORDER - cells["depth"]) << 1
 
@@ -226,18 +223,17 @@ class AbstractMOC:
     @classmethod
     def from_json(cls, json_moc):
         """
-        Creates a MOC from a dictionary of HEALPix arrays indexed by their depth.
+        Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
 
         Parameters
         ----------
         json_moc : {str : [int]}
-            A dictionary of HEALPix arrays indexed by their order
+            A dictionary of HEALPix cell arrays indexed by their order
 
         Returns
         -------
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
-            the MOC/TimeMOC object reflecting ``json_moc``.
-
+            the MOC.
         """
         intervals_arr = np.array([])
         for order, pix_l in json_moc.items():
@@ -258,7 +254,7 @@ class AbstractMOC:
 
     def _uniq_pixels_iterator(self):
         """
-        Generator giving the NUNIQ HEALPix pixels of the Moc/TimeMOC
+        Generator giving the NUNIQ HEALPix pixels of the MOC.
 
         Returns
         -------
@@ -273,16 +269,14 @@ class AbstractMOC:
     @classmethod
     def from_fits(cls, filename):
         """
-        Load a MOC from a MOC fits file.
+        Load a MOC from a FITS file.
 
-        It corresponds to the default type of file in which the MOCs/TMOCs are stored when using
-        the method `mocpy.abstract_moc.AbstractMOC.write`. 
-        A fits file stores the list of NUNIQ HEALPix cells describing the MOC in a binary HDU table.
+        The specified FITS file must store the MOC (i.e. the list of HEALPix cells it contains) in a binary HDU table.
 
         Parameters
         ----------
         filename : str
-            The path to the moc fits file
+            The path to the FITS file.
 
         Returns
         -------
@@ -300,17 +294,17 @@ class AbstractMOC:
     @staticmethod
     def _to_json(uniq_arr):
         """
-        Serialize a mocpy object (array of uniq) to json
+        Serialize a MOC to the JSON format.
 
         Parameters
         ----------
         uniq_arr : `~numpy.ndarray`
-            the array of uniq reprensenting the mocpy object to serialize
+            The array of HEALPix cells representing the MOC to serialize.
 
         Returns
         -------
         result_json : {str : [int]}
-            a dictionary of pixel list each indexed by their order
+            A dictionary of HEALPix cell lists indexed by their depth.
         """
         result_json = {}
 
@@ -329,19 +323,19 @@ class AbstractMOC:
 
     def _to_fits(self, uniq_arr, optional_kw_dict=None):
         """
-        Serialize a mocpy object (array of uniq) to a fits format
+        Serialize a MOC to the FITS format.
 
         Parameters
         ----------
         uniq_arr : `numpy.ndarray`
-            the array of uniq representing the mocpy object to serialize
+            The array of HEALPix cells representing the MOC to serialize.
         optional_kw_dict : dict
-            optional keywords arguments added to the fits header
+            Optional keywords arguments added to the FITS header.
 
         Returns
         -------
         thdulist : `astropy.io.fits.HDUList`
-            the fits serialization of the MOC/TimeMOC object
+            The list of HDU tables.
         """
         moc_order = self.max_order
         if moc_order <= 13:
@@ -367,17 +361,19 @@ class AbstractMOC:
         """
         Serialize the MOC into a specific format.
 
+        Possible formats are FITS and JSON.
+
         Parameters
         ----------
         format : str
-            'fits' by default. Other choice possible is 'json'.
+            'fits' by default. The other possible choice is 'json'.
         optional_kw_dict : dict
-            optional keywords arguments added to the fits header
+            Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
 
         Returns
         -------
-        result : `astropy.io.fits.HDUList` or json dictionary
-            Serialized MOC.
+        result : `astropy.io.fits.HDUList` or JSON dictionary
+            The result of the serialization.
         """
         formats = ('fits', 'json')
         if format not in formats:
@@ -400,28 +396,19 @@ class AbstractMOC:
 
     def write(self, path, format='fits', optional_kw_dict=None):
         """
-        Serialize a MOC/TimeMOC object.
+        Write the MOC to a file.
 
-        Possibility to write it to a file at ``path``. Format can be 'fits' or 'json',
-        though only the fits format is officially supported by the IVOA.
+        Format can be 'fits' or 'json', though only the fits format is officially supported by the IVOA.
 
         Parameters
         ----------
         path : str, optional
-            path to save the MOC object. The mocpy is written to path only if ``serialize`` is False. None by default
+            The path to the file to save the MOC in.
         format : str, optional
-            format in which the mocpy object will be serialized. Constraint to takes its value
-            among "fits" or "json". By default, ``format`` is set to "fits".
+            The format in which the MOC will be serialized before being saved. Possible formats are "fits" or "json".
+            By default, ``format`` is set to "fits".
         optional_kw_dict : optional
-            optional dictionary keywords for the header of the fits file. Only used if ``format`` is "fits"
-        write_to_file : bool, optional
-            Set to False by default. In this case, this method does not write to a file but returns the serialized form
-            of the MOC/TimeMOC object to the user. If you want to write to a file
-
-        Returns
-        -------
-        result : `astropy.io.fits.HDUList` or JSON dict
-            The serialization depending on the value of ``format``.
+            Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
         serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
         if format == 'fits':
@@ -433,7 +420,10 @@ class AbstractMOC:
 
     def degrade_to_order(self, new_order):
         """
-        Degrade self to a mocpy object at max_order being equal to ``new_order``
+        Degrade self to a new, less precise, MOC.
+
+        The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
+        degraded MOC is set to ``new_order``. 
 
         Parameters
         ----------
@@ -441,8 +431,8 @@ class AbstractMOC:
 
         Returns
         -------
-        moc : `mocpy.moc.MOC` or `mocpy.tmoc.TimeMOC`
-            the res decreased mocpy object
+        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+            The degraded MOC.
         """
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - new_order)
         ofs = (int(1) << shift) - 1

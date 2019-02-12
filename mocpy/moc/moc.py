@@ -30,7 +30,39 @@ __license__ = "BSD 3-Clause License"
 __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 class MOC(AbstractMOC):
-    """Multi-order spatial coverage class"""
+    """
+    Multi-order spatial coverage class
+    
+    A MOC describes the coverage of an arbitrary region on the unit sphere.
+    MOCs are usually used for describing the global coverage of catalog/image surveys such as GALEX or SDSS.
+    A MOC corresponds to a list of `HEALPix <https://healpix.sourceforge.io/>`__ cells at different depths.
+    This class gives you the possibility to:
+    
+    1. Define `~mocpy.moc.MOC` objects:
+
+    - From a FITS file that stores HEALPix cells (see `from_fits`).
+    - Directly from a list of HEALPix cells expressed either as a numpy structural array (see `from_cells`) or a simple
+      python dictionnary (see `from_json`).
+    - From a list of sky coordinates (see `from_skycoords`, `from_lonlat`).
+    - From a convex/concave polygon (see `from_polygon`).
+    - From a cone (will be implemented in a next version).
+
+    2. Perform fast logical operations between `~mocpy.moc.MOC` objects:
+
+    - The `intersection`
+    - The `union`
+    - The `difference`
+    - The `complement`
+
+    3. Plot the `~mocpy.moc.MOC` objects:
+
+    - Draw the MOC with its HEALPix cells (see `fill`)
+    - Draw the perimeter of a MOC (see `border`)
+
+    4. Get the sky coordinates defining the border(s) of `~mocpy.moc.MOC` objects (see `get_boundaries`).
+
+    5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
+    """
 
     def __init__(self, interval_set=None):
         AbstractMOC.__init__(self, interval_set)
@@ -42,7 +74,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        array : `numpy.ndarray`
+        array : `~numpy.ndarray`
             the array of HEALPix at ``max_order``
         """
         factor = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
@@ -55,21 +87,21 @@ class MOC(AbstractMOC):
 
     def contains(self, ra, dec, keep_inside=True):
         """
-        Get a boolean mask array of the positions lying inside (or outside) the MOC.
+        Get a boolean mask array of the positions lying inside (or outside) the MOC instance.
 
         Parameters
         ----------
         ra : `astropy.units.Quantity`
-            right ascension array
-        dec: `astropy.units.Quantity`
-            declination array
+            Right ascension array
+        dec : `astropy.units.Quantity`
+            Declination array
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
-            is false, the mask indicates the coordinates lying outside the MOC. 
+            is false, contains will return the mask of the coordinates lying outside the MOC.
 
         Returns
         -------
-        array : `~numpy.darray`
+        array : `~np.ndarray`
             A mask boolean array
         """
         max_order = self.max_order
@@ -91,14 +123,14 @@ class MOC(AbstractMOC):
 
     def add_neighbours(self):
         """
-        Extends the MOC so that it includes the HEALPix cells touching the border of the MOC.
+        Extends the MOC instance so that it includes the HEALPix cells touching its border.
 
-        This operation is done at the max depth of the MOC.
+        The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
-            self extended by one degree of neighbors
+            self extended by one degree of neighbours.
         """
         # Get the pixels array of the MOC at the its max order.
         ipix = self._best_res_pixels()
@@ -120,14 +152,14 @@ class MOC(AbstractMOC):
 
     def remove_neighbours(self):
         """
-        Remove from the MOC the HEALPix cells located at the border of the MOC.
+        Remove from the MOC instance the HEALPix cells located at its border.
 
-        This operation is done at the max depth of the MOC.
+        The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
-            self
+            self minus its HEALPix cells located at its border.
         """
         # Get the HEALPix cells of the MOC at its max depth
         ipix = self._best_res_pixels()
@@ -151,76 +183,137 @@ class MOC(AbstractMOC):
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Add the MOC to a matplotlib axis
+        Draw the MOC to a matplotlib axis.
+
+        This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
+        You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`
+        (see the `list of valid keywords <https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch>`__).
 
         Parameters
         ----------
-        ax : `~matplotlib.axes.Axes`
-            Matplotlib axis
-        wcs: `~astropy.wcs.WCS`
-            World coordinate system in which the MOC is projeted
+        ax : `matplotlib.axes.Axes`
+            Matplotlib axis.
+        wcs : `astropy.wcs.WCS`
+            WCS defining the World system <-> Image system projection.
         kw_mpl_pathpatch
-            Plotting arguments for `matplotlib.patches.PathPatch`
+            Plotting arguments for `matplotlib.patches.PathPatch`.
+        
+        Examples
+        --------
+        >>> from mocpy import MOC, WCS
+        >>> from astropy.coordinates import Angle, SkyCoord
+        >>> import astropy.units as u
+        >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
+        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
+        >>> moc = MOC.from_fits(filename)
+        >>> # Plot the MOC using matplotlib
+        >>> import matplotlib.pyplot as plt
+        >>> fig = plt.figure(111, figsize=(15, 15))
+        >>> # Define a WCS as a context
+        >>> with WCS(fig, 
+        ...         fov=50 * u.deg,
+        ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+        ...         coordsys="icrs",
+        ...         rotation=Angle(0, u.degree),
+        ...         projection="AIT") as wcs:
+        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        ...     # Call fill giving the matplotlib axe and the `~astropy.wcs.WCS` object.
+        ...     # We will set the matplotlib keyword linewidth to 0 so that it does not plot
+        ...     # the border of each HEALPix cell.
+        ...     # The color can also be specified along with an alpha value.
+        ...     moc.fill(ax=ax, wcs=wcs, linewidth=0, alpha=0.5, fill=True, color="green")
+        >>> plt.xlabel('ra')
+        >>> plt.ylabel('dec')
+        >>> plt.grid(color="black", linestyle="dotted")
         """
         fill.fill(self, ax, wcs, **kw_mpl_pathpatch)
 
     def border(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Add the MOC border to a matplotlib axis
+        Draw the MOC border(s) to a matplotlib axis.
+
+        This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
+        You are able to specify various styling kwargs for `matplotlib.patches.PathPatch` 
+        (see the `list of valid keywords <https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch>`__).
 
         Parameters
         ----------
-        ax : `~matplotlib.axes.Axes`
-            Matplotlib axis
-        wcs: `~astropy.wcs.WCS`
-            World coordinate system in which the MOC is projeted
+        ax : `matplotlib.axes.Axes`
+            Matplotlib axis.
+        wcs : `astropy.wcs.WCS`
+            WCS defining the World system <-> Image system projection. 
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`
+
+        Examples
+        --------
+        >>> from mocpy import MOC, WCS
+        >>> from astropy.coordinates import Angle, SkyCoord
+        >>> import astropy.units as u
+        >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
+        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
+        >>> moc = MOC.from_fits(filename)
+        >>> # Plot the MOC using matplotlib
+        >>> import matplotlib.pyplot as plt
+        >>> fig = plt.figure(111, figsize=(15, 15))
+        >>> # Define a WCS as a context
+        >>> with WCS(fig, 
+        ...         fov=50 * u.deg,
+        ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+        ...         coordsys="icrs",
+        ...         rotation=Angle(0, u.degree),
+        ...         projection="AIT") as wcs:
+        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        ...     # Call border giving the matplotlib axe and the `~astropy.wcs.WCS` object.
+        ...     moc.border(ax=ax, wcs=wcs, alpha=0.5, color="red")
+        >>> plt.xlabel('ra')
+        >>> plt.ylabel('dec')
+        >>> plt.grid(color="black", linestyle="dotted")
         """
         border.border(self, ax, wcs, **kw_mpl_pathpatch)
 
     def get_boundaries(self, order=None):
         """
-        Return the boundaries of the MOC
+        Returns the sky coordinates defining the border(s) of the MOC.
 
-        The returned boundaries are expressed as a list of SkyCoord.
+        The border(s) are expressed as a list of SkyCoord.
         Each SkyCoord refers to the coordinates of one border of the MOC (i.e. 
-        either a border of a connexe MOC component or a border of a hole
-        located in a connexe MOC component).
+        either a border of a connexe MOC part or a border of a hole
+        located in a connexe MOC part).
 
         Parameters
         ----------
-        order: int
-            The order of the MOC before computing its boundaries.
-            A shallow order leads to a faster computation.
-            By default the current max order of the MOC is taken.
+        order : int
+            The depth of the MOC before computing its boundaries.
+            A shallow depth leads to a faster computation.
+            By default the maximum depth of the MOC is taken.
 
         Return
         ------
-        boundaries: [`~astropy.coordinates.SkyCoord`]
-            A list of SkyCoords each describing one border.
+        coords: [`~astropy.coordinates.SkyCoord`]
+            A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
         return Boundaries.get(self, order)
 
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
         """
-        Create a `~mocpy.moc.MOC` from an image stored as a fits file
+        Create a `~mocpy.moc.MOC` from an image stored as a fits file.
 
         Parameters
         ----------
-        header : `~astropy.io.fits.Header`
-            fits header containing all the info of where the image is located (position, size, etc...)
+        header : `astropy.io.fits.Header`
+            FITS header containing all the info of where the image is located (position, size, etc...)
         max_norder : int
-            the moc resolution
-        mask_arr : `~numpy.ndarray`, optional
-            a 2D boolean array of the same size of the image where pixels having the value 1 are part of
+            The moc resolution.
+        mask_arr : `numpy.ndarray`, optional
+            A boolean array of the same size of the image where pixels having the value 1 are part of
             the final MOC and pixels having the value 0 are not.
 
         Returns
         -------
-        moc : `mocpy.MOC`
-            the MOC object loaded from the ``mask_arr`` and ``header`` extracted from the image
+        moc : `~mocpy.moc.MOC`
+            The resulting MOC.
         """
         # load the image data
         height = header['NAXIS2']
@@ -268,19 +361,19 @@ class MOC(AbstractMOC):
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
         """
-        Load a moc from a set of fits images
+        Load a MOC from a set of fits images.
 
         Parameters
         ----------
         path_l : [str]
-            the path list where the fits image are located
+            A list of path where the fits image are located.
         max_norder : int
-            moc resolution
+            The MOC resolution.
 
         Returns
         -------
-        moc : `~mocpy.MOC`
-            the union of all the moc from path_l
+        moc : `~mocpy.moc.MOC`
+            The union of all the MOCs created from the paths found in ``path_l``.
         """
         moc = MOC()
         for path in path_l:
@@ -293,10 +386,10 @@ class MOC(AbstractMOC):
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
         """
-        Create a `~mocpy.moc.MOC` object from a VizieR table
+        Create a `~mocpy.moc.MOC` object from a VizieR table.
 
-        TODO already implemented in astroquery.cds (asking the MOCServer for an ID).
-        TODO a astroquery.cds.query_object(ID) should return a Dataset object containing the field ``moc_access_url``
+        **Info**: This method is already implemented in `astroquery.cds <https://astroquery.readthedocs.io/en/latest/cds/cds.html>`__. You can ask to get a `mocpy.moc.MOC` object
+        from a vizier catalog ID.
 
         Parameters
         ----------
@@ -308,7 +401,7 @@ class MOC(AbstractMOC):
         Returns
         -------
         result : `~mocpy.moc.MOC`
-            the created moc
+            The resulting MOC.
         """
         nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
         if nside not in nside_possible_values:
@@ -322,10 +415,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_ivorn(cls, ivorn, nside=256):
         """
-        Create a `~mocpy.moc.MOC` object from a given ivorn
-
-        TODO already implemented in astroquery.cds (asking the MOCServer for an ID).
-        TODO a astroquery.cds.query_object(ID) should return a Dataset object containing the field ``moc_access_url``
+        Create a `~mocpy.moc.MOC` object from a given ivorn.
 
         Parameters
         ----------
@@ -336,7 +426,7 @@ class MOC(AbstractMOC):
         Returns
         -------
         result : `~mocpy.moc.MOC`
-            the created moc
+            The resulting MOC.
         """
         return cls.from_url('%s?%s' % (MOC.MOC_SERVER_ROOT_URL,
                                        urlencode({
@@ -348,17 +438,17 @@ class MOC(AbstractMOC):
     @classmethod
     def from_url(cls, url):
         """
-        Create a `~mocpy.moc.MOC` object from a given url
+        Create a `~mocpy.moc.MOC` object from a given url.
 
         Parameters
         ----------
         url : str
-            the url where the fits file representing a moc is available
+            The url of a FITS file storing a MOC.
 
         Returns
         -------
         result : `~mocpy.moc.MOC`
-            the created moc
+            The resulting MOC.
         """
         path = download_file(url, show_progress=False, timeout=60)
         return cls.from_fits(path)
@@ -366,12 +456,12 @@ class MOC(AbstractMOC):
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
         """
-        Create a MOC from an astropy skycoord.
+        Create a MOC from an `astropy.coordinates.SkyCoord`.
 
         Parameters
         ----------
-        skycoords : `~astropy.coordinates.SkyCoord`
-            Must be expressed using the ICRS coordinate system.
+        skycoords : `astropy.coordinates.SkyCoord`
+            The sky coordinates that will belong to the MOC.
         max_norder : int
             The depth of the smallest HEALPix cells contained in the MOC.
         
@@ -392,13 +482,14 @@ class MOC(AbstractMOC):
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
         """
-        Create a MOC from astropy lon, lat quantities.
+        Create a MOC from astropy lon, lat `astropy.units.Quantity`.
         
         Parameters
         ----------
-        skycoords : `~astropy.coordinates.SkyCoord`
-            Must be expressed in ICRS because the astropy-HEALPix frame used here
-            is in ICRS.
+        lon : `astropy.units.Quantity`
+            The longitudes of the sky coordinates belonging to the MOC.
+        lat : `astropy.units.Quantity`
+            The latitudes of the sky coordinates belonging to the MOC.
         max_norder : int
             The depth of the smallest HEALPix cells contained in the MOC.
         
@@ -419,22 +510,26 @@ class MOC(AbstractMOC):
     @classmethod
     def from_polygon_skycoord(cls, skycoord, inside=None, max_depth=10):
         """
-        Create a MOC from a polygon
+        Create a MOC from a polygon.
+
+        The polygon is given as an `astropy.coordinates.SkyCoord` that contains the 
+        vertices of the polygon. Concave and convex polygons are accepted but
+        self-intersecting ones are currently not properly handled.
 
         Parameters
         ----------
-        skycoord : `~astropy.coordinates.SkyCoord`
-            The sky coordinates defining the polygon. Can describe convex and
-            concave polygons but not self-intersecting ones.
-        inside : `~astropy.coordinates.SkyCoord`, optional
+        skycoord : `astropy.coordinates.SkyCoord`
+            The sky coordinates defining the vertices of a polygon. It can describe a convex or
+            concave polygon but not a self-intersecting one.
+        inside : `astropy.coordinates.SkyCoord`, optional
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
-            on the unit sphere (there is no infinite area that can be considered as the outside.
-            On the sphere, a polygon delimits two finite areas.).
+            on the unit sphere (there is no infinite area that can be considered as the outside because on the sphere,
+            a closed polygon delimits two finite areas).
             Possible improvement: take the inside area as the one covering the less of the sphere.
 
             If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
             concave polygons.
-        max_depth: int, optional
+        max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
 
         Returns
@@ -450,23 +545,27 @@ class MOC(AbstractMOC):
         """
         Create a MOC from a polygon
 
+        The polygon is given as lon and lat `astropy.units.Quantity` that define the 
+        vertices of the polygon. Concave and convex polygons are accepted but
+        self-intersecting ones are currently not properly handled.
+
         Parameters
         ----------
-        lon : `~astropy.units.Quantity`
+        lon : `astropy.units.Quantity`
             The longitudes defining the polygon. Can describe convex and
             concave polygons but not self-intersecting ones.
-        lat : `~astropy.units.Quantity`
+        lat : `astropy.units.Quantity`
             The latitudes defining the polygon. Can describe convex and concave
             polygons but not self-intersecting ones.
-        inside : `~astropy.coordinates.SkyCoord`, optional
+        inside : `astropy.coordinates.SkyCoord`, optional
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
-            on the unit sphere (there is no infinite area that can be considered as the outside.
-            On the sphere, a polygon delimits two finite areas.).
+            on the unit sphere (there is no infinite area that can be considered as the outside because on the sphere,
+            a closed polygon delimits two finite areas).
             Possible improvement: take the inside area as the one covering the less of the sphere.
 
             If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
             concave polygons.
-        max_depth: int, optional
+        max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
 
         Returns
@@ -548,8 +647,7 @@ class MOC(AbstractMOC):
         """
         Plot the MOC object using a mollweide projection.
 
-        This method uses matplotlib. New `fill` and `border` methods tend to replace
-        this one, produce more reliable results and allow you to specify additional 
+        **Deprecated**: New `fill` and `border` produce more reliable results and allow you to specify additional 
         matplotlib style rendering parameters.
 
         Parameters

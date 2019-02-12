@@ -1,7 +1,6 @@
 import numpy as np
 
-from astropy.coordinates import SkyCoord
-from astropy.coordinates import Angle
+from astropy import coordinates
 from astropy import wcs
 
 import astropy.units as u
@@ -14,18 +13,18 @@ class WCS:
 
     Parameters
     ----------
-    fig: `~matplotlib.pyplot.figure`
+    fig : `~matplotlib.pyplot.figure`
         The matplotlib figure used for plotting the MOC.
-    fov: `~astropy.units.Quantity`
-        Field of view
-    center: `~astropy.coordinates.SkyCoord`, optional
-        World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame)
-    coordsys: str, optional
-        Coordinate system. Default to "icrs". Must be in ["icrs", "galactic"]
-    projection: str, optional
+    fov : `~astropy.units.Quantity`
+        Size of the field of view.
+    center : `~astropy.coordinates.SkyCoord`, optional
+        World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame).
+    coordsys : str, optional
+        Coordinate system. Default to "icrs". Must be in ["icrs", "galactic"].
+    projection : str, optional
         World base -> Image base projection type. See http://docs.astropy.org/en/stable/wcs/#supported-projections for
         the projections currently supported in astropy. Default to Aitoff.
-    rotation: `~astropy.coordinates.Angle`, optional
+    rotation : `~astropy.coordinates.Angle`, optional
         The angle of rotation. Default to no rotation.
 
     Returns
@@ -62,10 +61,10 @@ class WCS:
     def __init__(self,
                  fig,
                  fov,
-                 center=SkyCoord(0, 0, unit="deg", frame="icrs"),
+                 center=coordinates.SkyCoord(0, 0, unit="deg", frame="icrs"),
                  coordsys="icrs",
                  projection="AIT",
-                 rotation=Angle(0, u.radian)):
+                 rotation=coordinates.Angle(0, u.radian)):
         self.w = wcs.WCS(naxis=2)
         
         width_px, height_px = fig.get_size_inches() * float(fig.dpi)
