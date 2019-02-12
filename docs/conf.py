@@ -177,7 +177,11 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
-    'astropy': ('http://docs.astropy.org/en/stable/', None),
+    'astropy': ('http://docs.astropy.org/en/latest/', None),
     'matplotlib': ('https://matplotlib.org/' ,None),
     'networkx': ('https://networkx.github.io/documentation/stable/', None),
 }
+
+def setup(app):
+    copybutton_path = os.path.join(os.path.dirname(__file__), "js/copybutton.js")
+    app.add_javascript(copybutton_path)

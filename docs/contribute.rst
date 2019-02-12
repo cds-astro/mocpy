@@ -47,7 +47,7 @@ independent python interpreter (in this case, a python3 one, instanciated from /
 
     pip install -r <path_to_mocpy_repo>/requirements/contributing.txt
 
-- Once you are done with your development you can deactivate the virtual env::
+- Once you are done with your developments you can deactivate the virtual env::
 
     deactivate
 
@@ -64,12 +64,6 @@ Once your environment is set up and activated you can run the tests
 - To run the tests with coverage report locally::
 
     python -m pytest -v mocpy --cov-report=term --cov=mocpy mocpy
-
-- If you want to do some profiling on a specific test use the following command::
-
-    python -m pytest mocpy -v -k <your_test_name> --profile-svg
-
-This will generate for you a nice SVG tree graph.
 
 
 Building the documentation
