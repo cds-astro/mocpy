@@ -172,10 +172,10 @@ class AbstractMOC:
             res.append((last, itv[0]))
             last = itv[1]
 
-        max_pix_order = self._get_max_pix()
+        max_pix_depth = self._get_max_pix()
 
-        if last < max_pix_order:
-            res.append((last, max_pix_order))
+        if last < max_pix_depth:
+            res.append((last, max_pix_depth))
 
         return IntervalSet.from_numpy_array(np.asarray(res))
 
@@ -235,22 +235,22 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        intervals_arr = np.array([])
+        intervals = np.array([])
         for order, pix_l in json_moc.items():
             if len(pix_l) == 0:
                 continue
-            pix_arr = np.array(pix_l)
-            p1 = pix_arr
-            p2 = pix_arr + 1
+            pix = np.array(pix_l)
+            p1 = pix
+            p2 = pix + 1
             shift = 2 * (AbstractMOC.HPY_MAX_NORDER - int(order))
 
-            itv_arr = np.vstack((p1 << shift, p2 << shift)).T
-            if intervals_arr.size == 0:
-                intervals_arr = itv_arr
+            itv = np.vstack((p1 << shift, p2 << shift)).T
+            if intervals.size == 0:
+                intervals = itv
             else:
-                intervals_arr = np.vstack((intervals_arr, itv_arr))
+                intervals = np.vstack((intervals, itv))
 
-        return cls(IntervalSet.from_numpy_array(intervals_arr))
+        return cls(IntervalSet.from_numpy_array(intervals))
 
     def _uniq_pixels_iterator(self):
         """
@@ -292,13 +292,13 @@ class AbstractMOC:
         return cls(interval_set)
 
     @staticmethod
-    def _to_json(uniq_arr):
+    def _to_json(uniq):
         """
         Serializes a MOC to the JSON format.
 
         Parameters
         ----------
-        uniq_arr : `~numpy.ndarray`
+        uniq : `~numpy.ndarray`
             The array of HEALPix cells representing the MOC to serialize.
 
         Returns
@@ -308,26 +308,26 @@ class AbstractMOC:
         """
         result_json = {}
 
-        order_arr, ipix_arr = utils.uniq2orderipix(uniq_arr)
-        min_order = np.min(order_arr[0])
-        max_order = np.max(order_arr[-1])
+        depth, ipix = utils.uniq2orderipix(uniq)
+        min_depth = np.min(depth[0])
+        max_depth = np.max(depth[-1])
 
-        for order in range(min_order, max_order+1):
-            pix_index = np.where(order_arr == order)[0]
+        for d in range(min_depth, max_depth+1):
+            pix_index = np.where(depth == d)[0]
             if pix_index.size:
                 # there are pixels belonging to the current order
-                ipix_order_arr = ipix_arr[pix_index]
-                result_json[str(order)] = ipix_order_arr.tolist()
+                ipix_depth = ipix[pix_index]
+                result_json[str(d)] = ipix_depth.tolist()
 
         return result_json
 
-    def _to_fits(self, uniq_arr, optional_kw_dict=None):
+    def _to_fits(self, uniq, optional_kw_dict=None):
         """
         Serializes a MOC to the FITS format.
 
         Parameters
         ----------
-        uniq_arr : `numpy.ndarray`
+        uniq : `numpy.ndarray`
             The array of HEALPix cells representing the MOC to serialize.
         optional_kw_dict : dict
             Optional keywords arguments added to the FITS header.
@@ -337,18 +337,20 @@ class AbstractMOC:
         thdulist : `astropy.io.fits.HDUList`
             The list of HDU tables.
         """
-        moc_order = self.max_order
-        if moc_order <= 13:
+        depth = self.max_order
+        if depth <= 13:
             fits_format = '1J'
         else:
             fits_format = '1K'
 
         tbhdu = fits.BinTableHDU.from_columns(
-            fits.ColDefs([fits.Column(name='UNIQ', format=fits_format, array=uniq_arr)]))
+            fits.ColDefs([
+                fits.Column(name='UNIQ', format=fits_format, array=uniq)
+            ]))
         tbhdu.header['PIXTYPE'] = 'HEALPIX'
         tbhdu.header['ORDERING'] = 'NUNIQ'
         tbhdu.header.update(self._fits_header_keywords)
-        tbhdu.header['MOCORDER'] = moc_order
+        tbhdu.header['MOCORDER'] = depth
         tbhdu.header['MOCTOOL'] = 'MOCPy'
         if optional_kw_dict:
             for key in optional_kw_dict:
@@ -383,14 +385,14 @@ class AbstractMOC:
         for uniq in self._uniq_pixels_iterator():
             uniq_l.append(uniq)
 
-        uniq_arr = np.array(uniq_l)
+        uniq = np.array(uniq_l)
 
         if format == 'fits':
-            result = self._to_fits(uniq_arr=uniq_arr,
+            result = self._to_fits(uniq=uniq,
                                    optional_kw_dict=optional_kw_dict)
         else:
             # json format serialization
-            result = self.__class__._to_json(uniq_arr=uniq_arr)
+            result = self.__class__._to_json(uniq=uniq)
 
         return result
 

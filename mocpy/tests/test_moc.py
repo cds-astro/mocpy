@@ -78,7 +78,7 @@ def moc_from_fits_image():
     with fits.open(image_path) as hdulist:
         moc = MOC.from_image(header=hdulist[0].header,
                              max_norder=7,
-                             mask_arr=hdulist[0].data)
+                             mask=hdulist[0].data)
 
     return moc
 

@@ -74,8 +74,8 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        array : `~numpy.ndarray`
-            the array of HEALPix at ``max_order``
+        result : `~numpy.ndarray`
+            The array of HEALPix at ``max_order``
         """
         factor = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         pix_l = []
@@ -104,19 +104,19 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-        max_order = self.max_order
-        m = np.zeros(nside2npix(1 << max_order), dtype=bool)
+        depth = self.max_order
+        m = np.zeros(nside2npix(1 << depth), dtype=bool)
 
-        pix_id_arr = self._best_res_pixels()
-        m[pix_id_arr] = True
+        pix_id = self._best_res_pixels()
+        m[pix_id] = True
 
         if not keep_inside:
             m = np.logical_not(m)
 
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
-        pix_arr = hp.lonlat_to_healpix(ra, dec)
+        hp = HEALPix(nside=(1 << depth), order='nested')
+        pix = hp.lonlat_to_healpix(ra, dec)
 
-        return m[pix_arr]
+        return m[pix]
 
     def _get_max_pix(self):
         return 3*(2**60)
@@ -296,7 +296,7 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_image(cls, header, max_norder, mask_arr=None):
+    def from_image(cls, header, max_norder, mask=None):
         """
         Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
@@ -306,7 +306,7 @@ class MOC(AbstractMOC):
             FITS header containing all the info of where the image is located (position, size, etc...)
         max_norder : int
             The moc resolution.
-        mask_arr : `numpy.ndarray`, optional
+        mask : `numpy.ndarray`, optional
             A boolean array of the same size of the image where pixels having the value 1 are part of
             the final MOC and pixels having the value 0 are not.
 
@@ -322,9 +322,9 @@ class MOC(AbstractMOC):
         # use wcs from astropy to locate the image in the world coordinates
         w = wcs.WCS(header)
 
-        if mask_arr is not None:
+        if mask is not None:
             # We have an array of pixels that are part of of survey
-            y, x = np.where(mask_arr)
+            y, x = np.where(mask)
             pix_crd = np.dstack((x, y))[0]
         else:
             # If we do not have a mask array we create the moc of all the image
@@ -474,9 +474,9 @@ class MOC(AbstractMOC):
         ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+        intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        interval_set = IntervalSet.from_numpy_array(intervals)
         return cls(interval_set)
 
     @classmethod
@@ -502,9 +502,9 @@ class MOC(AbstractMOC):
         ipix = hp.lonlat_to_healpix(lon, lat)
 
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+        intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        interval_set = IntervalSet.from_numpy_array(intervals)
         return cls(interval_set)
 
     @classmethod
@@ -590,8 +590,8 @@ class MOC(AbstractMOC):
         """
         Sky fraction covered by the MOC
         """
-        pix_id_arr = self._best_res_pixels()
-        nb_pix_filled = pix_id_arr.size
+        pix_id = self._best_res_pixels()
+        nb_pix_filled = pix_id.size
         return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
 
     # TODO : move this in astroquery.Simbad.query_region
@@ -683,15 +683,15 @@ class MOC(AbstractMOC):
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
 
         m = np.zeros(nside2npix(1 << plotted_moc.max_order))
-        pix_id_arr = plotted_moc._best_res_pixels()
+        pix_id = plotted_moc._best_res_pixels()
 
         # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.
         if isinstance(frame, Galactic):
-            lon, lat = hp.boundaries_lonlat(pix_id_arr, step=2)
+            lon, lat = hp.boundaries_lonlat(pix_id, step=2)
             sky_crd = SkyCoord(lon, lat, unit='deg')
-            pix_id_arr = hp.lonlat_to_healpix(sky_crd.galactic.l, sky_crd.galactic.b)
+            pix_id = hp.lonlat_to_healpix(sky_crd.galactic.l, sky_crd.galactic.b)
 
-        m[pix_id_arr] = 1
+        m[pix_id] = 1
 
         z = np.flip(m[pix_map], axis=1)
 

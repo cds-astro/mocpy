@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.5] - 2019-02-08
 ### Added
 - Plotting a moc with matplotlib axes is faster (concers **fill** and **border** methods). The level of detail of the plotted MOC is function of the FoV. The MOC is degraded to the minimum depth so that a cell of this depth can be contained in 1px at the center of the projection. For small FoVs, we only plot the part of MOC contained in the view (thanks to the speed of logical operation between MOCs).
+- The [docs](https://mocpy.readthedocs.io/en/latest/) features more examples on how to plot a MOC, perform logical operations between MOCs, etc...
+- The doc of the API has been reviewed and features some test codes that can be run with the sphinx command `make doctest`.
+
+### Removed
+- The use of **multiprocessing** in the `fill` method.
 
 ## [0.5.4] - 2019-02-06
 ### Added
