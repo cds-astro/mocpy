@@ -54,7 +54,7 @@ class AbstractMOC:
 
     def empty(self):
         """
-        Check whether the MOC is empty.
+        Checks whether the MOC is empty.
 
         A MOC is empty when its list of HEALPix cell ranges is empty.
 
@@ -68,7 +68,7 @@ class AbstractMOC:
     @property
     def max_order(self):
         """
-        Returns the depth of the smallest HEALPix cells found in the MOC.
+        Depth of the smallest HEALPix cells found in the MOC instance.
         """
         # TODO: cache value
         combo = int(0)
@@ -149,7 +149,7 @@ class AbstractMOC:
 
     def complement(self):
         """
-        Return the complement of the MOC instance.
+        Returns the complement of the MOC instance.
 
         Returns
         -------
@@ -185,7 +185,7 @@ class AbstractMOC:
     @staticmethod
     def _neighbour_pixels(hp, ipix):
         """
-        Get all the pixels neighbours of ``ipix``
+        Returns all the pixels neighbours of ``ipix``
         """
         neigh_ipix = np.unique(hp.neighbours(ipix).ravel())
         # Remove negative pixel values returned by `~astropy_healpix.HEALPix.neighbours`
@@ -194,7 +194,7 @@ class AbstractMOC:
     @classmethod
     def from_cells(cls, cells):
         """
-        Creates a MOC from a numpy array representing the cells.
+        Creates a MOC from a numpy array representing the HEALPix cells.
 
         Parameters
         ----------
@@ -227,8 +227,8 @@ class AbstractMOC:
 
         Parameters
         ----------
-        json_moc : {str : [int]}
-            A dictionary of HEALPix cell arrays indexed by their order
+        json_moc : dict(str : [int]
+            A dictionary of HEALPix cell arrays indexed by their depth.
 
         Returns
         -------
@@ -269,7 +269,7 @@ class AbstractMOC:
     @classmethod
     def from_fits(cls, filename):
         """
-        Load a MOC from a FITS file.
+        Loads a MOC from a FITS file.
 
         The specified FITS file must store the MOC (i.e. the list of HEALPix cells it contains) in a binary HDU table.
 
@@ -294,7 +294,7 @@ class AbstractMOC:
     @staticmethod
     def _to_json(uniq_arr):
         """
-        Serialize a MOC to the JSON format.
+        Serializes a MOC to the JSON format.
 
         Parameters
         ----------
@@ -323,7 +323,7 @@ class AbstractMOC:
 
     def _to_fits(self, uniq_arr, optional_kw_dict=None):
         """
-        Serialize a MOC to the FITS format.
+        Serializes a MOC to the FITS format.
 
         Parameters
         ----------
@@ -359,7 +359,7 @@ class AbstractMOC:
 
     def serialize(self, format='fits', optional_kw_dict=None):
         """
-        Serialize the MOC into a specific format.
+        Serializes the MOC into a specific format.
 
         Possible formats are FITS and JSON.
 
@@ -396,7 +396,7 @@ class AbstractMOC:
 
     def write(self, path, format='fits', optional_kw_dict=None):
         """
-        Write the MOC to a file.
+        Writes the MOC to a file.
 
         Format can be 'fits' or 'json', though only the fits format is officially supported by the IVOA.
 
@@ -420,7 +420,7 @@ class AbstractMOC:
 
     def degrade_to_order(self, new_order):
         """
-        Degrade self to a new, less precise, MOC.
+        Degrades the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``. 

@@ -70,7 +70,7 @@ class MOC(AbstractMOC):
 
     def _best_res_pixels(self):
         """
-        Get a numpy array of all the HEALPix indexes contained in the MOC at its max order.
+        Returns a numpy array of all the HEALPix indexes contained in the MOC at its max order.
 
         Returns
         -------
@@ -87,7 +87,7 @@ class MOC(AbstractMOC):
 
     def contains(self, ra, dec, keep_inside=True):
         """
-        Get a boolean mask array of the positions lying inside (or outside) the MOC instance.
+        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class MOC(AbstractMOC):
 
     def remove_neighbours(self):
         """
-        Remove from the MOC instance the HEALPix cells located at its border.
+        Removes from the MOC instance the HEALPix cells located at its border.
 
         The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.
 
@@ -183,7 +183,7 @@ class MOC(AbstractMOC):
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Draw the MOC to a matplotlib axis.
+        Draws the MOC on a matplotlib axis.
 
         This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
         You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`
@@ -230,7 +230,7 @@ class MOC(AbstractMOC):
 
     def border(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Draw the MOC border(s) to a matplotlib axis.
+        Draws the MOC border(s) on a matplotlib axis.
 
         This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
         You are able to specify various styling kwargs for `matplotlib.patches.PathPatch` 
@@ -298,7 +298,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_image(cls, header, max_norder, mask_arr=None):
         """
-        Create a `~mocpy.moc.MOC` from an image stored as a fits file.
+        Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
         Parameters
         ----------
@@ -361,7 +361,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
         """
-        Load a MOC from a set of fits images.
+        Loads a MOC from a set of FITS file images.
 
         Parameters
         ----------
@@ -386,7 +386,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
         """
-        Create a `~mocpy.moc.MOC` object from a VizieR table.
+        Creates a `~mocpy.moc.MOC` object from a VizieR table.
 
         **Info**: This method is already implemented in `astroquery.cds <https://astroquery.readthedocs.io/en/latest/cds/cds.html>`__. You can ask to get a `mocpy.moc.MOC` object
         from a vizier catalog ID.
@@ -415,7 +415,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_ivorn(cls, ivorn, nside=256):
         """
-        Create a `~mocpy.moc.MOC` object from a given ivorn.
+        Creates a `~mocpy.moc.MOC` object from a given ivorn.
 
         Parameters
         ----------
@@ -438,7 +438,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_url(cls, url):
         """
-        Create a `~mocpy.moc.MOC` object from a given url.
+        Creates a `~mocpy.moc.MOC` object from a given url.
 
         Parameters
         ----------
@@ -456,7 +456,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
         """
-        Create a MOC from an `astropy.coordinates.SkyCoord`.
+        Creates a MOC from an `astropy.coordinates.SkyCoord`.
 
         Parameters
         ----------
@@ -482,7 +482,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
         """
-        Create a MOC from astropy lon, lat `astropy.units.Quantity`.
+        Creates a MOC from astropy lon, lat `astropy.units.Quantity`.
         
         Parameters
         ----------
@@ -510,7 +510,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_polygon_skycoord(cls, skycoord, inside=None, max_depth=10):
         """
-        Create a MOC from a polygon.
+        Creates a MOC from a polygon.
 
         The polygon is given as an `astropy.coordinates.SkyCoord` that contains the 
         vertices of the polygon. Concave and convex polygons are accepted but
@@ -525,7 +525,7 @@ class MOC(AbstractMOC):
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
             on the unit sphere (there is no infinite area that can be considered as the outside because on the sphere,
             a closed polygon delimits two finite areas).
-            Possible improvement: take the inside area as the one covering the less of the sphere.
+            Possible improvement: take the inside area as the one covering the smallest region on the sphere.
 
             If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
             concave polygons.
@@ -543,7 +543,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_polygon(cls, lon, lat, inside=None, max_depth=10):
         """
-        Create a MOC from a polygon
+        Creates a MOC from a polygon
 
         The polygon is given as lon and lat `astropy.units.Quantity` that define the 
         vertices of the polygon. Concave and convex polygons are accepted but
@@ -561,7 +561,7 @@ class MOC(AbstractMOC):
             A point that will be inside the MOC is needed as it is not possible to determine the inside area of a polygon 
             on the unit sphere (there is no infinite area that can be considered as the outside because on the sphere,
             a closed polygon delimits two finite areas).
-            Possible improvement: take the inside area as the one covering the less of the sphere.
+            Possible improvement: take the inside area as the one covering the smallest region on the sphere.
 
             If inside=None (default behavior), the mean of all the vertices is taken as lying inside the polygon. That approach may not work for 
             concave polygons.
@@ -588,7 +588,7 @@ class MOC(AbstractMOC):
     @property
     def sky_fraction(self):
         """
-        Return the sky fraction covered by the MOC
+        Sky fraction covered by the MOC
         """
         pix_id_arr = self._best_res_pixels()
         nb_pix_filled = pix_id_arr.size
@@ -597,14 +597,14 @@ class MOC(AbstractMOC):
     # TODO : move this in astroquery.Simbad.query_region
     def query_simbad(self, max_rows=10000):
         """
-        Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance
+        Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.
         """
         return self._query('SIMBAD', max_rows)
 
     # TODO : move this in astroquery.Vizier.query_region
     def query_vizier_table(self, table_id, max_rows=10000):
         """
-        Query a VizieR table for sources in the coverage of the MOC instance
+        Query a VizieR table for sources in the coverage of the MOC instance.
         """
         return self._query(table_id, max_rows)
 
@@ -647,13 +647,13 @@ class MOC(AbstractMOC):
         """
         Plot the MOC object using a mollweide projection.
 
-        **Deprecated**: New `fill` and `border` produce more reliable results and allow you to specify additional 
-        matplotlib style rendering parameters.
+        **Deprecated**: New `fill` and `border` methods produce more reliable results and allow you to specify additional 
+        matplotlib style parameters.
 
         Parameters
         ----------
         title : str
-            the title of the plot
+            The title of the plot
         frame : `astropy.coordinates.BaseCoordinateFrame`, optional
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """

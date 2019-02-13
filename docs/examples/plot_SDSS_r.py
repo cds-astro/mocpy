@@ -7,7 +7,7 @@ moc = MOC.from_fits(filename)
 # Plot the MOC using matplotlib
 import matplotlib.pyplot as plt
 fig = plt.figure(111, figsize=(15, 10))
-# Define a WCS as a context
+# Define a astropy WCS easily
 with WCS(fig, 
         fov=200 * u.deg,
         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
