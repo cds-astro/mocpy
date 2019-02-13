@@ -10,15 +10,12 @@ from matplotlib.patches import PathPatch
 
 from .utils import build_plotting_moc
 from . import culling_backfacing_cells
-from ...parallel_task import send_to_multiple_processes
 from . import axis_viewport
 
-#This method is multiprocessed using the multiprocessing python package.
-def compute_healpix_vertices(x):
+def compute_healpix_vertices(depth, ipix, wcs):
     path_vertices = np.array([])
     codes = np.array([])
 
-    depth, ipixels, wcs = x
     depth = int(depth)
 
     step = 1
@@ -26,7 +23,7 @@ def compute_healpix_vertices(x):
         step = 2
 
     hp = HEALPix(order="nested", nside=(1 << depth), frame=ICRS())
-    ipix_boundaries = hp.boundaries_skycoord(ipixels, step=step)
+    ipix_boundaries = hp.boundaries_skycoord(ipix, step=step)
     # Projection on the given WCS
     xp, yp = skycoord_to_pixel(ipix_boundaries, wcs=wcs)
 
@@ -59,12 +56,14 @@ def compute_the_patches(moc, wcs):
     depth_ipix_d = moc.serialize(format="json")
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(depth_ipix_d=depth_ipix_d, wcs=wcs)
 
-    # Send a (depth, hash, wcs) tuple to compute_healpix_vertices
-    args = [depth_ipix + (wcs,) for depth_ipix in depth_ipix_clean_d.items()]
+    patches = []
+    for depth, ipix in depth_ipix_clean_d.items():
+        patch = compute_healpix_vertices(depth=depth,
+                    ipix=ipix,
+                    wcs=wcs)
+        patches.append(patch)
 
-    # Use multiprocessing for computing the healpix vertices of the cells
-    # cleaned from those backfacing the viewport.
-    return send_to_multiple_processes(func=compute_healpix_vertices, args=args, workers=1)
+    return patches
 
 def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
     first_patch = patches[0]
