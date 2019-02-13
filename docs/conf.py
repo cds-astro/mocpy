@@ -183,5 +183,4 @@ intersphinx_mapping = {
 }
 
 def setup(app):
-    copybutton_path = os.path.join(os.path.dirname(__file__), "js/copybutton.js")
-    app.add_javascript(copybutton_path)
+    app.add_javascript("js/copybutton.js")
