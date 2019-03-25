@@ -14,6 +14,7 @@ setup(name='MOCPy',
     url='https://github.com/cds-astro/mocpy',
     install_requires=['astropy',
         'astropy_healpix',
+        'cdshealpix',
         'requests',
         'numpy',
         'matplotlib', # Used in fill and border

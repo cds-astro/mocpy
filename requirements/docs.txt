@@ -1,6 +1,7 @@
 requests
 astropy
 astropy_healpix
+cdshealpix
 matplotlib
 networkx
 spherical_geometry
