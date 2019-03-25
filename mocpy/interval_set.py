@@ -107,7 +107,9 @@ class IntervalSet:
         """
         ret = []
         start = stop = None
-        for itv in sorted(self._intervals.tolist()):
+        # Use numpy sort method
+        self._intervals.sort(axis=0)
+        for itv in self._intervals.tolist():
             if start is None:
                 start, stop = itv
                 continue
