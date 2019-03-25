@@ -58,6 +58,12 @@ def test_moc_from_lonlat(lonlat_gen_f, size):
 
     moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=7)
 
+def test_from_healpix_cells():
+    ipix = np.array([40, 87, 65])
+    depth = np.array([3, 3, 3])
+    fully_covered = np.array([True, True, True])
+
+    moc = MOC.from_healpix_cells(ipix, depth, fully_covered)
 
 def test_moc_from_fits():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'

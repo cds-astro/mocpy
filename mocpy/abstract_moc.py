@@ -193,29 +193,41 @@ class AbstractMOC:
         return neigh_ipix[np.where(neigh_ipix >= 0)]
 
     @classmethod
-    def from_cells(cls, cells):
+    def from_healpix_cells(cls, ipix, depth, fully_covered=None):
         """
-        Creates a MOC from a numpy array representing the HEALPix cells.
+        Creates a MOC from a set of HEALPix cells at a given depth.
 
         Parameters
         ----------
-        cells : `numpy.ndarray`
-            Must be a numpy structured array (See https://docs.scipy.org/doc/numpy-1.15.0/user/basics.rec.html).
-            The structure of a cell contains 3 attributes:
+        ipix : `numpy.ndarray`
+            HEALPix cell indices.
+        depth : `numpy.ndarray`
+            Depth of the HEALPix cells. Must be of the same size of `ipix`.
+        fully_covered : `numpy.ndarray`, optional
+            HEALPix cells coverage flags. This flag informs whether a cell is
+            fully covered by a cone (resp. polygon, elliptical cone) or not.
+            Must be of the same size of `ipix`.
 
-            - A `ipix` value being a np.uint64
-            - A `depth` value being a np.uint32
-            - A `fully_covered` flag bit stored in a np.uint8
+        Raises
+        ------
+        IndexError
+            When `ipix`, `depth` and `fully_covered` do not have the same shape
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
-            The MOC.
+            The MOC
         """
-        shift = (AbstractMOC.HPY_MAX_NORDER - cells["depth"]) << 1
+        if ipix.shape != depth.shape:
+            raise IndexError('ipix and depth arrays must have the same shape')
 
-        p1 = cells["ipix"]
-        p2 = cells["ipix"] + 1
+        if fully_covered is not None and ipix.shape != fully_covered.shape:
+            raise IndexError('ipix and fully_covered arrays must have the same shape')
+
+        shift = (AbstractMOC.HPY_MAX_NORDER - depth) << 1
+
+        p1 = ipix
+        p2 = ipix + 1
 
         intervals = np.vstack((p1 << shift, p2 << shift)).T
 
