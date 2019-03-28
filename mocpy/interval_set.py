@@ -32,7 +32,7 @@ class IntervalSet:
     """
     HPY_MAX_ORDER = 29
 
-    def __init__(self, intervals=None, make_consistent=True):
+    def __init__(self, intervals=None, make_consistent=True, min_depth=None):
         """
         IntervalSet constructor.
 
@@ -49,11 +49,7 @@ class IntervalSet:
         intervals = np.array([]) if intervals is None else intervals
         self._intervals = intervals
         if make_consistent:
-            self._merge_intervals()
-
-    @classmethod
-    def from_numpy_array(cls, arr):
-        return cls(arr)
+            self._merge_intervals(min_depth=min_depth)
 
     def copy(self):
         """
@@ -99,32 +95,54 @@ class IntervalSet:
         """
         return self._intervals.size == 0
 
-    def _merge_intervals(self):
+    def _merge_intervals(self, min_depth):
         """
         Merge overlapping intervals.
 
         This method is called only once in the constructor.
         """
+        def add_interval(ret, start, stop):
+            if min_depth is not None:
+                shift = 2 * (29 - min_depth)
+                mask = (int(1) << shift) - 1
+
+                if stop - start < mask:
+                    ret.append((start, stop))
+                else:
+                    ofs = start & mask
+                    st = start
+                    if ofs > 0:
+                        st = (start - ofs) + (mask + 1)
+                        ret.append((start, st))
+
+                    while st + mask + 1 < stop:
+                        ret.append((st, st + mask + 1))
+                        st = st + mask + 1
+
+                    ret.append((st, stop))
+            else:
+                ret.append((start, stop))
+
         ret = []
         start = stop = None
         # Use numpy sort method
         self._intervals.sort(axis=0)
-        for itv in self._intervals.tolist():
+        for itv in self._intervals:
             if start is None:
                 start, stop = itv
                 continue
 
-            #  gap between intervals
+            # gap between intervals
             if itv[0] > stop:
-                ret.append((start, stop))
+                add_interval(ret, start, stop)
                 start, stop = itv
             else:
-                #  merge intervals
+                # merge intervals
                 if itv[1] > stop:
                     stop = itv[1]
 
         if start is not None and stop is not None:
-            ret.append((start, stop))
+            add_interval(ret, start, stop)
 
         self._intervals = np.asarray(ret)
 
@@ -235,12 +253,12 @@ class IntervalSet:
                     res.append((a + ofs2, b + ofs2))
 
             if len(r4) > 0:
-                r4_is = IntervalSet.from_numpy_array(np.asarray(r4))
+                r4_is = IntervalSet(np.asarray(r4))
                 r2 = r2.difference(r4_is)
 
             order += 1
 
-        return IntervalSet.from_numpy_array(np.asarray(res))
+        return IntervalSet(np.asarray(res))
 
     @classmethod
     def from_nuniq_interval_set(cls, nuniq_is):
@@ -271,7 +289,7 @@ class IntervalSet:
                 order, i_pix = uniq2orderipix(j)
 
                 if order != last_order:
-                    nested_is = nested_is.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
+                    nested_is = nested_is.union(IntervalSet(np.asarray(rtmp)))
                     rtmp = []
                     last_order = order
                     diff_order = IntervalSet.HPY_MAX_ORDER - order
@@ -279,7 +297,7 @@ class IntervalSet:
 
                 rtmp.append((i_pix << shift_order, (i_pix + 1) << shift_order))
 
-        nested_is = nested_is.union(IntervalSet.from_numpy_array(np.asarray(rtmp)))
+        nested_is = nested_is.union(IntervalSet(np.asarray(rtmp)))
         return nested_is
 
     @staticmethod

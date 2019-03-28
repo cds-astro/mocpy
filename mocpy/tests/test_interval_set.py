@@ -14,6 +14,13 @@ def test_interval_set_consistency(isets):
     assert isets['a'] == IntervalSet(np.asarray([(27, 126)]))
     assert isets['b'] == IntervalSet(np.asarray([(9, 61), (68, 105)]))
 
+def test_interval_min_depth():
+    big_cells = np.array([(0, 4**29)])
+    itv_result = IntervalSet(big_cells, min_depth=1)
+    
+    small_cells = np.array([(0, 4**28), (4**28, 2*4**28), (2*4**28, 3*4**28), (3*4**28, 4**29)])
+    itv_small_cells = IntervalSet(small_cells, make_consistent=False)
+    assert itv_result == itv_small_cells
 
 def test_interval_set_union(isets):
     assert isets['a'].union(isets['b']) == IntervalSet(np.array([(9, 126)]))

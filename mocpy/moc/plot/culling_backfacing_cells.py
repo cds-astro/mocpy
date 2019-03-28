@@ -54,7 +54,9 @@ def from_moc(depth_ipix_d, wcs):
     max_depth = max(depths)
     ipixels = np.asarray(depth_ipix_d[str(min_depth)])
 
-    max_split_depth = max_depth
+    # Split the cells located at the border of the projection
+    # until at least the depth 7
+    max_split_depth = max(7, max_depth)
 
     ipix_d = {}
     for depth in range(min_depth, max_split_depth + 1):
@@ -63,7 +65,7 @@ def from_moc(depth_ipix_d, wcs):
         ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
         # Projection on the given WCS
         xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
-        xp, yp, frontface_id = backface_culling(xp, yp)
+        _, _, frontface_id = backface_culling(xp, yp)
 
         # Get the pixels which are backfacing the projection
         backfacing_ipix = ipixels[~frontface_id]
@@ -72,23 +74,18 @@ def from_moc(depth_ipix_d, wcs):
         depth_str = str(depth)
         ipix_d.update({depth_str: frontface_ipix})
 
-        if depth < max_depth:
-            next_depth = str(depth + 1)
-            ipixels = []
-            if next_depth in depth_ipix_d:
-                ipixels = depth_ipix_d[next_depth]
-            
-            for bf_ipix in backfacing_ipix:
-                child_bf_ipix = bf_ipix << 2
-                ipixels.extend([child_bf_ipix,
-                    child_bf_ipix + 1,
-                    child_bf_ipix + 2,
-                    child_bf_ipix + 3])
+        next_depth = str(depth + 1)
+        ipixels = []
+        if next_depth in depth_ipix_d:
+            ipixels = depth_ipix_d[next_depth]
 
-            ipixels = np.asarray(ipixels)
+        for bf_ipix in backfacing_ipix:
+            child_bf_ipix = bf_ipix << 2
+            ipixels.extend([child_bf_ipix,
+                child_bf_ipix + 1,
+                child_bf_ipix + 2,
+                child_bf_ipix + 3])
 
-    for depth in range(max_split_depth+1, max_depth+1):
-        depth_str = str(depth)
-        ipix_d.update({depth_str: depth_ipix_d[depth_str]})
+        ipixels = np.asarray(ipixels)
 
     return ipix_d

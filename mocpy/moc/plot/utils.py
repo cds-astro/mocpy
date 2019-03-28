@@ -20,6 +20,8 @@ def build_plotting_moc(moc, wcs):
     if moc.max_order > depth_res:
         moc_plot = moc.degrade_to_order(depth_res)
 
+    moc_plot = moc_plot.refine_to_order(min_depth=2)
+
     # Get the MOC delimiting the FOV polygon
     width_px = int(wcs.wcs.crpix[0]*2.) # Supposing the wcs is centered in the axis
     heigth_px = int(wcs.wcs.crpix[1]*2.)

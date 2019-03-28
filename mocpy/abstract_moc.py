@@ -177,7 +177,7 @@ class AbstractMOC:
         if last < max_pix_depth:
             res.append((last, max_pix_depth))
 
-        return IntervalSet.from_numpy_array(np.asarray(res))
+        return IntervalSet(np.asarray(res))
 
     def _get_max_pix(self):
         pass
@@ -218,7 +218,7 @@ class AbstractMOC:
 
         intervals = np.vstack((p1 << shift, p2 << shift)).T
 
-        return cls(IntervalSet.from_numpy_array(intervals))
+        return cls(IntervalSet(intervals))
 
     @classmethod
     def from_json(cls, json_moc):
@@ -250,7 +250,7 @@ class AbstractMOC:
             else:
                 intervals = np.vstack((intervals, itv))
 
-        return cls(IntervalSet.from_numpy_array(intervals))
+        return cls(IntervalSet(intervals))
 
     def _uniq_pixels_iterator(self):
         """
@@ -287,7 +287,7 @@ class AbstractMOC:
 
         intervals = np.vstack((table['UNIQ'], table['UNIQ']+1)).T
 
-        nuniq_interval_set = IntervalSet.from_numpy_array(intervals)
+        nuniq_interval_set = IntervalSet(intervals)
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
         return cls(interval_set)
 
@@ -430,6 +430,7 @@ class AbstractMOC:
         Parameters
         ----------
         new_order : int
+            Maximum depth of the output degraded MOC.
 
         Returns
         -------
@@ -441,6 +442,7 @@ class AbstractMOC:
         mask = ~ofs
         adda = int(0)
         addb = ofs
+
         iv_set = []
 
         for iv in self._interval_set._intervals:
@@ -449,4 +451,7 @@ class AbstractMOC:
             if b > a:
                 iv_set.append((a, b))
 
-        return self.__class__(IntervalSet.from_numpy_array(np.asarray(iv_set)))
+        return self.__class__(IntervalSet(np.asarray(iv_set)))
+
+    def refine_to_order(self, min_depth):
+        return self.__class__(IntervalSet(self._interval_set._intervals, min_depth=min_depth))

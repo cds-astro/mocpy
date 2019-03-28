@@ -147,7 +147,7 @@ class MOC(AbstractMOC):
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + 1) << shift)).T
         # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
-        self._interval_set = self._interval_set.union(IntervalSet.from_numpy_array(neigh_itv))
+        self._interval_set = self._interval_set.union(IntervalSet(neigh_itv))
         return self
 
     def remove_neighbours(self):
@@ -178,7 +178,7 @@ class MOC(AbstractMOC):
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + 1) << shift)).T
-        self._interval_set = IntervalSet.from_numpy_array(reduced_itv)
+        self._interval_set = IntervalSet(reduced_itv)
         return self
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
@@ -354,7 +354,7 @@ class MOC(AbstractMOC):
 
         # This MOC will be consistent when one will do operations on the moc (union, inter, ...) or
         # simply write it to a fits or json file
-        interval_set = IntervalSet.from_numpy_array(intervals_arr)
+        interval_set = IntervalSet(intervals_arr)
 
         return cls(interval_set=interval_set)
 
@@ -476,7 +476,7 @@ class MOC(AbstractMOC):
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
         intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        interval_set = IntervalSet.from_numpy_array(intervals)
+        interval_set = IntervalSet(intervals)
         return cls(interval_set)
 
     @classmethod
@@ -504,7 +504,7 @@ class MOC(AbstractMOC):
         shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
         intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
 
-        interval_set = IntervalSet.from_numpy_array(intervals)
+        interval_set = IntervalSet(intervals)
         return cls(interval_set)
 
     @classmethod
