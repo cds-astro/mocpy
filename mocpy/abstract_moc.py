@@ -297,7 +297,7 @@ class AbstractMOC:
         """
         Create a MOC from a str.
         
-        This grammar is expressed is the `MOC IVOA <http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf>`
+        This grammar is expressed is the `MOC IVOA <http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf>`__
         specification at section 2.3.2.
 
         Parameters
