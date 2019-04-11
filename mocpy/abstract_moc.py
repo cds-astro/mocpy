@@ -396,7 +396,7 @@ class AbstractMOC:
 
         return result
 
-    def write(self, path, format='fits', optional_kw_dict=None):
+    def write(self, path, format='fits', overwrite=False, optional_kw_dict=None):
         """
         Writes the MOC to a file.
 
@@ -409,12 +409,14 @@ class AbstractMOC:
         format : str, optional
             The format in which the MOC will be serialized before being saved. Possible formats are "fits" or "json".
             By default, ``format`` is set to "fits".
+        overwrite : bool, optional
+            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. Default to False.
         optional_kw_dict : optional
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
         serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
         if format == 'fits':
-            serialization.writeto(path, overwrite=True)
+            serialization.writeto(path, overwrite=overwrite)
         else:
             import json
             with open(path, 'w') as h:

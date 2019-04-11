@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2019-04-11
+### Added
+- Serialize to str. Call moc.serialize(format="str")
+- Load a MOC from a str (see section 2.3.2 of [MOC IVOA paper](http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf)).
+- Fix vizualization bug when plotting all the allsky MOC. Biggest cells to plot are limited to depth 2. Cells of depth 0 and 1 are
+subdivided into cells of depth 2 for the visualization purpose.
+
+### Changed
+- Add of a `overwrite` optional keyword in the write method. Before 0.5.6 the default behaviour was to
+always overwrite already existing files. Now it does not overwrite by default. To do that, you have to
+set the `overwrite` keyword.
+
 ## [0.5.5] - 2019-02-08
 ### Added
 - Plotting a moc with matplotlib axes is faster (concers **fill** and **border** methods). The level of detail of the plotted MOC is function of the FoV. The MOC is degraded to the minimum depth so that a cell of this depth can be contained in 1px at the center of the projection. For small FoVs, we only plot the part of MOC contained in the view (thanks to the speed of logical operation between MOCs).
