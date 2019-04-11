@@ -318,6 +318,8 @@ class AbstractMOC:
         # Import lark parser when from_str is called
         # at least one time
         from lark import Lark, Transformer
+        class ParsingException(Exception):
+            pass
 
         class TreeToJson(Transformer):
             def value(self, items):
@@ -365,7 +367,11 @@ class AbstractMOC:
                 %import common.INT
                 """, start='value')
 
-        tree = AbstractMOC.LARK_PARSER_STR.parse(value)
+        try:
+            tree = AbstractMOC.LARK_PARSER_STR.parse(value)
+        except Exception as err:
+            raise ParsingException("Could not parse {0}. \n Check the grammar section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf to see the correct syntax for writing a MOC from a str".format(value))
+
         moc_json = TreeToJson().transform(tree)
 
         return cls.from_json(moc_json)
