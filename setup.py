@@ -21,6 +21,7 @@ setup(name='MOCPy',
         # Disable the installation of spherical-geometry as it
         # fails the appveyor tests for python 3 of astroquery. See https://github.com/astropy/astroquery/pull/1343
         # 'spherical-geometry',
+        'lark-parser', # Used in from_str for parsing the string given and create the MOC from it
     ],
     provides=['mocpy'],
     long_description="MOCPy is a Python library allowing easy creation \

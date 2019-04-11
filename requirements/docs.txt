@@ -6,3 +6,4 @@ networkx
 spherical_geometry
 sphinx
 numpydoc
+lark-parser

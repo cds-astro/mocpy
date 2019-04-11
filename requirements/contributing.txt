@@ -10,6 +10,7 @@ astropy_healpix
 matplotlib
 networkx
 spherical_geometry
+lark-parser
 
 # Package for basic testing purposes
 pytest

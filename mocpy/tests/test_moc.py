@@ -92,6 +92,18 @@ def test_moc_serialize_and_from_json(moc_from_fits_image):
     moc2 = MOC.from_json(ipix_d)
     assert moc_from_fits_image == moc2
 
+@pytest.mark.parametrize("expected, moc_str", [
+    (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
+    '5/8-10,42-46,54,8 6/4500 8/45'),
+    (MOC.from_json({}), '0/'),
+    (MOC.from_json({'29': [101]}), '29/101'),
+    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1,9'),
+    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2,9'),
+    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r ,\n 8/8-10\n 11/'),
+])
+def test_from_str(expected, moc_str):
+    assert MOC.from_str(moc_str) == expected
+
 @pytest.mark.parametrize("moc, expected", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
     '5/8-10,42-46,54 6/4500 8/45'),
