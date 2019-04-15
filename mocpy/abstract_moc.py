@@ -193,47 +193,6 @@ class AbstractMOC:
         return neigh_ipix[np.where(neigh_ipix >= 0)]
 
     @classmethod
-    def from_healpix_cells(cls, ipix, depth, fully_covered=None):
-        """
-        Creates a MOC from a set of HEALPix cells at a given depth.
-
-        Parameters
-        ----------
-        ipix : `numpy.ndarray`
-            HEALPix cell indices.
-        depth : `numpy.ndarray`
-            Depth of the HEALPix cells. Must be of the same size of `ipix`.
-        fully_covered : `numpy.ndarray`, optional
-            HEALPix cells coverage flags. This flag informs whether a cell is
-            fully covered by a cone (resp. polygon, elliptical cone) or not.
-            Must be of the same size of `ipix`.
-
-        Raises
-        ------
-        IndexError
-            When `ipix`, `depth` and `fully_covered` do not have the same shape
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            The MOC
-        """
-        if ipix.shape != depth.shape:
-            raise IndexError('ipix and depth arrays must have the same shape')
-
-        if fully_covered is not None and ipix.shape != fully_covered.shape:
-            raise IndexError('ipix and fully_covered arrays must have the same shape')
-
-        shift = (AbstractMOC.HPY_MAX_NORDER - depth) << 1
-
-        p1 = ipix
-        p2 = ipix + 1
-
-        intervals = np.vstack((p1 << shift, p2 << shift)).T
-
-        return cls(IntervalSet(intervals))
-
-    @classmethod
     def from_json(cls, json_moc):
         """
         Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
