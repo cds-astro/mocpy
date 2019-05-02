@@ -19,6 +19,7 @@ from astropy_healpix.healpy import nside2npix
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
+from .. import core
 
 from .boundaries import Boundaries
 from .plot import fill, border
@@ -524,6 +525,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
+        """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(lon, lat)
         ipix = ipix.astype(np.uint64)
@@ -533,6 +535,9 @@ class MOC(AbstractMOC):
 
         interval_set = IntervalSet(intervals)
         return cls(interval_set)
+        """
+        intervals = core.from_lonlat(max_norder, lon.to_value(u.rad), lat.to_value(u.rad))
+        return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
     def from_polygon_skycoord(cls, skycoord, inside=None, max_depth=10):

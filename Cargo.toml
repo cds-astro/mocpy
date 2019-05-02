@@ -1,0 +1,34 @@
+[package]
+name = "moc"
+version = "0.1.0"
+authors = ["Matthieu Baumann <matthieu.baumann@astro.unistra.fr>"]
+edition = "2018"
+
+[build-system]
+requires = ["setuptools", "wheel", "setuptools-rust"]
+
+[lib]
+name = "moc"
+path = "src/lib.rs"
+test = true
+doctest = true
+bench = true
+crate-type = ["cdylib"]
+
+[dependencies]
+rand = "0.6.5"
+intervals = { path = "./intervals" }
+healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
+ndarray = "0.12"
+ndarray-parallel = "0.9.0"
+numpy = "0.5.0"
+num = "0.2"
+time = "*"
+
+[dependencies.pyo3]
+version = "0.6.0"
+features = ["extension-module"]
+
+[profile.release]
+lto = true
+debug = false

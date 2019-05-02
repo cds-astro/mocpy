@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+from setuptools_rust import Binding, RustExtension
 
 exec(open('mocpy/version.py').read())
 
@@ -31,6 +32,19 @@ setup(name='MOCPy',
      into hierarchically grouped predefined cells.\n \
      An experimental support for TMOC (temporal MOC) has been added since version 0.4.0.\
      It allows creation, parsing and comparison of TMOCs.",
+    rust_extensions=[RustExtension(
+        # Package name
+        "mocpy.core",
+        # The path to the cargo.toml file defining the rust-side wrapper.
+        # This file usually contains the name of the project, its version, the author
+        # and the dependencies of the crate (in our case the rust wrapper depends on the cdshealpix
+        # crate). 
+        'Cargo.toml',
+        # The binding with the Rust cdshealpix API is manually done using CFFI.
+        # Some rust tools such as the pyo3 can also do rust<->python bindings.
+        binding=Binding.NoBinding,
+        # Add the --release option when building the rust code
+        debug=False)],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python',

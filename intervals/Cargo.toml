@@ -1,0 +1,21 @@
+[package]
+name = "intervals"
+version = "0.1.0"
+authors = ["Matthieu Baumann <matthieu.baumann@astro.unistra.fr>"]
+edition = "2018"
+
+[lib]
+name = "intervals"
+path = "src/lib.rs"
+test = true
+doctest = true
+bench = true
+
+[dependencies]
+num = "0.2"
+rand = "0.6.5"
+rayon = "1.0.3"
+
+[profile.release]
+lto = true
+debug = false

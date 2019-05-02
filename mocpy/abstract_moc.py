@@ -10,6 +10,8 @@ from astropy.table import Table
 from .interval_set import IntervalSet
 from . import utils
 
+from . import core
+
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
@@ -71,15 +73,9 @@ class AbstractMOC:
         """
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
-        combo = np.uint64(0)
-        for iv in self._interval_set._intervals:
-            combo |= iv[0] | iv[1]
-
-        ret = AbstractMOC.HPY_MAX_NORDER - (utils.number_trailing_zeros(combo) // np.uint8(2))
-        if ret < 0:
-            ret = np.uint64(0)
-
-        return ret
+        # TODO: remove the cast
+        depth = core.depth(self._interval_set._intervals.astype(np.uint64))
+        return depth
 
     def intersection(self, another_moc, *args):
         """
@@ -595,4 +591,4 @@ class AbstractMOC:
         return self.__class__(IntervalSet(np.asarray(iv_set)))
 
     def refine_to_order(self, min_depth):
-        return self.__class__(IntervalSet(self._interval_set._intervals, min_depth=min_depth))
+        return self.__class__(IntervalSet(self._interval_set._intervals, min_depth=min_depth, make_consistent=False))
