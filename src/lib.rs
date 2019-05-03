@@ -9,9 +9,9 @@ extern crate time;
 
 extern crate pyo3;
 
-use ndarray::{Zip, ArrayD, ArrayViewD, ArrayViewMutD, Array1, Array2, ArrayViewMut2};
+use ndarray::{Zip, Array1, Array2};
 use ndarray_parallel::prelude::*;
-use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn};
+use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use num::{Integer, PrimInt};
 
@@ -19,7 +19,7 @@ use intervals::intervals::Intervals;
 use intervals::ranges::Ranges;
 use intervals::bounded::Bounded;
 
-use time::PreciseTime;
+//use time::PreciseTime;
 
 use std::ops::Range;
 use std::mem;
@@ -32,13 +32,15 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>)
     -> Py<PyArray2<u64>> {
+ 
         let lon = lon.as_array();
         let lat = lat.as_array();
 
         let len = lon.shape()[0];
+
         // Allocate a new result array that will
         // store the merged nested intervals of the MOC
-        // No copy of the data occuring        
+        // No copy of the data occuring
         let ranges: Vec<Range<u64>> = vec![0..1; len];
         let mut pixels = Array1::from_vec(ranges);
         
@@ -55,9 +57,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 let e2 = (pix + 1) << shift;
                 *p = e1..e2;
             });
-        
-        let start = PreciseTime::now();
-        // pix is full we can compute the merged intervals
+
+        //let start = PreciseTime::now();
         let intervals = {
             let ptr = pixels.as_mut_ptr() as *mut Range<u64>;
             let cap = len;
@@ -70,9 +71,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
             data.into()
         };
-        let end = PreciseTime::now();
-        println!("{} seconds for allocation", start.to(end));
-
+        //let end = PreciseTime::now();
+        //println!("{} time elapsed", start.to(end));
+        
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
     }
@@ -92,7 +93,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         )
     }
 
-    fn intervals_to_2darray<T: Integer + PrimInt + Bounded<T> + Send + 'static>(intervals: Intervals<T>) -> Array2<T> {
+    fn intervals_to_2darray<T>(intervals: Intervals<T>) -> Array2<T>
+    where T : Integer + PrimInt + Bounded<T> + Send + 'static {
         if let Intervals::Nested(ranges) = intervals {
             // Cast Vec<Range<u64>> to Vec<u64>
             let len = ranges.0.len();
@@ -110,26 +112,92 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             unreachable!()
         }
     }
-    /*
+    
     #[pyfn(m, "union")]
     fn union_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let a = input1.as_array();
-        let b = input2.as_array();
+        let input1 = input1.as_array().to_owned();
+        let input2 = input2.as_array().to_owned();
 
-        let intervals1 = unsafe {
-            ndarray_to_intervals::<u64>(a)
+        let mut i1 = unsafe {
+            array2d_to_intervals(input1)
         };
-        let intervals2 = unsafe {
-            ndarray_to_intervals::<u64>(b)
+        let i2 = unsafe {
+            array2d_to_intervals(input2)
         };
 
-        intervals1.union(intervals2);
+        i1.union(i2);
 
-        a.into_pyarray().to_owned()
+        let result = intervals_to_2darray(i1);
+        result.into_pyarray(py).to_owned()
     }
-    */
+
+    #[pyfn(m, "difference")]
+    fn difference_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let input1 = input1.as_array().to_owned();
+        let input2 = input2.as_array().to_owned();
+
+        let mut i1 = unsafe {
+            array2d_to_intervals(input1)
+        };
+        let i2 = unsafe {
+            array2d_to_intervals(input2)
+        };
+
+        i1.difference(i2);
+
+        let result = intervals_to_2darray(i1);
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "intersection")]
+    fn intersection_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let input1 = input1.as_array().to_owned();
+        let input2 = input2.as_array().to_owned();
+
+        let mut i1 = unsafe {
+            array2d_to_intervals(input1)
+        };
+        let i2 = unsafe {
+            array2d_to_intervals(input2)
+        };
+
+        i1.intersection(i2);
+
+        let result = intervals_to_2darray(i1);
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "complement")]
+    fn complement_py(py: Python, input: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let input = input
+            .as_array()
+            .to_owned();
+
+        let mut intervals = unsafe {
+            array2d_to_intervals(input)
+        };
+        intervals.complement();
+
+        let result = intervals_to_2darray(intervals);
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "degrade")]
+    fn degrade_py(py: Python, input: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
+        let input = input.as_array().to_owned();
+
+        let mut intervals = unsafe {
+            array2d_to_intervals(input)
+        };
+
+        intervals.degrade(depth);
+
+        let result = intervals_to_2darray(intervals);
+        result.into_pyarray(py).to_owned()
+    }
+
     #[pyfn(m, "depth")]
-    fn depth_py(py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
+    fn depth_py(_py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
         let input = input.as_array().to_owned();
         let intervals = unsafe {
             array2d_to_intervals(input)

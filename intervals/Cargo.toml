@@ -17,5 +17,7 @@ rand = "0.6.5"
 rayon = "1.0.3"
 
 [profile.release]
-lto = true
-debug = false
+opt-level = 3
+
+[profile.dev]
+opt-level = 0

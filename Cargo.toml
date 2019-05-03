@@ -30,5 +30,7 @@ version = "0.6.0"
 features = ["extension-module"]
 
 [profile.release]
-lto = true
-debug = false
+opt-level = 3
+
+[profile.dev]
+opt-level = 0

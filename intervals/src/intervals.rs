@@ -119,8 +119,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + 'static {
     pub fn to_nested(self) -> Intervals<T> {
         match self {
             Intervals::Uniq(ranges) => {
-                let nested_ranges: Vec<_> = NestedIntervalsIter::new(ranges).collect();
-                Intervals::Nested(Ranges::<T>::new(nested_ranges))
+                let data_nested: Vec<_> = NestedIntervalsIter::new(ranges).collect();
+                Intervals::Nested(Ranges::<T>::new(data_nested))
             },
             Intervals::Nested(_) => {
                 self
@@ -152,8 +152,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + 'static {
     pub fn to_uniq(self) -> Intervals<T> {
         match self {
             Intervals::Nested(ranges) => {
-                let uniq_ranges: Vec<_> = UniqIntervalsIter::new(ranges).collect();
-                Intervals::Uniq(Ranges::<T>::new(uniq_ranges))
+                let uniq_data: Vec<_> = UniqIntervalsIter::new(ranges).collect();
+                Intervals::Uniq(Ranges::<T>::new(uniq_data))
             },
             Intervals::Uniq(_) => {
                 self
@@ -295,6 +295,18 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + 'static {
         self.merge(other, &|a, b| a && b)
     }
 
+    pub fn complement(&mut self) {
+        match self {
+            Intervals::Nested(ref mut ranges) => {
+                ranges.complement()
+            },
+            Intervals::Uniq(_) => {
+                panic!("Cannot be able to complement a intervals expressed as uniq.\n
+                        Please convert it to nested intervals.")
+            },
+        }
+    }
+
     pub fn depth(&self) -> i8 {
         let total: T = self.iter().fold(Zero::zero(), |res, x| {
             res | x.start | x.end
@@ -305,6 +317,41 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + 'static {
             depth = 0;
         }
         depth
+    }
+
+    pub fn degrade(&mut self, depth: i8) {
+        match self {
+            Intervals::Nested(ref mut ranges) => {
+                let shift = ((<T>::MAXDEPTH - depth) << 1) as u32;
+
+                let mut offset: T = One::one();
+                offset = offset.unsigned_shl(shift) - One::one();
+
+                let mut mask: T = One::one();
+                mask = mask.checked_mul(&!offset).unwrap();
+
+                let adda: T = Zero::zero();
+                let mut addb: T = One::one();
+                addb = addb.checked_mul(&offset).unwrap();
+
+                let capacity = ranges.0.len();
+                let mut result = Vec::<Range<T>>::with_capacity(capacity);
+
+                for range in ranges.0.iter() {
+                    let a: T = range.start.checked_add(&adda).unwrap() & mask;
+                    let b: T = range.end.checked_add(&addb).unwrap() & mask;
+
+                    if b > a {
+                        result.push(a..b);
+                    }
+                }
+
+                ranges.0 = result;
+            },
+            Intervals::Uniq(_) => {
+                panic!("Can only degrade nested expressed intervals!");
+            }
+        }
     }
 }
 
@@ -646,6 +693,51 @@ mod tests {
     }
 
     #[test]
+    fn test_complement() {
+        fn assert_complement(input: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
+            let mut intervals = Intervals::Nested(
+                Ranges::<u64>::new(input)
+            );
+
+            let expected_intervals = Intervals::Nested(
+                Ranges::<u64>::new(expected)
+            );
+
+            intervals.complement();
+            intervals_eq(intervals, expected_intervals, true);
+        }
+
+        fn assert_complement_pow_2(input: Vec<Range<u64>>) {
+            let input_cloned = input.clone();
+            
+            let mut intervals = Intervals::Nested(
+                Ranges::<u64>::new(input)
+            );
+
+            let start_intervals = Intervals::Nested(
+                Ranges::<u64>::new(input_cloned)
+            );
+
+            intervals.complement();
+            intervals.complement();
+
+            intervals_eq(intervals, start_intervals, true);
+        }
+
+        assert_complement(vec![5..10], vec![0..5, 10..u64::MAXPIX]);
+        assert_complement_pow_2(vec![5..10]);
+
+        assert_complement(vec![0..10], vec![10..u64::MAXPIX]);
+        assert_complement_pow_2(vec![0..10]);
+
+        assert_complement(vec![0..1, 2..3, 4..5, 6..u64::MAXPIX], vec![1..2, 3..4, 5..6]);
+        assert_complement_pow_2(vec![0..1, 2..3, 4..5, 6..u64::MAXPIX]);
+
+        assert_complement(vec![], vec![0..u64::MAXPIX]);
+        assert_complement_pow_2(vec![]);
+    }
+
+    #[test]
     fn test_depth() {
         let i1 = Intervals::Nested(
             Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)])
@@ -666,6 +758,39 @@ mod tests {
             Ranges::<u64>::new(vec![0..12*4.pow(29)])
         );
         assert_eq!(i4.depth(), 0);
+    }
+
+    #[test]
+    fn test_degrade() {
+        let mut i1 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)])
+        );
+        i1.degrade(0);
+        assert_eq!(i1.depth(), 0);
+
+        let mut i2 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)])
+        );
+        i2.degrade(1);
+        assert_eq!(i2.depth(), 1);
+
+        let mut i3 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)])
+        );
+        i3.degrade(1);
+        assert_eq!(i3.depth(), 1);
+
+        let mut i4 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..12*4.pow(29)])
+        );
+        i4.degrade(0);
+        assert_eq!(i4.depth(), 0);
+
+        let mut i5 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)])
+        );
+        i5.degrade(5);
+        assert_eq!(i5.depth(), 2);
     }
 
     #[test]

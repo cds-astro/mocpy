@@ -73,8 +73,7 @@ class AbstractMOC:
         """
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
-        # TODO: remove the cast
-        depth = core.depth(self._interval_set._intervals.astype(np.uint64))
+        depth = core.depth(self._interval_set._intervals)
         return depth
 
     def intersection(self, another_moc, *args):
@@ -93,11 +92,14 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        interval_set = self._interval_set.intersection(another_moc._interval_set)
+        intervals = core.intersection(
+            self._interval_set._intervals,
+            another_moc._interval_set._intervals
+        )
         for moc in args:
-            interval_set = interval_set.intersection(moc._interval_set)
+            intervals = core.intersection(intervals, moc._interval_set._intervals)
 
-        return self.__class__(interval_set)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def union(self, another_moc, *args):
         """
@@ -115,11 +117,14 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        interval_set = self._interval_set.union(another_moc._interval_set)
+        intervals = core.union(
+            self._interval_set._intervals,
+            another_moc._interval_set._intervals
+        )
         for moc in args:
-            interval_set = interval_set.union(moc._interval_set)
+            intervals = core.union(intervals, moc._interval_set._intervals)
 
-        return self.__class__(interval_set)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def difference(self, another_moc, *args):
         """
@@ -137,11 +142,17 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        interval_set = self._interval_set.difference(another_moc._interval_set)
+        intervals = core.difference(
+            self._interval_set._intervals,
+            another_moc._interval_set._intervals
+        )
         for moc in args:
-            interval_set = interval_set.difference(moc._interval_set)
+            intervals = core.difference(
+                intervals,
+                moc._interval_set._intervals
+            )
 
-        return self.__class__(interval_set)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def complement(self):
         """
@@ -152,28 +163,8 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        complement_interval = self._complement_interval()
-        return self.__class__(complement_interval)
-
-    def _complement_interval(self):
-        res = []
-        intervals_l = sorted(self._interval_set._intervals.tolist())
-
-        if intervals_l[0][0] > np.uint64(0):
-            res.append((np.uint64(0), intervals_l[0][0]))
-
-        last = intervals_l[0][1]
-
-        for itv in intervals_l[1:]:
-            res.append((last, itv[0]))
-            last = itv[1]
-
-        max_pix_depth = self._get_max_pix()
-
-        if last < max_pix_depth:
-            res.append((last, max_pix_depth))
-
-        return IntervalSet(np.asarray(res, dtype=np.uint64))
+        intervals = core.complement(self._interval_set._intervals)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def _get_max_pix(self):
         pass
@@ -254,7 +245,6 @@ class AbstractMOC:
         table = Table.read(filename)
 
         intervals = np.vstack((table['UNIQ'], table['UNIQ'] + 1)).T
-        intervals = intervals.astype(np.uint64)
 
         nuniq_interval_set = IntervalSet(intervals)
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
@@ -574,8 +564,8 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(new_order))
-        ofs = (np.uint64(1) << shift) - np.uint64(1)
+        """shift = 2 * (AbstractMOC.HPY_MAX_NORDER - new_order)
+        ofs = (int(1) << shift) - 1
         mask = ~ofs
         adda = np.uint64(0)
         addb = ofs
@@ -589,6 +579,9 @@ class AbstractMOC:
                 iv_set.append((a, b))
 
         return self.__class__(IntervalSet(np.asarray(iv_set)))
+        """
+        intervals = core.degrade(self._interval_set._intervals, new_order)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def refine_to_order(self, min_depth):
         return self.__class__(IntervalSet(self._interval_set._intervals, min_depth=min_depth, make_consistent=False))

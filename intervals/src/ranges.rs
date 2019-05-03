@@ -6,7 +6,7 @@ use std::slice::Iter;
 
 use rayon::prelude::*;
 
-use num::{Integer, PrimInt, CheckedAdd};
+use num::{Integer, PrimInt, Zero, One};
 use crate::bounded::Bounded;
 
 #[derive(Debug)]
@@ -143,6 +143,34 @@ where T: Integer + PrimInt + Bounded<T> + Send {
         self.merge(other, &|a, b| a && !b)
     }
 
+    pub fn complement(&mut self) {
+        if self.is_empty() {
+            self.0.push(Zero::zero()..<T>::MAXPIX);
+            return;
+        }
+
+        let mut s = 0;
+        let mut last = if self[0].start == Zero::zero() {
+            s = 1;
+            self[0].end
+        } else {
+            Zero::zero()
+        };
+
+        let mut result = self.0.iter().skip(s)
+            .map(|range| {
+                let r = last..range.start;
+                last = range.end;
+                r
+            })
+            .collect::<Vec<_>>();
+
+        if last < <T>::MAXPIX {
+            result.push(last..<T>::MAXPIX);
+        }
+        self.0 = result;
+    }
+
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -178,13 +206,13 @@ where T: Integer {
 
 #[derive(Debug)]
 pub struct MergeOverlappingRangesIter<'a, T>
-where T: Integer + Clone + Copy + PrimInt + CheckedAdd + Bounded<T> {
+where T: Integer + Clone + Copy {
     last: Option<Range<T>>,
     ranges: Iter<'a, Range<T>>,
 }
 
 impl<'a, T> MergeOverlappingRangesIter<'a, T> 
-where T: Integer + Clone + Copy + PrimInt + CheckedAdd + Bounded<T> {
+where T: Integer + Clone + Copy {
     fn new(mut ranges: Iter<'a, Range<T>>) -> MergeOverlappingRangesIter<'a, T> {
         let last = ranges.next().cloned();
         MergeOverlappingRangesIter {
@@ -195,7 +223,7 @@ where T: Integer + Clone + Copy + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T> 
-where T: Integer + Clone + Copy + PrimInt + CheckedAdd + Bounded<T> {
+where T: Integer + Clone + Copy {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {

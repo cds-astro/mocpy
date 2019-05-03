@@ -46,8 +46,9 @@ class IntervalSet:
             True by default. Remove the overlapping intervals that makes
             a valid MOC (i.e. can be plot, serialized, manipulated).
         """
-        self._intervals = np.array([], dtype=np.uint64) if intervals is None else intervals
-
+        intervals = np.array([], dtype=np.uint64) if intervals is None else intervals
+        # TODO: remove the cast to uint64
+        self._intervals = intervals.astype(np.uint64)
         if make_consistent:
             if min_depth is not None:
                 min_depth = np.uint8(min_depth)
