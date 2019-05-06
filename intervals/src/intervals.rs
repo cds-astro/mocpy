@@ -9,7 +9,7 @@ use std::ops::{Range, BitOr};
 /// Can be either given in the nested or uniq form.
 #[derive(Debug)]
 pub enum Intervals<T>
-where T: Integer + PrimInt + Bounded<T>  {
+where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug  {
     /// Ranges given in nested form
     Nested(Ranges<T>),
     /// Ranges given in uniq form
@@ -17,14 +17,14 @@ where T: Integer + PrimInt + Bounded<T>  {
 }
 
 impl<T> From<Vec<Range<T>>> for Intervals<T>
-where T: Integer + PrimInt + Bounded<T> + Send {
+where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
     fn from(ranges: Vec<Range<T>>) -> Self {
         Intervals::Nested(Ranges::<T>::new(ranges))
     }
 }
 
 impl<T> Intervals<T>
-where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + 'static {
+where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 'static {
     /// Get an iterator returning uniq ranges
     /// 
     /// # Arguments
@@ -456,7 +456,7 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<T> Iterator for NestedIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> {
+where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -591,6 +591,28 @@ mod tests {
     }
 
     #[test]
+    fn test_uniq_nested_conversion() {
+        let input = vec![1056..1057, 1057..1058, 1083..1084, 1048539..1048540, 1048574..1048575, 1048575..1048576];
+        let input_cloned = input.clone();
+        
+        let intervals = Intervals::Uniq(
+            Ranges::<u64>::new(
+                input
+            )
+        );
+        let expected_intervals = Intervals::Uniq(
+            Ranges::<u64>::new(
+                input_cloned
+            )
+        );
+
+        let nested_intervals = intervals.to_nested();
+        let final_intervals = nested_intervals.to_uniq();
+
+        intervals_eq(expected_intervals, final_intervals, false);
+    }
+
+    #[test]
     fn test_nested_iter() {
         let intervals = Intervals::Uniq(
             Ranges::<u64>::new(
@@ -599,8 +621,7 @@ mod tests {
         );
         let complex_intervals = Intervals::Uniq(
             Ranges::<u64>::new(
-                vec![
-                    (1 + 4*4.pow(27))..(4 + 4*4.pow(27)),
+                vec![(1 + 4*4.pow(27))..(4 + 4*4.pow(27)),
                     (2 + 4*4.pow(28))..(4 + 4*4.pow(28)),
                     (16 + 4*4.pow(28))..(19 + 4*4.pow(28)),
                     (7 + 4*4.pow(29))..(8 + 4*4.pow(29))

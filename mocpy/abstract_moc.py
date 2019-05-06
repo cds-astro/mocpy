@@ -243,12 +243,8 @@ class AbstractMOC:
             The resulting MOC.
         """
         table = Table.read(filename)
-
-        intervals = np.vstack((table['UNIQ'], table['UNIQ'] + 1)).T
-
-        nuniq_interval_set = IntervalSet(intervals)
-        interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
-        return cls(interval_set)
+        intervals = core.to_nested(table['UNIQ'].astype(np.uint64))
+        return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
     def from_str(cls, value):
@@ -328,7 +324,9 @@ class AbstractMOC:
         try:
             tree = AbstractMOC.LARK_PARSER_STR.parse(value)
         except Exception as err:
-            raise ParsingException("Could not parse {0}. \n Check the grammar section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf to see the correct syntax for writing a MOC from a str".format(value))
+            raise ParsingException("Could not parse {0}. \n Check the grammar \
+                section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf \
+                to see the correct syntax for writing a MOC from a str".format(value))
 
         moc_json = TreeToJson().transform(tree)
 

@@ -1,5 +1,5 @@
 extern crate intervals;
-
+#[macro_use(stack)]
 extern crate ndarray;
 extern crate ndarray_parallel;
 extern crate numpy;
@@ -9,7 +9,7 @@ extern crate time;
 
 extern crate pyo3;
 
-use ndarray::{Zip, Array1, Array2};
+use ndarray::{Zip, Array, Array1, Array2, Axis};
 use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
@@ -79,7 +79,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     /// Suppose the input array is contiguous in memory
-    unsafe fn array2d_to_intervals(mut input: Array2<u64>) -> Intervals<u64> {
+    unsafe fn array2d_to_intervals(mut input: Array2<u64>, nested: bool) -> Intervals<u64> {
         let len = input.shape()[0];
         let cap = len;
         let ptr = input.as_mut_ptr() as *mut Range<u64>;
@@ -88,13 +88,19 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let ranges = Vec::from_raw_parts(ptr, len, cap);
 
-        Intervals::Nested(
-            Ranges::<u64>::new(ranges)
-        )
+        if nested {
+            Intervals::Nested(
+                Ranges::<u64>::new(ranges)
+            )
+        } else {
+            Intervals::Uniq(
+                Ranges::<u64>::new(ranges)
+            )
+        }
     }
 
     fn intervals_to_2darray<T>(intervals: Intervals<T>) -> Array2<T>
-    where T : Integer + PrimInt + Bounded<T> + Send + 'static {
+    where T : Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug + 'static {
         if let Intervals::Nested(ranges) = intervals {
             // Cast Vec<Range<u64>> to Vec<u64>
             let len = ranges.0.len();
@@ -119,10 +125,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input2 = input2.as_array().to_owned();
 
         let mut i1 = unsafe {
-            array2d_to_intervals(input1)
+            array2d_to_intervals(input1, true)
         };
         let i2 = unsafe {
-            array2d_to_intervals(input2)
+            array2d_to_intervals(input2, true)
         };
 
         i1.union(i2);
@@ -137,10 +143,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input2 = input2.as_array().to_owned();
 
         let mut i1 = unsafe {
-            array2d_to_intervals(input1)
+            array2d_to_intervals(input1, true)
         };
         let i2 = unsafe {
-            array2d_to_intervals(input2)
+            array2d_to_intervals(input2, true)
         };
 
         i1.difference(i2);
@@ -155,10 +161,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input2 = input2.as_array().to_owned();
 
         let mut i1 = unsafe {
-            array2d_to_intervals(input1)
+            array2d_to_intervals(input1, true)
         };
         let i2 = unsafe {
-            array2d_to_intervals(input2)
+            array2d_to_intervals(input2, true)
         };
 
         i1.intersection(i2);
@@ -174,7 +180,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned();
 
         let mut intervals = unsafe {
-            array2d_to_intervals(input)
+            array2d_to_intervals(input, true)
         };
         intervals.complement();
 
@@ -187,7 +193,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input = input.as_array().to_owned();
 
         let mut intervals = unsafe {
-            array2d_to_intervals(input)
+            array2d_to_intervals(input, true)
         };
 
         intervals.degrade(depth);
@@ -200,11 +206,31 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn depth_py(_py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
         let input = input.as_array().to_owned();
         let intervals = unsafe {
-            array2d_to_intervals(input)
+            array2d_to_intervals(input, true)
         };
         
         let depth = intervals.depth();
         Ok(depth)
+    }
+
+    #[pyfn(m, "to_nested")]
+    fn to_nested_py(py: Python, uniq: &PyArray1<u64>) -> Py<PyArray2<u64>> {
+        let start = uniq.as_array().to_owned();
+        let shape = (start.shape()[0], 1);
+
+        let start = start.into_shape(shape).unwrap();
+        let end = &start + &Array::ones(shape);
+        
+        let input = stack![Axis(1), start, end].to_owned();
+        
+        let mut intervals = unsafe {
+            array2d_to_intervals(input, false)
+        };
+
+        let intervals = intervals.to_nested();
+        let result = intervals_to_2darray(intervals);
+        result.into_pyarray(py).to_owned()
+        //input.into_pyarray(py).to_owned()
     }
 
     Ok(())

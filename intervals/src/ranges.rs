@@ -15,7 +15,7 @@ pub struct Ranges<T>(pub Vec<Range<T>>) where T: Integer;
 impl<T> Ranges<T>
 where T: Integer + PrimInt + Bounded<T> + Send {
     pub fn new(mut data: Vec<Range<T>>) -> Ranges<T> {
-        (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
+        (&mut data).par_sort_by(|left, right| left.start.cmp(&right.start));
 
         let ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter()).collect();
         Ranges(ranges)
