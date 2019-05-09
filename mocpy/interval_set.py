@@ -47,7 +47,7 @@ class IntervalSet:
             a valid MOC (i.e. can be plot, serialized, manipulated).
         """
         intervals = np.array([]) if intervals is None else intervals
-        self._intervals = intervals
+        self._intervals = intervals.astype(np.int)
         if make_consistent:
             self._merge_intervals(min_depth=min_depth)
 

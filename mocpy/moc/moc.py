@@ -593,9 +593,10 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         ipix : `numpy.ndarray`
-            HEALPix cell indices.
+            HEALPix cell indices. dtype must be np.uint64
         depth : `numpy.ndarray`
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
+            dtype must be np.uint8
         fully_covered : `numpy.ndarray`, optional
             HEALPix cells coverage flags. This flag informs whether a cell is
             fully covered by a cone (resp. polygon, elliptical cone) or not.
@@ -623,7 +624,6 @@ class MOC(AbstractMOC):
         p2 = ipix + 1
 
         intervals = np.vstack((p1 << shift, p2 << shift)).T
-
         return cls(IntervalSet(intervals))
 
     @property
