@@ -34,6 +34,15 @@ install:
   - source activate mocpy-env
 
 script:
+  - pip install setuptools_rust
+  # Install Rust compiler
+  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  # Generate the dynamic library from the cdshealpix Rust crate.
+  # This will download the crate from crates.io and build it first.
+  - python setup.py build_rust
+  # Move the dynamic lib to the python package folder
+  - find build/ -name "*.so" -type f -exec cp {} ./mocpy \;
   - python -m pytest -v mocpy --cov-report=term --cov=mocpy
   # Test notebooks
   - pip install .
