@@ -13,6 +13,9 @@ use ndarray::{Zip, Array, Array1, Array2, Axis};
 use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
+use pyo3::exceptions;
+use pyo3::types::{PyDict, PyString, PyLong, PyList};
+use pyo3::ToPyObject;
 use num::{Integer, PrimInt};
 
 use intervals::intervals::Intervals;
@@ -32,7 +35,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>)
     -> Py<PyArray2<u64>> {
- 
         let lon = lon.as_array();
         let lat = lat.as_array();
 
@@ -43,9 +45,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         // No copy of the data occuring
         let ranges: Vec<Range<u64>> = vec![0..1; len];
         let mut pixels = Array1::from_vec(ranges);
-        
+
         let shift = (u64::MAXDEPTH as u8 - depth) << 1;
-        
+
         let layer = healpix::nested::get_or_create(depth);
         Zip::from(&mut pixels)
             .and(&lon)
@@ -73,7 +75,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         };
         //let end = PreciseTime::now();
         //println!("{} time elapsed", start.to(end));
-        
+
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
     }
@@ -187,6 +189,58 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
     }
+    
+    
+
+    #[pyfn(m, "from_json")]
+    fn from_json_py(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
+        const TYPE_KEY_MSG_ERR: &'static str = "The key must be a python str that \n \
+        encodes an integer on 1 byte. Ex: {'5': [0, 6, 7, ..., 9]}";
+        const TYPE_VALUES_MSG_ERR: &'static str = "The values must be list of unsigned \n \
+        integer on 64 bits (8 bytes). Ex: {'5': [0, 6, 7, ..., 9]}";
+        const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &'static str = "Cannot extract 64bits unsigned integer from the python list!";
+
+        let mut ranges = Vec::<Range<u64>>::new();
+
+        for (depth, pixels) in input.into_iter() {
+            let depth = depth.downcast_ref::<PyString>()
+                .map_err(|_| {
+                    exceptions::TypeError::py_err(TYPE_KEY_MSG_ERR)
+                })?
+                .to_string()?
+                .parse::<i8>()
+                .unwrap();
+
+            let pixels = pixels.downcast_ref::<PyList>()
+                .map_err(|_| {
+                    exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR)
+                })?;
+
+            let shift = ((<u64>::MAXDEPTH - depth) << 1) as u64;
+
+            for p in pixels.into_iter() {
+                let pixel = p.downcast_ref::<PyLong>()
+                    .map_err(|_| {
+                        exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR)
+                    })?
+                    .to_object(py)
+                    .extract::<u64>(py)
+                    .map_err(|_| {
+                        exceptions::ValueError::py_err(EXTRACT_IPIX_FROM_LIST_MSG_ERR)
+                    })?;
+
+                let e1 = pixel << shift;
+                let e2 = (pixel + 1) << shift;
+                ranges.push(e1..e2);
+            }
+        }
+
+        let intervals = Intervals::Nested(
+            Ranges::<u64>::new(ranges)
+        );
+        let result = intervals_to_2darray(intervals);
+        Ok(result.into_pyarray(py).to_owned())
+    }
 
     #[pyfn(m, "degrade")]
     fn degrade_py(py: Python, input: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
@@ -220,9 +274,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let start = start.into_shape(shape).unwrap();
         let end = &start + &Array::ones(shape);
-        
+
         let input = stack![Axis(1), start, end].to_owned();
-        
+
         let mut intervals = unsafe {
             array2d_to_intervals(input, false)
         };
@@ -230,7 +284,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let intervals = intervals.to_nested();
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
-        //input.into_pyarray(py).to_owned()
     }
 
     Ok(())

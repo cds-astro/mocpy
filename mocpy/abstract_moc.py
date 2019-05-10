@@ -193,7 +193,7 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        intervals = np.array([], dtype=np.uint64)
+        """intervals = np.array([])
         for order, pix_l in json_moc.items():
             if len(pix_l) == 0:
                 continue
@@ -209,6 +209,9 @@ class AbstractMOC:
                 intervals = np.vstack((intervals, itv))
 
         return cls(IntervalSet(intervals))
+        """
+        intervals = core.from_json(json_moc)
+        return cls(IntervalSet(intervals, make_consistent=False))
 
     def _uniq_pixels_iterator(self):
         """
@@ -298,7 +301,7 @@ class AbstractMOC:
             def range_pix(self, range_pix):
                 lower_bound = int(range_pix[0])
                 upper_bound = int(range_pix[1])
-                return np.arange(start=lower_bound, stop=upper_bound + 1, dtype=int)
+                return np.arange(start=lower_bound, stop=upper_bound + 1, dtype=int).tolist()
 
             def pixs(self, items):
                 ipixs = []
@@ -329,7 +332,6 @@ class AbstractMOC:
                 to see the correct syntax for writing a MOC from a str".format(value))
 
         moc_json = TreeToJson().transform(tree)
-
         return cls.from_json(moc_json)
 
     @staticmethod

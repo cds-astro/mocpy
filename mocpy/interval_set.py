@@ -46,8 +46,8 @@ class IntervalSet:
             True by default. Remove the overlapping intervals that makes
             a valid MOC (i.e. can be plot, serialized, manipulated).
         """
+        # TODO: remove the cast to np.uint64
         intervals = np.array([], dtype=np.uint64) if intervals is None else intervals
-        # TODO: remove the cast to uint64
         self._intervals = intervals.astype(np.uint64)
         if make_consistent:
             if min_depth is not None:
@@ -125,6 +125,9 @@ class IntervalSet:
                     ret.append((st, stop))
             else:
                 ret.append((start, stop))
+
+        # TODO: make that code in rust (min depth)
+        self._intervals = self._intervals.astype(np.int)
 
         ret = []
         start = stop = None

@@ -6,7 +6,7 @@ use std::slice::Iter;
 
 use rayon::prelude::*;
 
-use num::{Integer, PrimInt, Zero, One};
+use num::{Integer, PrimInt, Zero};
 use crate::bounded::Bounded;
 
 #[derive(Debug)]
@@ -225,12 +225,33 @@ where T: Integer + Clone + Copy {
 impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T> 
 where T: Integer + Clone + Copy {
     type Item = Range<T>;
+/*
+            if min_depth is not None:
+                shift = 2 * (29 - min_depth)
+                mask = (int(1) << shift) - 1
 
+                if stop - start < mask:
+                    ret.append((start, stop))
+                else:
+                    ofs = start & mask
+                    st = start
+                    if ofs > 0:
+                        st = (start - ofs) + (mask + 1)
+                        ret.append((start, st))
+
+                    while st + mask + 1 < stop:
+                        ret.append((st, st + mask + 1))
+                        st = st + mask + 1
+
+                    ret.append((st, stop))
+            else:
+                ret.append((start, stop))
+*/
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(curr) = self.ranges.next() {
             let prev = self.last.as_mut().unwrap();
             if curr.start <= prev.end {
-                prev.end = curr.end;
+                prev.end = cmp::max(curr.end, prev.end);
             } else {
                 let next = self.last.clone();
                 self.last = Some(curr.clone());

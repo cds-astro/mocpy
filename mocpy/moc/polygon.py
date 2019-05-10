@@ -162,7 +162,7 @@ class PolygonComputer:
             end_depth = start_depth
             self.degrade_to_max_depth = True
 
-        self.ipix_d = {str(order): [] for order in range(start_depth, end_depth + 1)}
+        self.ipix_d = {str(order): [] for order in range(int(start_depth), int(end_depth) + 1)}
 
         ## Iterative version of the algorithm: seems a bit faster than the recursive one
         for depth in range(start_depth, end_depth + 1):
@@ -194,7 +194,7 @@ class PolygonComputer:
                 shape = shapes[i]
                 # Definition of a SphericalPolygon from the border coordinates of a HEALPix cell
                 ipix_shape = SphericalPolygon.from_radec(lon=shape[:, 0], lat=shape[:, 1], degrees=False)
-                ipix = ipixels[i]
+                ipix = int(ipixels[i])
 
                 if self.polygon.intersects_poly(ipix_shape):
                     # If we are at the max depth then we direcly add to the MOC the intersecting ipixels

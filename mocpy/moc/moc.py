@@ -81,7 +81,7 @@ class MOC(AbstractMOC):
         factor = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         pix_l = []
         for iv in self._interval_set._intervals:
-            for val in range(iv[0] >> factor, iv[1] >> factor):
+            for val in range(int(iv[0]) >> factor, int(iv[1]) >> factor):
                 pix_l.append(val)
 
         return np.asarray(pix_l, dtype=np.uint64)
@@ -153,6 +153,8 @@ class MOC(AbstractMOC):
         neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + np.uint64(1)) << shift)).T
         # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
         self._interval_set = self._interval_set.union(IntervalSet(neigh_itv))
+        # TODO: do these last lines in rust
+        self._interval_set._intervals = self._interval_set._intervals.astype(np.uint64)
         return self
 
     def remove_neighbours(self):
@@ -366,10 +368,12 @@ class MOC(AbstractMOC):
             pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
 
         frame = wcs.utils.wcs_to_celestial_frame(w)
-        world_pix_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit='deg', frame=frame)
-
-        max_norder = np.uint8(max_norder)
-        hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
+        world_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit="deg", frame=frame).icrs
+        lon = world_crd.ra
+        lat = world_crd.dec
+        moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=max_norder)
+        return moc
+        """hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
         ipix = hp.skycoord_to_healpix(world_pix_crd)
         ipix = ipix.astype(np.uint64)
         # remove doubles
@@ -383,6 +387,7 @@ class MOC(AbstractMOC):
         interval_set = IntervalSet(intervals_arr)
 
         return cls(interval_set=interval_set)
+        """
 
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
@@ -401,11 +406,14 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = MOC()
+        moc = None
         for path in path_l:
             header = fits.getheader(path)
             current_moc = MOC.from_image(header=header, max_norder=max_norder)
-            moc = moc.union(current_moc)
+            if moc is None:
+                moc = current_moc
+            else:
+                moc = moc.union(current_moc)
 
         return moc
 
@@ -496,15 +504,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        hp = HEALPix(nside=(1 << max_norder), order='nested')
-        ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
-        ipix = ipix.astype(np.uint64)
-
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(max_norder))
-        intervals = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
-
-        interval_set = IntervalSet(intervals)
-        return cls(interval_set)
+        return cls.from_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, max_norder=max_norder)
 
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
@@ -536,7 +536,7 @@ class MOC(AbstractMOC):
         interval_set = IntervalSet(intervals)
         return cls(interval_set)
         """
-        intervals = core.from_lonlat(max_norder, lon.to_value(u.rad), lat.to_value(u.rad))
+        intervals = core.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod

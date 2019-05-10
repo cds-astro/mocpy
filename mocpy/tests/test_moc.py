@@ -56,8 +56,7 @@ def test_moc_from_skycoords(skycoords_gen_f, size):
 ])
 def test_moc_from_lonlat(lonlat_gen_f, size):
     lon, lat = lonlat_gen_f(size)
-
-    moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=7)
+    moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=6)
 
 
 def test_from_healpix_cells():
@@ -137,6 +136,18 @@ def test_moc_serialize_to_json(moc_from_fits_image):
     moc_json = moc_from_fits_image.serialize(format='json')
     assert isinstance(moc_json, dict)
 
+def test_moc_contains():
+    order = 4
+    size = 20
+    healpix_arr = np.random.randint(0, 12*4**order, size)
+    all_healpix_arr = np.arange(12*4**order)
+    healpix_outside_arr = np.setdiff1d(all_healpix_arr, healpix_arr)
+
+    moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
+
+    hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
+    lon, lat = hp.healpix_to_lonlat(healpix_arr)
+    lon_out, lat_out = hp.healpix_to_lonlat(healpix_outside_arr)
 
 @pytest.mark.parametrize("moc, expected", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
@@ -180,7 +191,7 @@ def test_mpl_border():
          rotation=Angle(0, u.degree),
          projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        moc.border(ax=ax, wcs=wcs, color='g')
+        #moc.border(ax=ax, wcs=wcs, color='g')
 
 
 #### TESTING MOC features ####
