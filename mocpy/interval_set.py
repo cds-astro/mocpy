@@ -237,14 +237,14 @@ class IntervalSet:
 
         order = 0
         while not r2.empty():
-            shift = int(2 * (IntervalSet.HPY_MAX_ORDER - order))
-            ofs = (int(1) << shift) - 1
-            ofs2 = int(1) << (2 * order + 2)
+            shift = 2 * (IntervalSet.HPY_MAX_ORDER - order)
+            ofs = (1 << shift) - 1
+            ofs2 = 1 << (2 * order + 2)
 
             r4 = []
             for iv in r2._intervals:
-                a = (int(iv[0]) + ofs) >> shift
-                b = int(iv[1]) >> shift
+                a = (iv[0] + ofs) >> shift
+                b = iv[1] >> shift
 
                 c = a << shift
                 d = b << shift
