@@ -77,13 +77,13 @@ class MOC(AbstractMOC):
         result : `~numpy.ndarray`
             The array of HEALPix at ``max_order``
         """
-        factor = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        factor = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         pix_l = []
         for iv in self._interval_set._intervals:
             for val in range(iv[0] >> factor, iv[1] >> factor):
                 pix_l.append(val)
 
-        return np.asarray(pix_l)
+        return np.asarray(pix_l, dtype=np.uint64)
 
     def contains(self, ra, dec, keep_inside=True):
         """
@@ -134,18 +134,20 @@ class MOC(AbstractMOC):
         """
         # Get the pixels array of the MOC at the its max order.
         ipix = self._best_res_pixels()
-
+        ipix = ipix.astype(int)
+        
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         # Get the HEALPix array containing the neighbors of ``ipix``.
         # This array "extends" ``ipix`` by one degree of neighbors. 
         extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
+        extend_ipix = extend_ipix.astype(np.uint64)
         
         # Compute the difference between ``extend_ipix`` and ``ipix`` to get only the neighboring pixels
         # located at the border of the MOC.
         neigh_ipix = np.setdiff1d(extend_ipix, ipix)
 
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + 1) << shift)).T
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + np.uint64(1)) << shift)).T
         # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
         self._interval_set = self._interval_set.union(IntervalSet(neigh_itv))
         return self
@@ -163,6 +165,7 @@ class MOC(AbstractMOC):
         """
         # Get the HEALPix cells of the MOC at its max depth
         ipix = self._best_res_pixels()
+        ipix = ipix.astype(int)
 
         hp = HEALPix(nside=(1 << self.max_order), order='nested')
         # Extend it to include the max depth neighbor cells.
@@ -173,11 +176,12 @@ class MOC(AbstractMOC):
 
         # Remove these pixels from ``ipix``
         border_ipix = AbstractMOC._neighbour_pixels(hp, neigh_ipix)
+        border_ipix = border_ipix.astype(np.uint64)
         reduced_ipix = np.setdiff1d(ipix, border_ipix)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + 1) << shift)).T
+        shift = np.uint64(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + np.uint64(1)) << shift)).T
         self._interval_set = IntervalSet(reduced_itv)
         return self
 
@@ -344,13 +348,15 @@ class MOC(AbstractMOC):
         frame = wcs.utils.wcs_to_celestial_frame(w)
         world_pix_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit='deg', frame=frame)
 
+        max_norder = np.uint8(max_norder)
         hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
         ipix = hp.skycoord_to_healpix(world_pix_crd)
+        ipix = ipix.astype(np.uint64)
         # remove doubles
         ipix = np.unique(ipix)
 
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals_arr = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - max_norder)
+        intervals_arr = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
 
         # This MOC will be consistent when one will do operations on the moc (union, inter, ...) or
         # simply write it to a fits or json file
@@ -472,9 +478,10 @@ class MOC(AbstractMOC):
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(skycoords.icrs.ra, skycoords.icrs.dec)
+        ipix = ipix.astype(np.uint64)
 
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(max_norder))
+        intervals = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
 
         interval_set = IntervalSet(intervals)
         return cls(interval_set)
@@ -500,9 +507,10 @@ class MOC(AbstractMOC):
         """
         hp = HEALPix(nside=(1 << max_norder), order='nested')
         ipix = hp.lonlat_to_healpix(lon, lat)
+        ipix = ipix.astype(np.uint64)
 
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals = np.vstack((ipix << shift, (ipix + 1) << shift)).T
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(max_norder))
+        intervals = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
 
         interval_set = IntervalSet(intervals)
         return cls(interval_set)
@@ -618,10 +626,10 @@ class MOC(AbstractMOC):
         if fully_covered is not None and ipix.shape != fully_covered.shape:
             raise IndexError('ipix and fully_covered arrays must have the same shape')
 
-        shift = (AbstractMOC.HPY_MAX_NORDER - depth) << 1
+        shift = (AbstractMOC.HPY_MAX_NORDER - np.uint8(depth)) << np.uint8(1)
 
         p1 = ipix
-        p2 = ipix + 1
+        p2 = ipix + np.uint64(1)
 
         intervals = np.vstack((p1 << shift, p2 << shift)).T
         return cls(IntervalSet(intervals))

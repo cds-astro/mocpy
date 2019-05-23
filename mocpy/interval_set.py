@@ -30,7 +30,7 @@ class IntervalSet:
     in the constructor. As there are no ways of modifying an IntervalSet object (e.g. add new HEALPix cells) then we are
     sure an IntervalSet is consistent when manipulating it for intersecting MOCs, doing their union etc...
     """
-    HPY_MAX_ORDER = 29
+    HPY_MAX_ORDER = np.uint8(29)
 
     def __init__(self, intervals=None, make_consistent=True, min_depth=None):
         """
@@ -46,9 +46,11 @@ class IntervalSet:
             True by default. Remove the overlapping intervals that makes
             a valid MOC (i.e. can be plot, serialized, manipulated).
         """
-        intervals = np.array([]) if intervals is None else intervals
-        self._intervals = intervals.astype(np.uint64)
+        self._intervals = np.array([], dtype=np.uint64) if intervals is None else intervals
+
         if make_consistent:
+            if min_depth is not None:
+                min_depth = np.uint8(min_depth)
             self._merge_intervals(min_depth=min_depth)
 
     def copy(self):
@@ -103,8 +105,8 @@ class IntervalSet:
         """
         def add_interval(ret, start, stop):
             if min_depth is not None:
-                shift = 2 * (29 - min_depth)
-                mask = (1 << shift) - 1
+                shift = np.uint8(2) * (np.uint8(29) - min_depth)
+                mask = (np.uint64(1) << shift) - np.uint64(1)
 
                 if stop - start < mask:
                     ret.append((start, stop))
@@ -112,12 +114,12 @@ class IntervalSet:
                     ofs = start & mask
                     st = start
                     if ofs > 0:
-                        st = (start - ofs) + (mask + 1)
+                        st = (start - ofs) + (mask + np.uint64(1))
                         ret.append((start, st))
 
                     while st + mask + 1 < stop:
-                        ret.append((st, st + mask + 1))
-                        st = st + mask + 1
+                        ret.append((st, st + mask + np.uint64(1)))
+                        st = st + mask + np.uint64(1)
 
                     ret.append((st, stop))
             else:
@@ -126,7 +128,7 @@ class IntervalSet:
         ret = []
         start = stop = None
         # Use numpy sort method
-        self._intervals.sort(axis=0)
+        self._intervals.sort(axis = 0)
         for itv in self._intervals:
             if start is None:
                 start, stop = itv
@@ -145,7 +147,7 @@ class IntervalSet:
             add_interval(ret, start, stop)
 
         self._intervals = np.asarray(ret)
-        self._intervals = self._intervals.astype(np.uint64)
+        #self._intervals = self._intervals.astype(np.uint64)
 
     def union(self, another_is):
         """
@@ -236,11 +238,11 @@ class IntervalSet:
         if r2.empty():
             return IntervalSet()
 
-        order = 0
+        order = np.uint8(0)
         while not r2.empty():
-            shift = 2 * (IntervalSet.HPY_MAX_ORDER - order)
-            ofs = (1 << shift) - 1
-            ofs2 = 1 << (2 * order + 2)
+            shift = np.uint8(2) * (np.uint8(IntervalSet.HPY_MAX_ORDER) - order)
+            ofs = (np.uint64(1) << shift) - np.uint64(1)
+            ofs2 = np.uint64(1) << (np.uint8(2) * order + np.uint8(2))
 
             r4 = []
             for iv in r2._intervals:
@@ -254,10 +256,10 @@ class IntervalSet:
                     res.append((a + ofs2, b + ofs2))
 
             if len(r4) > 0:
-                r4_is = IntervalSet(np.asarray(r4))
+                r4_is = IntervalSet(np.asarray(r4, dtype=np.uint64))
                 r2 = r2.difference(r4_is)
 
-            order += 1
+            order += np.uint8(1)
 
         return IntervalSet(np.asarray(res))
 
@@ -281,24 +283,24 @@ class IntervalSet:
         # Appending a list is faster than appending a numpy array
         # For these algorithms we append a list and create the interval set from the finished list
         rtmp = []
-        last_order = 0
+        last_order = np.uint8(0)
         intervals = nuniq_is._intervals
-        diff_order = IntervalSet.HPY_MAX_ORDER
-        shift_order = 2 * diff_order
+        diff_order = np.uint8(IntervalSet.HPY_MAX_ORDER)
+        shift_order = np.uint8(2) * diff_order
         for interval in intervals:
-            for j in range(interval[0], interval[1]):
-                order, i_pix = uniq2orderipix(j)
+            for uniq in range(interval[0], interval[1]):
+                order, i_pix = uniq2orderipix(np.uint64(uniq))
 
                 if order != last_order:
-                    nested_is = nested_is.union(IntervalSet(np.asarray(rtmp)))
+                    nested_is = nested_is.union(IntervalSet(np.asarray(rtmp, dtype=np.uint64)))
                     rtmp = []
                     last_order = order
-                    diff_order = IntervalSet.HPY_MAX_ORDER - order
-                    shift_order = 2 * diff_order
+                    diff_order = np.uint8(IntervalSet.HPY_MAX_ORDER) - order
+                    shift_order = np.uint8(2) * diff_order
 
-                rtmp.append((i_pix << shift_order, (i_pix + 1) << shift_order))
+                rtmp.append((i_pix << shift_order, (i_pix + np.uint64(1)) << shift_order))
 
-        nested_is = nested_is.union(IntervalSet(np.asarray(rtmp)))
+        nested_is = nested_is.union(IntervalSet(np.asarray(rtmp, dtype=np.uint64)))
         return nested_is
 
     @staticmethod
@@ -355,4 +357,4 @@ class IntervalSet:
 
             scan = min(a_endpoints[a_index], b_endpoints[b_index])
 
-        return np.asarray(res).reshape((-1, 2))
+        return np.asarray(res, dtype=np.uint64).reshape((-1, 2))

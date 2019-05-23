@@ -82,19 +82,20 @@ def uniq2orderipix(uniq):
     convert a HEALPix pixel coded as a NUNIQ number
     to a (norder, ipix) tuple
     """
-    order = ((np.log2(uniq//4)) // 2)
-    #order = order.astype(int)
-    ipix = uniq - 4 * (4**order)
+    order = (np.log2(uniq // np.uint8(4))) // np.uint8(2)
+    order = order.astype(np.uint8)
+    ipix = uniq - np.uint64(4) * (np.uint64(4) ** np.uint64(order))
 
-    return order, ipix
+    return order, ipix.astype(np.uint64)
 
 
 def orderipix2uniq(n_order, n_pix):
-    return n_pix + ((4**n_order) << 2)
+    return n_pix + ((np.uint64(4) ** n_order) << np.uint64(2))
 
 
 # x : int 64 bits
 def number_trailing_zeros(x):
+    x = int(x)
     bits = 0
     # convention for x == 0 => return 0
     if x == 0:
@@ -119,4 +120,4 @@ def number_trailing_zeros(x):
         bits += 1
         x >>= 1
 
-    return bits
+    return np.uint8(bits)

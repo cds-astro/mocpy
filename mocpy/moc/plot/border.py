@@ -27,7 +27,10 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         ipixels_all = np.arange(num_ipixels)
         ipixels_open = np.setdiff1d(ipixels_all, ipixels_open, assume_unique=True)
     
+    ipixels_open = ipixels_open.astype(int)
     neighbors = hp.neighbours(ipixels_open)
+    neighbors = neighbors.astype(np.uint64)
+    ipixels_open = ipixels_open.astype(np.uint64)
     # Select the direct neighbors (i.e. those in WEST, NORTH, EAST and SOUTH directions)
     neighbors = neighbors[[0, 2, 4, 6], :]
     ipix_moc = np.isin(neighbors, ipixels_open)

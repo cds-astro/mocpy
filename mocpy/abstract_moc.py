@@ -21,7 +21,7 @@ class AbstractMOC:
     """
     Basic functions for manipulating MOCs.
     """
-    HPY_MAX_NORDER = 29
+    HPY_MAX_NORDER = np.uint8(29)
     LARK_PARSER_STR = None
 
     def __init__(self, interval_set=None):
@@ -71,14 +71,13 @@ class AbstractMOC:
         """
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
-        # TODO: cache value
-        combo = int(0)
+        combo = np.uint64(0)
         for iv in self._interval_set._intervals:
             combo |= iv[0] | iv[1]
 
-        ret = AbstractMOC.HPY_MAX_NORDER - (utils.number_trailing_zeros(combo) // 2)
+        ret = AbstractMOC.HPY_MAX_NORDER - (utils.number_trailing_zeros(combo) // np.uint8(2))
         if ret < 0:
-            ret = 0
+            ret = np.uint64(0)
 
         return ret
 
@@ -207,14 +206,14 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        intervals = np.array([])
+        intervals = np.array([], dtype=np.uint64)
         for order, pix_l in json_moc.items():
             if len(pix_l) == 0:
                 continue
-            pix = np.array(pix_l)
+            pix = np.array(pix_l, dtype=np.uint64)
             p1 = pix
-            p2 = pix + 1
-            shift = 2 * (AbstractMOC.HPY_MAX_NORDER - int(order))
+            p2 = pix + np.uint64(1)
+            shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(order))
 
             itv = np.vstack((p1 << shift, p2 << shift)).T
             if intervals.size == 0:
@@ -234,6 +233,7 @@ class AbstractMOC:
             the NUNIQ HEALPix pixels iterator
         """
         intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set)._intervals
+
         for uniq_iv in intervals_uniq_l:
             for uniq in range(uniq_iv[0], uniq_iv[1]):
                 yield uniq
@@ -257,7 +257,8 @@ class AbstractMOC:
         """
         table = Table.read(filename)
 
-        intervals = np.vstack((table['UNIQ'], table['UNIQ']+1)).T
+        intervals = np.vstack((table['UNIQ'], table['UNIQ'] + 1)).T
+        intervals = intervals.astype(np.uint64)
 
         nuniq_interval_set = IntervalSet(intervals)
         interval_set = IntervalSet.from_nuniq_interval_set(nuniq_interval_set)
@@ -315,7 +316,7 @@ class AbstractMOC:
             def range_pix(self, range_pix):
                 lower_bound = int(range_pix[0])
                 upper_bound = int(range_pix[1])
-                return np.arange(lower_bound, upper_bound + 1, dtype=int)
+                return np.arange(start=lower_bound, stop=upper_bound + 1, dtype=int)
 
             def pixs(self, items):
                 ipixs = []
@@ -414,7 +415,7 @@ class AbstractMOC:
         min_depth = np.min(depth[0])
         max_depth = np.max(depth[-1])
 
-        for d in range(min_depth, max_depth+1):
+        for d in range(min_depth, max_depth + 1):
             pix_index = np.where(depth == d)[0]
 
             if pix_index.size > 0:
@@ -439,7 +440,7 @@ class AbstractMOC:
                     for ipix in ipix_depth[1:]:
                         # If the current pixel does not follow the previous one
                         # then we can end a range and serializes it
-                        if ipix > last_range + 1:
+                        if ipix > last_range + np.uint64(1):
                             res = write_cells(res, beg_range, last_range, sep=',')
                             # The current pixel is the beginning of a new range
                             beg_range = ipix
@@ -521,7 +522,7 @@ class AbstractMOC:
         for uniq in self._uniq_pixels_iterator():
             uniq_l.append(uniq)
 
-        uniq = np.array(uniq_l)
+        uniq = np.array(uniq_l, dtype=np.uint64)
 
         if format == 'fits':
             result = self._to_fits(uniq=uniq,
@@ -577,10 +578,10 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        shift = 2 * (AbstractMOC.HPY_MAX_NORDER - new_order)
-        ofs = (int(1) << shift) - 1
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(new_order))
+        ofs = (np.uint64(1) << shift) - np.uint64(1)
         mask = ~ofs
-        adda = int(0)
+        adda = np.uint64(0)
         addb = ofs
 
         iv_set = []

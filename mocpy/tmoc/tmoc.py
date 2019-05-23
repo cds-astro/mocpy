@@ -45,8 +45,8 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times_arr = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=int)
-        intervals_arr = np.vstack((times_arr, times_arr + 1)).T
+        times_arr = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        intervals_arr = np.vstack((times_arr, times_arr + np.uint64(1))).T
 
         # degrade the TimeMoc to the order computer from ``delta_t``
         order = TimeMOC.time_resolution_to_order(delta_t)
@@ -72,8 +72,8 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        min_times_arr = np.asarray(min_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=int)
-        max_times_arr = np.asarray(max_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=int)
+        min_times_arr = np.asarray(min_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        max_times_arr = np.asarray(max_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
 
         intervals_arr = np.vstack((min_times_arr, max_times_arr + 1)).T
 
@@ -86,11 +86,11 @@ class TimeMOC(AbstractMOC):
         Add all the pixels at max order in the neighbourhood of the moc
 
         """
-        time_delta = 1 << (2*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, 0)
-        intervals_arr[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, (1 << 58) - 1)
+        intervals_arr[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, np.uint64(0))
+        intervals_arr[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, np.uint64((1 << 58) - 1))
 
         self._interval_set = IntervalSet(intervals_arr)
 
@@ -99,11 +99,11 @@ class TimeMOC(AbstractMOC):
         Remove all the pixels at max order located at the bound of the moc
 
         """
-        time_delta = 1 << (2*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = np.minimum(intervals_arr[:, 0] + time_delta, (1 << 58) - 1)
-        intervals_arr[:, 1] = np.maximum(intervals_arr[:, 1] - time_delta, 0)
+        intervals_arr[:, 0] = np.minimum(intervals_arr[:, 0] + time_delta, np.uint64((1 << 58) - 1))
+        intervals_arr[:, 1] = np.maximum(intervals_arr[:, 1] - time_delta, np.uint64(0))
 
         good_intervals = intervals_arr[:, 1] > intervals_arr[:, 0]
 
@@ -118,7 +118,7 @@ class TimeMOC(AbstractMOC):
             4**29 - 1
 
         """
-        return (1 << 58) - 1
+        return np.uint64((1 << 58) - 1)
 
     def _process_degradation(self, another_moc, order_op):
         """
@@ -334,7 +334,7 @@ class TimeMOC(AbstractMOC):
         rough_tmoc = self.degrade_to_order(new_max_order)
 
         pix_arr = (times.jd * TimeMOC.DAY_MICRO_SEC)
-        pix_arr = pix_arr.astype(int)
+        pix_arr = pix_arr.astype(np.uint64)
 
         intervals_arr = rough_tmoc._interval_set._intervals
         inf_arr = np.vstack([pix_arr[i] >= intervals_arr[:, 0] for i in range(pix_arr.shape[0])])
@@ -386,7 +386,7 @@ class TimeMOC(AbstractMOC):
         """
 
         order = 29 - int(np.log2(delta_time.sec * 1e6) / 2)
-        return order
+        return np.uint8(order)
 
     def plot(self, title='TimeMoc', view=(None, None)):
         """

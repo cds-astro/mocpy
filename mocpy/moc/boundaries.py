@@ -78,7 +78,11 @@ class Boundaries():
 
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
+        ipixels = ipixels.astype(int)
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
+        ipixels = ipixels.astype(np.uint64)
+        neighbours = neighbours.astype(np.uint64)
+
         isin = np.isin(neighbours, ipixels)
         border = isin.sum(axis=0) < 4
 

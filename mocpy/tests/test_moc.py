@@ -89,14 +89,19 @@ def moc_from_fits_image():
     return moc
 
 
+@pytest.fixture()
+def moc_from_json():
+    return MOC.from_json({'8': [45, 78], '4': [42, 57]})
+
+
 def test_moc_from_fits_image(moc_from_fits_image):
     assert moc_from_fits_image
 
 
-def test_moc_serialize_and_from_json(moc_from_fits_image):
-    ipix_d = moc_from_fits_image.serialize(format="json")
+def test_moc_serialize_and_from_json(moc_from_json):
+    ipix_d = moc_from_json.serialize(format="json")
     moc2 = MOC.from_json(ipix_d)
-    assert moc_from_fits_image == moc2
+    assert moc_from_json == moc2
 
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
