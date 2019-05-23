@@ -1,0 +1,42 @@
+environment:
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
+  matrix:
+    # Important remark: We need to use VS 2017 for compiling spherical-geometry
+    # for python 3.5 -> 3.7 on any architectures, whether it is 64 or 32 bits.
+    # Nightly 64-bit MSVC
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python27-x64"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_ARCH: "64"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "64"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "64"
+
+build_script:
+  # Install python dependencies for running the tests
+  # and building the docs
+  - python -m pip install -r requirements/contributing.txt
+
+test_script:
+  - python -m pytest -v mocpy --cov-report=term --cov=mocpy
+  # Test notebooks
+  - pip install .
+  - python test_notebooks.py
+  # Test docs build:
+  - cd docs
+  - make html
+  # Execute the tests found in the doc
+  - make doctest
+  - cd ..
