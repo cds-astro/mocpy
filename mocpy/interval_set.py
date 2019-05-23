@@ -145,7 +145,7 @@ class IntervalSet:
             add_interval(ret, start, stop)
 
         self._intervals = np.asarray(ret)
-        self._intervals = intervals.astype(np.uint64)
+        self._intervals = self._intervals.astype(np.uint64)
 
     def union(self, another_is):
         """
