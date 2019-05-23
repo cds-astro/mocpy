@@ -47,7 +47,7 @@ class IntervalSet:
             a valid MOC (i.e. can be plot, serialized, manipulated).
         """
         intervals = np.array([]) if intervals is None else intervals
-        self._intervals = intervals.astype(np.int)
+        self._intervals = intervals.astype(np.uint64)
         if make_consistent:
             self._merge_intervals(min_depth=min_depth)
 
@@ -104,7 +104,7 @@ class IntervalSet:
         def add_interval(ret, start, stop):
             if min_depth is not None:
                 shift = 2 * (29 - min_depth)
-                mask = (int(1) << shift) - 1
+                mask = (1 << shift) - 1
 
                 if stop - start < mask:
                     ret.append((start, stop))
@@ -145,6 +145,7 @@ class IntervalSet:
             add_interval(ret, start, stop)
 
         self._intervals = np.asarray(ret)
+        self._intervals = intervals.astype(np.uint64)
 
     def union(self, another_is):
         """
