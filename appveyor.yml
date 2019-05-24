@@ -25,7 +25,7 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
-  - set PATH=%PYTHON%\Scripts;%PATH%
+  - set PATH=%PYTHON%\\Scripts;%PATH%
 
 build_script:
   # Install python dependencies for running the tests
