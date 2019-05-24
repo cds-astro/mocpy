@@ -27,10 +27,10 @@ environment:
 build_script:
   # Install python dependencies for running the tests
   # and building the docs
-  - "%PYTHON%\\python.exe" -m pip install -r requirements/contributing.txt
+  - "%PYTHON%\\python.exe -m pip install -r requirements/contributing.txt"
 
 test_script:
-  - "%PYTHON%\\python.exe" -m pytest -v mocpy --cov-report=term --cov=mocpy
+  - "%PYTHON%\\python.exe -m pytest -v mocpy --cov-report=term --cov=mocpy"
   # Test docs build:
   - cd docs
   - make html
