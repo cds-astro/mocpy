@@ -132,16 +132,18 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self extended by one degree of neighbours.
         """
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+
         # Get the pixels array of the MOC at the its max order.
         ipix = self._best_res_pixels()
-        ipix = ipix.astype(int)
-        
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
         # Get the HEALPix array containing the neighbors of ``ipix``.
         # This array "extends" ``ipix`` by one degree of neighbors. 
+        ipix = ipix.astype(np.int)
         extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
+        ipix = ipix.astype(np.uint64)
+
         extend_ipix = extend_ipix.astype(np.uint64)
-        
+
         # Compute the difference between ``extend_ipix`` and ``ipix`` to get only the neighboring pixels
         # located at the border of the MOC.
         neigh_ipix = np.setdiff1d(extend_ipix, ipix)
@@ -163,20 +165,24 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self minus its HEALPix cells located at its border.
         """
+        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+
         # Get the HEALPix cells of the MOC at its max depth
         ipix = self._best_res_pixels()
-        ipix = ipix.astype(int)
 
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
         # Extend it to include the max depth neighbor cells.
+        ipix = ipix.astype(np.int)
         extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
-
+        ipix = ipix.astype(np.uint64)
+        extend_ipix = extend_ipix.astype(np.uint64)
         # Get only the max depth HEALPix cells lying at the border of the MOC
         neigh_ipix = np.setxor1d(extend_ipix, ipix)
 
         # Remove these pixels from ``ipix``
+        neigh_ipix = neigh_ipix.astype(np.int)
         border_ipix = AbstractMOC._neighbour_pixels(hp, neigh_ipix)
         border_ipix = border_ipix.astype(np.uint64)
+        
         reduced_ipix = np.setdiff1d(ipix, border_ipix)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
