@@ -155,10 +155,6 @@ def test_mpl_fill():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
-                          # Python 2.7 RuntimeError.
-
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
     with WCS(fig,
@@ -174,10 +170,6 @@ def test_mpl_fill():
 def test_mpl_border():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
-
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
-                          # Python 2.7 RuntimeError.
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
