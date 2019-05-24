@@ -38,7 +38,6 @@ test_script:
   - "%PYTHON%\\python.exe -m pytest -v mocpy --cov-report=term --cov=mocpy"
   # Test docs build:
   - cd docs
-  - make html
   # Execute the tests found in the doc
   - make doctest
-  - cd ..
+

@@ -182,7 +182,7 @@ class MOC(AbstractMOC):
         neigh_ipix = neigh_ipix.astype(np.int)
         border_ipix = AbstractMOC._neighbour_pixels(hp, neigh_ipix)
         border_ipix = border_ipix.astype(np.uint64)
-        
+
         reduced_ipix = np.setdiff1d(ipix, border_ipix)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
@@ -305,7 +305,7 @@ class MOC(AbstractMOC):
         Raises
         ------
         DeprecationWarning
-            This method is not stable. A future more stable algorithm will be implemented!
+            This method is not stable and not tested! A future more stable algorithm will be implemented!
 
         Return
         ------
