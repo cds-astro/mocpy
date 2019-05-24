@@ -15,8 +15,6 @@ setup(name='MOCPy',
     install_requires=['astropy',
         'astropy_healpix',
         'cdshealpix',
-        'requests',
-        'numpy',
         'matplotlib', # Used in fill and border
         'networkx', # Used in get_boundaries
         # Disable the installation of spherical-geometry as it

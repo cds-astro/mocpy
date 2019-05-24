@@ -3,8 +3,6 @@
 # See https://mocpy.readthedocs.io/en/latest/contribute.html for more details.
 
 # Mandatory packages for MOCPy to work 
-numpy
-requests
 astropy
 astropy_healpix
 cdshealpix
