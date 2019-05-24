@@ -6,6 +6,7 @@ from astropy_healpix import HEALPix
 
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel
+import astropy.units as u
 
 class Boundaries():
     @staticmethod
@@ -13,10 +14,10 @@ class Boundaries():
         boundaries_l = []
 
         # Get the ipixels of the MOC at the deepest order
-        hp, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
+        max_order, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
 
         # Split the global MOC graph into all its non connected subgraphs.
-        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(hp, ipixels)
+        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(max_order, ipixels)
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
         return boundaries_l
@@ -29,7 +30,6 @@ class Boundaries():
                 moc = m.degrade_to_order(order)
 
         max_order = moc.max_order
-        hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
         ipixels = moc._best_res_pixels()
 
         # Take the complement if the MOC covers more than half of the sky => the perimeter(MOC) = perimeter(complement(MOC))
@@ -41,10 +41,10 @@ class Boundaries():
         #    ipixels_all = np.arange(num_ipixels)
         #    ipixels = np.setdiff1d(ipixels_all, ipixels, assume_unique=True)
 
-        return hp, ipixels
+        return max_order, ipixels
 
     @staticmethod
-    def _compute_graph_HEALPix_boundaries(hp, ipixels):
+    def _compute_graph_HEALPix_boundaries(depth, ipixels):
         def insert_edge(G, l1, l2, p1_lon, p1_lat, p2_lon, p2_lat):
             # Nodes are indexed by str(skycoord). When getting ordered nodes, one can retrieve back the skycoord instance
             # by accessing the python dict `pts_d`.
@@ -79,8 +79,10 @@ class Boundaries():
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
         ipixels = ipixels.astype(np.int)
+        hp = HEALPix(nside=(1 << depth), order='nested', frame=ICRS())
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
-        #ipixels = ipixels.astype(np.uint64)
+        ipixels = ipixels.astype(np.uint64)
+
         neighbours = neighbours.astype(np.uint64)
 
         isin = np.isin(neighbours, ipixels)
@@ -90,16 +92,20 @@ class Boundaries():
         isin_border = isin[:, border]
 
         # Phase 2: Build the graph from the positions of the ipixels boundaries
+        #import cdshealpix as healpix
+        #ipix_lon, ipix_lat = healpix.vertices(ipixels_border, depth)
+        #ipix_lon[:, [1, 3]] = ipix_lon[:, [3, 1]]
+        #ipix_lat[:, [1, 3]] = ipix_lat[:, [3, 1]]
         ipix_lon, ipix_lat = hp.boundaries_lonlat(ipixels_border, step=1)
 
-        ipix_lon_deg = ipix_lon.deg
-        ipix_lat_deg = ipix_lat.deg
+        ipix_lon_deg = ipix_lon.to_value(u.deg)
+        ipix_lat_deg = ipix_lat.to_value(u.deg)
 
         ipix_lon_repr = \
-         np.around(np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=6).tolist()
+         np.around(np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3).tolist()
         ipix_lat_repr = \
-         np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=6).tolist()
-
+         np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3).tolist()
+        
         west_border = ~isin_border[0, :]
         south_border = ~isin_border[1, :]
         east_border = ~isin_border[2, :]

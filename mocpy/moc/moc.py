@@ -284,6 +284,10 @@ class MOC(AbstractMOC):
         Each SkyCoord refers to the coordinates of one border of the MOC (i.e. 
         either a border of a connexe MOC part or a border of a hole
         located in a connexe MOC part).
+        This function is currently not stable: encoding a vertice of a 
+        HEALPix cell (N, E, S, W) should not depend on the position of the
+        vertice but rather on the uniq value (+ 2 bits to encode the direction
+        of the vertice).
 
         Parameters
         ----------
@@ -292,11 +296,20 @@ class MOC(AbstractMOC):
             A shallow depth leads to a faster computation.
             By default the maximum depth of the MOC is taken.
 
+        Raises
+        ------
+        DeprecationWarning
+            This method is not stable. A future more stable algorithm will be implemented!
+
         Return
         ------
         coords: [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
+
+        import warnings
+        warnings.simplefilter('default')
+        warnings.warn('This method is not stable. A future more stable algorithm will be implemented!', DeprecationWarning)
         return Boundaries.get(self, order)
 
     @classmethod
