@@ -163,8 +163,8 @@ class AbstractMOC:
         res = []
         intervals_l = sorted(self._interval_set._intervals.tolist())
 
-        if intervals_l[0][0] > 0:
-            res.append((0, intervals_l[0][0]))
+        if intervals_l[0][0] > np.uint64(0):
+            res.append((np.uint64(0), intervals_l[0][0]))
 
         last = intervals_l[0][1]
 
@@ -177,7 +177,7 @@ class AbstractMOC:
         if last < max_pix_depth:
             res.append((last, max_pix_depth))
 
-        return IntervalSet(np.asarray(res))
+        return IntervalSet(np.asarray(res, dtype=np.uint64))
 
     def _get_max_pix(self):
         pass
@@ -234,8 +234,8 @@ class AbstractMOC:
         """
         intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set)._intervals
 
-        for uniq_iv in intervals_uniq_l:
-            for uniq in range(uniq_iv[0], uniq_iv[1]):
+        for uniq_interval in intervals_uniq_l:
+            for uniq in np.arange(np.int(uniq_interval[0]), np.int(uniq_interval[1]), dtype=np.uint64):
                 yield uniq
 
     @classmethod

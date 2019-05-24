@@ -288,8 +288,8 @@ class IntervalSet:
         diff_order = np.uint8(IntervalSet.HPY_MAX_ORDER)
         shift_order = np.uint8(2) * diff_order
         for interval in intervals:
-            for uniq in range(interval[0], interval[1]):
-                order, i_pix = uniq2orderipix(np.uint64(uniq))
+            for uniq in np.arange(np.int(interval[0]), np.int(interval[1]), dtype=np.uint64):
+                order, i_pix = uniq2orderipix(uniq)
 
                 if order != last_order:
                     nested_is = nested_is.union(IntervalSet(np.asarray(rtmp, dtype=np.uint64)))

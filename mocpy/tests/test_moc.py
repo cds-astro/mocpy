@@ -287,6 +287,13 @@ def test_moc_difference(mocs_op):
     })
 
 
-def test_moc_complement():
+def test_moc_complement_consistency():
     moc = MOC.from_fits('resources/P-GALEXGR6-AIS-FUV.fits')
     assert moc.complement().complement() == moc
+
+
+@pytest.mark.parametrize("input, expected", [
+    (MOC.from_json({'0': [1, 3]}), MOC.from_json({'0': [0, 2, 4, 5, 6, 7, 8, 9, 10, 11]}))
+])
+def test_moc_complement(input, expected):
+    assert input.complement() == expected
