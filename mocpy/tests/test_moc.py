@@ -12,6 +12,8 @@ from astropy_healpix import HEALPix
 
 from ..moc import MOC, WCS
 
+
+#### TESTING MOC creation ####
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
                     dec=np.random.uniform(-90, 90, size),
@@ -58,12 +60,14 @@ def test_moc_from_lonlat(lonlat_gen_f, size):
 
     moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=7)
 
+
 def test_from_healpix_cells():
     ipix = np.array([40, 87, 65])
     depth = np.array([3, 3, 3])
     fully_covered = np.array([True, True, True])
 
     moc = MOC.from_healpix_cells(ipix, depth, fully_covered)
+
 
 def test_moc_from_fits():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
@@ -95,13 +99,14 @@ def moc_from_json():
 
 
 def test_moc_from_fits_image(moc_from_fits_image):
-    assert moc_from_fits_image
+    assert isinstance(moc_from_fits_image, MOC)
 
 
 def test_moc_serialize_and_from_json(moc_from_json):
     ipix_d = moc_from_json.serialize(format="json")
     moc2 = MOC.from_json(ipix_d)
     assert moc_from_json == moc2
+
 
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
@@ -115,6 +120,25 @@ def test_moc_serialize_and_from_json(moc_from_json):
 def test_from_str(expected, moc_str):
     assert MOC.from_str(moc_str) == expected
 
+
+def test_moc_skyfraction():
+    moc = MOC.from_json({
+        '0': [0, 1, 2, 3, 4, 5]
+    })
+    assert moc.sky_fraction == 0.5
+
+
+#### TESTING MOC serialization ####
+def test_moc_serialize_to_fits(moc_from_fits_image):
+    hdulist = moc_from_fits_image.serialize(format='fits')
+    assert isinstance(hdulist, fits.hdu.hdulist.HDUList)
+
+
+def test_moc_serialize_to_json(moc_from_fits_image):
+    moc_json = moc_from_fits_image.serialize(format='json')
+    assert isinstance(moc_json, dict)
+
+
 @pytest.mark.parametrize("moc, expected", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
     '5/8-10,42-46,54 6/4500 8/45'),
@@ -126,26 +150,49 @@ def test_from_str(expected, moc_str):
 def test_serialize_to_str(moc, expected):
     assert moc.serialize(format="str") == expected
 
-def test_moc_write_and_from_json(moc_from_fits_image):
-    tmp_file = tempfile.NamedTemporaryFile()
-    moc_from_fits_image.write(tmp_file.name, format='json')
 
-    with open(tmp_file.name, 'r') as moc_file:
-        import json
-        moc_d = json.load(moc_file)
-        moc2 = MOC.from_json(json_moc=moc_d)
-        assert moc_from_fits_image == moc2
+#### TESTING MOC plot functions ####
+def test_mpl_fill():
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+                          # Python 2.7 RuntimeError.
+
+    import matplotlib.pyplot as plt
+    fig = plt.figure(111, figsize=(10, 10))
+    with WCS(fig,
+         fov=50 * u.deg,
+         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+         coordsys="icrs",
+         rotation=Angle(0, u.degree),
+         projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
 
-def test_moc_write_to_fits(moc_from_fits_image):
-    hdulist = moc_from_fits_image.serialize(format='fits')
-    assert isinstance(hdulist, fits.hdu.hdulist.HDUList)
+def test_mpl_border():
+    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
+    moc = MOC.from_fits(fits_path)
+
+    import matplotlib
+    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
+                          # Python 2.7 RuntimeError.
+
+    import matplotlib.pyplot as plt
+    fig = plt.figure(111, figsize=(10, 10))
+    with WCS(fig,
+         fov=50 * u.deg,
+         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+         coordsys="icrs",
+         rotation=Angle(0, u.degree),
+         projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        moc.border(ax=ax, wcs=wcs, color='g')
 
 
-def test_moc_write_to_json(moc_from_fits_image):
-    moc_json = moc_from_fits_image.serialize(format='json')
-    assert isinstance(moc_json, dict)
-
+#### TESTING MOC features ####
 def test_moc_contains():
     order = 4
     size = 20
@@ -170,49 +217,13 @@ def test_moc_contains():
     should_be_inside_arr = moc.contains(ra=lon_out, dec=lat_out, keep_inside=False)
     assert should_be_inside_arr.all()
 
-def test_mpl_fill():
-    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
-
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
-                          # Python 2.7 RuntimeError.
-
-    import matplotlib.pyplot as plt
-    fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
-         fov=50 * u.deg,
-         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-         coordsys="icrs",
-         rotation=Angle(0, u.degree),
-         projection="AIT") as wcs:
-        ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
-
-def test_mpl_border():
-    fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
-
-    import matplotlib
-    matplotlib.use('Agg') # Disable the need of a X-server when importing matplotlib.pyplot. This gets rid of a
-                          # Python 2.7 RuntimeError.
-
-    import matplotlib.pyplot as plt
-    fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
-         fov=50 * u.deg,
-         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-         coordsys="icrs",
-         rotation=Angle(0, u.degree),
-         projection="AIT") as wcs:
-        ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        moc.border(ax=ax, wcs=wcs, color='g')
 
 def test_boundaries():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
+
 
 @pytest.fixture()
 def mocs():
@@ -251,13 +262,7 @@ def test_neighbours(mocs):
     assert moc2 == mocs['moc2']
 
 
-def test_moc_skyfraction():
-    moc = MOC.from_json({
-        '0': [0, 1, 2, 3, 4, 5]
-    })
-    assert moc.sky_fraction == 0.5
-
-
+#### TESTING MOC operations ####
 @pytest.fixture()
 def mocs_op():
     moc1 = MOC.from_json({
