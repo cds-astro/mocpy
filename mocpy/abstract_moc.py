@@ -74,6 +74,7 @@ class AbstractMOC:
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
         depth = core.depth(self._interval_set._intervals)
+        depth = np.uint8(depth)
         return depth
 
     def intersection(self, another_moc, *args):

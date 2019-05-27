@@ -127,7 +127,7 @@ class IntervalSet:
                 ret.append((start, stop))
 
         # TODO: make that code in rust (min depth)
-        self._intervals = self._intervals.astype(np.int)
+        #self._intervals = self._intervals.astype(np.int)
 
         ret = []
         start = stop = None
@@ -150,7 +150,7 @@ class IntervalSet:
         if start is not None and stop is not None:
             add_interval(ret, start, stop)
 
-        self._intervals = np.asarray(ret)
+        self._intervals = np.asarray(ret, dtype=np.uint64)
         #self._intervals = self._intervals.astype(np.uint64)
 
     def union(self, another_is):

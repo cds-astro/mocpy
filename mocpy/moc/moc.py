@@ -189,7 +189,7 @@ class MOC(AbstractMOC):
         reduced_ipix = np.setdiff1d(ipix, border_ipix)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
-        shift = np.uint64(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
+        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
         reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + np.uint64(1)) << shift)).T
         self._interval_set = IntervalSet(reduced_itv)
         return self

@@ -202,7 +202,7 @@ def test_moc_contains():
     all_healpix_arr = np.arange(12*4**order)
     healpix_outside_arr = np.setdiff1d(all_healpix_arr, healpix_arr)
 
-    moc = MOC.from_json(json_moc={str(order): list(healpix_arr)})
+    moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
 
     hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
     lon, lat = hp.healpix_to_lonlat(healpix_arr)

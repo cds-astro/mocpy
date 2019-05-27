@@ -19,3 +19,7 @@ pytest-cov
 # Packages for updating the docs
 sphinx
 numpydoc
+
+# Packages for compiling the library
+setuptools
+setuptools-rust 
