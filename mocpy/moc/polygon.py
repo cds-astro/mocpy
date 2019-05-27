@@ -135,6 +135,8 @@ class PolygonComputer:
     def __init__(self, ra, dec, inside=None, max_depth=10):
         ra = ra.to(u.rad).value
         dec = dec.to(u.rad).value
+        print("ra dtype", ra.dtype)
+        # Cast to uint64
         # Check if the vertices form a closed polygon
         if ra[0] != ra[-1] or dec[0] != dec[-1]:
             # If not, append the first vertex to ``vertices``

@@ -19,7 +19,7 @@ where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug  {
 impl<T> From<Vec<Range<T>>> for Intervals<T>
 where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
     fn from(ranges: Vec<Range<T>>) -> Self {
-        Intervals::Nested(Ranges::<T>::new(ranges))
+        Intervals::Nested(Ranges::<T>::new(ranges, None))
     }
 }
 
@@ -39,7 +39,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// // Create a set of ranges under the nested format
     /// let intervals_nest = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![0..2]
+    ///         vec![0..2],
+    ///		None
     ///     )
     /// );
     /// // Call `uniq_into_iter` on it to get an iterator
@@ -74,7 +75,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// // Create a set of ranges under the uniq format
     /// let intervals_uniq = Intervals::Uniq(
     ///     Ranges::<u64>::new(
-    ///         vec![(4*4_u64.pow(12) + 100)..(4*4_u64.pow(12) + 150)]
+    ///         vec![(4*4_u64.pow(12) + 100)..(4*4_u64.pow(12) + 150)],
+    ///         None,
     ///     )
     /// );
     /// // Call `nested_into_iter` on it to get an iterator
@@ -109,7 +111,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// // Create a set of ranges under the uniq format
     /// let intervals_uniq = Intervals::Uniq(
     ///     Ranges::<u64>::new(
-    ///         vec![(4*4_u64.pow(12) + 100)..(4*4_u64.pow(12) + 150)]
+    ///         vec![(4*4_u64.pow(12) + 100)..(4*4_u64.pow(12) + 150)],
+    ///         None,
     ///     )
     /// );
     /// // Call `to_nested` on it to get a new Intervals
@@ -120,7 +123,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         match self {
             Intervals::Uniq(ranges) => {
                 let data_nested: Vec<_> = NestedIntervalsIter::new(ranges).collect();
-                Intervals::Nested(Ranges::<T>::new(data_nested))
+                Intervals::Nested(Ranges::<T>::new(data_nested, None))
             },
             Intervals::Nested(_) => {
                 self
@@ -142,7 +145,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// // Create a set of ranges under the nested format
     /// let intervals_nested = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![80..1520, 2..3]
+    ///         vec![80..1520, 2..3],
+    ///		None
     ///     )
     /// );
     /// // Call `to_uniq` on it to get a new Intervals object
@@ -153,7 +157,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         match self {
             Intervals::Nested(ranges) => {
                 let uniq_data: Vec<_> = UniqIntervalsIter::new(ranges).collect();
-                Intervals::Uniq(Ranges::<T>::new(uniq_data))
+                Intervals::Uniq(Ranges::<T>::new(uniq_data, None))
             },
             Intervals::Uniq(_) => {
                 self
@@ -192,7 +196,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
                     Intervals::Uniq(other_uniq_ranges) => {
                         // Convert uniq intervals to nested ones
                         let other_nested_ranges: Vec<_> = NestedIntervalsIter::new(other_uniq_ranges).collect();
-                        ranges.merge(Ranges::<T>::new(other_nested_ranges), op);
+                        ranges.merge(Ranges::<T>::new(other_nested_ranges, None), op);
                     }
                 }
             },
@@ -201,7 +205,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
                     Intervals::Nested(other_nested_ranges) => {
                         // Convert nested intervals to uniq ones
                         let other_uniq_ranges: Vec<_> = UniqIntervalsIter::new(other_nested_ranges).collect();
-                        ranges.merge(Ranges::<T>::new(other_uniq_ranges), op);
+                        ranges.merge(Ranges::<T>::new(other_uniq_ranges, None), op);
                     },
                     Intervals::Uniq(other_ranges) => {
                         ranges.merge(other_ranges, op);
@@ -225,12 +229,14 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// 
     /// let mut a = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![12..17, 3..5, 5..7, 6..8]
+    ///         vec![12..17, 3..5, 5..7, 6..8],
+    ///		None
     ///     )
     /// );
     /// let b = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![0..1, 2..5]
+    ///         vec![0..1, 2..5],
+    ///		None
     ///     )
     /// );
     /// a.union(b);
@@ -253,12 +259,14 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// 
     /// let mut a = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![12..17, 3..5, 5..7, 6..8]
+    ///         vec![12..17, 3..5, 5..7, 6..8],
+    ///		None
     ///     )
     /// );
     /// let b = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![0..1, 2..5]
+    ///         vec![0..1, 2..5],
+    ///		None,
     ///     )
     /// );
     /// a.difference(b);
@@ -281,12 +289,14 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// 
     /// let mut a = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![12..17, 3..5, 5..7, 6..8]
+    ///         vec![12..17, 3..5, 5..7, 6..8],
+    ///		None,
     ///     )
     /// );
     /// let b = Intervals::Nested(
     ///     Ranges::<u64>::new(
-    ///         vec![0..1, 2..5]
+    ///         vec![0..1, 2..5],
+    ///		None
     ///     )
     /// );
     /// a.intersection(b);
@@ -389,7 +399,7 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<T> Iterator for UniqIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send {
+where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug + Send {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -406,7 +416,7 @@ where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send {
 
                 if c2 > c1 {
                     self.ranges.difference(
-                        Ranges::<T>::new(vec![c1..c2])
+                        Ranges::<T>::new(vec![c1..c2], None)
                     );
 
                     let e1 = self.depth_offset.checked_add(&pix1).unwrap();
@@ -508,8 +518,8 @@ mod tests {
                 if compare_nested {
                     assert_eq!(ra.0, rb.0);
                 } else {
-                    let ra_uniq = Ranges::<u64>::new(left.uniq_into_iter().collect());
-                    let rb_uniq = Ranges::<u64>::new(right.uniq_into_iter().collect());
+                    let ra_uniq = Ranges::<u64>::new(left.uniq_into_iter().collect(), None);
+                    let rb_uniq = Ranges::<u64>::new(right.uniq_into_iter().collect(), None);
 
                     assert_eq!(ra_uniq.0, rb_uniq.0);
                 }
@@ -518,27 +528,27 @@ mod tests {
                 if !compare_nested {
                     assert_eq!(ra.0, rb.0);
                 } else {
-                    let ra_nested = Ranges::<u64>::new(left.nested_into_iter().collect());
-                    let rb_nested = Ranges::<u64>::new(right.nested_into_iter().collect());
+                    let ra_nested = Ranges::<u64>::new(left.nested_into_iter().collect(), None);
+                    let rb_nested = Ranges::<u64>::new(right.nested_into_iter().collect(), None);
 
                     assert_eq!(ra_nested.0, rb_nested.0);
                 }
             },
             (Intervals::Nested(ref ra), Intervals::Uniq(ref rb)) => {
                 if compare_nested {
-                    let rb_nested = Ranges::<u64>::new(right.nested_into_iter().collect());
+                    let rb_nested = Ranges::<u64>::new(right.nested_into_iter().collect(), None);
                     assert_eq!(ra.0, rb_nested.0);
                 } else {
-                    let ra_uniq = Ranges::<u64>::new(left.uniq_into_iter().collect());
+                    let ra_uniq = Ranges::<u64>::new(left.uniq_into_iter().collect(), None);
                     assert_eq!(ra_uniq.0, rb.0);
                 }
             },
             (Intervals::Uniq(ref ra), Intervals::Nested(ref rb)) => {
                 if compare_nested {
-                    let ra_nested = Ranges::<u64>::new(left.nested_into_iter().collect());
+                    let ra_nested = Ranges::<u64>::new(left.nested_into_iter().collect(), None);
                     assert_eq!(ra_nested.0, rb.0);
                 } else {
-                    let rb_uniq = Ranges::<u64>::new(right.uniq_into_iter().collect());
+                    let rb_uniq = Ranges::<u64>::new(right.uniq_into_iter().collect(), None);
                     assert_eq!(ra.0, rb_uniq.0);
                 }
             }
@@ -548,8 +558,8 @@ mod tests {
     #[test]
     fn merge_range() {
         fn assert_merge(a: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let intervals = Intervals::Nested(Ranges::<u64>::new(a));
-            let expected_intervals = Intervals::Nested(Ranges::<u64>::new(expected));
+            let intervals = Intervals::Nested(Ranges::<u64>::new(a, None));
+            let expected_intervals = Intervals::Nested(Ranges::<u64>::new(expected, None));
 
             intervals_eq(intervals, expected_intervals, true);
         }
@@ -561,18 +571,30 @@ mod tests {
     }
 
     #[test]
+    fn merge_range_min_depth() {
+	let intervals_d0 = Intervals::Nested(
+            Ranges::<u64>::new(vec![0..(1<<58)], Some(1))
+        );
+	let expected_ranges = vec![0..(1<<56), (1<<56)..(1<<57), (1<<57)..3*(1<<56), 3*(1<<56)..(1<<58)];
+
+	if let Intervals::Nested(ref ranges) = &intervals_d0 {
+	    assert_eq!(ranges.0, expected_ranges);
+	}
+    }
+
+    #[test]
     fn test_uniq_iter() {
         let intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..1])
+            Ranges::<u64>::new(vec![0..1], None)
         );
         let complex_intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![7..76])
+            Ranges::<u64>::new(vec![7..76], None)
         );
         let empty_intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![])
+            Ranges::<u64>::new(vec![], None)
         );
 
-        let expected_intervals = Intervals::Uniq(Ranges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)]));
+        let expected_intervals = Intervals::Uniq(Ranges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)], None));
         let expected_complex_intervals = Intervals::Uniq(
             Ranges::<u64>::new(
                 vec![
@@ -580,10 +602,11 @@ mod tests {
                     (2 + 4*4.pow(28))..(4 + 4*4.pow(28)),
                     (16 + 4*4.pow(28))..(19 + 4*4.pow(28)),
                     (7 + 4*4.pow(29))..(8 + 4*4.pow(29))
-                ]
+                ],
+		None
             )
         );
-        let expected_empty_intervals = Intervals::Uniq(Ranges::<u64>::new(vec![]));
+        let expected_empty_intervals = Intervals::Uniq(Ranges::<u64>::new(vec![], None));
 
         intervals_eq(intervals, expected_intervals, false);
         intervals_eq(complex_intervals, expected_complex_intervals, false);
@@ -597,12 +620,14 @@ mod tests {
         
         let intervals = Intervals::Uniq(
             Ranges::<u64>::new(
-                input
+                input,
+		None
             )
         );
         let expected_intervals = Intervals::Uniq(
             Ranges::<u64>::new(
-                input_cloned
+                input_cloned,
+		None
             )
         );
 
@@ -616,7 +641,8 @@ mod tests {
     fn test_nested_iter() {
         let intervals = Intervals::Uniq(
             Ranges::<u64>::new(
-                vec![4*4.pow(29)..(4*4.pow(29) + 1)]
+                vec![4*4.pow(29)..(4*4.pow(29) + 1)],
+		None
             )
         );
         let complex_intervals = Intervals::Uniq(
@@ -625,21 +651,22 @@ mod tests {
                     (2 + 4*4.pow(28))..(4 + 4*4.pow(28)),
                     (16 + 4*4.pow(28))..(19 + 4*4.pow(28)),
                     (7 + 4*4.pow(29))..(8 + 4*4.pow(29))
-                ]
+                ],
+		None
             )
         );
         let empty_intervals = Intervals::Uniq(
-            Ranges::<u64>::new(vec![])
+            Ranges::<u64>::new(vec![], None)
         );
 
         let expected_intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..1])
+            Ranges::<u64>::new(vec![0..1], None)
         );
         let expected_complex_intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![7..76])
+            Ranges::<u64>::new(vec![7..76], None)
         );
         let expected_empty_intervals = Intervals::Nested(
-            Ranges::<u64>::new(vec![])
+            Ranges::<u64>::new(vec![], None)
         );
 
         intervals_eq(intervals, expected_intervals, true);
@@ -650,11 +677,11 @@ mod tests {
     #[test]
     fn test_union() {
         fn assert_union(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a));
-            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b));
+            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a, None));
+            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b, None));
             
             let expected_union_intervals = Intervals::Nested(
-                Ranges::<u64>::new(expected)
+                Ranges::<u64>::new(expected, None)
             );
 
             intervals_a.union(intervals_b);
@@ -672,11 +699,11 @@ mod tests {
     #[test]
     fn test_intersection() {
         fn assert_intersection(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a));
-            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b));
+            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a, None));
+            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b, None));
             
             let expected_inter_intervals = Intervals::Nested(
-                Ranges::<u64>::new(expected)
+                Ranges::<u64>::new(expected, None)
             );
 
             intervals_a.intersection(intervals_b);
@@ -694,11 +721,11 @@ mod tests {
     #[test]
     fn test_difference() {
         fn assert_difference(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a));
-            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b));
+            let mut intervals_a = Intervals::Nested(Ranges::<u64>::new(a, None));
+            let intervals_b = Intervals::Nested(Ranges::<u64>::new(b, None));
             
             let expected_diff_intervals = Intervals::Nested(
-                Ranges::<u64>::new(expected)
+                Ranges::<u64>::new(expected, None)
             );
 
             intervals_a.difference(intervals_b);
@@ -717,11 +744,11 @@ mod tests {
     fn test_complement() {
         fn assert_complement(input: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
             let mut intervals = Intervals::Nested(
-                Ranges::<u64>::new(input)
+                Ranges::<u64>::new(input, None)
             );
 
             let expected_intervals = Intervals::Nested(
-                Ranges::<u64>::new(expected)
+                Ranges::<u64>::new(expected, None)
             );
 
             intervals.complement();
@@ -732,11 +759,11 @@ mod tests {
             let input_cloned = input.clone();
             
             let mut intervals = Intervals::Nested(
-                Ranges::<u64>::new(input)
+                Ranges::<u64>::new(input, None)
             );
 
             let start_intervals = Intervals::Nested(
-                Ranges::<u64>::new(input_cloned)
+                Ranges::<u64>::new(input_cloned, None)
             );
 
             intervals.complement();
@@ -761,22 +788,22 @@ mod tests {
     #[test]
     fn test_depth() {
         let i1 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)])
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)], None)
         );
         assert_eq!(i1.depth(), 0);
 
         let i2 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)])
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None)
         );
         assert_eq!(i2.depth(), 2);
 
         let i3 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)])
+            Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)], None)
         );
         assert_eq!(i3.depth(), 3);
 
         let i4 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..12*4.pow(29)])
+            Ranges::<u64>::new(vec![0..12*4.pow(29)], None)
         );
         assert_eq!(i4.depth(), 0);
     }
@@ -784,31 +811,31 @@ mod tests {
     #[test]
     fn test_degrade() {
         let mut i1 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)])
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)], None)
         );
         i1.degrade(0);
         assert_eq!(i1.depth(), 0);
 
         let mut i2 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)])
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None)
         );
         i2.degrade(1);
         assert_eq!(i2.depth(), 1);
 
         let mut i3 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)])
+            Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)], None)
         );
         i3.degrade(1);
         assert_eq!(i3.depth(), 1);
 
         let mut i4 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..12*4.pow(29)])
+            Ranges::<u64>::new(vec![0..12*4.pow(29)], None)
         );
         i4.degrade(0);
         assert_eq!(i4.depth(), 0);
 
         let mut i5 = Intervals::Nested(
-            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)])
+            Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None)
         );
         i5.degrade(5);
         assert_eq!(i5.depth(), 2);

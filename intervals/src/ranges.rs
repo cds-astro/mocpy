@@ -1,4 +1,5 @@
 
+use std::collections::VecDeque;
 use std::mem;
 use std::cmp;
 use std::ops::Range;
@@ -6,19 +7,19 @@ use std::slice::Iter;
 
 use rayon::prelude::*;
 
-use num::{Integer, PrimInt, Zero};
+use num::{One, Integer, PrimInt, Zero};
 use crate::bounded::Bounded;
 
 #[derive(Debug)]
 pub struct Ranges<T>(pub Vec<Range<T>>) where T: Integer;
 
 impl<T> Ranges<T>
-where T: Integer + PrimInt + Bounded<T> + Send {
-    pub fn new(mut data: Vec<Range<T>>) -> Ranges<T> {
-        (&mut data).par_sort_by(|left, right| left.start.cmp(&right.start));
+where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug + Send {
+    pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>) -> Ranges<T> {
+        (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
 
-        let ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter()).collect();
-        Ranges(ranges)
+	let merged_ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter(), min_depth).collect();
+	Ranges(merged_ranges)
     }
 
     pub fn to_flat_vec(self) -> Vec<T> {
@@ -209,59 +210,107 @@ pub struct MergeOverlappingRangesIter<'a, T>
 where T: Integer + Clone + Copy {
     last: Option<Range<T>>,
     ranges: Iter<'a, Range<T>>,
+    split_ranges: VecDeque<Range<T>>,
+    min_depth: Option<i8>,
 }
 
 impl<'a, T> MergeOverlappingRangesIter<'a, T> 
-where T: Integer + Clone + Copy {
-    fn new(mut ranges: Iter<'a, Range<T>>) -> MergeOverlappingRangesIter<'a, T> {
+where T: std::fmt::Debug + Integer + PrimInt + Clone + Copy {
+    fn new(mut ranges: Iter<'a, Range<T>>, min_depth: Option<i8>) -> MergeOverlappingRangesIter<'a, T> {
         let last = ranges.next().cloned();
-        MergeOverlappingRangesIter {
+        let split_ranges = VecDeque::<Range<T>>::new();
+	    MergeOverlappingRangesIter {
             last,
             ranges,
+	        split_ranges,
+	        min_depth,
         }
     }
+
+    fn split_range(&self, range: Range<T>) -> VecDeque<Range<T>> {
+    	let mut ranges = VecDeque::<Range<T>>::new();
+	    match self.min_depth {
+            None => { ranges.push_back(range); },
+            Some(ref val) => {
+                let shift = 2 * (29 - val) as u32;
+
+                let mut mask: T = One::one();
+                mask = mask.unsigned_shl(shift) - One::one();
+
+                if range.end - range.start < mask {
+                    ranges.push_back(range);
+                } else {
+                    let offset = range.start & mask;
+                    let mut s = range.start;
+                    if offset > Zero::zero() {
+                    s = (range.start - offset) + mask + One::one();
+                        ranges.push_back(range.start..s);
+                    }
+
+                    while s + mask + One::one() < range.end {
+                        let next = s + mask + One::one();
+                        ranges.push_back(s..next);
+                        s = next;
+                    }
+
+                    ranges.push_back(s..range.end);
+                }
+            }
+	    }
+	    ranges
+    }
+
+    
+    /*fn merge(ranges: &mut [Range<T>], idx: usize) {
+        if ranges.len() > 1 {
+            let m_index = (v.len() >> 1) as usize;
+            let mut (l_ranges, r_ranges) = v.split_at_mut(m_index);
+            rayon::join(|| merge(l_ranges),
+                        || merge(r_ranges));
+
+            // Ranges are supposed to be sorted here
+            let l_index = (l_ranges.len() - 1) as usize;
+            let r_index = 0 as usize;
+
+            if l_ranges[l_index].end > r_ranges[r_index].start {
+                r_ranges[r_index].start = l_ranges[l_index].start;
+
+                ranges.swap();
+            }
+        }
+    }*/
 }
 
+
+
 impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T> 
-where T: Integer + Clone + Copy {
+where T: Integer + PrimInt + Clone + Copy + std::fmt::Debug {
     type Item = Range<T>;
-/*
-            if min_depth is not None:
-                shift = 2 * (29 - min_depth)
-                mask = (int(1) << shift) - 1
 
-                if stop - start < mask:
-                    ret.append((start, stop))
-                else:
-                    ofs = start & mask
-                    st = start
-                    if ofs > 0:
-                        st = (start - ofs) + (mask + 1)
-                        ret.append((start, st))
-
-                    while st + mask + 1 < stop:
-                        ret.append((st, st + mask + 1))
-                        st = st + mask + 1
-
-                    ret.append((st, stop))
-            else:
-                ret.append((start, stop))
-*/
     fn next(&mut self) -> Option<Self::Item> {
+        if !self.split_ranges.is_empty() {
+            return self.split_ranges.pop_front();
+        } 
+
         while let Some(curr) = self.ranges.next() {
             let prev = self.last.as_mut().unwrap();
             if curr.start <= prev.end {
                 prev.end = cmp::max(curr.end, prev.end);
             } else {
-                let next = self.last.clone();
+		let range = self.last.clone();
                 self.last = Some(curr.clone());
-                return next
+
+                self.split_ranges = self.split_range(range.unwrap());
+                return self.split_ranges.pop_front();
             }
         }
+
         if self.last.is_some() {
-            let next = self.last.clone();
+            let range = self.last.clone();
             self.last = None;
-            next
+
+            self.split_ranges = self.split_range(range.unwrap());
+            return self.split_ranges.pop_front();
         } else {
             None
         }

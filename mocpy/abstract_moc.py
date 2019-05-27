@@ -584,4 +584,5 @@ class AbstractMOC:
         return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def refine_to_order(self, min_depth):
-        return self.__class__(IntervalSet(self._interval_set._intervals, min_depth=min_depth, make_consistent=False))
+        intervals = core.refine_to_order(self._interval_set._intervals, min_depth)
+        return self.__class__(IntervalSet(intervals, make_consistent=False))
