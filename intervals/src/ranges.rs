@@ -18,8 +18,8 @@ where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug + Send {
     pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>) -> Ranges<T> {
         (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
 
-	let merged_ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter(), min_depth).collect();
-	Ranges(merged_ranges)
+        let merged_ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter(), min_depth).collect();
+        Ranges(merged_ranges)
     }
 
     pub fn to_flat_vec(self) -> Vec<T> {
@@ -260,7 +260,6 @@ where T: std::fmt::Debug + Integer + PrimInt + Clone + Copy {
 	    ranges
     }
 
-    
     /*fn merge(ranges: &mut [Range<T>], idx: usize) {
         if ranges.len() > 1 {
             let m_index = (v.len() >> 1) as usize;
@@ -297,7 +296,7 @@ where T: Integer + PrimInt + Clone + Copy + std::fmt::Debug {
             if curr.start <= prev.end {
                 prev.end = cmp::max(curr.end, prev.end);
             } else {
-		let range = self.last.clone();
+		        let range = self.last.clone();
                 self.last = Some(curr.clone());
 
                 self.split_ranges = self.split_range(range.unwrap());
