@@ -408,7 +408,9 @@ class TimeMOC(AbstractMOC):
         import matplotlib.pyplot as plt
 
         if self._interval_set.empty():
-            print('Nothing to print. This TimeMoc object is empty.')
+            import warnings
+            warnings.simplefilter('default')
+            warnings.warn('This time moc is empty', UserWarning)
             return
 
         plot_order = 15
