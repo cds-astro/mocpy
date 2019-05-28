@@ -1,5 +1,6 @@
 import pytest
 import copy
+import os
 
 import numpy as np
 
@@ -11,12 +12,7 @@ from astropy_healpix import HEALPix
 
 from ..moc import MOC, WCS
 
-# WARN PY2: turn off tkinter for python2 testing
-# with travis
-import sys
-if sys.version_info.major == 2:
-    import matplotlib
-    matplotlib.use('Agg')
+import matplotlib
 
 
 #### TESTING MOC creation ####
@@ -173,6 +169,11 @@ def test_mpl_fill():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
 
+    # WARN PY2: turn off tkinter for python2 testing
+    # with travis
+    if os.environ.get('DISPLAY','') == '':
+        matplotlib.use('Agg')
+
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
     with WCS(fig,
@@ -188,6 +189,11 @@ def test_mpl_fill():
 def test_mpl_border():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
+
+    # WARN PY2: turn off tkinter for python2 testing
+    # with travis
+    if os.environ.get('DISPLAY','') == '':
+        matplotlib.use('Agg')
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
@@ -227,7 +233,7 @@ def test_moc_contains():
     assert should_be_inside_arr.all()
 
 
-# IMPROVE THE ALGO
+# TODO: IMPROVE THE ALGO
 '''
 def test_boundaries():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
