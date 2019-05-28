@@ -219,10 +219,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let shift = ((<u64>::MAXDEPTH - depth) << 1) as u64;
 
             for p in pixels.into_iter() {
-                let pixel = p.downcast_ref::<PyInt>()
-                    .map_err(|_| {
-                        exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR)
-                    })?
+                let pixel = p
                     .to_object(py)
                     .extract::<u64>(py)
                     .map_err(|_| {
