@@ -21,7 +21,11 @@ install:
   # Install the dependencies for running the test and building the docs
   - pip install -r requirements/contributing.txt
   - pip install setuptools setuptools_rust
-  - pip install -U pytest-cov pytest
+  # PY2 WARN: Update pytest cov for python2 testing on travis
+  - |
+    if [ "$TRAVIS_PYTHON_VERSION" = "2.7" ]; then
+      pip install -U pytest-cov
+    fi
 
 script:
   # Generate the dynamic library from the cdshealpix Rust crate.
@@ -33,7 +37,7 @@ script:
   # Test notebooks
   - pip install .
   # Install other dependencies for running the notebooks
-  - pip install jupyter astroquery
+  - pip install -U jupyter astroquery
   - python test_notebooks.py
   # Test docs build:
   - cd docs
