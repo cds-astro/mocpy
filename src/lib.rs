@@ -14,7 +14,7 @@ use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::exceptions;
-use pyo3::types::{PyDict, PyString, PyInt, PyList};
+use pyo3::types::{PyDict, PyString, PyList};
 use pyo3::ToPyObject;
 use num::{Integer, PrimInt};
 
@@ -304,6 +304,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         let intervals = intervals.to_uniq();
+
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
     }

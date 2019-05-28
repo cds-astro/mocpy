@@ -37,8 +37,12 @@ script:
   # Test notebooks
   - pip install .
   # Install other dependencies for running the notebooks
-  - pip install -U jupyter astroquery
-  - python test_notebooks.py
+  # PY2 WARN: Running the notebooks only for PY3 jobs
+  - |
+    if [ "$TRAVIS_PYTHON_VERSION" != "2.7" ]; then
+      pip install jupyter astroquery
+      python test_notebooks.py
+    fi
   # Test docs build:
   - cd docs
   - make html
