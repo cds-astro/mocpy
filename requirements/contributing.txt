@@ -11,10 +11,10 @@ networkx
 spherical_geometry
 lark-parser
 
-# Package for basic testing purposes
-pytest
 # Pytest extension package enabling test coverage
 pytest-cov
+# Package for basic testing purposes
+pytest
 
 # Packages for updating the docs
 sphinx

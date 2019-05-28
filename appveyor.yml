@@ -46,7 +46,7 @@ build_script:
   - "%PYTHON%\\python.exe -m pip install setuptools setuptools_rust"
   - "%PYTHON%\\python.exe setup.py build_rust"
   # Copy the generated library to the python files location
-  - xcopy "build\lib\cdshealpix\*.pyd" cdshealpix /sy
+  - xcopy "build\lib\mocpy\*.pyd" mocpy /sy
 
 test_script:
   - "%PYTHON%\\python.exe -m pytest -v mocpy --cov-report=term --cov=mocpy"
