@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
+import sys
+
 from setuptools import setup, find_packages
-from setuptools_rust import Binding, RustExtension
+from setuptools_rust import RustExtension
+
+PYTHON_MAJOR_VERSION = sys.version_info[0]
 
 exec(open('mocpy/version.py').read())
 
@@ -40,9 +44,9 @@ setup(name='MOCPy',
         # and the dependencies of the crate (in our case the rust wrapper depends on the cdshealpix
         # crate). 
         'Cargo.toml',
-        # The binding with the Rust cdshealpix API is manually done using CFFI.
-        # Some rust tools such as the pyo3 can also do rust<->python bindings.
-        binding=Binding.NoBinding,
+        # Specify python version to setuptools_rust
+        rustc_flags=['--cfg=Py_{}'.format(PYTHON_MAJOR_VERSION)],
+        features=['numpy/python{}'.format(PYTHON_MAJOR_VERSION)],
         # Add the --release option when building the rust code
         debug=False)],
     classifiers=[
@@ -51,4 +55,6 @@ setup(name='MOCPy',
         'License :: OSI Approved :: BSD License',
         'Topic :: Scientific/Engineering :: Astronomy',
     ],
+    # rust extensions are not zip safe, just like C-extensions.
+    zip_safe=False,
 )
