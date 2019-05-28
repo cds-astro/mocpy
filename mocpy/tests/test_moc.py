@@ -1,6 +1,6 @@
 import pytest
 import copy
-import os
+import sys
 
 import numpy as np
 
@@ -11,8 +11,6 @@ from astropy.io import fits
 from astropy_healpix import HEALPix
 
 from ..moc import MOC, WCS
-
-import matplotlib
 
 
 #### TESTING MOC creation ####
@@ -165,14 +163,14 @@ def test_serialize_to_str(moc, expected):
 
 
 #### TESTING MOC plot functions ####
+# WARN PY2: turn off tkinter for python2 testing
+# with travis
+@pytest.mark.skipif(sys.version_info.major == 2,
+    reason='TclError: no display name and no $DISPLAY environment variable'
+           'in python2 environments')
 def test_mpl_fill():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
-
-    # WARN PY2: turn off tkinter for python2 testing
-    # with travis
-    if os.environ.get('DISPLAY','') == '':
-        matplotlib.use('Agg')
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
@@ -185,15 +183,14 @@ def test_mpl_fill():
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
-
+# WARN PY2: turn off tkinter for python2 testing
+# with travis
+@pytest.mark.skipif(sys.version_info.major == 2,
+    reason='TclError: no display name and no $DISPLAY environment variable'
+           'in python2 environments')
 def test_mpl_border():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
-
-    # WARN PY2: turn off tkinter for python2 testing
-    # with travis
-    if os.environ.get('DISPLAY','') == '':
-        matplotlib.use('Agg')
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
