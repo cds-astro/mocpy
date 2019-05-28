@@ -34,7 +34,7 @@ install:
   - rustc -vV
   - cargo -vV
   # Set the path so that the good python version is chosen
-  - pip install cibuildwheel==0.10.0 setuptools_rust
+  - pip install cibuildwheel==0.10.0
   - set PATH=%PYTHON%;%PATH%
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
@@ -42,9 +42,8 @@ build_script:
   # Install python dependencies for compiling
   # the dynamic library and run the tests
   - "%PYTHON%\\python.exe -m pip install -r requirements/contributing.txt"
-  # Update setuptools so that `python setup.py build_rust` can parse the requirements.txt file
-  - "%PYTHON%\\python.exe -m pip install -U setuptools"
   # Compile the dynamic library (.pyd on Windows env)
+  - pip install setuptools setuptools_rust
   - "%PYTHON%\\python.exe setup.py build_rust"
   # Copy the generated library to the python files location
   - xcopy "build\lib\cdshealpix\*.pyd" cdshealpix /sy

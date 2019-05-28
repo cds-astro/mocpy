@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 from ..py23_compat import urlencode, int, BytesIO
-import requests
 import tempfile
 import os
 import numpy as np
@@ -688,6 +687,7 @@ class MOC(AbstractMOC):
         for sources in the coverage of the MOC instance
         """
         from astropy.io.votable import parse_single_table
+        import requests
 
         if max_rows is not None and max_rows >= 0:
             max_rows_str = str(max_rows)

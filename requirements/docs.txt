@@ -1,4 +1,3 @@
-requests
 astropy
 astropy_healpix
 cdshealpix

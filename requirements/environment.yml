@@ -3,14 +3,9 @@ channels:
 - conda-forge
 
 dependencies:
-- requests
 - astropy
 - astropy-healpix
 - matplotlib
-- astroquery
-- jupyter
-- nbconvert
-- nbformat
 - pytest
 - pytest-cov
 - sphinx
