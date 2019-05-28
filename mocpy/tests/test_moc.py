@@ -11,6 +11,13 @@ from astropy_healpix import HEALPix
 
 from ..moc import MOC, WCS
 
+# WARN PY2: turn off tkinter for python2 testing
+# with travis
+import sys
+if sys.version_info.major == 2:
+    import matplotlib
+    matplotlib.use('Agg')
+
 
 #### TESTING MOC creation ####
 def get_random_skycoords(size):

@@ -5,7 +5,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools_rust import RustExtension
 
-PYTHON_MAJOR_VERSION = sys.version_info[0]
+PYTHON_MAJOR_VERSION = sys.version_info.major
 
 exec(open('mocpy/version.py').read())
 
