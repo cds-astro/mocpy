@@ -14,7 +14,7 @@ use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::exceptions;
-use pyo3::types::{PyDict, PyString, PyLong, PyList};
+use pyo3::types::{PyDict, PyString, PyInt, PyList};
 use pyo3::ToPyObject;
 use num::{Integer, PrimInt};
 
@@ -196,7 +196,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_json_py(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
         const TYPE_KEY_MSG_ERR: &'static str = "The key must be a python str that \n \
         encodes an integer on 1 byte. Ex: {'5': [0, 6, 7, ..., 9]}";
-        const TYPE_VALUES_MSG_ERR: &'static str = "The values must be list of unsigned \n \
+        const TYPE_VALUES_MSG_ERR: &'static str = "The values must be a list of unsigned \n \
         integer on 64 bits (8 bytes). Ex: {'5': [0, 6, 7, ..., 9]}";
         const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &'static str = "Cannot extract 64bits unsigned integer from the python list!";
 
@@ -219,7 +219,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let shift = ((<u64>::MAXDEPTH - depth) << 1) as u64;
 
             for p in pixels.into_iter() {
-                let pixel = p.downcast_ref::<PyLong>()
+                let pixel = p.downcast_ref::<PyInt>()
                     .map_err(|_| {
                         exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR)
                     })?

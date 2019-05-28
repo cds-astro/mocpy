@@ -107,7 +107,7 @@ def test_moc_serialize_and_from_json(moc_from_json):
 
 
 @pytest.mark.parametrize("expected, moc_str", [
-    (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
+    (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[5], '7':[], '8':[45]}),
     '5/8-10,42-46,54,8 6/4500 8/45'),
     (MOC.from_json({}), '0/'),
     (MOC.from_json({'29': [101]}), '29/101'),
