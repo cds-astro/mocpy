@@ -2,15 +2,6 @@
 # for people wishing to contribute to MOCPy.
 # See https://mocpy.readthedocs.io/en/latest/contribute.html for more details.
 
-# Mandatory packages for MOCPy to work 
-astropy
-astropy_healpix
-cdshealpix
-matplotlib
-networkx
-spherical_geometry
-lark-parser
-
 # Pytest extension package enabling test coverage
 pytest-cov
 # Package for basic testing purposes
@@ -19,3 +10,12 @@ pytest
 # Packages for updating the docs
 sphinx
 numpydoc
+
+# Mandatory packages for MOCPy to work 
+astropy
+astropy_healpix
+cdshealpix
+matplotlib
+networkx
+spherical_geometry
+lark-parser

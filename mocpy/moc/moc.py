@@ -730,6 +730,12 @@ class MOC(AbstractMOC):
         frame : `astropy.coordinates.BaseCoordinateFrame`, optional
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
+        import warnings
+        warnings.simplefilter('default')
+        warnings.warn('This method is deprecated and is no longer tested.'
+                      'Please refer to this documentation page for plotting MOCs using'
+                      'matplotlib: https://mocpy.readthedocs.io/en/latest/examples/examples.html#loading-and-plotting-the-moc-of-sdss', DeprecationWarning)
+
         frame = ICRS() if frame is None else frame
 
         from matplotlib.colors import LinearSegmentedColormap

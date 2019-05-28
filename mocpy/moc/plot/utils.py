@@ -34,12 +34,12 @@ def build_plotting_moc(moc, wcs):
     X, Y = np.meshgrid(x_px, y_px)
 
     X_px = np.append(X[0, :-1], X[:-1, -1])
-    X_px = np.append(X_px, np.flip(X[-1, 1:]))
+    X_px = np.append(X_px, X[-1, 1:][::-1])
     X_px = np.append(X_px, X[:-1, 0])
 
     Y_px = np.append(Y[0, :-1], Y[:-1, -1])
     Y_px = np.append(Y_px, Y[-1, :-1])
-    Y_px = np.append(Y_px, np.flip(Y[1:, 0]))
+    Y_px = np.append(Y_px, Y[1:, 0][::-1])
 
     # Disable the output of warnings when encoutering NaNs.
     warnings.filterwarnings("ignore")
