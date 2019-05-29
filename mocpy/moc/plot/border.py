@@ -17,7 +17,7 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
 
     max_order = moc_to_plot.max_order
     hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
-    ipixels_open = moc_to_plot._best_res_pixels()
+    ipixels_open = core.flatten_pixels(moc_to_plot._interval_set._intervals, moc_to_plot.max_order)
     
     # Take the complement if the MOC covers more than half of the sky
     num_ipixels = 3 << (2*(max_order + 1))

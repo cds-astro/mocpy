@@ -88,7 +88,6 @@ def moc_from_fits_image():
         moc = MOC.from_image(header=hdulist[0].header,
                              max_norder=7,
                              mask=hdulist[0].data)
-
     return moc
 
 

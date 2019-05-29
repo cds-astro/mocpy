@@ -126,6 +126,14 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input1 = input1.as_array().to_owned();
         let input2 = input2.as_array().to_owned();
 
+        // Deal with the bound cases when
+        // one of the two intervals are empty
+        if input1.is_empty() {
+            return input2.into_pyarray(py).to_owned();
+        } else if input2.is_empty() {
+            return input1.into_pyarray(py).to_owned();
+        }
+
         let mut i1 = unsafe {
             array2d_to_intervals(input1, true, None)
         };
@@ -144,6 +152,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let input1 = input1.as_array().to_owned();
         let input2 = input2.as_array().to_owned();
 
+        if input1.is_empty() || input2.is_empty() {
+            return input1.into_pyarray(py).to_owned();
+        }
+
         let mut i1 = unsafe {
             array2d_to_intervals(input1, true, None)
         };
@@ -161,6 +173,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn intersection_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let input1 = input1.as_array().to_owned();
         let input2 = input2.as_array().to_owned();
+
+        if input1.is_empty() {
+            return input1.into_pyarray(py).to_owned();
+        } else if input2.is_empty() {
+            return input2.into_pyarray(py).to_owned();
+        }
 
         let mut i1 = unsafe {
             array2d_to_intervals(input1, true, None)
@@ -181,16 +199,23 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .as_array()
             .to_owned();
 
-        let mut intervals = unsafe {
-            array2d_to_intervals(input, true, None)
+        let mut intervals = if input.is_empty() {
+            Intervals::Nested(Ranges::<u64>::new(vec![], None))
+        } else {
+            unsafe {
+                array2d_to_intervals(input, true, None)
+            }
         };
         intervals.complement();
 
-        let result = intervals_to_2darray(intervals);
+        let result = if !intervals.is_empty() {
+            intervals_to_2darray(intervals)
+        } else {
+            Array::zeros((1, 0))
+        };
+
         result.into_pyarray(py).to_owned()
     }
-    
-    
 
     #[pyfn(m, "from_json")]
     fn from_json_py(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
@@ -253,12 +278,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         result.into_pyarray(py).to_owned()
     }
 
-    #[pyfn(m, "refine_to_order")]
-    fn refine_to_order_py(py: Python, input: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
+    #[pyfn(m, "merge_nested_intervals")]
+    fn merge_nested_intervals_py(py: Python, input: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
         let input = input.as_array().to_owned();
 
         let intervals = unsafe {
-            array2d_to_intervals(input, true, Some(min_depth))
+            if min_depth == -1 {
+                array2d_to_intervals(input, true, None)
+            } else {
+                array2d_to_intervals(input, true, Some(min_depth))
+            }
         };
 
         let result = intervals_to_2darray(intervals);
@@ -271,7 +300,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let intervals = unsafe {
             array2d_to_intervals(input, true, None)
         };
-        
+
         let depth = intervals.depth();
         Ok(depth)
     }
@@ -296,7 +325,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     #[pyfn(m, "to_uniq")]
-    fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
         let input = nested.as_array().to_owned();
 
         let intervals = unsafe {
@@ -304,6 +333,66 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         let intervals = intervals.to_uniq();
+
+        let result = if let Intervals::Uniq(ranges) = intervals {
+            let mut data = Vec::<u64>::new();
+            for r in ranges.iter() {
+                for u in r.start..r.end {
+                    data.push(u);
+                }
+            }
+            // Get a Array1 from the Vec<u64> without copying any data
+            let result = Array1::from_vec(data);
+            result.to_owned()
+        } else {
+            unreachable!();
+        };
+
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "flatten_pixels")]
+    fn flatten_pixels_py(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
+        let input = nested.as_array().to_owned();
+        let factor = 1 << (2 * (<u64>::MAXDEPTH - depth)) as u64;
+
+        let flattened_intervals = &input / &Array::from_elem(input.shape(), factor);
+
+        let mut flattened_pixels = Vec::<u64>::new();
+        for interval in flattened_intervals.axis_iter(Axis(0)) {
+            for pix in interval[0]..interval[1] {
+                flattened_pixels.push(pix);
+            }
+        }
+        let result = Array1::from_vec(flattened_pixels).to_owned();
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "from_healpix_cells")]
+    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> Py<PyArray2<u64>> {
+        let mut pixels = pixels.as_array().to_owned();
+        let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
+        
+        let depth = depth.as_array().to_owned();
+
+        Zip::from(&mut pixels)
+            .and(&mut pixels_1)
+            .and(&depth)
+            .par_apply(|pix, pix1, &d| {
+                let factor = 2 * (<u64>::MAXDEPTH - d);
+                *pix <<= factor;
+                *pix1 <<= factor;
+            });
+
+        let shape = (pixels.shape()[0], 1);
+        let pixels = pixels.into_shape(shape).unwrap();
+        let pixels_1 = pixels_1.into_shape(shape).unwrap();
+
+        let mut pixel_ranges = stack![Axis(1), pixels, pixels_1].to_owned();
+
+        let intervals = unsafe {
+            array2d_to_intervals(pixel_ranges, true, None)
+        };
 
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()

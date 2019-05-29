@@ -45,12 +45,13 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times_arr = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-        intervals_arr = np.vstack((times_arr, times_arr + np.uint64(1))).T
+        times = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        times = times.reshape((times.shape[0], 1))
+        intervals = np.hstack((times, times + np.uint64(1)))
 
-        # degrade the TimeMoc to the order computer from ``delta_t``
-        order = TimeMOC.time_resolution_to_order(delta_t)
-        return TimeMOC(IntervalSet(intervals_arr)).degrade_to_order(order)
+        # degrade the TimeMoc to the order computed from ``delta_t``
+        depth = TimeMOC.time_resolution_to_order(delta_t)
+        return TimeMOC(IntervalSet(intervals)).degrade_to_order(depth)
 
     @classmethod
     def from_time_ranges(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -72,14 +73,17 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        min_times_arr = np.asarray(min_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-        max_times_arr = np.asarray(max_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        min_times = np.asarray(min_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        max_times = np.asarray(max_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
 
-        intervals_arr = np.vstack((min_times_arr, max_times_arr + 1)).T
+        min_times = min_times.reshape((min_times.shape[0], 1))
+        max_times = max_times.reshape((max_times.shape[0], 1))
 
-        # degrade the TimeMoc to the order computer from ``delta_t``
-        order = TimeMOC.time_resolution_to_order(delta_t)
-        return TimeMOC(IntervalSet(intervals_arr)).degrade_to_order(order)
+        intervals = np.hstack((min_times, max_times + 1))
+
+        # degrade the TimeMoc to the order computed from ``delta_t``
+        depth = TimeMOC.time_resolution_to_order(delta_t)
+        return TimeMOC(IntervalSet(intervals)).degrade_to_order(depth)
 
     def add_neighbours(self):
         """
@@ -88,11 +92,11 @@ class TimeMOC(AbstractMOC):
         """
         time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
-        intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, np.uint64(0))
-        intervals_arr[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, np.uint64((1 << 58) - 1))
+        intervals = self._interval_set._intervals
+        intervals[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, np.uint64(0))
+        intervals[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, np.uint64((1 << 58) - 1))
 
-        self._interval_set = IntervalSet(intervals_arr)
+        self._interval_set = IntervalSet(intervals)
 
     def remove_neighbours(self):
         """
@@ -101,24 +105,13 @@ class TimeMOC(AbstractMOC):
         """
         time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
-        intervals_arr = self._interval_set._intervals
-        intervals_arr[:, 0] = np.minimum(intervals_arr[:, 0] + time_delta, np.uint64((1 << 58) - 1))
-        intervals_arr[:, 1] = np.maximum(intervals_arr[:, 1] - time_delta, np.uint64(0))
+        intervals = self._interval_set._intervals
+        intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 1] = np.maximum(intervals[:, 1] - time_delta, np.uint64(0))
 
-        good_intervals = intervals_arr[:, 1] > intervals_arr[:, 0]
+        good_intervals = intervals[:, 1] > intervals[:, 0]
 
-        self._interval_set = IntervalSet(intervals_arr[good_intervals])
-
-    def _get_max_pix(self):
-        """
-        Max time pixel : 4**29 - 1 us
-
-        Returns
-        -------
-            4**29 - 1
-
-        """
-        return np.uint64((1 << 58) - 1)
+        self._interval_set = IntervalSet(intervals[good_intervals])
 
     def _process_degradation(self, another_moc, order_op):
         """

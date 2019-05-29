@@ -167,9 +167,6 @@ class AbstractMOC:
         intervals = core.complement(self._interval_set._intervals)
         return self.__class__(IntervalSet(intervals, make_consistent=False))
 
-    def _get_max_pix(self):
-        pass
-
     @staticmethod
     def _neighbour_pixels(hp, ipix):
         """
@@ -223,7 +220,7 @@ class AbstractMOC:
         uniq :
             the NUNIQ HEALPix pixels iterator
         """
-        intervals_uniq_l = IntervalSet.to_nuniq_interval_set(self._interval_set)._intervals
+        intervals_uniq_l = core.to_uniq(self._interval_set._intervals)
 
         for uniq_interval in intervals_uniq_l:
             for uniq in np.arange(np.int(uniq_interval[0]), np.int(uniq_interval[1]), dtype=np.uint64):
@@ -505,11 +502,12 @@ class AbstractMOC:
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
 
-        uniq_l = []
+        """uniq_l = []
         for uniq in self._uniq_pixels_iterator():
             uniq_l.append(uniq)
-
-        uniq = np.array(uniq_l, dtype=np.uint64)
+        """
+        uniq = core.to_uniq(self._interval_set._intervals)
+        # uniq = np.array(uniq_l, dtype=np.uint64)
 
         if format == 'fits':
             result = self._to_fits(uniq=uniq,
@@ -585,5 +583,5 @@ class AbstractMOC:
         return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def refine_to_order(self, min_depth):
-        intervals = core.refine_to_order(self._interval_set._intervals, min_depth)
+        intervals = core.merge_nested_intervals(self._interval_set._intervals, min_depth)
         return self.__class__(IntervalSet(intervals, make_consistent=False))

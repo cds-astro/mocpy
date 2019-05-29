@@ -12,6 +12,7 @@ from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
 from astropy.coordinates import SkyCoord
 from astropy import wcs
 
+import cdshealpix
 from astropy_healpix import HEALPix
 from astropy_healpix.healpy import nside2npix
 
@@ -104,22 +105,18 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-        depth = self.max_order
-        m = np.zeros(nside2npix(1 << depth), dtype=bool)
+        max_depth = self.max_order
+        m = np.zeros(3 << (2*(max_depth + 1)), dtype=bool)
 
-        pix_id = self._best_res_pixels()
+        pix_id = core.flatten_pixels(self._interval_set._intervals, max_depth)
         m[pix_id] = True
 
         if not keep_inside:
             m = np.logical_not(m)
 
-        hp = HEALPix(nside=(1 << depth), order='nested')
-        pix = hp.lonlat_to_healpix(ra, dec)
+        pix = cdshealpix.lonlat_to_healpix(ra, dec, max_depth)
 
         return m[pix]
-
-    def _get_max_pix(self):
-        return 3*(2**60)
 
     def add_neighbours(self):
         """
@@ -132,28 +129,24 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self extended by one degree of neighbours.
         """
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
+        max_depth = self.max_order
 
         # Get the pixels array of the MOC at the its max order.
-        ipix = self._best_res_pixels()
+        ipix = core.flatten_pixels(self._interval_set._intervals, max_depth)
         # Get the HEALPix array containing the neighbors of ``ipix``.
-        # This array "extends" ``ipix`` by one degree of neighbors. 
-        ipix = ipix.astype(np.int)
-        extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
-        ipix = ipix.astype(np.uint64)
-
-        extend_ipix = extend_ipix.astype(np.uint64)
+        # This array "extends" ``ipix`` by one degree of neighbors.
+        ipix_extended = cdshealpix.neighbours(ipix, max_depth)
+        ipix_extended = ipix_extended[ipix_extended >= 0]
+        ipix_extended = ipix_extended.astype(np.uint64)
 
         # Compute the difference between ``extend_ipix`` and ``ipix`` to get only the neighboring pixels
         # located at the border of the MOC.
-        neigh_ipix = np.setdiff1d(extend_ipix, ipix)
+        ipix_neighbors = np.setdiff1d(ipix_extended, ipix)
 
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        neigh_itv = np.vstack((neigh_ipix << shift, (neigh_ipix + np.uint64(1)) << shift)).T
-        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC at its max order.
-        self._interval_set = self._interval_set.union(IntervalSet(neigh_itv))
-        # TODO: do these last lines in rust
-        self._interval_set._intervals = self._interval_set._intervals.astype(np.uint64)
+        depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.int8)
+        intervals_neighbors = core.from_healpix_cells(ipix_neighbors, depth_neighbors)
+        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC 
+        self._interval_set._intervals = core.union(self._interval_set._intervals, intervals_neighbors)
         return self
 
     def remove_neighbours(self):
@@ -167,30 +160,28 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self minus its HEALPix cells located at its border.
         """
-        hp = HEALPix(nside=(1 << self.max_order), order='nested')
-
+        max_depth = self.max_order
         # Get the HEALPix cells of the MOC at its max depth
-        ipix = self._best_res_pixels()
-
-        # Extend it to include the max depth neighbor cells.
-        ipix = ipix.astype(np.int)
-        extend_ipix = AbstractMOC._neighbour_pixels(hp, ipix)
-        ipix = ipix.astype(np.uint64)
-        extend_ipix = extend_ipix.astype(np.uint64)
+        ipix = core.flatten_pixels(self._interval_set._intervals, max_depth)
+        # Get the HEALPix array containing the neighbors of ``ipix``.
+        # This array "extends" ``ipix`` by one degree of neighbors.
+        ipix_extended = cdshealpix.neighbours(ipix, max_depth)
+        ipix_extended = ipix_extended[ipix_extended >= 0]
+        ipix_extended = ipix_extended.astype(np.uint64)
         # Get only the max depth HEALPix cells lying at the border of the MOC
-        neigh_ipix = np.setxor1d(extend_ipix, ipix)
+        ipix_neighbors = np.setxor1d(ipix_extended, ipix)
 
         # Remove these pixels from ``ipix``
-        neigh_ipix = neigh_ipix.astype(np.int)
-        border_ipix = AbstractMOC._neighbour_pixels(hp, neigh_ipix)
-        border_ipix = border_ipix.astype(np.uint64)
+        ipix_around_border = cdshealpix.neighbours(ipix_neighbors, max_depth)
+        ipix_around_border = ipix_around_border[ipix_around_border >= 0]
+        ipix_around_border = ipix_around_border.astype(np.uint64)
 
-        reduced_ipix = np.setdiff1d(ipix, border_ipix)
+        final_ipix = np.setdiff1d(ipix, ipix_around_border)
+        final_depth = np.full(shape=final_ipix.shape, fill_value=max_depth, dtype=np.int8)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - self.max_order)
-        reduced_itv = np.vstack((reduced_ipix << shift, (reduced_ipix + np.uint64(1)) << shift)).T
-        self._interval_set = IntervalSet(reduced_itv)
+        intervals = core.from_healpix_cells(final_ipix, final_depth)
+        self._interval_set = IntervalSet(intervals, make_consistent=False)
         return self
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
@@ -368,25 +359,11 @@ class MOC(AbstractMOC):
 
         frame = wcs.utils.wcs_to_celestial_frame(w)
         world_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit="deg", frame=frame).icrs
+
         lon = world_crd.ra
         lat = world_crd.dec
         moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=max_norder)
         return moc
-        """hp = HEALPix(nside=(1 << max_norder), order='nested', frame=ICRS())
-        ipix = hp.skycoord_to_healpix(world_pix_crd)
-        ipix = ipix.astype(np.uint64)
-        # remove doubles
-        ipix = np.unique(ipix)
-
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - max_norder)
-        intervals_arr = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
-
-        # This MOC will be consistent when one will do operations on the moc (union, inter, ...) or
-        # simply write it to a fits or json file
-        interval_set = IntervalSet(intervals_arr)
-
-        return cls(interval_set=interval_set)
-        """
 
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
@@ -524,17 +501,6 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        """
-        hp = HEALPix(nside=(1 << max_norder), order='nested')
-        ipix = hp.lonlat_to_healpix(lon, lat)
-        ipix = ipix.astype(np.uint64)
-
-        shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(max_norder))
-        intervals = np.vstack((ipix << shift, (ipix + np.uint64(1)) << shift)).T
-
-        interval_set = IntervalSet(intervals)
-        return cls(interval_set)
-        """
         intervals = core.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         return cls(IntervalSet(intervals, make_consistent=False))
 
@@ -643,28 +609,26 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The MOC
         """
+        # TODO: Code it in rust
         if ipix.shape != depth.shape:
             raise IndexError('ipix and depth arrays must have the same shape')
 
         if fully_covered is not None and ipix.shape != fully_covered.shape:
             raise IndexError('ipix and fully_covered arrays must have the same shape')
 
-        shift = (AbstractMOC.HPY_MAX_NORDER - np.uint8(depth)) << np.uint8(1)
+        intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
 
-        p1 = ipix
-        p2 = ipix + np.uint64(1)
-
-        intervals = np.vstack((p1 << shift, p2 << shift)).T
-        return cls(IntervalSet(intervals))
+        return cls(IntervalSet(intervals, make_consistent=False))
 
     @property
     def sky_fraction(self):
         """
         Sky fraction covered by the MOC
         """
-        pix_id = self._best_res_pixels()
-        nb_pix_filled = pix_id.size
-        return nb_pix_filled / float(3 << (2*(self.max_order + 1)))
+        max_depth = self.max_order
+        flattened_pixels = core.flatten_pixels(self._interval_set._intervals, max_depth)
+        num_pixels = flattened_pixels.size
+        return num_pixels / float(3 << (2*(max_depth + 1)))
 
     # TODO : move this in astroquery.Simbad.query_region
     def query_simbad(self, max_rows=10000):
@@ -762,7 +726,7 @@ class MOC(AbstractMOC):
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
 
         m = np.zeros(nside2npix(1 << plotted_moc.max_order))
-        pix_id = plotted_moc._best_res_pixels()
+        pix_id = core.flatten_pixels(plotted_moc._interval_set._intervals, plotted_moc.max_order)
 
         # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.
         if isinstance(frame, Galactic):
