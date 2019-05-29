@@ -3,12 +3,11 @@
 language: python
 
 python:
-  # We don't actually use the Travis Python, but this keeps it organized.
-  - "2.7"
   # We only test with the oldest Python 3 version we support
   # Python is very good about backward compatibility,
   # so testing on newer ones is almost never useful.
   - "3.5"
+  - "3.6"
 
 addons:
   apt:
