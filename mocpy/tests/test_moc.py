@@ -200,7 +200,7 @@ def test_mpl_border():
          rotation=Angle(0, u.degree),
          projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        #moc.border(ax=ax, wcs=wcs, color='g')
+        moc.border(ax=ax, wcs=wcs, color='g')
 
 
 #### TESTING MOC features ####

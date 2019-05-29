@@ -8,6 +8,8 @@ from astropy.wcs.utils import skycoord_to_pixel
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
+from ... import core
+
 def border(moc, ax, wcs, **kw_mpl_pathpatch):
     from .utils import build_plotting_moc
     moc_to_plot = build_plotting_moc(moc, wcs)
@@ -16,7 +18,6 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         return
 
     max_order = moc_to_plot.max_order
-    hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
     ipixels_open = core.flatten_pixels(moc_to_plot._interval_set._intervals, moc_to_plot.max_order)
     
     # Take the complement if the MOC covers more than half of the sky
@@ -28,6 +29,7 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         ipixels_open = np.setdiff1d(ipixels_all, ipixels_open, assume_unique=True)
     
     ipixels_open = ipixels_open.astype(int)
+    hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
     neighbors = hp.neighbours(ipixels_open)
     neighbors = neighbors.astype(np.uint64)
     ipixels_open = ipixels_open.astype(np.uint64)
