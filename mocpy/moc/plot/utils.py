@@ -62,6 +62,6 @@ def build_plotting_moc(moc, wcs):
 
     # The moc to plot is the INPUT_MOC & MOC_VIEWPORT. For small FOVs this can reduce
     # a lot the time to draw the MOC along with its borders.
-    moc_plot = moc_plot.intersection(moc_viewport)
+    #moc_plot = moc_plot.intersection(moc_viewport)
     return moc_plot
 

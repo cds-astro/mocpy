@@ -297,16 +297,34 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     
     #[pyfn(m, "depth")]
     fn depth_py(_py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
-        let input = input.as_array().to_owned();
+        let mut input = input.as_array().to_owned();
         if input.is_empty() {
             return Ok(0);
         }
 
-        let intervals = unsafe {
-            array2d_to_intervals(input, true, None)
+        // Get the ranges and compute the depth
+        // directly on them, i.e. without creating
+        // an Intervals object that will necessary
+        // merge the overlapping ranges.
+        let ranges = unsafe {
+            let len = input.shape()[0];
+            let cap = len;
+            let ptr = input.as_mut_ptr() as *mut Range<u64>;
+
+            mem::forget(input);
+
+            Vec::from_raw_parts(ptr, len, cap)
         };
 
-        let depth = intervals.depth();
+        let total = ranges.iter().fold(0, |acc, r| {
+            acc | r.start | r.end
+        });
+
+        let mut depth: i8 = <u64>::MAXDEPTH - (total.trailing_zeros() >> 1) as i8;
+
+        if depth < 0 {
+            depth = 0;
+        }
         Ok(depth)
     }
     

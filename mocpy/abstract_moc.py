@@ -476,10 +476,10 @@ class AbstractMOC:
             result = self._to_fits(uniq=uniq,
                                    optional_kw_dict=optional_kw_dict)
         elif format == 'str':
-            result = self.__class__._to_str(uniq=uniq)
+            result = self._to_str(uniq=uniq)
         else:
             # json format serialization
-            result = self.__class__._to_json(uniq=uniq)
+            result = self._to_json(uniq=uniq)
 
         return result
 
@@ -546,4 +546,6 @@ class AbstractMOC:
 
     def refine_to_order(self, min_depth):
         intervals = core.merge_nested_intervals(self._interval_set._intervals, min_depth)
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return self.__class__(interval_set)
+

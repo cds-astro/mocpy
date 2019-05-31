@@ -24,7 +24,7 @@ class TimeMOC(AbstractMOC):
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
     def __init__(self, interval_set=None):
-        AbstractMOC.__init__(self, interval_set)
+        super(TimeMOC, self).__init__(interval_set)
         self._fits_header_keywords = {'TIMESYS': ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')}
 
     @classmethod
@@ -93,8 +93,8 @@ class TimeMOC(AbstractMOC):
         time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals = self._interval_set._intervals
-        intervals[:, 0] = np.maximum(intervals_arr[:, 0] - time_delta, np.uint64(0))
-        intervals[:, 1] = np.minimum(intervals_arr[:, 1] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 0] = np.maximum(intervals[:, 0] - time_delta, np.uint64(0))
+        intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 58) - 1))
 
         self._interval_set = IntervalSet(intervals)
 
@@ -329,9 +329,9 @@ class TimeMOC(AbstractMOC):
         pix_arr = (times.jd * TimeMOC.DAY_MICRO_SEC)
         pix_arr = pix_arr.astype(np.uint64)
 
-        intervals_arr = rough_tmoc._interval_set._intervals
-        inf_arr = np.vstack([pix_arr[i] >= intervals_arr[:, 0] for i in range(pix_arr.shape[0])])
-        sup_arr = np.vstack([pix_arr[i] <= intervals_arr[:, 1] for i in range(pix_arr.shape[0])])
+        intervals = rough_tmoc._interval_set._intervals
+        inf_arr = np.vstack([pix_arr[i] >= intervals[:, 0] for i in range(pix_arr.shape[0])])
+        sup_arr = np.vstack([pix_arr[i] <= intervals[:, 1] for i in range(pix_arr.shape[0])])
 
         if keep_inside:
             res = inf_arr & sup_arr

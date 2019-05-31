@@ -23,10 +23,5 @@ def test_tmoc_construction():
     time_moc2 = TimeMOC.from_time_ranges(Time(data['t_min'], format="mjd", scale="tdb"),
                                          Time(data['t_max'], format="mjd", scale="tdb"),
                                          delta_t=TimeMOC.order_to_time_resolution(29))
-    """
-    time_moc2 = TimeMoc.from_csv_file(path='resources/TMOC/HST_SDSSg/uniq-times.csv',
-                                      delta_t=TimeMoc.order_to_time_resolution(29),
-                                      format='mjd',
-                                      scale='tdb')
-    """
+
     assert time_moc == time_moc2, 'bad tmoc construction'

@@ -323,6 +323,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         });
 
         let mut depth: i8 = <T>::MAXDEPTH - (total.trailing_zeros() >> 1) as i8;
+
         if depth < 0 {
             depth = 0;
         }
