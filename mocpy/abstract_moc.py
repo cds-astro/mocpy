@@ -191,40 +191,8 @@ class AbstractMOC:
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        """intervals = np.array([])
-        for order, pix_l in json_moc.items():
-            if len(pix_l) == 0:
-                continue
-            pix = np.array(pix_l, dtype=np.uint64)
-            p1 = pix
-            p2 = pix + np.uint64(1)
-            shift = np.uint8(2) * (AbstractMOC.HPY_MAX_NORDER - np.uint8(order))
-
-            itv = np.vstack((p1 << shift, p2 << shift)).T
-            if intervals.size == 0:
-                intervals = itv
-            else:
-                intervals = np.vstack((intervals, itv))
-
-        return cls(IntervalSet(intervals))
-        """
         intervals = core.from_json(json_moc)
         return cls(IntervalSet(intervals, make_consistent=False))
-
-    def _uniq_pixels_iterator(self):
-        """
-        Generator giving the NUNIQ HEALPix pixels of the MOC.
-
-        Returns
-        -------
-        uniq :
-            the NUNIQ HEALPix pixels iterator
-        """
-        intervals_uniq_l = core.to_uniq(self._interval_set._intervals)
-
-        for uniq_interval in intervals_uniq_l:
-            for uniq in np.arange(np.int(uniq_interval[0]), np.int(uniq_interval[1]), dtype=np.uint64):
-                yield uniq
 
     @classmethod
     def from_fits(cls, filename):
@@ -502,12 +470,7 @@ class AbstractMOC:
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
 
-        """uniq_l = []
-        for uniq in self._uniq_pixels_iterator():
-            uniq_l.append(uniq)
-        """
-        uniq = core.to_uniq(self._interval_set._intervals)
-        # uniq = np.array(uniq_l, dtype=np.uint64)
+        uniq = self._interval_set.uniq
 
         if format == 'fits':
             result = self._to_fits(uniq=uniq,
@@ -539,12 +502,27 @@ class AbstractMOC:
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
         serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
+
         if format == 'fits':
             serialization.writeto(path, overwrite=overwrite)
         else:
-            import json
-            with open(path, 'w') as h:
-                h.write(json.dumps(serialization, sort_keys=True, indent=2))
+            import os
+            file_exists = os.path.isfile(path)
+
+            if file_exists and not overwrite:
+                raise OSError('File {} already exists! Set ``overwrite`` to '
+                            'True if you want to replace it.'.format(path))
+
+            if format == 'json':
+                import json
+                with open(path, 'w') as f_out:
+                    f_out.write(
+                        json.dumps(serialization, sort_keys=True, indent=2)
+                    )
+            elif format == 'str':
+                with open(path, 'w') as f_out:
+                    f_out.write(serialization)
+
 
     def degrade_to_order(self, new_order):
         """
@@ -562,22 +540,6 @@ class AbstractMOC:
         -------
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
-        """
-        """shift = 2 * (AbstractMOC.HPY_MAX_NORDER - new_order)
-        ofs = (int(1) << shift) - 1
-        mask = ~ofs
-        adda = np.uint64(0)
-        addb = ofs
-
-        iv_set = []
-
-        for iv in self._interval_set._intervals:
-            a = (iv[0] + adda) & mask
-            b = (iv[1] + addb) & mask
-            if b > a:
-                iv_set.append((a, b))
-
-        return self.__class__(IntervalSet(np.asarray(iv_set)))
         """
         intervals = core.degrade(self._interval_set._intervals, new_order)
         return self.__class__(IntervalSet(intervals, make_consistent=False))

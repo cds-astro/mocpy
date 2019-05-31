@@ -22,8 +22,6 @@ use intervals::intervals::Intervals;
 use intervals::ranges::Ranges;
 use intervals::bounded::Bounded;
 
-//use time::PreciseTime;
-
 use std::ops::Range;
 use std::mem;
 
@@ -60,7 +58,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 *p = e1..e2;
             });
 
-        //let start = PreciseTime::now();
         let intervals = {
             let ptr = pixels.as_mut_ptr() as *mut Range<u64>;
             let cap = len;
@@ -73,8 +70,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
             data.into()
         };
-        //let end = PreciseTime::now();
-        //println!("{} time elapsed", start.to(end));
 
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
@@ -100,7 +95,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             )
         }
     }
-
+    
     fn intervals_to_2darray<T>(intervals: Intervals<T>) -> Array2<T>
     where T : Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug + 'static {
         if let Intervals::Nested(ranges) = intervals {
@@ -192,7 +187,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = intervals_to_2darray(i1);
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "complement")]
     fn complement_py(py: Python, input: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let input = input
@@ -216,7 +211,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "from_json")]
     fn from_json_py(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
         const TYPE_KEY_MSG_ERR: &'static str = "The key must be a python str that \n \
@@ -263,10 +258,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = intervals_to_2darray(intervals);
         Ok(result.into_pyarray(py).to_owned())
     }
-
+    
     #[pyfn(m, "degrade")]
     fn degrade_py(py: Python, input: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
         let input = input.as_array().to_owned();
+        if input.is_empty() {
+            return input.into_pyarray(py).to_owned();
+        }
 
         let mut intervals = unsafe {
             array2d_to_intervals(input, true, None)
@@ -281,6 +279,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "merge_nested_intervals")]
     fn merge_nested_intervals_py(py: Python, input: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
         let input = input.as_array().to_owned();
+        if input.is_empty() {
+            return input.into_pyarray(py).to_owned();
+        }
 
         let intervals = unsafe {
             if min_depth == -1 {
@@ -293,10 +294,14 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = intervals_to_2darray(intervals);
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "depth")]
     fn depth_py(_py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
         let input = input.as_array().to_owned();
+        if input.is_empty() {
+            return Ok(0);
+        }
+
         let intervals = unsafe {
             array2d_to_intervals(input, true, None)
         };
@@ -304,13 +309,17 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let depth = intervals.depth();
         Ok(depth)
     }
-
+    
     #[pyfn(m, "to_nested")]
     fn to_nested_py(py: Python, uniq: &PyArray1<u64>) -> Py<PyArray2<u64>> {
-        let start = uniq.as_array().to_owned();
-        let shape = (start.shape()[0], 1);
+        let uniq = uniq.as_array().to_owned();
+        if uniq.is_empty() {
+            return Array::zeros((1, 0)).into_pyarray(py).to_owned();
+        }
 
-        let start = start.into_shape(shape).unwrap();
+        let shape = (uniq.shape()[0], 1);
+
+        let start = uniq.into_shape(shape).unwrap();
         let end = &start + &Array::ones(shape);
 
         let input = stack![Axis(1), start, end].to_owned();
@@ -327,6 +336,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "to_uniq")]
     fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
         let input = nested.as_array().to_owned();
+
+        if input.is_empty() {
+            return Array::zeros((0,)).into_pyarray(py).to_owned();
+        }
 
         let intervals = unsafe {
             array2d_to_intervals(input, true, None)
@@ -350,7 +363,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "flatten_pixels")]
     fn flatten_pixels_py(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
         let input = nested.as_array().to_owned();
@@ -367,7 +380,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = Array1::from_vec(flattened_pixels).to_owned();
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "from_healpix_cells")]
     fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> Py<PyArray2<u64>> {
         let mut pixels = pixels.as_array().to_owned();
@@ -388,7 +401,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let pixels = pixels.into_shape(shape).unwrap();
         let pixels_1 = pixels_1.into_shape(shape).unwrap();
 
-        let mut pixel_ranges = stack![Axis(1), pixels, pixels_1].to_owned();
+        let pixel_ranges = stack![Axis(1), pixels, pixels_1].to_owned();
 
         let intervals = unsafe {
             array2d_to_intervals(pixel_ranges, true, None)

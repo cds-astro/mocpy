@@ -5,8 +5,12 @@ from ..interval_set import IntervalSet
 
 @pytest.fixture()
 def isets():
-    a = IntervalSet(np.array([[49, 73], [53, 54], [33, 63], [65, 80], [51, 80], [100, 126], [38, 68], [61, 72], [74, 102], [27, 43]], dtype=np.uint64))
-    b = IntervalSet(np.array([[17, 26], [17, 41], [12, 31], [32, 61], [68, 90], [77, 105], [18, 27], [12, 35], [9, 37], [87, 97]], dtype=np.uint64))
+    a = IntervalSet(np.array([[49, 73], [53, 54], [33, 63], [65, 80],
+        [51, 80], [100, 126], [38, 68], [61, 72],
+        [74, 102], [27, 43]], dtype=np.uint64))
+    b = IntervalSet(np.array([[17, 26], [17, 41], [12, 31], [32, 61],
+        [68, 90], [77, 105], [18, 27], [12, 35],
+        [9, 37], [87, 97]], dtype=np.uint64))
     return dict(a=a, b=b)
 
 
@@ -53,34 +57,36 @@ def test_interval_set_complement():
 @pytest.fixture()
 def isets2():
     nested1 = IntervalSet(np.array([[0, 1]], dtype=np.uint64))
-    nuniq1 = IntervalSet(np.array([[4*4**29, 4*4**29 + 1]], dtype=np.uint64))
+    nuniq1 = np.array([4*4**29], dtype=np.uint64)
     nested2 = IntervalSet(np.array([[7, 76]], dtype=np.uint64))
-    nuniq2 = IntervalSet(np.array([[1 + 4*4**27, 4 + 4*4**27],
-                                   [2 + 4*4**28, 4 + 4*4**28],
-                                   [16 + 4*4**28, 19 + 4*4**28],
-                                   [7 + 4*4**29,  8 + 4*4**29]], dtype=np.uint64))
-    return dict(nested1=nested1, nuniq1=nuniq1,
-                nested2=nested2, nuniq2=nuniq2)
+    nuniq2 = np.array([1 + 4*4**27, 2 + 4*4**27, 3 + 4*4**27,
+                      2 + 4*4**28, 3 + 4*4**28,
+                      16 + 4*4**28, 17 + 4*4**28, 18 + 4*4**28,
+                      7 + 4*4**29], dtype=np.uint64)
+    return {
+        'nest1': nested1,
+        'uniq1': nuniq1,
+        'nest2': nested2,
+        'uniq2': nuniq2,
+    }
 
 
-def test_to_nuinq_interval_set(isets2):
-    assert IntervalSet.to_nuniq_interval_set(isets2['nested1']) == isets2['nuniq1']
-    assert IntervalSet.to_nuniq_interval_set(isets2['nested2']) == isets2['nuniq2']
+def test_to_uniq(isets2):
+    assert (isets2['nest1'].uniq == isets2['uniq1']).all()
+    assert (isets2['nest2'].uniq == isets2['uniq2']).all()
     # empty nested interval set
-    assert IntervalSet.to_nuniq_interval_set(IntervalSet()) == IntervalSet()
+    assert (IntervalSet().uniq == np.array([], dtype=np.uint64)).all()
 
 
-def test_from_nuinq_interval_set(isets2):
-    assert IntervalSet.from_nuniq_interval_set(isets2['nuniq1']) == isets2['nested1']
-    assert IntervalSet.from_nuniq_interval_set(isets2['nuniq2']) == isets2['nested2']
+def test_from_uniq(isets2):
+    assert IntervalSet.from_uniq(isets2['uniq1']) == isets2['nest1']
+    assert IntervalSet.from_uniq(isets2['uniq2']) == isets2['nest2']
     # empty nuniq interval set
-    assert IntervalSet.from_nuniq_interval_set(IntervalSet()) == IntervalSet()
+    assert IntervalSet.from_uniq(np.array([], dtype=np.uint64)) == IntervalSet()
 
 
 def test_from_to_interval_set(isets2):
-    assert IntervalSet.from_nuniq_interval_set(
-        IntervalSet.to_nuniq_interval_set(isets2['nested1'])
-    ) == isets2['nested1']
+    assert IntervalSet.from_uniq(isets2['nest1'].uniq) == isets2['nest1']
 
 
 def test_interval_set_min(isets):

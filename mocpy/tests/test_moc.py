@@ -136,6 +136,34 @@ def test_moc_serialize_to_json(moc_from_fits_image):
     moc_json = moc_from_fits_image.serialize(format='json')
     assert isinstance(moc_json, dict)
 
+
+@pytest.mark.parametrize("moc, expected", [
+    (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
+    '5/8-10,42-46,54 6/4500 8/45'),
+    (MOC.from_json({}), ''),
+    (MOC.from_json({'29': [101]}), '29/101'),
+    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1,9'),
+    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2,9'),
+])
+def test_serialize_to_str(moc, expected):
+    assert moc.serialize(format="str") == expected
+
+
+@pytest.mark.parametrize("filename, overwrite, format, os_error", [
+    ('moc', True, 'fits', False),
+    ('moc', False, 'fits', True),
+    ('moc', True, 'json', False),
+    ('moc', True, 'str', False),
+    ('moc', False, 'str', True),
+])
+def test_write(moc_from_json, filename, overwrite, format, os_error):
+    if os_error:
+        with pytest.raises(OSError):
+            moc_from_json.write(filename, format=format, overwrite=overwrite)
+    else:
+        moc_from_json.write(filename, format=format, overwrite=overwrite)
+
+
 def test_moc_contains():
     order = 4
     size = 20
@@ -148,17 +176,6 @@ def test_moc_contains():
     hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
     lon, lat = hp.healpix_to_lonlat(healpix_arr)
     lon_out, lat_out = hp.healpix_to_lonlat(healpix_outside_arr)
-
-@pytest.mark.parametrize("moc, expected", [
-    (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10,42-46,54 6/4500 8/45'),
-    (MOC.from_json({}), ''),
-    (MOC.from_json({'29': [101]}), '29/101'),
-    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1,9'),
-    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2,9'),
-])
-def test_serialize_to_str(moc, expected):
-    assert moc.serialize(format="str") == expected
 
 
 #### TESTING MOC plot functions ####

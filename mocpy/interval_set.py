@@ -55,15 +55,21 @@ class IntervalSet:
         if intervals.dtype is not np.uint64:
             intervals = intervals.astype(np.uint64)
         self._intervals = intervals
+
         if make_consistent:
-            if min_depth is not None:
-                min_depth = np.int8(min_depth)
+            if min_depth is None:
+                min_depth = -1
+            
+            min_depth = np.int8(min_depth)
             self._merge_nested_intervals(min_depth)
 
+
+    @classmethod
+    def from_uniq(cls, pix):
+        intervals = core.to_nested(pix)
+        return cls(intervals=intervals, make_consistent=False)
+
     def _merge_nested_intervals(self, min_depth):
-        if min_depth is None:
-            min_depth = np.int8(-1)
-        
         if not self.empty():
             self._intervals = core.merge_nested_intervals(self._intervals, min_depth)
 
@@ -126,3 +132,13 @@ class IntervalSet:
     def complement(self):
         intervals = core.complement(self._intervals)
         return IntervalSet(intervals, make_consistent=False)
+
+    @property
+    def uniq(self):
+        if self.empty():
+            return self._intervals
+        return core.to_uniq(self._intervals)
+
+    @property
+    def nested(self):
+        return self._intervals
