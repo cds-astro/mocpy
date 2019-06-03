@@ -8,6 +8,8 @@ from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel
 import astropy.units as u
 
+from .. import core
+
 class Boundaries():
     @staticmethod
     def get(moc, order):
