@@ -30,9 +30,8 @@ def plot(moc, lon, lat):
 def test_create_from_polygon():
     lon = [83.71315909, 83.71378887, 83.71297292, 83.71233919] * u.deg
     lat = [-5.44217436,-5.44298864, -5.44361751, -5.4428033] * u.deg
-    inside = SkyCoord(-15, -15, unit="deg", frame="icrs")
 
-    moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=20, inside=None)
+    moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=20)
 
     truth_ipix_d = {'17': [89921647231],
         '18': [359686588915,

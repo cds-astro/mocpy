@@ -15,11 +15,15 @@ pub struct Ranges<T>(pub Vec<Range<T>>) where T: Integer;
 
 impl<T> Ranges<T>
 where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug + Send {
-    pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>) -> Ranges<T> {
-        (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
+    pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Ranges<T> {
+        let ranges = if make_consistent {
+            (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
 
-        let merged_ranges: Vec<_> = MergeOverlappingRangesIter::new(data.iter(), min_depth).collect();
-        Ranges(merged_ranges)
+            MergeOverlappingRangesIter::new(data.iter(), min_depth).collect::<Vec<_>>()
+        } else {
+            data
+        };
+        Ranges(ranges)
     }
 
     pub fn to_flat_vec(self) -> Vec<T> {
