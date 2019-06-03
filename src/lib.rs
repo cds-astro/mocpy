@@ -282,17 +282,18 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         if input.is_empty() {
             return input.into_pyarray(py).to_owned();
         }
+        let min_depth = if min_depth == -1 {
+            None
+        } else {
+            Some(min_depth)
+        };
 
         let intervals = unsafe {
-            if min_depth == -1 {
-                array2d_to_intervals(input, true, None)
-            } else {
-                array2d_to_intervals(input, true, Some(min_depth))
-            }
+            array2d_to_intervals(input, true, min_depth)
         };
 
         let result = intervals_to_2darray(intervals);
-        result.into_pyarray(py).to_owned()
+        result.to_owned().into_pyarray(py).to_owned()
     }
     
     #[pyfn(m, "depth")]

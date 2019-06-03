@@ -63,7 +63,6 @@ class IntervalSet:
             min_depth = np.int8(min_depth)
             self._merge_nested_intervals(min_depth)
 
-
     @classmethod
     def from_uniq(cls, pix):
         intervals = core.to_nested(pix)

@@ -35,9 +35,9 @@ class TimeMOC(AbstractMOC):
         Parameters
         ----------
         times : `astropy.time.Time`
-            astropy observation times
+            Astropy observation times
         delta_t : `astropy.time.TimeDelta`, optional
-            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            The duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``).
 
@@ -89,29 +89,49 @@ class TimeMOC(AbstractMOC):
         """
         Add all the pixels at max order in the neighbourhood of the moc
 
+        Returns
+        -------
+        tmoc : `~mocpy.tmoc.TimeMOC`
+            self extended by one degree of neighbors.
         """
         time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals = self._interval_set._intervals
+        # WARN: astype gives the ownership/writeable of the array to python
+        # It is necessary for writing the array
+        # This will be removed as soon as this code is ported in rust
+        intervals = intervals.astype(np.uint64)
+
         intervals[:, 0] = np.maximum(intervals[:, 0] - time_delta, np.uint64(0))
         intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 58) - 1))
 
         self._interval_set = IntervalSet(intervals)
+        return self
 
     def remove_neighbours(self):
         """
         Remove all the pixels at max order located at the bound of the moc
 
+        Returns
+        -------
+        tmoc : `~mocpy.tmoc.TimeMOC`
+            self shrinked by one degree of neighbors.
         """
         time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
 
         intervals = self._interval_set._intervals
+        # WARN: astype gives the ownership/writeable of the array to python
+        # It is necessary for writing the array
+        # This will be removed as soon as this code is ported in rust
+        intervals = intervals.astype(np.uint64)
+
         intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 58) - 1))
         intervals[:, 1] = np.maximum(intervals[:, 1] - time_delta, np.uint64(0))
 
         good_intervals = intervals[:, 1] > intervals[:, 0]
 
         self._interval_set = IntervalSet(intervals[good_intervals])
+        return self
 
     def _process_degradation(self, another_moc, order_op):
         """
@@ -188,6 +208,7 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self | ``moc``
 
         """
+
         order_op = TimeMOC.time_resolution_to_order(delta_t)
 
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
@@ -358,6 +379,7 @@ class TimeMOC(AbstractMOC):
             time equivalent to ``order``
 
         """
+
         delta_t = TimeDelta(4**(29 - order) / 1e6, format='sec', scale='tdb')
         return delta_t
 
