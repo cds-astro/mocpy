@@ -3,9 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import copy
 import numpy as np
 
-from .py23_compat import range
-from .utils import uniq2orderipix
-
 from . import core
 
 __author__ = "Thomas Boch"
