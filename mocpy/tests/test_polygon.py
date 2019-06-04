@@ -5,28 +5,6 @@ from astropy.coordinates import SkyCoord
 
 import numpy as np
 
-def plot(moc, lon, lat):
-    import matplotlib.pyplot as plt
-    from astropy.wcs.utils import skycoord_to_pixel
-
-    fig = plt.figure(figsize=(10, 10))
-    
-    with WCS(fig, 
-         fov=50 * u.deg,
-         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-         coordsys="icrs",
-         rotation=Angle(0, u.degree),
-         projection="AIT") as wcs:
-        ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        moc.fill(ax=ax, wcs=wcs, edgecolor='g', facecolor='g', linewidth=1.0, fill=True, alpha=0.5)
-
-    plt.xlabel('ra')
-    plt.ylabel('dec')
-    plt.grid(color='black', ls='dotted')
-    plt.title('from polygon')
-    plt.show()
-    plt.close()
-
 def test_create_from_polygon():
     lon = [83.71315909, 83.71378887, 83.71297292, 83.71233919] * u.deg
     lat = [-5.44217436,-5.44298864, -5.44361751, -5.4428033] * u.deg
