@@ -14,6 +14,7 @@ lark-parser
 # Packages for updating the docs
 sphinx
 numpydoc
+astropy-sphinx-theme
 
 # Pytest extension package enabling test coverage
 pytest-cov

@@ -8,7 +8,7 @@ from astropy.coordinates import SkyCoord, ICRS, Angle
 import astropy.units as u
 from astropy.io import fits
 
-from astropy_healpix import HEALPix
+import cdshealpix
 
 from ..moc import MOC, WCS
 
@@ -164,26 +164,7 @@ def test_write(moc_from_json, filename, overwrite, format, os_error):
         moc_from_json.write(filename, format=format, overwrite=overwrite)
 
 
-def test_moc_contains():
-    order = 4
-    size = 20
-    healpix_arr = np.random.randint(0, 12*4**order, size)
-    all_healpix_arr = np.arange(12*4**order)
-    healpix_outside_arr = np.setdiff1d(all_healpix_arr, healpix_arr)
-
-    moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
-
-    hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
-    lon, lat = hp.healpix_to_lonlat(healpix_arr)
-    lon_out, lat_out = hp.healpix_to_lonlat(healpix_outside_arr)
-
-
 #### TESTING MOC plot functions ####
-# WARN PY2: turn off tkinter for python2 testing
-# with travis
-@pytest.mark.skipif(sys.version_info.major == 2,
-    reason='TclError: no display name and no $DISPLAY environment variable'
-           'in python2 environments')
 def test_mpl_fill():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
@@ -199,11 +180,7 @@ def test_mpl_fill():
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
-# WARN PY2: turn off tkinter for python2 testing
-# with travis
-@pytest.mark.skipif(sys.version_info.major == 2,
-    reason='TclError: no display name and no $DISPLAY environment variable'
-           'in python2 environments')
+
 def test_mpl_border():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
@@ -230,9 +207,8 @@ def test_moc_contains():
 
     moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
 
-    hp = HEALPix(nside=(1 << order), order='nested', frame=ICRS())
-    lon, lat = hp.healpix_to_lonlat(healpix_arr)
-    lon_out, lat_out = hp.healpix_to_lonlat(healpix_outside_arr)
+    lon, lat = cdshealpix.healpix_to_lonlat(healpix_arr, order)
+    lon_out, lat_out = cdshealpix.healpix_to_lonlat(healpix_outside_arr, order)
 
     should_be_inside_arr = moc.contains(ra=lon, dec=lat)
     assert should_be_inside_arr.all()

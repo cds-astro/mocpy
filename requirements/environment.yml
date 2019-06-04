@@ -11,6 +11,7 @@ dependencies:
 - sphinx
 - pip:
   - numpydoc
+  - astropy-sphinx-theme
   - networkx
   - spherical_geometry
   - lark-parser

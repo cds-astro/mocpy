@@ -14,7 +14,6 @@ from astropy import wcs
 
 import cdshealpix
 from astropy_healpix import HEALPix
-from astropy_healpix.healpy import nside2npix
 
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
@@ -127,9 +126,13 @@ class MOC(AbstractMOC):
         ipix_neighbors = np.setdiff1d(ipix_extended, ipix)
 
         depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.int8)
-        intervals_neighbors = core.from_healpix_cells(ipix_neighbors, depth_neighbors)
-        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC 
-        self._interval_set._intervals = core.union(self._interval_set._intervals, intervals_neighbors)
+        #intervals_neighbors = core.from_healpix_cells(ipix_neighbors, depth_neighbors)
+        moc_neighbors = MOC.from_healpix_cells(ipix_neighbors, depth_neighbors)
+        
+        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC
+        #self._interval_set._intervals = core.union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
+        final = self.union(moc_neighbors)
+        self._interval_set = final._interval_set
         return self
 
     def remove_neighbours(self):
@@ -163,8 +166,8 @@ class MOC(AbstractMOC):
         final_depth = np.full(shape=final_ipix.shape, fill_value=max_depth, dtype=np.int8)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
-        intervals = core.from_healpix_cells(final_ipix, final_depth)
-        self._interval_set = IntervalSet(intervals, make_consistent=False)
+        final = MOC.from_healpix_cells(final_ipix, final_depth)
+        self._interval_set = final._interval_set
         return self
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
@@ -572,7 +575,6 @@ class MOC(AbstractMOC):
             raise IndexError('ipix and fully_covered arrays must have the same shape')
 
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
-
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @property
@@ -586,6 +588,7 @@ class MOC(AbstractMOC):
         return num_pixels / float(3 << (2*(max_depth + 1)))
 
     # TODO : move this in astroquery.Simbad.query_region
+    # See https://github.com/astropy/astroquery/pull/1466
     def query_simbad(self, max_rows=10000):
         """
         Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.
@@ -593,6 +596,7 @@ class MOC(AbstractMOC):
         return self._query('SIMBAD', max_rows)
 
     # TODO : move this in astroquery.Vizier.query_region
+    # See https://github.com/astropy/astroquery/pull/1466
     def query_vizier_table(self, table_id, max_rows=10000):
         """
         Query a VizieR table for sources in the coverage of the MOC instance.
@@ -680,7 +684,7 @@ class MOC(AbstractMOC):
 
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
 
-        m = np.zeros(nside2npix(1 << plotted_moc.max_order))
+        m = np.zeros(12*4**(plotted_moc.max_order))
         pix_id = core.flatten_pixels(plotted_moc._interval_set._intervals, plotted_moc.max_order)
 
         # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.

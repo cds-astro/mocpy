@@ -83,7 +83,9 @@ class TimeMOC(AbstractMOC):
 
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
-        return TimeMOC(IntervalSet(intervals)).degrade_to_order(depth)
+
+        tmoc = TimeMOC(IntervalSet(intervals))
+        return tmoc.degrade_to_order(depth)
 
     def add_neighbours(self):
         """

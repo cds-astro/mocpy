@@ -4,6 +4,9 @@ from astropy_healpix import HEALPix
 from astropy.coordinates import ICRS
 from astropy.wcs.utils import skycoord_to_pixel
 
+import cdshealpix
+from astropy.coordinates import SkyCoord
+
 def backface_culling(xp, yp):
     # Remove cells crossing the MOC after projection
     # The remaining HEALPix cells are used for computing the patch of the MOC
@@ -62,9 +65,15 @@ def from_moc(depth_ipix_d, wcs):
     for depth in range(min_depth, max_split_depth + 1):
         hp = HEALPix(nside=(1 << depth), order='nested', frame=ICRS())
 
-        ipix_boundaries = hp.boundaries_skycoord(ipixels, step=1)
+        ipix_vertices = hp.boundaries_skycoord(ipixels, step=1)
+
+        # WARN: Precision error on cdshealpix vertices ?
+        #ipix_lon, ipix_lat = cdshealpix.vertices(ipixels, depth)
+        #ipix_lon = ipix_lon[:, [2, 3, 0, 1]]
+        #ipix_lat = ipix_lat[:, [2, 3, 0, 1]]
+        #ipix_vertices = SkyCoord(ipix_lon, ipix_lat, frame=ICRS())
         # Projection on the given WCS
-        xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
+        xp, yp = skycoord_to_pixel(coords=ipix_vertices, wcs=wcs)
         _, _, frontface_id = backface_culling(xp, yp)
 
         # Get the pixels which are backfacing the projection

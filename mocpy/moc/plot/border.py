@@ -1,12 +1,13 @@
 import numpy as np
 
-from astropy_healpix import HEALPix
-from astropy.coordinates import ICRS
+from astropy.coordinates import ICRS, SkyCoord
 
 from astropy.wcs.utils import skycoord_to_pixel
 
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
+
+import cdshealpix
 
 from ... import core
 
@@ -28,13 +29,9 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         ipixels_all = np.arange(num_ipixels)
         ipixels_open = np.setdiff1d(ipixels_all, ipixels_open, assume_unique=True)
     
-    ipixels_open = ipixels_open.astype(int)
-    hp = HEALPix(nside=(1 << max_order), order='nested', frame=ICRS())
-    neighbors = hp.neighbours(ipixels_open)
-    neighbors = neighbors.astype(np.uint64)
-    ipixels_open = ipixels_open.astype(np.uint64)
+    neighbors = cdshealpix.neighbours(ipixels_open, max_order).T
     # Select the direct neighbors (i.e. those in WEST, NORTH, EAST and SOUTH directions)
-    neighbors = neighbors[[0, 2, 4, 6], :]
+    neighbors = neighbors[[3, 7, 5, 1], :]
     ipix_moc = np.isin(neighbors, ipixels_open)
 
     west_edge = ipix_moc[0, :]
@@ -54,7 +51,9 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
     east_border = east_edge[ipixels_border_id]
     north_border = north_edge[ipixels_border_id]
     ipixels_border = ipixels_open[ipixels_border_id]
-    ipix_boundaries = hp.boundaries_skycoord(ipixels_border, step=1)
+
+    ipix_lon_boundaries, ipix_lat_boundaries = cdshealpix.vertices(ipixels_border, max_order)
+    ipix_boundaries = SkyCoord(ipix_lon_boundaries, ipix_lat_boundaries, frame=ICRS())
     
     # Projection on the given WCS
     xp, yp = skycoord_to_pixel(coords=ipix_boundaries, wcs=wcs)
@@ -69,19 +68,19 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
     for i in range(xp.shape[0]):
         vx = xp[i]
         vy = yp[i]
-        if not south_border[i]:
+        if not north_border[i]:
             path_vertices_l += [(vx[0], vy[0]), (vx[1], vy[1]), (0, 0)]
             codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
 
-        if not west_border[i]:
+        if not east_border[i]:
             path_vertices_l += [(vx[1], vy[1]), (vx[2], vy[2]), (0, 0)]
             codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
 
-        if not north_border[i]:
+        if not south_border[i]:
             path_vertices_l += [(vx[2], vy[2]), (vx[3], vy[3]), (0, 0)]
             codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
 
-        if not east_border[i]:
+        if not west_border[i]:
             path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
             codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
 

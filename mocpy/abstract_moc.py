@@ -93,14 +93,12 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        intervals = core.intersection(
-            self._interval_set._intervals,
-            another_moc._interval_set._intervals
-        )
-        for moc in args:
-            intervals = core.intersection(intervals, moc._interval_set._intervals)
+        intervals = self._interval_set.intersection(another_moc._interval_set)
 
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        for moc in args:
+            intervals = intervals.intersection(moc._interval_set)
+
+        return self.__class__(intervals)
 
     def union(self, another_moc, *args):
         """
@@ -118,14 +116,12 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        intervals = core.union(
-            self._interval_set._intervals,
-            another_moc._interval_set._intervals
-        )
-        for moc in args:
-            intervals = core.union(intervals, moc._interval_set._intervals)
+        intervals = self._interval_set.union(another_moc._interval_set)
 
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        for moc in args:
+            intervals = intervals.union(moc._interval_set)
+
+        return self.__class__(intervals)
 
     def difference(self, another_moc, *args):
         """
@@ -143,17 +139,12 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        intervals = core.difference(
-            self._interval_set._intervals,
-            another_moc._interval_set._intervals
-        )
-        for moc in args:
-            intervals = core.difference(
-                intervals,
-                moc._interval_set._intervals
-            )
+        intervals = self._interval_set.difference(another_moc._interval_set)
 
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        for moc in args:
+            intervals = intervals.difference(moc._interval_set)
+
+        return self.__class__(intervals)
 
     def complement(self):
         """
@@ -164,8 +155,8 @@ class AbstractMOC:
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        intervals = core.complement(self._interval_set._intervals)
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        intervals = self._interval_set.complement()
+        return self.__class__(intervals)
 
     @staticmethod
     def _neighbour_pixels(hp, ipix):
@@ -481,7 +472,7 @@ class AbstractMOC:
         else:
             # json format serialization
             result = self._to_json(uniq)
-            # WARN: use the rust to_json (seems to have equivalent perf compared to python)
+            # WARN: use the rust to_json
             # result = self._to_json(self._interval_set.nested)
 
         return result

@@ -7,3 +7,4 @@ spherical_geometry
 sphinx
 numpydoc
 lark-parser
+astropy-sphinx-theme
