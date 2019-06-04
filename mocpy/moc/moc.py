@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-import tempfile
-import os
 import numpy as np
+from urllib.parse import urlencode
+from io import BytesIO
 
 from astropy.utils.data import download_file
 from astropy import units as u
@@ -603,7 +603,7 @@ class MOC(AbstractMOC):
         return self._query(table_id, max_rows)
 
     # TODO : move this in astroquery
-    def _query(self, resource_id, max_rows):
+    def _query(moc, resource_id, max_rows=100000):
         """
         Internal method to query Simbad or a VizieR table
         for sources in the coverage of the MOC instance
@@ -611,30 +611,23 @@ class MOC(AbstractMOC):
         from astropy.io.votable import parse_single_table
         import requests
 
-        if max_rows is not None and max_rows >= 0:
-            max_rows_str = str(max_rows)
-        else:
-            max_rows_str = str(9999999999)
+        moc_file = BytesIO()
+        moc_fits = moc.serialize(format='fits')
+        moc_fits.writeto(moc_file)
 
-        tmp_moc = tempfile.NamedTemporaryFile(delete=False)
-
-        self.write(tmp_moc.name)
         r = requests.post('http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat',
                           data={'mode': 'mocfile',
                                 'catName': resource_id,
                                 'format': 'votable',
-                                'limit': max_rows_str},
-                          files={'moc': open(tmp_moc.name, 'rb')},
+                                'limit': max_rows},
+                          files={'moc': moc_file.getvalue()},
                           headers={'User-Agent': 'MOCPy'},
                           stream=True)
 
-        tmp_vot = BytesIO()
-        tmp_vot.write(r.content)
+        votable = BytesIO()
+        votable.write(r.content)
 
-        table = parse_single_table(tmp_vot).to_table()
-
-        # finally delete temp files
-        os.unlink(tmp_moc.name)
+        table = parse_single_table(votable).to_table()
 
         return table
 
