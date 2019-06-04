@@ -58,10 +58,10 @@ def build_plotting_moc(moc, wcs):
     # Import MOC here to avoid circular imports
     from ..moc import MOC
     # Create a rough MOC (depth=3 is sufficient) from the viewport
-    moc_viewport = MOC.from_polygon_skycoord(viewport, max_depth=4)
+    moc_viewport = MOC.from_polygon_skycoord(viewport, max_depth=3)
 
     # The moc to plot is the INPUT_MOC & MOC_VIEWPORT. For small FOVs this can reduce
     # a lot the time to draw the MOC along with its borders.
-    #moc_plot = moc_plot.intersection(moc_viewport)
+    moc_plot = moc_plot.intersection(moc_viewport)
     return moc_plot
 

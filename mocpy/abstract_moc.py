@@ -471,16 +471,15 @@ class AbstractMOC:
         if format not in formats:
             raise ValueError('format should be one of %s' % (str(formats)))
 
+        uniq = self._interval_set.uniq
+
         if format == 'fits':
-            uniq = self._interval_set.uniq
             result = self._to_fits(uniq=uniq,
                                    optional_kw_dict=optional_kw_dict)
         elif format == 'str':
-            uniq = self._interval_set.uniq
             result = self._to_str(uniq=uniq)
         else:
             # json format serialization
-            uniq = self._interval_set.uniq
             result = self._to_json(uniq)
             # WARN: use the rust to_json (seems to have equivalent perf compared to python)
             # result = self._to_json(self._interval_set.nested)

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rust backend
 - Add tests for windows py27 and py3
 
+### Changed
+- API CHANGE!: the ``inside`` parameter of from_polygon and from_polygon_skycoord has been removed !
+  The inside of the polygon is deduced from the order of the sky coordinates passed.
+
 ## [0.5.7] - 2019-04-12
 ### Changed
 - Change from_cells to from_healpix_cells. Its API does change too. It now takes the three ipix, depth and flags numpy arrays separatly instead as a numpy structure. This has the advantage of direcltly passing the arrays returned by `cdshealpix`. Creating a numpy structured array from simple numpy column arrays needed to copy the data from the arrays to the structural array.

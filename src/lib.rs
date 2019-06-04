@@ -384,7 +384,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let intervals = unsafe {
             array2d_to_intervals(input, true, None, false)
         };
-
         let intervals = intervals.to_uniq();
 
         let result = if let Intervals::Uniq(ranges) = intervals {

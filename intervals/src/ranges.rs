@@ -14,7 +14,7 @@ use crate::bounded::Bounded;
 pub struct Ranges<T>(pub Vec<Range<T>>) where T: Integer;
 
 impl<T> Ranges<T>
-where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug + Send {
+where T: Integer + PrimInt + Bounded<T> + Send {
     pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Ranges<T> {
         let ranges = if make_consistent {
             (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
@@ -219,7 +219,7 @@ where T: Integer + Clone + Copy {
 }
 
 impl<'a, T> MergeOverlappingRangesIter<'a, T> 
-where T: std::fmt::Debug + Integer + PrimInt + Clone + Copy {
+where T: Integer + PrimInt + Clone + Copy {
     fn new(mut ranges: Iter<'a, Range<T>>, min_depth: Option<i8>) -> MergeOverlappingRangesIter<'a, T> {
         let last = ranges.next().cloned();
         let split_ranges = VecDeque::<Range<T>>::new();
@@ -287,7 +287,7 @@ where T: std::fmt::Debug + Integer + PrimInt + Clone + Copy {
 
 
 impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T> 
-where T: Integer + PrimInt + Clone + Copy + std::fmt::Debug {
+where T: Integer + PrimInt + Clone + Copy {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {

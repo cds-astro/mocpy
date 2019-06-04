@@ -208,7 +208,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
                     Intervals::Uniq(other_uniq_ranges) => {
                         // Convert uniq intervals to nested ones
                         let other_nested_ranges: Vec<_> = NestedIntervalsIter::new(other_uniq_ranges).collect();
-                        ranges.merge(Ranges::<T>::new(other_nested_ranges, None, false), op);
+                        ranges.merge(Ranges::<T>::new(other_nested_ranges, None, true), op);
                     }
                 }
             },
@@ -217,7 +217,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
                     Intervals::Nested(other_nested_ranges) => {
                         // Convert nested intervals to uniq ones
                         let other_uniq_ranges: Vec<_> = UniqIntervalsIter::new(other_nested_ranges).collect();
-                        ranges.merge(Ranges::<T>::new(other_uniq_ranges, None, false), op);
+                        ranges.merge(Ranges::<T>::new(other_uniq_ranges, None, true), op);
                     },
                     Intervals::Uniq(other_ranges) => {
                         ranges.merge(other_ranges, op);
@@ -387,7 +387,8 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
 pub struct UniqIntervalsIter<T>
 where T: Integer + PrimInt + CheckedAdd + Bounded<T> {
     ranges: Ranges<T>,
-
+    id: usize,
+    tmp_vec_ranges: Vec<Range<T>>,
     depth: i8,
     shift: u32,
     offset: T,
@@ -397,6 +398,8 @@ where T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 impl<T> UniqIntervalsIter<T>
 where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
     fn new(ranges: Ranges<T>) -> UniqIntervalsIter<T> {
+        let id = 0;
+        let tmp_vec_ranges = Vec::<Range<T>>::new();
         let depth = 0;
         let shift = ((T::MAXDEPTH - depth) << 1) as u32;
 
@@ -408,7 +411,9 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 
         UniqIntervalsIter {
             ranges,
-            
+            id,
+            tmp_vec_ranges,
+
             depth,
             shift,
             offset,
@@ -418,12 +423,15 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<T> Iterator for UniqIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug + Send {
+where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + std::fmt::Debug {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.ranges.is_empty() {
-            for range in self.ranges.iter() {
+            let start_id = self.id;
+            let end_id = self.ranges.0.len();
+            for i in start_id..end_id {
+                let range = &self.ranges[i];
                 let t1 = range.start + self.offset;
                 let t2 = range.end;
 
@@ -433,10 +441,10 @@ where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug + Send {
                 let c1 = pix1.unsigned_shl(self.shift);
                 let c2 = pix2.unsigned_shl(self.shift);
 
+                self.id += 1;
+
                 if c2 > c1 {
-                    self.ranges.difference(
-                        Ranges::<T>::new(vec![c1..c2], None, false)
-                    );
+                    self.tmp_vec_ranges.push(c1..c2);
 
                     let e1 = self.depth_offset.checked_add(&pix1).unwrap();
                     let e2 = self.depth_offset.checked_add(&pix2).unwrap();
@@ -444,7 +452,23 @@ where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug + Send {
                     return Some(e1..e2);
                 }
             }
+            
+            self.ranges.difference(
+                Ranges::<T>::new(
+                    self.tmp_vec_ranges.clone(),
+                    None,
+                    true
+                )
+            );
+            self.id = 0;
+            self.tmp_vec_ranges.clear();
+
             self.depth += 1;
+            assert!(self.depth <= <T>::MAXDEPTH ||
+                   (self.depth > <T>::MAXDEPTH && self.ranges.is_empty()));
+            if self.depth > <T>::MAXDEPTH && self.ranges.is_empty() {
+                break;
+            }
 
             // Recompute the constants for the new depth
             self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
@@ -516,7 +540,7 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<T> Iterator for DepthPixIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug + Send {
+where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send {
     type Item = (i8, T);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -595,7 +619,7 @@ where  T: Integer + PrimInt + CheckedAdd + Bounded<T> {
 }
 
 impl<T> Iterator for NestedIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
+where T: Integer + PrimInt + CheckedAdd + Bounded<T> {
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
