@@ -14,8 +14,7 @@ stages:
   # to PyPI. Architecture supported:
   # - manylinux1_x86_64 py3.5->3.7
   # - osx py3.5->3.7
-  - name: Deploying
-    if: tag IS present
+  - Deploying
 
 addons:
   apt:
@@ -107,7 +106,6 @@ jobs:
         # Execute the tests found in the doc
         - make doctest
         - cd ..
-
       #### DEPLOYING STAGE ####
       - stage: Deploying
         name: "manylinux1_x86_64"
