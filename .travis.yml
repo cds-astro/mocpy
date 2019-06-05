@@ -29,7 +29,7 @@ jobs:
       python: 3.5
       env:
         - PIP=pip
-        - PYTHON=python3
+        - PYTHON=python
       install:
         # Install Rust compiler
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
@@ -48,7 +48,7 @@ jobs:
       python: 3.7
       env:
         - PIP=pip
-        - PYTHON=python3
+        - PYTHON=python
       install:
         # Install Rust compiler
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
@@ -67,7 +67,7 @@ jobs:
       python: 3.7
       language: generic
       env:
-        - PIP=pip
+        - PIP=pip3
         - PYTHON=python3
       install:
         # Install Rust compiler
@@ -87,7 +87,7 @@ jobs:
       python: 3.7
       env:
         - PIP=pip
-        - PYTHON=python3
+        - PYTHON=python
       install:
         # Install Rust compiler
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
@@ -109,40 +109,40 @@ jobs:
         - cd ..
 
       #### DEPLOYING STAGE ####
-      # - stage: Deploying
-      #   name: "manylinux1_x86_64"
-      #   # Job generating the wheels for Linux 32-bit platforms
-      #   os: linux
-      #   sudo: required
-      #   env:
-      #     - CIBW_SKIP="*manylinux1_i686* cp27-*"
-      #     - PIP=pip
-      #     - PYTHON=python3
-      #   services:
-      #     # We use docker for generating the wheels for Linux.
-      #     - docker
-      #   script: ./travis/deploy.sh
-      # - name: "manylinux1_i686"
-      #   # Job generating the wheels for Linux 64-bit platforms
-      #   os: linux
-      #   sudo: required
-      #   env:
-      #     - CIBW_SKIP="*manylinux1_x86_64* cp27-*"
-      #     - PIP=pip
-      #     - PYTHON=python3
-      #   services:
-      #     # We use docker for generating the wheels for Linux.
-      #     - docker
-      #   script: ./travis/deploy.sh
-      # - name: "MacOS"
-      #   os: osx
-      #   sudo: required
-      #   language: generic
-      #   env:
-      #     - CIBW_SKIP=cp27-*
-      #     - PIP=pip2
-      #     - PYTHON=python2
-      #   script: ./travis/deploy.sh
+      - stage: Deploying
+        name: "manylinux1_x86_64"
+        # Job generating the wheels for Linux 32-bit platforms
+        os: linux
+        sudo: required
+        env:
+          - CIBW_SKIP="*manylinux1_i686* cp27-*"
+          - PIP=pip
+          - PYTHON=python3
+        services:
+          # We use docker for generating the wheels for Linux.
+          - docker
+        script: ./travis/deploy.sh
+      - name: "manylinux1_i686"
+        # Job generating the wheels for Linux 64-bit platforms
+        os: linux
+        sudo: required
+        env:
+          - CIBW_SKIP="*manylinux1_x86_64* cp27-*"
+          - PIP=pip
+          - PYTHON=python3
+        services:
+          # We use docker for generating the wheels for Linux.
+          - docker
+        script: ./travis/deploy.sh
+      - name: "MacOS"
+        os: osx
+        sudo: required
+        language: generic
+        env:
+          - CIBW_SKIP=cp27-*
+          - PIP=pip2
+          - PYTHON=python2
+        script: ./travis/deploy.sh
 # Deployment and upload to PyPI if a commit is tagged and only on the master branch
 # https://docs.travis-ci.com/user/deployment/pypi/#deploying-tags
 deploy:
