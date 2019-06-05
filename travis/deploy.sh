@@ -4,7 +4,7 @@
 set -e
 
 ### Build the wheels ###
-$PIP install cibuildwheel==0.10.0 setuptools-rust
+$PIP install cibuildwheel==0.11.1 setuptools-rust
 export CIBW_BEFORE_BUILD="pip install setuptools-rust && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y"
 export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
 cibuildwheel --output-dir dist

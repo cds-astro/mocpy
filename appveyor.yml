@@ -35,7 +35,7 @@ install:
   - rustc -vV
   - cargo -vV
   # Set the path so that the good python version is chosen
-  - "%PYTHON%\\python.exe -m pip install cibuildwheel==0.10.0"
+  - "%PYTHON%\\python.exe -m pip install cibuildwheel==0.11.1"
   - set PATH=%PYTHON%;%PATH%
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
