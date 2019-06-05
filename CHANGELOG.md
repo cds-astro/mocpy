@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Rust backend
 - Add tests for windows py27 and py3
+- from_polygon relies on cdshealpix. spherical_geometry dependency removed!
 
 ### Changed
 - API CHANGE!: the ``inside`` parameter of from_polygon and from_polygon_skycoord has been removed !

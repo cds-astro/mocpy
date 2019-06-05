@@ -8,7 +8,6 @@ astropy_healpix
 cdshealpix
 matplotlib
 networkx
-spherical_geometry
 lark-parser
 
 # Packages for updating the docs

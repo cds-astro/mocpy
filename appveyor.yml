@@ -8,9 +8,6 @@ environment:
     # Note: TWINE_PASSWORD is set in Appveyor settings
     CIBW_BEFORE_BUILD: pip install setuptools-rust
   matrix:
-    # Important remark: We need to use VS 2017 for compiling spherical-geometry
-    # for python 3.5 -> 3.7 on any architectures, whether it is 64 or 32 bits.
-    # Nightly 64-bit MSVC
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python35-x64"

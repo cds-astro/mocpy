@@ -13,6 +13,5 @@ dependencies:
   - numpydoc
   - astropy-sphinx-theme
   - networkx
-  - spherical_geometry
   - lark-parser
   - cdshealpix

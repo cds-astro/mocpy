@@ -3,7 +3,6 @@ astropy_healpix
 cdshealpix
 matplotlib
 networkx
-spherical_geometry
 sphinx
 numpydoc
 lark-parser

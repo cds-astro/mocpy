@@ -11,4 +11,3 @@ dependencies:
 - requests
 - matplotlib # Used in fill and border
 - networkx # Used in get_boundaries
-- spherical-geometry
