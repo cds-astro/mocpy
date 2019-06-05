@@ -74,8 +74,8 @@ jobs:
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
         - export PATH="$HOME/.cargo/bin:$PATH"
         # Install the dependencies for running the test and building the docs
-        - $PIP install -r requirements/contributing.txt
         - $PIP install setuptools setuptools_rust
+        - $PIP install -r requirements/contributing.txt
         # Generate the dynamic library from the cdshealpix Rust crate.
         # This will download the crate from crates.io and build it first.
         - $PYTHON setup.py build_rust
