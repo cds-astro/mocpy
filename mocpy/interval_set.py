@@ -56,8 +56,8 @@ class IntervalSet:
         if make_consistent:
             if min_depth is None:
                 min_depth = -1
-            
-            min_depth = np.int(min_depth)
+
+            min_depth = np.int8(min_depth)
             self._merge_nested_intervals(min_depth)
 
     @classmethod

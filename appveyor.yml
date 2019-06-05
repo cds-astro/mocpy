@@ -4,21 +4,32 @@ environment:
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
+    TWINE_USERNAME: bmatthieu3
+    # Note: TWINE_PASSWORD is set in Appveyor settings
+    CIBW_BEFORE_BUILD: pip install setuptools-rust
   matrix:
     # Important remark: We need to use VS 2017 for compiling spherical-geometry
     # for python 3.5 -> 3.7 on any architectures, whether it is 64 or 32 bits.
     # Nightly 64-bit MSVC
     - channel: nightly
       target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp36-* cp37-*"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python36-x64"
       PYTHON_VERSION: "3.6.x"
       PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp37-*"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python37-x64"
       PYTHON_VERSION: "3.7.x"
       PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-*"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 install:
@@ -29,7 +40,7 @@ install:
   - rustc -vV
   - cargo -vV
   # Set the path so that the good python version is chosen
-  - pip install cibuildwheel==0.10.0
+  - "%PYTHON%\\python.exe -m pip install cibuildwheel==0.10.0"
   - set PATH=%PYTHON%;%PATH%
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
@@ -45,9 +56,22 @@ build_script:
 
 test_script:
   - "%PYTHON%\\python.exe -m pytest -v mocpy --cov-report=term --cov=mocpy"
-  #- "%PYTHON%\\python.exe -m pytest -v mocpy/tests/test_moc.py --cov-report=term --cov=mocpy"
   # Test docs build:
   - cd docs
   # Execute the tests found in the doc
   - make doctest
+
+after_test:
+  - ps: |
+      # if ($env:APPVEYOR_REPO_TAG -eq $true)
+      # {
+      cibuildwheel --output-dir dist
+      # Upload to PyPI if the tests succeed
+      "%PYTHON%\\python.exe -m pip install twine"
+      # python -m twine upload "dist\\*.whl" --skip-existing
+      # }
+
+artifacts:
+  - path: "dist\\*.whl"
+    name: Wheels
 
