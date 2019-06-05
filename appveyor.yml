@@ -55,6 +55,7 @@ test_script:
   - cd docs
   # Execute the tests found in the doc
   - make doctest
+  - cd ..
 
 after_test:
   - ps: |
