@@ -42,7 +42,7 @@ where T: Integer + PrimInt + Bounded<T> + Send {
         result
     }
     
-    pub fn merge(&mut self, mut other: Self, op: &Fn(bool, bool) -> bool) {
+    pub fn merge(&mut self, mut other: Self, op: &dyn Fn(bool, bool) -> bool) {
         fn to_range_vec<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
             let mut owned_input = Vec::<T>::new();
             mem::swap(&mut owned_input, input);

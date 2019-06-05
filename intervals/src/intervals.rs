@@ -51,7 +51,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     ///     .uniq_into_iter()
     ///     .collect();
     /// ```
-    pub fn uniq_into_iter(self) -> Box<Iterator<Item = Range<T>>> {
+    pub fn uniq_into_iter(self) -> Box<dyn Iterator<Item = Range<T>>> {
         match self {
             Intervals::Nested(ranges) => {
                 Box::new(UniqIntervalsIter::new(ranges))
@@ -88,7 +88,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     ///     .nested_into_iter()
     ///     .collect();
     /// ```
-    pub fn nested_into_iter(self) -> Box<Iterator<Item = Range<T>>> {
+    pub fn nested_into_iter(self) -> Box<dyn Iterator<Item = Range<T>>> {
         match self {
             Intervals::Uniq(ranges) => {
                 Box::new(NestedIntervalsIter::new(ranges))
@@ -99,7 +99,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         }
     }
 
-    pub fn depthpix_into_iter(self) -> Box<Iterator<Item = (i8, T)>> {
+    pub fn depthpix_into_iter(self) -> Box<dyn Iterator<Item = (i8, T)>> {
         if let Intervals::Nested(ranges) = self {
             Box::new(DepthPixIntervalsIter::new(ranges))
         } else {
@@ -178,7 +178,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     }
 
     /// Get an iterator over the range references
-    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = &Range<T>> + 'a> {
+    pub fn iter<'a>(&'a self) -> Box<dyn Iterator<Item = &Range<T>> + 'a> {
         match self {
             Intervals::Nested(ref ranges) => {
                 Box::new(ranges.0.iter())
@@ -198,7 +198,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         }
     }
 
-    fn merge(&mut self, other: Self, op: &Fn(bool, bool) -> bool) {
+    fn merge(&mut self, other: Self, op: &dyn Fn(bool, bool) -> bool) {
         match self {
             Intervals::Nested(ref mut ranges) => {
                 match other {

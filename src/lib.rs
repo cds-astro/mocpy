@@ -9,6 +9,7 @@ extern crate time;
 
 extern crate pyo3;
 
+
 use ndarray::{Zip, Array, Array1, Array2, Axis};
 use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
@@ -26,6 +27,7 @@ use std::ops::Range;
 use std::mem;
 use std::collections::HashMap;
 
+#[allow(unused_parens)]
 #[pymodule]
 fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_lonlat")]
