@@ -44,7 +44,7 @@ build_script:
   - xcopy "build\lib\mocpy\*.pyd" mocpy /sy
 
 test_script:
-  - "%PYTHON%\\python.exe -m pytest -v mocpy/tests/test_interval_set.py -k test_interval_set_consistency --cov-report=term --cov=mocpy"
+  - "%PYTHON%\\python.exe -m pytest -v -s mocpy/tests/test_interval_set.py -k test_interval_set_consistency --cov-report=term --cov=mocpy"
   #- "%PYTHON%\\python.exe -m pytest -v mocpy/tests/test_moc.py --cov-report=term --cov=mocpy"
   # Test docs build:
   - cd docs
