@@ -49,19 +49,16 @@ class IntervalSet:
         # TODO: remove the cast to np.uint64
         # This code is executed as long as the Intervals objects
         # are not created from the rust code! (e.g. for the TimeMOCs)
-        print('aaa')
         if intervals.dtype is not np.uint64:
             intervals = intervals.astype(np.uint64)
         self._intervals = intervals
-        print('bbb')
+
         if make_consistent:
             if min_depth is None:
                 min_depth = -1
             
-            #min_depth = np.int(min_depth)
-            print('zzz')
+            min_depth = np.int(min_depth)
             self._merge_nested_intervals(min_depth)
-            print('nnn')
 
     @classmethod
     def from_uniq(cls, pix):
