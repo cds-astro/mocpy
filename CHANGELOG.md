@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rust backend
 - Add tests for windows py27 and py3
 - from_polygon relies on cdshealpix. spherical_geometry dependency removed!
+- change astropy-healpix dependency from mandatory to optional. astropy-healpix is now used in only a few deprecated methods
+  (such as the old plot method from `mocpy.MOC` and `get_boundaries` which will soon make use of cdshealpix too).
 
 ### Changed
 - API CHANGE!: the ``inside`` parameter of from_polygon and from_polygon_skycoord has been removed !
