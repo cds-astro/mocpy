@@ -10,7 +10,10 @@
 linux32 --32bit i386 sh -c '
     apt update > /dev/null &&
     apt install -y curl pkg-config libfreetype6-dev \
-	python3 python3-pip >/dev/null
+	python3 python3-pip >/dev/null &&
+    # Symbolic link so that pyO3 points to the
+    # python3 version
+    ln -s /usr/bin/python3 /usr/bin/python
 ' &&
 
 # Run the tests
