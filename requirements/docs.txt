@@ -1,5 +1,4 @@
 astropy
-astropy_healpix
 cdshealpix
 matplotlib
 networkx
@@ -7,3 +6,4 @@ sphinx
 numpydoc
 lark-parser
 astropy-sphinx-theme
+astropy_healpix

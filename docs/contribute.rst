@@ -47,7 +47,7 @@ along with a new empty pip package manager.
 
 - Activate your virtual environment::
 
-    source ~/mocpy-venv/bin/activate
+    source ~/mocpy-env/bin/activate
 
 `pip list` will tell you that there is no package installed and `python`
 opens a session with the `mocpy-env` interpreter.

@@ -12,7 +12,10 @@ from astropy.coordinates import SkyCoord
 from astropy import wcs
 
 import cdshealpix
-from astropy_healpix import HEALPix
+try:
+    from astropy_healpix import HEALPix
+except ImportError:
+    pass
 
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet

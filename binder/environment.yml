@@ -7,7 +7,7 @@ channels:
 dependencies:
 - astropy
 - astroquery
-- astropy-healpix
+- astropy-healpix # Optional dependency for boundaries notebook
 - requests
 - matplotlib # Used in fill and border
 - networkx # Used in get_boundaries

@@ -4,11 +4,13 @@
 
 # Mandatory packages for MOCPy to work 
 astropy
-astropy_healpix
 cdshealpix
 matplotlib
 networkx
 lark-parser
+
+# Optional packages
+astropy_healpix
 
 # Packages for updating the docs
 sphinx

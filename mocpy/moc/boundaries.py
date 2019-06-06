@@ -2,7 +2,10 @@ import numpy as np
 # A python module handling graph manipulations
 import networkx as nx
 
-from astropy_healpix import HEALPix
+try:
+    from astropy_healpix import HEALPix
+except ImportError:
+    pass
 
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel

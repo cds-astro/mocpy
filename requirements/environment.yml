@@ -4,7 +4,6 @@ channels:
 
 dependencies:
 - astropy
-- astropy-healpix
 - matplotlib
 - pytest
 - pytest-cov
@@ -15,3 +14,4 @@ dependencies:
   - networkx
   - lark-parser
   - cdshealpix
+  - astropy_healpix

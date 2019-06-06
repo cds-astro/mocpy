@@ -1,7 +1,6 @@
 import numpy as np
-
-from astropy_healpix import HEALPix
-from astropy.coordinates import ICRS
+from astropy.coordinates import ICRS, SkyCoord
+import cdshealpix
 
 from astropy.wcs.utils import skycoord_to_pixel
 
@@ -22,8 +21,11 @@ def compute_healpix_vertices(depth, ipix, wcs):
     if depth < 3:
         step = 2
 
-    hp = HEALPix(order="nested", nside=(1 << depth), frame=ICRS())
-    ipix_boundaries = hp.boundaries_skycoord(ipix, step=step)
+    ipix_lon, ipix_lat = cdshealpix.vertices(ipix, depth)
+        
+    ipix_lon = ipix_lon[:, [2, 3, 0, 1]]
+    ipix_lat = ipix_lat[:, [2, 3, 0, 1]]
+    ipix_boundaries = SkyCoord(ipix_lon, ipix_lat, frame=ICRS())
     # Projection on the given WCS
     xp, yp = skycoord_to_pixel(ipix_boundaries, wcs=wcs)
 
@@ -32,21 +34,21 @@ def compute_healpix_vertices(depth, ipix, wcs):
     c3 = np.vstack((xp[:, 2], yp[:, 2])).T
     c4 = np.vstack((xp[:, 3], yp[:, 3])).T
 
-    if depth < 3:
-        c5 = np.vstack((xp[:, 4], yp[:, 4])).T
-        c6 = np.vstack((xp[:, 5], yp[:, 5])).T
-        c7 = np.vstack((xp[:, 6], yp[:, 6])).T
-        c8 = np.vstack((xp[:, 7], yp[:, 7])).T
+    # if depth < 3:
+    #     c5 = np.vstack((xp[:, 4], yp[:, 4])).T
+    #     c6 = np.vstack((xp[:, 5], yp[:, 5])).T
+    #     c7 = np.vstack((xp[:, 6], yp[:, 6])).T
+    #     c8 = np.vstack((xp[:, 7], yp[:, 7])).T
 
-        cells = np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
+    #     cells = np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
 
-        path_vertices = cells.reshape((9*c1.shape[0], 2))
-        single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
-    else:
-        cells = np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
+    #     path_vertices = cells.reshape((9*c1.shape[0], 2))
+    #     single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+    # else:
+    cells = np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
 
-        path_vertices = cells.reshape((5*c1.shape[0], 2))
-        single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+    path_vertices = cells.reshape((5*c1.shape[0], 2))
+    single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
 
     codes = np.tile(single_code, c1.shape[0])
 

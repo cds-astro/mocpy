@@ -17,8 +17,9 @@ setup(name='MOCPy',
     author_email='thomas.boch@astro.unistra.fr',
     license='BSD',
     url='https://github.com/cds-astro/mocpy',
-    install_requires=['astropy',
-        'astropy_healpix',
+    # astropy_healpix is now an optional dependency
+    install_requires=[
+        'astropy',
         'cdshealpix',
         'matplotlib', # Used in fill and border
         'networkx', # Used in get_boundaries

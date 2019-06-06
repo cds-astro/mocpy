@@ -1,6 +1,5 @@
 import numpy as np
 
-from astropy_healpix import HEALPix
 from astropy.coordinates import ICRS
 from astropy.wcs.utils import skycoord_to_pixel
 
@@ -13,37 +12,36 @@ def backface_culling(xp, yp):
     vx = xp
     vy = yp
 
-    def cross_product(vx, vy, i):
+    def compute_vector_at_index(X, Y, i):
         cur = i
-        prev = (i - 1) % 4
         next = (i + 1) % 4
 
-        # Construct the first vector from A to B
-        x1 = vx[:, cur] - vx[:, prev]
-        y1 = vy[:, cur] - vy[:, prev]
-        z1 = np.zeros(x1.shape)
+        x = X[:, next] - X[:, cur]
+        y = Y[:, next] - Y[:, cur]
+        z = np.zeros(x.shape)
 
-        v1 = np.vstack((x1, y1, z1)).T
-        # Construct the second vector from B to C
-        x2 = vx[:, next] - vx[:, cur]
-        y2 = vy[:, next] - vy[:, cur]
-        z2 = np.zeros(x2.shape)
-
-        v2 = np.vstack((x2, y2, z2)).T
-        # Compute the cross product between the two
-        return np.cross(v1, v2)
+        v = np.vstack((x, y, z)).T
+        return v
 
     # A ----- B
     #  \      |
     #   D-----C
     # Compute the cross product between AB and BC
     # and the cross product between BC and CD
-    ABC = cross_product(vx, vy, 1)
-    CDA = cross_product(vx, vy, 3)
+    AB = compute_vector_at_index(vx, vy, 0)
+    BC = compute_vector_at_index(vx, vy, 1)
+    CD = compute_vector_at_index(vx, vy, 2)
+    DA = compute_vector_at_index(vx, vy, 3)
 
-    frontface_cells  = (ABC[:, 2] < 0) & (CDA[:, 2] < 0)
+    ABC = np.cross(AB, BC)
+    BCD = np.cross(BC, CD)
+    CDA = np.cross(CD, DA)
+    DAB = np.cross(DA, AB)
+
+    tol = -0.1
+    frontface_cells = (ABC[:, 2] <= tol) & (CDA[:, 2] <= tol) & (BCD[:, 2] <= tol) & (DAB[:, 2] <= tol)
+
     frontface_cells = np.asarray(frontface_cells)
-
     vx = vx[frontface_cells]
     vy = vy[frontface_cells]
 
@@ -63,15 +61,12 @@ def from_moc(depth_ipix_d, wcs):
 
     ipix_d = {}
     for depth in range(min_depth, max_split_depth + 1):
-        hp = HEALPix(nside=(1 << depth), order='nested', frame=ICRS())
+        ipix_lon, ipix_lat = cdshealpix.vertices(ipixels, depth)
+        
+        ipix_lon = ipix_lon[:, [2, 3, 0, 1]]
+        ipix_lat = ipix_lat[:, [2, 3, 0, 1]]
+        ipix_vertices = SkyCoord(ipix_lon, ipix_lat, frame=ICRS())
 
-        ipix_vertices = hp.boundaries_skycoord(ipixels, step=1)
-
-        # WARN: Precision error on cdshealpix vertices ?
-        #ipix_lon, ipix_lat = cdshealpix.vertices(ipixels, depth)
-        #ipix_lon = ipix_lon[:, [2, 3, 0, 1]]
-        #ipix_lat = ipix_lat[:, [2, 3, 0, 1]]
-        #ipix_vertices = SkyCoord(ipix_lon, ipix_lat, frame=ICRS())
         # Projection on the given WCS
         xp, yp = skycoord_to_pixel(coords=ipix_vertices, wcs=wcs)
         _, _, frontface_id = backface_culling(xp, yp)
@@ -85,6 +80,7 @@ def from_moc(depth_ipix_d, wcs):
 
         next_depth = str(depth + 1)
         ipixels = []
+        
         if next_depth in depth_ipix_d:
             ipixels = depth_ipix_d[next_depth]
 
