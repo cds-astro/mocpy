@@ -72,8 +72,11 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        min_times = np.asarray(min_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-        max_times = np.asarray(max_times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        min_times_jd = min_times.jd.astype(np.float64)
+        max_times_jd = max_times.jd.astype(np.float64)
+
+        min_times = np.asarray(min_times_jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        max_times = np.asarray(max_times_jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
 
         min_times = min_times.reshape((min_times.shape[0], 1))
         max_times = max_times.reshape((max_times.shape[0], 1))
