@@ -8,6 +8,14 @@ environment:
     # Note: TWINE_PASSWORD is set in Appveyor settings
     CIBW_BEFORE_BUILD: pip install setuptools-rust
   matrix:
+    # Nightly 32-bit MSVC
+    - channel: nightly
+      target: i686-pc-windows-msvc
+      PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "32"
+      CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp36-* cp37-*"
+    # Nightly 64-bit MSVC
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python35-x64"
@@ -20,6 +28,12 @@ environment:
       PYTHON_VERSION: "3.6.x"
       PYTHON_ARCH: "64"
       CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp37-*"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-*"
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python37-x64"
