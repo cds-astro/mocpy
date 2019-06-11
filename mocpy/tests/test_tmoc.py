@@ -18,10 +18,9 @@ def test_empty_tmoc():
     with pytest.raises(ValueError):
         max_time = tmoc.max_time
 
-    """tmoc_ranges = TimeMOC.from_time_ranges(times, times)
+    tmoc_ranges = TimeMOC.from_time_ranges(times, times)
     assert tmoc_ranges.empty()
     assert tmoc_ranges.total_duration == 0
-    """
 
 def test_simple_tmoc():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
@@ -46,12 +45,11 @@ def test_tmoc_from_time_ranges():
 
     assert tmoc == tmoc2
 
-    '''with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         tmoc_ranges = TimeMOC.from_time_ranges(
             Time([], format="jd", scale="tdb"),
             Time([3], format="jd", scale="tdb")
         )
-    '''
 
 def test_add_neighbours():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
