@@ -461,7 +461,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     
     #[pyfn(m, "from_healpix_cells")]
-    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> PyResult<Py<PyArray2<u64>>> {
+    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> Py<PyArray2<u64>> {
         let mut pixels = pixels.as_array().to_owned();
         let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
         
@@ -491,7 +491,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         let result = intervals_to_2darray(intervals);
-        Ok(result.into_pyarray(py).to_owned())
+        result.into_pyarray(py).to_owned()
     }
 
     Ok(())
