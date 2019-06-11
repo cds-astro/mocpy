@@ -375,6 +375,44 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         result.into_pyarray(py).to_owned()
     }
 
+    #[pyfn(m, "from_time_ranges")]
+    fn from_time_ranges(py: Python, min_times: &PyArray1<f64>, max_times: &PyArray1<f64>) -> PyResult<Py<PyArray2<u64>>> {
+        let min_times = min_times.as_array();
+        let max_times = max_times.as_array();
+
+        if min_times.shape() != max_times.shape() {
+            Err(exceptions::ValueError::py_err("min and max ranges have not the same shape"))
+        } else {
+            if min_times.is_empty() {
+                return Ok(Array::zeros((1, 0))
+                    .into_pyarray(py)
+                    .to_owned());
+            }
+            let shape = (min_times.shape()[0], 1);
+
+            let min_times = min_times
+                .into_shape(shape)
+                .unwrap();
+            let max_times = max_times
+                .into_shape(shape)
+                .unwrap();
+
+            let min_times = &min_times * &Array::from_elem(shape, 86400000000_f64);
+            let min_times = min_times.mapv(|e| e as u64);
+
+            let max_times = &max_times * &Array::from_elem(shape, 86400000000_f64);
+            let max_times = max_times.mapv(|e| e as u64 + 1);
+
+            let ranges = stack![Axis(1), min_times, max_times].to_owned();
+            let intervals = unsafe {
+                array2d_to_intervals(ranges, true, None, true)
+            };
+
+            let result = intervals_to_2darray(intervals);
+            Ok(result.into_pyarray(py).to_owned())
+        }
+    }
+
     #[pyfn(m, "to_uniq")]
     fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
         let input = nested.as_array().to_owned();

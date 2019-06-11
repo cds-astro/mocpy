@@ -9,6 +9,8 @@ from astropy.time import Time, TimeDelta
 from ..interval_set import IntervalSet
 from ..abstract_moc import AbstractMOC
 
+from .. import core
+
 __author__ = "Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
@@ -72,21 +74,14 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        min_times_jd = min_times.jd.astype(np.float64)
-        max_times_jd = max_times.jd.astype(np.float64)
-
-        min_times = np.asarray(min_times_jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-        max_times = np.asarray(max_times_jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-
-        min_times = min_times.reshape((min_times.shape[0], 1))
-        max_times = max_times.reshape((max_times.shape[0], 1))
-
-        intervals = np.hstack((min_times, max_times + 1))
-
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
+        intervals = core.from_time_ranges(
+            min_times.jd.astype(np.float64),
+            max_times.jd.astype(np.float64),
+        )
 
-        tmoc = TimeMOC(IntervalSet(intervals))
+        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
         return tmoc.degrade_to_order(depth)
 
     def add_neighbours(self):
