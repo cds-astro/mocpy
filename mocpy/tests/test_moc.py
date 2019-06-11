@@ -5,6 +5,7 @@ import sys
 import numpy as np
 
 from astropy.coordinates import SkyCoord, ICRS, Angle
+from astropy.io.votable import parse_single_table
 import astropy.units as u
 from astropy.io import fits
 
@@ -71,6 +72,19 @@ def test_from_healpix_cells():
 def test_moc_from_fits():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
     moc = MOC.from_fits(fits_path)
+
+
+def test_moc_consistent_with_aladin():
+    truth = MOC.from_fits('resources/CDS-I-125A-catalog_MOC.fits')
+    table = parse_single_table("resources/I_125A_catalog.vot").to_table()
+
+    moc = MOC.from_lonlat(
+        table['_RAJ2000'].T * u.deg,
+        table['_DEJ2000'].T * u.deg,
+        max_norder=8
+    )
+
+    assert moc == truth
 
 
 def test_moc_from_fits_images():

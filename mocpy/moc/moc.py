@@ -569,13 +569,6 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The MOC
         """
-        # TODO: Code it in rust
-        if ipix.shape != depth.shape:
-            raise IndexError('ipix and depth arrays must have the same shape')
-
-        if fully_covered is not None and ipix.shape != fully_covered.shape:
-            raise IndexError('ipix and fully_covered arrays must have the same shape')
-
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
 

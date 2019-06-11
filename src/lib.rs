@@ -381,7 +381,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let max_times = max_times.as_array();
 
         if min_times.shape() != max_times.shape() {
-            Err(exceptions::ValueError::py_err("min and max ranges have not the same shape"))
+            Err(exceptions::IndexError::py_err("min and max ranges have not the same shape"))
         } else {
             if min_times.is_empty() {
                 return Ok(Array::zeros((1, 0))
@@ -461,11 +461,15 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     
     #[pyfn(m, "from_healpix_cells")]
-    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> Py<PyArray2<u64>> {
+    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> PyResult<Py<PyArray2<u64>>> {
         let mut pixels = pixels.as_array().to_owned();
         let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
         
         let depth = depth.as_array().to_owned();
+
+        if pixels.shape() != depth.shape() {
+            return Err(exceptions::IndexError::py_err("pixels and depth arrays must have the same shape"));
+        }
 
         Zip::from(&mut pixels)
             .and(&mut pixels_1)
@@ -487,7 +491,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         let result = intervals_to_2darray(intervals);
-        result.into_pyarray(py).to_owned()
+        Ok(result.into_pyarray(py).to_owned())
     }
 
     Ok(())

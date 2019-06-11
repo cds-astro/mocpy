@@ -14,9 +14,13 @@ def test_empty_tmoc():
 
     with pytest.raises(ValueError):
         min_time = tmoc.min_time
-    
+
     with pytest.raises(ValueError):
         max_time = tmoc.max_time
+
+    tmoc_ranges = TimeMOC.from_time_ranges(times, times)
+    assert tmoc_ranges.empty()
+    assert tmoc_ranges.total_duration == 0
 
 def test_simple_tmoc():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
@@ -26,7 +30,7 @@ def test_simple_tmoc():
 
     tmoc.write('tmoc.txt', format='json', overwrite=True)
 
-def test_tmoc_building():
+def test_tmoc_from_time_ranges():
     """
     Assert a correct tmoc loaded from a fits file is equal to the tmoc built from a CSV file
     containing a list of time intervals
@@ -40,6 +44,12 @@ def test_tmoc_building():
                                      delta_t=TimeMOC.order_to_time_resolution(29))
 
     assert tmoc == tmoc2
+
+    with pytest.raises(IndexError):
+        tmoc_ranges = TimeMOC.from_time_ranges(
+            Time([], format="mjd", scale="tdb"),
+            Time([3], format="mjd", scale="tdb")
+        )
 
 def test_add_neighbours():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
