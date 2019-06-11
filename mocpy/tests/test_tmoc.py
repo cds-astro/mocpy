@@ -48,8 +48,8 @@ def test_tmoc_from_time_ranges():
 
     '''with pytest.raises(IndexError):
         tmoc_ranges = TimeMOC.from_time_ranges(
-            Time([], format="mjd", scale="tdb"),
-            Time([3], format="mjd", scale="tdb")
+            Time([], format="jd", scale="tdb"),
+            Time([3], format="jd", scale="tdb")
         )
     '''
 

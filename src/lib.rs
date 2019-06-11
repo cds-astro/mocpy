@@ -467,9 +467,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         
         let depth = depth.as_array().to_owned();
 
-        if pixels.shape() != depth.shape() {
+        /*if pixels.shape() != depth.shape() {
             return Err(exceptions::IndexError::py_err("pixels and depth arrays must have the same shape"));
-        }
+        }*/
 
         Zip::from(&mut pixels)
             .and(&mut pixels_1)
