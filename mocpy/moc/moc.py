@@ -569,6 +569,12 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The MOC
         """
+        if ipix.shape != depth.shape:
+            raise IndexError("pixels and depth arrays must have the same shape")
+
+        if fully_covered is not None and fully_covered.shape != ipix.shape:
+            raise IndexError("fully covered and depth arrays must have the same shape")
+
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
 

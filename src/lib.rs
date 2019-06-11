@@ -381,7 +381,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let max_times = max_times.as_array();
 
         if min_times.shape() != max_times.shape() {
-            Err(exceptions::IndexError::py_err("min and max ranges have not the same shape"))
+            Err(exceptions::ValueError::py_err("min and max ranges have not the same shape"))
         } else {
             if min_times.is_empty() {
                 return Ok(Array::zeros((1, 0))
