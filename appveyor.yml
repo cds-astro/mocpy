@@ -48,6 +48,7 @@ environment:
       CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-*"
 
 install:
+  - echo %APPVEYOR_REPO_TAG%
   # Install cargo. See: https://github.com/starkat99/appveyor-rust/blob/master/appveyor.yml
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init -yv --default-toolchain nightly --default-host %target%
