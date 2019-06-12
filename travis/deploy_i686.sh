@@ -10,7 +10,7 @@ set -e
 
 ### Build the wheels ###
 $PIP install cibuildwheel==0.11.1 setuptools-rust
-export CIBW_BEFORE_BUILD="yum install -y freetype-devel &&
+export CIBW_BEFORE_BUILD="yum install -y freetype freetype-devel &&
  yum install -y libpng-devel &&
  yum install -y pkgconfig &&
  pip install setuptools-rust &&
