@@ -78,14 +78,13 @@ jobs:
           --tty
           --detach
           "${DOCKER_IMAGE_LINUX_32}"
-      before_script:
       script:
         - >
           docker exec 
           --interactive
           --tty
           "${DOCKER_CONTAINER_LINUX_32}"
-          sh -c "cd /mnt/mocpy && ./travis/testing_py3_ubuntu_32.sh"
+          sh -c "cd /mnt/mocpy && ./travis/testing_i686.sh"
     - name: "Python=3.7 OSX"
       os: osx
       python: 3.7
@@ -134,7 +133,7 @@ jobs:
       #### DEPLOYING STAGE ####
     - stage: Deploying
       name: "manylinux1_x86_64"
-      # Job generating the wheels for Linux 32-bit platforms
+      # Job generating the wheels for Linux 64-bit platforms
       os: linux
       sudo: required
       env:
@@ -142,21 +141,19 @@ jobs:
         - PIP=pip
         - PYTHON=python3
       services:
-        # We use docker for generating the wheels for Linux.
         - docker
       script: ./travis/deploy.sh
-    # - name: "manylinux1_i686"
-    #   # Job generating the wheels for Linux 64-bit platforms
-    #   os: linux
-    #   sudo: required
-    #   env:
-    #     - CIBW_SKIP="*manylinux1_x86_64* cp27-* cp34-*"
-    #     - PIP=pip
-    #     - PYTHON=python3
-    #   services:
-    #     # We use docker for generating the wheels for Linux.
-    #     - docker
-    #   script: ./travis/deploy.sh
+    - name: "manylinux1_i686"
+      # Job generating the wheels for Linux 32-bit platforms
+      os: linux
+      sudo: required
+      env:
+        - CIBW_SKIP="*manylinux1_x86_64* cp27-* cp34-*"
+        - PIP=pip
+        - PYTHON=python3
+      services:
+        - docker
+      script: ./travis/deploy.sh
     - name: "OSX"
       os: osx
       sudo: required

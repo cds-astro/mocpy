@@ -15,6 +15,18 @@ environment:
       PYTHON_VERSION: "3.5.x"
       PYTHON_ARCH: "32"
       CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp36-* cp37-*"
+    - channel: nightly
+      target: i686-pc-windows-msvc
+      PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "32"
+      CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp35-* cp37-*"
+    - channel: nightly
+      target: i686-pc-windows-msvc
+      PYTHON: "C:\\Python37"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "32"
+      CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp35-* cp36-*"
     # Nightly 64-bit MSVC
     - channel: nightly
       target: x86_64-pc-windows-msvc
@@ -69,13 +81,13 @@ test_script:
 
 after_test:
   - ps: |
-      # if ($env:APPVEYOR_REPO_TAG -eq $true)
-      # {
-      cibuildwheel --output-dir dist
-      # Upload to PyPI if the tests succeed
-      "%PYTHON%\\python.exe -m pip install twine"
-      # python -m twine upload "dist\\*.whl" --skip-existing
-      # }
+      if ($env:APPVEYOR_REPO_TAG -eq $true)
+      {
+        cibuildwheel --output-dir dist
+        # Upload to PyPI if the tests succeed
+        "%PYTHON%\\python.exe -m pip install twine"
+        python -m twine upload "dist\\*.whl" --skip-existing
+      }
 
 artifacts:
   - path: "dist\\*.whl"
