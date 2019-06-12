@@ -183,4 +183,4 @@ intersphinx_mapping = {
 }
 
 def setup(app):
-    app.add_javascript("js/copybutton.js")
+    pass
