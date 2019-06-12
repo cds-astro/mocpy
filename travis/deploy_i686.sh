@@ -15,6 +15,7 @@ export CIBW_BEFORE_BUILD="yum install -y libpng-devel &&
  wget https://download.savannah.gnu.org/releases/freetype/freetype-2.4.0.tar.gz &&
  tar -zxvf freetype-2.4.0.tar.gz &&
  cd freetype-2.4.0/ &&
+ make &&
  make install &&
  cd .. &&
  pip install setuptools-rust &&
