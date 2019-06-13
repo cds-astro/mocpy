@@ -14,6 +14,7 @@ git config --global user.name "$GH_NAME"
 
 git remote rm origin
 git remote add cds-astro https://"$GH_NAME":"$GH_TOKEN"@github.com/cds-astro/mocpy.git
+git fetch cds-astro
 
 git checkout gh-pages
 rm -rf *
