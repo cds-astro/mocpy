@@ -8,15 +8,17 @@ env:
     - TWINE_USERNAME=bmatthieu3
     - DOCKER_IMAGE_LINUX_32=daald/ubuntu32:xenial
     - DOCKER_CONTAINER_LINUX_32=ubuntu32_container
+    - DOCKER_CONTAINER_DEPLOY_DOC=deploy_doc
 
 # Define the order of the stages
 stages:
-  - Testing
   # Stage reponsible for building and publishing the wheels
   # to PyPI. Architecture supported:
   # - manylinux1_x86_64 py3.5->3.7
   # - osx py3.5->3.7
   - Deploying
+  - Testing
+
 
 addons:
   apt:
@@ -132,7 +134,29 @@ jobs:
         - cd ..
     #### DEPLOYING STAGE ####
     - stage: Deploying
-      name: "manylinux1_x86_64"
+      name: "Update doc to gh-pages"
+      os: linux
+      services:
+        - docker
+      before_install:
+        - docker pull ubuntu
+        - >
+          docker run
+          --volume ${PWD}:/mnt/mocpy
+          --name "${DOCKER_CONTAINER_DEPLOY_DOC}"
+          --rm
+          --interactive
+          --tty
+          --detach
+          ubuntu
+      script:
+        - >
+          docker exec 
+          --interactive
+          --tty
+          "${DOCKER_CONTAINER_DEPLOY_DOC}"
+          sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
+    - name: "manylinux1_x86_64"
       # Job generating the wheels for Linux 64-bit platforms
       os: linux
       sudo: required
