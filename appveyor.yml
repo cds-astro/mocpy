@@ -82,9 +82,9 @@ after_test:
       if ($env:APPVEYOR_REPO_TAG -eq $true)
       {
         cibuildwheel --output-dir dist
+        python -m pip install twine
         # Upload to PyPI if the tests succeed
-        "%PYTHON%\\python.exe -m pip install twine"
-        "%PYTHON%\\python.exe -m twine upload dist\\*.whl --skip-existing"
+        python -m twine upload "dist\\*.whl" --skip-existing
       }
 
 artifacts:
