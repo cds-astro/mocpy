@@ -102,22 +102,22 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.add_neighbours" title="mocpy.TimeMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.add_neighbours" title="mocpy.TimeMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>(self)</p></td>
 <td><p>Add all the pixels at max order in the neighbourhood of the moc</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.complement" title="mocpy.TimeMOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.complement" title="mocpy.TimeMOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>(self)</p></td>
 <td><p>Returns the complement of the MOC instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.contains" title="mocpy.TimeMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(times[, keep_inside, delta_t])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.contains" title="mocpy.TimeMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(self, times[, keep_inside, delta_t])</p></td>
 <td><p>Get a mask array (e.g.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.degrade_to_order" title="mocpy.TimeMOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(new_order)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.degrade_to_order" title="mocpy.TimeMOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(self, new_order)</p></td>
 <td><p>Degrades the MOC instance to a new, less precise, MOC.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.difference" title="mocpy.TimeMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(another_moc[, delta_t])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.difference" title="mocpy.TimeMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(self, another_moc[, delta_t])</p></td>
 <td><p>Difference between self and moc.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.empty" title="mocpy.TimeMOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.empty" title="mocpy.TimeMOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>(self)</p></td>
 <td><p>Checks whether the MOC is empty.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_fits" title="mocpy.TimeMOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
@@ -135,28 +135,28 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_times" title="mocpy.TimeMOC.from_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times</span></code></a>(times[, delta_t])</p></td>
 <td><p>Create a TimeMOC from a <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.intersection" title="mocpy.TimeMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc[, delta_t])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.intersection" title="mocpy.TimeMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(self, another_moc[, delta_t])</p></td>
 <td><p>Intersection between self and moc.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.order_to_time_resolution" title="mocpy.TimeMOC.order_to_time_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_time_resolution</span></code></a>(order)</p></td>
 <td><p>Convert an TimeMoc order to its equivalent time</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.plot" title="mocpy.TimeMOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([title, view])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.plot" title="mocpy.TimeMOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(self[, title, view])</p></td>
 <td><p>Plot the TimeMoc in a time window.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.remove_neighbours" title="mocpy.TimeMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.remove_neighbours" title="mocpy.TimeMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>(self)</p></td>
 <td><p>Remove all the pixels at max order located at the bound of the moc</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.serialize" title="mocpy.TimeMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.serialize" title="mocpy.TimeMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>(self[, format, optional_kw_dict])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.time_resolution_to_order" title="mocpy.TimeMOC.time_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_resolution_to_order</span></code></a>(delta_time)</p></td>
 <td><p>Convert a time resolution to a TimeMoc order.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.union" title="mocpy.TimeMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc[, delta_t])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.union" title="mocpy.TimeMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(self, another_moc[, delta_t])</p></td>
 <td><p>Union between self and moc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.write" title="mocpy.TimeMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.write" title="mocpy.TimeMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(self, path[, format, overwrite, …])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
@@ -174,7 +174,7 @@
 </table>
 <dl class="method">
 <dt id="mocpy.TimeMOC.add_neighbours">
-<code class="sig-name descname">add_neighbours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.add_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_neighbours</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.add_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add all the pixels at max order in the neighbourhood of the moc</p>
 <dl class="field-list">
 <dt class="field-odd">Returns</dt>
@@ -188,7 +188,7 @@
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.complement">
-<code class="sig-name descname">complement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.complement" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">complement</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.complement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the complement of the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns</dt>
@@ -219,7 +219,7 @@ a lot of time without big pauses.</p>
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.contains">
-<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param">times</em>, <em class="sig-param">keep_inside=True</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.contains" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">times</em>, <em class="sig-param">keep_inside=True</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the
 TMOC instance.</p>
 <dl class="field-list">
@@ -247,7 +247,7 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.degrade_to_order">
-<code class="sig-name descname">degrade_to_order</code><span class="sig-paren">(</span><em class="sig-param">new_order</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">degrade_to_order</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">new_order</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
 <dd><p>Degrades the MOC instance to a new, less precise, MOC.</p>
 <p>The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
 degraded MOC is set to <code class="docutils literal notranslate"><span class="pre">new_order</span></code>.</p>
@@ -269,7 +269,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.difference">
-<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.difference" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.difference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Difference between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
 to set a time resolution for performing the tmoc diff</p>
 <dl class="field-list">
@@ -294,13 +294,13 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.empty">
-<code class="sig-name descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.empty" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">empty</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the MOC is empty.</p>
 <p>A MOC is empty when its list of HEALPix cell ranges is empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>result: bool</strong></dt><dd><p>True if the MOC instance is empty.</p>
+<dt>result: bool</dt><dd><p>True if the MOC instance is empty.</p>
 </dd>
 </dl>
 </dd>
@@ -425,7 +425,7 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.intersection">
-<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.intersection" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersection between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
 to set a time resolution for performing the tmoc intersection</p>
 <dl class="field-list">
@@ -504,7 +504,7 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='TimeMoc'</em>, <em class="sig-param">view=(None</em>, <em class="sig-param">None)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">title='TimeMoc'</em>, <em class="sig-param">view=(None</em>, <em class="sig-param">None)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the TimeMoc in a time window.</p>
 <p>This method uses interactive matplotlib. The user can move its mouse through the plot to see the
 time (at the mouse position).</p>
@@ -523,7 +523,7 @@ all the observation time window is rendered).</p>
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.remove_neighbours">
-<code class="sig-name descname">remove_neighbours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.remove_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">remove_neighbours</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.remove_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all the pixels at max order located at the bound of the moc</p>
 <dl class="field-list">
 <dt class="field-odd">Returns</dt>
@@ -537,7 +537,7 @@ all the observation time window is rendered).</p>
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.serialize">
-<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">format='fits'</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.serialize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.serialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serializes the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
@@ -595,7 +595,7 @@ total duration of all the observation times of the tmoc</p>
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.union">
-<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.union" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">delta_t=&lt;TimeDelta object: scale='tdb' format='sec' value=1800.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.TimeMOC.union" title="Permalink to this definition">¶</a></dt>
 <dd><p>Union between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
 to set a time resolution for performing the tmoc union</p>
 <dl class="field-list">
@@ -620,7 +620,7 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="method">
 <dt id="mocpy.TimeMOC.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">overwrite=False</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">path</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">overwrite=False</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">

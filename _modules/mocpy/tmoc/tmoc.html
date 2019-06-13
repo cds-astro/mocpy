@@ -71,6 +71,8 @@
 <span class="kn">from</span> <span class="nn">..interval_set</span> <span class="k">import</span> <span class="n">IntervalSet</span>
 <span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="k">import</span> <span class="n">AbstractMOC</span>
 
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">core</span>
+
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
 
@@ -134,21 +136,14 @@
 <span class="sd">        -------</span>
 <span class="sd">        time_moc : `~mocpy.tmoc.TimeMOC`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">min_times_jd</span> <span class="o">=</span> <span class="n">min_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">max_times_jd</span> <span class="o">=</span> <span class="n">max_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-        <span class="n">min_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">min_times_jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
-        <span class="n">max_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">max_times_jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
-
-        <span class="n">min_times</span> <span class="o">=</span> <span class="n">min_times</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">min_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">max_times</span> <span class="o">=</span> <span class="n">max_times</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">max_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
-
-        <span class="n">intervals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">min_times</span><span class="p">,</span> <span class="n">max_times</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-
         <span class="c1"># degrade the TimeMoc to the order computed from ``delta_t``</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span>
+            <span class="n">min_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">max_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+        <span class="p">)</span>
 
-        <span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">))</span>
+        <span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">tmoc</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TimeMOC.add_neighbours"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.add_neighbours">[docs]</a>    <span class="k">def</span> <span class="nf">add_neighbours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

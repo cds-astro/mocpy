@@ -131,28 +131,28 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.add_neighbours" title="mocpy.MOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.add_neighbours" title="mocpy.MOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>(self)</p></td>
 <td><p>Extends the MOC instance so that it includes the HEALPix cells touching its border.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.border" title="mocpy.MOC.border"><code class="xref py py-obj docutils literal notranslate"><span class="pre">border</span></code></a>(ax, wcs, **kw_mpl_pathpatch)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.border" title="mocpy.MOC.border"><code class="xref py py-obj docutils literal notranslate"><span class="pre">border</span></code></a>(self, ax, wcs, \*\*kw_mpl_pathpatch)</p></td>
 <td><p>Draws the MOC border(s) on a matplotlib axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.complement" title="mocpy.MOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.complement" title="mocpy.MOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>(self)</p></td>
 <td><p>Returns the complement of the MOC instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.contains" title="mocpy.MOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(ra, dec[, keep_inside])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.contains" title="mocpy.MOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(self, ra, dec[, keep_inside])</p></td>
 <td><p>Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.degrade_to_order" title="mocpy.MOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(new_order)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.degrade_to_order" title="mocpy.MOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(self, new_order)</p></td>
 <td><p>Degrades the MOC instance to a new, less precise, MOC.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.difference" title="mocpy.MOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(another_moc, *args)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.difference" title="mocpy.MOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(self, another_moc, \*args)</p></td>
 <td><p>Difference between the MOC instance and other MOCs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.empty" title="mocpy.MOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.empty" title="mocpy.MOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>(self)</p></td>
 <td><p>Checks whether the MOC is empty.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.fill" title="mocpy.MOC.fill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fill</span></code></a>(ax, wcs, **kw_mpl_pathpatch)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.fill" title="mocpy.MOC.fill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fill</span></code></a>(self, ax, wcs, \*\*kw_mpl_pathpatch)</p></td>
 <td><p>Draws the MOC on a matplotlib axis.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_fits" title="mocpy.MOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
@@ -194,31 +194,31 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_vizier_table" title="mocpy.MOC.from_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_vizier_table</span></code></a>(table_id[, nside])</p></td>
 <td><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> object from a VizieR table.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>([order])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>(self[, order])</p></td>
 <td><p>Returns the sky coordinates defining the border(s) of the MOC.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.intersection" title="mocpy.MOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc, *args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.intersection" title="mocpy.MOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(self, another_moc, \*args)</p></td>
 <td><p>Intersection between the MOC instance and other MOCs.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.plot" title="mocpy.MOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([title, frame])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.plot" title="mocpy.MOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(self[, title, frame])</p></td>
 <td><p>Plot the MOC object using a mollweide projection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.query_simbad" title="mocpy.MOC.query_simbad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_simbad</span></code></a>([max_rows])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.query_simbad" title="mocpy.MOC.query_simbad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_simbad</span></code></a>(self[, max_rows])</p></td>
 <td><p>Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.query_vizier_table" title="mocpy.MOC.query_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_vizier_table</span></code></a>(table_id[, max_rows])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.query_vizier_table" title="mocpy.MOC.query_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_vizier_table</span></code></a>(self, table_id[, max_rows])</p></td>
 <td><p>Query a VizieR table for sources in the coverage of the MOC instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.remove_neighbours" title="mocpy.MOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.remove_neighbours" title="mocpy.MOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>(self)</p></td>
 <td><p>Removes from the MOC instance the HEALPix cells located at its border.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.serialize" title="mocpy.MOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.serialize" title="mocpy.MOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>(self[, format, optional_kw_dict])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.union" title="mocpy.MOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc, *args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.union" title="mocpy.MOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(self, another_moc, \*args)</p></td>
 <td><p>Union between the MOC instance and other MOCs.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.write" title="mocpy.MOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.write" title="mocpy.MOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(self, path[, format, overwrite, …])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
@@ -236,7 +236,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 </table>
 <dl class="method">
 <dt id="mocpy.MOC.add_neighbours">
-<code class="sig-name descname">add_neighbours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.add_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_neighbours</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.add_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extends the MOC instance so that it includes the HEALPix cells touching its border.</p>
 <p>The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.</p>
 <dl class="field-list">
@@ -251,7 +251,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 
 <dl class="method">
 <dt id="mocpy.MOC.border">
-<code class="sig-name descname">border</code><span class="sig-paren">(</span><em class="sig-param">ax</em>, <em class="sig-param">wcs</em>, <em class="sig-param">**kw_mpl_pathpatch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.border"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.border" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">border</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ax</em>, <em class="sig-param">wcs</em>, <em class="sig-param">**kw_mpl_pathpatch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.border"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.border" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws the MOC border(s) on a matplotlib axis.</p>
 <p>This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
 You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a> 
@@ -297,7 +297,7 @@ You are able to specify various styling kwargs for <a class="reference external"
 
 <dl class="method">
 <dt id="mocpy.MOC.complement">
-<code class="sig-name descname">complement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.complement" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">complement</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.complement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the complement of the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns</dt>
@@ -311,7 +311,7 @@ You are able to specify various styling kwargs for <a class="reference external"
 
 <dl class="method">
 <dt id="mocpy.MOC.contains">
-<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param">ra</em>, <em class="sig-param">dec</em>, <em class="sig-param">keep_inside=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.contains" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ra</em>, <em class="sig-param">dec</em>, <em class="sig-param">keep_inside=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -336,7 +336,7 @@ is false, contains will return the mask of the coordinates lying outside the MOC
 
 <dl class="method">
 <dt id="mocpy.MOC.degrade_to_order">
-<code class="sig-name descname">degrade_to_order</code><span class="sig-paren">(</span><em class="sig-param">new_order</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">degrade_to_order</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">new_order</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
 <dd><p>Degrades the MOC instance to a new, less precise, MOC.</p>
 <p>The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
 degraded MOC is set to <code class="docutils literal notranslate"><span class="pre">new_order</span></code>.</p>
@@ -358,7 +358,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="method">
 <dt id="mocpy.MOC.difference">
-<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.difference" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.difference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Difference between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -380,13 +380,13 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="method">
 <dt id="mocpy.MOC.empty">
-<code class="sig-name descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.empty" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">empty</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the MOC is empty.</p>
 <p>A MOC is empty when its list of HEALPix cell ranges is empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>result: bool</strong></dt><dd><p>True if the MOC instance is empty.</p>
+<dt>result: bool</dt><dd><p>True if the MOC instance is empty.</p>
 </dd>
 </dl>
 </dd>
@@ -395,7 +395,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="method">
 <dt id="mocpy.MOC.fill">
-<code class="sig-name descname">fill</code><span class="sig-paren">(</span><em class="sig-param">ax</em>, <em class="sig-param">wcs</em>, <em class="sig-param">**kw_mpl_pathpatch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.fill" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fill</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ax</em>, <em class="sig-param">wcs</em>, <em class="sig-param">**kw_mpl_pathpatch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.fill" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws the MOC on a matplotlib axis.</p>
 <p>This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
 You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
@@ -511,7 +511,7 @@ Must be of the same size of <code class="xref py py-obj docutils literal notrans
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>IndexError</strong></dt><dd><p>When <code class="xref py py-obj docutils literal notranslate"><span class="pre">ipix</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">fully_covered</span></code> do not have the same shape</p>
+<dt>IndexError</dt><dd><p>When <code class="xref py py-obj docutils literal notranslate"><span class="pre">ipix</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">fully_covered</span></code> do not have the same shape</p>
 </dd>
 </dl>
 </dd>
@@ -756,7 +756,7 @@ from a vizier catalog ID.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.get_boundaries">
-<code class="sig-name descname">get_boundaries</code><span class="sig-paren">(</span><em class="sig-param">order=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.get_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.get_boundaries" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_boundaries</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">order=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.get_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.get_boundaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sky coordinates defining the border(s) of the MOC.</p>
 <p>The border(s) are expressed as a list of SkyCoord.
 Each SkyCoord refers to the coordinates of one border of the MOC (i.e. 
@@ -777,7 +777,7 @@ By default the maximum depth of the MOC is taken.</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>DeprecationWarning</strong></dt><dd><p>This method is not stable and not tested! A future more stable algorithm will be implemented!</p>
+<dt>DeprecationWarning</dt><dd><p>This method is not stable and not tested! A future more stable algorithm will be implemented!</p>
 </dd>
 </dl>
 </dd>
@@ -786,7 +786,7 @@ By default the maximum depth of the MOC is taken.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.intersection">
-<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.intersection" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersection between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -814,7 +814,7 @@ By default the maximum depth of the MOC is taken.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='MOC'</em>, <em class="sig-param">frame=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">title='MOC'</em>, <em class="sig-param">frame=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the MOC object using a mollweide projection.</p>
 <p><strong>Deprecated</strong>: New <a class="reference internal" href="#mocpy.MOC.fill" title="mocpy.MOC.fill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fill</span></code></a> and <a class="reference internal" href="#mocpy.MOC.border" title="mocpy.MOC.border"><code class="xref py py-obj docutils literal notranslate"><span class="pre">border</span></code></a> methods produce more reliable results and allow you to specify additional 
 matplotlib style parameters.</p>
@@ -832,19 +832,19 @@ matplotlib style parameters.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.query_simbad">
-<code class="sig-name descname">query_simbad</code><span class="sig-paren">(</span><em class="sig-param">max_rows=10000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.query_simbad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.query_simbad" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">query_simbad</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">max_rows=10000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.query_simbad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.query_simbad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mocpy.MOC.query_vizier_table">
-<code class="sig-name descname">query_vizier_table</code><span class="sig-paren">(</span><em class="sig-param">table_id</em>, <em class="sig-param">max_rows=10000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.query_vizier_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.query_vizier_table" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">query_vizier_table</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">table_id</em>, <em class="sig-param">max_rows=10000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.query_vizier_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.query_vizier_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query a VizieR table for sources in the coverage of the MOC instance.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mocpy.MOC.remove_neighbours">
-<code class="sig-name descname">remove_neighbours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.remove_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">remove_neighbours</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.remove_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes from the MOC instance the HEALPix cells located at its border.</p>
 <p>The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.</p>
 <dl class="field-list">
@@ -859,7 +859,7 @@ matplotlib style parameters.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.serialize">
-<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">format='fits'</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.serialize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.serialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serializes the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
@@ -888,7 +888,7 @@ matplotlib style parameters.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.union">
-<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.union" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">another_moc</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.union" title="Permalink to this definition">¶</a></dt>
 <dd><p>Union between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -910,7 +910,7 @@ matplotlib style parameters.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">overwrite=False</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">path</em>, <em class="sig-param">format='fits'</em>, <em class="sig-param">overwrite=False</em>, <em class="sig-param">optional_kw_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.MOC.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">

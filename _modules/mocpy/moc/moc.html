@@ -631,12 +631,11 @@
 <span class="sd">        moc : `~mocpy.moc.MOC`</span>
 <span class="sd">            The MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO: Code it in rust</span>
         <span class="k">if</span> <span class="n">ipix</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">depth</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;ipix and depth arrays must have the same shape&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;pixels and depth arrays must have the same shape&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">fully_covered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ipix</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">fully_covered</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;ipix and fully_covered arrays must have the same shape&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fully_covered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fully_covered</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">ipix</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;fully covered and depth arrays must have the same shape&quot;</span><span class="p">)</span>
 
         <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span><span class="n">ipix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">),</span> <span class="n">depth</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
