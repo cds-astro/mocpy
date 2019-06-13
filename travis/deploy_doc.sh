@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 set -e
 
@@ -42,7 +42,3 @@ touch .nojekyll
 git add --all
 git commit -am "doc update"
 git push cds-astro gh-pages
-
-
-
-
