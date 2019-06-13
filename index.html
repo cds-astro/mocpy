@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to MOCPy’s documentation! &#8212; mocpy 0.6.0 documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Install" href="install.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="#"><span id="logotext1">astro</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="install.html" title="Install">
+	  next &raquo;
+	</a>
+      </li>
+      <li>
+	<a href="#">mocpy 0.6.0 documentation</a>
+	 &#187;
+      </li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-mocpy-s-documentation">
+<span id="index"></span><h1>Welcome to MOCPy’s documentation!<a class="headerlink" href="#welcome-to-mocpy-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples.html#loading-and-plotting-the-moc-of-sdss">Loading and plotting the MOC of SDSS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples.html#intersection-between-galex-and-sdss">Intersection between GALEX and SDSS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples.html#create-a-moc-from-a-concave-polygon">Create a MOC from a concave polygon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples.html#get-the-border-s-of-a-moc">Get the border(s) of a MOC</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#class-overview">Class overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contribute</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#setting-up-the-environment">Setting up the environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#building-the-documentation">Building the documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>MOCPy is a Python library allowing easy creation, parsing and manipulation
+of MOCs (Multi-Order Coverage maps).
+As of the version 0.6.0, MOCPy is only distributed for Python 3.5/3.6
+and 3.7. Python 2 users can still refer to the
+<a class="reference external" href="https://github.com/cds-astro/mocpy/releases/tag/v0.5.7">0.5.7</a> version.
+Its code is hosted on <a class="reference external" href="https://github.com/cds-astro/mocpy/">GitHub</a> and
+distributed under the BSD-3 license.</p>
+<p>MOC is an <a class="reference external" href="http://ivoa.net/documents/MOC/">IVOA standard</a> enabling description
+of arbitrary sky regions. Based on the HEALPix sky tessellation, it maps
+regions on the sky into hierarchically grouped predefined cells.</p>
+<p>MOCPy provides the <a class="reference internal" href="stubs/mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></a> and <a class="reference internal" href="stubs/mocpy.TimeMOC.html#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></a> classes handling
+respectively the manipulation of spatial and temporal MOCs.</p>
+<p>As an example, here is the sky coverage of the SDSS sky survey:</p>
+<p>(<a class="reference external" href="./examples/plot_SDSS_r.py">Source code</a>)</p>
+<div class="figure align-default">
+<img alt="_images/plot_SDSS_r1.png" src="_images/plot_SDSS_r1.png" />
+</div>
+<p>As well as its time coverage:</p>
+<p>(<a class="reference external" href="./examples/plot_TMOC_SDSS_r.py">Source code</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.png">png</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.hires.png">hires.png</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="_images/plot_TMOC_SDSS_r.png" src="_images/plot_TMOC_SDSS_r.png" />
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Welcome to MOCPy’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Install</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/index.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+  </p>
+</footer>
+  </body>
+</html>

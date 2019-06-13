@@ -1,0 +1,584 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>mocpy.tmoc.tmoc &#8212; mocpy 0.6.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../../_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../../index.html"><span id="logotext1">astro</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../../index.html">mocpy 0.6.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mocpy.tmoc.tmoc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="k">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+
+<span class="kn">from</span> <span class="nn">..interval_set</span> <span class="k">import</span> <span class="n">IntervalSet</span>
+<span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="k">import</span> <span class="n">AbstractMOC</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;BSD 3-Clause License&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;matthieu.baumann@astro.unistra.fr&quot;</span>
+
+
+<div class="viewcode-block" id="TimeMOC"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC">[docs]</a><span class="k">class</span> <span class="nc">TimeMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multi-order time coverage class. Experimental&quot;&quot;&quot;</span>
+    <span class="n">DAY_MICRO_SEC</span> <span class="o">=</span> <span class="mf">86400000000.</span>
+    <span class="c1"># default observation time : 30 min</span>
+    <span class="n">DEFAULT_OBSERVATION_TIME</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;sec&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_set</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interval_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_header_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;TIMESYS&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;JD&#39;</span><span class="p">,</span> <span class="s1">&#39;ref system JD BARYCENTRIC TT, 1 usec level 29&#39;</span><span class="p">)}</span>
+
+<div class="viewcode-block" id="TimeMOC.from_times"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.from_times">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_times</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a TimeMOC from a `astropy.time.Time`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times : `astropy.time.Time`</span>
+<span class="sd">            Astropy observation times</span>
+<span class="sd">        delta_t : `astropy.time.TimeDelta`, optional</span>
+<span class="sd">            The duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMOC order to represent the observations (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        time_moc : `~mocpy.tmoc.TimeMOC`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">times</span><span class="p">,</span> <span class="n">times</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="c1"># degrade the TimeMoc to the order computed from ``delta_t``</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">))</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeMOC.from_time_ranges"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.from_time_ranges">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_time_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">min_times</span><span class="p">,</span> <span class="n">max_times</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a TimeMOC from a range defined by two `astropy.time.Time`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        min_times : `astropy.time.Time`</span>
+<span class="sd">            astropy times defining the left part of the intervals</span>
+<span class="sd">        max_times : `astropy.time.Time`</span>
+<span class="sd">            astropy times defining the right part of the intervals</span>
+<span class="sd">        delta_t : `astropy.time.TimeDelta`, optional</span>
+<span class="sd">            the duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMOC order to represent the observations (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        time_moc : `~mocpy.tmoc.TimeMOC`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">min_times_jd</span> <span class="o">=</span> <span class="n">min_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">max_times_jd</span> <span class="o">=</span> <span class="n">max_times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">min_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">min_times_jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="n">max_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">max_times_jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+        <span class="n">min_times</span> <span class="o">=</span> <span class="n">min_times</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">min_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">max_times</span> <span class="o">=</span> <span class="n">max_times</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">max_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">min_times</span><span class="p">,</span> <span class="n">max_times</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># degrade the TimeMoc to the order computed from ``delta_t``</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+
+        <span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tmoc</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeMOC.add_neighbours"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.add_neighbours">[docs]</a>    <span class="k">def</span> <span class="nf">add_neighbours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add all the pixels at max order in the neighbourhood of the moc</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tmoc : `~mocpy.tmoc.TimeMOC`</span>
+<span class="sd">            self extended by one degree of neighbors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">IntervalSet</span><span class="o">.</span><span class="n">HPY_MAX_ORDER</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">))</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span>
+        <span class="c1"># WARN: astype gives the ownership/writeable of the array to python</span>
+        <span class="c1"># It is necessary for writing the array</span>
+        <span class="c1"># This will be removed as soon as this code is ported in rust</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+        <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_delta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">time_delta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">58</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span> <span class="o">=</span> <span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="TimeMOC.remove_neighbours"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.remove_neighbours">[docs]</a>    <span class="k">def</span> <span class="nf">remove_neighbours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all the pixels at max order located at the bound of the moc</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tmoc : `~mocpy.tmoc.TimeMOC`</span>
+<span class="sd">            self shrinked by one degree of neighbors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">IntervalSet</span><span class="o">.</span><span class="n">HPY_MAX_ORDER</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">))</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span>
+        <span class="c1"># WARN: astype gives the ownership/writeable of the array to python</span>
+        <span class="c1"># It is necessary for writing the array</span>
+        <span class="c1"># This will be removed as soon as this code is ported in rust</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+        <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">time_delta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">58</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_delta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">good_intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span> <span class="o">=</span> <span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="n">good_intervals</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">_process_degradation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Degrade (down-sampling) self and ``another_moc`` to ``order_op`` order</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        another_moc : `~mocpy.tmoc.TimeMoc`</span>
+<span class="sd">        order_op : int</span>
+<span class="sd">            the order in which self and ``another_moc`` will be down-sampled to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : (`~mocpy.tmoc.TimeMoc`, `~mocpy.tmoc.TimeMoc`)</span>
+<span class="sd">            self and ``another_moc`` degraded TimeMocs</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_order</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span> <span class="n">another_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">order_op</span> <span class="o">&gt;</span> <span class="n">max_order</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Requested time resolution for the operation cannot be applied.</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                      <span class="s1">&#39;The TimeMoc object resulting from the operation is of time resolution </span><span class="si">{0}</span><span class="s1"> sec.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="n">max_order</span><span class="p">)</span><span class="o">.</span><span class="n">sec</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+        <span class="n">self_degradation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">order_op</span><span class="p">)</span>
+        <span class="n">another_moc_degradation</span> <span class="o">=</span> <span class="n">another_moc</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">order_op</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">self_degradation</span><span class="p">,</span> <span class="n">another_moc_degradation</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="TimeMOC.intersection"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.intersection">[docs]</a>    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_moc</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Intersection between self and moc. ``delta_t`` gives the possibility to the user</span>
+<span class="sd">        to set a time resolution for performing the tmoc intersection</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        another_moc : `~mocpy.abstract_moc.AbstractMOC`</span>
+<span class="sd">            the MOC/TimeMOC used for performing the intersection with self</span>
+<span class="sd">        delta_t : `~astropy.time.TimeDelta`, optional</span>
+<span class="sd">            the duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMoc order to represent the observations. (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`</span>
+<span class="sd">            MOC object whose interval set corresponds to : self &amp; ``moc``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">order_op</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+
+        <span class="n">self_degraded</span><span class="p">,</span> <span class="n">moc_degraded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_degradation</span><span class="p">(</span><span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="n">self_degraded</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">moc_degraded</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeMOC.union"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_moc</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Union between self and moc. ``delta_t`` gives the possibility to the user</span>
+<span class="sd">        to set a time resolution for performing the tmoc union</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        another_moc : `~mocpy.abstract_moc.AbstractMOC`</span>
+<span class="sd">            the MOC/TimeMoc to bind to self</span>
+<span class="sd">        delta_t : `~astropy.time.TimeDelta`, optional</span>
+<span class="sd">            the duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMoc order to represent the observations. (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`</span>
+<span class="sd">            MOC object whose interval set corresponds to : self | ``moc``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">order_op</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+
+        <span class="n">self_degraded</span><span class="p">,</span> <span class="n">moc_degraded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_degradation</span><span class="p">(</span><span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="n">self_degraded</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">moc_degraded</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeMOC.difference"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.difference">[docs]</a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_moc</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Difference between self and moc. ``delta_t`` gives the possibility to the user</span>
+<span class="sd">        to set a time resolution for performing the tmoc diff</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        another_moc : `~mocpy.abstract_moc.AbstractMOC`</span>
+<span class="sd">            the MOC/TimeMoc to substract from self</span>
+<span class="sd">        delta_t : `~astropy.time.TimeDelta`, optional</span>
+<span class="sd">            the duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMoc order to represent the observations. (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMoc`</span>
+<span class="sd">            MOC object whose interval set corresponds to : self - ``moc``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">order_op</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+
+        <span class="n">self_degraded</span><span class="p">,</span> <span class="n">moc_degraded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_degradation</span><span class="p">(</span><span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="n">self_degraded</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">moc_degraded</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the total duration covered by the temporal moc</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        duration : `~astropy.time.TimeDelta`</span>
+<span class="sd">            total duration of all the observation times of the tmoc</span>
+<span class="sd">            total duration of all the observation times of the tmoc</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">total_time_us</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># The interval set is checked for consistency before looping over all the intervals</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">stop_time</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">:</span>
+            <span class="n">total_time_us</span> <span class="o">=</span> <span class="n">total_time_us</span> <span class="o">+</span> <span class="p">(</span><span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="n">total_time_us</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;sec&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">duration</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a percentage of fill between the min and max time the moc is defined.</span>
+
+<span class="sd">        A value near 0 shows a sparse temporal moc (i.e. the moc does not cover a lot</span>
+<span class="sd">        of time and covers very distant times. A value near 1 means that the moc covers</span>
+<span class="sd">        a lot of time without big pauses.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : float</span>
+<span class="sd">            fill percentage (between 0 and 1.)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_duration</span><span class="o">.</span><span class="n">jd</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_time</span><span class="p">)</span><span class="o">.</span><span class="n">jd</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the `~astropy.time.Time` time of the tmoc first observation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        min_time : `astropy.time.Time`</span>
+<span class="sd">            time of the first observation</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">min_time</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">min</span> <span class="o">/</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">min_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the `~astropy.time.Time` time of the tmoc last observation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        max_time : `~astropy.time.Time`</span>
+<span class="sd">            time of the last observation</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">max_time</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">max</span> <span class="o">/</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_time</span>
+
+<div class="viewcode-block" id="TimeMOC.contains"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the</span>
+<span class="sd">        TMOC instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times : `astropy.time.Time`</span>
+<span class="sd">            astropy times to check whether they are contained in the TMOC or not.</span>
+<span class="sd">        keep_inside : bool, optional</span>
+<span class="sd">            True by default. If so the filtered table contains only observations that are located the MOC.</span>
+<span class="sd">            If ``keep_inside`` is False, the filtered table contains all observations lying outside the MOC.</span>
+<span class="sd">        delta_t : `astropy.time.TimeDelta`, optional</span>
+<span class="sd">            the duration of one observation. It is set to 30 min by default. This data is used to compute the</span>
+<span class="sd">            more efficient TimeMOC order to represent the observations (Best order = the less precise order which</span>
+<span class="sd">            is able to discriminate two observations separated by ``delta_t``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array : `~numpy.darray`</span>
+<span class="sd">            A mask boolean array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># the requested order for filtering the astropy observations table is more precise than the order</span>
+        <span class="c1"># of the TimeMoc object</span>
+        <span class="n">current_max_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span>
+        <span class="n">new_max_order</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_max_order</span> <span class="o">&gt;</span> <span class="n">current_max_order</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Requested time resolution filtering cannot be applied.</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                      <span class="s1">&#39;Filtering is applied with a time resolution of </span><span class="si">{0}</span><span class="s1"> sec.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="n">current_max_order</span><span class="p">)</span><span class="o">.</span><span class="n">sec</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+        <span class="n">rough_tmoc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">new_max_order</span><span class="p">)</span>
+
+        <span class="n">pix_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd</span> <span class="o">*</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span><span class="p">)</span>
+        <span class="n">pix_arr</span> <span class="o">=</span> <span class="n">pix_arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">rough_tmoc</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span>
+        <span class="n">inf_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">pix_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pix_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+        <span class="n">sup_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">pix_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pix_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+
+        <span class="k">if</span> <span class="n">keep_inside</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">inf_arr</span> <span class="o">&amp;</span> <span class="n">sup_arr</span>
+            <span class="n">filtered_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="o">~</span><span class="n">inf_arr</span> <span class="o">|</span> <span class="o">~</span><span class="n">sup_arr</span>
+            <span class="n">filtered_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">filtered_rows</span></div>
+
+<div class="viewcode-block" id="TimeMOC.order_to_time_resolution"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.order_to_time_resolution">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">order_to_time_resolution</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert an TimeMoc order to its equivalent time</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        order : int</span>
+<span class="sd">            order to convert</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        delta_t : `~astropy.time.TimeDelta`</span>
+<span class="sd">            time equivalent to ``order``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">4</span><span class="o">**</span><span class="p">(</span><span class="mi">29</span> <span class="o">-</span> <span class="n">order</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;sec&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">delta_t</span></div>
+
+<div class="viewcode-block" id="TimeMOC.time_resolution_to_order"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.time_resolution_to_order">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a time resolution to a TimeMoc order.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        delta_time : `~astropy.time.TimeDelta`</span>
+<span class="sd">            time to convert</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        order : int</span>
+<span class="sd">            The less precise order which is able to discriminate two observations separated by ``delta_time``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">order</span> <span class="o">=</span> <span class="mi">29</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">delta_time</span><span class="o">.</span><span class="n">sec</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">order</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeMOC.plot"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;TimeMoc&#39;</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the TimeMoc in a time window.</span>
+
+<span class="sd">        This method uses interactive matplotlib. The user can move its mouse through the plot to see the</span>
+<span class="sd">        time (at the mouse position).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            The title of the plot. Set to &#39;TimeMoc&#39; by default.</span>
+<span class="sd">        view : (`~astropy.time.Time`, `~astropy.time.Time`), optional</span>
+<span class="sd">            Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.</span>
+<span class="sd">            all the observation time window is rendered).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="k">import</span> <span class="n">LinearSegmentedColormap</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="kn">import</span> <span class="nn">warnings</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This time moc is empty&#39;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">plot_order</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span> <span class="o">&gt;</span> <span class="n">plot_order</span><span class="p">:</span>
+            <span class="n">plotted_moc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">plot_order</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plotted_moc</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="n">min_jd</span> <span class="o">=</span> <span class="n">plotted_moc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jd</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">view</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="n">view</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">jd</span>
+        <span class="n">max_jd</span> <span class="o">=</span> <span class="n">plotted_moc</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jd</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">view</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">view</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">jd</span>
+
+        <span class="k">if</span> <span class="n">max_jd</span> <span class="o">&lt;</span> <span class="n">min_jd</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid selection: max_jd = </span><span class="si">{0}</span><span class="s2"> must be &gt; to min_jd = </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_jd</span><span class="p">,</span> <span class="n">min_jd</span><span class="p">))</span>
+
+        <span class="n">fig1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;iso&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">2000</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_jd</span> <span class="o">-</span> <span class="n">min_jd</span><span class="p">)</span> <span class="o">/</span> <span class="n">size</span>
+        <span class="n">min_jd_time</span> <span class="o">=</span> <span class="n">min_jd</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">Time</span><span class="p">([</span><span class="n">min_jd_time</span><span class="p">,</span> <span class="n">max_jd</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iso</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">70</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">s_time_us</span><span class="p">,</span> <span class="n">e_time_us</span><span class="p">)</span> <span class="ow">in</span> <span class="n">plotted_moc</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">:</span>
+            <span class="n">s_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">s_time_us</span> <span class="o">/</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span> <span class="o">-</span> <span class="n">min_jd_time</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta</span><span class="p">)</span>
+            <span class="n">e_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">e_time_us</span> <span class="o">/</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">DAY_MICRO_SEC</span> <span class="o">-</span> <span class="n">min_jd_time</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta</span><span class="p">)</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">s_index</span><span class="p">:(</span><span class="n">e_index</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="c1"># hack in case of full time mocs.</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="o">//</span><span class="mi">10</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="n">color_map</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="s1">&#39;w2r&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;#fffff0&#39;</span><span class="p">,</span> <span class="s1">&#39;#aa0000&#39;</span><span class="p">])</span>
+        <span class="n">color_map</span><span class="o">.</span><span class="n">set_under</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">color_map</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;bilinear&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">color_map</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">on_mouse_motion</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">txt</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">texts</span><span class="p">:</span>
+                <span class="n">txt</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">text</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+
+            <span class="n">time</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">+</span> <span class="n">min_jd_time</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+
+            <span class="n">tx</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">-</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">700</span><span class="p">))</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span>
+
+        <span class="n">cid</span> <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;motion_notify_event&#39;</span><span class="p">,</span> <span class="n">on_mouse_motion</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+
+
+<form action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right"> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+  </p>
+</footer>
+  </body>
+</html>
