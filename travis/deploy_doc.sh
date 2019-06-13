@@ -18,6 +18,7 @@ git remote add cds-astro https://"$GH_NAME":"$GH_TOKEN"@github.com/cds-astro/moc
 git checkout gh-pages
 rm -rf *
 
+
 git checkout cds-astro/master .
 
 curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
