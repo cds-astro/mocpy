@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Deploy mocpy for x86_64 archs with python3
 #
