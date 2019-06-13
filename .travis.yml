@@ -154,6 +154,9 @@ jobs:
           docker exec 
           --interactive
           --tty
+          --env GH_EMAIL="${GH_EMAIL}"
+          --env GH_NAME="${GH_NAME}"
+          --env GH_TOKEN="${GH_TOKEN}"
           "${DOCKER_CONTAINER_DEPLOY_DOC}"
           sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
     - name: "manylinux1_x86_64"
