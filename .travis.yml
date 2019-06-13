@@ -134,7 +134,29 @@ jobs:
         - cd ..
     #### DEPLOYING STAGE ####
     - stage: Deploying
-      name: "manylinux1_x86_64"
+      name: "Update doc to gh-pages"
+      os: linux
+      services:
+        - docker
+      before_install:
+        - docker pull ubuntu
+        - >
+          docker run
+          --volume ${PWD}:/mnt/mocpy
+          --name "${DOCKER_CONTAINER_DEPLOY_DOC}"
+          --rm
+          --interactive
+          --tty
+          --detach
+          ubuntu
+      script:
+        - >
+          docker exec 
+          --interactive
+          --tty
+          "${DOCKER_CONTAINER_DEPLOY_DOC}"
+          sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
+    - name: "manylinux1_x86_64"
       # Job generating the wheels for Linux 64-bit platforms
       os: linux
       sudo: required
@@ -165,25 +187,3 @@ jobs:
         - PIP=pip2
         - PYTHON=python2
       script: ./travis/deploy.sh
-    - name: "Update doc to gh-pages"
-      os: linux
-      services:
-        - docker
-      before_install:
-        - docker pull ubuntu
-        - >
-          docker run
-          --volume ${PWD}:/mnt/mocpy
-          --name "${DOCKER_CONTAINER_DEPLOY_DOC}"
-          --rm
-          --interactive
-          --tty
-          --detach
-          ubuntu
-      script:
-        - >
-          docker exec 
-          --interactive
-          --tty
-          "${DOCKER_CONTAINER_DEPLOY_DOC}"
-          sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
