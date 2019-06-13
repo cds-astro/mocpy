@@ -85,7 +85,7 @@ after_test:
         cibuildwheel --output-dir dist
         # Upload to PyPI if the tests succeed
         "%PYTHON%\\python.exe -m pip install twine"
-        python -m twine upload "dist\\*.whl" --skip-existing
+        "%PYTHON%\\python.exe -m twine upload "dist\\*.whl" --skip-existing"
       }
 
 artifacts:
