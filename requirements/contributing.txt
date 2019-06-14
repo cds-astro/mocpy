@@ -1,6 +1,6 @@
 # This file is used for setting up an virtualenv environment
 # for people wishing to contribute to MOCPy.
-# See https://mocpy.readthedocs.io/en/latest/contribute.html for more details.
+# See https://cds-astro.github.io/mocpy/contribute.html for more details.
 
 # Mandatory packages for MOCPy to work 
 astropy
