@@ -2,7 +2,16 @@
 MOCPy
 *****
 
-MOCPy is a Python library allowing easy creation, parsing and manipulation of MOCs (Multi-Order Coverage maps). See the `documentation <https://cds-astro.github.io/mocpy/>`__ for more details about installing MOCPy and using it.
+MOCPy is a Python library allowing easy creation, parsing and manipulation of
+MOCs (Multi-Order Coverage maps).
+See the `documentation <https://cds-astro.github.io/mocpy/>`__ for more
+details about installing MOCPy and using it.
+
+.. image:: ./resources/readme.png
+    :scale: 50 %
+
+    Rendered with MOCPy
+
 
 |Travis Status| |AppVeyor status| |Notebook Binder| |Doc|
 

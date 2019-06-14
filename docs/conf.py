@@ -45,6 +45,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
+    'sphinxcontrib.bibtex',
     # Extension for plotting image in the doc
     'matplotlib.sphinxext.plot_directive',
     # To support Numpy docstrings, we use this extension:
@@ -95,7 +96,12 @@ html_show_sphinx = False
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logotext1': 'MOC',  # white,  semi-bold
+    'logotext2': 'py',  # orange, light
+    'logotext3': ':docs',   # white,  light
+    'astropy_project_menubar': False,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

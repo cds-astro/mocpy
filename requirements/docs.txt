@@ -3,6 +3,7 @@ cdshealpix
 matplotlib
 networkx
 sphinx
+sphinxcontrib-bibtex
 numpydoc
 lark-parser
 astropy-sphinx-theme

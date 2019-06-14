@@ -14,6 +14,7 @@ astropy_healpix
 
 # Packages for updating the docs
 sphinx
+sphinxcontrib-bibtex
 numpydoc
 astropy-sphinx-theme
 
