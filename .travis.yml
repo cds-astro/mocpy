@@ -18,9 +18,7 @@ stages:
   # - manylinux1_x86_64 py3.5->3.7
   # - osx py3.5->3.7
   - name: Deploying
-    if: branch = master
-    on:
-      tags: true
+    if: tag IS present
 
 addons:
   apt:
