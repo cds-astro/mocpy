@@ -14,7 +14,6 @@ export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
 cibuildwheel --output-dir dist
 ### Upload the wheels to PyPI ###
 # If the commit is tagged
-if [[ $TRAVIS_TAG ]]; then
-    $PIP install twine
-    $PYTHON -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*.whl --skip-existing
-fi
+$PIP install twine
+$PYTHON -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*.whl --skip-existing
+
