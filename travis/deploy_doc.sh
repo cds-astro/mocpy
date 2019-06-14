@@ -19,7 +19,7 @@ git fetch cds-astro
 git checkout gh-pages
 rm -rf *
 
-git checkout master .
+git checkout cds-astro/master .
 
 curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
 export PATH="$HOME/.cargo/bin:$PATH"
