@@ -1,19 +1,22 @@
 *****
 MOCPy
 *****
+|Travis Status| |AppVeyor status| |Notebook Binder| |Doc|
 
 MOCPy is a Python library allowing easy creation, parsing and manipulation of
 MOCs (Multi-Order Coverage maps).
+
 See the `documentation <https://cds-astro.github.io/mocpy/>`__ for more
 details about installing MOCPy and using it.
 
-.. image:: ./resources/readme.png
-    :scale: 50 %
+.. figure:: ./resources/readme.png
+   :scale: 50 %
+   :align: center
+   :alt: map to buried treasure
 
-    Rendered with MOCPy
+   *Rendered with MOCpy!*
 
 
-|Travis Status| |AppVeyor status| |Notebook Binder| |Doc|
 
 .. |Travis Status| image:: http://img.shields.io/travis/cds-astro/mocpy.svg?branch=master
     :target: https://travis-ci.org/cds-astro/mocpy
