@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.MOC &#8212; mocpy 0.6.0 documentation</title>
+    <title>mocpy.MOC &#8212; mocpy 0.6.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -23,7 +23,7 @@
 
   </head><body>
 <div class="topbar">
-  <a class="brand" title="Documentation Home" href="../index.html"><span id="logotext1">astro</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <a class="brand" title="Documentation Home" href="../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
   <ul>
     
     <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
@@ -57,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.6.0 documentation</a>
+	<a href="../index.html">mocpy 0.6.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -111,7 +111,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 </ul>
 <ol class="arabic simple" start="4">
 <li><p>Get the sky coordinates defining the border(s) of <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects (see <a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>).</p></li>
-<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
+<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -174,7 +174,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_lonlat" title="mocpy.MOC.from_lonlat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_lonlat</span></code></a>(lon, lat, max_norder)</p></td>
-<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
+<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_polygon" title="mocpy.MOC.from_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_polygon</span></code></a>(lon, lat[, max_depth])</p></td>
 <td><p>Creates a MOC from a polygon</p></td>
@@ -183,7 +183,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <td><p>Creates a MOC from a polygon.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_skycoords" title="mocpy.MOC.from_skycoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_skycoords</span></code></a>(skycoords, max_norder)</p></td>
-<td><p>Creates a MOC from an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
+<td><p>Creates a MOC from an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_str" title="mocpy.MOC.from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code></a>(value)</p></td>
 <td><p>Create a MOC from a str.</p></td>
@@ -261,7 +261,7 @@ You are able to specify various styling kwargs for <a class="reference external"
 <dd class="field-odd"><dl>
 <dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
 <dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a></p>
 </dd>
@@ -316,9 +316,9 @@ You are able to specify various styling kwargs for <a class="reference external"
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>ra</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array</p>
+<dt><strong>ra</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array</p>
 </dd>
-<dt><strong>dec</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array</p>
+<dt><strong>dec</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the mask describes coordinates lying inside the MOC. If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code>
 is false, contains will return the mask of the coordinates lying outside the MOC.</p>
@@ -405,7 +405,7 @@ You are able to specify various styling kwargs for <a class="reference external"
 <dd class="field-odd"><dl>
 <dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
 <dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.1.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>.</p>
 </dd>
@@ -525,7 +525,7 @@ Must be of the same size of <code class="xref py py-obj docutils literal notrans
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>header</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/headers.html#astropy.io.fits.Header" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.Header</span></code></a></span></dt><dd><p>FITS header containing all the info of where the image is located (position, size, etc…)</p>
+<dt><strong>header</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/headers.html#astropy.io.fits.Header" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.Header</span></code></a></span></dt><dd><p>FITS header containing all the info of where the image is located (position, size, etc…)</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The moc resolution.</p>
 </dd>
@@ -587,13 +587,13 @@ the final MOC and pixels having the value 0 are not.</p>
 <dl class="method">
 <dt id="mocpy.MOC.from_lonlat">
 <em class="property">classmethod </em><code class="sig-name descname">from_lonlat</code><span class="sig-paren">(</span><em class="sig-param">lon</em>, <em class="sig-param">lat</em>, <em class="sig-param">max_norder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_lonlat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_lonlat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a MOC from astropy lon, lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p>
+<dd><p>Creates a MOC from astropy lon, lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates belonging to the MOC.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates belonging to the MOC.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates belonging to the MOC.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates belonging to the MOC.</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The depth of the smallest HEALPix cells contained in the MOC.</p>
 </dd>
@@ -612,15 +612,15 @@ the final MOC and pixels having the value 0 are not.</p>
 <dt id="mocpy.MOC.from_polygon">
 <em class="property">classmethod </em><code class="sig-name descname">from_polygon</code><span class="sig-paren">(</span><em class="sig-param">lon</em>, <em class="sig-param">lat</em>, <em class="sig-param">max_depth=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_polygon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a MOC from a polygon</p>
-<p>The polygon is given as lon and lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> that define the 
+<p>The polygon is given as lon and lat <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> that define the 
 vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes defining the polygon. Can describe convex and
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes defining the polygon. Can describe convex and
 concave polygons but not self-intersecting ones.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes defining the polygon. Can describe convex and concave
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes defining the polygon. Can describe convex and concave
 polygons but not self-intersecting ones.</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int, optional</span></dt><dd><p>The resolution of the MOC. Set to 10 by default.</p>
@@ -640,12 +640,12 @@ polygons but not self-intersecting ones.</p>
 <dt id="mocpy.MOC.from_polygon_skycoord">
 <em class="property">classmethod </em><code class="sig-name descname">from_polygon_skycoord</code><span class="sig-paren">(</span><em class="sig-param">skycoord</em>, <em class="sig-param">max_depth=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_polygon_skycoord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_polygon_skycoord" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a MOC from a polygon.</p>
-<p>The polygon is given as an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a> that contains the 
+<p>The polygon is given as an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a> that contains the 
 vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>skycoord</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates defining the vertices of a polygon. It can describe a convex or
+<dt><strong>skycoord</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates defining the vertices of a polygon. It can describe a convex or
 concave polygon but not a self-intersecting one.</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int, optional</span></dt><dd><p>The resolution of the MOC. Set to 10 by default.</p>
@@ -664,11 +664,11 @@ concave polygon but not a self-intersecting one.</p>
 <dl class="method">
 <dt id="mocpy.MOC.from_skycoords">
 <em class="property">classmethod </em><code class="sig-name descname">from_skycoords</code><span class="sig-paren">(</span><em class="sig-param">skycoords</em>, <em class="sig-param">max_norder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_skycoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_skycoords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a MOC from an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p>
+<dd><p>Creates a MOC from an <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will belong to the MOC.</p>
+<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will belong to the MOC.</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The depth of the smallest HEALPix cells contained in the MOC.</p>
 </dd>
@@ -823,7 +823,7 @@ matplotlib style parameters.</p>
 <dd class="field-odd"><dl>
 <dt><strong>title</strong><span class="classifier">str</span></dt><dd><p>The title of the plot</p>
 </dd>
-<dt><strong>frame</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.BaseCoordinateFrame.html#astropy.coordinates.BaseCoordinateFrame" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.BaseCoordinateFrame</span></code></a>, optional</span></dt><dd><p>Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</p>
+<dt><strong>frame</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.BaseCoordinateFrame.html#astropy.coordinates.BaseCoordinateFrame" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.BaseCoordinateFrame</span></code></a>, optional</span></dt><dd><p>Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</p>
 </dd>
 </dl>
 </dd>
@@ -873,7 +873,7 @@ matplotlib style parameters.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v4.0.dev683)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>

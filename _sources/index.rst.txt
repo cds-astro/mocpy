@@ -20,6 +20,9 @@ and 3.7. Python 2 users can still refer to the
 Its code is hosted on `GitHub <https://github.com/cds-astro/mocpy/>`__ and
 distributed under the BSD-3 license.
 
+What is a MOC ?
+---------------
+
 MOC is an `IVOA standard <http://ivoa.net/documents/MOC/>`__ enabling description
 of arbitrary sky regions. Based on the HEALPix sky tessellation, it maps
 regions on the sky into hierarchically grouped predefined cells.
@@ -34,6 +37,14 @@ As an example, here is the sky coverage of the SDSS sky survey:
 As well as its time coverage:
 
 .. plot:: examples/plot_TMOC_SDSS_r.py
+
+- :cite:`2014ivoa.spec.0602F`
+
+References
+----------
+
+.. bibliography:: references.bib
+    :all:
 
 Indices and tables
 ==================

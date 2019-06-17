@@ -12,13 +12,13 @@ env:
 
 # Define the order of the stages
 stages:
+  - Testing
   # Stage reponsible for building and publishing the wheels
   # to PyPI. Architecture supported:
   # - manylinux1_x86_64 py3.5->3.7
   # - osx py3.5->3.7
-  - Deploying
-  - Testing
-
+  - name: Deploying
+    if: tag IS present
 
 addons:
   apt:
