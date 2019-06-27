@@ -17,7 +17,6 @@ __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 __license__ = "BSD 3-Clause License"
 __email__ = "matthieu.baumann@astro.unistra.fr"
 
-
 class TimeMOC(AbstractMOC):
     """Multi-order time coverage class. Experimental"""
     DAY_MICRO_SEC = 86400000000.

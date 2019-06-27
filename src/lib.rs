@@ -137,16 +137,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             return input1.into_pyarray(py).to_owned();
         }
 
-        let mut i1 = unsafe {
+        let i1 = unsafe {
             array2d_to_intervals(input1, true, None, false)
         };
         let i2 = unsafe {
             array2d_to_intervals(input2, true, None, false)
         };
 
-        i1.union(i2);
+        let result = i1.union(&i2);
 
-        let result = intervals_to_2darray(i1);
+        let result = intervals_to_2darray(result);
         result.into_pyarray(py).to_owned()
     }
 
@@ -159,16 +159,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             return input1.into_pyarray(py).to_owned();
         }
 
-        let mut i1 = unsafe {
+        let i1 = unsafe {
             array2d_to_intervals(input1, true, None, false)
         };
         let i2 = unsafe {
             array2d_to_intervals(input2, true, None, false)
         };
 
-        i1.difference(i2);
+        let result = i1.difference(&i2);
 
-        let result = intervals_to_2darray(i1);
+        let result = intervals_to_2darray(result);
         result.into_pyarray(py).to_owned()
     }
 
@@ -183,16 +183,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             return input2.into_pyarray(py).to_owned();
         }
 
-        let mut i1 = unsafe {
+        let i1 = unsafe {
             array2d_to_intervals(input1, true, None, false)
         };
         let i2 = unsafe {
             array2d_to_intervals(input2, true, None, false)
         };
 
-        i1.intersection(i2);
+        let result = i1.intersection(&i2);
 
-        let result = intervals_to_2darray(i1);
+        let result = intervals_to_2darray(result);
         result.into_pyarray(py).to_owned()
     }
     
@@ -209,10 +209,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 array2d_to_intervals(input, true, None, false)
             }
         };
-        intervals.complement();
+        let result = intervals.complement().unwrap();
 
-        let result = if !intervals.is_empty() {
-            intervals_to_2darray(intervals)
+        let result = if !result.is_empty() {
+            intervals_to_2darray(result)
         } else {
             Array::zeros((1, 0))
         };
