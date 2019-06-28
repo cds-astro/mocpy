@@ -27,6 +27,8 @@ use std::ops::Range;
 use std::mem;
 use std::collections::HashMap;
 
+pub mod core;
+
 #[allow(unused_parens)]
 #[pymodule]
 fn core(_py: Python, m: &PyModule) -> PyResult<()> {

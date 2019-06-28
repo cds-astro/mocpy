@@ -362,6 +362,7 @@ pub enum Operation {
 impl<T, S> Ranges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + std::fmt::Debug {
+
     pub fn new(mut t: Vec<Range<T>>,
                s: Vec<Ranges<S>>,
                min_depth: Option<i8>,
