@@ -34,5 +34,21 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
              })
              .collect::<Vec<_>>();
     
-    Ranges2D::<T, S>::new(x, y, None, true)
+    Ranges2D::<T, S>::new(x, y, None, true)?
+}
+
+fn project_on_first_dim<T, S>(x: &Ranges<T>, coverage: &Ranges2D<T, S>) -> Option<Ranges<S>> {
+    coverage.x
+	.par_iter()
+	.zip(coverage.y.par_iter())
+    	// Filter the time ranges to keep only those
+	// that lie into ``x``
+	.filter(|t, s| {
+	    x.contains(t)  
+	})
+	// Compute the union of all the 2nd dim ranges
+	// that have been kept
+	.reduce_with(|(t1, ref s1), (t2, ref s2)| {
+	    s1.union(s2)
+	})
 }

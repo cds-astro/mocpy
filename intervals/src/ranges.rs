@@ -196,6 +196,19 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
     pub fn iter(&self) -> Iter<Range<T>> {
         self.0.iter()
     }
+
+    pub fn contains(&self, x: &Range<T>) -> bool {
+	let result = self.0.par_iter()
+	    .map(|r| {
+	    	if x.start >= r.end || x.end <= r.start {
+		    false
+		}
+		true
+	    })
+	    .reduce_with(|a, b| a && b)
+	    .unwrap();
+	result
+    }
 }
 
 impl<T> PartialEq for Ranges<T>
