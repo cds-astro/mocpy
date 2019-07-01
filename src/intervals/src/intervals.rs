@@ -1,5 +1,8 @@
 use crate::ranges::Ranges;
-use num::{Integer, PrimInt, CheckedAdd, One, Zero};
+use crate::ranges::{UniqToNestedIter,
+                    NestedToUniqIter,
+                    DepthPixIter};
+use num::{Integer, PrimInt, Zero};
 use crate::bounded::Bounded;
 
 use std::ops::{Range, BitOr};
@@ -9,22 +12,15 @@ use std::ops::{Range, BitOr};
 /// Can be either given in the nested or uniq form.
 #[derive(Debug)]
 pub enum Intervals<T>
-where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug  {
+where T: Integer + PrimInt + Bounded<T> + Sync + std::fmt::Debug + Send {
     /// Ranges given in nested form
     Nested(Ranges<T>),
     /// Ranges given in uniq form
     Uniq(Ranges<T>),
 }
 
-impl<T> From<Vec<Range<T>>> for Intervals<T>
-where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
-    fn from(ranges: Vec<Range<T>>) -> Self {
-        Intervals::Nested(Ranges::<T>::new(ranges, None, true))
-    }
-}
-
 impl<T> Intervals<T>
-where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 'static {
+where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + Sync + std::fmt::Debug + 'static {
     /// Get an iterator returning uniq ranges
     /// 
     /// # Arguments
@@ -54,7 +50,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     pub fn uniq_into_iter(self) -> Box<dyn Iterator<Item = Range<T>>> {
         match self {
             Intervals::Nested(ranges) => {
-                Box::new(UniqIntervalsIter::new(ranges))
+                Box::new(NestedToUniqIter::new(ranges))
             },
             Intervals::Uniq(ranges) => {
                 Box::new(ranges.0.into_iter())
@@ -91,7 +87,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     pub fn nested_into_iter(self) -> Box<dyn Iterator<Item = Range<T>>> {
         match self {
             Intervals::Uniq(ranges) => {
-                Box::new(NestedIntervalsIter::new(ranges))
+                Box::new(UniqToNestedIter::new(ranges))
             },
             Intervals::Nested(ranges) => {
                 Box::new(ranges.0.into_iter())
@@ -101,7 +97,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
 
     pub fn depthpix_into_iter(self) -> Box<dyn Iterator<Item = (i8, T)>> {
         if let Intervals::Nested(ranges) = self {
-            Box::new(DepthPixIntervalsIter::new(ranges))
+            Box::new(DepthPixIter::new(ranges))
         } else {
             unreachable!()
         }
@@ -133,7 +129,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     pub fn to_nested(self) -> Intervals<T> {
         match self {
             Intervals::Uniq(ranges) => {
-                let data_nested: Vec<_> = NestedIntervalsIter::new(ranges).collect();
+                let data_nested: Vec<_> = UniqToNestedIter::new(ranges).collect();
                 Intervals::Nested(Ranges::<T>::new(data_nested, None, true))
             },
             Intervals::Nested(_) => {
@@ -168,7 +164,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     pub fn to_uniq(self) -> Intervals<T> {
         match self {
             Intervals::Nested(ranges) => {
-                let uniq_data: Vec<_> = UniqIntervalsIter::new(ranges).collect();
+                let uniq_data: Vec<_> = NestedToUniqIter::new(ranges).collect();
                 Intervals::Uniq(Ranges::<T>::new(uniq_data, None, true))
             },
             Intervals::Uniq(_) => {
@@ -198,7 +194,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
         }
     }
 
-    fn merge(&self, other: &Self, op: &dyn Fn(bool, bool) -> bool) -> Result<Self, &'static str> {
+    fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Result<Self, &'static str> {
         match self {
             Intervals::Nested(ref ranges) => {
                 match other {
@@ -256,7 +252,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// let result = a.union(&b);
     /// ```
     pub fn union(&self, other: &Self) -> Self {
-        self.merge(other, &|a, b| a || b).unwrap()
+        self.merge(other, |a, b| a || b).unwrap()
     }
     
     /// Perform the difference between self and another Intervals object
@@ -288,7 +284,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// let result = a.difference(&b);
     /// ```
     pub fn difference(&self, other: &Self) -> Self {
-        self.merge(&other, &|a, b| a && !b).unwrap()
+        self.merge(&other, |a, b| a && !b).unwrap()
     }
     
     /// Perform the intersection between self and another Intervals object
@@ -320,7 +316,7 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     /// let result = a.intersection(&b);
     /// ```
     pub fn intersection(&self, other: &Self) -> Self {
-        self.merge(&other, &|a, b| a && b).unwrap()
+        self.merge(&other, |a, b| a && b).unwrap()
     }
 
     pub fn complement(&self) -> Result<Self, &'static str> {
@@ -353,306 +349,12 @@ where T: Integer + PrimInt + Bounded<T> + BitOr<T> + Send + std::fmt::Debug + 's
     pub fn degrade(&mut self, depth: i8) {
         match self {
             Intervals::Nested(ref mut ranges) => {
-                let shift = ((<T>::MAXDEPTH - depth) << 1) as u32;
-
-                let mut offset: T = One::one();
-                offset = offset.unsigned_shl(shift) - One::one();
-
-                let mut mask: T = One::one();
-                mask = mask.checked_mul(&!offset).unwrap();
-
-                let adda: T = Zero::zero();
-                let mut addb: T = One::one();
-                addb = addb.checked_mul(&offset).unwrap();
-
-                let capacity = ranges.0.len();
-                let mut result = Vec::<Range<T>>::with_capacity(capacity);
-
-                for range in ranges.0.iter() {
-                    let a: T = range.start.checked_add(&adda).unwrap() & mask;
-                    let b: T = range.end.checked_add(&addb).unwrap() & mask;
-
-                    if b > a {
-                        result.push(a..b);
-                    }
-                }
-
-                ranges.0 = result;
+                ranges.degrade(depth);
             },
             Intervals::Uniq(_) => {
                 panic!("Can only degrade nested expressed intervals!");
             }
         }
-    }
-}
-
-pub struct UniqIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    ranges: Ranges<T>,
-    id: usize,
-    tmp_vec_ranges: Vec<Range<T>>,
-    depth: i8,
-    shift: u32,
-    offset: T,
-    depth_offset: T,
-}
-
-impl<T> UniqIntervalsIter<T>
-where  T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    fn new(ranges: Ranges<T>) -> UniqIntervalsIter<T> {
-        let id = 0;
-        let tmp_vec_ranges = Vec::<Range<T>>::new();
-        let depth = 0;
-        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
-
-        let mut offset: T = One::one();
-        offset = offset.unsigned_shl(shift) - One::one();
-
-        let mut depth_offset: T = One::one();
-        depth_offset = depth_offset.unsigned_shl((2 * depth + 2) as u32);
-
-        UniqIntervalsIter {
-            ranges,
-            id,
-            tmp_vec_ranges,
-
-            depth,
-            shift,
-            offset,
-            depth_offset,
-        }
-    }
-}
-
-impl<T> Iterator for UniqIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + std::fmt::Debug {
-    type Item = Range<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while !self.ranges.is_empty() {
-            let start_id = self.id;
-            let end_id = self.ranges.0.len();
-            for i in start_id..end_id {
-                let range = &self.ranges[i];
-                let t1 = range.start + self.offset;
-                let t2 = range.end;
-
-                let pix1 = t1.unsigned_shr(self.shift);
-                let pix2 = t2.unsigned_shr(self.shift);
-
-                let c1 = pix1.unsigned_shl(self.shift);
-                let c2 = pix2.unsigned_shl(self.shift);
-
-                self.id += 1;
-
-                if c2 > c1 {
-                    self.tmp_vec_ranges.push(c1..c2);
-
-                    let e1 = self.depth_offset.checked_add(&pix1).unwrap();
-                    let e2 = self.depth_offset.checked_add(&pix2).unwrap();
-
-                    return Some(e1..e2);
-                }
-            }
-            
-            self.ranges = self.ranges.difference(
-                &Ranges::<T>::new(
-                    self.tmp_vec_ranges.clone(),
-                    None,
-                    true
-                )
-            );
-            self.id = 0;
-            self.tmp_vec_ranges.clear();
-
-            self.depth += 1;
-            assert!(self.depth <= <T>::MAXDEPTH ||
-                   (self.depth > <T>::MAXDEPTH && self.ranges.is_empty()));
-            if self.depth > <T>::MAXDEPTH && self.ranges.is_empty() {
-                break;
-            }
-
-            // Recompute the constants for the new depth
-            self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
-            self.offset = One::one();
-            self.offset = self.offset.unsigned_shl(self.shift) - One::one();
-
-            self.depth_offset = One::one();
-            self.depth_offset = self.depth_offset.unsigned_shl((2 * self.depth + 2) as u32);
-        }
-        None 
-    }
-}
-
-pub struct DepthPixIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    ranges: Ranges<T>,
-    current: Option<Range<T>>,
-    last: Option<T>,
-    depth: i8,
-    shift: u32,
-    offset: T,
-    depth_offset: T,
-}
-
-impl<T> DepthPixIntervalsIter<T>
-where  T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    fn new(ranges: Ranges<T>) -> DepthPixIntervalsIter<T> {
-        let depth = 0;
-        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
-
-        let mut offset: T = One::one();
-        offset = offset.unsigned_shl(shift) - One::one();
-
-        let mut depth_offset: T = One::one();
-        depth_offset = depth_offset.unsigned_shl((2 * depth + 2) as u32);
-
-        let current = None;
-        let last = None;
-        DepthPixIntervalsIter {
-            ranges,
-            current,
-            last,
-            depth,
-            shift,
-            offset,
-            depth_offset,
-        }
-    }
-
-    fn next_item_range(&mut self) -> Option<(i8, T)> {
-        if let Some(current) = self.current.clone() {
-            let last = self.last.unwrap();
-            if last < current.end {
-                let (depth, pix) = <T>::pix_depth(last);
-                self.last = last
-                    .checked_add(&One::one());
-
-                Some((depth as i8, pix))
-            } else {
-                self.current = None;
-                self.last = None;
-                None
-            }
-        } else {
-            None
-        }
-    }
-}
-
-impl<T> Iterator for DepthPixIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + std::fmt::Debug {
-    type Item = (i8, T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next_depth_pix = self.next_item_range();
-        if next_depth_pix.is_some() {
-            next_depth_pix
-        } else {
-            while !self.ranges.is_empty() {
-                for range in self.ranges.iter() {
-                    let t1 = range.start + self.offset;
-                    let t2 = range.end;
-
-                    let pix1 = t1.unsigned_shr(self.shift);
-                    let pix2 = t2.unsigned_shr(self.shift);
-
-                    let c1 = pix1.unsigned_shl(self.shift);
-                    let c2 = pix2.unsigned_shl(self.shift);
-
-                    if c2 > c1 {
-                        self.ranges = self.ranges.difference(
-                            &Ranges::<T>::new(vec![c1..c2], None, false)
-                        );
-
-                        let e1 = self.depth_offset
-                            .checked_add(&pix1)
-                            .unwrap();
-                        let e2 = self.depth_offset
-                            .checked_add(&pix2)
-                            .unwrap();
-                        
-                        self.last = Some(e1);
-                        self.current = Some(e1..e2);
-
-                        return self.next_item_range();
-                    }
-                }
-                self.depth += 1;
-
-                // Recompute the constants for the new depth
-                self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
-                self.offset = One::one();
-                self.offset = self.offset.unsigned_shl(self.shift) - One::one();
-                
-                self.depth_offset = One::one();
-                self.depth_offset = self.depth_offset.unsigned_shl((2 * self.depth + 2) as u32);
-            }
-            None
-        }
-    }
-}
-
-pub struct NestedIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    ranges: Ranges<T>,
-    u: T,
-    
-    range_index: usize,
-}
-
-impl<T> NestedIntervalsIter<T>
-where  T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    fn new(ranges: Ranges<T>) -> NestedIntervalsIter<T> {
-        let range_index = 0;
-
-        let u = if ranges.0.len() > 0 {
-            ranges[range_index].start
-        } else {
-            Zero::zero()
-        };
-        NestedIntervalsIter {
-            ranges,
-            u,
-            range_index,
-        }
-    }
-}
-
-impl<T> Iterator for NestedIntervalsIter<T>
-where T: Integer + PrimInt + CheckedAdd + Bounded<T> + std::fmt::Debug {
-    type Item = Range<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while self.range_index < self.ranges.0.len() {
-            let (depth, ipix) = T::pix_depth(self.u);
-
-            let shift = (T::MAXDEPTH as u32 - depth) << 1;
-
-            let one: T = One::one();
-            let e1 = ipix
-                .unsigned_shl(shift);
-            let e2 = ipix
-                .checked_add(&one)
-                .unwrap()
-                .unsigned_shl(shift);
-
-            self.u = self.u
-                .checked_add(&one)
-                .unwrap();
-
-            let u_end = self.ranges[self.range_index].end;
-            if self.u == u_end {
-                self.range_index += 1;
-
-                if self.range_index < self.ranges.0.len() {
-                    self.u = self.ranges[self.range_index].start;
-                }
-            }
-
-            return Some(e1..e2)
-        }
-        None
     }
 }
 

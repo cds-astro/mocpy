@@ -6,9 +6,9 @@ extern crate numpy;
 extern crate healpix;
 extern crate num;
 extern crate time;
+extern crate rayon;
 
 extern crate pyo3;
-
 
 use ndarray::{Zip, Array, Array1, Array2, Axis};
 use ndarray_parallel::prelude::*;
@@ -20,7 +20,7 @@ use pyo3::{ToPyObject, PyObject};
 use num::{Integer, PrimInt};
 
 use intervals::intervals::Intervals;
-use intervals::ranges::Ranges;
+use intervals::ranges::{Ranges, RangesPy};
 use intervals::bounded::Bounded;
 
 use std::ops::Range;
@@ -64,7 +64,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 *p = e1..e2;
             });
         
-        let intervals = {
+        let ranges = {
             let ptr = pixels.as_mut_ptr() as *mut Range<u64>;
             let cap = len;
 
@@ -74,10 +74,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 Vec::from_raw_parts(ptr, len, cap)
             };
 
-            data.into()
+            Ranges::<u64>::new(data, None, true)
         };
 
-        let result = intervals_to_2darray(intervals);
+        let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
     
@@ -107,7 +107,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     
     fn intervals_to_2darray<T>(intervals: Intervals<T>) -> Array2<T>
-    where T : Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug + 'static {
+    where T : Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug + 'static {
         if let Intervals::Nested(ranges) = intervals {
             // Cast Vec<Range<u64>> to Vec<u64>
             let len = ranges.0.len();
@@ -127,94 +127,110 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     #[pyfn(m, "union")]
-    fn union_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let input1 = input1.as_array().to_owned();
-        let input2 = input2.as_array().to_owned();
+    fn union_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
+        let b = b.as_array().to_owned();
 
         // Deal with the bound cases when
         // one of the two intervals are empty
-        if input1.is_empty() {
-            return input2.into_pyarray(py).to_owned();
-        } else if input2.is_empty() {
-            return input1.into_pyarray(py).to_owned();
+        if a.is_empty() {
+            return b
+                .into_pyarray(py)
+                .to_owned();
+        } else if b.is_empty() {
+            return a
+                .into_pyarray(py)
+                .to_owned();
         }
 
-        let i1 = unsafe {
-            array2d_to_intervals(input1, true, None, false)
-        };
-        let i2 = unsafe {
-            array2d_to_intervals(input2, true, None, false)
-        };
+        let a: Ranges<u64> = RangesPy { 
+            data: a,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+        let b: Ranges<u64> = RangesPy { 
+            data: b,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
 
-        let result = i1.union(&i2);
+        let result = a.union(&b);
 
-        let result = intervals_to_2darray(result);
+        let result: Array2<u64> = result.into();
         result.into_pyarray(py).to_owned()
     }
 
     #[pyfn(m, "difference")]
-    fn difference_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let input1 = input1.as_array().to_owned();
-        let input2 = input2.as_array().to_owned();
+    fn difference_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
+        let b = b.as_array().to_owned();
 
-        if input1.is_empty() || input2.is_empty() {
-            return input1.into_pyarray(py).to_owned();
+        if a.is_empty() || b.is_empty() {
+            return a.into_pyarray(py).to_owned();
         }
 
-        let i1 = unsafe {
-            array2d_to_intervals(input1, true, None, false)
-        };
-        let i2 = unsafe {
-            array2d_to_intervals(input2, true, None, false)
-        };
+        let a: Ranges<u64> = RangesPy { 
+            data: a,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+        let b: Ranges<u64> = RangesPy { 
+            data: b,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
 
-        let result = i1.difference(&i2);
+        let result = a.difference(&b);
 
-        let result = intervals_to_2darray(result);
+        let result: Array2<u64> = result.into();
         result.into_pyarray(py).to_owned()
     }
 
     #[pyfn(m, "intersection")]
-    fn intersection_py(py: Python, input1: &PyArray2<u64>, input2: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let input1 = input1.as_array().to_owned();
-        let input2 = input2.as_array().to_owned();
+    fn intersection_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
+        let b = b.as_array().to_owned();
 
-        if input1.is_empty() {
-            return input1.into_pyarray(py).to_owned();
-        } else if input2.is_empty() {
-            return input2.into_pyarray(py).to_owned();
+        if a.is_empty() {
+            return a.into_pyarray(py).to_owned();
+        } else if b.is_empty() {
+            return b.into_pyarray(py).to_owned();
         }
 
-        let i1 = unsafe {
-            array2d_to_intervals(input1, true, None, false)
-        };
-        let i2 = unsafe {
-            array2d_to_intervals(input2, true, None, false)
-        };
+        let a: Ranges<u64> = RangesPy { 
+            data: a,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+        let b: Ranges<u64> = RangesPy { 
+            data: b,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
 
-        let result = i1.intersection(&i2);
+        let result = a.intersection(&b);
 
-        let result = intervals_to_2darray(result);
+        let result: Array2<u64> = result.into();
         result.into_pyarray(py).to_owned()
     }
     
     #[pyfn(m, "complement")]
-    fn complement_py(py: Python, input: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let input = input
-            .as_array()
-            .to_owned();
+    fn complement_py(py: Python, a: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
 
-        let mut intervals = if input.is_empty() {
-            Intervals::Nested(Ranges::<u64>::new(vec![], None, false))
+        let mut ranges = if a.is_empty() {
+            Ranges::<u64>::new(vec![], None, false)
         } else {
-            unsafe {
-                array2d_to_intervals(input, true, None, false)
-            }
+            RangesPy { 
+                data: a,
+                min_depth: None,
+                make_consistent: false,
+            }.into()
         };
-        let result = intervals.complement().unwrap();
+        let result = ranges.complement();
 
         let result = if !result.is_empty() {
-            intervals_to_2darray(result)
+            result.into()
         } else {
             Array::zeros((1, 0))
         };
@@ -262,10 +278,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             }
         }
 
-        let intervals = Intervals::Nested(
-            Ranges::<u64>::new(ranges, None, true)
-        );
-        let result = intervals_to_2darray(intervals);
+        let ranges = Ranges::<u64>::new(ranges, None, true);
+        let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }
     

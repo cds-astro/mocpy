@@ -7,14 +7,21 @@ use std::slice::Iter;
 
 use rayon::prelude::*;
 
-use num::{One, Integer, PrimInt, Zero};
+use num::{One, Integer, PrimInt, Zero, CheckedAdd};
 use crate::bounded::Bounded;
 
 #[derive(Debug, Clone)]
-pub struct Ranges<T>(pub Vec<Range<T>>) where T: Integer + std::fmt::Debug;
+pub struct Ranges<T>(pub Vec<Range<T>>)
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug;
 
 impl<T> Ranges<T>
-where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
     pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Ranges<T> {
         let ranges = if make_consistent {
             (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
@@ -42,7 +49,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
         result
     }
     
-    pub fn merge(&self, other: &Self, op: &dyn Fn(bool, bool) -> bool) -> Self {
+    pub fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
         // Unflatten a stack containing T-typed elements
         // to a stack of Range<T> types elements without
         // copying the data.
@@ -148,15 +155,15 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
     }
 
     pub fn union(&self, other: &Self) -> Self {        
-        self.merge(other, &|a, b| a || b)
+        self.merge(other, |a, b| a || b)
     }
 
     pub fn intersection(&self, other: &Self) -> Self {
-        self.merge(other, &|a, b| a && b)
+        self.merge(other, |a, b| a && b)
     }
 
     pub fn difference(&self, other: &Self) -> Self {
-        self.merge(other, &|a, b| a && !b)
+        self.merge(other, |a, b| a && !b)
     }
 
     pub fn complement(&self) -> Self {
@@ -198,21 +205,105 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug {
     }
 
     pub fn contains(&self, x: &Range<T>) -> bool {
-	let result = self.0.par_iter()
-	    .map(|r| {
-	    	if x.start >= r.end || x.end <= r.start {
-		    false
-		}
-		true
-	    })
-	    .reduce_with(|a, b| a && b)
-	    .unwrap();
-	result
+        let result = self.0.par_iter()
+            .map(|r| {
+                if x.start >= r.end || x.end <= r.start {
+                    false
+                } else {
+                    true
+                }
+            })
+            .reduce_with(|a, b| a && b)
+            .unwrap();
+        result
+    }
+
+    pub fn degrade(&mut self, depth: i8) {
+        let shift = ((<T>::MAXDEPTH - depth) << 1) as u32;
+
+        let mut offset: T = One::one();
+        offset = offset.unsigned_shl(shift) - One::one();
+
+        let mut mask: T = One::one();
+        mask = mask.checked_mul(&!offset).unwrap();
+
+        let adda: T = Zero::zero();
+        let mut addb: T = One::one();
+        addb = addb.checked_mul(&offset).unwrap();
+
+        let capacity = self.0.len();
+        let mut result = Vec::<Range<T>>::with_capacity(capacity);
+
+        for range in self.iter() {
+            let a: T = range.start.checked_add(&adda).unwrap() & mask;
+            let b: T = range.end.checked_add(&addb).unwrap() & mask;
+
+            if b > a {
+                result.push(a..b);
+            }
+        }
+
+        self.0 = result;
+    }
+}
+
+pub struct RangesPy<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    pub data: Array2<T>,
+    pub min_depth: Option<i8>,
+    pub make_consistent: bool,
+}
+
+impl<T> From<RangesPy<T>> for Ranges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    fn from(ranges: RangesPy<T>) -> Self {
+        let mut data = ranges.data;
+        let min_depth = ranges.min_depth;
+        let make_consistent = ranges.make_consistent;
+        
+        let len = data.shape()[0];
+        let cap = len;
+        let ptr = data.as_mut_ptr() as *mut Range<T>;
+
+        mem::forget(data);
+
+        let data = unsafe {
+            Vec::from_raw_parts(ptr, len, cap)
+        };
+
+        Ranges::<T>::new(data, min_depth, make_consistent)
+    }
+}
+
+use ndarray::{Array1, Array2};
+impl From<Ranges<u64>> for Array2<u64> {
+    fn from(ranges: Ranges<u64>) -> Self {
+        // Cast Vec<Range<u64>> to Vec<u64>
+        let len = ranges.0.len();
+        let data = ranges.to_flat_vec();
+
+        // Get a Array1 from the Vec<u64> without copying any data
+        let result = Array1::from_vec(data);
+
+        // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
+        // of HEALPix cell contained in the moc
+        result.into_shape((len, 2))
+                .unwrap()
+                .to_owned()
     }
 }
 
 impl<T> PartialEq for Ranges<T>
-where T: Integer + std::fmt::Debug {
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
@@ -220,7 +311,10 @@ where T: Integer + std::fmt::Debug {
 
 use std::ops::Index;
 impl<T> Index<usize> for Ranges<T>
-where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug {
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
     type Output = Range<T>;
 
     fn index(&self, index: usize) -> &Range<T> {
@@ -230,7 +324,10 @@ where T: Integer + PrimInt + Bounded<T> + std::fmt::Debug {
 
 use std::iter::FromIterator;
 impl<T> FromIterator<Range<T>> for Ranges<T>
-where T: Integer + std::fmt::Debug {
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
     fn from_iter<I: IntoIterator<Item = Range<T>>>(iter: I) -> Self {
         let mut ranges = Ranges(Vec::<Range<T>>::new());
 
@@ -351,10 +448,317 @@ where T: Integer + PrimInt + Clone + Copy {
     }
 }
 
+pub struct NestedToUniqIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    ranges: Ranges<T>,
+    id: usize,
+    buffer: Vec<Range<T>>,
+    depth: i8,
+    shift: u32,
+    off: T,
+    depth_off: T,
+}
+
+impl<T> NestedToUniqIter<T>
+where T: Integer + PrimInt + CheckedAdd 
+        + Bounded<T>
+        + Sync + Send
+        + std::fmt::Debug {
+    pub fn new(ranges: Ranges<T>) -> NestedToUniqIter<T> {
+        let id = 0;
+        let buffer = Vec::<Range<T>>::new();
+        let depth = 0;
+        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
+
+        let mut off: T = One::one();
+        off = off.unsigned_shl(shift) - One::one();
+
+        let mut depth_off: T = One::one();
+        depth_off = depth_off.unsigned_shl((2 * depth + 2) as u32);
+
+        NestedToUniqIter {
+            ranges,
+            id,
+            buffer,
+
+            depth,
+            shift,
+            off,
+            depth_off,
+        }
+    }
+}
+
+impl<T> Iterator for NestedToUniqIter<T>
+where T: Integer + PrimInt + CheckedAdd
+        + Bounded<T>
+        + Send + Sync
+        + std::fmt::Debug {
+    type Item = Range<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while !self.ranges.is_empty() {
+            let start_id = self.id;
+            let end_id = self.ranges.0.len();
+            for i in start_id..end_id {
+                let range = &self.ranges[i];
+                let t1 = range.start + self.off;
+                let t2 = range.end;
+
+                let pix1 = t1.unsigned_shr(self.shift);
+                let pix2 = t2.unsigned_shr(self.shift);
+
+                let c1 = pix1.unsigned_shl(self.shift);
+                let c2 = pix2.unsigned_shl(self.shift);
+
+                self.id += 1;
+
+                if c2 > c1 {
+                    self.buffer.push(c1..c2);
+
+                    let e1 = self.depth_off.checked_add(&pix1).unwrap();
+                    let e2 = self.depth_off.checked_add(&pix2).unwrap();
+
+                    return Some(e1..e2);
+                }
+            }
+            
+            self.ranges = self.ranges.difference(
+                &Ranges::<T>::new(
+                    self.buffer.clone(),
+                    None,
+                    true
+                )
+            );
+            self.id = 0;
+            self.buffer.clear();
+
+            self.depth += 1;
+            assert!(self.depth <= <T>::MAXDEPTH ||
+                   (self.depth > <T>::MAXDEPTH && self.ranges.is_empty()));
+            if self.depth > <T>::MAXDEPTH && self.ranges.is_empty() {
+                break;
+            }
+
+            // Recompute the constants for the new depth
+            self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
+            self.off = One::one();
+            self.off = self.off.unsigned_shl(self.shift) - One::one();
+
+            self.depth_off = One::one();
+            self.depth_off = self.depth_off.unsigned_shl((2 * self.depth + 2) as u32);
+        }
+        None 
+    }
+}
+
+pub struct DepthPixIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    ranges: Ranges<T>,
+    current: Option<Range<T>>,
+
+    last: Option<T>,
+    depth: i8,
+    shift: u32,
+
+    offset: T,
+    depth_offset: T,
+}
+
+impl<T> DepthPixIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    pub fn new(ranges: Ranges<T>) -> DepthPixIter<T> {
+        let depth = 0;
+        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
+
+        let mut offset: T = One::one();
+        offset = offset.unsigned_shl(shift) - One::one();
+
+        let mut depth_offset: T = One::one();
+        depth_offset = depth_offset.unsigned_shl((2 * depth + 2) as u32);
+
+        let current = None;
+        let last = None;
+        DepthPixIter {
+            ranges,
+            current,
+            last,
+            depth,
+            shift,
+            offset,
+            depth_offset,
+        }
+    }
+
+    fn next_item_range(&mut self) -> Option<(i8, T)> {
+        if let Some(current) = self.current.clone() {
+            let last = self.last.unwrap();
+            if last < current.end {
+                let (depth, pix) = <T>::pix_depth(last);
+                self.last = last
+                    .checked_add(&One::one());
+
+                Some((depth as i8, pix))
+            } else {
+                self.current = None;
+                self.last = None;
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
+impl<T> Iterator for DepthPixIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    type Item = (i8, T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next_depth_pix = self.next_item_range();
+        if next_depth_pix.is_some() {
+            next_depth_pix
+        } else {
+            while !self.ranges.is_empty() {
+                for range in self.ranges.iter() {
+                    let t1 = range.start + self.offset;
+                    let t2 = range.end;
+
+                    let pix1 = t1.unsigned_shr(self.shift);
+                    let pix2 = t2.unsigned_shr(self.shift);
+
+                    let c1 = pix1.unsigned_shl(self.shift);
+                    let c2 = pix2.unsigned_shl(self.shift);
+
+                    if c2 > c1 {
+                        self.ranges = self.ranges.difference(
+                            &Ranges::<T>::new(vec![c1..c2], None, false)
+                        );
+
+                        let e1 = self.depth_offset
+                            .checked_add(&pix1)
+                            .unwrap();
+                        let e2 = self.depth_offset
+                            .checked_add(&pix2)
+                            .unwrap();
+                        
+                        self.last = Some(e1);
+                        self.current = Some(e1..e2);
+
+                        return self.next_item_range();
+                    }
+                }
+                self.depth += 1;
+
+                // Recompute the constants for the new depth
+                self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
+                self.offset = One::one();
+                self.offset = self.offset.unsigned_shl(self.shift) - One::one();
+                
+                self.depth_offset = One::one();
+                self.depth_offset = self.depth_offset.unsigned_shl((2 * self.depth + 2) as u32);
+            }
+            None
+        }
+    }
+}
+
+// Iterator responsible for converting
+// ranges of uniq numbers to ranges of
+// nested numbers
+pub struct UniqToNestedIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    ranges: Ranges<T>,
+    cur: T,
+    id: usize,
+}
+
+impl<T> UniqToNestedIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    pub fn new(ranges: Ranges<T>) -> UniqToNestedIter<T> {
+        let id = 0;
+
+        let cur = if ranges.0.len() > 0 {
+            ranges[id].start
+        } else {
+            Zero::zero()
+        };
+        UniqToNestedIter {
+            ranges,
+            cur,
+            id,
+        }
+    }
+}
+
+impl<T> Iterator for UniqToNestedIter<T>
+where T: Integer + PrimInt + CheckedAdd
+    + Bounded<T>
+    + Sync + Send
+    + std::fmt::Debug {
+    type Item = Range<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Iteration through the ranges
+        while self.id < self.ranges.0.len() {
+            // We get the depth/ipix values of the 
+            // current uniq number
+            let (depth, ipix) = T::pix_depth(self.cur);
+
+            // We compute the number of bit to shift
+            let shift = (T::MAXDEPTH as u32 - depth) << 1;
+
+            let one: T = One::one();
+            // Compute the final nested range
+            // for the depth given
+            let e1 = ipix
+                .unsigned_shl(shift);
+            let e2 = ipix
+                .checked_add(&one)
+                .unwrap()
+                .unsigned_shl(shift);
+
+            self.cur = self.cur
+                .checked_add(&one)
+                .unwrap();
+
+            let end = self.ranges[self.id].end;
+            if self.cur == end {
+                self.id += 1;
+
+                if self.id < self.ranges.0.len() {
+                    self.cur = self.ranges[self.id].start;
+                }
+            }
+
+            return Some(e1..e2)
+        }
+        None
+    }
+}
+
 #[derive(Debug)]
 pub struct Ranges2D<T, S>
-where T: Integer + Clone + Copy + std::fmt::Debug,
-      S: Integer + Clone + Copy + std::fmt::Debug {
+where T: Integer + Clone + Copy + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Clone + Copy + Sync + Send + std::fmt::Debug {
     // First dimension
     pub x: Vec<Range<T>>,
     // Second dimension (usually the spatial one)
@@ -366,15 +770,12 @@ where T: Integer + Clone + Copy + std::fmt::Debug,
     pub y: Vec<Ranges<S>>,
 }
 
-pub enum Operation {
-    Union,
-    Intersection,
-    Difference,
-}
+type Operation<T, S> = fn(&Ranges2D<T, S>, &Ranges2D<T, S>, bool, bool, usize, usize) -> Option<Ranges<S>>;
+
 
 impl<T, S> Ranges2D<T, S>
-where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
-      S: Integer + PrimInt + Bounded<S> + Send + std::fmt::Debug {
+where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
 
     pub fn new(mut t: Vec<Range<T>>,
                s: Vec<Ranges<S>>,
@@ -521,7 +922,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
         })
     }
     
-    pub fn merge(&self, other: &Self, op: Operation) -> Ranges2D<T, S> {
+    pub fn merge(&self, other: &Self, op: Operation<T, S>) -> Ranges2D<T, S> {
         // Unflatten a stack containing T-typed elements
         // to a stack of Range<T> types elements without
         // copying the data.
@@ -603,44 +1004,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
             let in_t1 = (on_rising_edge_t1 && c == t1[i]) | (!on_rising_edge_t1 && c < t1[i]);
             let in_t2 = (on_rising_edge_t2 && c == t2[j]) | (!on_rising_edge_t2 && c < t2[j]);
 
-            let s = match op {
-                Operation::Union => {
-                    if in_t1 && in_t2 {
-                        let s1 = &self.y[i >> 1];
-                        let s2 = &other.y[j >> 1];
-                        Some(s1.union(s2))
-                    } else if !in_t1 && in_t2 {
-                        let s2 = &other.y[j >> 1];
-                        Some(s2.clone())
-                    } else if in_t1 && !in_t2 {
-                        let s1 = &self.y[i >> 1];
-                        Some(s1.clone())
-                    } else {
-                        None
-                    }
-                },
-                Operation::Intersection => {
-                    if in_t1 && in_t2 {
-                        let s1 = &self.y[i >> 1];
-                        let s2 = &other.y[j >> 1];
-                        Some(s1.intersection(s2))
-                    } else {
-                        None
-                    }
-                },
-                Operation::Difference => {
-                    if in_t1 && in_t2 {
-                        let s1 = &self.y[i >> 1];
-                        let s2 = &other.y[j >> 1];
-                        Some(s1.difference(s2))
-                    } else if in_t1 && !in_t2 {
-                        let s1 = &self.y[i >> 1];
-                        Some(s1.clone())
-                    } else {
-                        None
-                    }
-                }
-            };
+            let s = op(self, other, in_t1, in_t2, i, j);
 
             if let Some(prev_ranges) = prev_s {
                 if let Some(cur_ranges) = s {
@@ -677,16 +1041,55 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
         }
     }
 
+    fn op_union(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.union(s2))
+        } else if !in_t1 && in_t2 {
+            let s2 = &other.y[j >> 1];
+            Some(s2.clone())
+        } else if in_t1 && !in_t2 {
+            let s1 = &self.y[i >> 1];
+            Some(s1.clone())
+        } else {
+            None
+        }
+    }
+
     pub fn union(&self, other: &Self) -> Self {
-        self.merge(other, Operation::Union)
+        self.merge(other, Self::op_union)
+    }
+
+    fn op_intersection(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.intersection(s2))
+        } else {
+            None
+        }
     }
 
     pub fn intersection(&self, other: &Self) -> Self {
-        self.merge(other, Operation::Intersection)
+        self.merge(other, Self::op_intersection)
+    }
+
+    fn op_difference(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.difference(s2))
+        } else if in_t1 && !in_t2 {
+            let s1 = &self.y[i >> 1];
+            Some(s1.clone())
+        } else {
+            None
+        }
     }
 
     pub fn difference(&self, other: &Self) -> Self {
-        self.merge(other, Operation::Difference)
+        self.merge(other, Self::op_difference)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -695,8 +1098,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
 }
 
 impl<T, S> PartialEq for Ranges2D<T, S>
-where T: Integer + Clone + Copy + std::fmt::Debug,
-      S: Integer + Clone + Copy + std::fmt::Debug {
+where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
     fn eq(&self, other: &Self) -> bool {
         // It is fast to check if the two ranges
         // have the same number of ranges towards their
@@ -726,15 +1129,14 @@ where T: Integer + Clone + Copy + std::fmt::Debug,
 #[cfg(test)]
 mod tests {
     use crate::bounded::Bounded;
-    use crate::intervals::Intervals;
     use crate::ranges::{Ranges, Ranges2D};
 
     use num::{PrimInt, Integer};
     use std::ops::Range;
 
     fn creating_ranges<T, S>(ranges_t: Vec<Range<T>>, ranges_s: Vec<Vec<Range<S>>>) -> Ranges2D<T, S>
-    where T: Integer + PrimInt + Bounded<T> + Send + std::fmt::Debug,
-          S: Integer + PrimInt + Bounded<S> + Send + std::fmt::Debug {
+    where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+          S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
         let mut vec_ranges_s = Vec::<Ranges<S>>::with_capacity(ranges_t.len());
 
         for range_s in ranges_s.into_iter() {
