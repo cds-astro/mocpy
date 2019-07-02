@@ -405,7 +405,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 impl<T, S> NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
-    
+
     fn create_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
         let mut off1: T = One::one();

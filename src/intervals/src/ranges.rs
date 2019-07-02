@@ -93,61 +93,46 @@ where T: Integer + PrimInt
                  .collect()
         }
 
+        let sentinel = <T>::MAXPIX + One::one();
         // Flatten the Vec<Range<u64>> to Vec<u64>.
         // This operation returns new vectors
-        let mut left = flatten(&self.0).into_iter();
-        let mut right = flatten(&other.0).into_iter();
+        let mut l = flatten(&self.0);
+        // Push the sentinel
+        l.push(sentinel);
+        let mut r = flatten(&other.0);
+        // Push the sentinel
+        r.push(sentinel);
 
-        let mut left_id = 0;
-        let mut right_id = 0;
+        let mut i = 0;
+        let mut j = 0;
 
         let mut result: Vec<T> = vec![];
 
-        let mut curr_left_item = left.next();
-        let mut curr_right_item = right.next();
-        while curr_left_item.is_some() || curr_right_item.is_some() {
-            if curr_left_item.is_some() && curr_right_item.is_some() {
-                let left_item = curr_left_item.unwrap();
-                let right_item = curr_right_item.unwrap();
-                let curr = cmp::min(left_item, right_item);
+        while i < l.len() || j < r.len() {
+            let c = cmp::min(l[i], r[j]);
+            // If the two ranges have been processed
+            // then we break the loop
+            if c == sentinel {
+                break;
+            }
 
-                let in_left = !((curr < left_item) ^ ((left_id & 0x1) != 0));
-                let in_right = !((curr < right_item) ^ ((right_id & 0x1) != 0));
-                let in_res = op(in_left, in_right);
+            let on_rising_edge_t1 = (i & 0x1) == 0;
+            let on_rising_edge_t2 = (j & 0x1) == 0;
+            let in_l = (on_rising_edge_t1 && c == l[i]) | (!on_rising_edge_t1 && c < l[i]);
+            let in_r = (on_rising_edge_t2 && c == r[j]) | (!on_rising_edge_t2 && c < r[j]);
 
-                if in_res ^ ((result.len() & 0x1) != 0) {
-                    result.push(curr);
-                }
-                if curr == left_item {
-                    left_id += 1;
-                    curr_left_item = left.next();
-                }
-                if curr == right_item {
-                    right_id += 1;
-                    curr_right_item = right.next();
-                }
-            } else if curr_left_item.is_none() {
-                let curr = curr_right_item.unwrap();
+            let closed = (result.len() & 0x1) == 0;
 
-                let in_res = op(false, true);
-                if in_res {
-                    result.push(curr);
-                }
-                
-                right_id += 1;
-                curr_right_item = right.next();
-            } else if curr_right_item.is_none() {
-                let curr = curr_left_item.unwrap();
-                
-                let in_res = op(true, false);
-                if in_res {
-                    result.push(curr);
-                }
-                
-                left_id += 1;
-                curr_left_item = left.next();
-            } else {
-                unreachable!();
+            let add = !(closed ^ op(in_l, in_r));
+            if add {
+                result.push(c);
+            }
+
+            if c == l[i] {
+                i += 1;
+            }
+            if c == r[j] {
+                j += 1;
             }
         }
 

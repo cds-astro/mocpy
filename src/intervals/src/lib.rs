@@ -4,6 +4,7 @@ extern crate rand;
 extern crate test;
 extern crate rayon;
 extern crate ndarray;
+extern crate healpix;
 
 mod ranges;
 pub mod ranges2d;
@@ -15,6 +16,8 @@ use crate::bounded::Bounded;
 use std::ops::Range;
 use std::mem;
 use std::slice::Iter;
+
+use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct UniqRanges<T>

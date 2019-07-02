@@ -22,8 +22,9 @@ use intervals::{NestedRanges, UniqRanges, RangesPy};
 use intervals::bounded::Bounded;
 
 use std::ops::Range;
-use std::mem;
 use std::collections::HashMap;
+
+mod ranges;
 
 #[allow(unused_parens)]
 #[pymodule]
@@ -34,45 +35,15 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>)
     -> Py<PyArray2<u64>> {
-        let lon = lon.as_array();
-        let lat = lat.as_array();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
 
-        let len = lon.shape()[0];
-
-        // Allocate a new result array that will
-        // store the merged nested intervals of the MOC
-        // No copy of the data occuring
-        let ranges: Vec<Range<u64>> = vec![0..1; len];
-        let mut pixels = Array1::from_vec(ranges);
+        let ranges = ranges::create_from_position(lon, lat, depth);
         
-        let shift = (u64::MAXDEPTH as u8 - depth) << 1;
-        
-        let layer = healpix::nested::get_or_create(depth);
-        
-        Zip::from(&mut pixels)
-            .and(&lon)
-            .and(&lat)
-            .par_apply(|p, &lon, &lat| {
-                let pix = layer.hash(lon, lat);
-
-                let e1 = pix << shift;
-                let e2 = (pix + 1) << shift;
-                *p = e1..e2;
-            });
-        
-        let ranges = {
-            let ptr = pixels.as_mut_ptr() as *mut Range<u64>;
-            let cap = len;
-
-            mem::forget(pixels);
-
-            let data = unsafe {
-                Vec::from_raw_parts(ptr, len, cap)
-            };
-
-            NestedRanges::<u64>::new(data, None, true)
-        };
-
         let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
@@ -169,7 +140,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn complement_py(py: Python, a: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let a = a.as_array().to_owned();
 
-        let mut ranges = if a.is_empty() {
+        let ranges = if a.is_empty() {
             NestedRanges::<u64>::new(vec![], None, false)
         } else {
             RangesPy { 

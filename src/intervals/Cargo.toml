@@ -16,6 +16,7 @@ num = "0.2"
 rand = "0.6.5"
 rayon = "*"
 ndarray = "0.12"
+healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 
 [profile.release]
 opt-level = 3
