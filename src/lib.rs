@@ -17,17 +17,13 @@ use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::exceptions;
 use pyo3::types::{PyDict, PyString, PyList};
 use pyo3::{ToPyObject, PyObject};
-use num::{Integer, PrimInt};
 
-use intervals::intervals::Intervals;
-use intervals::ranges::{Ranges, RangesPy};
+use intervals::{NestedRanges, UniqRanges, RangesPy};
 use intervals::bounded::Bounded;
 
 use std::ops::Range;
 use std::mem;
 use std::collections::HashMap;
-
-pub mod core;
 
 #[allow(unused_parens)]
 #[pymodule]
@@ -74,58 +70,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 Vec::from_raw_parts(ptr, len, cap)
             };
 
-            Ranges::<u64>::new(data, None, true)
+            NestedRanges::<u64>::new(data, None, true)
         };
 
         let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
     
-    /// Suppose the input array is contiguous in memory
-    unsafe fn array2d_to_intervals(mut input: Array2<u64>,
-        nested: bool,
-        min_depth: Option<i8>,
-        make_consistent: bool
-    ) -> Intervals<u64> {
-        let len = input.shape()[0];
-        let cap = len;
-        let ptr = input.as_mut_ptr() as *mut Range<u64>;
-
-        mem::forget(input);
-
-        let ranges = Vec::from_raw_parts(ptr, len, cap);
-
-        if nested {
-            Intervals::Nested(
-                Ranges::<u64>::new(ranges, min_depth, make_consistent)
-            )
-        } else {
-            Intervals::Uniq(
-                Ranges::<u64>::new(ranges, min_depth, make_consistent)
-            )
-        }
-    }
-    
-    fn intervals_to_2darray<T>(intervals: Intervals<T>) -> Array2<T>
-    where T : Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug + 'static {
-        if let Intervals::Nested(ranges) = intervals {
-            // Cast Vec<Range<u64>> to Vec<u64>
-            let len = ranges.0.len();
-            let data = ranges.to_flat_vec();
-
-            // Get a Array1 from the Vec<u64> without copying any data
-            let result = Array1::from_vec(data);
-
-            // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
-            // of HEALPix cell contained in the moc
-            result.into_shape((len, 2))
-                  .unwrap()
-                  .to_owned()
-        } else {
-            unreachable!()
-        }
-    }
-
     #[pyfn(m, "union")]
     fn union_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let a = a.as_array().to_owned();
@@ -143,12 +94,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 .to_owned();
         }
 
-        let a: Ranges<u64> = RangesPy { 
+        let a: NestedRanges<u64> = RangesPy {
             data: a,
             min_depth: None,
             make_consistent: false,
         }.into();
-        let b: Ranges<u64> = RangesPy { 
+        let b: NestedRanges<u64> = RangesPy {
             data: b,
             min_depth: None,
             make_consistent: false,
@@ -169,12 +120,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             return a.into_pyarray(py).to_owned();
         }
 
-        let a: Ranges<u64> = RangesPy { 
+        let a: NestedRanges<u64> = RangesPy { 
             data: a,
             min_depth: None,
             make_consistent: false,
         }.into();
-        let b: Ranges<u64> = RangesPy { 
+        let b: NestedRanges<u64> = RangesPy { 
             data: b,
             min_depth: None,
             make_consistent: false,
@@ -197,12 +148,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             return b.into_pyarray(py).to_owned();
         }
 
-        let a: Ranges<u64> = RangesPy { 
+        let a: NestedRanges<u64> = RangesPy { 
             data: a,
             min_depth: None,
             make_consistent: false,
         }.into();
-        let b: Ranges<u64> = RangesPy { 
+        let b: NestedRanges<u64> = RangesPy { 
             data: b,
             min_depth: None,
             make_consistent: false,
@@ -219,7 +170,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let a = a.as_array().to_owned();
 
         let mut ranges = if a.is_empty() {
-            Ranges::<u64>::new(vec![], None, false)
+            NestedRanges::<u64>::new(vec![], None, false)
         } else {
             RangesPy { 
                 data: a,
@@ -278,7 +229,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             }
         }
 
-        let ranges = Ranges::<u64>::new(ranges, None, true);
+        let ranges = NestedRanges::<u64>::new(ranges, None, true);
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }
@@ -289,9 +240,11 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = PyDict::new(py);
         
         if !input.is_empty() {
-            let intervals = unsafe {
-                array2d_to_intervals(input, true, None, false)
-            };
+            let ranges: NestedRanges<u64> = RangesPy { 
+                data: input,
+                min_depth: None,
+                make_consistent: false,
+            }.into();
 
             let size = (<u64>::MAXDEPTH + 1) as usize;
             let mut dict = HashMap::with_capacity(size);
@@ -300,7 +253,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 dict.insert(d.to_string(), Vec::<u64>::new()).unwrap();
             }
 
-            for (depth, pix) in intervals.depthpix_into_iter() {
+            for (depth, pix) in ranges.iter_depth_pix() {
                 dict.get_mut(&depth.to_string())
                     .unwrap()
                     .push(pix);
@@ -317,29 +270,31 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         Ok(result.to_object(py))
     }
-
+    
     #[pyfn(m, "degrade")]
-    fn degrade_py(py: Python, input: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
-        let input = input.as_array().to_owned();
-        if input.is_empty() {
-            return input.into_pyarray(py).to_owned();
+    fn degrade_py(py: Python, a: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
+        if a.is_empty() {
+            return a.into_pyarray(py).to_owned();
         }
 
-        let mut intervals = unsafe {
-            array2d_to_intervals(input, true, None, true)
-        };
+        let mut ranges: NestedRanges<u64> = RangesPy {
+            data: a,
+            min_depth: None,
+            make_consistent: true,
+        }.into();
 
-        intervals.degrade(depth);
+        ranges.degrade(depth);
 
-        let result = intervals_to_2darray(intervals);
+        let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "merge_nested_intervals")]
-    fn merge_nested_intervals_py(py: Python, input: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
-        let input = input.as_array().to_owned();
-        if input.is_empty() {
-            return input.into_pyarray(py).to_owned();
+    fn merge_nested_intervals_py(py: Python, a: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
+        let a = a.as_array().to_owned();
+        if a.is_empty() {
+            return a.into_pyarray(py).to_owned();
         }
         let min_depth = if min_depth == -1 {
             None
@@ -347,27 +302,32 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             Some(min_depth)
         };
 
-        let intervals = unsafe {
-            array2d_to_intervals(input, true, min_depth, true)
-        };
+        let ranges: NestedRanges<u64> = RangesPy {
+            data: a,
+            min_depth: min_depth,
+            make_consistent: true,
+        }.into();
 
-        let result = intervals_to_2darray(intervals);
+        let result: Array2<u64> = ranges.into();
         result.to_owned().into_pyarray(py).to_owned()
     }
-
+    
     #[pyfn(m, "depth")]
-    fn depth_py(_py: Python, input: &PyArray2<u64>) -> PyResult<i8> {
-        let input = input.as_array().to_owned();
-        if input.is_empty() {
+    fn depth_py(_py: Python, a: &PyArray2<u64>) -> PyResult<i8> {
+        let a = a.as_array().to_owned();
+        if a.is_empty() {
             return Ok(0);
         }
-        let intervals = unsafe {
-            array2d_to_intervals(input, true, None, false)
-        };
-        let depth = intervals.depth();
+        let ranges: NestedRanges<u64> = RangesPy {
+            data: a,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+
+        let depth = ranges.depth();
         Ok(depth)
     }
-
+    
     #[pyfn(m, "to_nested")]
     fn to_nested_py(py: Python, uniq: &PyArray1<u64>) -> Py<PyArray2<u64>> {
         let uniq = uniq.as_array().to_owned();
@@ -382,12 +342,43 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let input = stack![Axis(1), start, end].to_owned();
 
-        let intervals = unsafe {
-            array2d_to_intervals(input, false, None, true)
-        };
+        let ranges: UniqRanges<u64> = RangesPy {
+            data: input,
+            min_depth: None,
+            make_consistent: true,
+        }.into();
 
-        let intervals = intervals.to_nested();
-        let result = intervals_to_2darray(intervals);
+        let ranges = ranges.to_nested();
+        let result: Array2<u64> = ranges.into();
+        result.into_pyarray(py).to_owned()
+    }
+    
+    #[pyfn(m, "to_uniq")]
+    fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
+        let input = nested.as_array().to_owned();
+
+        if input.is_empty() {
+            return Array::zeros((0,)).into_pyarray(py).to_owned();
+        }
+
+        let ranges: NestedRanges<u64> = RangesPy {
+            data: input,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+
+        let uniq_ranges = ranges.to_uniq();
+
+        let mut data = Vec::<u64>::new();
+        for r in uniq_ranges.iter() {
+            for u in r.start..r.end {
+                data.push(u);
+            }
+        }
+        // Get a Array1 from the Vec<u64> without copying any data
+        let result = Array1::from_vec(data);
+        result.to_owned();
+
         result.into_pyarray(py).to_owned()
     }
 
@@ -420,45 +411,17 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let max_times = max_times.mapv(|e| e as u64 + 1);
 
             let ranges = stack![Axis(1), min_times, max_times].to_owned();
-            let intervals = unsafe {
-                array2d_to_intervals(ranges, true, None, true)
-            };
+            let ranges: NestedRanges<u64> = RangesPy {
+                data: ranges,
+                min_depth: None,
+                make_consistent: true,
+            }.into();
 
-            let result = intervals_to_2darray(intervals);
+            let result: Array2<u64> = ranges.into();
             Ok(result.into_pyarray(py).to_owned())
         }
     }
-
-    #[pyfn(m, "to_uniq")]
-    fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
-        let input = nested.as_array().to_owned();
-
-        if input.is_empty() {
-            return Array::zeros((0,)).into_pyarray(py).to_owned();
-        }
-
-        let intervals = unsafe {
-            array2d_to_intervals(input, true, None, false)
-        };
-        let intervals = intervals.to_uniq();
-
-        let result = if let Intervals::Uniq(ranges) = intervals {
-            let mut data = Vec::<u64>::new();
-            for r in ranges.iter() {
-                for u in r.start..r.end {
-                    data.push(u);
-                }
-            }
-            // Get a Array1 from the Vec<u64> without copying any data
-            let result = Array1::from_vec(data);
-            result.to_owned()
-        } else {
-            unreachable!();
-        };
-
-        result.into_pyarray(py).to_owned()
-    }
-
+    
     #[pyfn(m, "flatten_pixels")]
     fn flatten_pixels_py(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
         let input = nested.as_array().to_owned();
@@ -502,13 +465,15 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let pixel_ranges = stack![Axis(1), pixels, pixels_1].to_owned();
 
-        let intervals = unsafe {
-            array2d_to_intervals(pixel_ranges, true, None, true)
-        };
+        let ranges: NestedRanges<u64> = RangesPy {
+            data: pixel_ranges,
+            min_depth: None,
+            make_consistent: true,
+        }.into();
 
-        let result = intervals_to_2darray(intervals);
+        let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
-
+    
     Ok(())
 }
