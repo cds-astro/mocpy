@@ -1,5 +1,6 @@
 extern crate intervals;
 #[macro_use(stack)]
+
 extern crate ndarray;
 extern crate ndarray_parallel;
 extern crate numpy;
@@ -10,6 +11,9 @@ extern crate rayon;
 
 extern crate pyo3;
 
+#[macro_use]
+extern crate lazy_static;
+
 use ndarray::{Zip, Array, Array1, Array2, Axis};
 use ndarray_parallel::prelude::*;
 use numpy::{IntoPyArray, PyArray1, PyArray2};
@@ -19,16 +23,24 @@ use pyo3::types::{PyDict, PyString, PyList};
 use pyo3::{ToPyObject, PyObject};
 
 use intervals::{NestedRanges, UniqRanges, RangesPy};
+use intervals::ranges2d::NestedRanges2D;
 use intervals::bounded::Bounded;
 
 use std::ops::Range;
 use std::collections::HashMap;
 
+use std::sync::Mutex;
+
 mod ranges;
+
+lazy_static! {
+    static ref RANGES_2D: Mutex<HashMap<usize, NestedRanges2D<u64, u64>>> = Mutex::new(HashMap::new());
+}
 
 #[allow(unused_parens)]
 #[pymodule]
 fn core(_py: Python, m: &PyModule) -> PyResult<()> {
+    // Global NestedRanges2D
     #[pyfn(m, "from_lonlat")]
     fn from_lonlat_py(py: Python,
         depth: u8,
@@ -43,11 +55,100 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .into_raw_vec();
 
         let ranges = ranges::create_from_position(lon, lat, depth);
-        
         let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
-    
+
+    #[pyfn(m, "from_time_lonlat")]
+    fn from_time_lonlat_py(
+        times: &PyArray1<f64>,
+        d1: u8,
+        lon: &PyArray1<f64>,
+        lat: &PyArray1<f64>,
+        d2: u8)
+    // Return a tuple of two arrays containing
+    // the first (time) and second (spatial) dimensions.
+    -> PyResult<()> {
+        let times = times.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2);
+        dbg!(ts_ranges.ranges.x.len());
+        let mut d = RANGES_2D.lock().unwrap();
+        d.insert(0, ts_ranges);
+
+        Ok(())
+    }
+
+    #[pyfn(m, "project_on_first_dim")]
+    fn project_on_first_dim(py: Python,
+        first_dim_ranges: &PyArray2<u64>,
+        coverage_id: usize,
+    ) -> Py<PyArray2<u64>> {
+        // Build the first dim ranges
+        let first_dim_ranges = first_dim_ranges.as_array().to_owned();
+        let first_dim_ranges: NestedRanges<u64> = RangesPy {
+            data: first_dim_ranges,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+        
+        // Get the coverage
+        let mut res = RANGES_2D.lock().unwrap();
+        let coverage = res.remove(&coverage_id).unwrap();
+
+        // Project the coverage into the second dim
+        // with respect to the first dim ranges given
+        // by the user
+        //dbg!(coverage.ranges.x.clone());
+        //dbg!(coverage.ranges.y);
+        println!("start projection");
+        let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, &coverage);
+        println!("end projection");
+        dbg!(first_dim_ranges);
+        // Convert this to a numpy array understandable for python
+        let result: Array2<u64> = projection.into();
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "project_on_second_dim")]
+    fn project_on_second_dim(py: Python,
+        first_dim_ranges: &PyArray2<u64>,
+        coverage_id: usize,
+    ) -> Py<PyArray2<u64>> {
+        // Build the first dim ranges
+        let first_dim_ranges = first_dim_ranges.as_array().to_owned();
+        let first_dim_ranges: NestedRanges<u64> = RangesPy {
+            data: first_dim_ranges,
+            min_depth: None,
+            make_consistent: false,
+        }.into();
+        
+        // Get the coverage
+        let res = RANGES_2D.lock().unwrap();
+        let coverage = &res.get(&coverage_id).unwrap();
+
+        // Project the coverage into the second dim
+        // with respect to the first dim ranges given
+        // by the user
+        //dbg!(coverage.ranges.x.clone());
+        //dbg!(coverage.ranges.y);
+        println!("start projection");
+        let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, coverage);
+        println!("end projection");
+        dbg!(first_dim_ranges);
+        // Convert this to a numpy array understandable for python
+        let result: Array2<u64> = projection.into();
+        result.into_pyarray(py).to_owned()
+    }
+
     #[pyfn(m, "union")]
     fn union_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let a = a.as_array().to_owned();

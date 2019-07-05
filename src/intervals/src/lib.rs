@@ -7,6 +7,7 @@ extern crate ndarray;
 extern crate healpix;
 
 mod ranges;
+mod utils;
 pub mod ranges2d;
 pub mod bounded;
 
@@ -226,10 +227,10 @@ where T: Integer + PrimInt
 use ndarray::{Array1, Array2};
 impl From<NestedRanges<u64>> for Array2<u64> {
     fn from(nested_ranges: NestedRanges<u64>) -> Self {
-        let ranges = nested_ranges.ranges;
+        let ranges = nested_ranges.ranges.0;
         // Cast Vec<Range<u64>> to Vec<u64>
-        let len = ranges.0.len();
-        let data = ranges.to_flat_vec();
+        let len = ranges.len();
+        let data = utils::to_flat_vec(ranges);
 
         // Get a Array1 from the Vec<u64> without copying any data
         let result = Array1::from_vec(data);
@@ -243,10 +244,10 @@ impl From<NestedRanges<u64>> for Array2<u64> {
 }
 impl From<UniqRanges<u64>> for Array2<u64> {
     fn from(uniq_ranges: UniqRanges<u64>) -> Self {
-        let ranges = uniq_ranges.ranges;
+        let ranges = uniq_ranges.ranges.0;
         // Cast Vec<Range<u64>> to Vec<u64>
-        let len = ranges.0.len();
-        let data = ranges.to_flat_vec();
+        let len = ranges.len();
+        let data = utils::to_flat_vec(ranges);
 
         // Get a Array1 from the Vec<u64> without copying any data
         let result = Array1::from_vec(data);

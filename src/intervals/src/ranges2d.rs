@@ -10,18 +10,18 @@ use std::mem;
 use rayon::prelude::*;
 
 #[derive(Debug)]
-struct Ranges2D<T, S>
+pub struct Ranges2D<T, S>
 where T: Integer + Clone + Copy + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Clone + Copy + Sync + Send + std::fmt::Debug {
     // First dimension
-    x: Vec<Range<T>>,
+    pub x: Vec<Range<T>>,
     // Second dimension (usually the spatial one)
     // Consecutive S values do not always refer to
     // neighbours spatial cells. Therefore there is a few chance
     // that time coverage will be the same for consecutive
     // spatial cells. So the spatial cells will not be merged
     // a lot.
-    y: Vec<Ranges<S>>,
+    pub y: Vec<Ranges<S>>,
 }
 
 type Operation<T, S> = fn(
@@ -48,9 +48,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
 
     fn new(mut t: Vec<Range<T>>,
-               s: Vec<Ranges<S>>,
-               min_depth: Option<i8>,
-               make_consistent: bool) -> Result<Ranges2D<T, S>, &'static str> {
+           mut s: Vec<Ranges<S>>,
+           min_depth: Option<i8>,
+           make_consistent: bool) -> Result<Ranges2D<T, S>, &'static str> {
         
         if t.len() != s.len() {
             return Err("Each 1st dimension range must refer to an \
@@ -68,7 +68,52 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             // * A range on the first dimension referring to an empty set of ranges is discarded.
             
             // First step, the 1st dim ranges are sorted
-            (&mut t).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
+            let mut join_ts = t.into_par_iter().zip_eq(s.into_par_iter())
+                               .collect::<Vec<_>>();
+
+            (&mut join_ts).par_sort_unstable_by(|left, right| left.0.start.cmp(&right.0.start));
+
+            let mut t_current = &join_ts[0].0;
+
+            let mut s_to_union = Vec::<Vec<usize>>::new();
+            s_to_union.push(vec![0]);
+
+            for (i, (t, _)) in join_ts
+                .iter()
+                .skip(1)
+                .enumerate() {
+                    if !t.eq(&t_current) {
+                        t_current = t;
+                        s_to_union.push(vec![i]);
+                    } else {
+                        s_to_union.last_mut()
+                            .unwrap()
+                            .push(i);
+                    }
+                }
+
+            let (t, s): (Vec<_>, Vec<_>) = s_to_union.into_iter()
+                .map(|v| {
+                    let first_id: usize = v.first().unwrap().clone();
+                    let ref t = join_ts[first_id].0;
+
+                    let s = v.into_par_iter()
+                            .map(|i| {
+                                let r = join_ts[i].1.clone();
+                                r
+                            })
+                            .reduce(
+                                || Ranges::<S>::new(vec![], None, false),
+                                |s1, s2| {
+                                    s1.union(&s2)
+                                }
+                            );
+
+                    (t.clone(), s)
+                })
+                .unzip();
+
+            dbg!(t.len());
 
             // These stacks will contain the final 1st dim set of ranges
             // and for each of them, their corresponding 2nd dim set of ranges.
@@ -100,7 +145,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 let mut prev_s = prev_s.unwrap();
                 let mut prev_t = prev_t.unwrap();
                 // We continue looping over the 1st dim ranges from the ``start_idx`` index.
-                for (cur_t, cur_s) in t.into_iter().skip(start_idx)
+                for (cur_t, mut cur_s) in t.into_iter().skip(start_idx)
                                        .zip(s.into_iter().skip(start_idx)) {
                     // We discard ranges that are not valid
                     // (i.e. those associated with an empty set of 2nd dim ranges).
@@ -115,6 +160,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                             // are matching
                             if cur_s == prev_s {
                                 prev_t.end = cmp::max(prev_t.end, cur_t.end);
+                            } else if cur_t == prev_t {
+                                prev_s.union_mut(&mut cur_s);
                             // If they are not we can be in two cases: 
                             // 1. The second range ``cur_t`` is not contained into ``prev_t``
                             // xxxx|----
@@ -136,34 +183,38 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
                                 let e1 = cmp::min(cur_t.end, prev_t.end);
                                 let e2 = cmp::max(cur_t.end, prev_t.end);
-
                                 let t2 = cur_t.start..e1;
                                 let t3 = e1..e2;
+                                
+                                if t1.start != t1.end {
+                                    res_t.push(t1);
+                                    // We push ``x``
+                                    res_s.push(prev_s.clone());
+                                }
 
-                                res_t.push(t1);
-                                res_t.push(t2);
-                                res_t.push(t3.clone());
-
-                                // We push ``x``
-                                res_s.push(prev_s.clone());
+                                res_t.push(t2.clone());
                                 // We push ``z`` aka the union between
                                 // ``x`` and ``y``
                                 let z = prev_s.union(&cur_s);
                                 res_s.push(z);
-                                
-                                // Depending on whether we lie on the first
-                                // or the second case, we push either ``x``
-                                // or ``y``
-                                if e2 == prev_t.end {
-                                    // 2nd case
-                                    res_s.push(prev_s.clone());
-                                } else {
-                                    // 1st case
-                                    res_s.push(cur_s.clone());
-                                    prev_s = cur_s;
-                                }
 
-                                prev_t = t3;
+                                if t3.start != t3.end {
+                                    res_t.push(t3.clone());
+                                    // Depending on whether we lie on the first
+                                    // or the second case, we push either ``x``
+                                    // or ``y``
+                                    if e2 == prev_t.end {
+                                        // 2nd case
+                                        res_s.push(prev_s.clone());
+                                    } else {
+                                        // 1st case
+                                        res_s.push(cur_s.clone());
+                                        prev_s = cur_s;
+                                    }
+                                    prev_t = t3;
+                                } else {
+                                    prev_t = t2;
+                                }
                             }
                         // If ``prev_t`` and ``cur_t`` are not overlapping or
                         // if they are touching but the 2nd ranges are not equal
@@ -180,6 +231,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 res_t.push(prev_t);
                 res_s.push(prev_s);
             }
+
+            res_s.shrink_to_fit();
+            res_t.shrink_to_fit();
 
             (res_t, res_s)
         } else {
@@ -396,17 +450,27 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     }
 }
 
+#[derive(Debug)]
 pub struct NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
-    ranges: Ranges2D<T, S>,
+    pub ranges: Ranges2D<T, S>,
 }
 
 impl<T, S> NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
 
-    fn create_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
+    // Create a Time/Redshift/..., Space coverage with:
+    //
+    // - A set of quantity points stored in ``x`` expressed at the maximum depth.
+    //   This quantity axe can be a time one or a redshift one etc...
+    //   This will define the first dimension of the object.
+    // - A set of spatial HEALPix cells stored in ``y`` and given at the depth ``d2``
+    //   This will define the second dimension of the object.
+    //
+    // The resulted 2 dim ranges will be of depth (``d1``, ``d2``)
+    pub fn create_quantity_space_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
         let mut off1: T = One::one();
         off1 = off1.unsigned_shl(s1) - One::one();
@@ -417,14 +481,54 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         let x = x.into_par_iter()
                 .map(|r| {
                     let a: T = r & m1;
-                    let b: T = r.checked_add(&off1).unwrap();
+                    let b: T = r.checked_add(&off1).unwrap() & m1;
                     a..b
                 })
                 .collect::<Vec<_>>();
 
         let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
+        let y = y.into_par_iter()
+                .map(|r| {
+                    let a = r.unsigned_shl(s2);
+                    let b = r.checked_add(&One::one())
+                             .unwrap()
+                             .unsigned_shl(s2);
+                    Ranges::<S>::new(vec![a..b], None, false)
+                })
+                .collect::<Vec<_>>();
+
+        let ranges = Ranges2D::<T, S>::new(x, y, None, true).unwrap();
+        NestedRanges2D {
+            ranges
+        }
+    }
+
+    // Create a Space, Time/Redshift/... coverage with:
+    //
+    // - A set of spatial HEALPix cells stored in ``x`` and given at the depth ``d1``
+    //   This will define the first dimension of the object.
+    // - A set of quantity points stored in ``y`` expressed at the maximum depth.
+    //   This quantity axe can be a time one or a redshift one etc...
+    //   This will define the second dimension of the object.
+    //
+    // The resulted 2 dim ranges will be of depth (``d1``, ``d2``)
+    pub fn create_space_quantity_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
+        // The spatial dimension as the first one
+        let s1 = ((<S>::MAXDEPTH - d1) << 1) as u32;
+        let x = x.into_par_iter()
+                .map(|r| {
+                    let a = r.unsigned_shl(s1);
+                    let b = r.checked_add(&One::one())
+                             .unwrap()
+                             .unsigned_shl(s1);
+                    a..b
+                })
+                .collect::<Vec<_>>();
+
+        // The quantity dimension as the second one
+        let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
         let mut off2: S = One::one();
-        off2 = off2.unsigned_shl(s2);
+        off2 = off2.unsigned_shl(s2) - One::one();
 
         let mut m2: S = One::one();
         m2 = m2.checked_mul(&!off2).unwrap();
@@ -432,7 +536,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         let y = y.into_par_iter()
                 .map(|r| {
                     let a: S = r & m2;
-                    let b: S = r.checked_add(&off2).unwrap();
+                    let b: S = r.checked_add(&off2).unwrap() & m2;
                     Ranges::<S>::new(vec![a..b], None, false)
                 })
                 .collect::<Vec<_>>();
@@ -451,7 +555,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     // It then returns the union of the 2nd dim set of ranges
     // of the matching ranges (i.e. the ones contained into the
     // range set ``x``).
-    fn project_on_second_dim(x: &NestedRanges<T>, coverage: &NestedRanges2D<T, S>) -> NestedRanges<S> {
+    pub fn project_on_second_dim(x: &NestedRanges<T>, coverage: &NestedRanges2D<T, S>) -> NestedRanges<S> {
         let coverage = &coverage.ranges;
         let ranges = coverage.x
             .par_iter()
@@ -473,6 +577,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                     s1.union(&s2)
                 }
             );
+
         NestedRanges {
             ranges
         }
@@ -482,10 +587,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     // are contained into ``y``
     //
     // Works in the same manner of ``project_on_first_dim``
-    fn project_on_first_dim(y: &NestedRanges<S>, coverage: &NestedRanges2D<T, S>) -> NestedRanges<T> {
-        let coverage = &coverage.ranges;
+    pub fn project_on_first_dim(y: &NestedRanges<S>, coverage: NestedRanges2D<T, S>) -> NestedRanges<T> {
+        let coverage = coverage.ranges;
         let t_ranges = coverage.x
-            .par_iter()
+            .into_par_iter()
             .zip_eq(coverage.y.par_iter())
             // Filter the time ranges to keep only those
             // that lie into ``x``
@@ -498,14 +603,54 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 // The matching 1st dim ranges matching
                 // are cloned. We do not want
                 // to consume the Range2D
-                Some(t.clone())
+                Some(t)
             })
             .collect::<Vec<_>>();
 
         NestedRanges::<T>::new(t_ranges, None, true)
     }
 }
+/*
+use crate::utils;
+use ndarray::{Array1, Array2, Array3};
+impl From<NestedRanges2D<u64, u64>> for (Array2<u64>, Array3<u64>) {
+    fn from(nested_ranges: NestedRanges2D<u64, u64>) -> Self {
+        let ranges = nested_ranges.ranges;
+        // Cast Vec<Range<u64>> to Vec<u64>
+        let len = ranges.x.len();
 
+        let x = utils::to_flat_vec(ranges.x);
+
+        // Get a Array1 from the Vec<u64> without copying any data
+        let x = Array1::from_vec(x)
+            .into_shape((len, 2))
+            // Reshape it to an Array2 of shape (N x 2) where N is the number
+            // of ranges of the first dimension
+            .unwrap()
+            // Get an owned value because we will return it out this method
+            .to_owned()
+
+        let y = ranges.y
+            .into_par_iter()
+            .map(|r| {
+                let l = r.0.len();
+                let data = utils::to_flat_vec(r.0);
+                Array1::from_vec(data)
+                    .into_shape((len, 2))
+                    // Reshape it to an Array2 of shape (N x 2) where N is the number
+                    // of ranges of the first dimension
+                    .unwrap()
+                    // Get an owned value because we will return it out this method
+                    .to_owned()
+            })
+            .collect::<Vec<_>>();
+            
+
+
+        result
+    }
+}
+*/
 #[cfg(test)]
 mod tests {
     use crate::bounded::Bounded;

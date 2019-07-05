@@ -33,22 +33,6 @@ where T: Integer + PrimInt
         Ranges(ranges)
     }
 
-    pub fn to_flat_vec(self) -> Vec<T> {
-        let mut data = self.0;
-
-        let len = data.len() << 1;
-        let cap = data.capacity();
-        let ptr = data.as_mut_ptr() as *mut T;
-
-        mem::forget(data);
-
-        let result = unsafe {
-            Vec::from_raw_parts(ptr, len, cap)
-        };
-
-        result
-    }
-
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
         // Unflatten a stack containing T-typed elements
         // to a stack of Range<T> types elements without
@@ -139,8 +123,109 @@ where T: Integer + PrimInt
         Ranges(unflatten(&mut result))
     }
 
+    fn merge_mut(&mut self, other: &mut Self, op: impl Fn(bool, bool) -> bool) {
+        // Unflatten a stack containing T-typed elements
+        // to a stack of Range<T> types elements without
+        // copying the data.
+        fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
+            let mut owned_input = Vec::<T>::new();
+            // We swap the content refered by input with a new
+            // allocated vector.
+            // This fix the problem when ``input`` is freed by reaching out
+            // the end of the caller scope.
+            std::mem::swap(&mut owned_input, input);
+
+            let len = owned_input.len() >> 1;
+            let cap = owned_input.capacity();
+            let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
+            
+            mem::forget(owned_input);
+
+            let result = unsafe {
+                Vec::from_raw_parts(ptr, len, cap)
+            };
+            
+            result
+        }
+
+        // Flatten a stack containing Range<T> typed elements to a stack containing
+        // the start followed by the end value of the set of ranges (i.e. a Vec<T>).
+        // This does a copy of the data. This is necessary because we do not want to
+        // modify ``self`` as well as ``other`` and we want to return the result of 
+        // the union of the two Ranges2D.
+        fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
+            let mut owned_input = Vec::<Range<T>>::new();
+            // We swap the content refered by input with a new
+            // allocated vector.
+            // This fix the problem when ``input`` is freed by reaching out
+            // the end of the caller scope.
+            std::mem::swap(&mut owned_input, input);
+
+            let len = owned_input.len() << 1;
+            let cap = owned_input.capacity();
+            let ptr = owned_input.as_mut_ptr() as *mut T;
+            
+            mem::forget(owned_input);
+
+            let result = unsafe {
+                Vec::from_raw_parts(ptr, len, cap)
+            };
+            
+            result
+        }
+
+        let sentinel = <T>::MAXPIX + One::one();
+        // Flatten the Vec<Range<u64>> to Vec<u64>.
+        // This operation returns new vectors
+        let mut l = flatten(&mut self.0);
+        // Push the sentinel
+        l.push(sentinel);
+        let mut r = flatten(&mut other.0);
+        // Push the sentinel
+        r.push(sentinel);
+
+        let mut i = 0;
+        let mut j = 0;
+
+        let mut result: Vec<T> = vec![];
+
+        while i < l.len() || j < r.len() {
+            let c = cmp::min(l[i], r[j]);
+            // If the two ranges have been processed
+            // then we break the loop
+            if c == sentinel {
+                break;
+            }
+
+            let on_rising_edge_t1 = (i & 0x1) == 0;
+            let on_rising_edge_t2 = (j & 0x1) == 0;
+            let in_l = (on_rising_edge_t1 && c == l[i]) | (!on_rising_edge_t1 && c < l[i]);
+            let in_r = (on_rising_edge_t2 && c == r[j]) | (!on_rising_edge_t2 && c < r[j]);
+
+            let closed = (result.len() & 0x1) == 0;
+
+            let add = !(closed ^ op(in_l, in_r));
+            if add {
+                result.push(c);
+            }
+
+            if c == l[i] {
+                i += 1;
+            }
+            if c == r[j] {
+                j += 1;
+            }
+        }
+
+        self.0 = unflatten(&mut result);
+    }
+
     pub fn union(&self, other: &Self) -> Self {        
         self.merge(other, |a, b| a || b)
+    }
+
+    pub fn union_mut(&mut self, other: &mut Self) {
+        self.merge_mut(other, |a, b| a || b)
     }
 
     pub fn intersection(&self, other: &Self) -> Self {
