@@ -104,8 +104,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                             })
                             .reduce(
                                 || Ranges::<S>::new(vec![], None, false),
-                                |s1, s2| {
-                                    s1.union(&s2)
+                                |mut s1, mut s2| {
+                                    (&mut s1).union_mut(&mut s2);
+                                    s1
                                 }
                             );
 
