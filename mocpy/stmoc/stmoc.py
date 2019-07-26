@@ -23,7 +23,13 @@ __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 __license__ = "BSD 3-Clause License"
 __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
+
 class STMOC(serializer.IO):
+    """
+    Time-Spatial Coverage map class.
+
+    """
+
     def __init__(self):
         self._index = None
         self._fits_column_name = 'PIXELS'
