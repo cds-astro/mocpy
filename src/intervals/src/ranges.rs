@@ -23,14 +23,15 @@ where T: Integer + PrimInt
     + Send + Sync
     + std::fmt::Debug {
     pub fn new(mut data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Ranges<T> {
-        let ranges = if make_consistent {
+        let data = if make_consistent {
             (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
 
             MergeOverlappingRangesIter::new(data.iter(), min_depth).collect::<Vec<_>>()
         } else {
             data
         };
-        Ranges(ranges)
+
+        Ranges(data)
     }
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
@@ -516,6 +517,8 @@ where T: Integer + PrimInt + CheckedAdd
         let mut depth_off: T = One::one();
         depth_off = depth_off.unsigned_shl((2 * depth + 2) as u32);
 
+        let one: T = One::one();
+
         NestedToUniqIter {
             ranges,
             id,
@@ -524,11 +527,13 @@ where T: Integer + PrimInt + CheckedAdd
             depth,
             shift,
             off,
-            depth_off,
+            depth_off
         }
     }
 }
 
+
+use num::Unsigned;
 impl<T> Iterator for NestedToUniqIter<T>
 where T: Integer + PrimInt + CheckedAdd
         + Bounded<T>
@@ -542,6 +547,8 @@ where T: Integer + PrimInt + CheckedAdd
             let end_id = self.ranges.0.len();
             for i in start_id..end_id {
                 let range = &self.ranges[i];
+                self.id += 1;
+
                 let t1 = range.start + self.off;
                 let t2 = range.end;
 
@@ -551,18 +558,18 @@ where T: Integer + PrimInt + CheckedAdd
                 let c1 = pix1.unsigned_shl(self.shift);
                 let c2 = pix2.unsigned_shl(self.shift);
 
-                self.id += 1;
-
                 if c2 > c1 {
                     self.buffer.push(c1..c2);
 
-                    let e1 = self.depth_off.checked_add(&pix1).unwrap();
-                    let e2 = self.depth_off.checked_add(&pix2).unwrap();
+                    let e1 = self.depth_off
+                        .checked_add(&pix1).unwrap();
+                    let e2 = self.depth_off
+                        .checked_add(&pix2).unwrap();
 
                     return Some(e1..e2);
                 }
             }
-            
+
             self.ranges = self.ranges.difference(
                 &Ranges::<T>::new(
                     self.buffer.clone(),

@@ -34,10 +34,16 @@ impl Bounded<u128> for u128 {
     const MAXDEPTH: i8 = 62;
     const MAXPIX: u128 = 3 << 126;
 }
+
 impl Bounded<u64> for u64 {
     const MAXDEPTH: i8 = 29;
     const MAXPIX: u64 = 3 << 60;
 }
+impl Bounded<i64> for i64 {
+    const MAXDEPTH: i8 = 29;
+    const MAXPIX: i64 = 3 << 60;
+}
+
 impl Bounded<u32> for u32 {
     const MAXDEPTH: i8 = 13;
     const MAXPIX: u32 = 3 << 28;

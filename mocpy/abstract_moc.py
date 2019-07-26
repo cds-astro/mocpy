@@ -7,7 +7,7 @@ from astropy.io import fits
 from astropy.table import Table
 
 from .interval_set import IntervalSet
-from . import utils
+from . import utils, serializer
 
 from . import core
 
@@ -18,7 +18,7 @@ __license__ = "BSD 3-Clause License"
 __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 
-class AbstractMOC:
+class AbstractMOC(serializer.IO):
     """
     Basic functions for manipulating MOCs.
     """
@@ -28,8 +28,7 @@ class AbstractMOC:
     def __init__(self, interval_set=None):
         interval = IntervalSet() if interval_set is None else interval_set
         self._interval_set = interval
-        # Must be overridden in subclasses
-        self._fits_header_keywords = None
+        self._fits_column_name = 'UNIQ'
 
     def __repr__(self):
         return self._interval_set.__repr__()
@@ -281,6 +280,9 @@ class AbstractMOC:
         moc_json = TreeToJson().transform(tree)
         return cls.from_json(moc_json)
 
+    def _uniq_format(self):
+        return self._interval_set.uniq
+
     @staticmethod
     def _to_json(uniq):
         """
@@ -302,7 +304,7 @@ class AbstractMOC:
         min_depth = np.min(depth[0])
         max_depth = np.max(depth[-1])
 
-        for d in range(min_depth, max_depth+1):
+        for d in range(min_depth, max_depth + 1):
             pix_index = np.where(depth == d)[0]
             if pix_index.size:
                 # there are pixels belonging to the current order
@@ -391,122 +393,6 @@ class AbstractMOC:
         res = res[:-1]
 
         return res
-
-    def _to_fits(self, uniq, optional_kw_dict=None):
-        """
-        Serializes a MOC to the FITS format.
-
-        Parameters
-        ----------
-        uniq : `numpy.ndarray`
-            The array of HEALPix cells representing the MOC to serialize.
-        optional_kw_dict : dict
-            Optional keywords arguments added to the FITS header.
-
-        Returns
-        -------
-        thdulist : `astropy.io.fits.HDUList`
-            The list of HDU tables.
-        """
-        depth = self.max_order
-        if depth <= 13:
-            fits_format = '1J'
-        else:
-            fits_format = '1K'
-
-        tbhdu = fits.BinTableHDU.from_columns(
-            fits.ColDefs([
-                fits.Column(name='UNIQ', format=fits_format, array=uniq)
-            ]))
-        tbhdu.header['PIXTYPE'] = 'HEALPIX'
-        tbhdu.header['ORDERING'] = 'NUNIQ'
-        tbhdu.header.update(self._fits_header_keywords)
-        tbhdu.header['MOCORDER'] = depth
-        tbhdu.header['MOCTOOL'] = 'MOCPy'
-        if optional_kw_dict:
-            for key in optional_kw_dict:
-                tbhdu.header[key] = optional_kw_dict[key]
-
-        thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
-        return thdulist
-
-    def serialize(self, format='fits', optional_kw_dict=None):
-        """
-        Serializes the MOC into a specific format.
-
-        Possible formats are FITS, JSON and STRING
-
-        Parameters
-        ----------
-        format : str
-            'fits' by default. The other possible choice is 'json' or 'str'.
-        optional_kw_dict : dict
-            Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
-
-        Returns
-        -------
-        result : `astropy.io.fits.HDUList` or JSON dictionary
-            The result of the serialization.
-        """
-        formats = ('fits', 'json', 'str')
-        if format not in formats:
-            raise ValueError('format should be one of %s' % (str(formats)))
-
-        uniq = self._interval_set.uniq
-
-        if format == 'fits':
-            result = self._to_fits(uniq=uniq,
-                                   optional_kw_dict=optional_kw_dict)
-        elif format == 'str':
-            result = self._to_str(uniq=uniq)
-        else:
-            # json format serialization
-            result = self._to_json(uniq)
-            # WARN: use the rust to_json
-            # result = self._to_json(self._interval_set.nested)
-
-        return result
-
-    def write(self, path, format='fits', overwrite=False, optional_kw_dict=None):
-        """
-        Writes the MOC to a file.
-
-        Format can be 'fits' or 'json', though only the fits format is officially supported by the IVOA.
-
-        Parameters
-        ----------
-        path : str, optional
-            The path to the file to save the MOC in.
-        format : str, optional
-            The format in which the MOC will be serialized before being saved. Possible formats are "fits" or "json".
-            By default, ``format`` is set to "fits".
-        overwrite : bool, optional
-            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. Default to False.
-        optional_kw_dict : optional
-            Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
-        """
-        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
-
-        if format == 'fits':
-            serialization.writeto(path, overwrite=overwrite)
-        else:
-            import os
-            file_exists = os.path.isfile(path)
-
-            if file_exists and not overwrite:
-                raise OSError('File {} already exists! Set ``overwrite`` to '
-                            'True if you want to replace it.'.format(path))
-
-            if format == 'json':
-                import json
-                with open(path, 'w') as f_out:
-                    f_out.write(
-                        json.dumps(serialization, sort_keys=True, indent=2)
-                    )
-            elif format == 'str':
-                with open(path, 'w') as f_out:
-                    f_out.write(serialization)
-
 
     def degrade_to_order(self, new_order):
         """

@@ -25,7 +25,6 @@ class TimeMOC(AbstractMOC):
 
     def __init__(self, interval_set=None):
         super(TimeMOC, self).__init__(interval_set)
-        self._fits_header_keywords = {'TIMESYS': ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29')}
 
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -237,6 +236,25 @@ class TimeMOC(AbstractMOC):
 
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
         return super(TimeMOC, self_degraded).difference(moc_degraded)
+
+    @property
+    def _fits_header_keywords(self):
+        return {
+            'PIXTYPE': 'HEALPIX',
+            'ORDERING': 'NUNIQ',
+            'TIMESYS': ('JD', 'ref system JD BARYCENTRIC TT, 1 usec level 29'),
+            'MOCORDER': self.max_order,
+            'MOCTOOL': 'MOCPy'
+        }
+    
+    @property
+    def _fits_format(self):
+        depth = self.max_order
+        if depth <= 13:
+            fits_format = '1J'
+        else:
+            fits_format = '1K'
+        return fits_format
 
     @property
     def total_duration(self):

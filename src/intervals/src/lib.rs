@@ -1,4 +1,5 @@
 #![feature(test)]
+#![feature(step_trait)]
 extern crate num;
 extern crate rand;
 extern crate test;
@@ -15,6 +16,7 @@ use num::{Integer, PrimInt};
 use crate::bounded::Bounded;
 
 use std::ops::Range;
+use ranges::Ranges;
 use std::mem;
 use std::slice::Iter;
 
@@ -200,6 +202,29 @@ where T: Integer + PrimInt
         NestedRanges::<T>::new(data, min_depth, make_consistent)
     }
 }
+
+impl<T> From<Ranges<T>> for NestedRanges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    fn from(ranges: Ranges<T>) -> Self {
+        NestedRanges::<T> {
+            ranges
+        }
+    }
+}
+
+impl<T> From<NestedRanges<T>> for Ranges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    fn from(nested_ranges: NestedRanges<T>) -> Self {
+        nested_ranges.ranges
+    }
+}
+
 impl<T> From<RangesPy<T>> for UniqRanges<T>
 where T: Integer + PrimInt
     + Bounded<T>
@@ -224,39 +249,112 @@ where T: Integer + PrimInt
     }
 }
 
-use ndarray::{Array1, Array2};
-impl From<NestedRanges<u64>> for Array2<u64> {
-    fn from(nested_ranges: NestedRanges<u64>) -> Self {
-        let ranges = nested_ranges.ranges.0;
-        // Cast Vec<Range<u64>> to Vec<u64>
-        let len = ranges.len();
-        let data = utils::to_flat_vec(ranges);
-
-        // Get a Array1 from the Vec<u64> without copying any data
-        let result = Array1::from_vec(data);
-
-        // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
-        // of HEALPix cell contained in the moc
-        result.into_shape((len, 2))
-                .unwrap()
-                .to_owned()
+impl<T> From<Ranges<T>> for UniqRanges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    fn from(ranges: Ranges<T>) -> Self {
+        UniqRanges::<T> {
+            ranges
+        }
     }
 }
+
+impl<T> From<UniqRanges<T>> for Ranges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    fn from(uniq_ranges: UniqRanges<T>) -> Self {
+        uniq_ranges.ranges
+    }
+}
+
+fn nested_ranges_to_array2d<T>(input: NestedRanges<T>) -> Array2<T> 
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    let ranges = input.ranges.0;
+    // Cast Vec<Range<u64>> to Vec<u64>
+    let len = ranges.len();
+    let data = utils::to_flat_vec(ranges);
+
+    // Get a Array1 from the Vec<u64> without copying any data
+    let result = Array1::from_vec(data);
+
+    // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
+    // of HEALPix cell contained in the moc
+    result.into_shape((len, 2))
+            .unwrap()
+            .to_owned()
+}
+fn uniq_ranges_to_array2d<T>(input: UniqRanges<T>) -> Array2<T> 
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    let ranges = input.ranges.0;
+    // Cast Vec<Range<u64>> to Vec<u64>
+    let len = ranges.len();
+    let data = utils::to_flat_vec(ranges);
+
+    // Get a Array1 from the Vec<u64> without copying any data
+    let result = Array1::from_vec(data);
+
+    // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
+    // of HEALPix cell contained in the moc
+    result.into_shape((len, 2))
+            .unwrap()
+            .to_owned()
+}
+
+use ndarray::{Array1, Array2};
+impl From<NestedRanges<u64>> for Array2<u64> {
+    fn from(input: NestedRanges<u64>) -> Self {
+        nested_ranges_to_array2d(input)
+    }
+}
+impl From<NestedRanges<i64>> for Array2<i64> {
+    fn from(input: NestedRanges<i64>) -> Self {
+        nested_ranges_to_array2d(input)
+    }
+}
+
 impl From<UniqRanges<u64>> for Array2<u64> {
-    fn from(uniq_ranges: UniqRanges<u64>) -> Self {
-        let ranges = uniq_ranges.ranges.0;
-        // Cast Vec<Range<u64>> to Vec<u64>
-        let len = ranges.len();
-        let data = utils::to_flat_vec(ranges);
+    fn from(input: UniqRanges<u64>) -> Self {
+        uniq_ranges_to_array2d(input)
+    }
+}
 
-        // Get a Array1 from the Vec<u64> without copying any data
-        let result = Array1::from_vec(data);
+fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T> 
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::iter::Step
+    + std::fmt::Debug {
+    let ranges = input.ranges;
 
-        // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
-        // of HEALPix cell contained in the moc
-        result.into_shape((len, 2))
-                .unwrap()
-                .to_owned()
+    let mut result: Vec<T> = Vec::<T>::new();
+
+    // Add the UNIQs contained into the spatial MOC
+    for range in ranges.0 {
+        for uniq_range in range.start..range.end {
+            result.push(uniq_range);
+        }
+    }
+    // Get an Array1 from the Vec<i64> without copying any data
+    Array1::from_vec(result).to_owned()
+}
+impl From<UniqRanges<u64>> for Array1<u64> {
+    fn from(input: UniqRanges<u64>) -> Self {
+        uniq_ranges_to_array1d(input)
+    }
+}
+impl From<UniqRanges<i64>> for Array1<i64> {
+    fn from(input: UniqRanges<i64>) -> Self {
+        uniq_ranges_to_array1d(input)
     }
 }
 

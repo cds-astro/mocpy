@@ -114,8 +114,6 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 })
                 .unzip();
 
-            dbg!(t.len());
-
             // These stacks will contain the final 1st dim set of ranges
             // and for each of them, their corresponding 2nd dim set of ranges.
             let mut res_t = Vec::<Range<T>>::with_capacity(t.len());
@@ -451,6 +449,36 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     }
 }
 
+use ndarray::Array1;
+impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
+    fn from(input: &NestedRanges2D<u64, u64>) -> Self {
+        let ranges = &input.ranges;
+
+        let first_dim_ranges = &ranges.x;
+        let second_dim_ranges = &ranges.y;
+
+        let mut result: Vec<i64> = Vec::<i64>::new();
+
+        // Iterate over the tuples (time range, spatial moc associated)
+        for (t, s) in first_dim_ranges.iter().zip(second_dim_ranges.iter()) {
+            // 1. Append the time range. The opposite is taken so that one can
+            //    recognize it is a first dimensional range
+            result.push(-(t.start as i64));
+            result.push(-(t.end as i64));
+
+            // 2. Append the spatial ranges describing the spatial coverage
+            //    associated to the above time range.
+            for second_dim_range in &s.0 {
+                result.push(second_dim_range.start as i64);
+                result.push(second_dim_range.end as i64);
+            }
+        }
+
+        // Get an Array1 from the Vec<i64> without copying any data
+        Array1::from_vec(result).to_owned()
+    }
+}
+
 #[derive(Debug)]
 pub struct NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
@@ -610,48 +638,25 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
         NestedRanges::<T>::new(t_ranges, None, true)
     }
-}
-/*
-use crate::utils;
-use ndarray::{Array1, Array2, Array3};
-impl From<NestedRanges2D<u64, u64>> for (Array2<u64>, Array3<u64>) {
-    fn from(nested_ranges: NestedRanges2D<u64, u64>) -> Self {
-        let ranges = nested_ranges.ranges;
-        // Cast Vec<Range<u64>> to Vec<u64>
-        let len = ranges.x.len();
 
-        let x = utils::to_flat_vec(ranges.x);
+    /// Get the maximum depth of the 2D ranges along its first and
+    /// second dimensions.
+    pub fn depth(&self) -> (i8, i8) {
+        let coverage = &self.ranges;
+        let y = coverage.y
+            .par_iter()
+            .map(|ranges| ranges.depth())
+            .max()
+            .unwrap_or_else(|| {
+                0
+            });
 
-        // Get a Array1 from the Vec<u64> without copying any data
-        let x = Array1::from_vec(x)
-            .into_shape((len, 2))
-            // Reshape it to an Array2 of shape (N x 2) where N is the number
-            // of ranges of the first dimension
-            .unwrap()
-            // Get an owned value because we will return it out this method
-            .to_owned()
+        let x = Ranges::<T>::new(coverage.x.clone(), None, false).depth();
 
-        let y = ranges.y
-            .into_par_iter()
-            .map(|r| {
-                let l = r.0.len();
-                let data = utils::to_flat_vec(r.0);
-                Array1::from_vec(data)
-                    .into_shape((len, 2))
-                    // Reshape it to an Array2 of shape (N x 2) where N is the number
-                    // of ranges of the first dimension
-                    .unwrap()
-                    // Get an owned value because we will return it out this method
-                    .to_owned()
-            })
-            .collect::<Vec<_>>();
-            
-
-
-        result
+        dbg!(x, y)
     }
 }
-*/
+
 #[cfg(test)]
 mod tests {
     use crate::bounded::Bounded;

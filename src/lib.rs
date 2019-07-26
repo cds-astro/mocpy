@@ -68,7 +68,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         d2: u8)
     // Return a tuple of two arrays containing
     // the first (time) and second (spatial) dimensions.
-    -> PyResult<()> {
+    -> PyResult<usize> {
         let times = times.as_array()
             .to_owned()
             .into_raw_vec();
@@ -80,11 +80,11 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .into_raw_vec();
 
         let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2);
-        dbg!(ts_ranges.ranges.x.len());
         let mut d = RANGES_2D.lock().unwrap();
+        let index = d.len();
         d.insert(0, ts_ranges);
 
-        Ok(())
+        Ok(index)
     }
 
     #[pyfn(m, "project_on_first_dim")]
@@ -107,12 +107,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         // Project the coverage into the second dim
         // with respect to the first dim ranges given
         // by the user
-        //dbg!(coverage.ranges.x.clone());
-        //dbg!(coverage.ranges.y);
-        println!("start projection");
         let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, &coverage);
-        println!("end projection");
-        dbg!(first_dim_ranges);
         // Convert this to a numpy array understandable for python
         let result: Array2<u64> = projection.into();
         result.into_pyarray(py).to_owned()
@@ -130,7 +125,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             min_depth: None,
             make_consistent: false,
         }.into();
-        
+
         // Get the coverage
         let res = RANGES_2D.lock().unwrap();
         let coverage = &res.get(&coverage_id).unwrap();
@@ -138,15 +133,34 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         // Project the coverage into the second dim
         // with respect to the first dim ranges given
         // by the user
-        //dbg!(coverage.ranges.x.clone());
-        //dbg!(coverage.ranges.y);
-        println!("start projection");
         let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, coverage);
-        println!("end projection");
-        dbg!(first_dim_ranges);
+
         // Convert this to a numpy array understandable for python
         let result: Array2<u64> = projection.into();
         result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "ranges2d_to_uniq")]
+    fn ranges2d_to_uniq(py: Python,
+        coverage_id: usize,
+    ) -> Py<PyArray1<i64>> {
+        // Get the coverage
+        let res = RANGES_2D.lock().unwrap();
+        let coverage = res.get(&coverage_id).unwrap();
+        let result: Array1<i64> = coverage.into();
+        // Convert this to a numpy array understandable for python
+        result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "ranges2d_depth")]
+    fn ranges2d_depth(_py: Python,
+        coverage_id: usize,
+    ) -> PyResult<(i8, i8)> {
+        // Get the coverage
+        let res = RANGES_2D.lock().unwrap();
+        let coverage = &res.get(&coverage_id).unwrap();
+
+        Ok(coverage.depth())
     }
 
     #[pyfn(m, "union")]
@@ -260,7 +274,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
         result.into_pyarray(py).to_owned()
     }
-    
+
     #[pyfn(m, "from_json")]
     fn from_json_py(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
         const TYPE_KEY_MSG_ERR: &'static str = "The key must be a python str that \n \
@@ -390,6 +404,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         if a.is_empty() {
             return Ok(0);
         }
+
         let ranges: NestedRanges<u64> = RangesPy {
             data: a,
             min_depth: None,
@@ -399,7 +414,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let depth = ranges.depth();
         Ok(depth)
     }
-    
+
     #[pyfn(m, "to_nested")]
     fn to_nested_py(py: Python, uniq: &PyArray1<u64>) -> Py<PyArray2<u64>> {
         let uniq = uniq.as_array().to_owned();
@@ -440,16 +455,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         }.into();
 
         let uniq_ranges = ranges.to_uniq();
-
-        let mut data = Vec::<u64>::new();
-        for r in uniq_ranges.iter() {
-            for u in r.start..r.end {
-                data.push(u);
-            }
-        }
-        // Get a Array1 from the Vec<u64> without copying any data
-        let result = Array1::from_vec(data);
-        result.to_owned();
+        let result: Array1<u64> = uniq_ranges.into();
 
         result.into_pyarray(py).to_owned()
     }

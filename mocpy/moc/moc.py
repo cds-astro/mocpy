@@ -68,7 +68,6 @@ class MOC(AbstractMOC):
 
     def __init__(self, interval_set=None):
         super(MOC, self).__init__(interval_set)
-        self._fits_header_keywords = {'COORDSYS': ('C', 'reference frame (C=ICRS)')}
 
     def contains(self, ra, dec, keep_inside=True):
         """
@@ -577,6 +576,25 @@ class MOC(AbstractMOC):
 
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
+
+    @property
+    def _fits_header_keywords(self):
+        return {
+            'PIXTYPE': 'HEALPIX',
+            'ORDERING': 'NUNIQ',
+            'COORDSYS': ('C', 'reference frame (C=ICRS)'),
+            'MOCORDER': self.max_order,
+            'MOCTOOL': 'MOCPy'
+        }
+    
+    @property
+    def _fits_format(self):
+        depth = self.max_order
+        if depth <= 13:
+            fits_format = '1J'
+        else:
+            fits_format = '1K'
+        return fits_format
 
     @property
     def sky_fraction(self):
