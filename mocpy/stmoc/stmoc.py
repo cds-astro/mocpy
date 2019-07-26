@@ -37,9 +37,9 @@ class STMOC(serializer.IO):
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
         """
-        Creates a 2D coverage where:
+        Creates a 2D Coverage from a set of times and positions associated to each time.
 
-        - Its first dimension refers to `astropy.time.Time` times
+        - Its first dimension refers to `astropy.time.Time` times.
         - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
         
         Parameters
