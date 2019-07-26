@@ -32,26 +32,27 @@ class STMOC(serializer.IO):
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
         """
         Creates a 2D coverage where:
+
         - Its first dimension refers to `astropy.time.Time` times
-        - Its second dimension refers to lon, lat positions.
+        - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
         
         Parameters
         ----------
         time : `astropy.time.Time`
             The times of each sky coordinates.
         time_depth : int
-            Time depth
+            Time depth.
         lon : `astropy.units.Quantity`
             The longitudes of the sky coordinates observed at a specific time.
         lat : `astropy.units.Quantity`
             The latitudes of the sky coordinates observed at a specific time.
         spatial_depth : int
-            Spatial depth
+            Spatial depth.
         
         Returns
         -------
         result : `~mocpy.stmoc.STMOC`
-            The resulting Spatial Time Coverage map
+            The resulting Spatial-Time Coverage map.
         """
         times = times.jd.astype(np.float64)
         lon = lon.to_value('rad').astype(np.float64)
@@ -69,9 +70,9 @@ class STMOC(serializer.IO):
 
     def project_on_second_dimension(self, times):
         """
-        Project the STMOC to its second dimensions with a constraint on its first dimension.
+        Project the STMOC to its second dimension with a constraint on its first dimension.
 
-        This will perform the union of all the spatial coverages lying in a set of time ranges
+        This will perform the union of all the spatial coverages lying in a set of time ranges.
         
         Parameters
         ----------
@@ -81,8 +82,8 @@ class STMOC(serializer.IO):
         Returns
         -------
         result : `~mocpy.moc.MOC`
-            The projeted spatial coverage map resulting from the union of all the 
-            spatial coverages lying in the set of time ranges passed.
+            The projeted Spatial Coverage map resulting from the union of all the
+            spatial coverages lying in the set of time ranges given.
         """
         if times.shape[1] != 2:
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
