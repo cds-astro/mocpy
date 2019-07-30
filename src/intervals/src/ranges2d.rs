@@ -697,27 +697,44 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
     /// Get the maximum depth of the 2D ranges along its first and
     /// second dimensions.
+    /// 
+    /// If the NestedRanges2D is empty the depth returned is set
+    /// to (0, 0)
     pub fn depth(&self) -> (i8, i8) {
         let coverage = &self.ranges;
         let y = coverage.y
             .par_iter()
+            // Compute the depths of the Ranges<T>
             .map(|ranges| ranges.depth())
+            // Get the max of these depths
             .max()
+            // If there are no ranges, the max depth
+            // along the second dimension is set to 0
             .unwrap_or_else(|| {
                 0
             });
 
-        // TODO: optimize that, we do not need to create a Ranges here (copy is done)!
-        //let x = Ranges::<T>::new(coverage.x.clone(), None, false).depth();
         let x = coverage.x
             .par_iter()
-            .map(|range| Ranges::<T>::new(vec![range.clone()], None, false).depth())
+            // Compute de depths of the first dimensional ranges
+            .map(|range| {
+                let res = range.start | range.end;
+                let mut depth: i8 = <T>::MAXDEPTH - (res.trailing_zeros() >> 1) as i8;
+
+                if depth < 0 {
+                    depth = 0;
+                }
+                depth
+            })
+            // Get the max of these depths
             .max()
+            // If there are no ranges, the max depth
+            // along the first dimension is set to 0
             .unwrap_or_else(|| {
                 0
             });
 
-        dbg!(x, y)
+        (x, y)
     }
 
     /// Returns the minimum value along the `T` dimension
