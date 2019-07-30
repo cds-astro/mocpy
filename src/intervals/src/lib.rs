@@ -279,7 +279,7 @@ where T: Integer + PrimInt
     let ranges = input.ranges.0;
     // Cast Vec<Range<u64>> to Vec<u64>
     let len = ranges.len();
-    let data = utils::to_flat_vec(ranges);
+    let data = utils::flatten(ranges);
 
     // Get a Array1 from the Vec<u64> without copying any data
     let result = Array1::from_vec(data);
@@ -298,7 +298,7 @@ where T: Integer + PrimInt
     let ranges = input.ranges.0;
     // Cast Vec<Range<u64>> to Vec<u64>
     let len = ranges.len();
-    let data = utils::to_flat_vec(ranges);
+    let data = utils::flatten(ranges);
 
     // Get a Array1 from the Vec<u64> without copying any data
     let result = Array1::from_vec(data);

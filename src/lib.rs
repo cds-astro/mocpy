@@ -33,14 +33,15 @@ use std::sync::Mutex;
 
 mod ranges;
 
+type Coverage2DHashMap = HashMap<usize, NestedRanges2D<u64, u64>>;
+
 lazy_static! {
-    static ref RANGES_2D: Mutex<HashMap<usize, NestedRanges2D<u64, u64>>> = Mutex::new(HashMap::new());
+    static ref RANGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
 }
 
 #[allow(unused_parens)]
 #[pymodule]
 fn core(_py: Python, m: &PyModule) -> PyResult<()> {
-    // Global NestedRanges2D
     #[pyfn(m, "from_lonlat")]
     fn from_lonlat_py(py: Python,
         depth: u8,
@@ -62,12 +63,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_lonlat")]
     fn from_time_lonlat_py(
         times: &PyArray1<f64>,
-        d1: u8,
+        d1: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
-        d2: u8)
-    // Return a tuple of two arrays containing
-    // the first (time) and second (spatial) dimensions.
+        d2: i8)
     -> PyResult<usize> {
         let times = times.as_array()
             .to_owned()
@@ -79,10 +78,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2);
+        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2)
+            .map_err(|msg| {
+                exceptions::ValueError::py_err(msg)
+            })?;
         let mut d = RANGES_2D.lock().unwrap();
         let index = d.len();
-        d.insert(0, ts_ranges);
+        dbg!((&ts_ranges).ranges.x.len());
+        dbg!((&ts_ranges).ranges.y.len());
+
+        d.insert(index, ts_ranges);
 
         Ok(index)
     }
@@ -140,16 +145,33 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         result.into_pyarray(py).to_owned()
     }
 
-    #[pyfn(m, "ranges2d_to_uniq")]
+    #[pyfn(m, "ranges2d_to_fits")]
     fn ranges2d_to_uniq(py: Python,
         coverage_id: usize,
     ) -> Py<PyArray1<i64>> {
         // Get the coverage
         let res = RANGES_2D.lock().unwrap();
         let coverage = res.get(&coverage_id).unwrap();
+        println!("{:?}", coverage.ranges.x.len());
+        println!("{:?}", coverage.ranges.y.len());
+
         let result: Array1<i64> = coverage.into();
         // Convert this to a numpy array understandable for python
         result.into_pyarray(py).to_owned()
+    }
+
+    #[pyfn(m, "ranges2d_from_fits")]
+    fn ranges2d_from_fits_py(data: &PyArray1<i64>) -> PyResult<usize> {
+        let data = data.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let ts_ranges: NestedRanges2D<u64, u64> = data.into();
+        let mut d = RANGES_2D.lock().unwrap();
+        let index = d.len();
+        d.insert(index, ts_ranges);
+
+        Ok(index)
     }
 
     #[pyfn(m, "ranges2d_depth")]
@@ -158,9 +180,41 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ) -> PyResult<(i8, i8)> {
         // Get the coverage
         let res = RANGES_2D.lock().unwrap();
-        let coverage = &res.get(&coverage_id).unwrap();
+        let coverage = res.get(&coverage_id).unwrap();
 
         Ok(coverage.depth())
+    }
+
+    #[pyfn(m, "ranges2d_min_time")]
+    fn ranges2d_min_time(_py: Python,
+        coverage_id: usize,
+    ) -> PyResult<f64> {
+        // Get the coverage
+        let res = RANGES_2D.lock().unwrap();
+        let coverage = res.get(&coverage_id).unwrap();
+
+        let t_min = coverage.t_min()
+            .map_err(|msg| {
+                exceptions::ValueError::py_err(msg)
+            })?;
+
+        Ok((t_min as f64) / 86400000000_f64)
+    }
+
+    #[pyfn(m, "ranges2d_max_time")]
+    fn ranges2d_max_time(_py: Python,
+        coverage_id: usize,
+    ) -> PyResult<f64> {
+        // Get the coverage
+        let res = RANGES_2D.lock().unwrap();
+        let coverage = res.get(&coverage_id).unwrap();
+
+        let t_max = coverage.t_max()
+            .map_err(|msg| {
+                exceptions::ValueError::py_err(msg)
+            })?;
+        
+        Ok((t_max as f64) / 86400000000_f64)
     }
 
     #[pyfn(m, "union")]

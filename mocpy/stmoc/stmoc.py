@@ -10,6 +10,7 @@ from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
 from astropy.coordinates import SkyCoord
 from astropy import wcs
+from astropy.time import Time
 
 import cdshealpix
 from .. import core
@@ -26,13 +27,25 @@ __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 class STMOC(serializer.IO):
     """
-    Time-Spatial Coverage map class.
+    Time-Spatial Coverage class.
 
     """
 
     def __init__(self):
         self._index = None
         self._fits_column_name = 'PIXELS'
+
+    @property
+    def max_depth(self):
+        return core.ranges2d_depth(self._index)
+
+    @property
+    def max_time(self):
+        return Time(core.ranges2d_max_time(self._index), format='jd', scale='tdb')
+    
+    @property
+    def min_time(self):
+        return Time(core.ranges2d_min_time(self._index), format='jd', scale='tdb')
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -118,4 +131,61 @@ class STMOC(serializer.IO):
         return '1K'
 
     def _uniq_format(self):
-        return core.ranges2d_to_uniq(self._index)
+        return core.ranges2d_to_fits(self._index)
+
+    @classmethod
+    def from_fits(cls, filename):
+        """
+        Loads a STMOC from a FITS file.
+
+        Parameters
+        ----------
+        filename : str
+            The path to the FITS file.
+
+        Returns
+        -------
+        result : `~mocpy.moc.STMOC`
+            The resulting STMOC.
+        """
+        # Open the FITS file
+        hdulist = fits.open(filename)
+        # The binary HDU table contains all the data
+        header = hdulist[1].header
+
+        bin_HDU_table = hdulist[1]
+        # Some FITS file may not have a name column to access
+        # the data. So we rename it as the `PIXELS` columns.
+        if len(bin_HDU_table.columns) != 1:
+            raise AttributeError('The binary HDU table of {0} must contain only one'
+                'column where the data are stored.')
+
+        if bin_HDU_table.columns[0].name is None:
+            bin_HDU_table.columns[0].name = 'PIXELS'
+
+        key = bin_HDU_table.columns[0].name
+
+        # Retrieve the spatial and time order
+        # FITS header can be of two different format for expressing
+        # these orders:
+        # 1. TORDER key refers the max depth in the time dimension. MOCORDER then
+        #    refers the spatial max depth.
+        # 2. MOCORDER refers the max depth along the 1st dimension whereas
+        #    MOCORD_1 refers to the max depth along the 2nd dimension.
+        if header.get('TORDER') is None:
+            # We are in the 2. case
+            first_dim_depth = header.get('MOCORDER')
+            second_dim_depth = header.get('MOCORD_1')
+        else:
+            # We are in the 1. case
+            first_dim_depth = header.get('TORDER')
+            second_dim_depth = header.get('MOCORDER')
+
+        result = cls()
+        result._index = core.ranges2d_from_fits(
+            np.int8(first_dim_depth),
+            np.int8(second_dim_depth),
+            bin_HDU_table.data[key].astype(np.int64)
+        )
+        return result
+

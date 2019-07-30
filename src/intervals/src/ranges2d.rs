@@ -11,8 +11,8 @@ use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct Ranges2D<T, S>
-where T: Integer + Clone + Copy + Sync + std::fmt::Debug,
-      S: Integer + PrimInt + Bounded<S> + Clone + Copy + Sync + Send + std::fmt::Debug {
+where T: Integer + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug {
     // First dimension
     pub x: Vec<Range<T>>,
     // Second dimension (usually the spatial one)
@@ -80,8 +80,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
             for (i, (t, _)) in join_ts
                 .iter()
-                .skip(1)
-                .enumerate() {
+                .enumerate()
+                .skip(1) {
                     if !t.eq(&t_current) {
                         t_current = t;
                         s_to_union.push(vec![i]);
@@ -125,7 +125,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             // This range is stored in ``prev_t`` along with its corresponding
             // set of 2nd dim ranges ``prev_s``
             let (prev_t, prev_s): (Option<Range<T>>, Option<Ranges<S>>) = {
-                let mut first_t: Option<Range<T>> = None;
+                /*let mut first_t: Option<Range<T>> = None;
                 let mut first_s: Option<Ranges<S>> = None;
                 for (cur_t, cur_s) in t.iter().zip(s.iter()) {
                     start_idx = start_idx + 1;
@@ -134,8 +134,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                         first_s = Some(cur_s.clone());
                         break;
                     }
-                }
-                (first_t, first_s)
+                }*/
+                (Some(t[0].clone()), Some(s[0].clone()))
+                //(first_t, first_s)
             };
 
             // If there is at least one valid 1st dim range (i.e. one that contains
@@ -144,11 +145,13 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 let mut prev_s = prev_s.unwrap();
                 let mut prev_t = prev_t.unwrap();
                 // We continue looping over the 1st dim ranges from the ``start_idx`` index.
-                for (cur_t, mut cur_s) in t.into_iter().skip(start_idx)
-                                       .zip(s.into_iter().skip(start_idx)) {
+                for (cur_t, mut cur_s) in t.into_iter().zip(s.into_iter()).skip(1) {
                     // We discard ranges that are not valid
                     // (i.e. those associated with an empty set of 2nd dim ranges).
                     if !cur_s.is_empty() {
+                        if cur_t.start == cur_t.end {
+                            unreachable!("cur_t size is null!");
+                        }
                         // If ``prev_t`` and ``cur_t`` are touching to each other
                         // and the 2nd dim ranges are equal
                         if cur_t.start == prev_t.end && cur_s == prev_s {
@@ -224,6 +227,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                             prev_t = cur_t;
                             prev_s = cur_s;
                         }
+                    } else {
+                        unreachable!("A first dim range is obligatory associated with a Ranges<S>");
                     }
                 }
 
@@ -450,6 +455,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 }
 
 use ndarray::Array1;
+// Dump a NestedRanges2D<u64, u64> into a Array1<i64>
+// that can be send to python. Python will then be 
+// able to write it into a FITS file with astropy
 impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
     fn from(input: &NestedRanges2D<u64, u64>) -> Self {
         let ranges = &input.ranges;
@@ -476,6 +484,51 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
 
         // Get an Array1 from the Vec<i64> without copying any data
         Array1::from_vec(result).to_owned()
+    }
+}
+
+
+use crate::utils;
+// Create a NestedRanges2D<u64, u64> from a Array1<i64>
+// coming from a FITS file opened with astropy
+impl From<Vec<i64>> for NestedRanges2D<u64, u64> {
+    fn from(mut input: Vec<i64>) -> Self {
+        let input = utils::unflatten(&mut input);
+
+        let mut t = Vec::<Range<u64>>::new();
+        
+        let mut cur_s = Vec::<Range<u64>>::new();
+        let mut s = Vec::<Ranges<u64>>::new();
+        for r in input.into_iter() {
+            if r.start < 0 {
+                // First dim range
+                let t_start = (-r.start) as u64;
+                let t_end = (-r.end) as u64;
+                t.push(t_start..t_end);
+
+                // Push the second dim MOC if there is ranges in it
+                if !cur_s.is_empty() {
+                    // Warning: We suppose all the STMOCS read from FITS files
+                    // are already consistent when they have been saved!
+                    // That is why we do not check the consistency of the MOCs here!
+                    s.push(Ranges::<u64>::new(cur_s.clone(), None, false));
+                    cur_s.clear();
+                }
+            } else {
+                // Second dim range
+                let s_start = r.start as u64;
+                let s_end = r.end as u64;
+                cur_s.push(s_start..s_end);
+            }
+        }
+
+        // Push the last second dim coverage
+        s.push(Ranges::<u64>::new(cur_s, None, false));
+
+        let ranges = Ranges2D::<u64, u64>::new(t, s, None, false).unwrap();
+        NestedRanges2D {
+            ranges
+        }
     }
 }
 
@@ -510,7 +563,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         let x = x.into_par_iter()
                 .map(|r| {
                     let a: T = r & m1;
-                    let b: T = r.checked_add(&off1).unwrap() & m1;
+                    let b: T = r.checked_add(&One::one())
+                                .unwrap()
+                                .checked_add(&off1)
+                                .unwrap() & m1;
                     a..b
                 })
                 .collect::<Vec<_>>();
@@ -651,9 +707,35 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 0
             });
 
-        let x = Ranges::<T>::new(coverage.x.clone(), None, false).depth();
+        // TODO: optimize that, we do not need to create a Ranges here (copy is done)!
+        //let x = Ranges::<T>::new(coverage.x.clone(), None, false).depth();
+        let x = coverage.x
+            .par_iter()
+            .map(|range| Ranges::<T>::new(vec![range.clone()], None, false).depth())
+            .max()
+            .unwrap_or_else(|| {
+                0
+            });
 
         dbg!(x, y)
+    }
+
+    /// Returns the minimum value along the `T` dimension
+    pub fn t_min(&self) -> Result<T, &'static str> {
+        if self.ranges.is_empty() {
+            Err("The coverage is empty")
+        } else {
+            Ok(self.ranges.x[0].start)
+        }
+    }
+
+    /// Returns the maximum value along the `T` dimension
+    pub fn t_max(&self) -> Result<T, &'static str> {
+        if self.ranges.is_empty() {
+            Err("The coverage is empty")
+        } else {
+            Ok(self.ranges.x.last().unwrap().end)
+        }
     }
 }
 
@@ -692,27 +774,16 @@ mod tests {
     }
 
     #[test]
-    fn merge_overlapping_ranges_with_empty() {
+    fn merge_overlapping_ranges_2() {
         let ranges_t = vec![0..15, 7..14, 16..17, 18..19, 19..25];
         let ranges_s = vec![
             Ranges::<u64>::new(vec![0..4, 5..16, 17..18], None, true),
             Ranges::<u64>::new(vec![0..4, 5..16, 17..18], None, true),
-            Ranges::<u64>::new(vec![], None, true),
+            Ranges::<u64>::new(vec![0..4], None, true),
             Ranges::<u64>::new(vec![16..21], None, true),
             Ranges::<u64>::new(vec![16..21, 25..26], None, true),
         ];
         Ranges2D::<u64, u64>::new(ranges_t, ranges_s, None, true).unwrap();
-    }
-
-    #[test]
-    fn creating_empty_ranges() {
-        let ranges_t = vec![0..15, 7..14];
-        let ranges_s = vec![
-            Ranges::<u64>::new(vec![], None, true),
-            Ranges::<u64>::new(vec![], None, true),
-        ];
-        let ranges_2d = Ranges2D::<u64, u64>::new(ranges_t, ranges_s, None, true).unwrap();
-        assert!(ranges_2d.is_empty());
     }
 
     #[test]
@@ -751,30 +822,28 @@ mod tests {
     
     #[test]
     fn empty_range_union() {
-        let a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![]]);
-        assert!(a.is_empty());
+        let a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
         let b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
         let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(
-            vec![9..20],
-            vec![vec![0..17]]
+            vec![0..1, 9..20],
+            vec![vec![42..43], vec![0..17]]
         );
         assert_eq!(res, c);
     }
 
     #[test]
     fn empty_range_union_bis() {
-        let b = creating_ranges::<u64, u64>(vec![0..1], vec![vec![]]);
-        assert!(b.is_empty());
+        let b = creating_ranges::<u64, u64>(vec![0..9], vec![vec![0..20]]);
         let a = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
         let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(
-            vec![9..20],
-            vec![vec![0..17]]
+            vec![0..9, 9..20],
+            vec![vec![0..20], vec![0..17]]
         );
         assert_eq!(res, c);
     }

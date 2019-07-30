@@ -33,8 +33,8 @@ __email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
 
 class MOC(AbstractMOC):
     """
-    Multi-order spatial coverage class
-    
+    Multi-order spatial coverage class.
+
     A MOC describes the coverage of an arbitrary region on the unit sphere.
     MOCs are usually used for describing the global coverage of catalog/image surveys such as GALEX or SDSS.
     A MOC corresponds to a list of `HEALPix <https://healpix.sourceforge.io/>`__ cells at different depths.
