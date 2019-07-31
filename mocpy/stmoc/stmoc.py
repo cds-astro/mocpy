@@ -32,20 +32,20 @@ class STMOC(serializer.IO):
     """
 
     def __init__(self):
-        self._index = None
+        self.__index = None
         self._fits_column_name = 'PIXELS'
 
     @property
     def max_depth(self):
-        return core.ranges2d_depth(self._index)
+        return core.ranges2d_depth(self.__index)
 
     @property
     def max_time(self):
-        return Time(core.ranges2d_max_time(self._index), format='jd', scale='tdb')
+        return Time(core.ranges2d_max_time(self.__index), format='jd', scale='tdb')
     
     @property
     def min_time(self):
-        return Time(core.ranges2d_min_time(self._index), format='jd', scale='tdb')
+        return Time(core.ranges2d_min_time(self.__index), format='jd', scale='tdb')
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -84,7 +84,7 @@ class STMOC(serializer.IO):
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        result._index = core.from_time_lonlat(times, time_depth, lon, lat, spatial_depth)
+        result.__index = core.from_time_lonlat(times, time_depth, lon, lat, spatial_depth)
         return result
 
     def project_on_second_dimension(self, times):
@@ -108,12 +108,12 @@ class STMOC(serializer.IO):
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
 
         times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
-        ranges = core.project_on_second_dim(times, self._index)
+        ranges = core.project_on_second_dim(times, self.__index)
         return MOC(IntervalSet(ranges, make_consistent=False))
 
     @property
     def _fits_header_keywords(self):
-        t_depth, s_depth = core.ranges2d_depth(self._index)
+        t_depth, s_depth = core.ranges2d_depth(self.__index)
         return {
             'MOC': 'TIME.SPACE',
             'ORDERING': 'RANGE29',
@@ -131,7 +131,7 @@ class STMOC(serializer.IO):
         return '1K'
 
     def _uniq_format(self):
-        return core.ranges2d_to_fits(self._index)
+        return core.ranges2d_to_fits(self.__index)
 
     @classmethod
     def from_fits(cls, filename):
@@ -182,7 +182,7 @@ class STMOC(serializer.IO):
             second_dim_depth = header.get('MOCORDER')
 
         result = cls()
-        result._index = core.ranges2d_from_fits(
+        result.__index = core.ranges2d_from_fits(
             np.int8(first_dim_depth),
             np.int8(second_dim_depth),
             bin_HDU_table.data[key].astype(np.int64)

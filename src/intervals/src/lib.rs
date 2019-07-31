@@ -7,370 +7,62 @@ extern crate rayon;
 extern crate ndarray;
 extern crate healpix;
 
-mod ranges;
-mod utils;
-pub mod ranges2d;
 pub mod bounded;
+mod utils;
 
-use num::{Integer, PrimInt};
-use crate::bounded::Bounded;
+mod ranges;
+pub mod nestedranges;
+pub mod uniqranges;
 
-use std::ops::Range;
-use ranges::Ranges;
-use std::mem;
-use std::slice::Iter;
+pub mod nestedranges2d;
 
-use rayon::prelude::*;
-
-#[derive(Debug)]
-pub struct UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + Clone
-    + std::fmt::Debug {
-    ranges: ranges::Ranges<T>
-}
-
-impl<T> UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    pub fn new(data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Self {
-        let ranges = ranges::Ranges::<T>::new(data, min_depth, make_consistent);
-
-        UniqRanges {
-            ranges
-        }
-    }
-
-    pub fn to_nested(self) -> NestedRanges<T> {
-        let nested_data = ranges::UniqToNestedIter::new(self.ranges)
-            .collect::<Vec<_>>();
-        NestedRanges::<T>::new(nested_data, None, true)
-    }
-
-    pub fn iter(&self) -> Iter<Range<T>> {
-        self.ranges.iter()
-    }
-}
-
-impl<T> PartialEq for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn eq(&self, other: &Self) -> bool {
-        self.ranges == other.ranges
-    }
-}
-
-impl<T> Eq for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {}
-
-#[derive(Debug, Clone)]
-pub struct NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    pub ranges: ranges::Ranges<T>
-}
-
-impl<T> NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    pub fn new(data: Vec<Range<T>>, min_depth: Option<i8>, make_consistent: bool) -> Self {
-        let ranges = ranges::Ranges::<T>::new(data, min_depth, make_consistent);
-
-        NestedRanges {
-            ranges
-        }
-    }
-
-    pub fn to_uniq(self) -> UniqRanges<T> {
-        let uniq_data = ranges::NestedToUniqIter::new(self.ranges)
-            .collect::<Vec<_>>();
-        UniqRanges::<T>::new(uniq_data, None, true)
-    }
-
-    pub fn depth(&self) -> i8 {
-        self.ranges.depth()
-    }
-
-    pub fn degrade(&mut self, depth: i8) {
-        self.ranges.degrade(depth);
-    }
-
-    pub fn contains(&self, x: &Range<T>) -> bool {
-        self.ranges.contains(x)
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.ranges.is_empty()
-    }
-
-    pub fn iter(&self) -> Iter<Range<T>> {
-        self.ranges.iter()
-    }
-
-    pub fn iter_depth_pix(self) -> ranges::DepthPixIter<T> {
-        ranges::DepthPixIter::<T>::new(self.ranges)
-    }
-
-    pub fn union(&self, other: &Self) -> Self {
-        let ranges = self.ranges.union(&other.ranges);
-        NestedRanges {
-            ranges
-        }
-    }
-
-    pub fn intersection(&self, other: &Self) -> Self {
-        let ranges = self.ranges.intersection(&other.ranges);
-        NestedRanges {
-            ranges
-        }
-    }
-
-    pub fn difference(&self, other: &Self) -> Self {
-        let ranges = self.ranges.difference(&other.ranges);
-        NestedRanges {
-            ranges
-        }
-    }
-
-    pub fn complement(&self) -> Self {
-        let ranges = self.ranges.complement();
-        NestedRanges {
-            ranges
-        }
-    }
-}
-
-impl<T> PartialEq for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn eq(&self, other: &Self) -> bool {
-        self.ranges == other.ranges
-    }
-}
-
-impl<T> Eq for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {}
-
+use ndarray::Array2;
 pub struct RangesPy<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+{
     pub data: Array2<T>,
-    pub min_depth: Option<i8>,
-    pub make_consistent: bool,
 }
 
-impl<T> From<RangesPy<T>> for NestedRanges<T>
+use crate::nestedranges::NestedRanges;
+use crate::uniqranges::UniqRanges;
+use num::{Integer, PrimInt};
+use bounded::Bounded;
+
+impl<T> RangesPy<T>
 where T: Integer + PrimInt
     + Bounded<T>
     + Send + Sync
     + std::fmt::Debug {
-    fn from(ranges: RangesPy<T>) -> Self {
-        let mut data = ranges.data;
-        let min_depth = ranges.min_depth;
-        let make_consistent = ranges.make_consistent;
-        
-        let len = data.shape()[0];
-        let cap = len;
-        let ptr = data.as_mut_ptr() as *mut Range<T>;
 
-        mem::forget(data);
+    /// Convert the python input ranges to a NestedRanges<T> consistent type.
+    pub fn to_nested_ranges(self) -> NestedRanges<T> {
+        let data = utils::array2_to_vec_ranges(self.data);
 
-        let data = unsafe {
-            Vec::from_raw_parts(ptr, len, cap)
-        };
-
-        NestedRanges::<T>::new(data, min_depth, make_consistent)
+        NestedRanges::<T>::new(data)
     }
-}
 
-impl<T> From<Ranges<T>> for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn from(ranges: Ranges<T>) -> Self {
-        NestedRanges::<T> {
-            ranges
-        }
-    }
-}
+    /// Convert the python input ranges to a UniqRanges<T> consistent type.
+    pub fn to_uniq_ranges(self) -> UniqRanges<T> {
+        let data = utils::array2_to_vec_ranges(self.data);
 
-impl<T> From<NestedRanges<T>> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn from(nested_ranges: NestedRanges<T>) -> Self {
-        nested_ranges.ranges
-    }
-}
-
-impl<T> From<RangesPy<T>> for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn from(ranges: RangesPy<T>) -> Self {
-        let mut data = ranges.data;
-        let min_depth = ranges.min_depth;
-        let make_consistent = ranges.make_consistent;
-        
-        let len = data.shape()[0];
-        let cap = len;
-        let ptr = data.as_mut_ptr() as *mut Range<T>;
-
-        mem::forget(data);
-
-        let data = unsafe {
-            Vec::from_raw_parts(ptr, len, cap)
-        };
-
-        UniqRanges::<T>::new(data, min_depth, make_consistent)
-    }
-}
-
-impl<T> From<Ranges<T>> for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn from(ranges: Ranges<T>) -> Self {
-        UniqRanges::<T> {
-            ranges
-        }
-    }
-}
-
-impl<T> From<UniqRanges<T>> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    fn from(uniq_ranges: UniqRanges<T>) -> Self {
-        uniq_ranges.ranges
-    }
-}
-
-fn nested_ranges_to_array2d<T>(input: NestedRanges<T>) -> Array2<T> 
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    let ranges = input.ranges.0;
-    // Cast Vec<Range<u64>> to Vec<u64>
-    let len = ranges.len();
-    let data = utils::flatten(ranges);
-
-    // Get a Array1 from the Vec<u64> without copying any data
-    let result = Array1::from_vec(data);
-
-    // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
-    // of HEALPix cell contained in the moc
-    result.into_shape((len, 2))
-            .unwrap()
-            .to_owned()
-}
-fn uniq_ranges_to_array2d<T>(input: UniqRanges<T>) -> Array2<T> 
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    let ranges = input.ranges.0;
-    // Cast Vec<Range<u64>> to Vec<u64>
-    let len = ranges.len();
-    let data = utils::flatten(ranges);
-
-    // Get a Array1 from the Vec<u64> without copying any data
-    let result = Array1::from_vec(data);
-
-    // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
-    // of HEALPix cell contained in the moc
-    result.into_shape((len, 2))
-            .unwrap()
-            .to_owned()
-}
-
-use ndarray::{Array1, Array2};
-impl From<NestedRanges<u64>> for Array2<u64> {
-    fn from(input: NestedRanges<u64>) -> Self {
-        nested_ranges_to_array2d(input)
-    }
-}
-impl From<NestedRanges<i64>> for Array2<i64> {
-    fn from(input: NestedRanges<i64>) -> Self {
-        nested_ranges_to_array2d(input)
-    }
-}
-
-impl From<UniqRanges<u64>> for Array2<u64> {
-    fn from(input: UniqRanges<u64>) -> Self {
-        uniq_ranges_to_array2d(input)
-    }
-}
-
-fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T> 
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::iter::Step
-    + std::fmt::Debug {
-    let ranges = input.ranges;
-
-    let mut result: Vec<T> = Vec::<T>::new();
-
-    // Add the UNIQs contained into the spatial MOC
-    for range in ranges.0 {
-        for uniq_range in range.start..range.end {
-            result.push(uniq_range);
-        }
-    }
-    // Get an Array1 from the Vec<i64> without copying any data
-    Array1::from_vec(result).to_owned()
-}
-impl From<UniqRanges<u64>> for Array1<u64> {
-    fn from(input: UniqRanges<u64>) -> Self {
-        uniq_ranges_to_array1d(input)
-    }
-}
-impl From<UniqRanges<i64>> for Array1<i64> {
-    fn from(input: UniqRanges<i64>) -> Self {
-        uniq_ranges_to_array1d(input)
+        UniqRanges::<T>::new(data)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{UniqRanges, NestedRanges};
+    use crate::nestedranges::NestedRanges;
+    use crate::uniqranges::UniqRanges;
 
     use num::PrimInt;
 
     #[test]
     fn test_uniq_iter() {
-        let simple_nested = NestedRanges::<u64>::new(vec![0..1], None, true);
-        let complex_nested = NestedRanges::<u64>::new(vec![7..76], None, true);
-        let empty_nested = NestedRanges::<u64>::new(vec![], None, true);
+        let simple_nested = NestedRanges::<u64>::new(vec![0..1], None, true).unwrap();
+        let complex_nested = NestedRanges::<u64>::new(vec![7..76], None, true).unwrap();
+        let empty_nested = NestedRanges::<u64>::new(vec![], None, true).unwrap();
 
-        let simple_uniq = UniqRanges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)], None, true);
+        let simple_uniq = UniqRanges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)], None, true)
+            .unwrap();
         let complex_uniq = UniqRanges::<u64>::new(
             vec![
                 (1 + 4*4.pow(27))..(4 + 4*4.pow(27)),
@@ -380,8 +72,9 @@ mod tests {
             ],
             None,
             true
-        );
-        let empty_uniq = UniqRanges::<u64>::new(vec![], None, true);
+        ).unwrap();
+        let empty_uniq = UniqRanges::<u64>::new(vec![], None, true)
+            .unwrap();
 
         assert_eq!(simple_nested.clone().to_uniq(), simple_uniq);
         assert_eq!(complex_nested.clone().to_uniq(), complex_uniq);
@@ -396,8 +89,8 @@ mod tests {
     fn test_uniq_nested_conversion() {
         let input = vec![1056..1057, 1057..1058, 1083..1084, 1048539..1048540, 1048574..1048575, 1048575..1048576];
         
-        let ranges = UniqRanges::<u64>::new(input.clone(), None, true);
-        let expected = UniqRanges::<u64>::new(input, None, true);
+        let ranges = UniqRanges::<u64>::new(input.clone(), None, true).unwrap();
+        let expected = UniqRanges::<u64>::new(input, None, true).unwrap();
 
         assert_eq!(ranges.to_nested().to_uniq(), expected);
     }

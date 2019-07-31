@@ -1,11 +1,19 @@
-use intervals::NestedRanges;
-use intervals::ranges2d::NestedRanges2D;
+use intervals::nestedranges::NestedRanges;
+use intervals::nestedranges2d::NestedRanges2D;
+
 use intervals::bounded::Bounded;
 use std::ops::Range;
 
 use rayon::prelude::*;
+use pyo3::exceptions;
+use pyo3::prelude::PyResult;
 
-pub fn create_from_position(lon: Vec<f64>, lat: Vec<f64>, depth: u8) -> NestedRanges<u64> {
+pub fn create_from_position(lon: Vec<f64>, lat: Vec<f64>, depth: u8) -> PyResult<NestedRanges<u64>> {
+    if lon.len() != lat.len() {
+        return Err(exceptions::ValueError::py_err("Longitudes and Latitudes \
+            do not have the same shapes."));
+    }
+
     let mut data = Vec::<Range<u64>>::with_capacity(lon.len());
     data.resize(lon.len(), 0..1);
 
@@ -22,15 +30,23 @@ pub fn create_from_position(lon: Vec<f64>, lat: Vec<f64>, depth: u8) -> NestedRa
             *p = e1..e2;
         });
 
-    NestedRanges::<u64>::new(data, None, true)
+    ;
+    let result = NestedRanges::<u64>::new(data).make_consistent();
+    Ok(result)
 }
 
-pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, dt: i8, ds: i8) -> Result<NestedRanges2D<u64, u64>, &'static str> {
-    if dt > u64::MAXDEPTH {
-        Err("Time depth must be <= 29")
-    } else if ds > u64::MAXDEPTH {
-        Err("Space depth must be <= 29")
+
+pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, dt: i8, ds: i8) -> PyResult<NestedRanges2D<u64, u64>> {
+    if dt < 0 || dt > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err("Time depth must be in [0, 29]"))
+    } else if ds < 0 || ds > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err("Space depth must be in [0, 29]"))
     } else {
+        if times.len() != lon.len() || times.len() != lat.len() {
+            return Err(exceptions::ValueError::py_err("Times, longitudes \
+                and latitudes do not have the same shapes."));
+        }
+
         let mut ipix = vec![0; lon.len()];
 
         let layer = healpix::nested::get_or_create(ds as u8);
@@ -39,7 +55,7 @@ pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, 
             .for_each(|(p, (l, b))| {
                 *p = layer.hash(l, b);
             });
-        
+
         let times = times.into_par_iter()
             .map(|t| {
                 (t * 86400000000_f64).floor() as u64
@@ -51,8 +67,21 @@ pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, 
     }
 }
 
-/*
-use ndarray::{Array2, Array3};
-pub fn convert_nested_ranges_2d(ranges: NestedRanges2D<u64, u64>) -> (Array2<u64>, Array3<u64>) {
-    let x = NestedRanges::<u64>::new(ranges.ranges.x, None, false);
-}*/
+use ndarray::Array2;
+use intervals::RangesPy;
+pub fn create_nested_ranges_from_py(data: Array2<u64>) -> NestedRanges<u64> {
+    let ranges_from_py = RangesPy {
+        data,
+    };
+
+    ranges_from_py.to_nested_ranges()
+}
+
+use intervals::uniqranges::UniqRanges;
+pub fn create_uniq_ranges_from_py(data: Array2<u64>) -> UniqRanges<u64> {
+    let ranges_from_py = RangesPy {
+        data,
+    };
+
+    ranges_from_py.to_uniq_ranges()
+}

@@ -22,13 +22,13 @@ use pyo3::exceptions;
 use pyo3::types::{PyDict, PyString, PyList};
 use pyo3::{ToPyObject, PyObject};
 
-use intervals::{NestedRanges, UniqRanges, RangesPy};
-use intervals::ranges2d::NestedRanges2D;
+use intervals::nestedranges::NestedRanges;
+
+use intervals::nestedranges2d::NestedRanges2D;
 use intervals::bounded::Bounded;
 
 use std::ops::Range;
 use std::collections::HashMap;
-
 use std::sync::Mutex;
 
 mod ranges;
@@ -36,7 +36,7 @@ mod ranges;
 type Coverage2DHashMap = HashMap<usize, NestedRanges2D<u64, u64>>;
 
 lazy_static! {
-    static ref RANGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
+    static ref COVERAGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
 }
 
 #[allow(unused_parens)]
@@ -47,7 +47,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         depth: u8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>)
-    -> Py<PyArray2<u64>> {
+    -> PyResult<Py<PyArray2<u64>>> {
         let lon = lon.as_array()
             .to_owned()
             .into_raw_vec();
@@ -55,9 +55,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let ranges = ranges::create_from_position(lon, lat, depth);
+        let ranges = ranges::create_from_position(lon, lat, depth)?;
         let result: Array2<u64> = ranges.into();
-        result.into_pyarray(py).to_owned()
+        Ok(result.into_pyarray(py).to_owned())
     }
 
     #[pyfn(m, "from_time_lonlat")]
@@ -78,120 +78,124 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2)
-            .map_err(|msg| {
-                exceptions::ValueError::py_err(msg)
-            })?;
-        let mut d = RANGES_2D.lock().unwrap();
-        let index = d.len();
-        dbg!((&ts_ranges).ranges.x.len());
-        dbg!((&ts_ranges).ranges.y.len());
+        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2)?;
 
-        d.insert(index, ts_ranges);
+        // Insert a new coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        let result = {
+            let mut d = COVERAGES_2D.lock().unwrap();
+            
+            let index = d.len();
+            d.insert(index, ts_ranges);
+            
+            index
+        };
 
-        Ok(index)
+        Ok(result)
     }
 
     #[pyfn(m, "project_on_first_dim")]
     fn project_on_first_dim(py: Python,
-        first_dim_ranges: &PyArray2<u64>,
-        coverage_id: usize,
-    ) -> Py<PyArray2<u64>> {
-        // Build the first dim ranges
-        let first_dim_ranges = first_dim_ranges.as_array().to_owned();
-        let first_dim_ranges: NestedRanges<u64> = RangesPy {
-            data: first_dim_ranges,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-        
-        // Get the coverage
-        let mut res = RANGES_2D.lock().unwrap();
-        let coverage = res.remove(&coverage_id).unwrap();
+        ranges: &PyArray2<u64>,
+        index: usize,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        // Build the input ranges from a Array2
+        let ranges = ranges.as_array().to_owned();
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
 
-        // Project the coverage into the second dim
-        // with respect to the first dim ranges given
-        // by the user
-        let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, &coverage);
-        // Convert this to a numpy array understandable for python
-        let result: Array2<u64> = projection.into();
-        result.into_pyarray(py).to_owned()
+        // Get the coverage and perform the projection
+        let result = {
+            let res = COVERAGES_2D.lock().unwrap();
+            let coverage = res.get(&index).unwrap();
+
+            NestedRanges2D::project_on_first_dim(&ranges, coverage)
+        };
+
+        // Convert the result back to an ndarray::Array2
+        let result: Array2<u64> = result.into();
+        Ok(result.into_pyarray(py).to_owned())
     }
 
     #[pyfn(m, "project_on_second_dim")]
     fn project_on_second_dim(py: Python,
-        first_dim_ranges: &PyArray2<u64>,
-        coverage_id: usize,
-    ) -> Py<PyArray2<u64>> {
-        // Build the first dim ranges
-        let first_dim_ranges = first_dim_ranges.as_array().to_owned();
-        let first_dim_ranges: NestedRanges<u64> = RangesPy {
-            data: first_dim_ranges,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
+        ranges: &PyArray2<u64>,
+        index: usize,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        // Build the input ranges from a Array2
+        let ranges = ranges.as_array().to_owned();
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
+        // Get the coverage and perform the projection
+        let result = {
+            let res = COVERAGES_2D.lock().unwrap();
+            let coverage = res.get(&index).unwrap();
 
-        // Get the coverage
-        let res = RANGES_2D.lock().unwrap();
-        let coverage = &res.get(&coverage_id).unwrap();
+            NestedRanges2D::project_on_second_dim(&ranges, coverage)
+        };
 
-        // Project the coverage into the second dim
-        // with respect to the first dim ranges given
-        // by the user
-        let projection = NestedRanges2D::project_on_second_dim(&first_dim_ranges, coverage);
-
-        // Convert this to a numpy array understandable for python
-        let result: Array2<u64> = projection.into();
-        result.into_pyarray(py).to_owned()
+        // Convert the result back to an ndarray::Array2
+        let result: Array2<u64> = result.into();
+        Ok(result.into_pyarray(py).to_owned())
     }
 
     #[pyfn(m, "ranges2d_to_fits")]
-    fn ranges2d_to_uniq(py: Python,
-        coverage_id: usize,
+    fn ranges2d_to_fits(py: Python,
+        index: usize,
     ) -> Py<PyArray1<i64>> {
-        // Get the coverage
-        let res = RANGES_2D.lock().unwrap();
-        let coverage = res.get(&coverage_id).unwrap();
-        println!("{:?}", coverage.ranges.x.len());
-        println!("{:?}", coverage.ranges.y.len());
+        // Get the coverage and flatten it
+        // to a Array1
+        let result: Array1<i64> = {
+            let res = COVERAGES_2D.lock().unwrap();
+            let coverage = res.get(&index).unwrap();
 
-        let result: Array1<i64> = coverage.into();
-        // Convert this to a numpy array understandable for python
+            coverage.into()
+        };
+
         result.into_pyarray(py).to_owned()
     }
 
     #[pyfn(m, "ranges2d_from_fits")]
-    fn ranges2d_from_fits_py(data: &PyArray1<i64>) -> PyResult<usize> {
-        let data = data.as_array()
-            .to_owned()
-            .into_raw_vec();
+    fn ranges2d_from_fits(data: &PyArray1<i64>) -> PyResult<usize> {
+        let data = data.as_array().to_owned();
+        let new_coverage: NestedRanges2D<u64, u64> = data.into();
+        
+        // Insert a new coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        let result = {
+            let mut d = COVERAGES_2D.lock().unwrap();
+            
+            let index = d.len();
+            d.insert(index, new_coverage);
+            
+            index
+        };
 
-        let ts_ranges: NestedRanges2D<u64, u64> = data.into();
-        let mut d = RANGES_2D.lock().unwrap();
-        let index = d.len();
-        d.insert(index, ts_ranges);
-
-        Ok(index)
+        Ok(result)
     }
 
     #[pyfn(m, "ranges2d_depth")]
     fn ranges2d_depth(_py: Python,
-        coverage_id: usize,
+        index: usize,
     ) -> PyResult<(i8, i8)> {
-        // Get the coverage
-        let res = RANGES_2D.lock().unwrap();
-        let coverage = res.get(&coverage_id).unwrap();
+        // Get the coverage and computes its depth
+        // If the coverage is empty, the depth will be
+        // (0, 0)
+        let result = {
+            let res = COVERAGES_2D.lock().unwrap();
+            let coverage = res.get(&index).unwrap();
 
-        Ok(coverage.depth())
+            coverage.depth()
+        };
+
+        Ok(result)
     }
 
     #[pyfn(m, "ranges2d_min_time")]
     fn ranges2d_min_time(_py: Python,
-        coverage_id: usize,
+        index: usize,
     ) -> PyResult<f64> {
         // Get the coverage
-        let res = RANGES_2D.lock().unwrap();
-        let coverage = res.get(&coverage_id).unwrap();
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
 
         let t_min = coverage.t_min()
             .map_err(|msg| {
@@ -203,11 +207,11 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "ranges2d_max_time")]
     fn ranges2d_max_time(_py: Python,
-        coverage_id: usize,
+        index: usize,
     ) -> PyResult<f64> {
         // Get the coverage
-        let res = RANGES_2D.lock().unwrap();
-        let coverage = res.get(&coverage_id).unwrap();
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
 
         let t_max = coverage.t_max()
             .map_err(|msg| {
@@ -219,59 +223,27 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "union")]
     fn union_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
-        let b = b.as_array().to_owned();
+        let ranges_a = a.as_array().to_owned();
+        let ranges_b = b.as_array().to_owned();
 
-        // Deal with the bound cases when
-        // one of the two intervals are empty
-        if a.is_empty() {
-            return b
-                .into_pyarray(py)
-                .to_owned();
-        } else if b.is_empty() {
-            return a
-                .into_pyarray(py)
-                .to_owned();
-        }
+        let ranges_a = ranges::create_nested_ranges_from_py(ranges_a);
+        let ranges_b = ranges::create_nested_ranges_from_py(ranges_b);
 
-        let a: NestedRanges<u64> = RangesPy {
-            data: a,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-        let b: NestedRanges<u64> = RangesPy {
-            data: b,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-
-        let result = a.union(&b);
+        let result = ranges_a.union(&ranges_b);
 
         let result: Array2<u64> = result.into();
-        result.into_pyarray(py).to_owned()
+        result.to_owned().into_pyarray(py).to_owned()
     }
 
     #[pyfn(m, "difference")]
     fn difference_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
-        let b = b.as_array().to_owned();
+        let ranges_a = a.as_array().to_owned();
+        let ranges_b = b.as_array().to_owned();
 
-        if a.is_empty() || b.is_empty() {
-            return a.into_pyarray(py).to_owned();
-        }
+        let ranges_a = ranges::create_nested_ranges_from_py(ranges_a);
+        let ranges_b = ranges::create_nested_ranges_from_py(ranges_b);
 
-        let a: NestedRanges<u64> = RangesPy { 
-            data: a,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-        let b: NestedRanges<u64> = RangesPy { 
-            data: b,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-
-        let result = a.difference(&b);
+        let result = ranges_a.difference(&ranges_b);
 
         let result: Array2<u64> = result.into();
         result.into_pyarray(py).to_owned()
@@ -279,50 +251,29 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "intersection")]
     fn intersection_py(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
-        let b = b.as_array().to_owned();
+        let ranges_a = a.as_array().to_owned();
+        let ranges_b = b.as_array().to_owned();
 
-        if a.is_empty() {
-            return a.into_pyarray(py).to_owned();
-        } else if b.is_empty() {
-            return b.into_pyarray(py).to_owned();
-        }
+        let ranges_a = ranges::create_nested_ranges_from_py(ranges_a);
+        let ranges_b = ranges::create_nested_ranges_from_py(ranges_b);
 
-        let a: NestedRanges<u64> = RangesPy { 
-            data: a,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-        let b: NestedRanges<u64> = RangesPy { 
-            data: b,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
-
-        let result = a.intersection(&b);
+        let result = ranges_a.intersection(&ranges_b);
 
         let result: Array2<u64> = result.into();
         result.into_pyarray(py).to_owned()
     }
     
     #[pyfn(m, "complement")]
-    fn complement_py(py: Python, a: &PyArray2<u64>) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
+    fn complement_py(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+        let ranges = ranges.as_array().to_owned();
 
-        let ranges = if a.is_empty() {
-            NestedRanges::<u64>::new(vec![], None, false)
-        } else {
-            RangesPy { 
-                data: a,
-                min_depth: None,
-                make_consistent: false,
-            }.into()
-        };
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
         let result = ranges.complement();
 
         let result = if !result.is_empty() {
             result.into()
         } else {
+            // TODO: try without this condition
             Array::zeros((1, 0))
         };
 
@@ -335,7 +286,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         encodes an integer on 1 byte. Ex: {'5': [0, 6, 7, ..., 9]}";
         const TYPE_VALUES_MSG_ERR: &'static str = "The values must be a list of unsigned \n \
         integer on 64 bits (8 bytes). Ex: {'5': [0, 6, 7, ..., 9]}";
-        const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &'static str = "Cannot extract 64bits unsigned integer from the python list!";
+        const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &'static str = "Cannot extract 64 bits unsigned integer from the python list!";
 
         let mut ranges = Vec::<Range<u64>>::new();
 
@@ -369,125 +320,110 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             }
         }
 
-        let ranges = NestedRanges::<u64>::new(ranges, None, true);
+        let ranges = NestedRanges::<u64>::new(ranges)
+            .make_consistent();
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }
     
     #[pyfn(m, "to_json")]
-    fn to_json_py(py: Python, input: &PyArray2<u64>) -> PyResult<PyObject> {
-        let input = input.as_array().to_owned();
+    fn to_json_py(py: Python, ranges: &PyArray2<u64>) -> PyResult<PyObject> {
+        let ranges = ranges.as_array().to_owned();
         let result = PyDict::new(py);
         
-        if !input.is_empty() {
-            let ranges: NestedRanges<u64> = RangesPy { 
-                data: input,
-                min_depth: None,
-                make_consistent: false,
-            }.into();
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
 
-            let size = (<u64>::MAXDEPTH + 1) as usize;
-            let mut dict = HashMap::with_capacity(size);
+        let size = (<u64>::MAXDEPTH + 1) as usize;
+        let mut dict = HashMap::with_capacity(size);
 
-            for d in 0..size {
-                dict.insert(d.to_string(), Vec::<u64>::new()).unwrap();
-            }
+        // Initialize the hash map with all the depths and
+        // an empty vector of pixels associated to each of them
+        for d in 0..size {
+            dict.insert(d.to_string(), Vec::<u64>::new()).unwrap();
+        }
 
-            for (depth, pix) in ranges.iter_depth_pix() {
-                dict.get_mut(&depth.to_string())
-                    .unwrap()
-                    .push(pix);
-            }
+        // Fill the hash map with the pixels
+        for (depth, pix) in ranges.iter_depth_pix() {
+            dict.get_mut(&depth.to_string())
+                .unwrap()
+                .push(pix);
+        }
 
-            for (d, ipix) in &dict {
-                if !ipix.is_empty() {
-                    result.set_item(d, ipix).map_err(|_| {
-                        exceptions::ValueError::py_err("An error occured when inserting items into the PyDict")
-                    })?;
-                }
+        // Fill the dictionary with only the depths
+        // where pixels are found
+        for (d, ipix) in &dict {
+            if !ipix.is_empty() {
+                result.set_item(d, ipix).map_err(|_| {
+                    exceptions::ValueError::py_err("An error occured when inserting items into the PyDict")
+                })?;
             }
         }
 
         Ok(result.to_object(py))
     }
-    
+
     #[pyfn(m, "degrade")]
-    fn degrade_py(py: Python, a: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
-        if a.is_empty() {
-            return a.into_pyarray(py).to_owned();
-        }
+    fn degrade_py(py: Python, ranges: &PyArray2<u64>, depth: i8) -> Py<PyArray2<u64>> {
+        let ranges = ranges.as_array().to_owned();
 
-        let mut ranges: NestedRanges<u64> = RangesPy {
-            data: a,
-            min_depth: None,
-            make_consistent: true,
-        }.into();
-
+        let mut ranges = ranges::create_nested_ranges_from_py(ranges)
+            .make_consistent();
         ranges.degrade(depth);
 
         let result: Array2<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
-    
-    #[pyfn(m, "merge_nested_intervals")]
-    fn merge_nested_intervals_py(py: Python, a: &PyArray2<u64>, min_depth: i8) -> Py<PyArray2<u64>> {
-        let a = a.as_array().to_owned();
-        if a.is_empty() {
-            return a.into_pyarray(py).to_owned();
-        }
-        let min_depth = if min_depth == -1 {
-            None
-        } else {
-            Some(min_depth)
-        };
 
-        let ranges: NestedRanges<u64> = RangesPy {
-            data: a,
-            min_depth: min_depth,
-            make_consistent: true,
-        }.into();
+    #[pyfn(m, "merge_nested_intervals")]
+    fn merge_nested_intervals_py(py: Python, ranges: &PyArray2<u64>, min_depth: i8) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = ranges.as_array().to_owned();
+
+        // Convert the Array2<u64> to a NestedRanges<u64>
+        // and make it consistent
+        let mut ranges = ranges::create_nested_ranges_from_py(ranges)
+            .make_consistent();
+        
+        // If a min depth has been given
+        if min_depth != -1 {
+            // Then we check its validity
+            let max_depth = <u64>::MAXDEPTH;
+            if min_depth < 0 || min_depth > max_depth {
+                return Err(exceptions::ValueError::py_err("Min depth is not valid."));
+            }
+
+            // And perform the division of the ranges
+            ranges.divide(min_depth);
+        }
 
         let result: Array2<u64> = ranges.into();
-        result.to_owned().into_pyarray(py).to_owned()
+        Ok(result.into_pyarray(py).to_owned())
     }
-    
-    #[pyfn(m, "depth")]
-    fn depth_py(_py: Python, a: &PyArray2<u64>) -> PyResult<i8> {
-        let a = a.as_array().to_owned();
-        if a.is_empty() {
-            return Ok(0);
-        }
 
-        let ranges: NestedRanges<u64> = RangesPy {
-            data: a,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
+    #[pyfn(m, "depth")]
+    fn depth_py(_py: Python, ranges: &PyArray2<u64>) -> i8 {
+        let ranges = ranges.as_array().to_owned();
+
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
 
         let depth = ranges.depth();
-        Ok(depth)
+        depth
     }
 
     #[pyfn(m, "to_nested")]
-    fn to_nested_py(py: Python, uniq: &PyArray1<u64>) -> Py<PyArray2<u64>> {
-        let uniq = uniq.as_array().to_owned();
-        if uniq.is_empty() {
+    fn to_nested_py(py: Python, ranges: &PyArray1<u64>) -> Py<PyArray2<u64>> {
+        let ranges = ranges.as_array().to_owned();
+        if ranges.is_empty() {
             return Array::zeros((1, 0)).into_pyarray(py).to_owned();
         }
 
-        let shape = (uniq.shape()[0], 1);
+        let shape = (ranges.shape()[0], 1);
 
-        let start = uniq.into_shape(shape).unwrap();
+        let start = ranges.into_shape(shape).unwrap();
         let end = &start + &Array::ones(shape);
 
-        let input = stack![Axis(1), start, end].to_owned();
-
-        let ranges: UniqRanges<u64> = RangesPy {
-            data: input,
-            min_depth: None,
-            make_consistent: true,
-        }.into();
+        let ranges = stack![Axis(1), start, end];
+        let ranges = ranges::create_uniq_ranges_from_py(ranges)
+            .make_consistent();
 
         let ranges = ranges.to_nested();
         let result: Array2<u64> = ranges.into();
@@ -495,22 +431,17 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     
     #[pyfn(m, "to_uniq")]
-    fn to_uniq_py(py: Python, nested: &PyArray2<u64>) -> Py<PyArray1<u64>> {
-        let input = nested.as_array().to_owned();
+    fn to_uniq_py(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray1<u64>> {
+        let ranges = ranges.as_array().to_owned();
 
-        if input.is_empty() {
+        if ranges.is_empty() {
             return Array::zeros((0,)).into_pyarray(py).to_owned();
         }
 
-        let ranges: NestedRanges<u64> = RangesPy {
-            data: input,
-            min_depth: None,
-            make_consistent: false,
-        }.into();
+        let ranges = ranges::create_nested_ranges_from_py(ranges);
 
-        let uniq_ranges = ranges.to_uniq();
-        let result: Array1<u64> = uniq_ranges.into();
-
+        let ranges = ranges.to_uniq();
+        let result: Array1<u64> = ranges.into();
         result.into_pyarray(py).to_owned()
     }
 
@@ -543,20 +474,17 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let max_times = max_times.mapv(|e| e as u64 + 1);
 
             let ranges = stack![Axis(1), min_times, max_times].to_owned();
-            let ranges: NestedRanges<u64> = RangesPy {
-                data: ranges,
-                min_depth: None,
-                make_consistent: true,
-            }.into();
+            let ranges = ranges::create_nested_ranges_from_py(ranges)
+                .make_consistent();
 
             let result: Array2<u64> = ranges.into();
             Ok(result.into_pyarray(py).to_owned())
         }
     }
-    
+
     #[pyfn(m, "flatten_pixels")]
     fn flatten_pixels_py(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
-        let input = nested.as_array().to_owned();
+        let input = nested.as_array();
         let factor = 1 << (2 * (<u64>::MAXDEPTH - depth)) as u64;
 
         let flattened_intervals = &input / &Array::from_elem(input.shape(), factor);
@@ -567,20 +495,20 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
                 flattened_pixels.push(pix);
             }
         }
-        let result = Array1::from_vec(flattened_pixels).to_owned();
+        let result = Array1::from_vec(flattened_pixels);
         result.into_pyarray(py).to_owned()
     }
-    
+
     #[pyfn(m, "from_healpix_cells")]
-    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> Py<PyArray2<u64>> {
+    fn from_healpix_cells_py(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> PyResult<Py<PyArray2<u64>>> {
         let mut pixels = pixels.as_array().to_owned();
         let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
         
-        let depth = depth.as_array().to_owned();
+        let depth = depth.as_array();
 
-        /*if pixels.shape() != depth.shape() {
+        if pixels.shape() != depth.shape() {
             return Err(exceptions::IndexError::py_err("pixels and depth arrays must have the same shape"));
-        }*/
+        }
 
         Zip::from(&mut pixels)
             .and(&mut pixels_1)
@@ -595,16 +523,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let pixels = pixels.into_shape(shape).unwrap();
         let pixels_1 = pixels_1.into_shape(shape).unwrap();
 
-        let pixel_ranges = stack![Axis(1), pixels, pixels_1].to_owned();
+        let ranges = stack![Axis(1), pixels, pixels_1].to_owned();
 
-        let ranges: NestedRanges<u64> = RangesPy {
-            data: pixel_ranges,
-            min_depth: None,
-            make_consistent: true,
-        }.into();
+        let ranges = ranges::create_nested_ranges_from_py(ranges)
+            .make_consistent();
 
         let result: Array2<u64> = ranges.into();
-        result.into_pyarray(py).to_owned()
+        Ok(result.into_pyarray(py).to_owned())
     }
     
     Ok(())
