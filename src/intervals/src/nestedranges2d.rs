@@ -31,10 +31,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     /// Quantity could refer to a time but also a proper motion, a redshift, etc...
     /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
     /// 
-    /// # Info
+    /// # Precondition
     /// 
-    /// `d1` and `d2` depths are valid (within [0, <T>::MAXDEPTH])
-    /// `x` and `y` have the same size.
+    /// - `d1` and `d2` depths must be valid (within [0, <T>::MAXDEPTH])
+    /// - `x` and `y` must have the same size.
     pub fn create_quantity_space_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
         let mut off1: T = One::one();
@@ -67,7 +67,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 })
                 .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y, true);
+        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
 
         NestedRanges2D {
             ranges
@@ -85,10 +85,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     /// Quantity could refer to a time but also a proper motion, a redshift, etc...
     /// The resulted 2 dim ranges will be of depth (``d1``, ``d2``)
     /// 
-    /// # Info
+    /// # Precondition
     /// 
-    /// `d1` and `d2` depths are valid (within [0, <T>::MAXDEPTH])
-    /// `x` and `y` have the same size.
+    /// - `d1` and `d2` depths must be valid (within [0, <T>::MAXDEPTH])
+    /// - `x` and `y` must have the same size.
     pub fn create_space_quantity_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         // The spatial dimension as the first one
         let s1 = ((<S>::MAXDEPTH - d1) << 1) as u32;
@@ -120,7 +120,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 })
                 .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y, true);
+        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
 
         NestedRanges2D {
             ranges
@@ -187,8 +187,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             })
             .collect::<Vec<_>>();
 
-        NestedRanges::<T>::new(t_ranges)
-            .make_consistent()
+        NestedRanges::<T>::new(t_ranges).make_consistent()
     }
 
     /// Get the maximum depth of the 2D ranges along its first and
@@ -253,10 +252,21 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 }
 
 use ndarray::Array1;
-// Dump a NestedRanges2D<u64, u64> into a Array1<i64>
-// that can be send to python. Python will then be 
-// able to write it into a FITS file with astropy
 impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
+    /// Create a Array1<i64> from a NestedRanges2D<u64, u64>
+    /// 
+    /// This is used when storing a STMOC into a FITS file
+    /// 
+    /// # Info
+    /// 
+    /// The output Array1 stores the STMOC under the nested format.
+    /// Its memory layout contains each time range followed by the
+    /// list of space ranges referred to that time range.
+    /// Time ranges are negatives so that one can distinguish them
+    /// from space ranges.
+    /// 
+    /// Content example of an Array1 coming from a FITS file:
+    /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
     fn from(input: &NestedRanges2D<u64, u64>) -> Self {
         let ranges = &input.ranges;
 
@@ -285,16 +295,31 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
     }
 }
 
-
 use crate::utils;
-// Create a NestedRanges2D<u64, u64> from a Array1<i64>
-// coming from a FITS file opened with astropy
 impl From<Array1<i64>> for NestedRanges2D<u64, u64> {
+    /// Create a NestedRanges2D<u64, u64> from a Array1<i64>
+    /// 
+    /// This is used when loading a STMOC from a FITS file
+    /// opened with astropy
+    /// 
+    /// # Precondition
+    /// 
+    /// The input Array1 stores the STMOC under the nested format.
+    /// Its memory layout contains each time range followed by the
+    /// list of space ranges referred to that time range.
+    /// Time ranges are negatives so that one can distinguish them
+    /// from space ranges.
+    /// 
+    /// Content example of an Array1 coming from a FITS file:
+    /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
+    /// 
+    /// Coverages coming from FITS file are consistent because they
+    /// are stored this way.
     fn from(input: Array1<i64>) -> Self {
         let ranges = if input.is_empty() {
             // If the input array is empty
             // then we return an empty coverage
-            Ranges2D::<u64, u64>::new(vec![], vec![], false)
+            Ranges2D::<u64, u64>::new(vec![], vec![])
         } else {
             let mut input = input.into_raw_vec();
             let input = utils::unflatten(&mut input);
@@ -330,7 +355,9 @@ impl From<Array1<i64>> for NestedRanges2D<u64, u64> {
             s.push(Ranges::<u64>::new(cur_s));
 
             assert_eq!(t.len(), s.len());
-            Ranges2D::<u64, u64>::new(t, s, false)
+            // No need to make it consistent because it comes
+            // from python
+            Ranges2D::<u64, u64>::new(t, s)
         };
 
         NestedRanges2D {

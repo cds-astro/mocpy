@@ -57,24 +57,20 @@ mod tests {
 
     #[test]
     fn test_uniq_iter() {
-        let simple_nested = NestedRanges::<u64>::new(vec![0..1], None, true).unwrap();
-        let complex_nested = NestedRanges::<u64>::new(vec![7..76], None, true).unwrap();
-        let empty_nested = NestedRanges::<u64>::new(vec![], None, true).unwrap();
+        let simple_nested = NestedRanges::<u64>::new(vec![0..1]);
+        let complex_nested = NestedRanges::<u64>::new(vec![7..76]);
+        let empty_nested = NestedRanges::<u64>::new(vec![]);
 
-        let simple_uniq = UniqRanges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)], None, true)
-            .unwrap();
+        let simple_uniq = UniqRanges::<u64>::new(vec![4*4.pow(29)..(4*4.pow(29) + 1)]);
         let complex_uniq = UniqRanges::<u64>::new(
             vec![
                 (1 + 4*4.pow(27))..(4 + 4*4.pow(27)),
                 (2 + 4*4.pow(28))..(4 + 4*4.pow(28)),
                 (16 + 4*4.pow(28))..(19 + 4*4.pow(28)),
                 (7 + 4*4.pow(29))..(8 + 4*4.pow(29))
-            ],
-            None,
-            true
-        ).unwrap();
-        let empty_uniq = UniqRanges::<u64>::new(vec![], None, true)
-            .unwrap();
+            ]
+        ).make_consistent();
+        let empty_uniq = UniqRanges::<u64>::new(vec![]).make_consistent();
 
         assert_eq!(simple_nested.clone().to_uniq(), simple_uniq);
         assert_eq!(complex_nested.clone().to_uniq(), complex_uniq);
@@ -89,8 +85,8 @@ mod tests {
     fn test_uniq_nested_conversion() {
         let input = vec![1056..1057, 1057..1058, 1083..1084, 1048539..1048540, 1048574..1048575, 1048575..1048576];
         
-        let ranges = UniqRanges::<u64>::new(input.clone(), None, true).unwrap();
-        let expected = UniqRanges::<u64>::new(input, None, true).unwrap();
+        let ranges = UniqRanges::<u64>::new(input.clone()).make_consistent();
+        let expected = UniqRanges::<u64>::new(input).make_consistent();
 
         assert_eq!(ranges.to_nested().to_uniq(), expected);
     }

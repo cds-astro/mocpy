@@ -47,8 +47,9 @@ where T: Integer + PrimInt
     /// # Info
     /// 
     /// This requires min_depth to be defined between [0, <T>::MAXDEPTH]
-    pub fn divide(&mut self, min_depth: i8) {
-        self.ranges.divide(min_depth);
+    pub fn divide(mut self, min_depth: i8) -> Self {
+        self.ranges = self.ranges.divide(min_depth);
+        self
     }
 
     pub fn to_uniq(self) -> UniqRanges<T> {

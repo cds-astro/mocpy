@@ -46,11 +46,12 @@ where T: Integer + PrimInt
     /// # Info
     /// 
     /// This requires min_depth to be defined between [0, <T>::MAXDEPTH]
-    pub fn divide(&mut self, min_depth: i8) {
+    pub fn divide(mut self, min_depth: i8) -> Self {
         self.0 = MergeOverlappingRangesIter::new(
             self.iter(),
             Some(min_depth)
         ).collect::<Vec<_>>();
+        self
     }
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
@@ -846,7 +847,7 @@ mod tests {
     use crate::ranges::ranges_to_array2d;
     #[test]
     fn empty_ranges_to_array2d() {
-        let ranges = Ranges::<u64>::new(vec![], None, true).unwrap();
+        let ranges = Ranges::<u64>::new(vec![]).make_consistent();
 
         let result = ranges_to_array2d(ranges);
         assert_eq!(result, Array2::<u64>::zeros((1, 0)));
@@ -855,8 +856,8 @@ mod tests {
     #[test]
     fn merge_range() {
         fn assert_merge(a: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(a, None, true);
-            let expected_ranges = Ranges::<u64>::new(expected, None, true);
+            let ranges = Ranges::<u64>::new(a).make_consistent();
+            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
 
             assert_eq!(ranges, expected_ranges);
         }
@@ -869,7 +870,9 @@ mod tests {
 
     #[test]
     fn merge_range_min_depth() {
-        let ranges = Ranges::<u64>::new(vec![0..(1<<58)], Some(1), true).unwrap();
+        let ranges = Ranges::<u64>::new(vec![0..(1<<58)])
+            .make_consistent()
+            .divide(1);
         let expected_ranges = vec![0..(1<<56), (1<<56)..(1<<57), (1<<57)..3*(1<<56), 3*(1<<56)..(1<<58)];
 
         assert_eq!(ranges.0, expected_ranges);
@@ -878,10 +881,10 @@ mod tests {
     #[test]
     fn test_union() {
         fn assert_union(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a, None, true).unwrap();
-            let b = Ranges::<u64>::new(b, None, true).unwrap();
+            let a = Ranges::<u64>::new(a).make_consistent();
+            let b = Ranges::<u64>::new(b).make_consistent();
             
-            let expected_ranges = Ranges::<u64>::new(expected, None, true).unwrap();
+            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.union(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -897,10 +900,10 @@ mod tests {
     #[test]
     fn test_intersection() {
         fn assert_intersection(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a, None, true).unwrap();
-            let b = Ranges::<u64>::new(b, None, true).unwrap();
+            let a = Ranges::<u64>::new(a).make_consistent();
+            let b = Ranges::<u64>::new(b).make_consistent();
             
-            let expected_ranges = Ranges::<u64>::new(expected, None, true).unwrap();
+            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.intersection(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -916,10 +919,10 @@ mod tests {
     #[test]
     fn test_difference() {
         fn assert_difference(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a, None, true).unwrap();
-            let b = Ranges::<u64>::new(b, None, true).unwrap();
+            let a = Ranges::<u64>::new(a).make_consistent();
+            let b = Ranges::<u64>::new(b).make_consistent();
             
-            let expected_ranges = Ranges::<u64>::new(expected, None, true).unwrap();
+            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.difference(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -936,16 +939,16 @@ mod tests {
     #[test]
     fn test_complement() {
         fn assert_complement(input: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(input, None, true).unwrap();
-            let expected_ranges = Ranges::<u64>::new(expected, None, true).unwrap();
+            let ranges = Ranges::<u64>::new(input).make_consistent();
+            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
 
             let result = ranges.complement();
             assert_eq!(result, expected_ranges);
         }
 
         fn assert_complement_pow_2(input: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(input.clone(), None, true).unwrap();
-            let start_ranges = Ranges::<u64>::new(input, None, true).unwrap();
+            let ranges = Ranges::<u64>::new(input.clone()).make_consistent();
+            let start_ranges = Ranges::<u64>::new(input).make_consistent();
 
             let result = ranges.complement();
             let result = result.complement();
@@ -968,41 +971,41 @@ mod tests {
     
     #[test]
     fn test_depth() {
-        let r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)], None, true).unwrap();
+        let r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)]);
         assert_eq!(r1.depth(), 0);
 
-        let r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None, true).unwrap();
+        let r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
         assert_eq!(r2.depth(), 2);
 
-        let r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)], None, true).unwrap();
+        let r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)]);
         assert_eq!(r3.depth(), 3);
 
-        let r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)], None, true).unwrap();
+        let r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)]);
         assert_eq!(r4.depth(), 0);
 
-        let r5 = Ranges::<u64>::new(vec![], None, false).unwrap();
+        let r5 = Ranges::<u64>::new(vec![]);
         assert_eq!(r5.depth(), 0);
     }
 
     #[test]
     fn test_degrade() {
-        let mut r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)], None, true).unwrap();
+        let mut r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)]);
         r1.degrade(0);
         assert_eq!(r1.depth(), 0);
 
-        let mut r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None, true).unwrap();
+        let mut r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
         r2.degrade(1);
         assert_eq!(r2.depth(), 1);
 
-        let mut r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)], None, true).unwrap();
+        let mut r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)]);
         r3.degrade(1);
         assert_eq!(r3.depth(), 1);
 
-        let mut r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)], None, true).unwrap();
+        let mut r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)]);
         r4.degrade(0);
         assert_eq!(r4.depth(), 0);
 
-        let mut r5 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)], None, true).unwrap();
+        let mut r5 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
         r5.degrade(5);
         assert_eq!(r5.depth(), 2);
     }

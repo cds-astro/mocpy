@@ -392,7 +392,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             }
 
             // And perform the division of the ranges
-            ranges.divide(min_depth);
+            ranges = ranges.divide(min_depth);
         }
 
         let result: Array2<u64> = ranges.into();
