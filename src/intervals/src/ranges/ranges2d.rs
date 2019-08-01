@@ -42,6 +42,7 @@ type Operation<T, S> = fn(
     usize)
 -> Option<Ranges<S>>;
 
+use crate::utils;
 impl<T, S> Ranges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
@@ -107,9 +108,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                         })
                         .reduce(
                             || Ranges::<S>::new(vec![]),
-                            |mut s1, mut s2| {
-                                (&mut s1).union_mut(&mut s2);
-                                s1
+                            |s1, s2| {
+                                s1.union(&s2)
                             }
                         );
 
@@ -129,7 +129,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             let mut prev_s = prev_s.unwrap();
             let mut prev_t = prev_t.unwrap();
             // We know there is at least 2 (time, space) tuples at the point.
-            for (cur_t, mut cur_s) in t.into_iter().zip(s.into_iter()).skip(1) {
+            for (cur_t, cur_s) in t.into_iter().zip(s.into_iter()).skip(1) {
                 // We discard ranges that are not valid
                 // (i.e. those associated with an empty set of 2nd dim ranges).
                 if !cur_s.is_empty() {
@@ -147,7 +147,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                         if cur_s == prev_s {
                             prev_t.end = cmp::max(prev_t.end, cur_t.end);
                         } else if cur_t == prev_t {
-                            prev_s.union_mut(&mut cur_s);
+                            prev_s = prev_s.union(&cur_s);
                         // If they are not we can be in two cases: 
                         // 1. The second range ``cur_t`` is not contained into ``prev_t``
                         // xxxx|----
@@ -228,64 +228,20 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
         self
     }
-    
+
     fn merge(&self, other: &Self, op: Operation<T, S>) -> Ranges2D<T, S> {
-        // Unflatten a stack containing T-typed elements
-        // to a stack of Range<T> types elements without
-        // copying the data.
-        fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
-            let mut owned_input = Vec::<T>::new();
-            // We swap the content refered by input with a new
-            // allocated vector.
-            // This fix the problem when ``input`` is freed by reaching out
-            // the end of the caller scope.
-            std::mem::swap(&mut owned_input, input);
-
-            let len = owned_input.len() >> 1;
-            let cap = owned_input.capacity();
-            let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
-            
-            mem::forget(owned_input);
-
-            let result = unsafe {
-                Vec::from_raw_parts(ptr, len, cap)
-            };
-            
-            result
-        }
-
-        // Flatten a stack containing Range<T> typed elements to a stack containing
-        // the start followed by the end value of the set of ranges (i.e. a Vec<T>).
-        // This does a copy of the data. This is necessary because we do not want to
-        // modify ``self`` as well as ``other`` and we want to return the result of 
-        // the union of the two Ranges2D.
-        fn flatten<T>(input: &Vec<Range<T>>) -> Vec<T>
-        where T: Integer + Clone + Copy {
-            input.clone()
-                 .into_iter()
-                 // Convert Range<T> to Vec<T> containing
-                 // the start and the end values of the range.
-                 .map(|r| vec![r.start, r.end])
-                 // We can call flatten on a iterator containing other
-                 // iterators (or collections in our case).
-                 .flatten()
-                 // Collect to get back a newly created Vec<T> 
-                 .collect()
-        }
-
-        let sentinel = <T>::MAXPIX + One::one();
         // Get the ranges from the first dimensions of self and
         // cast them to flat vectors
-        let mut t1 = flatten(&self.x);
-        // Push the sentinel
-        t1.push(sentinel);
-        // Get the first dimension ranges from other
-        let mut t2 = flatten(&other.x);
-        // Push the sentinel
-        t2.push(sentinel);
+        let t1 = &self.x;
+        let t1_l = t1.len() << 1;
 
-        let mut t_ranges: Vec<T> = Vec::<T>::new();
-        let mut s_ranges: Vec<Ranges<S>> = Vec::<Ranges<S>>::new();
+        // Get the first dimension ranges from other
+        let t2 = &other.x;
+        let t2_l = t2.len() << 1;
+
+        let mut t_ranges = Vec::with_capacity(3 * cmp::max(t1_l, t2_l));
+        let mut s_ranges = Vec::with_capacity(3 * cmp::max(t1_l, t2_l));
+
         let mut i = 0 as usize;
         let mut j = 0 as usize;
 
@@ -298,20 +254,73 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         // its value to the current S Ranges.
         let mut prev_s: Option<&Ranges<S>> = None;
 
-        while i < t1.len() || j < t2.len() {
-            let c = cmp::min(t1[i], t2[j]);
-            // If the two Ranges2D have been processed
-            // then we break the loop
-            if c == sentinel {
-                break;
-            }
+        while i < t1_l || j < t2_l {
+            let (c, s) = if i == t1_l {
+                let v2 = if j & 0x1 != 0 {
+                    t2[j >> 1].end
+                } else {
+                    t2[j >> 1].start
+                };
 
-            let on_rising_edge_t1 = (i & 0x1) == 0;
-            let on_rising_edge_t2 = (j & 0x1) == 0;
-            let in_t1 = (on_rising_edge_t1 && c == t1[i]) | (!on_rising_edge_t1 && c < t1[i]);
-            let in_t2 = (on_rising_edge_t2 && c == t2[j]) | (!on_rising_edge_t2 && c < t2[j]);
+                let c = v2;
 
-            let s = op(self, other, in_t1, in_t2, i, j);
+                let in_t1 = false;
+                let on_rising_edge_t2 = (j & 0x1) == 0;
+                let in_t2 = on_rising_edge_t2;
+
+                let s = op(self, other, in_t1, in_t2, i, j);
+
+                j += 1;
+
+                (c, s)
+            } else if j == t2_l {
+                let v1 = if i & 0x1 != 0 {
+                    t1[i >> 1].end
+                } else {
+                    t1[i >> 1].start
+                };
+
+                let c = v1;
+
+                let on_rising_edge_t1 = (i & 0x1) == 0;
+                let in_t1 = on_rising_edge_t1;
+                let in_t2 = false;
+
+                let s = op(self, other, in_t1, in_t2, i, j);
+
+                i += 1;
+
+                (c, s)
+            } else {
+                let v1 = if i & 0x1 != 0 {
+                    t1[i >> 1].end
+                } else {
+                    t1[i >> 1].start
+                };
+                let v2 = if j & 0x1 != 0 {
+                    t2[j >> 1].end
+                } else {
+                    t2[j >> 1].start
+                };
+
+                let c = cmp::min(v1, v2);
+
+                let on_rising_edge_t1 = (i & 0x1) == 0;
+                let on_rising_edge_t2 = (j & 0x1) == 0;
+                let in_t1 = (on_rising_edge_t1 && c == v1) | (!on_rising_edge_t1 && c < v1);
+                let in_t2 = (on_rising_edge_t2 && c == v2) | (!on_rising_edge_t2 && c < v2);
+
+                let s = op(self, other, in_t1, in_t2, i, j);
+
+                if c == v1 {
+                    i += 1;
+                }
+                if c == v2 {
+                    j += 1;
+                }
+
+                (c, s)
+            };
 
             if let Some(prev_ranges) = prev_s {
                 if let Some(cur_ranges) = s {
@@ -332,16 +341,9 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                     prev_s = s_ranges.last();
                 }
             }
-
-            if c == t1[i] {
-                i += 1;
-            }
-            if c == t2[j] {
-                j += 1;
-            }
         }
 
-        let t_ranges = unflatten(&mut t_ranges);
+        let t_ranges = utils::unflatten(&mut t_ranges);
         Ranges2D {
             x: t_ranges,
             y: s_ranges,
@@ -482,30 +484,30 @@ mod tests {
 
     #[test]
     fn union_ranges_1_3() {
-        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..21]]);
+        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let mut b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..21]]);
 
-        let c = a.union(&b);
+        let c = a.union(&mut b);
 
         let res = creating_ranges::<u64, u64>(vec![0..20], vec![vec![16..21]]);
         assert_eq!(res, c);
     }
     #[test]
     fn union_ranges_1_3_bis() {
-        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..22]]);
+        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let mut b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..22]]);
 
-        let c = a.union(&b);
+        let c = a.union(&mut b);
 
         let res = creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
         assert_eq!(res, c);
     }
     #[test]
     fn union_ranges_covering() {
-        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let mut b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&b);
+        let c = a.union(&mut b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..9, 9..10, 10..20],
@@ -516,10 +518,10 @@ mod tests {
     
     #[test]
     fn empty_range_union() {
-        let a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
-        let b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let mut a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
+        let mut b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&b);
+        let c = a.union(&mut b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..1, 9..20],
@@ -530,10 +532,10 @@ mod tests {
 
     #[test]
     fn empty_range_union_bis() {
-        let b = creating_ranges::<u64, u64>(vec![0..9], vec![vec![0..20]]);
-        let a = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let mut b = creating_ranges::<u64, u64>(vec![0..9], vec![vec![0..20]]);
+        let mut a = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&b);
+        let c = a.union(&mut b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..9, 9..20],
@@ -544,21 +546,117 @@ mod tests {
 
     #[test]
     fn complex_union() {
-        let a = creating_ranges::<u64, u64>(
+        let mut a = creating_ranges::<u64, u64>(
             vec![0..2, 3..5, 8..9, 13..14],
             vec![vec![2..3], vec![2..3], vec![5..6], vec![7..8]]
         );
-        let b = creating_ranges::<u64, u64>(
+        let mut b = creating_ranges::<u64, u64>(
             vec![1..4, 6..7, 9..10, 11..12],
             vec![vec![0..3], vec![5..6], vec![5..6], vec![10..13]]
         );
 
-        let result = a.union(&b);
+        let result = a.union(&mut b);
         let expected = creating_ranges::<u64, u64>(
             vec![0..1, 1..4, 4..5, 6..7, 8..10, 11..12, 13..14],
             vec![vec![2..3], vec![0..3], vec![2..3], vec![5..6], vec![5..6], vec![10..13], vec![7..8]]
         );
 
         assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn test_intersection() {
+        let mut empty = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        let mut a = creating_ranges::<u64, u64>(
+            vec![1..4, 6..7],
+            vec![vec![0..3], vec![5..10]]
+        );
+
+        let mut b = creating_ranges::<u64, u64>(
+            vec![2..3, 6..7],
+            vec![vec![0..5], vec![7..11]]
+        );
+
+        let a_inter_b = a.intersection(&b);
+        let expect_a_inter_b = creating_ranges::<u64, u64>(
+            vec![2..3, 6..7],
+            vec![vec![0..3], vec![7..10]]
+        );
+
+        assert_eq!(expect_a_inter_b, a_inter_b);
+
+        let b_inter_empty = b.intersection(&empty);
+        let expect_b_inter_empty = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(b_inter_empty, expect_b_inter_empty);
+
+        let empty_inter_a = empty.intersection(&a);
+        let expect_empty_inter_a = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(empty_inter_a, expect_empty_inter_a);
+
+        let empty_inter_empty = empty.intersection(&empty);
+        let expect_empty_inter_empty = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(empty_inter_empty, expect_empty_inter_empty);
+    }
+
+    #[test]
+    fn test_difference() {
+        let mut empty = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        let mut a = creating_ranges::<u64, u64>(
+            vec![1..4, 6..7],
+            vec![vec![0..3], vec![5..10]]
+        );
+
+        let mut b = creating_ranges::<u64, u64>(
+            vec![2..3, 6..7],
+            vec![vec![0..5], vec![7..11]]
+        );
+
+        let a_diff_b = a.difference(&b);
+        let expect_a_diff_b = creating_ranges::<u64, u64>(
+            vec![1..2, 3..4, 6..7],
+            vec![vec![0..3], vec![0..3], vec![5..7]]
+        );
+
+        assert_eq!(expect_a_diff_b, a_diff_b);
+
+        let b_diff_empty = b.difference(&empty);
+
+        assert_eq!(b_diff_empty, b);
+
+        let empty_diff_a = empty.difference(&a);
+        let expect_empty_diff_a = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(empty_diff_a, expect_empty_diff_a);
+
+        let empty_diff_empty = empty.difference(&empty);
+        let expect_empty_diff_empty = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(empty_diff_empty, expect_empty_diff_empty);
     }
 }

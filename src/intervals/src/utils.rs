@@ -1,12 +1,19 @@
 use std::mem;
 use std::ops::Range;
 
-pub fn flatten<T>(mut data: Vec<Range<T>>) -> Vec<T> {
-    let len = data.len() << 1;
-    let cap = data.capacity();
-    let ptr = data.as_mut_ptr() as *mut T;
+pub fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
+    let mut owned_input = Vec::<Range<T>>::new();
+    // We swap the content refered by input with a new
+    // allocated vector.
+    // This fix the problem when ``input`` is freed by reaching out
+    // the end of the caller scope.
+    std::mem::swap(&mut owned_input, input);
 
-    mem::forget(data);
+    let len = owned_input.len() << 1;
+    let cap = owned_input.capacity();
+    let ptr = owned_input.as_mut_ptr() as *mut T;
+
+    mem::forget(owned_input);
 
     let result = unsafe {
         Vec::from_raw_parts(ptr, len, cap)
@@ -26,13 +33,13 @@ pub fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
     let len = owned_input.len() >> 1;
     let cap = owned_input.capacity();
     let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
-    
+
     mem::forget(owned_input);
 
     let result = unsafe {
         Vec::from_raw_parts(ptr, len, cap)
     };
-    
+
     result
 }
 
@@ -87,9 +94,9 @@ mod tests {
     use std::ops::Range;
     #[test]
     fn test_empty_flatten() {
-        let empty_ranges = Vec::<Range<u64>>::new();
+        let mut empty_ranges = Vec::<Range<u64>>::new();
 
-        let result = flatten(empty_ranges);
+        let result = flatten(&mut empty_ranges);
 
         assert_eq!(result, vec![]);
     }

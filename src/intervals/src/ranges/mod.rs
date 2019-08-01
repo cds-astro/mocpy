@@ -1,5 +1,4 @@
 use std::collections::VecDeque;
-use std::mem;
 use std::cmp;
 use std::ops::Range;
 use std::slice::Iter;
@@ -29,7 +28,7 @@ where T: Integer + PrimInt
         Ranges(data)
     }
 
-    /// Make the Ranges<T> consistent
+    /// Make the `Ranges<T>` consistent
     /// 
     /// # Info 
     /// 
@@ -41,11 +40,11 @@ where T: Integer + PrimInt
     }
 
     /// Divide the nested ranges into ranges of length
-    /// 4**(<T>::MAXDEPTH - min_depth)
+    /// `4**(<T>::MAXDEPTH - min_depth)`
     /// 
     /// # Info
     /// 
-    /// This requires min_depth to be defined between [0, <T>::MAXDEPTH]
+    /// This requires min_depth to be defined between `[0, <T>::MAXDEPTH]`
     pub fn divide(mut self, min_depth: i8) -> Self {
         self.0 = MergeOverlappingRangesIter::new(
             self.iter(),
@@ -55,76 +54,77 @@ where T: Integer + PrimInt
     }
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
-        // Unflatten a stack containing T-typed elements
-        // to a stack of Range<T> types elements without
-        // copying the data.
-        fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
-            let mut owned_input = Vec::<T>::new();
-            // We swap the content refered by input with a new
-            // allocated vector.
-            // This fix the problem when ``input`` is freed by reaching out
-            // the end of the caller scope.
-            std::mem::swap(&mut owned_input, input);
+        let l = &self.0;
+        let ll = l.len() << 1;
 
-            let len = owned_input.len() >> 1;
-            let cap = owned_input.capacity();
-            let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
-            
-            mem::forget(owned_input);
-
-            let result = unsafe {
-                Vec::from_raw_parts(ptr, len, cap)
-            };
-            
-            result
-        }
-
-        // Flatten a stack containing Range<T> typed elements to a stack containing
-        // the start followed by the end value of the set of ranges (i.e. a Vec<T>).
-        // This does a copy of the data. This is necessary because we do not want to
-        // modify ``self`` as well as ``other`` and we want to return the result of 
-        // the union of the two Ranges2D.
-        fn flatten<T>(input: &Vec<Range<T>>) -> Vec<T>
-        where T: Integer + Clone + Copy {
-            input.clone()
-                 .into_iter()
-                 // Convert Range<T> to Vec<T> containing
-                 // the start and the end values of the range.
-                 .map(|r| vec![r.start, r.end])
-                 // We can call flatten on a iterator containing other
-                 // iterators (or collections in our case).
-                 .flatten()
-                 // Collect to get back a newly created Vec<T> 
-                 .collect()
-        }
-
-        let sentinel = <T>::MAXPIX + One::one();
-        // Flatten the Vec<Range<u64>> to Vec<u64>.
-        // This operation returns new vectors
-        let mut l = flatten(&self.0);
-        // Push the sentinel
-        l.push(sentinel);
-        let mut r = flatten(&other.0);
-        // Push the sentinel
-        r.push(sentinel);
+        let r = &other.0;
+        let rl = r.len() << 1;
 
         let mut i = 0;
         let mut j = 0;
 
-        let mut result: Vec<T> = vec![];
+        let mut result = Vec::with_capacity((ll + rl) as usize);
 
-        while i < l.len() || j < r.len() {
-            let c = cmp::min(l[i], r[j]);
-            // If the two ranges have been processed
-            // then we break the loop
-            if c == sentinel {
-                break;
-            }
+        while i < ll || j < rl {
+            let (in_l, in_r, c) = if i == ll {
+                let rv = if j & 0x1 != 0 {
+                    r[j >> 1].end
+                } else {
+                    r[j >> 1].start
+                };
 
-            let on_rising_edge_t1 = (i & 0x1) == 0;
-            let on_rising_edge_t2 = (j & 0x1) == 0;
-            let in_l = (on_rising_edge_t1 && c == l[i]) | (!on_rising_edge_t1 && c < l[i]);
-            let in_r = (on_rising_edge_t2 && c == r[j]) | (!on_rising_edge_t2 && c < r[j]);
+                let on_rising_edge_t2 = (j & 0x1) == 0;
+
+                let in_l = false;
+                let in_r = on_rising_edge_t2;
+
+                j += 1;
+
+                (in_l, in_r, rv)
+            } else if j == rl {
+                let lv = if i & 0x1 != 0 {
+                    l[i >> 1].end
+                } else {
+                    l[i >> 1].start
+                };
+
+                let on_rising_edge_t1 = (i & 0x1) == 0;
+
+                let in_l = on_rising_edge_t1;
+                let in_r = false;
+
+                i += 1;
+
+                (in_l, in_r, lv)
+            } else {
+                let lv = if i & 0x1 != 0 {
+                    l[i >> 1].end
+                } else {
+                    l[i >> 1].start
+                };
+                let rv = if j & 0x1 != 0 {
+                    r[j >> 1].end
+                } else {
+                    r[j >> 1].start
+                };
+
+                let on_rising_edge_t1 = (i & 0x1) == 0;
+                let on_rising_edge_t2 = (j & 0x1) == 0;
+
+                let c = cmp::min(lv, rv);
+
+                let in_l = (on_rising_edge_t1 && c == lv) | (!on_rising_edge_t1 && c < lv);
+                let in_r = (on_rising_edge_t2 && c == rv) | (!on_rising_edge_t2 && c < rv);
+
+                if c == lv {
+                    i += 1;
+                }
+                if c == rv {
+                    j += 1;
+                }
+
+                (in_l, in_r, c)
+            };
 
             let closed = (result.len() & 0x1) == 0;
 
@@ -132,121 +132,13 @@ where T: Integer + PrimInt
             if add {
                 result.push(c);
             }
-
-            if c == l[i] {
-                i += 1;
-            }
-            if c == r[j] {
-                j += 1;
-            }
         }
 
-        Ranges(unflatten(&mut result))
-    }
-
-    fn merge_mut(&mut self, other: &mut Self, op: impl Fn(bool, bool) -> bool) {
-        // Unflatten a stack containing T-typed elements
-        // to a stack of Range<T> types elements without
-        // copying the data.
-        fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
-            let mut owned_input = Vec::<T>::new();
-            // We swap the content refered by input with a new
-            // allocated vector.
-            // This fix the problem when ``input`` is freed by reaching out
-            // the end of the caller scope.
-            std::mem::swap(&mut owned_input, input);
-
-            let len = owned_input.len() >> 1;
-            let cap = owned_input.capacity();
-            let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
-            
-            mem::forget(owned_input);
-
-            let result = unsafe {
-                Vec::from_raw_parts(ptr, len, cap)
-            };
-            
-            result
-        }
-
-        // Flatten a stack containing Range<T> typed elements to a stack containing
-        // the start followed by the end value of the set of ranges (i.e. a Vec<T>).
-        // This does a copy of the data. This is necessary because we do not want to
-        // modify ``self`` as well as ``other`` and we want to return the result of 
-        // the union of the two Ranges2D.
-        fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
-            let mut owned_input = Vec::<Range<T>>::new();
-            // We swap the content refered by input with a new
-            // allocated vector.
-            // This fix the problem when ``input`` is freed by reaching out
-            // the end of the caller scope.
-            std::mem::swap(&mut owned_input, input);
-
-            let len = owned_input.len() << 1;
-            let cap = owned_input.capacity();
-            let ptr = owned_input.as_mut_ptr() as *mut T;
-            
-            mem::forget(owned_input);
-
-            let result = unsafe {
-                Vec::from_raw_parts(ptr, len, cap)
-            };
-            
-            result
-        }
-
-        let sentinel = <T>::MAXPIX + One::one();
-        // Flatten the Vec<Range<u64>> to Vec<u64>.
-        // This operation returns new vectors
-        let mut l = flatten(&mut self.0);
-        // Push the sentinel
-        l.push(sentinel);
-        let mut r = flatten(&mut other.0);
-        // Push the sentinel
-        r.push(sentinel);
-
-        let mut i = 0;
-        let mut j = 0;
-
-        let mut result: Vec<T> = vec![];
-
-        while i < l.len() || j < r.len() {
-            let c = cmp::min(l[i], r[j]);
-            // If the two ranges have been processed
-            // then we break the loop
-            if c == sentinel {
-                break;
-            }
-
-            let on_rising_edge_t1 = (i & 0x1) == 0;
-            let on_rising_edge_t2 = (j & 0x1) == 0;
-            let in_l = (on_rising_edge_t1 && c == l[i]) | (!on_rising_edge_t1 && c < l[i]);
-            let in_r = (on_rising_edge_t2 && c == r[j]) | (!on_rising_edge_t2 && c < r[j]);
-
-            let closed = (result.len() & 0x1) == 0;
-
-            let add = !(closed ^ op(in_l, in_r));
-            if add {
-                result.push(c);
-            }
-
-            if c == l[i] {
-                i += 1;
-            }
-            if c == r[j] {
-                j += 1;
-            }
-        }
-
-        self.0 = unflatten(&mut result);
+        Ranges(utils::unflatten(&mut result))
     }
 
     pub fn union(&self, other: &Self) -> Self {        
         self.merge(other, |a, b| a || b)
-    }
-
-    pub fn union_mut(&mut self, other: &mut Self) {
-        self.merge_mut(other, |a, b| a || b)
     }
 
     pub fn intersection(&self, other: &Self) -> Self {
@@ -411,10 +303,10 @@ where T: Integer + PrimInt
         // By consistency, we also return a (1, 0) Array2 to python
         Array2::zeros((1, 0))
     } else {
-        let ranges = input.0;
+        let mut ranges = input.0;
         // Cast Vec<Range<u64>> to Vec<u64>
         let len = ranges.len();
-        let data = utils::flatten(ranges);
+        let data = utils::flatten(&mut ranges);
 
         // Get a Array1 from the Vec<u64> without copying any data
         let result = Array1::from_vec(data);
@@ -608,10 +500,10 @@ where T: Integer + PrimInt + CheckedAdd
                 }
             }
 
-            let buffer_ranges = Ranges::<T>::new(self.buffer.clone())
+            let mut buffer_ranges = Ranges::<T>::new(self.buffer.clone())
                 .make_consistent();
             self.ranges = self.ranges.difference(
-                &buffer_ranges
+                &mut buffer_ranges
             );
             self.id = 0;
             self.buffer.clear();
@@ -723,8 +615,8 @@ where T: Integer + PrimInt + CheckedAdd
                     let c2 = pix2.unsigned_shl(self.shift);
 
                     if c2 > c1 {
-                        let range_to_remove = Ranges::<T>::new(vec![c1..c2]);
-                        self.ranges = self.ranges.difference(&range_to_remove);
+                        let mut range_to_remove = Ranges::<T>::new(vec![c1..c2]);
+                        self.ranges = self.ranges.difference(&mut range_to_remove);
 
                         let e1 = self.depth_offset
                             .checked_add(&pix1)
@@ -893,6 +785,7 @@ mod tests {
         assert_union(vec![12..17, 3..5, 5..7, 6..8], vec![12..17, 3..5, 5..7, 6..8], vec![3..8, 12..17]);
         assert_union(vec![], vec![], vec![]);
         assert_union(vec![12..17], vec![], vec![12..17]);
+        assert_union(vec![], vec![12..17], vec![12..17]);
         assert_union(vec![0..1, 2..3, 4..5], vec![1..22], vec![0..22]);
         assert_union(vec![0..10], vec![15..22], vec![0..10, 15..22]);
     }
@@ -967,6 +860,8 @@ mod tests {
 
         assert_complement(vec![], vec![0..u64::MAXPIX]);
         assert_complement_pow_2(vec![]);
+
+        assert_complement(vec![0..u64::MAXPIX], vec![]);
     }
     
     #[test]

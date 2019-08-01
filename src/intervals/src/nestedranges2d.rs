@@ -291,6 +291,8 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             Ok(self.ranges.x.last().unwrap().end)
         }
     }
+
+
 }
 
 use ndarray::Array1;
