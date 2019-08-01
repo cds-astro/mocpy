@@ -45,12 +45,20 @@ where T: Integer + PrimInt
     + Bounded<T>
     + Send + Sync
     + std::fmt::Debug {
-    // Empty Array2 coming from MOCPy
+    let shape = input.shape();
+    // Warning: empty Array2 objects coming from MOCPy
     // do have a shape equal to (1, 0).
-    let len = if input.shape()[1] == 0 {
+    let len = if shape == [1, 0] {
+        // It is empty
         0
+    } else if shape[1] == 2 {
+        shape[0]
     } else {
-        input.shape()[0]
+        // Unrecognized shape of a Array2 coming
+        // from MOCPy python code
+        let msg = format!("Unrecognized Array2 shape coming from \
+            MOCPy python code {:?}", shape);
+        unreachable!(msg);
     };
     let cap = len;
     let ptr = input.as_mut_ptr() as *mut Range<T>;

@@ -1,5 +1,4 @@
 use intervals::nestedranges::NestedRanges;
-use intervals::nestedranges2d::NestedRanges2D;
 
 use intervals::bounded::Bounded;
 use std::ops::Range;
@@ -8,6 +7,25 @@ use rayon::prelude::*;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
+/// Create a spatial coverage from a list of sky coordinates
+/// 
+/// # Arguments
+/// 
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``depth`` - The depth at which HEALPix cell indices
+///   will be computed. This will correspond to the depth
+///   of the coverage once it will be created.
+/// 
+/// # Precondition
+/// 
+/// ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.coordinates.Quantity` objects.
+/// 
+/// # Errors
+/// 
+/// If the number of longitudes and latitudes do not match.
 pub fn create_from_position(lon: Vec<f64>, lat: Vec<f64>, depth: u8) -> PyResult<NestedRanges<u64>> {
     if lon.len() != lat.len() {
         return Err(exceptions::ValueError::py_err("Longitudes and Latitudes \
@@ -35,7 +53,30 @@ pub fn create_from_position(lon: Vec<f64>, lat: Vec<f64>, depth: u8) -> PyResult
     Ok(result)
 }
 
-
+use intervals::nestedranges2d::NestedRanges2D;
+/// Create a time-spatial coverage (2D) from a list of sky coordinates
+/// and times.
+/// 
+/// # Arguments
+/// 
+/// * ``times`` - The times expressed in jd.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+/// 
+/// # Precondition
+/// 
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.coordinates.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+/// 
+/// # Errors
+/// 
+/// If the number of longitudes, latitudes and times do not match.
 pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, dt: i8, ds: i8) -> PyResult<NestedRanges2D<u64, u64>> {
     if dt < 0 || dt > u64::MAXDEPTH {
         Err(exceptions::ValueError::py_err("Time depth must be in [0, 29]"))
@@ -68,20 +109,15 @@ pub fn create_from_time_position(times: Vec<f64>, lon: Vec<f64>, lat: Vec<f64>, 
 }
 
 use ndarray::Array2;
-use intervals::RangesPy;
+/// Cast an `Array2<u64>` coming from MOCPy python code to
+/// a `NestedRanges<u64>` object.
 pub fn create_nested_ranges_from_py(data: Array2<u64>) -> NestedRanges<u64> {
-    let ranges_from_py = RangesPy {
-        data,
-    };
-
-    ranges_from_py.to_nested_ranges()
+    data.into()
 }
 
 use intervals::uniqranges::UniqRanges;
+/// Cast an `Array2<u64>` coming from MOCPy python code to
+/// an `UniqRanges<u64>` object.
 pub fn create_uniq_ranges_from_py(data: Array2<u64>) -> UniqRanges<u64> {
-    let ranges_from_py = RangesPy {
-        data,
-    };
-
-    ranges_from_py.to_uniq_ranges()
+    data.into()
 }

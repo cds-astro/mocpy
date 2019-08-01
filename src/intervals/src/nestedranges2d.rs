@@ -20,20 +20,24 @@ impl<T, S> NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
 
-    /// Create a Quantity/Space 2D coverage:
+    /// Create a Quantity/Space 2D coverage
     ///
-    /// - A set of quantity points stored in ``x`` expressed at the maximum depth.
-    ///   This quantity axe can be a time one or a redshift one etc...
-    ///   This will define the first dimension of the object.
-    /// - A set of spatial HEALPix cells stored in ``y`` and given at the depth ``d2``
-    ///   This will define the second dimension of the object.
-    ///
-    /// Quantity could refer to a time but also a proper motion, a redshift, etc...
+    /// # Arguments 
+    /// 
+    /// * `x` - A set of quantity values expressed at the depth ``d1``.
+    ///   This quantity axe may refer to a time, a redshift etc...
+    ///   This will define the first dimension of the coverage.
+    /// * `y` - A set of spatial HEALPix cell indices at the depth ``d2``.
+    ///   This will define the second dimension of the coverage.
+    /// * `d1` - The depth of the coverage along its 1st dimension.
+    /// * `d2` - The depth of the coverage along its 2nd dimension.
+    /// 
     /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
     /// 
     /// # Precondition
     /// 
-    /// - `d1` and `d2` depths must be valid (within [0, <T>::MAXDEPTH])
+    /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
+    /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
     pub fn create_quantity_space_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
@@ -74,20 +78,24 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         }
     }
 
-    /// Create a Space/Quantity 2D coverage:
+    /// Create a Space/Quantity 2D coverage
     ///
-    /// - A set of spatial HEALPix cells stored in ``x`` and given at the depth ``d1``
-    ///   This will define the first dimension of the object.
-    /// - A set of quantity points stored in ``y`` expressed at the maximum depth.
-    ///   This quantity axe can be a time one or a redshift one etc...
-    ///   This will define the second dimension of the object.
-    ///
-    /// Quantity could refer to a time but also a proper motion, a redshift, etc...
-    /// The resulted 2 dim ranges will be of depth (``d1``, ``d2``)
+    /// # Arguments 
+    /// 
+    /// * `x` - A set of spatial HEALPix cell indices at the depth ``d1``.
+    ///   This will define the second dimension of the coverage.
+    /// * `y` - A set of quantity values expressed at the depth ``d2``.
+    ///   This quantity axe may refer to a time, a redshift etc...
+    ///   This will define the first dimension of the coverage.
+    /// * `d1` - The depth of the coverage along its 1st dimension.
+    /// * `d2` - The depth of the coverage along its 2nd dimension.
+    /// 
+    /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
     /// 
     /// # Precondition
     /// 
-    /// - `d1` and `d2` depths must be valid (within [0, <T>::MAXDEPTH])
+    /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
+    /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
     pub fn create_space_quantity_coverage(x: Vec<T>, y: Vec<S>, d1: i8, d2: i8) -> NestedRanges2D<T, S> {
         // The spatial dimension as the first one
@@ -127,14 +135,21 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         }
     }
 
-    // Returns all the 2nd dim ranges for which their 1st dim range
-    // is contained into ``x``
-    //
-    // This method checks for all the 1st dim ranges that
-    // lie into the range set ``x``.
-    // It then returns the union of the 2nd dim set of ranges
-    // of the matching ranges (i.e. the ones contained into the
-    // range set ``x``).
+    /// Returns the union of the ranges along the `S` axis for which their
+    /// `T` range is contained in ``x``
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``x``- The set of ranges along the `T` axis.
+    /// * ``coverage`` - The input coverage
+    /// 
+    /// # Algorithm
+    /// 
+    /// This method checks for all the `T` axis ranges of ``coverage`` that
+    /// lie into the range set ``x``.
+    /// 
+    /// It then performs the union of the `S` axis ranges corresponding to the 
+    /// matching ranges along the `T` axis.
     pub fn project_on_second_dim(x: &NestedRanges<T>, coverage: &NestedRanges2D<T, S>) -> NestedRanges<S> {
         let coverage = &coverage.ranges;
         let ranges = coverage.x
@@ -163,10 +178,21 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         ranges.into()
     }
 
-    // Returns all the 1st dim ranges for which their 2nd dim set of ranges
-    // are contained into ``y``
-    //
-    // Works in the same manner of ``project_on_first_dim``
+    /// Returns the union of the ranges along the `T` axis for which their
+    /// `S` ranges is contained in ``y``
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``y``- The set of ranges along the `S` axis.
+    /// * ``coverage`` - The input coverage.
+    /// 
+    /// # Algorithm
+    /// 
+    /// This method checks for all the `S` axis ranges of ``coverage`` that
+    /// lie into the range set ``y``.
+    /// 
+    /// It then performs the union of the `T` axis ranges corresponding to the 
+    /// matching ranges along the `S` axis.
     pub fn project_on_first_dim(y: &NestedRanges<S>, coverage: &NestedRanges2D<T, S>) -> NestedRanges<T> {
         let coverage = &coverage.ranges;
         let t_ranges = coverage.x
@@ -190,11 +216,19 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         NestedRanges::<T>::new(t_ranges).make_consistent()
     }
 
-    /// Get the maximum depth of the 2D ranges along its first and
-    /// second dimensions.
+    /// Compute the depth of the coverage
     /// 
-    /// If the NestedRanges2D is empty the depth returned is set
-    /// to (0, 0)
+    /// # Returns
+    /// 
+    /// A tuple containing two values:
+    /// 
+    /// * The maximum depth along the `T` axis
+    /// * The maximum depth along the `S` axis
+    /// 
+    /// # Info
+    /// 
+    /// If the `NestedRanges2D<T, S>` is empty, the depth returned
+    /// is set to (0, 0)
     pub fn depth(&self) -> (i8, i8) {
         let coverage = &self.ranges;
         let y = coverage.y
@@ -233,6 +267,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     }
 
     /// Returns the minimum value along the `T` dimension
+    /// 
+    /// # Errors
+    /// 
+    /// When the `NestedRanges2D<T, S>` is empty.
     pub fn t_min(&self) -> Result<T, &'static str> {
         if self.ranges.is_empty() {
             Err("The coverage is empty")
@@ -242,6 +280,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     }
 
     /// Returns the maximum value along the `T` dimension
+    /// 
+    /// # Errors
+    /// 
+    /// When the `NestedRanges2D<T, S>` is empty.
     pub fn t_max(&self) -> Result<T, &'static str> {
         if self.ranges.is_empty() {
             Err("The coverage is empty")

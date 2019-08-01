@@ -17,34 +17,47 @@ pub mod uniqranges;
 pub mod nestedranges2d;
 
 use ndarray::Array2;
-pub struct RangesPy<T>
-{
-    pub data: Array2<T>,
-}
 
 use crate::nestedranges::NestedRanges;
 use crate::uniqranges::UniqRanges;
 use num::{Integer, PrimInt};
 use bounded::Bounded;
 
-impl<T> RangesPy<T>
+impl<T> From<Array2<T>> for NestedRanges<T>
+where T: Integer + PrimInt
+    + Bounded<T>
+    + Send + Sync
+    + std::fmt::Debug {
+    
+    /// Convert a Array2 to a NestedRanges<T>
+    /// 
+    /// This is useful for converting a set of ranges
+    /// coming from python into a Rust structure
+    /// 
+    /// # Info
+    /// 
+    /// This method is used whenever an operation must be
+    /// done to a MOC such as logical operations, degradation
+    /// max depth computation, etc...
+    fn from(input: Array2<T>) -> NestedRanges<T> {
+        let ranges = utils::array2_to_vec_ranges(input);
+        NestedRanges::<T>::new(ranges)
+    }
+}
+
+impl<T> From<Array2<T>> for UniqRanges<T>
 where T: Integer + PrimInt
     + Bounded<T>
     + Send + Sync
     + std::fmt::Debug {
 
-    /// Convert the python input ranges to a NestedRanges<T> consistent type.
-    pub fn to_nested_ranges(self) -> NestedRanges<T> {
-        let data = utils::array2_to_vec_ranges(self.data);
-
-        NestedRanges::<T>::new(data)
-    }
-
-    /// Convert the python input ranges to a UniqRanges<T> consistent type.
-    pub fn to_uniq_ranges(self) -> UniqRanges<T> {
-        let data = utils::array2_to_vec_ranges(self.data);
-
-        UniqRanges::<T>::new(data)
+    /// Convert a Array2 to a UniqRanges<T>
+    /// 
+    /// This is useful for converting a set of ranges
+    /// coming from python into a Rust structure
+    fn from(input: Array2<T>) -> UniqRanges<T> {
+        let ranges = utils::array2_to_vec_ranges(input);
+        UniqRanges::<T>::new(ranges)
     }
 }
 
