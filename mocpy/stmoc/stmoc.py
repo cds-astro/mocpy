@@ -37,15 +37,15 @@ class STMOC(serializer.IO):
 
     @property
     def max_depth(self):
-        return core.ranges2d_depth(self.__index)
+        return core.coverage_2d_depth(self.__index)
 
     @property
     def max_time(self):
-        return Time(core.ranges2d_max_time(self.__index), format='jd', scale='tdb')
+        return Time(core.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
     
     @property
     def min_time(self):
-        return Time(core.ranges2d_min_time(self.__index), format='jd', scale='tdb')
+        return Time(core.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -104,16 +104,107 @@ class STMOC(serializer.IO):
             The projeted Spatial Coverage map resulting from the union of all the
             spatial coverages lying in the set of time ranges given.
         """
-        if times.shape[1] != 2:
+        if times.ndim != 2 or times.shape[1] != 2:
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
 
         times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
         ranges = core.project_on_second_dim(times, self.__index)
         return MOC(IntervalSet(ranges, make_consistent=False))
 
+    def project_on_first_dimension(self, moc):
+        """
+        Project the STMOC to its first dimension with a constraint
+        on its second dimension.
+
+        This will perform the union of all the time ranges whose associated
+        spatial coverages lie in ``moc``.
+
+        Parameters
+        ----------
+        moc : `mocpy.MOC`
+            The spatial coverage to project the STMOC onto.
+
+        Returns
+        -------
+        result : `~astropy.time.Time`
+            A set of astropy defined time ranges.
+        """
+        # Time ranges in µsec
+        time_ranges = core.project_on_first_dim(moc._intervals._intervals, self.__index)
+        return Time(time_ranges / 86400000000, format='jd', scale='tdb')
+
+    def union(self, other):
+        """
+        Union of two Space-Time coverages.
+
+        The union is first performed along the Time axis of the
+        coverage. The union of space axis coverages is done on time
+        ranges that overlap.
+
+        Parameters
+        ----------
+        other : `mocpy.STMOC`
+            The Space-Time coverage to perform the union with.
+
+        Returns
+        -------
+        result : `mocpy.STMOC`
+            A new Space-Time coverage being the union of `self`
+            with `other`.
+        """
+        result = STMOC()
+        result.__index = core.coverage_2d_union(self.__index, other.__index)
+        return result
+
+    def intersection(self, other):
+        """
+        Intersection of two Space-Time coverages.
+
+        The intersection is first performed along the Time axis of the
+        coverage. The intersection of space axis coverages is done on time
+        ranges that overlap.
+
+        Parameters
+        ----------
+        other : `mocpy.STMOC`
+            The Space-Time coverage to perform the intersection with.
+
+        Returns
+        -------
+        result : `mocpy.STMOC`
+            A new Space-Time coverage being the intersection of `self`
+            with `other`.
+        """
+        result = STMOC()
+        result.__index = core.coverage_2d_intersection(self.__index, other.__index)
+        return result
+
+    def difference(self, other):
+        """
+        Difference of two Space-Time coverages.
+
+        The difference is first performed along the Time axis of the
+        coverage. The difference of space axis coverages is done on time
+        ranges that overlap.
+
+        Parameters
+        ----------
+        other : `mocpy.STMOC`
+            The Space-Time coverage to perform the difference with.
+
+        Returns
+        -------
+        result : `mocpy.STMOC`
+            A new Space-Time coverage being the difference of `self`
+            with `other`.
+        """
+        result = STMOC()
+        result.__index = core.coverage_2d_difference(self.__index, other.__index)
+        return result
+
     @property
     def _fits_header_keywords(self):
-        t_depth, s_depth = core.ranges2d_depth(self.__index)
+        t_depth, s_depth = core.coverage_2d_depth(self.__index)
         return {
             'MOC': 'TIME.SPACE',
             'ORDERING': 'RANGE29',
@@ -131,7 +222,7 @@ class STMOC(serializer.IO):
         return '1K'
 
     def _uniq_format(self):
-        return core.ranges2d_to_fits(self.__index)
+        return core.coverage_2d_to_fits(self.__index)
 
     @classmethod
     def from_fits(cls, filename):
@@ -182,10 +273,9 @@ class STMOC(serializer.IO):
             second_dim_depth = header.get('MOCORDER')
 
         result = cls()
-        result.__index = core.ranges2d_from_fits(
+        result.__index = core.coverage_2d_from_fits(
             np.int8(first_dim_depth),
             np.int8(second_dim_depth),
             bin_HDU_table.data[key].astype(np.int64)
         )
         return result
-

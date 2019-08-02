@@ -71,7 +71,7 @@ class AbstractMOC(serializer.IO):
         """
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
-        depth = core.depth(self._interval_set._intervals)
+        depth = core.coverage_depth(self._interval_set._intervals)
         depth = np.uint8(depth)
         return depth
 
@@ -171,7 +171,7 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        intervals = core.from_json(json_moc)
+        intervals = core.coverage_from_json(json_moc)
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
@@ -179,7 +179,9 @@ class AbstractMOC(serializer.IO):
         """
         Loads a MOC from a FITS file.
 
-        The specified FITS file must store the MOC (i.e. the list of HEALPix cells it contains) in a binary HDU table.
+        The specified FITS file must store the MOC
+        (i.e. the list of HEALPix cells it contains)
+        in a binary HDU table.
 
         Parameters
         ----------
@@ -312,7 +314,7 @@ class AbstractMOC(serializer.IO):
                 result_json[str(d)] = ipix_depth.tolist()
 
         return result_json
-        #return core.to_json(intervals)
+        #return core.coverage_to_json(intervals)
 
     @staticmethod
     def _to_str(uniq):
@@ -411,11 +413,11 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        intervals = core.degrade(self._interval_set._intervals, new_order)
+        intervals = core.coverage_degrade(self._interval_set._intervals, new_order)
         return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def refine_to_order(self, min_depth):
-        intervals = core.merge_nested_intervals(self._interval_set._intervals, min_depth)
+        intervals = core.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
         interval_set = IntervalSet(intervals, make_consistent=False)
         return self.__class__(interval_set)
 

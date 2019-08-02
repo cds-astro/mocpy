@@ -67,7 +67,7 @@ class IntervalSet:
 
     def _merge_nested_intervals(self, min_depth):
         if not self.empty():
-            self._intervals = core.merge_nested_intervals(self._intervals, min_depth)
+            self._intervals = core.coverage_merge_nested_intervals(self._intervals, min_depth)
 
     def copy(self):
         """
@@ -114,19 +114,19 @@ class IntervalSet:
         return self._intervals.size == 0
 
     def union(self, other):
-        intervals = core.union(self._intervals, other._intervals)
+        intervals = core.coverage_union(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def intersection(self, other):
-        intervals = core.intersection(self._intervals, other._intervals)
+        intervals = core.coverage_intersection(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def difference(self, other):
-        intervals = core.difference(self._intervals, other._intervals)
+        intervals = core.coverage_difference(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def complement(self):
-        intervals = core.complement(self._intervals)
+        intervals = core.coverage_complement(self._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     @property

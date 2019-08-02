@@ -1,9 +1,8 @@
-use num::{One, Integer, PrimInt};
+use num::{Integer, PrimInt};
 use crate::bounded::Bounded;
 
 use std::ops::Range;
 use std::cmp;
-use std::mem;
 use crate::ranges::Ranges;
 
 use rayon::prelude::*;
@@ -324,7 +323,14 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
             if let Some(prev_ranges) = prev_s {
                 if let Some(cur_ranges) = s {
-                    if !prev_ranges.eq(&cur_ranges) {
+                    if cur_ranges.is_empty() {
+                        // Case of the difference
+                        // The difference of two 1D coverage
+                        // can be NULL therefore the time range must not
+                        // be pushed
+                        t_ranges.push(c);
+                        prev_s = None;
+                    } else if !prev_ranges.eq(&cur_ranges) {
                         t_ranges.push(c);
                         t_ranges.push(c);
                         s_ranges.push(cur_ranges);
@@ -336,9 +342,11 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                 }
             } else {
                 if let Some(cur_ranges) = s {
-                    t_ranges.push(c);
-                    s_ranges.push(cur_ranges);
-                    prev_s = s_ranges.last();
+                    if !cur_ranges.is_empty() {
+                        t_ranges.push(c);
+                        s_ranges.push(cur_ranges);
+                        prev_s = s_ranges.last();
+                    }
                 }
             }
         }
@@ -484,30 +492,30 @@ mod tests {
 
     #[test]
     fn union_ranges_1_3() {
-        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let mut b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..21]]);
+        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..21]]);
 
-        let c = a.union(&mut b);
+        let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(vec![0..20], vec![vec![16..21]]);
         assert_eq!(res, c);
     }
     #[test]
     fn union_ranges_1_3_bis() {
-        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let mut b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..22]]);
+        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let b = creating_ranges::<u64, u64>(vec![10..20], vec![vec![16..22]]);
 
-        let c = a.union(&mut b);
+        let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
         assert_eq!(res, c);
     }
     #[test]
     fn union_ranges_covering() {
-        let mut a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
-        let mut b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let a = creating_ranges::<u64, u64>(vec![0..10], vec![vec![16..21]]);
+        let b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&mut b);
+        let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..9, 9..10, 10..20],
@@ -518,10 +526,10 @@ mod tests {
     
     #[test]
     fn empty_range_union() {
-        let mut a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
-        let mut b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
+        let b = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&mut b);
+        let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..1, 9..20],
@@ -532,10 +540,10 @@ mod tests {
 
     #[test]
     fn empty_range_union_bis() {
-        let mut b = creating_ranges::<u64, u64>(vec![0..9], vec![vec![0..20]]);
-        let mut a = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
+        let b = creating_ranges::<u64, u64>(vec![0..9], vec![vec![0..20]]);
+        let a = creating_ranges::<u64, u64>(vec![9..20], vec![vec![0..17]]);
 
-        let c = a.union(&mut b);
+        let c = a.union(&b);
 
         let res = creating_ranges::<u64, u64>(
             vec![0..9, 9..20],
@@ -546,16 +554,16 @@ mod tests {
 
     #[test]
     fn complex_union() {
-        let mut a = creating_ranges::<u64, u64>(
+        let a = creating_ranges::<u64, u64>(
             vec![0..2, 3..5, 8..9, 13..14],
             vec![vec![2..3], vec![2..3], vec![5..6], vec![7..8]]
         );
-        let mut b = creating_ranges::<u64, u64>(
+        let b = creating_ranges::<u64, u64>(
             vec![1..4, 6..7, 9..10, 11..12],
             vec![vec![0..3], vec![5..6], vec![5..6], vec![10..13]]
         );
 
-        let result = a.union(&mut b);
+        let result = a.union(&b);
         let expected = creating_ranges::<u64, u64>(
             vec![0..1, 1..4, 4..5, 6..7, 8..10, 11..12, 13..14],
             vec![vec![2..3], vec![0..3], vec![2..3], vec![5..6], vec![5..6], vec![10..13], vec![7..8]]
@@ -566,17 +574,17 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-        let mut empty = creating_ranges::<u64, u64>(
+        let empty = creating_ranges::<u64, u64>(
             vec![],
             vec![]
         );
 
-        let mut a = creating_ranges::<u64, u64>(
+        let a = creating_ranges::<u64, u64>(
             vec![1..4, 6..7],
             vec![vec![0..3], vec![5..10]]
         );
 
-        let mut b = creating_ranges::<u64, u64>(
+        let b = creating_ranges::<u64, u64>(
             vec![2..3, 6..7],
             vec![vec![0..5], vec![7..11]]
         );
@@ -616,19 +624,24 @@ mod tests {
 
     #[test]
     fn test_difference() {
-        let mut empty = creating_ranges::<u64, u64>(
+        let empty = creating_ranges::<u64, u64>(
             vec![],
             vec![]
         );
 
-        let mut a = creating_ranges::<u64, u64>(
+        let a = creating_ranges::<u64, u64>(
             vec![1..4, 6..7],
             vec![vec![0..3], vec![5..10]]
         );
 
-        let mut b = creating_ranges::<u64, u64>(
+        let b = creating_ranges::<u64, u64>(
             vec![2..3, 6..7],
             vec![vec![0..5], vec![7..11]]
+        );
+
+        let c = creating_ranges::<u64, u64>(
+            vec![0..3, 3..7],
+            vec![vec![0..7], vec![0..12]]
         );
 
         let a_diff_b = a.difference(&b);
@@ -658,5 +671,13 @@ mod tests {
         );
 
         assert_eq!(empty_diff_empty, expect_empty_diff_empty);
+    
+        let b_diff_c = b.difference(&c);
+        let expect_b_diff_c = creating_ranges::<u64, u64>(
+            vec![],
+            vec![]
+        );
+
+        assert_eq!(b_diff_c, expect_b_diff_c);
     }
 }

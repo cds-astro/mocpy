@@ -131,7 +131,7 @@ class MOC(AbstractMOC):
         moc_neighbors = MOC.from_healpix_cells(ipix_neighbors, depth_neighbors)
         
         # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC
-        #self._interval_set._intervals = core.union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
+        #self._interval_set._intervals = core.coverage_union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
         final = self.union(moc_neighbors)
         self._interval_set = final._interval_set
         return self

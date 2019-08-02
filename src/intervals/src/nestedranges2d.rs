@@ -292,7 +292,44 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         }
     }
 
+    /// Performs the union between two `NestedRanges2D<T, S>`
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``other`` - The other `NestedRanges2D<T, S>` to
+    ///   perform the union with.
+    pub fn union(&self, other: &Self) -> Self {
+        let ranges = self.ranges.union(&other.ranges);
+        NestedRanges2D {
+            ranges
+        }
+    }
 
+    /// Performs the intersection between two `NestedRanges2D<T, S>`
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``other`` - The other `NestedRanges2D<T, S>` to
+    ///   perform the intersection with.
+    pub fn intersection(&self, other: &Self) -> Self {
+        let ranges = self.ranges.intersection(&other.ranges);
+        NestedRanges2D {
+            ranges
+        }
+    }
+
+    /// Performs the difference between two `NestedRanges2D<T, S>`
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``other`` - The other `NestedRanges2D<T, S>` to
+    ///   perform the difference with.
+    pub fn difference(&self, other: &Self) -> Self {
+        let ranges = self.ranges.difference(&other.ranges);
+        NestedRanges2D {
+            ranges
+        }
+    }
 }
 
 use ndarray::Array1;
@@ -340,7 +377,9 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
 }
 
 use crate::utils;
-impl From<Array1<i64>> for NestedRanges2D<u64, u64> {
+use std::convert::TryFrom;
+impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
+    type Error = &'static str;
     /// Create a NestedRanges2D<u64, u64> from a Array1<i64>
     /// 
     /// This is used when loading a STMOC from a FITS file
@@ -357,9 +396,14 @@ impl From<Array1<i64>> for NestedRanges2D<u64, u64> {
     /// Content example of an Array1 coming from a FITS file:
     /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
     /// 
-    /// Coverages coming from FITS file are consistent because they
+    /// Coverages coming from FITS file should be consistent because they
     /// are stored this way.
-    fn from(input: Array1<i64>) -> Self {
+    /// 
+    /// # Errors
+    /// 
+    /// * If the number of time ranges do not match the number of
+    ///   spatial coverages.
+    fn try_from(input: Array1<i64>) -> Result<Self, Self::Error> {
         let ranges = if input.is_empty() {
             // If the input array is empty
             // then we return an empty coverage
@@ -398,14 +442,18 @@ impl From<Array1<i64>> for NestedRanges2D<u64, u64> {
             // Push the last second dim coverage
             s.push(Ranges::<u64>::new(cur_s));
 
-            assert_eq!(t.len(), s.len());
+            // Propagate invalid Coverage FITS errors.
+            if t.len() != s.len() {
+                return Err("Number of time ranges and
+                    spatial coverages do not match.");
+            }
             // No need to make it consistent because it comes
             // from python
             Ranges2D::<u64, u64>::new(t, s)
         };
 
-        NestedRanges2D {
+        Ok(NestedRanges2D {
             ranges
-        }
+        })
     }
 }
