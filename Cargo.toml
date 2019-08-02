@@ -1,6 +1,6 @@
 [package]
 name = "moc"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Matthieu Baumann <matthieu.baumann@astro.unistra.fr>"]
 edition = "2018"
 

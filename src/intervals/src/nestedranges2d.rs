@@ -136,7 +136,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
     }
 
     /// Returns the union of the ranges along the `S` axis for which their
-    /// `T` range is contained in ``x``
+    /// `T` ranges intersect ``x``
     /// 
     /// # Arguments
     /// 
@@ -158,7 +158,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             // Filter the time ranges to keep only those
             // that lie into ``x``
             .filter_map(|(t, s)| {
-                if x.contains(t) {
+                if x.intersects(t) {
                     Some(s.clone())
                 } else {
                     None

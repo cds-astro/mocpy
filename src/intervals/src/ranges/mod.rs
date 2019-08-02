@@ -187,7 +187,7 @@ where T: Integer + PrimInt
         self.0.iter()
     }
 
-    pub fn contains(&self, x: &Range<T>) -> bool {
+    pub fn intersects(&self, x: &Range<T>) -> bool {
         let result = self.0.par_iter()
             .map(|r| {
                 if x.start >= r.end || x.end <= r.start {
@@ -196,9 +196,22 @@ where T: Integer + PrimInt
                     true
                 }
             })
-            .reduce_with(|a, b| a || b)
-            // Case where the Ranges<T> is empty
-            .unwrap_or_else(|| false);
+            .any(|a| a);
+
+        result
+    }
+
+    pub fn contains(&self, x: &Range<T>) -> bool {
+        let result = self.0.par_iter()
+            .map(|r| {
+                if x.start >= r.start && x.end <= r.end {
+                    true
+                } else {
+                    false
+                }
+            })
+            .any(|a| a);
+
         result
     }
 

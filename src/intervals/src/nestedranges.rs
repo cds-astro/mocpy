@@ -66,6 +66,10 @@ where T: Integer + PrimInt
         self.ranges.degrade(depth);
     }
 
+    pub fn intersects(&self, x: &Range<T>) -> bool {
+        self.ranges.intersects(x)
+    }
+
     pub fn contains(&self, x: &Range<T>) -> bool {
         self.ranges.contains(x)
     }
