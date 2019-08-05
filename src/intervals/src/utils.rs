@@ -15,9 +15,7 @@ pub fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
 
     mem::forget(owned_input);
 
-    let result = unsafe {
-        Vec::from_raw_parts(ptr, len, cap)
-    };
+    let result = unsafe { Vec::from_raw_parts(ptr, len, cap) };
 
     result
 }
@@ -36,22 +34,19 @@ pub fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
 
     mem::forget(owned_input);
 
-    let result = unsafe {
-        Vec::from_raw_parts(ptr, len, cap)
-    };
+    let result = unsafe { Vec::from_raw_parts(ptr, len, cap) };
 
     result
 }
 
+use crate::bounded::Bounded;
 use ndarray::Array2;
 use num::{Integer, PrimInt};
-use crate::bounded::Bounded;
 
 pub fn array2_to_vec_ranges<T>(mut input: Array2<T>) -> Vec<Range<T>>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     let shape = input.shape();
     // Warning: empty Array2 objects coming from MOCPy
     // do have a shape equal to (1, 0).
@@ -63,8 +58,11 @@ where T: Integer + PrimInt
     } else {
         // Unrecognized shape of a Array2 coming
         // from MOCPy python code
-        let msg = format!("Unrecognized Array2 shape coming from \
-            MOCPy python code {:?}", shape);
+        let msg = format!(
+            "Unrecognized Array2 shape coming from \
+             MOCPy python code {:?}",
+            shape
+        );
         unreachable!(msg);
     };
     let cap = len;
@@ -72,9 +70,7 @@ where T: Integer + PrimInt
 
     mem::forget(input);
 
-    unsafe {
-        Vec::from_raw_parts(ptr, len, cap)
-    }
+    unsafe { Vec::from_raw_parts(ptr, len, cap) }
 }
 
 #[cfg(test)]

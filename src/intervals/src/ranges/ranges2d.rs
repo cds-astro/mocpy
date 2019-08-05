@@ -1,16 +1,18 @@
-use num::{Integer, PrimInt};
 use crate::bounded::Bounded;
+use num::{Integer, PrimInt};
 
-use std::ops::Range;
-use std::cmp;
 use crate::ranges::Ranges;
+use std::cmp;
+use std::ops::Range;
 
 use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct Ranges2D<T, S>
-where T: Integer + Sync + std::fmt::Debug,
-      S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug {
+where
+    T: Integer + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug,
+{
     // First dimension
     pub x: Vec<Range<T>>,
     // Second dimension (usually the spatial one)
@@ -38,31 +40,29 @@ type Operation<T, S> = fn(
     usize,
     // The index of the current range bound
     // of the right operand
-    usize)
--> Option<Ranges<S>>;
+    usize,
+) -> Option<Ranges<S>>;
 
 use crate::utils;
 impl<T, S> Ranges2D<T, S>
-where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
-
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+{
     /// Creates a 2D coverage
-    /// 
+    ///
     /// # Arguments
-    /// 
-    /// * `t` - A set of ranges constituing the first dimension. This stores 
+    ///
+    /// * `t` - A set of ranges constituing the first dimension. This stores
     ///   usually quantities such as times, redshifts or proper motions.
     /// * `s` - A set of 1D coverage constituing the second dimension. This stores
     ///   usually space informations such as HEALPix cell indices under the nested format.
-    /// 
+    ///
     /// # Precondition
-    /// 
+    ///
     /// ``t`` and ``s`` must have the same length.
     pub fn new(t: Vec<Range<T>>, s: Vec<Ranges<S>>) -> Ranges2D<T, S> {
-        Ranges2D {
-            x: t,
-            y: s,
-        }
+        Ranges2D { x: t, y: s }
     }
 
     pub fn make_consistent(mut self) -> Self {
@@ -71,7 +71,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         // Consistency has sense only from 2 tuples
         if size > 1 {
             // Tuples are sorted along their first dimension.
-            let mut join_ts = self.x.into_par_iter().zip_eq(self.y.into_par_iter())
+            let mut join_ts = self
+                .x
+                .into_par_iter()
+                .zip_eq(self.y.into_par_iter())
                 .collect::<Vec<_>>();
 
             (&mut join_ts).par_sort_unstable_by(|left, right| left.0.start.cmp(&right.0.start));
@@ -81,36 +84,28 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             let mut s_to_union = Vec::<Vec<usize>>::new();
             s_to_union.push(vec![0]);
 
-            for (i, (t, _)) in join_ts
-                .iter()
-                .enumerate()
-                .skip(1) {
-                    if !t.eq(&t_current) {
-                        t_current = t;
-                        s_to_union.push(vec![i]);
-                    } else {
-                        s_to_union.last_mut()
-                            .unwrap()
-                            .push(i);
-                    }
+            for (i, (t, _)) in join_ts.iter().enumerate().skip(1) {
+                if !t.eq(&t_current) {
+                    t_current = t;
+                    s_to_union.push(vec![i]);
+                } else {
+                    s_to_union.last_mut().unwrap().push(i);
                 }
+            }
 
-            let (t, s): (Vec<_>, Vec<_>) = s_to_union.into_iter()
+            let (t, s): (Vec<_>, Vec<_>) = s_to_union
+                .into_iter()
                 .map(|v| {
                     let first_id: usize = v.first().unwrap().clone();
                     let ref t = join_ts[first_id].0;
 
-                    let s = v.into_par_iter()
+                    let s = v
+                        .into_par_iter()
                         .map(|i| {
                             let r = join_ts[i].1.clone();
                             r
                         })
-                        .reduce(
-                            || Ranges::<S>::new(vec![]),
-                            |s1, s2| {
-                                s1.union(&s2)
-                            }
-                        );
+                        .reduce(|| Ranges::<S>::new(vec![]), |s1, s2| s1.union(&s2));
 
                     (t.clone(), s)
                 })
@@ -147,7 +142,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                             prev_t.end = cmp::max(prev_t.end, cur_t.end);
                         } else if cur_t == prev_t {
                             prev_s = prev_s.union(&cur_s);
-                        // If they are not we can be in two cases: 
+                        // If they are not we can be in two cases:
                         // 1. The second range ``cur_t`` is not contained into ``prev_t``
                         // xxxx|----
                         // --|yyyyyy
@@ -170,7 +165,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
                             let e2 = cmp::max(cur_t.end, prev_t.end);
                             let t2 = cur_t.start..e1;
                             let t3 = e1..e2;
-                            
+
                             if t1.start != t1.end {
                                 res_t.push(t1);
                                 // We push ``x``
@@ -217,7 +212,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 
             res_t.push(prev_t);
             res_s.push(prev_s);
-            
+
             res_s.shrink_to_fit();
             res_t.shrink_to_fit();
 
@@ -358,7 +353,14 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         }
     }
 
-    fn op_union(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+    fn op_union(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
         if in_t1 && in_t2 {
             let s1 = &self.y[i >> 1];
             let s2 = &other.y[j >> 1];
@@ -378,7 +380,14 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         self.merge(other, Self::op_union)
     }
 
-    fn op_intersection(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+    fn op_intersection(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
         if in_t1 && in_t2 {
             let s1 = &self.y[i >> 1];
             let s2 = &other.y[j >> 1];
@@ -392,7 +401,14 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         self.merge(other, Self::op_intersection)
     }
 
-    fn op_difference(&self, other: &Self, in_t1: bool, in_t2: bool, i: usize, j: usize) -> Option<Ranges<S>> {
+    fn op_difference(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
         if in_t1 && in_t2 {
             let s1 = &self.y[i >> 1];
             let s2 = &other.y[j >> 1];
@@ -415,8 +431,10 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 }
 
 impl<T, S> PartialEq for Ranges2D<T, S>
-where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+{
     fn eq(&self, other: &Self) -> bool {
         // It is fast to check if the two ranges
         // have the same number of ranges towards their
@@ -431,8 +449,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
             } else {
                 // In the last step we must verify that
                 // each 2nd dim ranges are equal
-                for (s1, s2) in self.y.iter()
-                           .zip(other.y.iter()) {
+                for (s1, s2) in self.y.iter().zip(other.y.iter()) {
                     if s1 != s2 {
                         return false;
                     }
@@ -449,12 +466,17 @@ mod tests {
     use crate::ranges::ranges2d::Ranges2D;
     use crate::ranges::Ranges;
 
-    use num::{PrimInt, Integer};
+    use num::{Integer, PrimInt};
     use std::ops::Range;
 
-    fn creating_ranges<T, S>(ranges_t: Vec<Range<T>>, ranges_s: Vec<Vec<Range<S>>>) -> Ranges2D<T, S>
-    where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-          S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
+    fn creating_ranges<T, S>(
+        ranges_t: Vec<Range<T>>,
+        ranges_s: Vec<Vec<Range<S>>>,
+    ) -> Ranges2D<T, S>
+    where
+        T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+        S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+    {
         let mut vec_ranges_s = Vec::<Ranges<S>>::with_capacity(ranges_t.len());
 
         for range_s in ranges_s.into_iter() {
@@ -507,7 +529,8 @@ mod tests {
 
         let c = a.union(&b);
 
-        let res = creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
+        let res =
+            creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
         assert_eq!(res, c);
     }
     #[test]
@@ -519,11 +542,11 @@ mod tests {
 
         let res = creating_ranges::<u64, u64>(
             vec![0..9, 9..10, 10..20],
-            vec![vec![16..21], vec![0..21], vec![0..17]]
+            vec![vec![16..21], vec![0..21], vec![0..17]],
         );
         assert_eq!(res, c);
     }
-    
+
     #[test]
     fn empty_range_union() {
         let a = creating_ranges::<u64, u64>(vec![0..1], vec![vec![42..43]]);
@@ -531,10 +554,7 @@ mod tests {
 
         let c = a.union(&b);
 
-        let res = creating_ranges::<u64, u64>(
-            vec![0..1, 9..20],
-            vec![vec![42..43], vec![0..17]]
-        );
+        let res = creating_ranges::<u64, u64>(vec![0..1, 9..20], vec![vec![42..43], vec![0..17]]);
         assert_eq!(res, c);
     }
 
@@ -545,10 +565,7 @@ mod tests {
 
         let c = a.union(&b);
 
-        let res = creating_ranges::<u64, u64>(
-            vec![0..9, 9..20],
-            vec![vec![0..20], vec![0..17]]
-        );
+        let res = creating_ranges::<u64, u64>(vec![0..9, 9..20], vec![vec![0..20], vec![0..17]]);
         assert_eq!(res, c);
     }
 
@@ -556,17 +573,25 @@ mod tests {
     fn complex_union() {
         let a = creating_ranges::<u64, u64>(
             vec![0..2, 3..5, 8..9, 13..14],
-            vec![vec![2..3], vec![2..3], vec![5..6], vec![7..8]]
+            vec![vec![2..3], vec![2..3], vec![5..6], vec![7..8]],
         );
         let b = creating_ranges::<u64, u64>(
             vec![1..4, 6..7, 9..10, 11..12],
-            vec![vec![0..3], vec![5..6], vec![5..6], vec![10..13]]
+            vec![vec![0..3], vec![5..6], vec![5..6], vec![10..13]],
         );
 
         let result = a.union(&b);
         let expected = creating_ranges::<u64, u64>(
             vec![0..1, 1..4, 4..5, 6..7, 8..10, 11..12, 13..14],
-            vec![vec![2..3], vec![0..3], vec![2..3], vec![5..6], vec![5..6], vec![10..13], vec![7..8]]
+            vec![
+                vec![2..3],
+                vec![0..3],
+                vec![2..3],
+                vec![5..6],
+                vec![5..6],
+                vec![10..13],
+                vec![7..8],
+            ],
         );
 
         assert_eq!(expected, result);
@@ -574,80 +599,48 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-        let empty = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let empty = creating_ranges::<u64, u64>(vec![], vec![]);
 
-        let a = creating_ranges::<u64, u64>(
-            vec![1..4, 6..7],
-            vec![vec![0..3], vec![5..10]]
-        );
+        let a = creating_ranges::<u64, u64>(vec![1..4, 6..7], vec![vec![0..3], vec![5..10]]);
 
-        let b = creating_ranges::<u64, u64>(
-            vec![2..3, 6..7],
-            vec![vec![0..5], vec![7..11]]
-        );
+        let b = creating_ranges::<u64, u64>(vec![2..3, 6..7], vec![vec![0..5], vec![7..11]]);
 
         let a_inter_b = a.intersection(&b);
-        let expect_a_inter_b = creating_ranges::<u64, u64>(
-            vec![2..3, 6..7],
-            vec![vec![0..3], vec![7..10]]
-        );
+        let expect_a_inter_b =
+            creating_ranges::<u64, u64>(vec![2..3, 6..7], vec![vec![0..3], vec![7..10]]);
 
         assert_eq!(expect_a_inter_b, a_inter_b);
 
         let b_inter_empty = b.intersection(&empty);
-        let expect_b_inter_empty = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_b_inter_empty = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(b_inter_empty, expect_b_inter_empty);
 
         let empty_inter_a = empty.intersection(&a);
-        let expect_empty_inter_a = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_empty_inter_a = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(empty_inter_a, expect_empty_inter_a);
 
         let empty_inter_empty = empty.intersection(&empty);
-        let expect_empty_inter_empty = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_empty_inter_empty = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(empty_inter_empty, expect_empty_inter_empty);
     }
 
     #[test]
     fn test_difference() {
-        let empty = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let empty = creating_ranges::<u64, u64>(vec![], vec![]);
 
-        let a = creating_ranges::<u64, u64>(
-            vec![1..4, 6..7],
-            vec![vec![0..3], vec![5..10]]
-        );
+        let a = creating_ranges::<u64, u64>(vec![1..4, 6..7], vec![vec![0..3], vec![5..10]]);
 
-        let b = creating_ranges::<u64, u64>(
-            vec![2..3, 6..7],
-            vec![vec![0..5], vec![7..11]]
-        );
+        let b = creating_ranges::<u64, u64>(vec![2..3, 6..7], vec![vec![0..5], vec![7..11]]);
 
-        let c = creating_ranges::<u64, u64>(
-            vec![0..3, 3..7],
-            vec![vec![0..7], vec![0..12]]
-        );
+        let c = creating_ranges::<u64, u64>(vec![0..3, 3..7], vec![vec![0..7], vec![0..12]]);
 
         let a_diff_b = a.difference(&b);
         let expect_a_diff_b = creating_ranges::<u64, u64>(
             vec![1..2, 3..4, 6..7],
-            vec![vec![0..3], vec![0..3], vec![5..7]]
+            vec![vec![0..3], vec![0..3], vec![5..7]],
         );
 
         assert_eq!(expect_a_diff_b, a_diff_b);
@@ -657,26 +650,17 @@ mod tests {
         assert_eq!(b_diff_empty, b);
 
         let empty_diff_a = empty.difference(&a);
-        let expect_empty_diff_a = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_empty_diff_a = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(empty_diff_a, expect_empty_diff_a);
 
         let empty_diff_empty = empty.difference(&empty);
-        let expect_empty_diff_empty = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_empty_diff_empty = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(empty_diff_empty, expect_empty_diff_empty);
-    
+
         let b_diff_c = b.difference(&c);
-        let expect_b_diff_c = creating_ranges::<u64, u64>(
-            vec![],
-            vec![]
-        );
+        let expect_b_diff_c = creating_ranges::<u64, u64>(vec![], vec![]);
 
         assert_eq!(b_diff_c, expect_b_diff_c);
     }

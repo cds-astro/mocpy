@@ -1,38 +1,34 @@
 use num::{Integer, PrimInt};
 
-use crate::ranges::{Ranges, NestedToUniqIter, DepthPixIter};
-use crate::uniqranges::UniqRanges;
 use crate::bounded::Bounded;
+use crate::ranges::{DepthPixIter, NestedToUniqIter, Ranges};
+use crate::uniqranges::UniqRanges;
 
 use std::ops::Range;
 use std::slice::Iter;
 
 #[derive(Debug, Clone)]
 pub struct NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
-    ranges: Ranges<T>
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
+    ranges: Ranges<T>,
 }
 
 impl<T> NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     pub fn new(data: Vec<Range<T>>) -> Self {
         let ranges = Ranges::<T>::new(data);
 
-        NestedRanges {
-            ranges
-        }
+        NestedRanges { ranges }
     }
 
     /// Make the NestedRanges<T> consistent
-    /// 
-    /// # Info 
-    /// 
+    ///
+    /// # Info
+    ///
     /// By construction, the data are sorted so that it is possible (see the new
     /// method definition above) to merge the overlapping ranges.
     pub fn make_consistent(mut self) -> Self {
@@ -43,9 +39,9 @@ where T: Integer + PrimInt
     /// Divide the nested ranges into ranges of length
     /// 4**(<T>::MAXDEPTH - min_depth) if they are bigger than
     /// this size.
-    /// 
+    ///
     /// # Info
-    /// 
+    ///
     /// This requires min_depth to be defined between [0, <T>::MAXDEPTH]
     pub fn divide(mut self, min_depth: i8) -> Self {
         self.ranges = self.ranges.divide(min_depth);
@@ -53,8 +49,7 @@ where T: Integer + PrimInt
     }
 
     pub fn to_uniq(self) -> UniqRanges<T> {
-        let uniq_data = NestedToUniqIter::new(self.ranges)
-            .collect::<Vec<_>>();
+        let uniq_data = NestedToUniqIter::new(self.ranges).collect::<Vec<_>>();
         UniqRanges::<T>::new(uniq_data).make_consistent()
     }
 
@@ -88,66 +83,52 @@ where T: Integer + PrimInt
 
     pub fn union(&self, other: &Self) -> Self {
         let ranges = self.ranges.union(&other.ranges);
-        NestedRanges {
-            ranges
-        }
+        NestedRanges { ranges }
     }
 
     pub fn intersection(&self, other: &Self) -> Self {
         let ranges = self.ranges.intersection(&other.ranges);
-        NestedRanges {
-            ranges
-        }
+        NestedRanges { ranges }
     }
 
     pub fn difference(&self, other: &Self) -> Self {
         let ranges = self.ranges.difference(&other.ranges);
-        NestedRanges {
-            ranges
-        }
+        NestedRanges { ranges }
     }
 
     pub fn complement(&self) -> Self {
         let ranges = self.ranges.complement();
-        NestedRanges {
-            ranges
-        }
+        NestedRanges { ranges }
     }
 }
 
 impl<T> PartialEq for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn eq(&self, other: &Self) -> bool {
         self.ranges == other.ranges
     }
 }
 
-impl<T> Eq for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {}
+impl<T> Eq for NestedRanges<T> where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug
+{
+}
 
 impl<T> From<Ranges<T>> for NestedRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn from(ranges: Ranges<T>) -> Self {
-        NestedRanges::<T> {
-            ranges
-        }
+        NestedRanges::<T> { ranges }
     }
 }
 
 impl<T> From<NestedRanges<T>> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn from(nested_ranges: NestedRanges<T>) -> Self {
         nested_ranges.ranges
     }

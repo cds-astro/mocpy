@@ -1,39 +1,34 @@
 use num::{Integer, PrimInt};
 
-use crate::ranges::{Ranges, UniqToNestedIter};
-use crate::nestedranges::NestedRanges;
 use crate::bounded::Bounded;
+use crate::nestedranges::NestedRanges;
+use crate::ranges::{Ranges, UniqToNestedIter};
 
 use std::ops::Range;
 use std::slice::Iter;
 
 #[derive(Debug)]
 pub struct UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + Clone
-    + std::fmt::Debug {
-    ranges: Ranges<T>
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + Clone + std::fmt::Debug,
+{
+    ranges: Ranges<T>,
 }
 
 impl<T> UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     pub fn new(data: Vec<Range<T>>) -> Self {
         let ranges = Ranges::<T>::new(data);
 
-        UniqRanges {
-            ranges
-        }
+        UniqRanges { ranges }
     }
 
     /// Make the UniqRanges<T> consistent
-    /// 
-    /// # Info 
-    /// 
+    ///
+    /// # Info
+    ///
     /// By construction, the data are sorted so that it is possible (see the new
     /// method definition above) to merge the overlapping ranges.
     pub fn make_consistent(mut self) -> Self {
@@ -42,8 +37,7 @@ where T: Integer + PrimInt
     }
 
     pub fn to_nested(self) -> NestedRanges<T> {
-        let nested_data = UniqToNestedIter::new(self.ranges)
-            .collect::<Vec<_>>();
+        let nested_data = UniqToNestedIter::new(self.ranges).collect::<Vec<_>>();
         NestedRanges::<T>::new(nested_data).make_consistent()
     }
 
@@ -53,38 +47,29 @@ where T: Integer + PrimInt
 }
 
 impl<T> PartialEq for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn eq(&self, other: &Self) -> bool {
         self.ranges == other.ranges
     }
 }
 
-impl<T> Eq for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {}
+impl<T> Eq for UniqRanges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
 
 impl<T> From<Ranges<T>> for UniqRanges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn from(ranges: Ranges<T>) -> Self {
-        UniqRanges::<T> {
-            ranges
-        }
+        UniqRanges::<T> { ranges }
     }
 }
 
 impl<T> From<UniqRanges<T>> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn from(uniq_ranges: UniqRanges<T>) -> Self {
         uniq_ranges.ranges
     }
@@ -99,12 +84,10 @@ impl From<UniqRanges<u64>> for Array2<u64> {
 }
 
 use ndarray::Array1;
-fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T> 
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::iter::Step
-    + std::fmt::Debug {
+fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T>
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::iter::Step + std::fmt::Debug,
+{
     let ranges = input.ranges;
 
     let mut result: Vec<T> = Vec::<T>::new();

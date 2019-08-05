@@ -1,27 +1,28 @@
-use num::{Integer, PrimInt, One};
+use num::{Integer, One, PrimInt};
 
 #[inline(always)]
-const fn num_bits<T>() -> usize { 
+const fn num_bits<T>() -> usize {
     std::mem::size_of::<T>() * 8
 }
 
 const TO_EVEN_MASK: u32 = !0x1;
 
 pub trait Bounded<T>
-where T: Integer + PrimInt {
+where
+    T: Integer + PrimInt,
+{
     const MAXDEPTH: i8;
     const MAXPIX: T;
-    
 
     #[inline(always)]
     fn get_msb(x: T) -> u32 {
         num_bits::<T>() as u32 - x.leading_zeros() - 1
     }
-    
+
     #[inline(always)]
     fn pix_depth(u: T) -> (u32, T) {
         let msb = Self::get_msb(u) & TO_EVEN_MASK;
-        
+
         let depth = (msb >> 1) - 1;
         let t: T = One::one();
         let pix = u - t.unsigned_shl(msb);

@@ -1,27 +1,24 @@
-use std::collections::VecDeque;
 use std::cmp;
+use std::collections::VecDeque;
 use std::ops::Range;
 use std::slice::Iter;
 
 use rayon::prelude::*;
 
-use num::{One, Integer, PrimInt, Zero, CheckedAdd};
 use crate::bounded::Bounded;
+use num::{CheckedAdd, Integer, One, PrimInt, Zero};
 
 pub mod ranges2d;
 
 #[derive(Debug, Clone)]
 pub struct Ranges<T>(Vec<Range<T>>)
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug;
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug;
 
 impl<T> Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     pub fn new(mut data: Vec<Range<T>>) -> Ranges<T> {
         (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
 
@@ -29,9 +26,9 @@ where T: Integer + PrimInt
     }
 
     /// Make the `Ranges<T>` consistent
-    /// 
-    /// # Info 
-    /// 
+    ///
+    /// # Info
+    ///
     /// By construction, the data are sorted so that it is possible (see the new
     /// method definition above) to merge the overlapping ranges.
     pub fn make_consistent(mut self) -> Self {
@@ -41,15 +38,12 @@ where T: Integer + PrimInt
 
     /// Divide the nested ranges into ranges of length
     /// `4**(<T>::MAXDEPTH - min_depth)`
-    /// 
+    ///
     /// # Info
-    /// 
+    ///
     /// This requires min_depth to be defined between `[0, <T>::MAXDEPTH]`
     pub fn divide(mut self, min_depth: i8) -> Self {
-        self.0 = MergeOverlappingRangesIter::new(
-            self.iter(),
-            Some(min_depth)
-        ).collect::<Vec<_>>();
+        self.0 = MergeOverlappingRangesIter::new(self.iter(), Some(min_depth)).collect::<Vec<_>>();
         self
     }
 
@@ -137,7 +131,7 @@ where T: Integer + PrimInt
         Ranges(utils::unflatten(&mut result))
     }
 
-    pub fn union(&self, other: &Self) -> Self {        
+    pub fn union(&self, other: &Self) -> Self {
         self.merge(other, |a, b| a || b)
     }
 
@@ -163,7 +157,9 @@ where T: Integer + PrimInt
                 Zero::zero()
             };
 
-            result = self.0.iter()
+            result = self
+                .0
+                .iter()
                 .skip(s)
                 .map(|range| {
                     let r = last..range.start;
@@ -188,7 +184,9 @@ where T: Integer + PrimInt
     }
 
     pub fn intersects(&self, x: &Range<T>) -> bool {
-        let result = self.0.par_iter()
+        let result = self
+            .0
+            .par_iter()
             .map(|r| {
                 if x.start >= r.end || x.end <= r.start {
                     false
@@ -202,7 +200,9 @@ where T: Integer + PrimInt
     }
 
     pub fn contains(&self, x: &Range<T>) -> bool {
-        let result = self.0.par_iter()
+        let result = self
+            .0
+            .par_iter()
             .map(|r| {
                 if x.start >= r.start && x.end <= r.end {
                     true
@@ -244,9 +244,9 @@ where T: Integer + PrimInt
     }
 
     pub fn depth(&self) -> i8 {
-        let total: T = self.iter().fold(Zero::zero(), |res, x| {
-            res | x.start | x.end
-        });
+        let total: T = self
+            .iter()
+            .fold(Zero::zero(), |res, x| res | x.start | x.end);
 
         let mut depth: i8 = <T>::MAXDEPTH - (total.trailing_zeros() >> 1) as i8;
 
@@ -258,27 +258,21 @@ where T: Integer + PrimInt
 }
 
 impl<T> PartialEq for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl<T> Eq for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {}
+impl<T> Eq for Ranges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
 
 use std::ops::Index;
 impl<T> Index<usize> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     type Output = Range<T>;
 
     fn index(&self, index: usize) -> &Range<T> {
@@ -288,10 +282,9 @@ where T: Integer + PrimInt
 
 use std::iter::FromIterator;
 impl<T> FromIterator<Range<T>> for Ranges<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     fn from_iter<I: IntoIterator<Item = Range<T>>>(iter: I) -> Self {
         let mut ranges = Ranges(Vec::<Range<T>>::new());
 
@@ -303,13 +296,12 @@ where T: Integer + PrimInt
     }
 }
 
-use ndarray::{Array1, Array2};
 use crate::utils;
+use ndarray::{Array1, Array2};
 pub fn ranges_to_array2d<T>(input: Ranges<T>) -> Array2<T>
-where T: Integer + PrimInt
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     if input.is_empty() {
         // Warning: Empty 2D numpy arrays coming from python
         // have the shape (1, 0).
@@ -324,11 +316,9 @@ where T: Integer + PrimInt
         // Get a Array1 from the Vec<u64> without copying any data
         let result = Array1::from_vec(data);
 
-        // Reshape the result to get a Array2 of shape (N x 2) where N is the number 
+        // Reshape the result to get a Array2 of shape (N x 2) where N is the number
         // of HEALPix cell contained in the moc
-        result.into_shape((len, 2))
-            .unwrap()
-            .to_owned()
+        result.into_shape((len, 2)).unwrap().to_owned()
     }
 }
 
@@ -345,30 +335,39 @@ impl From<Ranges<i64>> for Array2<i64> {
 
 #[derive(Debug)]
 struct MergeOverlappingRangesIter<'a, T>
-where T: Integer {
+where
+    T: Integer,
+{
     last: Option<Range<T>>,
     ranges: Iter<'a, Range<T>>,
     split_ranges: VecDeque<Range<T>>,
     min_depth: Option<i8>,
 }
 
-impl<'a, T> MergeOverlappingRangesIter<'a, T> 
-where T: Integer + PrimInt {
-    fn new(mut ranges: Iter<'a, Range<T>>, min_depth: Option<i8>) -> MergeOverlappingRangesIter<'a, T> {
+impl<'a, T> MergeOverlappingRangesIter<'a, T>
+where
+    T: Integer + PrimInt,
+{
+    fn new(
+        mut ranges: Iter<'a, Range<T>>,
+        min_depth: Option<i8>,
+    ) -> MergeOverlappingRangesIter<'a, T> {
         let last = ranges.next().cloned();
         let split_ranges = VecDeque::<Range<T>>::new();
-	    MergeOverlappingRangesIter {
+        MergeOverlappingRangesIter {
             last,
             ranges,
-	        split_ranges,
-	        min_depth,
+            split_ranges,
+            min_depth,
         }
     }
 
     fn split_range(&self, range: Range<T>) -> VecDeque<Range<T>> {
-    	let mut ranges = VecDeque::<Range<T>>::new();
-	    match self.min_depth {
-            None => { ranges.push_back(range); },
+        let mut ranges = VecDeque::<Range<T>>::new();
+        match self.min_depth {
+            None => {
+                ranges.push_back(range);
+            }
             Some(ref val) => {
                 let shift = 2 * (29 - val) as u32;
 
@@ -381,7 +380,7 @@ where T: Integer + PrimInt {
                     let offset = range.start & mask;
                     let mut s = range.start;
                     if offset > Zero::zero() {
-                    s = (range.start - offset) + mask + One::one();
+                        s = (range.start - offset) + mask + One::one();
                         ranges.push_back(range.start..s);
                     }
 
@@ -394,26 +393,28 @@ where T: Integer + PrimInt {
                     ranges.push_back(s..range.end);
                 }
             }
-	    }
-	    ranges
+        }
+        ranges
     }
 }
 
-impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T> 
-where T: Integer + PrimInt {
+impl<'a, T> Iterator for MergeOverlappingRangesIter<'a, T>
+where
+    T: Integer + PrimInt,
+{
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if !self.split_ranges.is_empty() {
             return self.split_ranges.pop_front();
-        } 
+        }
 
         while let Some(curr) = self.ranges.next() {
             let prev = self.last.as_mut().unwrap();
             if curr.start <= prev.end {
                 prev.end = cmp::max(curr.end, prev.end);
             } else {
-		        let range = self.last.clone();
+                let range = self.last.clone();
                 self.last = Some(curr.clone());
 
                 self.split_ranges = self.split_range(range.unwrap());
@@ -434,10 +435,9 @@ where T: Integer + PrimInt {
 }
 
 pub struct NestedToUniqIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     ranges: Ranges<T>,
     id: usize,
     buffer: Vec<Range<T>>,
@@ -448,10 +448,9 @@ where T: Integer + PrimInt + CheckedAdd
 }
 
 impl<T> NestedToUniqIter<T>
-where T: Integer + PrimInt + CheckedAdd 
-        + Bounded<T>
-        + Sync + Send
-        + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     pub fn new(ranges: Ranges<T>) -> NestedToUniqIter<T> {
         let id = 0;
         let buffer = Vec::<Range<T>>::new();
@@ -472,16 +471,15 @@ where T: Integer + PrimInt + CheckedAdd
             depth,
             shift,
             off,
-            depth_off
+            depth_off,
         }
     }
 }
 
 impl<T> Iterator for NestedToUniqIter<T>
-where T: Integer + PrimInt + CheckedAdd
-        + Bounded<T>
-        + Send + Sync
-        + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -504,26 +502,23 @@ where T: Integer + PrimInt + CheckedAdd
                 if c2 > c1 {
                     self.buffer.push(c1..c2);
 
-                    let e1 = self.depth_off
-                        .checked_add(&pix1).unwrap();
-                    let e2 = self.depth_off
-                        .checked_add(&pix2).unwrap();
+                    let e1 = self.depth_off.checked_add(&pix1).unwrap();
+                    let e2 = self.depth_off.checked_add(&pix2).unwrap();
 
                     return Some(e1..e2);
                 }
             }
 
-            let mut buffer_ranges = Ranges::<T>::new(self.buffer.clone())
-                .make_consistent();
-            self.ranges = self.ranges.difference(
-                &mut buffer_ranges
-            );
+            let mut buffer_ranges = Ranges::<T>::new(self.buffer.clone()).make_consistent();
+            self.ranges = self.ranges.difference(&mut buffer_ranges);
             self.id = 0;
             self.buffer.clear();
 
             self.depth += 1;
-            assert!(self.depth <= <T>::MAXDEPTH ||
-                   (self.depth > <T>::MAXDEPTH && self.ranges.is_empty()));
+            assert!(
+                self.depth <= <T>::MAXDEPTH
+                    || (self.depth > <T>::MAXDEPTH && self.ranges.is_empty())
+            );
             if self.depth > <T>::MAXDEPTH && self.ranges.is_empty() {
                 break;
             }
@@ -536,15 +531,14 @@ where T: Integer + PrimInt + CheckedAdd
             self.depth_off = One::one();
             self.depth_off = self.depth_off.unsigned_shl((2 * self.depth + 2) as u32);
         }
-        None 
+        None
     }
 }
 
 pub struct DepthPixIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     ranges: Ranges<T>,
     current: Option<Range<T>>,
 
@@ -557,10 +551,9 @@ where T: Integer + PrimInt + CheckedAdd
 }
 
 impl<T> DepthPixIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     pub fn new(ranges: Ranges<T>) -> DepthPixIter<T> {
         let depth = 0;
         let shift = ((T::MAXDEPTH - depth) << 1) as u32;
@@ -589,8 +582,7 @@ where T: Integer + PrimInt + CheckedAdd
             let last = self.last.unwrap();
             if last < current.end {
                 let (depth, pix) = <T>::pix_depth(last);
-                self.last = last
-                    .checked_add(&One::one());
+                self.last = last.checked_add(&One::one());
 
                 Some((depth as i8, pix))
             } else {
@@ -605,10 +597,9 @@ where T: Integer + PrimInt + CheckedAdd
 }
 
 impl<T> Iterator for DepthPixIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Send + Sync
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + Sync + std::fmt::Debug,
+{
     type Item = (i8, T);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -631,13 +622,9 @@ where T: Integer + PrimInt + CheckedAdd
                         let mut range_to_remove = Ranges::<T>::new(vec![c1..c2]);
                         self.ranges = self.ranges.difference(&mut range_to_remove);
 
-                        let e1 = self.depth_offset
-                            .checked_add(&pix1)
-                            .unwrap();
-                        let e2 = self.depth_offset
-                            .checked_add(&pix2)
-                            .unwrap();
-                        
+                        let e1 = self.depth_offset.checked_add(&pix1).unwrap();
+                        let e2 = self.depth_offset.checked_add(&pix2).unwrap();
+
                         self.last = Some(e1);
                         self.current = Some(e1..e2);
 
@@ -650,7 +637,7 @@ where T: Integer + PrimInt + CheckedAdd
                 self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
                 self.offset = One::one();
                 self.offset = self.offset.unsigned_shl(self.shift) - One::one();
-                
+
                 self.depth_offset = One::one();
                 self.depth_offset = self.depth_offset.unsigned_shl((2 * self.depth + 2) as u32);
             }
@@ -663,20 +650,18 @@ where T: Integer + PrimInt + CheckedAdd
 // ranges of uniq numbers to ranges of
 // nested numbers
 pub struct UniqToNestedIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     ranges: Ranges<T>,
     cur: T,
     id: usize,
 }
 
 impl<T> UniqToNestedIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     pub fn new(ranges: Ranges<T>) -> UniqToNestedIter<T> {
         let id = 0;
 
@@ -685,25 +670,20 @@ where T: Integer + PrimInt + CheckedAdd
         } else {
             Zero::zero()
         };
-        UniqToNestedIter {
-            ranges,
-            cur,
-            id,
-        }
+        UniqToNestedIter { ranges, cur, id }
     }
 }
 
 impl<T> Iterator for UniqToNestedIter<T>
-where T: Integer + PrimInt + CheckedAdd
-    + Bounded<T>
-    + Sync + Send
-    + std::fmt::Debug {
+where
+    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
+{
     type Item = Range<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // Iteration through the ranges
         while self.id < self.ranges.0.len() {
-            // We get the depth/ipix values of the 
+            // We get the depth/ipix values of the
             // current uniq number
             let (depth, ipix) = T::pix_depth(self.cur);
 
@@ -713,16 +693,10 @@ where T: Integer + PrimInt + CheckedAdd
             let one: T = One::one();
             // Compute the final nested range
             // for the depth given
-            let e1 = ipix
-                .unsigned_shl(shift);
-            let e2 = ipix
-                .checked_add(&one)
-                .unwrap()
-                .unsigned_shl(shift);
+            let e1 = ipix.unsigned_shl(shift);
+            let e2 = ipix.checked_add(&one).unwrap().unsigned_shl(shift);
 
-            self.cur = self.cur
-                .checked_add(&one)
-                .unwrap();
+            self.cur = self.cur.checked_add(&one).unwrap();
 
             let end = self.ranges[self.id].end;
             if self.cur == end {
@@ -733,7 +707,7 @@ where T: Integer + PrimInt + CheckedAdd
                 }
             }
 
-            return Some(e1..e2)
+            return Some(e1..e2);
         }
         None
     }
@@ -745,11 +719,11 @@ mod tests {
     use crate::ranges::Ranges;
 
     use num::PrimInt;
-    use std::ops::Range;
     use rand::Rng;
+    use std::ops::Range;
 
-    use ndarray::Array2;
     use crate::ranges::ranges_to_array2d;
+    use ndarray::Array2;
     #[test]
     fn empty_ranges_to_array2d() {
         let ranges = Ranges::<u64>::new(vec![]).make_consistent();
@@ -775,10 +749,15 @@ mod tests {
 
     #[test]
     fn merge_range_min_depth() {
-        let ranges = Ranges::<u64>::new(vec![0..(1<<58)])
+        let ranges = Ranges::<u64>::new(vec![0..(1 << 58)])
             .make_consistent()
             .divide(1);
-        let expected_ranges = vec![0..(1<<56), (1<<56)..(1<<57), (1<<57)..3*(1<<56), 3*(1<<56)..(1<<58)];
+        let expected_ranges = vec![
+            0..(1 << 56),
+            (1 << 56)..(1 << 57),
+            (1 << 57)..3 * (1 << 56),
+            3 * (1 << 56)..(1 << 58),
+        ];
 
         assert_eq!(ranges.0, expected_ranges);
     }
@@ -788,27 +767,35 @@ mod tests {
         fn assert_union(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
             let a = Ranges::<u64>::new(a).make_consistent();
             let b = Ranges::<u64>::new(b).make_consistent();
-            
+
             let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.union(&b);
             assert_eq!(ranges, expected_ranges);
         }
 
-        assert_union(vec![12..17, 3..5, 5..7, 6..8], vec![0..1, 2..5], vec![0..1, 2..8, 12..17]);
-        assert_union(vec![12..17, 3..5, 5..7, 6..8], vec![12..17, 3..5, 5..7, 6..8], vec![3..8, 12..17]);
+        assert_union(
+            vec![12..17, 3..5, 5..7, 6..8],
+            vec![0..1, 2..5],
+            vec![0..1, 2..8, 12..17],
+        );
+        assert_union(
+            vec![12..17, 3..5, 5..7, 6..8],
+            vec![12..17, 3..5, 5..7, 6..8],
+            vec![3..8, 12..17],
+        );
         assert_union(vec![], vec![], vec![]);
         assert_union(vec![12..17], vec![], vec![12..17]);
         assert_union(vec![], vec![12..17], vec![12..17]);
         assert_union(vec![0..1, 2..3, 4..5], vec![1..22], vec![0..22]);
         assert_union(vec![0..10], vec![15..22], vec![0..10, 15..22]);
     }
-    
+
     #[test]
     fn test_intersection() {
         fn assert_intersection(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
             let a = Ranges::<u64>::new(a).make_consistent();
             let b = Ranges::<u64>::new(b).make_consistent();
-            
+
             let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.intersection(&b);
             assert_eq!(ranges, expected_ranges);
@@ -827,7 +814,7 @@ mod tests {
         fn assert_difference(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
             let a = Ranges::<u64>::new(a).make_consistent();
             let b = Ranges::<u64>::new(b).make_consistent();
-            
+
             let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
             let ranges = a.difference(&b);
             assert_eq!(ranges, expected_ranges);
@@ -839,7 +826,11 @@ mod tests {
         assert_difference(vec![], vec![0..5], vec![]);
         assert_difference(vec![0..20], vec![19..22], vec![0..19]);
         assert_difference(vec![0..20], vec![25..27], vec![0..20]);
-        assert_difference(vec![0..20], vec![1..2, 3..4, 5..6], vec![0..1, 2..3, 4..5, 6..20]);
+        assert_difference(
+            vec![0..20],
+            vec![1..2, 3..4, 5..6],
+            vec![0..1, 2..3, 4..5, 6..20],
+        );
     }
 
     #[test]
@@ -868,7 +859,10 @@ mod tests {
         assert_complement(vec![0..10], vec![10..u64::MAXPIX]);
         assert_complement_pow_2(vec![0..10]);
 
-        assert_complement(vec![0..1, 2..3, 4..5, 6..u64::MAXPIX], vec![1..2, 3..4, 5..6]);
+        assert_complement(
+            vec![0..1, 2..3, 4..5, 6..u64::MAXPIX],
+            vec![1..2, 3..4, 5..6],
+        );
         assert_complement_pow_2(vec![0..1, 2..3, 4..5, 6..u64::MAXPIX]);
 
         assert_complement(vec![], vec![0..u64::MAXPIX]);
@@ -876,19 +870,19 @@ mod tests {
 
         assert_complement(vec![0..u64::MAXPIX], vec![]);
     }
-    
+
     #[test]
     fn test_depth() {
-        let r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)]);
+        let r1 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 1)]);
         assert_eq!(r1.depth(), 0);
 
-        let r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
+        let r2 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
         assert_eq!(r2.depth(), 2);
 
-        let r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)]);
+        let r3 = Ranges::<u64>::new(vec![0..3 * 4.pow(29 - 3)]);
         assert_eq!(r3.depth(), 3);
 
-        let r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)]);
+        let r4 = Ranges::<u64>::new(vec![0..12 * 4.pow(29)]);
         assert_eq!(r4.depth(), 0);
 
         let r5 = Ranges::<u64>::new(vec![]);
@@ -897,27 +891,27 @@ mod tests {
 
     #[test]
     fn test_degrade() {
-        let mut r1 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 1)]);
+        let mut r1 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 1)]);
         r1.degrade(0);
         assert_eq!(r1.depth(), 0);
 
-        let mut r2 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
+        let mut r2 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
         r2.degrade(1);
         assert_eq!(r2.depth(), 1);
 
-        let mut r3 = Ranges::<u64>::new(vec![0..3*4.pow(29 - 3)]);
+        let mut r3 = Ranges::<u64>::new(vec![0..3 * 4.pow(29 - 3)]);
         r3.degrade(1);
         assert_eq!(r3.depth(), 1);
 
-        let mut r4 = Ranges::<u64>::new(vec![0..12*4.pow(29)]);
+        let mut r4 = Ranges::<u64>::new(vec![0..12 * 4.pow(29)]);
         r4.degrade(0);
         assert_eq!(r4.depth(), 0);
 
-        let mut r5 = Ranges::<u64>::new(vec![0..4*4.pow(29 - 3)]);
+        let mut r5 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
         r5.degrade(5);
         assert_eq!(r5.depth(), 2);
     }
-    
+
     #[test]
     fn test_uniq_decompose() {
         macro_rules! uniq_to_pix_depth {
@@ -930,7 +924,7 @@ mod tests {
                     let npix = 12 * 4.pow(depth);
                     let pix = rng.gen_range(0, npix);
 
-                    let uniq = 4*4.pow(depth) + pix;
+                    let uniq = 4 * 4.pow(depth) + pix;
                     assert_eq!(<$t>::pix_depth(uniq), (depth, pix));
                 });
             };
@@ -941,26 +935,29 @@ mod tests {
         uniq_to_pix_depth!(u32, 10000);
         uniq_to_pix_depth!(u8, 10000);
     }
-    
+
     use test::Bencher;
 
     #[bench]
     fn bench_uniq_to_depth_pix(b: &mut Bencher) {
         let mut rng = rand::thread_rng();
-        let n = test::black_box(100000);    
+        let n = test::black_box(100000);
 
-        let uniq: Vec<u64> = (0..n).map(|_| {
-            let depth = rng.gen_range(0, 30);
+        let uniq: Vec<u64> = (0..n)
+            .map(|_| {
+                let depth = rng.gen_range(0, 30);
 
-            let npix = 12 * 4.pow(depth);
-            let pix = rng.gen_range(0, npix);
+                let npix = 12 * 4.pow(depth);
+                let pix = rng.gen_range(0, npix);
 
-            let u = 4 * 4.pow(depth) + pix;
-            u
-        }).collect();
+                let u = 4 * 4.pow(depth) + pix;
+                u
+            })
+            .collect();
 
         b.iter(|| {
-            uniq.iter().fold(0, |a, b| a + (u64::pix_depth(*b).0 as u64))
+            uniq.iter()
+                .fold(0, |a, b| a + (u64::pix_depth(*b).0 as u64))
         });
     }
 }
