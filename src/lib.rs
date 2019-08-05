@@ -37,10 +37,75 @@ type Coverage2DHashMap = HashMap<usize, NestedRanges2D<u64, u64>>;
 
 lazy_static! {
     static ref COVERAGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
+    static ref NUM_COVERAGES_2D: Mutex<usize> = Mutex::new(0);
+}
+
+/// Insert a Time-Space coverage in the Hash Map
+/// storing all the current 2D coverages
+/// 
+/// # Arguments
+/// 
+/// * `coverage` - The new Time-Space coverage to insert
+/// 
+/// # Panics
+/// 
+/// * This will panic if the `COVERAGES_2D` or `NUM_COVERAGES_2D` 
+///   are already held by the current thread
+fn insert_new_coverage(coverage: NestedRanges2D<u64, u64>) -> usize {
+    let mut coverages = COVERAGES_2D.lock().unwrap();
+    let mut num_coverages = NUM_COVERAGES_2D.lock().unwrap();
+
+    let index = *num_coverages;
+    if let Some(_v) = coverages.insert(index, coverage) {
+        panic!("There is already a coverage at this index.");
+    }
+    *num_coverages += 1;
+    
+    index
+}
+
+/// Remove a Time-Space coverage from the Hash Map
+/// storing all the current 2D coverages
+/// 
+/// # Arguments
+/// 
+/// * `index` - The coverage to remove
+/// 
+/// # Panics
+/// 
+/// * If `COVERAGES_2D` is already held by the current thread.
+fn remove_coverage(index: usize) {
+    let mut coverages = COVERAGES_2D.lock().unwrap();
+    let _coverage = coverages.remove(&index)
+        // `None` is mapped to `Err(&'static str)`
+        // because we suppose there should be a coverage
+        // stored in the hash map at the `index` key.
+        .expect("There is no coverage to remove");
+}
+
+/// Replace a Time-Space coverage at a specific index.
+/// 
+/// # Arguments
+/// 
+/// * `index` - The index of the Time-Space coverage to replace
+/// * `coverage` - The new coverage
+/// 
+/// # Panics
+/// 
+/// * If no Time-Space coverage has been found in the hash map
+/// for this specific `index`.
+/// * If `COVERAGES_2D` is already held by the current thread.
+fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
+    let mut coverages = COVERAGES_2D.lock().unwrap();
+    coverages.insert(index, coverage)
+        // `None` is mapped to `Err(&'static str)`
+        // because we suppose there should be a coverage
+        // stored in the hash map at the `index` key.
+        .expect("There is no coverage present");
 }
 
 #[pymodule]
-fn core(_py: Python, m: &PyModule) -> PyResult<()> {
+pub fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// Create a 1D spatial coverage from a list of
     /// longitudes and latitudes
     /// 
@@ -59,7 +124,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon`` and ``lat`` do not have the same length
     /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     #[pyfn(m, "from_lonlat")]
-    fn from_lonlat_py(py: Python,
+    pub fn from_lonlat_py(py: Python,
         depth: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>)
@@ -99,13 +164,14 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
     /// 
     #[pyfn(m, "from_time_lonlat")]
-    fn from_time_lonlat_py(
+    pub fn from_time_lonlat_py(
+        index: usize,
         times: &PyArray1<f64>,
         d1: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
         d2: i8)
-    -> PyResult<usize> {
+    -> PyResult<()> {
         let times = times.as_array()
             .to_owned()
             .into_raw_vec();
@@ -116,20 +182,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let ts_ranges = ranges::create_from_time_position(times, lon, lat, d1, d2)?;
+        let coverage = ranges::create_from_time_position(times, lon, lat, d1, d2)?;
 
-        // Insert a new coverage in the COVERAGES_2D
+        // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        let result = {
-            let mut d = COVERAGES_2D.lock().unwrap();
-            
-            let index = d.len();
-            d.insert(index, ts_ranges);
-            
-            index
-        };
+        update_coverage(index, coverage);
 
-        Ok(result)
+        Ok(())
     }
 
     /// Project the Time-Space coverage into its first dimension
@@ -154,7 +213,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// This **should** not panic as this code is wrapped around MOCPy
     #[pyfn(m, "project_on_first_dim")]
-    fn project_on_first_dim(py: Python,
+    pub fn project_on_first_dim(py: Python,
         ranges: &PyArray2<u64>,
         index: usize,
     ) -> Py<PyArray2<u64>> {
@@ -197,7 +256,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// This **should** not panic as this code is wrapped around MOCPy
     #[pyfn(m, "project_on_second_dim")]
-    fn project_on_second_dim(py: Python,
+    pub fn project_on_second_dim(py: Python,
         ranges: &PyArray2<u64>,
         index: usize,
     ) -> Py<PyArray2<u64>> {
@@ -230,7 +289,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``index`` - The index of the Time-Space coverage
     ///   to serialize. 
     #[pyfn(m, "coverage_2d_to_fits")]
-    fn coverage_2d_to_fits(py: Python,
+    pub fn coverage_2d_to_fits(py: Python,
         index: usize,
     ) -> Py<PyArray1<i64>> {
         // Get the coverage and flatten it
@@ -271,27 +330,49 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// defined as above.
     use std::convert::TryFrom;
     #[pyfn(m, "coverage_2d_from_fits")]
-    fn coverage_2d_from_fits(data: &PyArray1<i64>) -> PyResult<usize> {
+    pub fn coverage_2d_from_fits(index: usize, data: &PyArray1<i64>) -> PyResult<()> {
         let data = data.as_array().to_owned();
-        let new_coverage =  NestedRanges2D::<u64, u64>::try_from(data)
+        let coverage_from_fits =  NestedRanges2D::<u64, u64>::try_from(data)
             .map_err(|msg| {
                     exceptions::ValueError::py_err(msg)
                 })?;
 
-        // Insert a new coverage in the COVERAGES_2D
+        // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        let result = {
-            let mut d = COVERAGES_2D.lock().unwrap();
-            
-            let index = d.len();
-            d.insert(index, new_coverage);
-            
-            index
-        };
+        update_coverage(index, coverage_from_fits);
 
-        Ok(result)
+        Ok(())
     }
 
+    /// Create a new empty Time-Space coverage
+    /// 
+    /// This method is called in the constructor of the
+    /// `mocpy.STMOC` class
+    /// 
+    /// # Returns
+    /// 
+    /// The index of the newly created Time-Space coverage
+    #[pyfn(m, "create_2d_coverage")]
+    pub fn create_2d_coverage(_py: Python) -> usize {
+        // Create new empty coverage
+        let empty_coverage = NestedRanges2D::<u64, u64>::new();
+
+        // Insert a new coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        let result = insert_new_coverage(empty_coverage);
+
+        result
+    }
+
+    /// Drop the content of a Time-Space coverage
+    /// 
+    /// This method is automatically called by the
+    /// Python garbage collector.
+    #[pyfn(m, "drop_2d_coverage")]
+    pub fn drop_2d_coverage(_py: Python, index: usize) {
+        remove_coverage(index);
+    }
+    
     /// Computes the depth of a Time-Space coverage
     /// 
     /// # Arguments
@@ -303,7 +384,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// If the Time-Space coverage is empty, the returned
     /// depth is `(0, 0)`.
     #[pyfn(m, "coverage_2d_depth")]
-    fn coverage_2d_depth(_py: Python,
+    pub fn coverage_2d_depth(_py: Python,
         index: usize,
     ) -> (i8, i8) {
         // Get the coverage and computes its depth
@@ -330,7 +411,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * If the coverage is empty.
     #[pyfn(m, "coverage_2d_min_time")]
-    fn coverage_2d_min_time(_py: Python,
+    pub fn coverage_2d_min_time(_py: Python,
         index: usize,
     ) -> PyResult<f64> {
         // Get the coverage
@@ -356,7 +437,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * If the coverage is empty.
     #[pyfn(m, "coverage_2d_max_time")]
-    fn coverage_2d_max_time(_py: Python,
+    pub fn coverage_2d_max_time(_py: Python,
         index: usize,
     ) -> PyResult<f64> {
         // Get the coverage
@@ -380,12 +461,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``id_right`` - The index of the Time-Space coverage being
     ///   in the right of the operation.
     #[pyfn(m, "coverage_2d_union")]
-    fn coverage_2d_union(_py: Python,
+    pub fn coverage_2d_union(_py: Python,
+        index: usize,
         id_left: usize,
         id_right: usize,
-    ) -> usize {
+    ) {
         let result = {
-            let mut coverages = COVERAGES_2D.lock().unwrap();
+            let coverages = COVERAGES_2D.lock().unwrap();
             // Get the left and right coverages
             let cov_left = coverages.get(&id_left).unwrap();
             let cov_right = coverages.get(&id_right).unwrap();
@@ -393,17 +475,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             // Perform the union
             let result = cov_left.union(cov_right);
 
-            // Insert the resulted coverage in the
-            // hash map
-            let index = coverages.len();
-            coverages.insert(index, result);
-
-            index
+            result
         };
         
-        // Return the index of the newly created
-        // coverage
-        result
+        // Update the coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, result);
     }
 
     /// Perform the intersection between two Time-Space coverages.
@@ -415,12 +492,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``id_right`` - The index of the Time-Space coverage being
     ///   in the right of the operation.
     #[pyfn(m, "coverage_2d_intersection")]
-    fn coverage_2d_intersection(_py: Python,
+    pub fn coverage_2d_intersection(_py: Python,
+        index: usize,
         id_left: usize,
         id_right: usize,
-    ) -> usize {
+    ) {
         let result = {
-            let mut coverages = COVERAGES_2D.lock().unwrap();
+            let coverages = COVERAGES_2D.lock().unwrap();
             // Get the left and right coverages
             let cov_left = coverages.get(&id_left).unwrap();
             let cov_right = coverages.get(&id_right).unwrap();
@@ -428,17 +506,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             // Perform the intersection
             let result = cov_left.intersection(cov_right);
 
-            // Insert the resulted coverage in the
-            // hash map
-            let index = coverages.len();
-            coverages.insert(index, result);
-
-            index
+            result
         };
         
-        // Return the index of the newly created
-        // coverage
-        result
+        // Update the coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, result);
     }
 
     /// Perform the difference between two Time-Space coverages.
@@ -450,12 +523,13 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``id_right`` - The index of the Time-Space coverage being
     ///   in the right of the operation.
     #[pyfn(m, "coverage_2d_difference")]
-    fn coverage_2d_difference(_py: Python,
+    pub fn coverage_2d_difference(_py: Python,
+        index: usize,
         id_left: usize,
         id_right: usize,
-    ) -> usize {
+    ) {
         let result = {
-            let mut coverages = COVERAGES_2D.lock().unwrap();
+            let coverages = COVERAGES_2D.lock().unwrap();
             // Get the left and right coverages
             let cov_left = coverages.get(&id_left).unwrap();
             let cov_right = coverages.get(&id_right).unwrap();
@@ -463,12 +537,35 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             // Perform the intersection
             let result = cov_left.difference(cov_right);
 
-            // Insert the resulted coverage in the
-            // hash map
-            let index = coverages.len();
-            coverages.insert(index, result);
+            result
+        };
 
-            index
+        // Update the coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, result)
+    }
+
+    /// Check the equality between two Time-Space coverages
+    /// 
+    /// # Arguments
+    /// 
+    /// * ``id_left`` - The index of the Time-Space coverage being
+    ///   in the left of the operation.
+    /// * ``id_right`` - The index of the Time-Space coverage being
+    ///   in the right of the operation.
+    #[pyfn(m, "coverage_2d_equality_check")]
+    pub fn coverage_2d_equality_check(_py: Python,
+        id_left: usize,
+        id_right: usize,
+    ) -> bool {
+        let result = {
+            let coverages = COVERAGES_2D.lock().unwrap();
+            // Get the left and right coverages
+            let cov_left = coverages.get(&id_left).unwrap();
+            let cov_right = coverages.get(&id_right).unwrap();
+
+            // Check the equality
+            (cov_left == cov_right)
         };
         
         // Return the index of the newly created
@@ -483,7 +580,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``a`` - The spatial coverage being the left operand
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_union")]
-    fn coverage_union(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    pub fn coverage_union(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
@@ -503,7 +600,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``a`` - The spatial coverage being the left operand
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_difference")]
-    fn coverage_difference(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    pub fn coverage_difference(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
@@ -523,7 +620,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``a`` - The spatial coverage being the left operand
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_intersection")]
-    fn coverage_intersection(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    pub fn coverage_intersection(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
@@ -542,7 +639,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``ranges`` - The input spatial coverage
     #[pyfn(m, "coverage_complement")]
-    fn coverage_complement(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    pub fn coverage_complement(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
 
         let ranges = ranges::create_nested_ranges_from_py(ranges);
@@ -576,7 +673,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``input`` dict values must be a list of unsigned integer encoded
     ///   on 64 bits (i.e. an array of `u64`).
     #[pyfn(m, "coverage_from_json")]
-    fn coverage_from_json(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
+    pub fn coverage_from_json(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
         const TYPE_KEY_MSG_ERR: &'static str = "The key must be a python str that \n \
         encodes an integer on 1 byte. Ex: {'5': [0, 6, 7, ..., 9]}";
         const TYPE_VALUES_MSG_ERR: &'static str = "The values must be a list of unsigned \n \
@@ -627,7 +724,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``ranges`` - The spatial coverage ranges to serialize.
     #[pyfn(m, "coverage_to_json")]
-    fn coverage_to_json(py: Python, ranges: &PyArray2<u64>) -> PyResult<PyObject> {
+    pub fn coverage_to_json(py: Python, ranges: &PyArray2<u64>) -> PyResult<PyObject> {
         let ranges = ranges.as_array().to_owned();
         let result = PyDict::new(py);
         
@@ -673,7 +770,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     #[pyfn(m, "coverage_degrade")]
-    fn coverage_degrade(py: Python, ranges: &PyArray2<u64>, depth: i8) -> PyResult<Py<PyArray2<u64>>> {
+    pub fn coverage_degrade(py: Python, ranges: &PyArray2<u64>, depth: i8) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
 
         let mut ranges = ranges::create_nested_ranges_from_py(ranges);
@@ -703,7 +800,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``min_depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     #[pyfn(m, "coverage_merge_nested_intervals")]
-    fn coverage_merge_nested_intervals(py: Python, ranges: &PyArray2<u64>, min_depth: i8) -> PyResult<Py<PyArray2<u64>>> {
+    pub fn coverage_merge_nested_intervals(py: Python, ranges: &PyArray2<u64>, min_depth: i8) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
 
         // Convert the Array2<u64> to a NestedRanges<u64>
@@ -733,7 +830,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``ranges`` - The input coverage.
     #[pyfn(m, "coverage_depth")]
-    fn coverage_depth(_py: Python, ranges: &PyArray2<u64>) -> i8 {
+    pub fn coverage_depth(_py: Python, ranges: &PyArray2<u64>) -> i8 {
         let ranges = ranges.as_array().to_owned();
 
         let ranges = ranges::create_nested_ranges_from_py(ranges);
@@ -748,7 +845,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``ranges`` - The HEALPix cells defined in the **uniq** format.
     #[pyfn(m, "to_nested")]
-    fn to_nested(py: Python, ranges: &PyArray1<u64>) -> Py<PyArray2<u64>> {
+    pub fn to_nested(py: Python, ranges: &PyArray1<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
         if ranges.is_empty() {
             return Array::zeros((1, 0)).into_pyarray(py).to_owned();
@@ -774,7 +871,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
     #[pyfn(m, "to_uniq")]
-    fn to_uniq(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray1<u64>> {
+    pub fn to_uniq(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray1<u64>> {
         let ranges = ranges.as_array().to_owned();
 
         if ranges.is_empty() {
@@ -799,7 +896,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * If the number of ``min_times`` and ``max_times`` do not match.
     #[pyfn(m, "from_time_ranges")]
-    fn from_time_ranges(py: Python, min_times: &PyArray1<f64>, max_times: &PyArray1<f64>) -> PyResult<Py<PyArray2<u64>>> {
+    pub fn from_time_ranges(py: Python, min_times: &PyArray1<f64>, max_times: &PyArray1<f64>) -> PyResult<Py<PyArray2<u64>>> {
         let min_times = min_times.as_array();
         let max_times = max_times.as_array();
 
@@ -842,7 +939,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The spatial coverage
     /// * ``depth`` - The depth to flatten the coverage to.
     #[pyfn(m, "flatten_pixels")]
-    fn flatten_pixels(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
+    pub fn flatten_pixels(py: Python, nested: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
         let input = nested.as_array();
         let factor = 1 << (2 * (<u64>::MAXDEPTH - depth)) as u64;
 
@@ -876,7 +973,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// 
     /// * ``depth`` and ``pixels`` have not the same length.
     #[pyfn(m, "from_healpix_cells")]
-    fn from_healpix_cells(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> PyResult<Py<PyArray2<u64>>> {
+    pub fn from_healpix_cells(py: Python, pixels: &PyArray1<u64>, depth: &PyArray1<i8>) -> PyResult<Py<PyArray2<u64>>> {
         let mut pixels = pixels.as_array().to_owned();
         let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
         

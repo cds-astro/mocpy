@@ -20,6 +20,15 @@ impl<T, S> NestedRanges2D<T, S>
 where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
       S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
 
+    /// Create a new empty `NestedRanges2D<T, S>`
+    pub fn new() -> NestedRanges2D<T, S> {
+        let ranges = Ranges2D::new(vec![], vec![]);
+
+        NestedRanges2D {
+            ranges
+        }
+    }
+
     /// Create a Quantity/Space 2D coverage
     ///
     /// # Arguments 
@@ -375,6 +384,20 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
         Array1::from_vec(result).to_owned()
     }
 }
+
+impl<T, S> PartialEq for NestedRanges2D<T, S>
+where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
+    fn eq(&self, other: &Self) -> bool {
+        self.ranges.eq(&other.ranges)
+    }
+}
+
+impl<T, S> Eq for NestedRanges2D<T, S>
+where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
+      S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug {
+}
+
 
 use crate::utils;
 use std::convert::TryFrom;

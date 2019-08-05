@@ -32,8 +32,14 @@ class STMOC(serializer.IO):
     """
 
     def __init__(self):
-        self.__index = None
+        self.__index = core.create_2d_coverage()
         self._fits_column_name = 'PIXELS'
+
+    def __del__(self):
+        core.drop_2d_coverage(self.__index)
+
+    def __eq__(self, other):
+        return core.coverage_2d_equality_check(self.__index, other.__index)
 
     @property
     def max_depth(self):
@@ -84,7 +90,7 @@ class STMOC(serializer.IO):
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        result.__index = core.from_time_lonlat(times, time_depth, lon, lat, spatial_depth)
+        core.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
         return result
 
     def project_on_second_dimension(self, times):
@@ -153,7 +159,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        result.__index = core.coverage_2d_union(self.__index, other.__index)
+        core.coverage_2d_union(result.__index, self.__index, other.__index)
         return result
 
     def intersection(self, other):
@@ -176,7 +182,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        result.__index = core.coverage_2d_intersection(self.__index, other.__index)
+        core.coverage_2d_intersection(result.__index, self.__index, other.__index)
         return result
 
     def difference(self, other):
@@ -199,7 +205,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        result.__index = core.coverage_2d_difference(self.__index, other.__index)
+        core.coverage_2d_difference(result.__index, self.__index, other.__index)
         return result
 
     @property
@@ -225,22 +231,10 @@ class STMOC(serializer.IO):
         return core.coverage_2d_to_fits(self.__index)
 
     @classmethod
-    def from_fits(cls, filename):
+    def deserialization(cls, hdulist):
         """
-        Loads a STMOC from a FITS file.
-
-        Parameters
-        ----------
-        filename : str
-            The path to the FITS file.
-
-        Returns
-        -------
-        result : `~mocpy.moc.STMOC`
-            The resulting STMOC.
+        Deserialization of an hdulist to a Time-Space coverage
         """
-        # Open the FITS file
-        hdulist = fits.open(filename)
         # The binary HDU table contains all the data
         header = hdulist[1].header
 
@@ -273,9 +267,27 @@ class STMOC(serializer.IO):
             second_dim_depth = header.get('MOCORDER')
 
         result = cls()
-        result.__index = core.coverage_2d_from_fits(
-            np.int8(first_dim_depth),
-            np.int8(second_dim_depth),
+        core.coverage_2d_from_fits(
+            result.__index,
             bin_HDU_table.data[key].astype(np.int64)
         )
         return result
+
+    @classmethod
+    def from_fits(cls, filename):
+        """
+        Loads a STMOC from a FITS file.
+
+        Parameters
+        ----------
+        filename : str
+            The path to the FITS file.
+
+        Returns
+        -------
+        result : `~mocpy.moc.STMOC`
+            The resulting STMOC.
+        """
+        # Open the FITS file
+        hdulist = fits.open(filename)
+        return STMOC.deserialization(hdulist)
