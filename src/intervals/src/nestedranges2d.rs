@@ -33,8 +33,9 @@ where
     ///
     /// # Arguments
     ///
-    /// * `x` - A set of quantity values expressed at the depth ``d1``.
-    ///   This quantity axe may refer to a time, a redshift etc...
+    /// * `x` - A set of values expressed that will be converted to
+    ///   ranges and degraded at the depth ``d1``.
+    ///   This quantity axe may refer to a time (expressed in µs), a redshift etc...
     ///   This will define the first dimension of the coverage.
     /// * `y` - A set of spatial HEALPix cell indices at the depth ``d2``.
     ///   This will define the second dimension of the coverage.
@@ -92,14 +93,80 @@ where
         NestedRanges2D { ranges }
     }
 
+    /// Create a Quantity/Space 2D coverage
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - A set of quantity ranges that will be degraded to the depth ``d1``.
+    ///   This quantity axe may refer to a time (expressed in µs), a redshift etc...
+    ///   This will define the first dimension of the coverage.
+    /// * `y` - A set of spatial HEALPix cell indices at the depth ``d2``.
+    ///   This will define the second dimension of the coverage.
+    /// * `d1` - The depth of the coverage along its 1st dimension.
+    /// * `d2` - The depth of the coverage along its 2nd dimension.
+    ///
+    /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
+    ///
+    /// # Precondition
+    ///
+    /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
+    /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
+    /// - `x` and `y` must have the same size.
+    /// - `x` must contain `[a..b]` ranges where `b > a`.
+    pub fn create_range_quantity_space_coverage(
+        x: Vec<Range<T>>,
+        y: Vec<S>,
+        d1: i8,
+        d2: i8,
+    ) -> NestedRanges2D<T, S> {
+        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
+        let mut off1: T = One::one();
+        off1 = off1.unsigned_shl(s1) - One::one();
+
+        let mut m1: T = One::one();
+        m1 = m1.checked_mul(&!off1).unwrap();
+
+        let x = x
+            .into_par_iter()
+            .filter_map(|r| {
+                let a: T = r.start & m1;
+                let b: T = r.end
+                    .checked_add(&off1)
+                    .unwrap()
+                    & m1;
+                if b > a {
+                    Some(a..b)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
+        let y = y
+            .into_par_iter()
+            .map(|r| {
+                let a = r.unsigned_shl(s2);
+                let b = r.checked_add(&One::one()).unwrap().unsigned_shl(s2);
+                // We do not want a min_depth along the 2nd dimension
+                // making sure that the created Ranges<S> is valid.
+                Ranges::<S>::new(vec![a..b])
+            })
+            .collect::<Vec<_>>();
+
+        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
+
+        NestedRanges2D { ranges }
+    }
+
     /// Create a Space/Quantity 2D coverage
     ///
     /// # Arguments
     ///
     /// * `x` - A set of spatial HEALPix cell indices at the depth ``d1``.
     ///   This will define the second dimension of the coverage.
-    /// * `y` - A set of quantity values expressed at the depth ``d2``.
-    ///   This quantity axe may refer to a time, a redshift etc...
+    /// * `y` - A set of values expressed that will be degraded to the depth ``d2``.
+    ///   This quantity axe may refer to a time (expressed in µs), a redshift etc...
     ///   This will define the first dimension of the coverage.
     /// * `d1` - The depth of the coverage along its 1st dimension.
     /// * `d2` - The depth of the coverage along its 2nd dimension.

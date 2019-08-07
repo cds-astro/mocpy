@@ -123,7 +123,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon`` and ``lat`` do not have the same length
     /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     #[pyfn(m, "from_lonlat")]
-    fn from_lonlat_py(
+    fn from_lonlat(
         py: Python,
         depth: i8,
         lon: &PyArray1<f64>,
@@ -161,7 +161,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
     ///
     #[pyfn(m, "from_time_lonlat")]
-    fn from_time_lonlat_py(
+    fn from_time_lonlat(
         index: usize,
         times: &PyArray1<f64>,
         d1: i8,
@@ -169,11 +169,76 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         lat: &PyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
-        let times = times.as_array().to_owned().into_raw_vec();
-        let lon = lon.as_array().to_owned().into_raw_vec();
-        let lat = lat.as_array().to_owned().into_raw_vec();
+        let times = times.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
 
         let coverage = time_space_coverage::create_from_time_position(times, lon, lat, d1, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time, longitude, latitude) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times`` - The times at which the sky coordinates have be given.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians
+    /// * ``lat`` - The latitudes in radians
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon`` and ``lat`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat`` and ``times`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_lonlat")]
+    fn from_time_ranges_lonlat(
+        index: usize,
+        times_start: &PyArray1<f64>,
+        times_end: &PyArray1<f64>,
+        d1: i8,
+        lon: &PyArray1<f64>,
+        lat: &PyArray1<f64>,
+        d2: i8,
+    ) -> PyResult<()> {
+        let times_start = times_start.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let times_end = times_end.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let coverage = time_space_coverage::create_from_time_ranges_position(
+            times_start, times_end,
+            lon, lat,
+            d1,
+            d2
+        )?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python

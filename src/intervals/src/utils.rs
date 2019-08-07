@@ -10,7 +10,7 @@ pub fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
     std::mem::swap(&mut owned_input, input);
 
     let len = owned_input.len() << 1;
-    let cap = owned_input.capacity();
+    let cap = len;
     let ptr = owned_input.as_mut_ptr() as *mut T;
 
     mem::forget(owned_input);
@@ -29,7 +29,7 @@ pub fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
     std::mem::swap(&mut owned_input, input);
 
     let len = owned_input.len() >> 1;
-    let cap = owned_input.capacity();
+    let cap = len;
     let ptr = owned_input.as_mut_ptr() as *mut Range<T>;
 
     mem::forget(owned_input);

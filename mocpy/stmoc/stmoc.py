@@ -83,7 +83,7 @@ class STMOC(serializer.IO):
         lon = lon.to_value('rad').astype(np.float64)
         lat = lat.to_value('rad').astype(np.float64)
 
-        if times.shape != lon.shape and lon.shape != lat.shape:
+        if times.shape != lon.shape or lon.shape != lat.shape:
             raise ValueError("Times and positions must have the same length.")
 
         if times.ndim != 1:
