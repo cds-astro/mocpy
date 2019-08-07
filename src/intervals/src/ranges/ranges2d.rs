@@ -187,8 +187,6 @@ where
             self.y = res_s;
         }
 
-        println!("# time ranges after consistency: {:?}", self.x.len());
-
         self
     }
 

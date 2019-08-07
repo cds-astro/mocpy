@@ -266,7 +266,7 @@ where
     }
 }
 
-impl<T> Eq for Ranges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
+//impl<T> Eq for Ranges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
 
 use std::ops::Index;
 impl<T> Index<usize> for Ranges<T>
