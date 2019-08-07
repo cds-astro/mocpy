@@ -6,10 +6,13 @@ Notebooks examples can be found on:
 * `The official github repo <https://github.com/cds-astro/mocpy/tree/master/notebooks>`__.
 * `Binder <https://mybinder.org/v2/gh/cds-astro/mocpy/master>`__. This allows you to run and modify the notebooks.
 
-Here are some code examples manipulating :py:class:`mocpy.moc.MOC` objects.
+Spatial coverages
+-----------------
+
+Here are some code examples manipulating :py:class:`MOC` objects.
 
 Loading and plotting the MOC of SDSS
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example:
 
@@ -26,7 +29,7 @@ This example:
     :include-source:
 
 Intersection between GALEX and SDSS
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example:
 
@@ -40,7 +43,7 @@ This example:
     :include-source:
 
 Create a MOC from a concave polygon
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to call :py:meth:`mocpy.moc.MOC.from_polygon` or :py:meth:`mocpy.moc.MOC.from_polygon_skycoord`.
 
@@ -48,7 +51,7 @@ This example shows how to call :py:meth:`mocpy.moc.MOC.from_polygon` or :py:meth
     :include-source:
 
 Get the border(s) of a MOC
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to call :py:meth:`mocpy.moc.MOC.get_boundaries`. The borders are returned as a list of `~astropy.coordinates.SkyCoord` each defining one border.
 In this example:
@@ -59,3 +62,26 @@ In this example:
 
 .. plot:: examples/compute_borders.py
     :include-source:
+
+Temporal coverages
+------------------
+
+A class :py:class:`TimeMOC` describes temporal coverages. 
+
+Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/tmoc.ipynb>`__ for how to use it.
+
+Space & Time coverages
+----------------------
+
+Space-Time coverages are a new feature of `mocpy` since its version 0.7.0 and are
+an attempt initiated by the Virtual Observatory for binding spatial and temporal coverages together.
+See its description formalized by the IVOA `here <http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf>`__.
+
+Space-Time coverages allows you to:
+
+1. Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. `~astropy.time.Time` ranges).
+2. Retrieve the temporal coverage observed by a mission within a spatial coverage.
+
+As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.
+
+Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/Space%20%26%20Time%20coverages.ipynb>`__ for how to compute and query Space-Time coverages.
