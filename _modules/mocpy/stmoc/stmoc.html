@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../../_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../../index.html">mocpy 0.7.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mocpy.stmoc.stmoc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">BytesIO</span>
+
+<span class="kn">from</span> <span class="nn">astropy.utils.data</span> <span class="k">import</span> <span class="n">download_file</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="k">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">ICRS</span><span class="p">,</span> <span class="n">Galactic</span><span class="p">,</span> <span class="n">BaseCoordinateFrame</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="k">import</span> <span class="n">wcs</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="k">import</span> <span class="n">Time</span>
+
+<span class="kn">import</span> <span class="nn">cdshealpix</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">core</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">serializer</span>
+<span class="kn">from</span> <span class="nn">..interval_set</span> <span class="k">import</span> <span class="n">IntervalSet</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Thomas Boch, Matthieu Baumann&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;BSD 3-Clause License&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr&quot;</span>
+
+
+<div class="viewcode-block" id="STMOC"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC">[docs]</a><span class="k">class</span> <span class="nc">STMOC</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">IO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Time-Spatial Coverage class.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">create_2d_coverage</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_column_name</span> <span class="o">=</span> <span class="s1">&#39;PIXELS&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">drop_2d_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_equality_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_max_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="STMOC.from_times_positions"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_times_positions">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_times_positions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a 2D Coverage from a set of times and positions associated to each time.</span>
+
+<span class="sd">        - Its first dimension refers to `astropy.time.Time` times.</span>
+<span class="sd">        - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        time : `astropy.time.Time`</span>
+<span class="sd">            The times of each sky coordinates.</span>
+<span class="sd">        time_depth : int</span>
+<span class="sd">            Time depth.</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        spatial_depth : int</span>
+<span class="sd">            Spatial depth.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.stmoc.STMOC`</span>
+<span class="sd">            The resulting Spatial-Time Coverage map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must have the same length.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must be 1D arrays.&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">from_time_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.project_on_second_dimension"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.project_on_second_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">project_on_second_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project the STMOC to its second dimension with a constraint on its first dimension.</span>
+
+<span class="sd">        This will perform the union of all the spatial coverages lying in a set of time ranges.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times : `astropy.time.Time`</span>
+<span class="sd">            The times ranges to project the STMOC onto.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC`</span>
+<span class="sd">            The projeted Spatial Coverage map resulting from the union of all the</span>
+<span class="sd">            spatial coverages lying in the set of time ranges given.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times ranges must be provided. The shape of times must be (_, 2)&quot;</span><span class="p">)</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd</span> <span class="o">*</span> <span class="mi">86400000000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_second_dim</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="STMOC.project_on_first_dimension"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.project_on_first_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">project_on_first_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project the STMOC to its first dimension with a constraint</span>
+<span class="sd">        on its second dimension.</span>
+
+<span class="sd">        This will perform the union of all the time ranges whose associated</span>
+<span class="sd">        spatial coverages lie in ``moc``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        moc : `mocpy.MOC`</span>
+<span class="sd">            The spatial coverage to project the STMOC onto.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~astropy.time.Time`</span>
+<span class="sd">            A set of astropy defined time ranges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Time ranges in µsec</span>
+        <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">moc</span><span class="o">.</span><span class="n">_intervals</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">time_ranges</span> <span class="o">/</span> <span class="mi">86400000000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="STMOC.union"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Union of two Space-Time coverages.</span>
+
+<span class="sd">        The union is first performed along the Time axis of the</span>
+<span class="sd">        coverage. The union of space axis coverages is done on time</span>
+<span class="sd">        ranges that overlap.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : `mocpy.STMOC`</span>
+<span class="sd">            The Space-Time coverage to perform the union with.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `mocpy.STMOC`</span>
+<span class="sd">            A new Space-Time coverage being the union of `self`</span>
+<span class="sd">            with `other`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_union</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.intersection"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.intersection">[docs]</a>    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Intersection of two Space-Time coverages.</span>
+
+<span class="sd">        The intersection is first performed along the Time axis of the</span>
+<span class="sd">        coverage. The intersection of space axis coverages is done on time</span>
+<span class="sd">        ranges that overlap.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : `mocpy.STMOC`</span>
+<span class="sd">            The Space-Time coverage to perform the intersection with.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `mocpy.STMOC`</span>
+<span class="sd">            A new Space-Time coverage being the intersection of `self`</span>
+<span class="sd">            with `other`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_intersection</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.difference"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.difference">[docs]</a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Difference of two Space-Time coverages.</span>
+
+<span class="sd">        The difference is first performed along the Time axis of the</span>
+<span class="sd">        coverage. The difference of space axis coverages is done on time</span>
+<span class="sd">        ranges that overlap.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : `mocpy.STMOC`</span>
+<span class="sd">            The Space-Time coverage to perform the difference with.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `mocpy.STMOC`</span>
+<span class="sd">            A new Space-Time coverage being the difference of `self`</span>
+<span class="sd">            with `other`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_difference</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_header_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t_depth</span><span class="p">,</span> <span class="n">s_depth</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;MOC&#39;</span><span class="p">:</span> <span class="s1">&#39;TIME.SPACE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ORDERING&#39;</span><span class="p">:</span> <span class="s1">&#39;RANGE29&#39;</span><span class="p">,</span>
+            <span class="c1"># Max depth along the first dimension</span>
+            <span class="s1">&#39;MOCORDER&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_depth</span><span class="p">),</span>
+            <span class="c1"># Max depth along the second dimension</span>
+            <span class="s1">&#39;MOCORD_1&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">s_depth</span><span class="p">),</span>
+            <span class="s1">&#39;COORDSYS&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TIMESYS&#39;</span><span class="p">:</span> <span class="s1">&#39;JD&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;MOCTOOL&#39;</span><span class="p">:</span> <span class="s1">&#39;MOCPy&#39;</span>
+        <span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;1K&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_uniq_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_to_fits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+
+<div class="viewcode-block" id="STMOC.deserialization"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.deserialization">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">deserialization</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdulist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deserialization of an hdulist to a Time-Space coverage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The binary HDU table contains all the data</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span>
+
+        <span class="n">bin_HDU_table</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Some FITS file may not have a name column to access</span>
+        <span class="c1"># the data. So we rename it as the `PIXELS` columns.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The binary HDU table of </span><span class="si">{0}</span><span class="s1"> must contain only one&#39;</span>
+                <span class="s1">&#39;column where the data are stored.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;PIXELS&#39;</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="c1"># Retrieve the spatial and time order</span>
+        <span class="c1"># FITS header can be of two different format for expressing</span>
+        <span class="c1"># these orders:</span>
+        <span class="c1"># 1. TORDER key refers the max depth in the time dimension. MOCORDER then</span>
+        <span class="c1">#    refers the spatial max depth.</span>
+        <span class="c1"># 2. MOCORDER refers the max depth along the 1st dimension whereas</span>
+        <span class="c1">#    MOCORD_1 refers to the max depth along the 2nd dimension.</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TORDER&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># We are in the 2. case</span>
+            <span class="n">first_dim_depth</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOCORDER&#39;</span><span class="p">)</span>
+            <span class="n">second_dim_depth</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOCORD_1&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We are in the 1. case</span>
+            <span class="n">first_dim_depth</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TORDER&#39;</span><span class="p">)</span>
+            <span class="n">second_dim_depth</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOCORDER&#39;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_from_fits</span><span class="p">(</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span>
+            <span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.from_fits"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_fits">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_fits</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a STMOC from a FITS file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            The path to the FITS file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.STMOC`</span>
+<span class="sd">            The resulting STMOC.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Open the FITS file</span>
+        <span class="n">hdulist</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">deserialization</span><span class="p">(</span><span class="n">hdulist</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+
+
+<form action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right"> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+  </p>
+</footer>
+  </body>
+</html>

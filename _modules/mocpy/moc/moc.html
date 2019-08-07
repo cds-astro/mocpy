@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.6.1 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.6.1 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -95,8 +95,8 @@
 
 <div class="viewcode-block" id="MOC"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC">[docs]</a><span class="k">class</span> <span class="nc">MOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Multi-order spatial coverage class</span>
-<span class="sd">    </span>
+<span class="sd">    Multi-order spatial coverage class.</span>
+
 <span class="sd">    A MOC describes the coverage of an arbitrary region on the unit sphere.</span>
 <span class="sd">    MOCs are usually used for describing the global coverage of catalog/image surveys such as GALEX or SDSS.</span>
 <span class="sd">    A MOC corresponds to a list of `HEALPix &lt;https://healpix.sourceforge.io/&gt;`__ cells at different depths.</span>
@@ -130,7 +130,6 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_set</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MOC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interval_set</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_header_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COORDSYS&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;reference frame (C=ICRS)&#39;</span><span class="p">)}</span>
 
 <div class="viewcode-block" id="MOC.contains"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -194,7 +193,7 @@
         <span class="n">moc_neighbors</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span><span class="n">ipix_neighbors</span><span class="p">,</span> <span class="n">depth_neighbors</span><span class="p">)</span>
         
         <span class="c1"># This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC</span>
-        <span class="c1">#self._interval_set._intervals = core.union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)</span>
+        <span class="c1">#self._interval_set._intervals = core.coverage_union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)</span>
         <span class="n">final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">moc_neighbors</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span> <span class="o">=</span> <span class="n">final</span><span class="o">.</span><span class="n">_interval_set</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -639,6 +638,25 @@
 
         <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span><span class="n">ipix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">),</span> <span class="n">depth</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_header_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;PIXTYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;HEALPIX&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ORDERING&#39;</span><span class="p">:</span> <span class="s1">&#39;NUNIQ&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;COORDSYS&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;reference frame (C=ICRS)&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;MOCORDER&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span>
+            <span class="s1">&#39;MOCTOOL&#39;</span><span class="p">:</span> <span class="s1">&#39;MOCPy&#39;</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">13</span><span class="p">:</span>
+            <span class="n">fits_format</span> <span class="o">=</span> <span class="s1">&#39;1J&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fits_format</span> <span class="o">=</span> <span class="s1">&#39;1K&#39;</span>
+        <span class="k">return</span> <span class="n">fits_format</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sky_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Examples &#8212; mocpy 0.6.1 documentation</title>
+    <title>Examples &#8212; mocpy 0.7.0 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -57,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.6.1 documentation</a>
+	<a href="../index.html">mocpy 0.7.0 documentation</a>
 	 &#187;
       </li>
       
@@ -78,9 +78,11 @@
 <li><p><a class="reference external" href="https://github.com/cds-astro/mocpy/tree/master/notebooks">The official github repo</a>.</p></li>
 <li><p><a class="reference external" href="https://mybinder.org/v2/gh/cds-astro/mocpy/master">Binder</a>. This allows you to run and modify the notebooks.</p></li>
 </ul>
-<p>Here are some code examples manipulating <code class="xref py py-class docutils literal notranslate"><span class="pre">mocpy.moc.MOC</span></code> objects.</p>
+<div class="section" id="spatial-coverages">
+<h2>Spatial coverages<a class="headerlink" href="#spatial-coverages" title="Permalink to this headline">¶</a></h2>
+<p>Here are some code examples manipulating <code class="xref py py-class docutils literal notranslate"><span class="pre">MOC</span></code> objects.</p>
 <div class="section" id="loading-and-plotting-the-moc-of-sdss">
-<h2>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Permalink to this headline">¶</a></h2>
+<h3>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Permalink to this headline">¶</a></h3>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverage of SDSS from a FITS file.</p></li>
@@ -125,7 +127,7 @@
 </div>
 </div>
 <div class="section" id="intersection-between-galex-and-sdss">
-<h2>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Permalink to this headline">¶</a></h2>
+<h3>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Permalink to this headline">¶</a></h3>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverages of SDSS and GALEX from FITS files.</p></li>
@@ -174,7 +176,7 @@
 </div>
 </div>
 <div class="section" id="create-a-moc-from-a-concave-polygon">
-<h2>Create a MOC from a concave polygon<a class="headerlink" href="#create-a-moc-from-a-concave-polygon" title="Permalink to this headline">¶</a></h2>
+<h3>Create a MOC from a concave polygon<a class="headerlink" href="#create-a-moc-from-a-concave-polygon" title="Permalink to this headline">¶</a></h3>
 <p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon_skycoord()</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
 <span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
@@ -236,8 +238,8 @@
 </div>
 </div>
 <div class="section" id="get-the-border-s-of-a-moc">
-<h2>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this headline">¶</a></h2>
-<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev567)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this headline">¶</a></h3>
+<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.0.dev625)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
@@ -291,6 +293,25 @@ In this example:</p>
 </div>
 </div>
 </div>
+<div class="section" id="temporal-coverages">
+<h2>Temporal coverages<a class="headerlink" href="#temporal-coverages" title="Permalink to this headline">¶</a></h2>
+<p>A class <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeMOC</span></code> describes temporal coverages.</p>
+<p>Please refer to the following notebook <a class="reference external" href="https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/tmoc.ipynb">here</a> for how to use it.</p>
+</div>
+<div class="section" id="space-time-coverages">
+<h2>Space &amp; Time coverages<a class="headerlink" href="#space-time-coverages" title="Permalink to this headline">¶</a></h2>
+<p>Space-Time coverages are a new feature of <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy</span></code> since its version 0.7.0 and are
+an attempt initiated by the Virtual Observatory for binding spatial and temporal coverages together.
+See its description formalized by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
+<p>Space-Time coverages allows you to:</p>
+<ol class="arabic simple">
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.0.dev625)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
+</ol>
+<p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
+<p>Please refer to the following notebook <a class="reference external" href="https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/Space%20%26%20Time%20coverages.ipynb">here</a> for how to compute and query Space-Time coverages.</p>
+</div>
+</div>
 
 
           </div>
@@ -300,10 +321,15 @@ In this example:</p>
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#spatial-coverages">Spatial coverages</a><ul>
 <li><a class="reference internal" href="#loading-and-plotting-the-moc-of-sdss">Loading and plotting the MOC of SDSS</a></li>
 <li><a class="reference internal" href="#intersection-between-galex-and-sdss">Intersection between GALEX and SDSS</a></li>
 <li><a class="reference internal" href="#create-a-moc-from-a-concave-polygon">Create a MOC from a concave polygon</a></li>
 <li><a class="reference internal" href="#get-the-border-s-of-a-moc">Get the border(s) of a MOC</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#temporal-coverages">Temporal coverages</a></li>
+<li><a class="reference internal" href="#space-time-coverages">Space &amp; Time coverages</a></li>
 </ul>
 </li>
 </ul>

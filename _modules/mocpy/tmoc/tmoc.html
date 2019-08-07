@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.tmoc.tmoc &#8212; mocpy 0.6.1 documentation</title>
+    <title>mocpy.tmoc.tmoc &#8212; mocpy 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.6.1 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -79,7 +79,6 @@
 <span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;BSD 3-Clause License&quot;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;matthieu.baumann@astro.unistra.fr&quot;</span>
 
-
 <div class="viewcode-block" id="TimeMOC"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC">[docs]</a><span class="k">class</span> <span class="nc">TimeMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Multi-order time coverage class. Experimental&quot;&quot;&quot;</span>
     <span class="n">DAY_MICRO_SEC</span> <span class="o">=</span> <span class="mf">86400000000.</span>
@@ -88,7 +87,6 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_set</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interval_set</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_header_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;TIMESYS&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;JD&#39;</span><span class="p">,</span> <span class="s1">&#39;ref system JD BARYCENTRIC TT, 1 usec level 29&#39;</span><span class="p">)}</span>
 
 <div class="viewcode-block" id="TimeMOC.from_times"><a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.from_times">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_times</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">DEFAULT_OBSERVATION_TIME</span><span class="p">):</span>
@@ -300,6 +298,25 @@
 
         <span class="n">self_degraded</span><span class="p">,</span> <span class="n">moc_degraded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_degradation</span><span class="p">(</span><span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TimeMOC</span><span class="p">,</span> <span class="n">self_degraded</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">moc_degraded</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_header_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;PIXTYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;HEALPIX&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ORDERING&#39;</span><span class="p">:</span> <span class="s1">&#39;NUNIQ&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TIMESYS&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;JD&#39;</span><span class="p">,</span> <span class="s1">&#39;ref system JD BARYCENTRIC TT, 1 usec level 29&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;MOCORDER&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span>
+            <span class="s1">&#39;MOCTOOL&#39;</span><span class="p">:</span> <span class="s1">&#39;MOCPy&#39;</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fits_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">13</span><span class="p">:</span>
+            <span class="n">fits_format</span> <span class="o">=</span> <span class="s1">&#39;1J&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fits_format</span> <span class="o">=</span> <span class="s1">&#39;1K&#39;</span>
+        <span class="k">return</span> <span class="n">fits_format</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">total_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
