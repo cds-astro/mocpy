@@ -5,6 +5,7 @@ channels:
 - conda-forge
 
 dependencies:
+- setuptools-rust
 - astropy
 - astroquery
 - astropy-healpix # Optional dependency for boundaries notebook
