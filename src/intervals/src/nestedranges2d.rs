@@ -320,38 +320,7 @@ where
     /// If the `NestedRanges2D<T, S>` is empty, the depth returned
     /// is set to (0, 0)
     pub fn depth(&self) -> (i8, i8) {
-        let coverage = &self.ranges;
-        let y = coverage
-            .y
-            .par_iter()
-            // Compute the depths of the Ranges<T>
-            .map(|ranges| ranges.depth())
-            // Get the max of these depths
-            .max()
-            // If there are no ranges, the max depth
-            // along the second dimension is set to 0
-            .unwrap_or_else(|| 0);
-
-        let x = coverage
-            .x
-            .par_iter()
-            // Compute de depths of the first dimensional ranges
-            .map(|range| {
-                let res = range.start | range.end;
-                let mut depth: i8 = <T>::MAXDEPTH - (res.trailing_zeros() >> 1) as i8;
-
-                if depth < 0 {
-                    depth = 0;
-                }
-                depth
-            })
-            // Get the max of these depths
-            .max()
-            // If there are no ranges, the max depth
-            // along the first dimension is set to 0
-            .unwrap_or_else(|| 0);
-
-        (x, y)
+        self.ranges.depth()
     }
 
     /// Returns the minimum value along the `T` dimension
@@ -411,6 +380,17 @@ where
     pub fn difference(&self, other: &Self) -> Self {
         let ranges = self.ranges.difference(&other.ranges);
         NestedRanges2D { ranges }
+    }
+
+    /// Check whether a `NestedRanges2D<T, S>` has data in
+    /// a (time, ra, dec) tuple.
+    ///
+    /// # Arguments
+    ///
+    /// * ``time`` - The time of the tuple
+    /// * ``range`` - The position that has been converted to a nested range
+    pub fn contains(&self, time: T, range: &Range<S>) -> bool {
+        self.ranges.contains(time, range)
     }
 }
 

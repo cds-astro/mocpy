@@ -14,6 +14,20 @@ def test_serialization():
 
     assert(decals == decals_result)
 
+
+from astropy.time import Time
+import astropy.units as u
+def test_from_times_lonlat():
+    times = Time([2440587.50000], format='mjd', scale='tdb')
+    lon = [0] * u.deg
+    lat = [0] * u.deg
+
+    stmoc = STMOC.from_times_positions(times, 2, lon, lat, 0)
+
+    assert(stmoc.contains(times, lon, lat).all())
+    assert(stmoc.contains(times, [180] * u.deg, [0] * u.deg, inside=False).all())
+
+
 def test_max_depth():
     decals = STMOC.from_fits('resources/STMOC/STMoc-DECaLS-g.fits')
     assert(decals.max_depth == (29, 9))

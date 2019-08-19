@@ -65,7 +65,6 @@ pub fn create_from_position(
             *p = e1..e2;
         });
 
-    ;
     let result = NestedRanges::<u64>::new(data).make_consistent();
     Ok(result)
 }

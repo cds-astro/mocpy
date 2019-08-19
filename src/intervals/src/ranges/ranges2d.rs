@@ -400,6 +400,81 @@ where
     pub fn is_empty(&self) -> bool {
         self.x.is_empty()
     }
+
+    /// Compute the depth of the coverage
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing two values:
+    ///
+    /// * The maximum depth along the `T` axis
+    /// * The maximum depth along the `S` axis
+    ///
+    /// # Info
+    ///
+    /// If the `NestedRanges2D<T, S>` is empty, the depth returned
+    /// is set to (0, 0)
+    pub fn depth(&self) -> (i8, i8) {
+        let y = self.y
+            .par_iter()
+            // Compute the depths of the Ranges<T>
+            .map(|ranges| ranges.depth())
+            // Get the max of these depths
+            .max()
+            // If there are no ranges, the max depth
+            // along the second dimension is set to 0
+            .unwrap_or_else(|| 0);
+
+        let x = self.x
+            .par_iter()
+            // Compute de depths of the first dimensional ranges
+            .map(|range| {
+                let res = range.start | range.end;
+                let mut depth: i8 = <T>::MAXDEPTH - (res.trailing_zeros() >> 1) as i8;
+
+                if depth < 0 {
+                    depth = 0;
+                }
+                depth
+            })
+            // Get the max of these depths
+            .max()
+            // If there are no ranges, the max depth
+            // along the first dimension is set to 0
+            .unwrap_or_else(|| 0);
+
+        (x, y)
+    }
+
+    /// Checks whether a (time, position) tuple lies into the `NestedRanges2D<T, S>`
+    /// 
+    /// # Arguments
+    ///
+    /// * ``time`` - The time at which the coordinate has been observed
+    /// * ``range`` - The spatial pixel of the nested range
+    pub fn contains(&self, time: T, range: &Range<S>) -> bool {
+        // Check whether time lies in the `T` dimension
+        let in_first_dim = self.x
+            .par_iter()
+            .enumerate()
+            .map(|(idx, r)| {
+                let in_time_range = time >= r.start && time <= r.end;
+                (in_time_range, idx)
+            })
+            .find_any(|&x| x.0)
+            .map(|x| {
+                x.1
+            });
+
+        if let Some(idx_first_dim) = in_first_dim {
+            // Check whether the pixel coordinate lies in the `S` dimension
+            // coverage where the time lies.
+            let s_coverage = &self.y[idx_first_dim];
+            s_coverage.contains(range)
+        } else {
+            false
+        }
+    }
 }
 
 impl<T, S> PartialEq for Ranges2D<T, S>

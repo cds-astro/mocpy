@@ -570,6 +570,37 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         result
     }
 
+    /// Check if (time, position) tuples are contained into a Time-Space coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage.
+    /// * ``times`` - Times at which the positions have been observed.
+    /// * ``lon`` - The longitudes.
+    /// * ``lat`` - The latitudes.
+    ///
+    /// # Errors
+    ///
+    /// * If `lon`, `lat` and `times` do not have the same length
+    #[pyfn(m, "coverage_2d_contains")]
+    fn coverage_2d_contains(
+        py: Python,
+        index: usize,
+        times: &PyArray1<f64>,
+        lon: &PyArray1<f64>,
+        lat: &PyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
+        let times = times.as_array().to_owned();
+        let lon = lon.as_array().to_owned();
+        let lat = lat.as_array().to_owned();
+
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+
+        let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
+        time_space_coverage::contains(coverage, times, lon, lat, &mut result)?;
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
     /// Perform the union between two spatial coverages
     ///
     /// # Arguments

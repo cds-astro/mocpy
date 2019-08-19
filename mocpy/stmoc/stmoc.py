@@ -208,6 +208,44 @@ class STMOC(serializer.IO):
         core.coverage_2d_difference(result.__index, self.__index, other.__index)
         return result
 
+    def contains(self, times, lon, lat, inside=True):
+        """
+        Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.
+
+        Parameters
+        ----------
+        times : `astropy.time.Time`
+            The times of each sky coordinates.
+        lon : `astropy.units.Quantity`
+            The longitudes of the sky coordinates observed at a specific time.
+        lat : `astropy.units.Quantity`
+            The latitudes of the sky coordinates observed at a specific time.
+        inside : bool, optional
+            True by default. The returned mask array has true values for (time, position)
+            lying inside the Space-Time coverage.
+
+        Returns
+        -------
+        array : `~np.ndarray`
+            A mask boolean array
+        """
+        times = times.jd.astype(np.float64)
+        lon = lon.to_value('rad').astype(np.float64)
+        lat = lat.to_value('rad').astype(np.float64)
+
+        if times.shape != lon.shape or lon.shape != lat.shape:
+            raise ValueError("Times and positions must have the same length.")
+
+        if times.ndim != 1:
+            raise ValueError("Times and positions must be 1D arrays.")
+
+        result = core.coverage_2d_contains(self.__index, times, lon, lat)
+
+        if not inside:
+            result = ~result
+
+        return result
+
     @property
     def _fits_header_keywords(self):
         t_depth, s_depth = core.coverage_2d_depth(self.__index)

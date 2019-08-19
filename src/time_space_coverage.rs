@@ -77,6 +77,7 @@ pub fn create_from_time_position(
     }
 }
 
+
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and ranges of times.
 ///
@@ -160,6 +161,63 @@ pub fn create_from_time_ranges_position(
             times, ipix, dt, ds,
         ))
     }
+}
+
+use ndarray::Zip;
+use ndarray_parallel::prelude::*;
+/// Create a time-spatial coverage (2D) from a list of sky coordinates
+/// and times.
+///
+/// # Arguments
+///
+/// * ``times`` - The times expressed in jd.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.coordinates.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn contains(
+    coverage: &NestedRanges2D<u64, u64>,
+    time: Array1<f64>,
+    lon: Array1<f64>,
+    lat: Array1<f64>,
+    result: &mut Array1<bool>,
+) -> PyResult<()> {
+    if time.len() != lon.len() || time.len() != lat.len() {
+        return Err(exceptions::ValueError::py_err(
+            "Times, longitudes and latitudes do not have the same shapes.",
+        ));
+    }
+
+    let (_, s_depth) = coverage.depth();
+    let layer = healpix::nested::get_or_create(s_depth as u8);
+    let shift = (<u64>::MAXDEPTH - s_depth) << 1;
+    Zip::from(result)
+        .and(&time)
+        .and(&lon)
+        .and(&lat)
+        .par_apply(|in_coverage, &t, &l, &b| {
+            let pix = layer.hash(l, b);
+            let e1 = pix << shift;
+            let e2 = (pix + 1) << shift;
+
+            let t = (t * 86400000000_f64).floor() as u64;
+            *in_coverage = dbg!(coverage.contains(t, &(e1..e2)));
+        });
+
+    Ok(())
 }
 
 use intervals::nestedranges::NestedRanges;
