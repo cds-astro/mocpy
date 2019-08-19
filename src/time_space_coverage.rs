@@ -214,7 +214,7 @@ pub fn contains(
             let e2 = (pix + 1) << shift;
 
             let t = (t * 86400000000_f64).floor() as u64;
-            *in_coverage = dbg!(coverage.contains(t, &(e1..e2)));
+            *in_coverage = coverage.contains(t, &(e1..e2));
         });
 
     Ok(())
