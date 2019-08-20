@@ -570,6 +570,21 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         result
     }
 
+    /// Checks whether a Time-Space coverage is empty.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage to check
+    ///   the emptiness.
+    #[pyfn(m, "coverage_2d_is_empty")]
+    fn coverage_2d_is_empty(_py: Python, index: usize) -> bool {
+        // Get the coverage
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+
+        coverage.is_empty()
+    }
+
     /// Check if (time, position) tuples are contained into a Time-Space coverage
     ///
     /// # Arguments

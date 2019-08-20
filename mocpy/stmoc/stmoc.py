@@ -53,6 +53,12 @@ class STMOC(serializer.IO):
     def min_time(self):
         return Time(core.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
 
+    def is_empty(self):
+        """
+        Check whether the Space-Time coverage is empty
+        """
+        return core.coverage_2d_is_empty(self.__index)
+
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
         """
@@ -223,6 +229,10 @@ class STMOC(serializer.IO):
         inside : bool, optional
             True by default. The returned mask array has true values for (time, position)
             lying inside the Space-Time coverage.
+
+        Raises
+        ------
+        ValueError : If `times`, `lon` and `lat` do not have the same length.
 
         Returns
         -------

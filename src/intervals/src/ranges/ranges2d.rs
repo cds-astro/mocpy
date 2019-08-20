@@ -453,25 +453,31 @@ where
     /// * ``time`` - The time at which the coordinate has been observed
     /// * ``range`` - The spatial pixel of the nested range
     pub fn contains(&self, time: T, range: &Range<S>) -> bool {
-        // Check whether time lies in the `T` dimension
+        // Check whether the time lies in the ranges of the `T` dimension
         let in_first_dim = self.x
             .par_iter()
             .enumerate()
-            .map(|(idx, r)| {
+            .filter_map(|(idx, r)| {
                 let in_time_range = time >= r.start && time <= r.end;
-                (in_time_range, idx)
+                if in_time_range {
+                    Some(idx)
+                } else {
+                    None
+                }
             })
-            .find_any(|&x| x.0)
-            .map(|x| {
-                x.1
-            });
-
-        if let Some(idx_first_dim) = in_first_dim {
+            .collect::<Vec<_>>();
+        
+        if in_first_dim.len() > 1 {
+            unreachable!();
+        } else if in_first_dim.len() == 1 {
+            let idx_first_dim = in_first_dim.first().unwrap().clone();
             // Check whether the pixel coordinate lies in the `S` dimension
             // coverage where the time lies.
             let s_coverage = &self.y[idx_first_dim];
             s_coverage.contains(range)
         } else {
+            // The time is not contained in any ranges so we simply
+            // return false here
             false
         }
     }

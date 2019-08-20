@@ -392,6 +392,11 @@ where
     pub fn contains(&self, time: T, range: &Range<S>) -> bool {
         self.ranges.contains(time, range)
     }
+
+    /// Check whether a `NestedRanges2D<T, S>` is empty
+    pub fn is_empty(&self) -> bool {
+        self.ranges.is_empty()
+    }
 }
 
 use ndarray::Array1;

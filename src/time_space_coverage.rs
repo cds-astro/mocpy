@@ -201,6 +201,7 @@ pub fn contains(
         ));
     }
 
+    // Retrieve the spatial depth of the Time-Space coverage
     let (_, s_depth) = coverage.depth();
     let layer = healpix::nested::get_or_create(s_depth as u8);
     let shift = (<u64>::MAXDEPTH - s_depth) << 1;
@@ -208,13 +209,18 @@ pub fn contains(
         .and(&time)
         .and(&lon)
         .and(&lat)
-        .par_apply(|in_coverage, &t, &l, &b| {
+        .par_apply(|r, &t, &l, &b| {
+            // Compute the HEALPix cell range at the max depth
+            // along the spatial dimension
             let pix = layer.hash(l, b);
             let e1 = pix << shift;
             let e2 = (pix + 1) << shift;
 
+            // Convert the observation time in µs
             let t = (t * 86400000000_f64).floor() as u64;
-            *in_coverage = coverage.contains(t, &(e1..e2));
+            // Check whether the (time in µs, HEALPix cell nested range)
+            // is contained into the Spatial-Time coverage
+            *r = coverage.contains(t, &(e1..e2));
         });
 
     Ok(())

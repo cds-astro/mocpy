@@ -26,6 +26,12 @@ def test_from_times_lonlat():
 
     assert(stmoc.contains(times, lon, lat).all())
     assert(stmoc.contains(times, [180] * u.deg, [0] * u.deg, inside=False).all())
+    assert(not stmoc.is_empty())
+
+
+def test_is_empty():
+    empty_stmoc = STMOC()
+    assert(empty_stmoc.is_empty())
 
 
 def test_max_depth():
