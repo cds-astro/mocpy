@@ -194,7 +194,8 @@ class AbstractMOC(serializer.IO):
             The resulting MOC.
         """
         table = Table.read(filename)
-        intervals = core.to_nested(table['UNIQ'].astype(np.uint64))
+        first_column_index = table.colnames[0]
+        intervals = core.to_nested(table[first_column_index].astype(np.uint64))
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod

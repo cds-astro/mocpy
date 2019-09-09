@@ -44,13 +44,18 @@ pub fn flatten_pixels(data: Array2<u64>, depth: i8) -> Array1<u64> {
 
     let flattened_intervals = &data / &Array::from_elem(data.shape(), factor);
 
-    let mut flattened_pixels = Vec::<u64>::new();
-    for interval in flattened_intervals.axis_iter(Axis(0)) {
-        for pix in interval[0]..interval[1] {
-            flattened_pixels.push(pix);
+    if flattened_intervals.is_empty() {
+        // Do not iter on axis 0
+        Array::zeros((0,))
+    } else {
+        let mut flattened_pixels = Vec::<u64>::new();
+        for interval in flattened_intervals.axis_iter(Axis(0)) {
+            for pix in interval[0]..interval[1] {
+                flattened_pixels.push(pix);
+            }
         }
+        Array1::from_vec(flattened_pixels)
     }
-    Array1::from_vec(flattened_pixels)
 }
 
 use pyo3::prelude::Python;

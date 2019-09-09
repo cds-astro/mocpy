@@ -140,6 +140,11 @@ def test_moc_skyfraction():
     assert moc.sky_fraction == 0.5
 
 
+def test_sky_fraction_on_empty_coverage():
+    moc = MOC()
+    assert moc.sky_fraction == 0
+
+
 #### TESTING MOC serialization ####
 def test_moc_serialize_to_fits(moc_from_fits_image):
     hdulist = moc_from_fits_image.serialize(format='fits')
@@ -315,6 +320,11 @@ def test_moc_difference(mocs_op):
 
 def test_moc_complement_consistency():
     moc = MOC.from_fits('resources/P-GALEXGR6-AIS-FUV.fits')
+    assert moc.complement().complement() == moc
+
+
+def test_from_fits_old():
+    moc = MOC.from_fits('resources/V_147_sdss12.moc.fits')
     assert moc.complement().complement() == moc
 
 
