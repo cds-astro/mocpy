@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.abstract_moc &#8212; mocpy 0.7.0 documentation</title>
+    <title>mocpy.abstract_moc &#8212; mocpy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">mocpy 0.7.0 documentation</a>
+	<a href="../../index.html">mocpy 0.7.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -256,7 +256,8 @@
 <span class="sd">            The resulting MOC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">to_nested</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;UNIQ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">))</span>
+        <span class="n">first_column_index</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">colnames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">to_nested</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">first_column_index</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>

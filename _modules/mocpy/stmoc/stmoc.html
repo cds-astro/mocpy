@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.0 documentation</title>
+    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.7.0 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -114,6 +114,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="STMOC.is_empty"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the Space-Time coverage is empty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="STMOC.from_times_positions"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_times_positions">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_times_positions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">):</span>
@@ -268,6 +274,48 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
         <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_difference</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.contains"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times : `astropy.time.Time`</span>
+<span class="sd">            The times of each sky coordinates.</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        inside : bool, optional</span>
+<span class="sd">            True by default. The returned mask array has true values for (time, position)</span>
+<span class="sd">            lying inside the Space-Time coverage.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError : If `times`, `lon` and `lat` do not have the same length.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array : `~np.ndarray`</span>
+<span class="sd">            A mask boolean array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must have the same length.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must be 1D arrays.&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="o">~</span><span class="n">result</span>
+
         <span class="k">return</span> <span class="n">result</span></div>
 
     <span class="nd">@property</span>
