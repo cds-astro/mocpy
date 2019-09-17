@@ -25,7 +25,7 @@ use rayon::prelude::*;
 ///
 /// ``lon`` and ``lat`` are expressed in radians.
 /// They are valid because they come from
-/// `astropy.coordinates.Quantity` objects.
+/// `astropy.units.Quantity` objects.
 ///
 /// # Errors
 ///

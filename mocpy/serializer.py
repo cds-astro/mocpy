@@ -75,7 +75,7 @@ class IO:
 
         Parameters
         ----------
-        path : str, optional
+        path : str
             The path to the file to save the MOC in.
         format : str, optional
             The format in which the MOC will be serialized before being saved. Possible formats are "fits" or "json".

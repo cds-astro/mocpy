@@ -492,6 +492,57 @@ class MOC(AbstractMOC):
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
+    def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
+        """
+        Creates a MOC from an elliptical cone
+
+        The ellipse is centered around the (`lon`, `lat`) position. `a` (resp. `b`) corresponds
+        to the semi-major axis magnitude (resp. semi-minor axis magnitude). `pa` is expressed as a
+        `~astropy.coordinates.Angle` and defines the position angle of the elliptical cone.
+
+        Parameters
+        ----------
+        lon : `astropy.units.Quantity`
+            The longitude of the center of the elliptical cone.
+        lat : `astropy.units.Quantity`
+            The latitude of the center of the elliptical cone.
+        a : `astropy.coordinates.Angle`
+            The semi-major axis angle of the elliptical cone.
+        b : `astropy.coordinates.Angle`
+            The semi-minor axis angle of the elliptical cone.
+        pa : `astropy.coordinates.Angle`
+            The position angle (i.e. the angle between the north and the semi-major axis, east-of-north).
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle
+        >>> moc = MOC.from_elliptical_cone(
+        ...  lon=0 * u.deg,
+        ...  lat=0 * u.deg,
+        ...  a=Angle(10, u.deg),
+        ...  b=Angle(5, u.deg),
+        ...  pa=Angle(0, u.deg),
+        ...  max_depth=10
+        ... )
+        """
+        pix, depth, fully_covered_flags = cdshealpix.elliptical_cone_search(lon, lat, a, b, pa, max_depth, delta_depth, flat=False)
+        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+
+    @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
         """
         Creates a MOC from a polygon.

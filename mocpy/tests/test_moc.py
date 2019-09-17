@@ -249,6 +249,14 @@ def test_boundaries():
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
 '''
+def test_from_elliptical_cone():
+    moc = MOC.from_elliptical_cone(
+        lon=0 * u.deg,
+        lat=0 * u.deg,
+        a=Angle(10, u.deg),
+        b=Angle(5, u.deg),
+        pa=Angle(0, u.deg),
+        max_depth=10)
 
 
 @pytest.fixture()

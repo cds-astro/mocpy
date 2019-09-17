@@ -25,7 +25,7 @@ use intervals::nestedranges2d::NestedRanges2D;
 ///
 /// * ``lon`` and ``lat`` are expressed in radians.
 /// They are valid because they come from
-/// `astropy.coordinates.Quantity` objects.
+/// `astropy.units.Quantity` objects.
 /// * ``times`` are expressed in jd and are coming
 /// from `astropy.time.Time` objects.
 ///
@@ -95,7 +95,7 @@ pub fn create_from_time_position(
 ///
 /// * ``lon`` and ``lat`` are expressed in radians.
 /// They are valid because they come from
-/// `astropy.coordinates.Quantity` objects.
+/// `astropy.units.Quantity` objects.
 /// * ``times`` are expressed in jd and are coming
 /// from `astropy.time.Time` objects.
 ///
@@ -181,7 +181,7 @@ use ndarray_parallel::prelude::*;
 ///
 /// * ``lon`` and ``lat`` are expressed in radians.
 /// They are valid because they come from
-/// `astropy.coordinates.Quantity` objects.
+/// `astropy.units.Quantity` objects.
 /// * ``times`` are expressed in jd and are coming
 /// from `astropy.time.Time` objects.
 ///
