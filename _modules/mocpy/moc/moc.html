@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.7.1 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.7.2 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.7.1 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -552,6 +552,57 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">intervals</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span><span class="n">max_norder</span><span class="p">,</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MOC.from_elliptical_cone"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_elliptical_cone">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_elliptical_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a MOC from an elliptical cone</span>
+
+<span class="sd">        The ellipse is centered around the (`lon`, `lat`) position. `a` (resp. `b`) corresponds</span>
+<span class="sd">        to the semi-major axis magnitude (resp. semi-minor axis magnitude). `pa` is expressed as a</span>
+<span class="sd">        `~astropy.coordinates.Angle` and defines the position angle of the elliptical cone.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitude of the center of the elliptical cone.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitude of the center of the elliptical cone.</span>
+<span class="sd">        a : `astropy.coordinates.Angle`</span>
+<span class="sd">            The semi-major axis angle of the elliptical cone.</span>
+<span class="sd">        b : `astropy.coordinates.Angle`</span>
+<span class="sd">            The semi-minor axis angle of the elliptical cone.</span>
+<span class="sd">        pa : `astropy.coordinates.Angle`</span>
+<span class="sd">            The position angle (i.e. the angle between the north and the semi-major axis, east-of-north).</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        delta_depth : int, optional</span>
+<span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
+<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
+<span class="sd">            `depth` + `depth_delta`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC`</span>
+<span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_elliptical_cone(</span>
+<span class="sd">        ...  lon=0 * u.deg,</span>
+<span class="sd">        ...  lat=0 * u.deg,</span>
+<span class="sd">        ...  a=Angle(10, u.deg),</span>
+<span class="sd">        ...  b=Angle(5, u.deg),</span>
+<span class="sd">        ...  pa=Angle(0, u.deg),</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pix</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">fully_covered_flags</span> <span class="o">=</span> <span class="n">cdshealpix</span><span class="o">.</span><span class="n">elliptical_cone_search</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span><span class="n">pix</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">fully_covered_flags</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MOC.from_polygon_skycoord"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon_skycoord">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_polygon_skycoord</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoord</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
