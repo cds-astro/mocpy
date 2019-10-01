@@ -763,6 +763,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut ranges = coverage::create_nested_ranges_from_py(ranges);
         coverage::degrade_nested_ranges(&mut ranges, depth)?;
 
+        // Merge the overlapping intervals after degradation
+        let ranges = ranges.make_consistent();
+
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }

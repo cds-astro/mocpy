@@ -241,6 +241,14 @@ def test_moc_contains():
     assert should_be_inside_arr.all()
 
 
+def test_degrade_to_order():
+    hst_fits_path = 'resources/hst.fits'
+    hst_moc = MOC.from_fits(hst_fits_path)
+
+    for order in reversed(range(0, hst_moc.max_order)):
+        hst_moc = hst_moc.degrade_to_order(order)
+        assert(hst_moc.sky_fraction <= 1.0)
+
 # TODO: IMPROVE THE ALGO
 '''
 def test_boundaries():
@@ -324,7 +332,6 @@ def test_moc_difference(mocs_op):
     assert mocs_op['first'].difference(mocs_op['second']) == MOC.from_json({
         '0': [2, 5]
     })
-
 
 def test_moc_complement_consistency():
     moc = MOC.from_fits('resources/P-GALEXGR6-AIS-FUV.fits')
