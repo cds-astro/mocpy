@@ -208,6 +208,22 @@ pub fn depth(coverage: &NestedRanges<u64>) -> i8 {
     coverage.depth()
 }
 
+/// Compute the sky fraction of a spatial coverage
+///
+/// # Arguments
+///
+/// * ``coverage`` - The spatial coverage
+/// * ``max_depth`` - The max depth of the spatial coverage.
+pub fn sky_fraction(data: Array2<u64>, max_depth: i8) -> f32 {
+    let flattened_pixels = flatten_pixels(data, max_depth);
+
+    //let num_total_pixels = dbg!((3 as u64) << (2*((max_depth as u64) + 1)));
+    let num_total_pixels = (3 as u64) << 2*((max_depth as u64) + 1);
+    let num_pixels = flattened_pixels.len();
+    let sky_fraction = (num_pixels as f32) / (num_total_pixels as f32);
+    sky_fraction
+}
+
 /// Cast an `Array2<u64>` coming from MOCPy python code to
 /// a `NestedRanges<u64>` object.
 pub fn create_nested_ranges_from_py(data: Array2<u64>) -> NestedRanges<u64> {

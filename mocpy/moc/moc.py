@@ -653,9 +653,8 @@ class MOC(AbstractMOC):
         Sky fraction covered by the MOC
         """
         max_depth = self.max_order
-        flattened_pixels = core.flatten_pixels(self._interval_set._intervals, max_depth)
-        num_pixels = flattened_pixels.size
-        return num_pixels / float(3 << (2*(max_depth + 1)))
+        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals, max_depth)
+        return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region
     # See https://github.com/astropy/astroquery/pull/1466

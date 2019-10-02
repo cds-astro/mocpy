@@ -245,7 +245,9 @@ def test_degrade_to_order():
     hst_fits_path = 'resources/hst.fits'
     hst_moc = MOC.from_fits(hst_fits_path)
 
-    for order in reversed(range(0, hst_moc.max_order)):
+    max_depth = hst_moc.max_order
+
+    for order in reversed(range(0, max_depth)):
         hst_moc = hst_moc.degrade_to_order(order)
         assert(hst_moc.sky_fraction <= 1.0)
 

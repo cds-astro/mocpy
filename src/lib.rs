@@ -820,6 +820,20 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         coverage::depth(&coverage)
     }
 
+    /// Compute the sky fraction of a spatial coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``coverage`` - The spatial coverage
+    /// * ``max_depth`` - The max depth of the spatial coverage.
+    #[pyfn(m, "coverage_sky_fraction")]
+    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>, max_depth: i8) -> f32 {
+
+        let ranges = ranges.as_array().to_owned();
+
+        coverage::sky_fraction(ranges, max_depth)
+    }
+
     /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
     ///
     /// # Arguments
