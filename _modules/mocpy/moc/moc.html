@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.7.2 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.7.3 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.7.2 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.3 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -715,9 +715,8 @@
 <span class="sd">        Sky fraction covered by the MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">max_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span>
-        <span class="n">flattened_pixels</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">flatten_pixels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
-        <span class="n">num_pixels</span> <span class="o">=</span> <span class="n">flattened_pixels</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">return</span> <span class="n">num_pixels</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">3</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">max_depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">sky_fraction</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_sky_fraction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sky_fraction</span>
 
     <span class="c1"># TODO : move this in astroquery.Simbad.query_region</span>
     <span class="c1"># See https://github.com/astropy/astroquery/pull/1466</span>
