@@ -99,22 +99,21 @@ class STMOC(serializer.IO):
         core.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
         return result
 
-    def project_on_second_dimension(self, times):
+    def query_by_time(self, times):
         """
-        Project the STMOC to its second dimension with a constraint on its first dimension.
+        Query the ST-MOC by time ranges.
 
         This will perform the union of all the spatial coverages lying in a set of time ranges.
-        
+
         Parameters
         ----------
         times : `astropy.time.Time`
-            The times ranges to project the STMOC onto.
+            Time ranges. Must be a Nx2 shaped astropy time array.
         
         Returns
         -------
         result : `~mocpy.moc.MOC`
-            The projeted Spatial Coverage map resulting from the union of all the
-            spatial coverages lying in the set of time ranges given.
+            The spatial coverage being observed within the input time ranges
         """
         if times.ndim != 2 or times.shape[1] != 2:
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
@@ -123,26 +122,25 @@ class STMOC(serializer.IO):
         ranges = core.project_on_second_dim(times, self.__index)
         return MOC(IntervalSet(ranges, make_consistent=False))
 
-    def project_on_first_dimension(self, moc):
+    def query_by_space(self, spatial_coverage):
         """
-        Project the STMOC to its first dimension with a constraint
-        on its second dimension.
+        Query the ST-MOC by space coverage.
 
         This will perform the union of all the time ranges whose associated
         spatial coverages lie in ``moc``.
 
         Parameters
         ----------
-        moc : `mocpy.MOC`
-            The spatial coverage to project the STMOC onto.
+        spatial_coverage : `mocpy.MOC`
+            The spatial coverage.
 
         Returns
         -------
         result : `~astropy.time.Time`
-            A set of astropy defined time ranges.
+            The time ranges observing in the ``spatial_coverage``
         """
         # Time ranges in µsec
-        time_ranges = core.project_on_first_dim(moc._intervals._intervals, self.__index)
+        time_ranges = core.project_on_first_dim(spatial_coverage._intervals._intervals, self.__index)
         return Time(time_ranges / 86400000000, format='jd', scale='tdb')
 
     def union(self, other):
