@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.3 documentation</title>
+    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.4 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.7.3 documentation</a>
+	<a href="../../../index.html">mocpy 0.7.4 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -161,22 +161,21 @@
         <span class="n">core</span><span class="o">.</span><span class="n">from_time_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="STMOC.project_on_second_dimension"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.project_on_second_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">project_on_second_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.query_by_time"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.query_by_time">[docs]</a>    <span class="k">def</span> <span class="nf">query_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Project the STMOC to its second dimension with a constraint on its first dimension.</span>
+<span class="sd">        Query the ST-MOC by time ranges.</span>
 
 <span class="sd">        This will perform the union of all the spatial coverages lying in a set of time ranges.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        times : `astropy.time.Time`</span>
-<span class="sd">            The times ranges to project the STMOC onto.</span>
+<span class="sd">            Time ranges. Must be a Nx2 shaped astropy time array.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        result : `~mocpy.moc.MOC`</span>
-<span class="sd">            The projeted Spatial Coverage map resulting from the union of all the</span>
-<span class="sd">            spatial coverages lying in the set of time ranges given.</span>
+<span class="sd">            The spatial coverage being observed within the input time ranges</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times ranges must be provided. The shape of times must be (_, 2)&quot;</span><span class="p">)</span>
@@ -185,26 +184,25 @@
         <span class="n">ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_second_dim</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="STMOC.project_on_first_dimension"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.project_on_first_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">project_on_first_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moc</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.query_by_space"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.query_by_space">[docs]</a>    <span class="k">def</span> <span class="nf">query_by_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_coverage</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Project the STMOC to its first dimension with a constraint</span>
-<span class="sd">        on its second dimension.</span>
+<span class="sd">        Query the ST-MOC by space coverage.</span>
 
 <span class="sd">        This will perform the union of all the time ranges whose associated</span>
 <span class="sd">        spatial coverages lie in ``moc``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        moc : `mocpy.MOC`</span>
-<span class="sd">            The spatial coverage to project the STMOC onto.</span>
+<span class="sd">        spatial_coverage : `mocpy.MOC`</span>
+<span class="sd">            The spatial coverage.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        result : `~astropy.time.Time`</span>
-<span class="sd">            A set of astropy defined time ranges.</span>
+<span class="sd">            The time ranges observing in the ``spatial_coverage``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Time ranges in µsec</span>
-        <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">moc</span><span class="o">.</span><span class="n">_intervals</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_intervals</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">time_ranges</span> <span class="o">/</span> <span class="mi">86400000000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="STMOC.union"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
