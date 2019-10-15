@@ -102,46 +102,20 @@ where
     ///   This will define the first dimension of the coverage.
     /// * `y` - A set of spatial HEALPix cell indices at the depth ``d2``.
     ///   This will define the second dimension of the coverage.
-    /// * `d1` - The depth of the coverage along its 1st dimension.
     /// * `d2` - The depth of the coverage along its 2nd dimension.
     ///
     /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
     ///
     /// # Precondition
     ///
-    /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
     /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
     /// - `x` must contain `[a..b]` ranges where `b > a`.
     pub fn create_range_quantity_space_coverage(
         x: Vec<Range<T>>,
         y: Vec<S>,
-        d1: i8,
         d2: i8,
     ) -> NestedRanges2D<T, S> {
-        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
-        let mut off1: T = One::one();
-        off1 = off1.unsigned_shl(s1) - One::one();
-
-        let mut m1: T = One::one();
-        m1 = m1.checked_mul(&!off1).unwrap();
-
-        let x = x
-            .into_par_iter()
-            .filter_map(|r| {
-                let a: T = r.start & m1;
-                let b: T = r.end
-                    .checked_add(&off1)
-                    .unwrap()
-                    & m1;
-                if b > a {
-                    Some(a..b)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-
         let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
         let y = y
             .into_par_iter()
@@ -154,7 +128,9 @@ where
             })
             .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
+        let ranges = Ranges2D::<T, S>::new(x, y)
+            .remove_different_length_time_ranges()
+            .make_consistent();
 
         NestedRanges2D { ranges }
     }
@@ -239,12 +215,11 @@ where
         coverage: &NestedRanges2D<T, S>,
     ) -> NestedRanges<S> {
         let coverage = &coverage.ranges;
-        let ranges = coverage
-            .x
+        let ranges = coverage.x
             .par_iter()
             .zip_eq(coverage.y.par_iter())
             // Filter the time ranges to keep only those
-            // that lie into ``x``
+            // that intersects with ``x``
             .filter_map(|(t, s)| {
                 if x.intersects(t) {
                     Some(s.clone())
@@ -252,11 +227,9 @@ where
                     None
                 }
             })
-            // Compute the union of all the 2nd dim ranges
-            // that have been kept
+            // Compute the union of all the 2nd
+            // dim ranges that have been kept
             .reduce(
-                // We do not want a min_depth along the 2nd dimension
-                // making sure that the created Ranges<S> is valid.
                 || Ranges::<S>::new(vec![]),
                 |s1, s2| s1.union(&s2),
             );
@@ -537,5 +510,30 @@ impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
         };
 
         Ok(NestedRanges2D { ranges })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::nestedranges2d::NestedRanges2D;
+
+    use num::{Integer, PrimInt};
+    use std::ops::Range;
+
+    #[test]
+    fn test_create_range_quantity_space_coverage() {
+        let times_ranges: Vec<Range<u64>> = vec![6..7, 16..17];
+        let spatial_ranges: Vec<u64> = vec![7, 20];
+        
+        let time_depth = 27;
+        let spatial_depth = 1;
+
+        let result = NestedRanges2D::<u64, u64>::create_range_quantity_space_coverage(
+            times_ranges,
+            spatial_ranges,
+            spatial_depth
+        );
+
+        assert_eq!(NestedRanges2D::new(), result);
     }
 }

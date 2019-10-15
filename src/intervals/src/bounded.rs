@@ -20,6 +20,11 @@ where
     }
 
     #[inline(always)]
+    fn get_lsb(x: T) -> u32 {
+        x.trailing_zeros() as u32
+    }
+
+    #[inline(always)]
     fn pix_depth(u: T) -> (u32, T) {
         let msb = Self::get_msb(u) & TO_EVEN_MASK;
 
@@ -28,6 +33,14 @@ where
         let pix = u - t.unsigned_shl(msb);
 
         (depth, pix)
+    }
+
+    #[inline(always)]
+    fn get_depth(x: T) -> u32 {
+        let msb = Self::get_msb(x) & TO_EVEN_MASK;
+        let depth = (msb >> 1) - 1;
+
+        depth
     }
 }
 

@@ -193,7 +193,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Arguments
     ///
-    /// * ``times`` - The times at which the sky coordinates have be given.
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -213,17 +214,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_ranges_lonlat")]
     fn from_time_ranges_lonlat(
         index: usize,
-        times_start: &PyArray1<f64>,
-        times_end: &PyArray1<f64>,
-        d1: i8,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
-        let times_start = times_start.as_array()
+        let times_min = times_min.as_array()
             .to_owned()
             .into_raw_vec();
-        let times_end = times_end.as_array()
+        let times_max = times_max.as_array()
             .to_owned()
             .into_raw_vec();
         let lon = lon.as_array()
@@ -233,12 +233,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_position(
-            times_start, times_end,
-            lon, lat,
-            d1,
-            d2
-        )?;
+        let coverage = time_space_coverage::create_from_time_ranges_position(times_min, times_max, lon, lat, d2)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python

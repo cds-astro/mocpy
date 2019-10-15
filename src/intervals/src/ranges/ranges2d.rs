@@ -1,5 +1,5 @@
 use crate::bounded::Bounded;
-use num::{Integer, PrimInt};
+use num::{Integer, PrimInt, One};
 
 use crate::ranges::Ranges;
 use std::cmp;
@@ -43,6 +43,57 @@ type Operation<T, S> = fn(
     usize,
 ) -> Option<Ranges<S>>;
 
+#[derive(Eq, PartialEq)]
+struct BoundRange<'a, T, S>
+where
+    T: Integer + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug,
+{
+    x: T,
+    y: &'a Ranges<S>,
+    start: bool
+};
+
+impl<'a, T, S> BoundRange<'a, T, S>
+where
+    T: Integer + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
+{
+    fn new(x: T, y: &'a Ranges<S>, start: bool) -> BoundRange<'a, T, S> {
+        BoundRange {
+            x,
+            y,
+            start
+        }
+    }
+}
+
+impl<'a, T, S> Ord for BoundRange<'a, T, S>
+where
+    T: Integer + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
+{
+    fn cmp(&self, other: &BoundRange<'a, T, S>) -> Ordering {
+        // Notice that the we flip the ordering on costs.
+        // In case of a tie we compare positions - this step is necessary
+        // to make implementations of `PartialEq` and `Ord` consistent.
+        other.x.cmp(&self.x)
+            .then_with(|| self.start.cmp(&other.start))
+    }
+}
+
+// `PartialOrd` needs to be implemented as well.
+impl PartialOrd for BoundRange<'a, T, S>
+where
+    T: Integer + Sync + std::fmt::Debug,
+    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
+{
+    fn partial_cmp(&self, other: &BoundRange<'a, T, S>) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+use std::collections::BinaryHeap;
 impl<T, S> Ranges2D<T, S>
 where
     T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
@@ -62,6 +113,55 @@ where
     /// ``t`` and ``s`` must have the same length.
     pub fn new(t: Vec<Range<T>>, s: Vec<Ranges<S>>) -> Ranges2D<T, S> {
         Ranges2D { x: t, y: s }
+    }
+
+    pub fn remove_different_length_time_ranges(mut self) -> Self {
+        if !self.is_empty() {
+            let mut time_ranges_heap = BinaryHeap::new();
+            
+            self.x
+                .iter()
+                .zip_eq(self.y.iter())
+                .map(|(t, s)| {
+                    let start_b = BoundRange::new(t.start, s, true);
+                    let end_b = BoundRange::new(t.end, s, true);
+
+                    time_ranges_heap.push(start_b);
+                    time_ranges_heap.push(end_b);
+                });
+
+            /*let (t, s): (Vec<_>, Vec<_>) = self.x
+                .into_par_iter()
+                .zip_eq(self.y.into_par_iter())
+                .map(|(t, s)| {
+                    let mut t1: T = One::one();
+                    t1 = t1.checked_mul(&t.start).unwrap();
+
+                    let mut sentinel: T = One::one();
+                    sentinel = sentinel.checked_mul(&t.end).unwrap();
+
+                    let mut split_ranges = Vec::new();
+                    while t1 < sentinel {
+                        let t2 = t1.checked_add(&min_length_time_range)
+                            .unwrap()
+                            .checked_sub(&One::one())
+                            .unwrap();
+
+                        let time_range = t1..t2;
+                        split_ranges.push((time_range, s.clone()));
+                        t1 = dbg!(t2);
+                    }
+
+                    split_ranges
+                })
+                .flatten()
+                .unzip();
+            
+            self.x = t;
+            self.y = s;*/
+        }
+
+        self
     }
 
     pub fn make_consistent(mut self) -> Self {
@@ -556,6 +656,26 @@ mod tests {
         let s_expect = vec![
             Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
             Ranges::<u64>::new(vec![16..21]),
+        ];
+        let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
+        assert_eq!(coverage, coverage_expect);
+    }
+
+    #[test]
+    fn remove_different_length_time_ranges() {
+        let t = vec![0..7, 0..30];
+        let s = vec![
+            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new(vec![16..21]),
+        ];
+        let coverage = Ranges2D::<u64, u64>::new(t, s)
+            .remove_different_length_time_ranges()
+            .make_consistent();
+
+        let t_expect = vec![0..7, 7..30];
+        let s_expect = vec![
+            Ranges::<u64>::new(vec![0..4, 5..21]),
+            Ranges::<u64>::new(vec![16..21])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
