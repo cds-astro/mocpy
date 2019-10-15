@@ -10,7 +10,7 @@ use num::{CheckedAdd, Integer, One, PrimInt, Zero};
 
 pub mod ranges2d;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq)]
 pub struct Ranges<T>(Vec<Range<T>>)
 where
     T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug;

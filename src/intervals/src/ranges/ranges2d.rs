@@ -43,57 +43,54 @@ type Operation<T, S> = fn(
     usize,
 ) -> Option<Ranges<S>>;
 
-#[derive(Eq, PartialEq)]
-struct BoundRange<'a, T, S>
+#[derive(Eq, PartialEq, Debug)]
+struct BoundRange<T>
 where
     T: Integer + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug,
 {
     x: T,
-    y: &'a Ranges<S>,
+    y_idx: usize,
     start: bool
-};
+}
 
-impl<'a, T, S> BoundRange<'a, T, S>
+impl<T> BoundRange<T>
 where
     T: Integer + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
 {
-    fn new(x: T, y: &'a Ranges<S>, start: bool) -> BoundRange<'a, T, S> {
+    fn new(x: T, y_idx: usize, start: bool) -> BoundRange<T> {
         BoundRange {
             x,
-            y,
+            y_idx,
             start
         }
     }
 }
 
-impl<'a, T, S> Ord for BoundRange<'a, T, S>
+use std::cmp::Ordering;
+impl<T> Ord for BoundRange<T>
 where
     T: Integer + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
 {
-    fn cmp(&self, other: &BoundRange<'a, T, S>) -> Ordering {
+    fn cmp(&self, other: &BoundRange<T>) -> Ordering {
         // Notice that the we flip the ordering on costs.
         // In case of a tie we compare positions - this step is necessary
         // to make implementations of `PartialEq` and `Ord` consistent.
-        other.x.cmp(&self.x)
-            .then_with(|| self.start.cmp(&other.start))
+        self.x.cmp(&other.x)
+            .then_with(|| other.start.cmp(&self.start))
     }
 }
 
 // `PartialOrd` needs to be implemented as well.
-impl PartialOrd for BoundRange<'a, T, S>
+impl<T> PartialOrd for BoundRange<T>
 where
     T: Integer + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug 
 {
-    fn partial_cmp(&self, other: &BoundRange<'a, T, S>) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &BoundRange<T>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
 impl<T, S> Ranges2D<T, S>
 where
     T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
@@ -119,16 +116,56 @@ where
         if !self.is_empty() {
             let mut time_ranges_heap = BinaryHeap::new();
             
-            self.x
-                .iter()
-                .zip_eq(self.y.iter())
-                .map(|(t, s)| {
-                    let start_b = BoundRange::new(t.start, s, true);
-                    let end_b = BoundRange::new(t.end, s, true);
+            for (idx, t) in self.x.iter().enumerate() {
+                let start_b = BoundRange::new(t.start, idx, true);
+                let end_b = BoundRange::new(t.end, idx, false);
 
-                    time_ranges_heap.push(start_b);
-                    time_ranges_heap.push(end_b);
-                });
+                time_ranges_heap.push(start_b);
+                time_ranges_heap.push(end_b);
+            }
+
+            let sorted_time_bound_ranges = time_ranges_heap.into_sorted_vec();
+
+            let mut time_ranges = vec![];
+            let mut spatial_coverages = vec![];
+
+            let mut ranges_idx = HashSet::new();
+            ranges_idx.insert(0);
+            let mut prev_time_bound = sorted_time_bound_ranges
+                .first()
+                .unwrap()
+                .x;
+            for time_bound in sorted_time_bound_ranges.iter().skip(1) {
+                let cur_time_bound = time_bound.x;
+
+                if time_bound.start {
+                    // We enter a new time range
+                    ranges_idx.insert(time_bound.y_idx);
+                }
+
+                if cur_time_bound > prev_time_bound {
+                    
+
+                    let mut spatial_coverage = Ranges::<S>::new(vec![]);
+
+                    for coverage_idx in ranges_idx.iter() {
+                        let ref other_spatial_coverage = self.y[coverage_idx.clone()];
+                        spatial_coverage = (&spatial_coverage).union(other_spatial_coverage);
+                    }
+
+                    time_ranges.push(prev_time_bound..cur_time_bound);
+                    spatial_coverages.push(spatial_coverage);
+                }
+
+                if !time_bound.start {
+                    ranges_idx.remove(&time_bound.y_idx);
+                }
+
+                prev_time_bound = cur_time_bound;
+            }
+
+            self.x = time_ranges;
+            self.y = spatial_coverages;
 
             /*let (t, s): (Vec<_>, Vec<_>) = self.x
                 .into_par_iter()
@@ -671,7 +708,7 @@ mod tests {
         let coverage = Ranges2D::<u64, u64>::new(t, s)
             .remove_different_length_time_ranges()
             .make_consistent();
-
+        
         let t_expect = vec![0..7, 7..30];
         let s_expect = vec![
             Ranges::<u64>::new(vec![0..4, 5..21]),

@@ -519,21 +519,4 @@ mod tests {
 
     use num::{Integer, PrimInt};
     use std::ops::Range;
-
-    #[test]
-    fn test_create_range_quantity_space_coverage() {
-        let times_ranges: Vec<Range<u64>> = vec![6..7, 16..17];
-        let spatial_ranges: Vec<u64> = vec![7, 20];
-        
-        let time_depth = 27;
-        let spatial_depth = 1;
-
-        let result = NestedRanges2D::<u64, u64>::create_range_quantity_space_coverage(
-            times_ranges,
-            spatial_ranges,
-            spatial_depth
-        );
-
-        assert_eq!(NestedRanges2D::new(), result);
-    }
 }
