@@ -1,10 +1,9 @@
 use crate::bounded::Bounded;
-use num::{Integer, PrimInt, One};
+use num::{Integer, PrimInt};
 
 use crate::ranges::Ranges;
 use std::cmp;
 use std::ops::Range;
-use std::collections::HashMap;
 
 use rayon::prelude::*;
 

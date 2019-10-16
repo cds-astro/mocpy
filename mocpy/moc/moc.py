@@ -543,6 +543,50 @@ class MOC(AbstractMOC):
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
     @classmethod
+    def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
+        """
+        Creates a MOC from a cone.
+
+        The cone is centered around the (`lon`, `lat`) position with a radius expressed by
+        `radius`.
+
+        Parameters
+        ----------
+        lon : `astropy.units.Quantity`
+            The longitude of the center of the cone.
+        lat : `astropy.units.Quantity`
+            The latitude of the center of the cone.
+        radius : `astropy.coordinates.Angle`
+            The radius angle of the cone.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle
+        >>> moc = MOC.from_cone(
+        ...  lon=0 * u.deg,
+        ...  lat=0 * u.deg,
+        ...  radius=Angle(10, u.deg),
+        ...  max_depth=10
+        ... )
+        """
+        pix, depth, fully_covered_flags = cdshealpix.cone_search(lon, lat, radius, max_depth, delta_depth, flat=False)
+        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+
+    @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
         """
         Creates a MOC from a polygon.
