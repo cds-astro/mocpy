@@ -72,11 +72,14 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
+        min_times_jd = np.atleast_1d(min_times.jd)
+        max_times_jd = np.atleast_1d(max_times.jd)
+
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
         intervals = core.from_time_ranges(
-            min_times.jd.astype(np.float64),
-            max_times.jd.astype(np.float64),
+            min_times_jd.astype(np.float64),
+            max_times_jd.astype(np.float64),
         )
 
         tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))

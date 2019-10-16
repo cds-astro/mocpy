@@ -49,7 +49,7 @@ where
     /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
     /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
-    pub fn create_quantity_space_coverage(
+    pub fn create_from_times_positions(
         x: Vec<T>,
         y: Vec<S>,
         d1: i8,
@@ -111,11 +111,35 @@ where
     /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
     /// - `x` must contain `[a..b]` ranges where `b > a`.
-    pub fn create_range_quantity_space_coverage(
+    pub fn create_from_time_ranges_positions(
         x: Vec<Range<T>>,
         y: Vec<S>,
+        d1: i8,
         d2: i8,
     ) -> NestedRanges2D<T, S> {
+        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
+        let mut off1: T = One::one();
+        off1 = off1.unsigned_shl(s1) - One::one();
+
+        let mut m1: T = One::one();
+        m1 = m1.checked_mul(&!off1).unwrap();
+
+        let x = x
+            .into_par_iter()
+            .filter_map(|r| {
+                let a: T = r.start & m1;
+                let b: T = r.end
+                    .checked_add(&off1)
+                    .unwrap()
+                    & m1;
+                if b > a {
+                    Some(a..b)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
         let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
         let y = y
             .into_par_iter()
@@ -129,7 +153,6 @@ where
             .collect::<Vec<_>>();
 
         let ranges = Ranges2D::<T, S>::new(x, y)
-            .remove_different_length_time_ranges()
             .make_consistent();
 
         NestedRanges2D { ranges }

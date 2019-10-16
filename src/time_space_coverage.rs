@@ -71,7 +71,7 @@ pub fn create_from_time_position(
             .map(|t| (t * 86400000000_f64).floor() as u64)
             .collect::<Vec<_>>();
 
-        Ok(NestedRanges2D::<u64, u64>::create_quantity_space_coverage(
+        Ok(NestedRanges2D::<u64, u64>::create_from_times_positions(
             times, ipix, dt, ds,
         ))
     }
@@ -105,6 +105,7 @@ pub fn create_from_time_position(
 pub fn create_from_time_ranges_position(
     times_start: Vec<f64>,
     times_end: Vec<f64>,
+    dt: i8,
     lon: Vec<f64>,
     lat: Vec<f64>,
     ds: i8,
@@ -112,6 +113,11 @@ pub fn create_from_time_ranges_position(
     if ds < 0 || ds > u64::MAXDEPTH {
         Err(exceptions::ValueError::py_err(format!(
             "Space depth must be in [0, {0}]",
+            <u64>::MAXDEPTH
+        )))
+    } else if dt < 0 || dt > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err(format!(
+            "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else {
@@ -151,8 +157,8 @@ pub fn create_from_time_ranges_position(
             ));
         }
 
-        Ok(NestedRanges2D::<u64, u64>::create_range_quantity_space_coverage(
-            times, ipix, ds,
+        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_positions(
+            times, ipix, dt, ds,
         ))
     }
 }

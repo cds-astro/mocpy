@@ -350,3 +350,12 @@ def test_from_fits_old():
 ])
 def test_moc_complement(input, expected):
     assert input.complement() == expected
+
+
+def test_spatial_res_to_order():
+    order = np.arange(30)
+
+    res = MOC.order_to_spatial_resolution(order)
+    output = MOC.spatial_resolution_to_order(res)
+
+    assert (order == output).all()

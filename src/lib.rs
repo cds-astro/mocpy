@@ -216,6 +216,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         index: usize,
         times_min: &PyArray1<f64>,
         times_max: &PyArray1<f64>,
+        d1: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
         d2: i8,
@@ -233,7 +234,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_position(times_min, times_max, lon, lat, d2)?;
+        let coverage = time_space_coverage::create_from_time_ranges_position(times_min, times_max, d1, lon, lat, d2)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python

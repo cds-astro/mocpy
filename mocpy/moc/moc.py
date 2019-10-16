@@ -8,7 +8,7 @@ from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Angle
 from astropy import wcs
 
 import cdshealpix
@@ -627,6 +627,44 @@ class MOC(AbstractMOC):
 
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
+
+    @staticmethod
+    def order_to_spatial_resolution(order):
+        """
+        Convert a depth to its equivalent spatial resolution.
+
+        Parameters
+        ----------
+        order : int
+            Spatial depth.
+
+        Returns
+        -------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution.
+
+        """
+        spatial_resolution = Angle(np.sqrt(np.pi/(3 * 4**(order))), unit='rad')
+        return spatial_resolution
+
+    @staticmethod
+    def spatial_resolution_to_order(spatial_resolution):
+        """
+        Convert a spatial resolution to a MOC order.
+
+        Parameters
+        ----------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution
+
+        Returns
+        -------
+        order : int
+            The order corresponding to the spatial resolution
+        """
+        res_rad = spatial_resolution.rad
+        order = np.ceil(np.log2(np.pi/(3*res_rad*res_rad))/2)
+        return np.uint8(order)
 
     @property
     def _fits_header_keywords(self):
