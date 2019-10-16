@@ -136,11 +136,58 @@ class STMOC(serializer.IO):
         if times_start.shape != lon.shape or lon.shape != lat.shape or times_start.shape != times_end.shape:
             raise ValueError("Times and positions must have the same length.")
 
-        if times.ndim != 1:
+        if times_start.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
         core.from_time_ranges_lonlat(result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth)
+        return result
+
+    @classmethod
+    def from_time_ranges_cones(cls, times_start, times_end, lon, lat, radius, time_depth=29, spatial_depth=29):
+        """
+        Creates a 2D Coverage from a set of times and positions associated to each time.
+
+        - Its first dimension refers to `astropy.time.Time` times.
+        - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
+
+        Parameters
+        ----------
+        times_start : `astropy.time.Time`
+            The starting times of each observations.
+        times_end : `astropy.time.Time`
+            The ending times of each observations.
+        lon : `astropy.units.Quantity`
+            The longitudes of the sky coordinates observed at a specific time.
+        lat : `astropy.units.Quantity`
+            The latitudes of the sky coordinates observed at a specific time.
+        radius : `astropy.coordinates.Angle`
+            The radius of the observation.
+        time_depth : int, optional
+            Time depth. By default, the time resolution chosen is 1µs.
+        spatial_depth : int, optional
+            Spatial depth. By default, the space resolution chosen is 393.2μas.
+
+        Returns
+        -------
+        result : `~mocpy.stmoc.STMOC`
+            The resulting Spatial-Time Coverage map.
+        """
+        times_start = times_start.jd.astype(np.float64)
+        times_end = times_end.jd.astype(np.float64)
+
+        lon = lon.to_value('rad').astype(np.float64)
+        lat = lat.to_value('rad').astype(np.float64)
+        radius = radius.to_value('rad').astype(np.float64)
+
+        if times_start.shape != lon.shape or lon.shape != lat.shape or times_start.shape != times_end.shape or times_start.shape != radius.shape:
+            raise ValueError("Times, positions and radiuses must have the same length.")
+
+        if times_start.ndim != 1:
+            raise ValueError("Times, positions and radiuses must be 1D arrays.")
+
+        result = cls()
+        core.from_time_ranges_cones(result.__index, times_start, times_end, time_depth, lon, lat, radius, spatial_depth)
         return result
 
     def query_by_time(self, times):

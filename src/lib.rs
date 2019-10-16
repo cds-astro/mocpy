@@ -179,7 +179,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_position(times, lon, lat, d1, d2)?;
+        let coverage = time_space_coverage::create_from_times_positions(times, lon, lat, d1, d2)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
@@ -189,7 +189,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     /// Create a 2D Time-Space coverage from a list of
-    /// (time, longitude, latitude) tuples.
+    /// (time_range, longitude, latitude) tuples.
     ///
     /// # Arguments
     ///
@@ -234,7 +234,67 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_position(times_min, times_max, d1, lon, lat, d2)?;
+        let coverage = time_space_coverage::create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude, radius) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians.
+    /// * ``lat`` - The latitudes in radians.
+    /// * ``radius`` - Radius in radians.
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon``, ``lat`` and ``radius`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_cones")]
+    fn from_time_ranges_cones(
+        index: usize,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
+        d1: i8,
+        lon: &PyArray1<f64>,
+        lat: &PyArray1<f64>,
+        radius: &PyArray1<f64>,
+        d2: i8,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let times_max = times_max.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let radius = radius.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let coverage = time_space_coverage::create_from_time_ranges_cones(times_min, times_max, d1, lon, lat, radius, d2, 2)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python

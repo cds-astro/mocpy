@@ -158,62 +158,59 @@ where
         NestedRanges2D { ranges }
     }
 
-    /// Create a Space/Quantity 2D coverage
+    /// Create a Quantity/Space 2D coverage
     ///
     /// # Arguments
     ///
-    /// * `x` - A set of spatial HEALPix cell indices at the depth ``d1``.
-    ///   This will define the second dimension of the coverage.
-    /// * `y` - A set of values expressed that will be degraded to the depth ``d2``.
+    /// * `x` - A set of quantity ranges that will be degraded to the depth ``d1``.
     ///   This quantity axe may refer to a time (expressed in µs), a redshift etc...
     ///   This will define the first dimension of the coverage.
-    /// * `d1` - The depth of the coverage along its 1st dimension.
+    /// * `y` - A set of spatial HEALPix cell indices at the depth ``d2``.
+    ///   This will define the second dimension of the coverage.
     /// * `d2` - The depth of the coverage along its 2nd dimension.
     ///
     /// The resulted 2D coverage will be of depth (``d1``, ``d2``)
     ///
     /// # Precondition
     ///
-    /// - `d1` must be valid (within `[0, <T>::MAXDEPTH]`)
     /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
-    pub fn create_space_quantity_coverage(
-        x: Vec<T>,
-        y: Vec<S>,
+    /// - `x` must contain `[a..b]` ranges where `b > a`.
+    pub fn create_from_time_ranges_spatial_coverage(
+        x: Vec<Range<T>>,
+        y: Vec<NestedRanges<S>>,
         d1: i8,
-        d2: i8,
     ) -> NestedRanges2D<T, S> {
-        // The spatial dimension as the first one
-        let s1 = ((<S>::MAXDEPTH - d1) << 1) as u32;
+        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
+        let mut off1: T = One::one();
+        off1 = off1.unsigned_shl(s1) - One::one();
+
+        let mut m1: T = One::one();
+        m1 = m1.checked_mul(&!off1).unwrap();
+
         let x = x
             .into_par_iter()
-            .map(|r| {
-                let a = r.unsigned_shl(s1);
-                let b = r.checked_add(&One::one()).unwrap().unsigned_shl(s1);
-                a..b
+            .filter_map(|r| {
+                let a: T = r.start & m1;
+                let b: T = r.end
+                    .checked_add(&off1)
+                    .unwrap()
+                    & m1;
+                if b > a {
+                    Some(a..b)
+                } else {
+                    None
+                }
             })
             .collect::<Vec<_>>();
-
-        // The quantity dimension as the second one
-        let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
-        let mut off2: S = One::one();
-        off2 = off2.unsigned_shl(s2) - One::one();
-
-        let mut m2: S = One::one();
-        m2 = m2.checked_mul(&!off2).unwrap();
 
         let y = y
             .into_par_iter()
-            .map(|r| {
-                let a: S = r & m2;
-                let b: S = r.checked_add(&off2).unwrap() & m2;
-                // We do not want a min_depth along the 2nd dimension
-                // making sure that the created Ranges<S> is valid.
-                Ranges::<S>::new(vec![a..b])
-            })
+            .map(|r| r.into())
             .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
+        let ranges = Ranges2D::<T, S>::new(x, y)
+            .make_consistent();
 
         NestedRanges2D { ranges }
     }

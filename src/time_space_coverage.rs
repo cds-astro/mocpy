@@ -32,7 +32,7 @@ use intervals::nestedranges2d::NestedRanges2D;
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_position(
+pub fn create_from_times_positions(
     times: Vec<f64>,
     lon: Vec<f64>,
     lat: Vec<f64>,
@@ -77,7 +77,6 @@ pub fn create_from_time_position(
     }
 }
 
-
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and ranges of times.
 ///
@@ -102,7 +101,7 @@ pub fn create_from_time_position(
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_ranges_position(
+pub fn create_from_time_ranges_positions(
     times_start: Vec<f64>,
     times_end: Vec<f64>,
     dt: i8,
@@ -159,6 +158,110 @@ pub fn create_from_time_ranges_position(
 
         Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_positions(
             times, ipix, dt, ds,
+        ))
+    }
+}
+
+use intervals::nestedranges::NestedRanges;
+/// Create a time-spatial coverage (2D) from a list of cones
+/// and time ranges.
+///
+/// # Arguments
+///
+/// * ``times_start`` - The starting times expressed in jd.
+/// * ``times_end`` - The ending times expressed in jd.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``radius`` - The radiuses of the cones.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn create_from_time_ranges_cones(
+    times_start: Vec<f64>,
+    times_end: Vec<f64>,
+    dt: i8,
+    lon: Vec<f64>,
+    lat: Vec<f64>,
+    radius: Vec<f64>,
+    ds: i8,
+    delta_ds: i8
+) -> PyResult<NestedRanges2D<u64, u64>> {
+    if ds < 0 || ds > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err(format!(
+            "Space depth must be in [0, {0}]",
+            <u64>::MAXDEPTH
+        )))
+    } else if dt < 0 || dt > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err(format!(
+            "Time depth must be in [0, {0}]",
+            <u64>::MAXDEPTH
+        )))
+    } else {
+        if times_start.len() != lon.len() ||
+           times_start.len() != lat.len() ||
+           times_start.len() != times_end.len() || 
+           times_start.len() != radius.len() {
+            return Err(exceptions::ValueError::py_err(
+                "Times, longitudes, latitudes and radius do not have the same shapes.",
+            ));
+        }
+
+        let mut cones = vec![NestedRanges::<u64>::new(vec![]); lon.len()];
+
+        cones.par_iter_mut()
+            .zip_eq(radius.into_par_iter().zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter())))
+            .for_each(|(cone, (r, (l, b)))| {
+                let bmoc = healpix::nested::cone_coverage_approx_custom(
+                    ds as u8,
+                    delta_ds as u8,
+                    l,
+                    b,
+                    r,
+                );
+
+                let data = bmoc.into_iter()
+                    .map(|cell| {
+                        let twice_delta_depth = 2 * ((<u64>::MAXDEPTH as u8) - cell.depth);
+                        (cell.hash << twice_delta_depth)..((cell.hash + 1) << twice_delta_depth)
+                    })
+                    .collect::<Vec<_>>();
+                
+                *cone = NestedRanges::new(data);
+            });
+
+        let times = times_start.into_par_iter()
+            .zip_eq(times_end.into_par_iter())
+            .filter_map(|(t1, t2)| {
+                let t1 = (t1 * 86400000000_f64).floor() as u64;
+                let t2 = (t2 * 86400000000_f64).floor() as u64;
+                if t2 > t1 {
+                    Some(t1..t2)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if times.len() != cones.len() {
+            return Err(exceptions::ValueError::py_err(
+                "Number of time ranges and sky coordinates do not match.",
+            ));
+        }
+
+        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_spatial_coverage(
+            times, cones, dt,
         ))
     }
 }
@@ -226,7 +329,6 @@ pub fn contains(
     Ok(())
 }
 
-use intervals::nestedranges::NestedRanges;
 /// Returns the union of the ranges along the `T` axis for which their
 /// `S` ranges is contained in ``y``
 ///
