@@ -1,9 +1,9 @@
+#[cfg(feature = "rayon")]
 extern crate intervals;
 #[macro_use(stack)]
 
 extern crate ndarray;
 extern crate healpix;
-extern crate ndarray_parallel;
 extern crate num;
 extern crate numpy;
 extern crate rayon;
@@ -17,7 +17,7 @@ extern crate lazy_static;
 use ndarray::{Array, Array1, Array2, Axis};
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use pyo3::{PyObject, ToPyObject};
 
 use intervals::nestedranges2d::NestedRanges2D;
@@ -267,16 +267,14 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
     ///
-    #[pyfn(m, "from_time_ranges_cones")]
-    fn from_time_ranges_cones(
+    #[pyfn(m, "from_time_ranges_spatial_coverages")]
+    fn from_time_ranges_spatial_coverages(
+        py: Python,
         index: usize,
         times_min: &PyArray1<f64>,
         times_max: &PyArray1<f64>,
         d1: i8,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>,
-        radius: &PyArray1<f64>,
-        d2: i8,
+        spatial_coverages: &PyList,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
             .to_owned()
@@ -284,17 +282,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let times_max = times_max.as_array()
             .to_owned()
             .into_raw_vec();
-        let lon = lon.as_array()
-            .to_owned()
-            .into_raw_vec();
-        let lat = lat.as_array()
-            .to_owned()
-            .into_raw_vec();
-        let radius = radius.as_array()
-            .to_owned()
-            .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_cones(times_min, times_max, d1, lon, lat, radius, d2, 2)?;
+        let coverage = time_space_coverage::from_time_ranges_spatial_coverages(py, times_min, times_max, d1, spatial_coverages)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
@@ -905,7 +894,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let shape = (ranges.shape()[0], 1);
 
             let start = ranges.into_shape(shape).unwrap();
-            let end = &start + &Array::ones(shape);
+            let end = &start + &Array2::<u64>::ones(shape);
 
             let ranges = stack![Axis(1), start, end];
             let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();

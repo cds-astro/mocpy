@@ -188,58 +188,46 @@ use intervals::nestedranges::NestedRanges;
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_ranges_cones(
+use pyo3::types::PyList;
+use numpy::PyArray2;
+use pyo3::{ToPyObject, Python};
+
+pub fn from_time_ranges_spatial_coverages(
+    py: Python,
     times_start: Vec<f64>,
     times_end: Vec<f64>,
     dt: i8,
-    lon: Vec<f64>,
-    lat: Vec<f64>,
-    radius: Vec<f64>,
-    ds: i8,
-    delta_ds: i8
+    spatial_coverages: &PyList,
 ) -> PyResult<NestedRanges2D<u64, u64>> {
-    if ds < 0 || ds > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
-            "Space depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
-        )))
-    } else if dt < 0 || dt > u64::MAXDEPTH {
+    if dt < 0 || dt > u64::MAXDEPTH {
         Err(exceptions::ValueError::py_err(format!(
             "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else {
-        if times_start.len() != lon.len() ||
-           times_start.len() != lat.len() ||
-           times_start.len() != times_end.len() || 
-           times_start.len() != radius.len() {
+        if times_start.len() != times_end.len() {
             return Err(exceptions::ValueError::py_err(
-                "Times, longitudes, latitudes and radius do not have the same shapes.",
+                "Invalid times.",
             ));
         }
 
-        let mut cones = vec![NestedRanges::<u64>::new(vec![]); lon.len()];
+        const ERR_CAST: &'static str = "Cannot cast spatial coverages to Array2<u64>";
+        let mut spatial_coverages_res: Vec<NestedRanges<u64>> = vec![];
 
-        cones.par_iter_mut()
-            .zip_eq(radius.into_par_iter().zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter())))
-            .for_each(|(cone, (r, (l, b)))| {
-                let bmoc = healpix::nested::cone_coverage_approx_custom(
-                    ds as u8,
-                    delta_ds as u8,
-                    l,
-                    b,
-                    r,
-                );
+        for spatial_cov in spatial_coverages.into_iter() {
+            // Loop over the python list and cast its elements
+            // to numpy PyArray2<u64> types first, to ndarray Array2<u64> secondly
+            // and finally to NestedRanges<u64>
+            let spatial_cov = spatial_cov
+                .to_object(py)
+                .extract::<&PyArray2<u64>>(py)
+                .map_err(|_| exceptions::ValueError::py_err(ERR_CAST))?
+                .as_array()
+                .to_owned()
+                .into();
 
-                let data = bmoc.into_iter()
-                    .map(|cell| {
-                        let twice_delta_depth = 2 * ((<u64>::MAXDEPTH as u8) - cell.depth);
-                        (cell.hash << twice_delta_depth)..((cell.hash + 1) << twice_delta_depth)
-                    })
-                    .collect::<Vec<_>>();
-                
-                *cone = NestedRanges::new(data);
-            });
+            spatial_coverages_res.push(spatial_cov);
+        }
 
         let times = times_start.into_par_iter()
             .zip_eq(times_end.into_par_iter())
@@ -254,20 +242,13 @@ pub fn create_from_time_ranges_cones(
             })
             .collect::<Vec<_>>();
 
-        if times.len() != cones.len() {
-            return Err(exceptions::ValueError::py_err(
-                "Number of time ranges and sky coordinates do not match.",
-            ));
-        }
-
         Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_spatial_coverage(
-            times, cones, dt,
+            times, spatial_coverages_res, dt,
         ))
     }
 }
 
 use ndarray::Zip;
-use ndarray_parallel::prelude::*;
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and times.
 ///

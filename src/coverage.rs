@@ -54,7 +54,7 @@ pub fn flatten_pixels(data: Array2<u64>, depth: i8) -> Array1<u64> {
                 flattened_pixels.push(pix);
             }
         }
-        Array1::from_vec(flattened_pixels)
+        flattened_pixels.into()
     }
 }
 
