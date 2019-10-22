@@ -6,7 +6,7 @@
 astropy
 cdshealpix
 matplotlib
-networkx
+networkx==2.2
 lark-parser
 
 # Optional packages
