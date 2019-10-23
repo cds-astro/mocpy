@@ -353,7 +353,7 @@ def test_moc_complement(input, expected):
 
 
 def test_spatial_res_to_order():
-    order = np.arange(30)
+    order = np.arange(14)
 
     res = MOC.order_to_spatial_resolution(order)
     output = MOC.spatial_resolution_to_order(res)
