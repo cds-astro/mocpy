@@ -77,6 +77,7 @@ class TimeMOC(AbstractMOC):
 
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
+
         intervals = core.from_time_ranges(
             min_times_jd.astype(np.float64),
             max_times_jd.astype(np.float64),
