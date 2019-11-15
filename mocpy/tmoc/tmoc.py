@@ -74,10 +74,19 @@ class TimeMOC(AbstractMOC):
         """
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
-        intervals = core.from_time_ranges(
-            min_times.jd.astype(np.float64),
-            max_times.jd.astype(np.float64),
-        )
+        if len(min_times) != len(max_times):
+            raise ValueError("min_times and max_times must have the same dimensions.")
+
+        if len(min_times) > 1:
+            intervals = core.from_time_ranges(
+                min_times.jd.astype(np.float64),
+                max_times.jd.astype(np.float64),
+            )
+        else:
+            intervals = core.from_time_ranges(
+                np.float64(min_times.jd),
+                np.float64(max_times.jd),
+            )
 
         tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
         return tmoc.degrade_to_order(depth)
