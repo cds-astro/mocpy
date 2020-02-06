@@ -1,4 +1,6 @@
 use num::{Integer, One, PrimInt};
+use std::ops::Range;
+
 
 #[inline(always)]
 const fn num_bits<T>() -> usize {
@@ -19,6 +21,8 @@ where
         num_bits::<T>() as u32 - x.leading_zeros() - 1
     }
 
+    // Rename `depth_pix` to be coherent with the order of the elements in the tuple?
+    // Return depth as a u8 instead of a u32?
     #[inline(always)]
     fn get_lsb(x: T) -> u32 {
         x.trailing_zeros() as u32
@@ -41,6 +45,23 @@ where
         let depth = (msb >> 1) - 1;
 
         depth
+    }
+
+    // Provide depth as a u8 instead of a u32?
+    fn to_uniq(depth: u32, pix: T) -> T {
+        let mut t: T = One::one();
+        t = t.unsigned_shl(2);
+        t.unsigned_shl(depth << 1) + pix
+    }
+
+    #[inline(always)]
+    fn uniq_to_range(u: T) -> Range<T> {
+        let (depth, pix) = Self::pix_depth(u);
+        let tdd = (Self::MAXDEPTH as u32 - depth) << 1;
+        Range {
+            start: pix.unsigned_shl(tdd),
+            end: (pix + One::one()).unsigned_shl(tdd) - One::one(),
+        }
     }
 }
 

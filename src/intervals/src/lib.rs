@@ -16,6 +16,8 @@ pub mod nestedranges;
 mod ranges;
 pub mod uniqranges;
 
+mod valuedcell;
+
 pub mod nestedranges2d;
 
 use ndarray::Array2;
