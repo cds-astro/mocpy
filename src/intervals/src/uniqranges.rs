@@ -3,6 +3,7 @@ use num::{Integer, PrimInt};
 use crate::bounded::Bounded;
 use crate::nestedranges::NestedRanges;
 use crate::ranges::{Ranges, UniqToNestedIter};
+use num::One;
 
 use std::ops::Range;
 use std::slice::Iter;
@@ -86,7 +87,7 @@ impl From<UniqRanges<u64>> for Array2<u64> {
 use ndarray::Array1;
 fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T>
 where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::iter::Step + std::fmt::Debug,
+    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
 {
     let ranges = input.ranges;
 
@@ -94,12 +95,13 @@ where
 
     // Add the UNIQs contained into the spatial MOC
     for range in ranges.iter() {
-        for uniq_range in range.start..range.end {
+        for uniq_range in num::range_step(range.start, range.end, One::one()) {
             result.push(uniq_range);
         }
     }
     // Get an Array1 from the Vec<i64> without copying any data
-    Array1::from_vec(result).to_owned()
+    let result: Array1<T> = result.into();
+    result.to_owned()
 }
 impl From<UniqRanges<u64>> for Array1<u64> {
     fn from(input: UniqRanges<u64>) -> Self {

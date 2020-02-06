@@ -118,8 +118,7 @@ pub fn complement(coverage: &NestedRanges<u64>) -> NestedRanges<u64> {
 }
 
 use crate::coverage;
-use ndarray::{Array, Array1, Array2, Axis, Zip};
-use ndarray_parallel::prelude::*;
+use ndarray::{Array1, Array2, Axis, Zip};
 /// Create a spatial coverage from a list of HEALPix cell indices.
 ///
 /// # Arguments
@@ -138,7 +137,8 @@ use ndarray_parallel::prelude::*;
 ///
 /// * ``depth`` and ``pixels`` have not the same length.
 pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResult<Array2<u64>> {
-    let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
+    let ones: Array1<u64> = Array1::<u64>::ones(pixels.shape()[0]);
+    let mut pixels_1 = &pixels + &ones;
 
     if pixels.shape() != depth.shape() {
         return Err(exceptions::IndexError::py_err(

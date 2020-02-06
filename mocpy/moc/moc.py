@@ -8,7 +8,7 @@ from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Angle
 from astropy import wcs
 
 import cdshealpix
@@ -543,6 +543,50 @@ class MOC(AbstractMOC):
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
     @classmethod
+    def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
+        """
+        Creates a MOC from a cone.
+
+        The cone is centered around the (`lon`, `lat`) position with a radius expressed by
+        `radius`.
+
+        Parameters
+        ----------
+        lon : `astropy.units.Quantity`
+            The longitude of the center of the cone.
+        lat : `astropy.units.Quantity`
+            The latitude of the center of the cone.
+        radius : `astropy.coordinates.Angle`
+            The radius angle of the cone.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle
+        >>> moc = MOC.from_cone(
+        ...  lon=0 * u.deg,
+        ...  lat=0 * u.deg,
+        ...  radius=Angle(10, u.deg),
+        ...  max_depth=10
+        ... )
+        """
+        pix, depth, fully_covered_flags = cdshealpix.cone_search(lon, lat, radius, max_depth, delta_depth, flat=False)
+        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+
+    @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
         """
         Creates a MOC from a polygon.
@@ -627,6 +671,44 @@ class MOC(AbstractMOC):
 
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
+
+    @staticmethod
+    def order_to_spatial_resolution(order):
+        """
+        Convert a depth to its equivalent spatial resolution.
+
+        Parameters
+        ----------
+        order : int
+            Spatial depth.
+
+        Returns
+        -------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution.
+
+        """
+        spatial_resolution = Angle(np.sqrt(np.pi/(3 * 4**(order))), unit='rad')
+        return spatial_resolution
+
+    @staticmethod
+    def spatial_resolution_to_order(spatial_resolution):
+        """
+        Convert a spatial resolution to a MOC order.
+
+        Parameters
+        ----------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution
+
+        Returns
+        -------
+        order : int
+            The order corresponding to the spatial resolution
+        """
+        res_rad = spatial_resolution.rad
+        order = np.ceil(np.log2(np.pi/(3*res_rad*res_rad))/2)
+        return np.uint8(order)
 
     @property
     def _fits_header_keywords(self):

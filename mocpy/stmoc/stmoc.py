@@ -99,6 +99,88 @@ class STMOC(serializer.IO):
         core.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
         return result
 
+    @classmethod
+    def from_time_ranges_positions(cls, times_start, times_end, lon, lat, time_depth=29, spatial_depth=29):
+        """
+        Creates a 2D Coverage from a set of times and positions associated to each time.
+
+        - Its first dimension refers to `astropy.time.Time` times.
+        - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
+
+        Parameters
+        ----------
+        times_start : `astropy.time.Time`
+            The starting times of each observations.
+        times_end : `astropy.time.Time`
+            The ending times of each observations.
+        lon : `astropy.units.Quantity`
+            The longitudes of the sky coordinates observed at a specific time.
+        lat : `astropy.units.Quantity`
+            The latitudes of the sky coordinates observed at a specific time.
+        time_depth : int, optional
+            Time depth. By default, the time resolution chosen is 1µs.
+        spatial_depth : int, optional
+            Spatial depth. By default, the space resolution chosen is 393.2μas.
+
+        Returns
+        -------
+        result : `~mocpy.stmoc.STMOC`
+            The resulting Spatial-Time Coverage map.
+        """
+        times_start = times_start.jd.astype(np.float64)
+        times_end = times_end.jd.astype(np.float64)
+
+        lon = lon.to_value('rad').astype(np.float64)
+        lat = lat.to_value('rad').astype(np.float64)
+
+        if times_start.shape != lon.shape or lon.shape != lat.shape or times_start.shape != times_end.shape:
+            raise ValueError("Times and positions must have the same length.")
+
+        if times_start.ndim != 1:
+            raise ValueError("Times and positions must be 1D arrays.")
+
+        result = cls()
+        core.from_time_ranges_lonlat(result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth)
+        return result
+
+    @classmethod
+    def from_spatial_coverages(cls, times_start, times_end, spatial_coverages, time_depth=29):
+        """
+        Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.
+
+        Parameters
+        ----------
+        times_start : `astropy.time.Time`
+            The starting times of each observations.
+        times_end : `astropy.time.Time`
+            The ending times of each observations.
+        spatial_coverages : list
+            List of `mocpy.MOC` spatial coverage objects.
+        time_depth : int, optional
+            Time depth. By default, the time resolution chosen is 1µs.
+        spatial_depth : int, optional
+            Spatial depth. By default, the space resolution chosen is 393.2μas.
+
+        Returns
+        -------
+        result : `~mocpy.stmoc.STMOC`
+            The resulting Spatial-Time Coverage map.
+        """
+        times_start = times_start.jd.astype(np.float64)
+        times_end = times_end.jd.astype(np.float64)
+
+        if times_start.shape != times_end.shape or times_start.shape[0] != len(spatial_coverages):
+            raise ValueError("Time ranges and spatial coverages must have the same length")
+
+        if times_start.ndim != 1:
+            raise ValueError("Times and spatial coverages must be 1D arrays")
+
+        result = cls()
+        spatial_coverages = [spatial_coverage._interval_set._intervals for spatial_coverage in spatial_coverages]
+
+        core.from_time_ranges_spatial_coverages(result.__index, times_start, times_end, time_depth, spatial_coverages)
+        return result
+
     def query_by_time(self, times):
         """
         Query the ST-MOC by time ranges.
@@ -140,7 +222,7 @@ class STMOC(serializer.IO):
             The time ranges observing in the ``spatial_coverage``
         """
         # Time ranges in µsec
-        time_ranges = core.project_on_first_dim(spatial_coverage._intervals._intervals, self.__index)
+        time_ranges = core.project_on_first_dim(spatial_coverage._interval_set._intervals, self.__index)
         return Time(time_ranges / 86400000000, format='jd', scale='tdb')
 
     def union(self, other):

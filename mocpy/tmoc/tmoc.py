@@ -72,11 +72,14 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
+        min_times_jd = np.atleast_1d(min_times.jd)
+        max_times_jd = np.atleast_1d(max_times.jd)
+
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
         intervals = core.from_time_ranges(
-            min_times.jd.astype(np.float64),
-            max_times.jd.astype(np.float64),
+            min_times_jd.astype(np.float64),
+            max_times_jd.astype(np.float64),
         )
 
         tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
@@ -419,7 +422,7 @@ class TimeMOC(AbstractMOC):
         order = 29 - int(np.log2(delta_time.sec * 1e6) / 2)
         return np.uint8(order)
 
-    def plot(self, title='TimeMoc', view=(None, None)):
+    def plot(self, title='TimeMoc', view=(None, None), figsize=(9.5, 5), **kwargs):
         """
         Plot the TimeMoc in a time window.
 
@@ -456,7 +459,7 @@ class TimeMOC(AbstractMOC):
         if max_jd < min_jd:
             raise ValueError("Invalid selection: max_jd = {0} must be > to min_jd = {1}".format(max_jd, min_jd))
 
-        fig1 = plt.figure(figsize=(9.5, 5))
+        fig1 = plt.figure(figsize=figsize)
         ax = fig1.add_subplot(111)
 
         ax.set_xlabel('iso')
@@ -487,7 +490,7 @@ class TimeMOC(AbstractMOC):
         color_map.set_under('w')
         color_map.set_bad('gray')
 
-        plt.imshow(z, interpolation='bilinear', cmap=color_map)
+        plt.imshow(z, interpolation='bilinear', **kwargs)
 
         def on_mouse_motion(event):
             for txt in ax.texts:

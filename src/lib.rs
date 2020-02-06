@@ -1,9 +1,9 @@
+#[cfg(feature = "rayon")]
 extern crate intervals;
 #[macro_use(stack)]
 
 extern crate ndarray;
 extern crate healpix;
-extern crate ndarray_parallel;
 extern crate num;
 extern crate numpy;
 extern crate rayon;
@@ -17,7 +17,7 @@ extern crate lazy_static;
 use ndarray::{Array, Array1, Array2, Axis};
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use pyo3::{PyObject, ToPyObject};
 
 use intervals::nestedranges2d::NestedRanges2D;
@@ -179,7 +179,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_position(times, lon, lat, d1, d2)?;
+        let coverage = time_space_coverage::create_from_times_positions(times, lon, lat, d1, d2)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
@@ -189,11 +189,12 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     /// Create a 2D Time-Space coverage from a list of
-    /// (time, longitude, latitude) tuples.
+    /// (time_range, longitude, latitude) tuples.
     ///
     /// # Arguments
     ///
-    /// * ``times`` - The times at which the sky coordinates have be given.
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -213,17 +214,17 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_ranges_lonlat")]
     fn from_time_ranges_lonlat(
         index: usize,
-        times_start: &PyArray1<f64>,
-        times_end: &PyArray1<f64>,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
         d1: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
-        let times_start = times_start.as_array()
+        let times_min = times_min.as_array()
             .to_owned()
             .into_raw_vec();
-        let times_end = times_end.as_array()
+        let times_max = times_max.as_array()
             .to_owned()
             .into_raw_vec();
         let lon = lon.as_array()
@@ -233,12 +234,56 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_position(
-            times_start, times_end,
-            lon, lat,
-            d1,
-            d2
-        )?;
+        let coverage = time_space_coverage::create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude, radius) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians.
+    /// * ``lat`` - The latitudes in radians.
+    /// * ``radius`` - Radius in radians.
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon``, ``lat`` and ``radius`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_spatial_coverages")]
+    fn from_time_ranges_spatial_coverages(
+        py: Python,
+        index: usize,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
+        d1: i8,
+        spatial_coverages: &PyList,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let times_max = times_max.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let coverage = time_space_coverage::from_time_ranges_spatial_coverages(py, times_min, times_max, d1, spatial_coverages)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
@@ -562,7 +607,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let cov_right = coverages.get(&id_right).unwrap();
 
             // Check the equality
-            (cov_left == cov_right)
+            cov_left == cov_right
         };
 
         // Return the index of the newly created
@@ -849,7 +894,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let shape = (ranges.shape()[0], 1);
 
             let start = ranges.into_shape(shape).unwrap();
-            let end = &start + &Array::ones(shape);
+            let end = &start + &Array2::<u64>::ones(shape);
 
             let ranges = stack![Axis(1), start, end];
             let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();

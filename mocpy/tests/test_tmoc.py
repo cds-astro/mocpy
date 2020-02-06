@@ -51,6 +51,15 @@ def test_tmoc_from_time_ranges():
             Time([3], format="jd", scale="tdb")
         )
 
+def test_tmoc_from_single_time_range():
+    """
+    Assert a correct tmoc loaded from a fits file is equal to the tmoc built from a CSV file
+    containing a list of time intervals
+    """
+    tmoc = TimeMOC.from_time_ranges(Time(0, format="mjd", scale="tdb"),
+                                    Time(3, format="mjd", scale="tdb"),
+                                    delta_t=TimeMOC.order_to_time_resolution(29))
+
 def test_add_neighbours():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
     times_expected = Time(np.array([1, 2, 3, 6, 7, 8])/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')

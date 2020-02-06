@@ -32,7 +32,7 @@ use intervals::nestedranges2d::NestedRanges2D;
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_position(
+pub fn create_from_times_positions(
     times: Vec<f64>,
     lon: Vec<f64>,
     lat: Vec<f64>,
@@ -71,12 +71,11 @@ pub fn create_from_time_position(
             .map(|t| (t * 86400000000_f64).floor() as u64)
             .collect::<Vec<_>>();
 
-        Ok(NestedRanges2D::<u64, u64>::create_quantity_space_coverage(
+        Ok(NestedRanges2D::<u64, u64>::create_from_times_positions(
             times, ipix, dt, ds,
         ))
     }
 }
-
 
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and ranges of times.
@@ -102,22 +101,22 @@ pub fn create_from_time_position(
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_ranges_position(
+pub fn create_from_time_ranges_positions(
     times_start: Vec<f64>,
     times_end: Vec<f64>,
+    dt: i8,
     lon: Vec<f64>,
     lat: Vec<f64>,
-    dt: i8,
     ds: i8,
 ) -> PyResult<NestedRanges2D<u64, u64>> {
-    if dt < 0 || dt > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
-            "Time depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
-        )))
-    } else if ds < 0 || ds > u64::MAXDEPTH {
+    if ds < 0 || ds > u64::MAXDEPTH {
         Err(exceptions::ValueError::py_err(format!(
             "Space depth must be in [0, {0}]",
+            <u64>::MAXDEPTH
+        )))
+    } else if dt < 0 || dt > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err(format!(
+            "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else {
@@ -157,14 +156,99 @@ pub fn create_from_time_ranges_position(
             ));
         }
 
-        Ok(NestedRanges2D::<u64, u64>::create_range_quantity_space_coverage(
+        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_positions(
             times, ipix, dt, ds,
         ))
     }
 }
 
+use intervals::nestedranges::NestedRanges;
+/// Create a time-spatial coverage (2D) from a list of cones
+/// and time ranges.
+///
+/// # Arguments
+///
+/// * ``times_start`` - The starting times expressed in jd.
+/// * ``times_end`` - The ending times expressed in jd.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``radius`` - The radiuses of the cones.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+use pyo3::types::PyList;
+use numpy::PyArray2;
+use pyo3::{ToPyObject, Python};
+
+pub fn from_time_ranges_spatial_coverages(
+    py: Python,
+    times_start: Vec<f64>,
+    times_end: Vec<f64>,
+    dt: i8,
+    spatial_coverages: &PyList,
+) -> PyResult<NestedRanges2D<u64, u64>> {
+    if dt < 0 || dt > u64::MAXDEPTH {
+        Err(exceptions::ValueError::py_err(format!(
+            "Time depth must be in [0, {0}]",
+            <u64>::MAXDEPTH
+        )))
+    } else {
+        if times_start.len() != times_end.len() {
+            return Err(exceptions::ValueError::py_err(
+                "Invalid times.",
+            ));
+        }
+
+        const ERR_CAST: &'static str = "Cannot cast spatial coverages to Array2<u64>";
+        let mut spatial_coverages_res: Vec<NestedRanges<u64>> = vec![];
+
+        for spatial_cov in spatial_coverages.into_iter() {
+            // Loop over the python list and cast its elements
+            // to numpy PyArray2<u64> types first, to ndarray Array2<u64> secondly
+            // and finally to NestedRanges<u64>
+            let spatial_cov = spatial_cov
+                .to_object(py)
+                .extract::<&PyArray2<u64>>(py)
+                .map_err(|_| exceptions::ValueError::py_err(ERR_CAST))?
+                .as_array()
+                .to_owned()
+                .into();
+
+            spatial_coverages_res.push(spatial_cov);
+        }
+
+        let times = times_start.into_par_iter()
+            .zip_eq(times_end.into_par_iter())
+            .filter_map(|(t1, t2)| {
+                let t1 = (t1 * 86400000000_f64).floor() as u64;
+                let t2 = (t2 * 86400000000_f64).floor() as u64;
+                if t2 > t1 {
+                    Some(t1..t2)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_spatial_coverage(
+            times, spatial_coverages_res, dt,
+        ))
+    }
+}
+
 use ndarray::Zip;
-use ndarray_parallel::prelude::*;
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and times.
 ///
@@ -226,7 +310,6 @@ pub fn contains(
     Ok(())
 }
 
-use intervals::nestedranges::NestedRanges;
 /// Returns the union of the ranges along the `T` axis for which their
 /// `S` ranges is contained in ``y``
 ///
