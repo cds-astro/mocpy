@@ -19,7 +19,7 @@ export CIBW_BEFORE_BUILD="yum install -y libpng-devel &&
  make install &&
  cd .. &&
  pip install setuptools-rust &&
- curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y"
+ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y"
 export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
 cibuildwheel --output-dir dist
 ### Upload the wheels to PyPI ###

@@ -7,5 +7,5 @@ $PYTHON -m pytest -v mocpy --cov-report=term --cov=mocpy
 # Test notebooks
 $PIP install .
 # Install other dependencies for running the notebooks
-$PIP install jupyter astroquery
+$PIP install jupyter astroquery regions
 $PYTHON test_notebooks.py

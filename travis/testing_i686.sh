@@ -23,7 +23,7 @@ linux32 --32bit i386 sh -c '
     pip install -r requirements/contributing.txt &&
     pip install setuptools_rust &&
     # Install Rust compiler
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y &&
+    curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y &&
     export PATH="$HOME/.cargo/bin:$PATH" &&
     # Build the rust dynamic library
     python3 setup.py build_rust &&
