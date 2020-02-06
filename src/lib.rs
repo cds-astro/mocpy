@@ -607,7 +607,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let cov_right = coverages.get(&id_right).unwrap();
 
             // Check the equality
-            (cov_left == cov_right)
+            cov_left == cov_right
         };
 
         // Return the index of the newly created

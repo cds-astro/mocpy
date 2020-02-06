@@ -314,7 +314,7 @@ where
         let data = utils::flatten(&mut ranges);
 
         // Get a Array1 from the Vec<u64> without copying any data
-        let result = Array1::from_vec(data);
+        let result: Array1<T> = data.into();
 
         // Reshape the result to get a Array2 of shape (N x 2) where N is the number
         // of HEALPix cell contained in the moc

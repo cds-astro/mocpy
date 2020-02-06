@@ -1,10 +1,12 @@
-#![feature(test)]
-#![feature(step_trait)]
+#![cfg_attr(nightly, feature(test))]
+
 extern crate healpix;
 extern crate ndarray;
 extern crate num;
 extern crate rand;
 extern crate rayon;
+
+#[cfg(nightly)]
 extern crate test;
 
 pub mod bounded;

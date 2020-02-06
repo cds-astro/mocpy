@@ -432,7 +432,8 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
         }
 
         // Get an Array1 from the Vec<i64> without copying any data
-        Array1::from_vec(result).to_owned()
+        let result: Array1<i64> = result.into();
+        result.to_owned()
     }
 }
 

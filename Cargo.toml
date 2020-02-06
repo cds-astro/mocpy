@@ -32,7 +32,7 @@ default-features = false # do not include the default features, and optionally
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.8.1"
+version = "0.8.5"
 features = ["extension-module"]
 
 [profile.release]
