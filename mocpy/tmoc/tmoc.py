@@ -45,6 +45,8 @@ class TimeMOC(AbstractMOC):
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
         times = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        times = np.atleast_1d(times)
+
         times = times.reshape((times.shape[0], 1))
         intervals = np.hstack((times, times + np.uint64(1)))
 
@@ -72,15 +74,20 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        min_times_jd = np.atleast_1d(min_times.jd)
-        max_times_jd = np.atleast_1d(max_times.jd)
-
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
+        
+        min_times = np.asarray(min_times.jd)
+        min_times = np.atleast_1d(min_times)
+
+        max_times = np.asarray(max_times.jd)
+        max_times = np.atleast_1d(max_times)
+
+        assert min_times.shape == max_times.shape
 
         intervals = core.from_time_ranges(
-            min_times_jd.astype(np.float64),
-            max_times_jd.astype(np.float64),
+            min_times.astype(np.float64),
+            max_times.astype(np.float64),
         )
 
         tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
