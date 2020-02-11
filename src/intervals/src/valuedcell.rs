@@ -1,25 +1,11 @@
-use num::{Num, Integer, PrimInt, One};
+
 use ndarray::Array1;
-use rayon::prelude::*;
 
 use std::cmp::Ordering::Equal;
 use std::ops::Range;
 
 use crate::bounded::{Bounded, NestedRange};
 use crate::nestedranges::NestedRanges;
-
-pub trait DivBy<Rhs = Self> {
-    type Output;
-    fn div_by(self, rhs: Rhs) -> Self::Output;
-}
-
-impl DivBy<u64> for f64 {
-    type Output = Self;
-
-    fn div_by(self, rhs: u64) -> Self::Output {
-        self / (rhs as f64)
-    }
-}
 
 /// Creates a MOC from the given list of uniq cells numbers according to the value they contains.
 /// We assume that the value is directly proportional to the covered area (like a flux or a probability).
@@ -43,6 +29,105 @@ impl DivBy<u64> for f64 {
 /// * `values`: values associated to each uniq.
 /// * `cumul_from`: the cumulative value from which cells are put in the MOC
 /// * `cumul_to`: the cumulative value to which cells are put in the MOC
+pub fn valued_cells_to_moc(
+    max_depth: u32,
+    uniq: Array1<u64>,
+    values: Array1<f64>,
+    cumul_from: f64,
+    cumul_to: f64
+) -> NestedRanges<u64> {
+    let mut valued_uniq_sorted: Vec<(u64, f64, f64)> = uniq.iter().zip(values.iter())
+        .map(|(uniq, val)| {
+            let (depth, _icell) = u64::pix_depth(*uniq);
+            let n_sub_cells = 1_u64 << ((max_depth - depth) << 1);
+            (*uniq, *val, val / (n_sub_cells as f64))
+        })
+    .collect::<Vec<(u64, f64, f64)>>();
+    // We use b.comp(a) instead of a.cmp(b) to get the DESC order
+    valued_uniq_sorted.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(Equal));
+    let mut result: Vec<Range<u64>> = Vec::with_capacity(valued_uniq_sorted.len());
+
+    let mut i = 0_usize;
+    let mut acc = 0_f64;
+    while i < valued_uniq_sorted.len() && acc + valued_uniq_sorted[i].1 <= cumul_from {
+        acc = acc + valued_uniq_sorted[i].1;
+        result.push(u64::uniq_to_range(valued_uniq_sorted[i].0));
+        i += 1;
+    }
+    if i < valued_uniq_sorted.len() && acc < cumul_from {
+        let (depth, icell) = u64::pix_depth(valued_uniq_sorted[i].0);
+        result = recursive_descent(
+            depth, icell, max_depth,
+            valued_uniq_sorted[i].1, cumul_from - acc, result);
+        i += 1;
+    }
+    while i < valued_uniq_sorted.len() && acc + valued_uniq_sorted[i].1 <= cumul_to {
+        acc = acc + valued_uniq_sorted[i].1;
+        result.push(u64::uniq_to_range(valued_uniq_sorted[i].0));
+        i += 1;
+    }
+    if i < valued_uniq_sorted.len() && acc < cumul_to {
+        let (depth, icell) = u64::pix_depth(valued_uniq_sorted[i].0);
+        result = recursive_descent(
+            depth, icell, max_depth,
+            valued_uniq_sorted[i].1, cumul_to - acc, result);
+    }
+    NestedRanges::new(result).make_consistent()
+}
+
+fn recursive_descent(
+    depth: u32,
+    ipix: u64,
+    max_depth: u32,
+
+    cell_val: f64,
+    mut target_val: f64,
+
+    mut result: Vec<Range<u64>>
+) -> Vec<Range<u64>> {
+    if depth == max_depth {
+        if cell_val <= target_val {
+            let rng: NestedRange<u64> = (depth as u8, ipix).into();
+            result.push(rng.0);
+        }
+    } else if target_val > 0_f64 {
+        let subcell_val = cell_val / 4_f64;
+        let depth = depth + 1;
+        let ipix = ipix << 2;
+        let mut i = 0_u64;
+        while i < 4 && target_val - subcell_val >= 0_f64 {
+            let rng: NestedRange<u64> = (depth as u8, ipix + i).into();
+            result.push(rng.0);
+            target_val = target_val - subcell_val;
+            i = i + 1;
+        }
+        if i < 4 {
+            result = recursive_descent(
+                depth, ipix + i, max_depth,
+                subcell_val, target_val, result
+            );
+        }
+    }
+    result
+}
+/*
+Version using generics. Seem to not work on windows archs. Is it a PyO3 bug or a
+bug involving the windows image used by AppVeyor?
+
+use num::{Num, Integer, PrimInt, One};
+pub trait DivBy<Rhs = Self> {
+    type Output;
+    fn div_by(self, rhs: Rhs) -> Self::Output;
+}
+
+impl DivBy<u64> for f64 {
+    type Output = Self;
+
+    fn div_by(self, rhs: u64) -> Self::Output {
+        self / (rhs as f64)
+    }
+}
+
 pub fn valued_cells_to_moc<T, V>(
     max_depth: u32,
     uniq: Array1<T>,
@@ -60,7 +145,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         })
     .collect::<Vec<(T, V, V)>>();
     // We use b.comp(a) instead of a.cmp(b) to get the DESC order
-    valued_uniq_sorted.par_sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(Equal));
+    valued_uniq_sorted.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(Equal));
     let mut result: Vec<Range<T>> = Vec::with_capacity(valued_uniq_sorted.len());
 
     let mut i = 0_usize;
@@ -124,7 +209,7 @@ where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
         }
     }
     result
-}
+}*/
 
 #[cfg(test)]
 mod tests {

@@ -70,12 +70,7 @@ build_script:
   - xcopy "build\lib\mocpy\*.pyd" mocpy /sy
 
 test_script:
-  - "%PYTHON%\\python.exe -m pytest -v mocpy --cov-report=term --cov=mocpy"
-  # Test docs build:
-  - cd docs
-  # Execute the tests found in the doc
-  - make doctest
-  - cd ..
+  - "%PYTHON%\\python.exe -m pytest -v mocpy"
 
 after_test:
   - ps: |

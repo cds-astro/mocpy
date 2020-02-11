@@ -137,6 +137,42 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }
+    
+    /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
+    ///
+    /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
+    ///
+    /// # Arguments
+    ///
+    /// * ``uniq`` - Uniq HEALPix indices
+    /// * ``values`` - Array containing the values associated for each cells.
+    /// Must be of the same size of ``uniq`` and must sum to one.
+    /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
+    /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
+    /// * ``max_depth`` - The largest depth of the output coverage, which must be larger or equals to the largest
+    /// depth in the `uniq` values.
+    ///
+    /// # Precondition
+    ///
+    /// * ``uniq`` and ``values`` must be of the same size
+    /// * ``values`` must sum to one
+    #[pyfn(m, "from_valued_hpx_cells")]
+    fn from_valued_hpx_cells(
+        py: Python,
+        max_depth: i8,
+        uniq: &PyArray1<u64>,
+        values: &PyArray1<f64>,
+        cumul_from: f64,
+        cumul_to: f64,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let uniq = uniq.as_array().to_owned();
+        let values = values.as_array().to_owned();
+
+        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth as u32, uniq, values, cumul_from, cumul_to)?;
+
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
 
     /// Create a 2D Time-Space coverage from a list of
     /// (time, longitude, latitude) tuples.
@@ -159,7 +195,6 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    ///
     #[pyfn(m, "from_time_lonlat")]
     fn from_time_lonlat(
         index: usize,
@@ -872,11 +907,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``coverage`` - The spatial coverage
     /// * ``max_depth`` - The max depth of the spatial coverage.
     #[pyfn(m, "coverage_sky_fraction")]
-    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>, max_depth: i8) -> f32 {
-
+    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>) -> f32 {
         let ranges = ranges.as_array().to_owned();
 
-        coverage::sky_fraction(ranges, max_depth)
+        coverage::sky_fraction(&ranges)
     }
 
     /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
