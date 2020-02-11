@@ -492,6 +492,44 @@ class MOC(AbstractMOC):
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
+    def from_valued_healpix_cells(cls, uniq, values, max_norder, cumul_from=0.0, cumul_to=1.0):
+        """
+        Creates a MOC from a list of uniq associated with values.
+
+        HEALPix cells are first sorted by their values.
+        The MOC contains the cells from which the cumulative value is between
+        ``cumul_from`` and ``cumul_to``.
+        Cells being on the fence are recursively splitted and added
+        until the depth of the cells is equal to ``max_norder``.
+
+        Parameters
+        ----------
+        uniq : `numpy.ndarray`
+            HEALPix cell indices written in uniq. dtype must be np.uint64
+        values : `numpy.ndarray`
+            Probabilities associated with each ``uniq`` cells. dtype must be np.float64
+        max_norder : int
+            Max depth of the MOC
+        cumul_from : float
+            Cumulative value from which cells will be added to the MOC
+        cumul_to : float
+            Cumulative value to which cells will be added to the MOC
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        intervals = core.from_valued_hpx_cells(
+            max_norder,
+            uniq.astype(np.uint64),
+            values.astype(np.float64),
+            np.float64(cumul_from),
+            np.float64(cumul_to)
+        )
+        return cls(IntervalSet(intervals, make_consistent=False))
+
+    @classmethod
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
         """
         Creates a MOC from an elliptical cone
@@ -734,8 +772,7 @@ class MOC(AbstractMOC):
         """
         Sky fraction covered by the MOC
         """
-        max_depth = self.max_order
-        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals, max_depth)
+        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals)
         return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region

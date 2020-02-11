@@ -133,6 +133,13 @@ def test_from_str(expected, moc_str):
     assert MOC.from_str(moc_str) == expected
 
 
+def test_moc_full_skyfraction():
+    moc = MOC.from_json({
+        '0': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    })
+    assert moc.sky_fraction == 1.0
+
+
 def test_moc_skyfraction():
     moc = MOC.from_json({
         '0': [0, 1, 2, 3, 4, 5]
@@ -359,3 +366,68 @@ def test_spatial_res_to_order():
     output = MOC.spatial_resolution_to_order(res)
 
     assert (order == output).all()
+
+
+def test_from_valued_healpix_cells_empty():
+    uniq = np.array([])
+    values = np.array([])
+
+    MOC.from_valued_healpix_cells(uniq, values, max_norder=10)
+
+
+def test_from_valued_healpix_cells_different_sizes():
+    uniq = np.array([500])
+    values = np.array([])
+
+    with pytest.raises(ValueError):
+        MOC.from_valued_healpix_cells(uniq, values, max_norder=10)
+
+
+def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
+    uniq = np.array([500])
+    values = np.array([1.0])
+
+    with pytest.raises(ValueError):
+        MOC.from_valued_healpix_cells(uniq, values, max_norder=10, cumul_from=0.8, cumul_to=-5.0)
+
+
+@pytest.mark.parametrize("cumul_from, cumul_to", [
+    (-5.0, 1.0),
+    (np.nan, np.inf),
+    (np.nan, np.nan),
+    (np.inf, np.nan),
+    (-10.0, -5.0)
+])
+def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
+    uniq = np.array([500])
+    values = np.array([-1.0])
+
+    MOC.from_valued_healpix_cells(uniq, values, max_norder=10, cumul_from=cumul_from, cumul_to=cumul_to)
+
+
+def test_from_valued_healpix_cells_bayestar():
+    from astropy.io import fits
+    fits_image_filename = './resources/bayestar.multiorder.fits'
+
+    with fits.open(fits_image_filename) as hdul:
+        hdul.info()
+        hdul[1].columns
+
+        data = hdul[1].data
+
+    uniq = data['UNIQ']
+    probdensity = data['PROBDENSITY']
+
+    import astropy_healpix as ah
+    import astropy.units as u
+
+    level, ipix = ah.uniq_to_level_ipix(uniq)
+    area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
+
+    prob = probdensity * area
+
+    cumul_to = np.linspace(0.01, 2.0, num=10)
+
+    for b in cumul_to:
+        MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)
+

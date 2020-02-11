@@ -1,7 +1,6 @@
 #![cfg_attr(nightly, feature(test))]
 
 extern crate healpix;
-#[macro_use]
 extern crate ndarray;
 extern crate num;
 extern crate rand;
