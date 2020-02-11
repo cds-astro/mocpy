@@ -63,6 +63,16 @@ In this example:
 .. plot:: examples/compute_borders.py
     :include-source:
 
+Gravitational Waves MOCs
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows the probability confidence regions of gravitational waves. HEALPix cells are given under the `uniq pixel notation <http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf>`__. Each
+pixel is associated with a specific value. We can create a MOC from which a GW has x% of change of being localized in it. By definition the MOC which has 100% of chance
+of containing a GW is the full sky MOC.
+
+.. plot:: examples/bayestar.py
+    :include-source:
+
 Temporal coverages
 ------------------
 
