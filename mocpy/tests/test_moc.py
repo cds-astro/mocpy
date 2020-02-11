@@ -430,4 +430,3 @@ def test_from_valued_healpix_cells_bayestar():
 
     for b in cumul_to:
         MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)
-
