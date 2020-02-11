@@ -1,6 +1,7 @@
 #![cfg_attr(nightly, feature(test))]
 
 extern crate healpix;
+#[macro_use]
 extern crate ndarray;
 extern crate num;
 extern crate rand;
@@ -16,8 +17,7 @@ pub mod nestedranges;
 mod ranges;
 pub mod uniqranges;
 
-mod valuedcell;
-
+pub mod valuedcell;
 pub mod nestedranges2d;
 
 use ndarray::Array2;

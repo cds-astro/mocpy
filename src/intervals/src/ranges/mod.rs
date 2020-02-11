@@ -936,7 +936,7 @@ mod tests {
         uniq_to_pix_depth!(u8, 10000);
     }
 
-    use test::Bencher;
+    /*use test::Bencher;
 
     #[bench]
     fn bench_uniq_to_depth_pix(b: &mut Bencher) {
@@ -959,5 +959,5 @@ mod tests {
             uniq.iter()
                 .fold(0, |a, b| a + (u64::pix_depth(*b).0 as u64))
         });
-    }
+    }*/
 }

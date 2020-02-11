@@ -1,7 +1,6 @@
 use num::{Integer, One, PrimInt};
 use std::ops::Range;
 
-
 #[inline(always)]
 const fn num_bits<T>() -> usize {
     std::mem::size_of::<T>() * 8
@@ -58,10 +57,29 @@ where
     fn uniq_to_range(u: T) -> Range<T> {
         let (depth, pix) = Self::pix_depth(u);
         let tdd = (Self::MAXDEPTH as u32 - depth) << 1;
+        // The length of a range computed from a pix
+        // at Self::MAXDEPTH equals to 1
         Range {
             start: pix.unsigned_shl(tdd),
-            end: (pix + One::one()).unsigned_shl(tdd) - One::one(),
+            end: (pix + One::one()).unsigned_shl(tdd),
         }
+    }
+}
+
+
+pub struct NestedRange<T: Integer + PrimInt>(pub Range<T>);
+
+impl<T> From<(u8, T)> for NestedRange<T>
+where T: Integer + PrimInt + Bounded<T> {
+    fn from(depth_pix: (u8, T)) -> Self {
+        let (d, pix) = depth_pix;
+        let tdd = (T::MAXDEPTH as u32 - (d as u32)) << 1;
+        NestedRange(
+            Range {
+                start: pix.unsigned_shl(tdd),
+                end: (pix + One::one()).unsigned_shl(tdd),
+            }
+        )
     }
 }
 
@@ -74,6 +92,7 @@ impl Bounded<u64> for u64 {
     const MAXDEPTH: i8 = 29;
     const MAXPIX: u64 = 3 << 60;
 }
+
 impl Bounded<i64> for i64 {
     const MAXDEPTH: i8 = 29;
     const MAXPIX: i64 = 3 << 60;
