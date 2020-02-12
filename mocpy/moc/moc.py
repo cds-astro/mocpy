@@ -328,7 +328,7 @@ class MOC(AbstractMOC):
         if mask is not None:
             # We have an array of pixels that are part of of survey
             y, x = np.where(mask)
-            pix_crd = np.dstack((x, y))[0]
+            pix = np.dstack((x, y))[0]
         else:
             # If we do not have a mask array we create the moc of all the image
             #
@@ -341,15 +341,40 @@ class MOC(AbstractMOC):
             borders so that all the image is covered (a too big step does not retrieve all
             the moc pix crossing the borders of the image).
             """
-            x, y = np.mgrid[0.5:(width + 0.5 + step_pix):step_pix, 0.5:(height + 0.5 + step_pix):step_pix]
-            pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
+            x, y = np.mgrid[
+                0:width:step_pix,
+                0:height:step_pix
+            ]
+            pix = np.dstack((x.ravel(), y.ravel()))[0]
 
+        world = w.wcs_pix2world(pix, 0)
+
+        # Remove coord containing inf/nan values
+        isnan = np.isnan(world)
+        isinf = np.isinf(world)
+
+        bad = isnan | isinf
+
+        # It is a bad coordinates whether one of its coordinate is bad
+        bad = bad[:, 0] | bad[:, 1]
+
+        good = ~bad
+
+        world = world[good]
+
+        # Get the frame from the wcs
         frame = wcs.utils.wcs_to_celestial_frame(w)
-        world_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit="deg", frame=frame).icrs
+        skycrd = SkyCoord(
+            world,
+            unit="deg",
+            frame=frame
+        )
 
-        lon = world_crd.ra
-        lat = world_crd.dec
-        moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=max_norder)
+        moc = MOC.from_lonlat(
+            lon=skycrd.icrs.ra,
+            lat=skycrd.icrs.dec,
+            max_norder=max_norder
+        )
         return moc
 
     @classmethod

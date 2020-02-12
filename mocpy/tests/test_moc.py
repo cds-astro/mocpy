@@ -94,6 +94,10 @@ def test_moc_from_fits_images():
                                 max_norder=10)
 
 
+def test_from_fits_images_2():
+    MOC.from_fits_images(['resources/u_gal.fits'], max_norder=10)
+
+
 @pytest.fixture()
 def moc_from_fits_image():
     image_path = 'resources/image_with_mask.fits.gz'
