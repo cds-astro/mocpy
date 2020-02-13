@@ -4,15 +4,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.7.4 documentation</title>
+    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.8.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
     <script type="text/javascript" src="../../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.7.4 documentation</a>
+	<a href="../../../index.html">mocpy 0.8.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -61,24 +61,24 @@
             
   <h1>Source code for mocpy.stmoc.stmoc</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 
-<span class="kn">from</span> <span class="nn">astropy.utils.data</span> <span class="k">import</span> <span class="n">download_file</span>
-<span class="kn">from</span> <span class="nn">astropy</span> <span class="k">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
-<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">ICRS</span><span class="p">,</span> <span class="n">Galactic</span><span class="p">,</span> <span class="n">BaseCoordinateFrame</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="k">import</span> <span class="n">SkyCoord</span>
-<span class="kn">from</span> <span class="nn">astropy</span> <span class="k">import</span> <span class="n">wcs</span>
-<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="k">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="nn">astropy.utils.data</span> <span class="kn">import</span> <span class="n">download_file</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">ICRS</span><span class="p">,</span> <span class="n">Galactic</span><span class="p">,</span> <span class="n">BaseCoordinateFrame</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">wcs</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 <span class="kn">import</span> <span class="nn">cdshealpix</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">serializer</span>
-<span class="kn">from</span> <span class="nn">..interval_set</span> <span class="k">import</span> <span class="n">IntervalSet</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">serializer</span>
+<span class="kn">from</span> <span class="nn">..interval_set</span> <span class="kn">import</span> <span class="n">IntervalSet</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Thomas Boch, Matthieu Baumann&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
@@ -93,14 +93,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">create_2d_coverage</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fits_column_name</span> <span class="o">=</span> <span class="s1">&#39;PIXELS&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">core</span><span class="o">.</span><span class="n">drop_2d_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">coverage_2d_equality_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -161,6 +161,88 @@
         <span class="n">core</span><span class="o">.</span><span class="n">from_time_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="STMOC.from_time_ranges_positions"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_time_ranges_positions">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_time_ranges_positions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a 2D Coverage from a set of times and positions associated to each time.</span>
+
+<span class="sd">        - Its first dimension refers to `astropy.time.Time` times.</span>
+<span class="sd">        - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times_start : `astropy.time.Time`</span>
+<span class="sd">            The starting times of each observations.</span>
+<span class="sd">        times_end : `astropy.time.Time`</span>
+<span class="sd">            The ending times of each observations.</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        time_depth : int, optional</span>
+<span class="sd">            Time depth. By default, the time resolution chosen is 1µs.</span>
+<span class="sd">        spatial_depth : int, optional</span>
+<span class="sd">            Spatial depth. By default, the space resolution chosen is 393.2μas.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.stmoc.STMOC`</span>
+<span class="sd">            The resulting Spatial-Time Coverage map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times_start</span> <span class="o">=</span> <span class="n">times_start</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">times_end</span> <span class="o">=</span> <span class="n">times_end</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times_start</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">times_start</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">times_end</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must have the same length.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times_start</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must be 1D arrays.&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">from_time_ranges_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="STMOC.from_spatial_coverages"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_spatial_coverages">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_spatial_coverages</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">spatial_coverages</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        times_start : `astropy.time.Time`</span>
+<span class="sd">            The starting times of each observations.</span>
+<span class="sd">        times_end : `astropy.time.Time`</span>
+<span class="sd">            The ending times of each observations.</span>
+<span class="sd">        spatial_coverages : list</span>
+<span class="sd">            List of `mocpy.MOC` spatial coverage objects.</span>
+<span class="sd">        time_depth : int, optional</span>
+<span class="sd">            Time depth. By default, the time resolution chosen is 1µs.</span>
+<span class="sd">        spatial_depth : int, optional</span>
+<span class="sd">            Spatial depth. By default, the space resolution chosen is 393.2μas.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.stmoc.STMOC`</span>
+<span class="sd">            The resulting Spatial-Time Coverage map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times_start</span> <span class="o">=</span> <span class="n">times_start</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">times_end</span> <span class="o">=</span> <span class="n">times_end</span><span class="o">.</span><span class="n">jd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times_start</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">times_end</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">times_start</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spatial_coverages</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time ranges and spatial coverages must have the same length&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">times_start</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and spatial coverages must be 1D arrays&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">spatial_coverages</span> <span class="o">=</span> <span class="p">[</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span> <span class="k">for</span> <span class="n">spatial_coverage</span> <span class="ow">in</span> <span class="n">spatial_coverages</span><span class="p">]</span>
+
+        <span class="n">core</span><span class="o">.</span><span class="n">from_time_ranges_spatial_coverages</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">spatial_coverages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
 <div class="viewcode-block" id="STMOC.query_by_time"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.query_by_time">[docs]</a>    <span class="k">def</span> <span class="nf">query_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Query the ST-MOC by time ranges.</span>
@@ -202,7 +284,7 @@
 <span class="sd">            The time ranges observing in the ``spatial_coverage``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Time ranges in µsec</span>
-        <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_intervals</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">time_ranges</span> <span class="o">/</span> <span class="mi">86400000000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;tdb&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="STMOC.union"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
