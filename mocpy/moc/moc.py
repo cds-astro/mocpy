@@ -299,7 +299,7 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_image(cls, header, max_norder, mask=None):
+    def from_fits_image(cls, hdulist, max_norder, mask=None):
         """
         Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
@@ -318,48 +318,37 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The resulting MOC.
         """
-        # load the image data
+        # Only take the first HDU
+        header = hdulist[0].header
+
         height = header['NAXIS2']
         width = header['NAXIS1']
 
-        # use wcs from astropy to locate the image in the world coordinates
+        # Compute a WCS from the header of the image
         w = wcs.WCS(header)
 
-        if mask is not None:
-            # We have an array of pixels that are part of of survey
-            y, x = np.where(mask)
-            pix = np.dstack((x, y))[0]
-        else:
-            # If we do not have a mask array we create the moc of all the image
-            #
-            step_pix = 1
-            """
-            Coords returned by wcs_pix2world method correspond to pixel centers. We want to retrieve the moc pix
-            crossing the borders of the image so we have to add 1/2 to the pixels coords before computing the lonlat.
-            
-            The step between two pix_crd is set to `step_pix` but can be diminished to have a better precision at the 
-            borders so that all the image is covered (a too big step does not retrieve all
-            the moc pix crossing the borders of the image).
-            """
-            x, y = np.mgrid[
-                0:width:step_pix,
-                0:height:step_pix
-            ]
-            pix = np.dstack((x.ravel(), y.ravel()))[0]
+        if mask is None:
+            data = hdulist[0].data
+            # A mask is computed discarding nan floating values
+            mask = np.isfinite(data)
+
+            # If the BLANK keyword is set to a value then we mask those
+            # pixels too
+            if header.get('BLANK') is not None:
+                discard_val = header['BLANK']
+
+                mask = mask & (data != discard_val)
+
+        y, x = np.where(mask)
+        pix = np.dstack((x, y))[0]
 
         world = w.wcs_pix2world(pix, 0)
 
         # Remove coord containing inf/nan values
-        isnan = np.isnan(world)
-        isinf = np.isinf(world)
+        good = np.isfinite(world)
 
-        bad = isnan | isinf
-
-        # It is a bad coordinates whether one of its coordinate is bad
-        bad = bad[:, 0] | bad[:, 1]
-
-        good = ~bad
-
+        # It is a good coordinates whether both its coordinate are good
+        good = good[:, 0] & good[:, 1]
         world = world[good]
 
         # Get the frame from the wcs
@@ -370,10 +359,17 @@ class MOC(AbstractMOC):
             frame=frame
         )
 
+        # Compute the order based on the CDELT
+        min_pixel_res = min(
+            abs(header['CDELT1']),
+            abs(header['CDELT2'])
+        ) * (np.pi / 180)
+        min_depth = int(np.floor(np.log2(np.pi / (3 * min_pixel_res * min_pixel_res)) / 2))
+
         moc = MOC.from_lonlat(
             lon=skycrd.icrs.ra,
             lat=skycrd.icrs.dec,
-            max_norder=max_norder
+            max_norder=min(max_norder, min_depth)
         )
         return moc
 
@@ -394,13 +390,10 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = None
-        for path in path_l:
-            header = fits.getheader(path)
-            current_moc = MOC.from_image(header=header, max_norder=max_norder)
-            if moc is None:
-                moc = current_moc
-            else:
+        moc = MOC()
+        for filename in path_l:
+            with fits.open(filename) as hdul:
+                current_moc = MOC.from_fits_image(hdulist=hdul, max_norder=max_norder)
                 moc = moc.union(current_moc)
 
         return moc
