@@ -9,10 +9,10 @@
 set -e
 
 ### Build the wheels ###
-$PIP install cibuildwheel==0.11.1 setuptools-rust
+$PIP install cibuildwheel setuptools-rust
 export CIBW_BEFORE_BUILD="yum install -y libpng-devel &&
- yum install -y wget &&
- wget https://download.savannah.gnu.org/releases/freetype/freetype-2.4.0.tar.gz &&
+ yum install -y curl &&
+ curl -LO https://download.savannah.gnu.org/releases/freetype/freetype-2.4.0.tar.gz &&
  tar -zxvf freetype-2.4.0.tar.gz &&
  cd freetype-2.4.0/ &&
  make &&
