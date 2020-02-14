@@ -360,16 +360,17 @@ class MOC(AbstractMOC):
         )
 
         # Compute the order based on the CDELT
-        min_pixel_res = min(
-            abs(header['CDELT1']),
-            abs(header['CDELT2'])
-        ) * (np.pi / 180)
-        min_depth = int(np.floor(np.log2(np.pi / (3 * min_pixel_res * min_pixel_res)) / 2))
+        c1 = header['CDELT1']
+        c2 = header['CDELT2']
+        max_res_px = np.sqrt(c1*c1 + c2*c2) * np.pi / 180.0
+        max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
+
+        max_norder = min(max_norder, max_depth_px)
 
         moc = MOC.from_lonlat(
             lon=skycrd.icrs.ra,
             lat=skycrd.icrs.dec,
-            max_norder=min(max_norder, min_depth)
+            max_norder=max_norder
         )
         return moc
 
