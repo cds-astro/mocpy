@@ -90,8 +90,7 @@ def test_moc_consistent_with_aladin():
 def test_moc_from_fits_images():
     image_path = 'resources/image_with_mask.fits.gz'
 
-    moc = MOC.from_fits_images([image_path],
-                                max_norder=10)
+    moc = MOC.from_fits_images([image_path], max_norder=15)
 
 
 def test_from_fits_images_2():
@@ -103,9 +102,8 @@ def moc_from_fits_image():
     image_path = 'resources/image_with_mask.fits.gz'
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_image(header=hdulist[0].header,
-                             max_norder=7,
-                             mask=hdulist[0].data)
+        moc = MOC.from_fits_image(hdulist=hdulist, max_norder=7, mask=hdulist[0].data)
+
     return moc
 
 
