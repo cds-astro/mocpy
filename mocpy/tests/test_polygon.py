@@ -158,3 +158,15 @@ def test_create_from_polygon():
 
     moc_truth = MOC.from_json(truth_ipix_d)
     assert(moc == moc_truth)
+
+def test_polygon2_issue_44():
+    from astropy import units as u
+    from mocpy import MOC
+    import numpy as np
+
+    ra = [174.75937396073138, 185.24062603926856, 184.63292896369916, 175.3670710363009]
+    dec = [-49.16744206799886, -49.16744206799887, -42.32049830486584, -42.32049830486584]
+
+    moc = MOC.from_polygon(ra * u.deg, dec * u.deg)
+
+    assert not moc.empty()
