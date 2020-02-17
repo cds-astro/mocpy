@@ -33,7 +33,10 @@ setup(name='MOCPy',
      Based on the HEALPix sky tessellation, it maps regions on the sky \
      into hierarchically grouped predefined cells.\n \
      An experimental support for TMOC (temporal MOC) has been added since version 0.4.0.\
-     It allows creation, parsing and comparison of TMOCs.",
+     It allows creation, parsing and comparison of TMOCs. \n\n \
+     Space & Time coverages (STMOC) are an extension of MOC to add time information. It is possible to get a TMOC by querying \
+     a STMOC with a MOC and/or get a MOC by querying a STMOC with a TMOC. \n\n \
+     Please check the mocpy's documentation by following this link: https://cds-astro.github.io/mocpy/",
     rust_extensions=[RustExtension(
         # Package name
         "mocpy.core",
