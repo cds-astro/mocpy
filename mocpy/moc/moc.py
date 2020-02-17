@@ -337,6 +337,7 @@ class MOC(AbstractMOC):
             if header.get('BLANK') is not None:
                 discard_val = header['BLANK']
 
+                # We keep the finite values and those who are not equal to the BLANK field
                 mask = mask & (data != discard_val)
 
         y, x = np.where(mask)
@@ -701,10 +702,10 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         ipix : `numpy.ndarray`
-            HEALPix cell indices. dtype must be np.uint64
+            HEALPix cell indices in the NESTED notation. dtype must be np.uint64
         depth : `numpy.ndarray`
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
-            dtype must be np.uint8
+            dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.
         fully_covered : `numpy.ndarray`, optional
             HEALPix cells coverage flags. This flag informs whether a cell is
             fully covered by a cone (resp. polygon, elliptical cone) or not.
