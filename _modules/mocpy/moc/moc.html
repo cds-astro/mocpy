@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.8.0 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.8.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.8.0 documentation</a>
+	<a href="../../../index.html">mocpy 0.8.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -252,7 +252,7 @@
 <span class="sd">        </span>
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, WCS</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, World2ScreenMPL</span>
 <span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV</span>
@@ -262,7 +262,7 @@
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
 <span class="sd">        &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">        &gt;&gt;&gt; with WCS(fig, </span>
+<span class="sd">        &gt;&gt;&gt; with World2ScreenMPL(fig, </span>
 <span class="sd">        ...         fov=50 * u.deg,</span>
 <span class="sd">        ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
 <span class="sd">        ...         coordsys=&quot;icrs&quot;,</span>
@@ -299,7 +299,7 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, WCS</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, World2ScreenMPL</span>
 <span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV</span>
@@ -309,7 +309,7 @@
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
 <span class="sd">        &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">        &gt;&gt;&gt; with WCS(fig, </span>
+<span class="sd">        &gt;&gt;&gt; with World2ScreenMPL(fig, </span>
 <span class="sd">        ...         fov=50 * u.deg,</span>
 <span class="sd">        ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
 <span class="sd">        ...         coordsys=&quot;icrs&quot;,</span>
@@ -360,8 +360,8 @@
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This method is not stable. A future more stable algorithm will be implemented!&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Boundaries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_image"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_image">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.from_fits_image"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_image">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_fits_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdulist</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.</span>
 
@@ -380,38 +380,61 @@
 <span class="sd">        moc : `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># load the image data</span>
+        <span class="c1"># Only take the first HDU</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span>
+
         <span class="n">height</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS2&#39;</span><span class="p">]</span>
         <span class="n">width</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS1&#39;</span><span class="p">]</span>
 
-        <span class="c1"># use wcs from astropy to locate the image in the world coordinates</span>
+        <span class="c1"># Compute a WCS from the header of the image</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">wcs</span><span class="o">.</span><span class="n">WCS</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># We have an array of pixels that are part of of survey</span>
-            <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
-            <span class="n">pix_crd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If we do not have a mask array we create the moc of all the image</span>
-            <span class="c1">#</span>
-            <span class="n">step_pix</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Coords returned by wcs_pix2world method correspond to pixel centers. We want to retrieve the moc pix</span>
-<span class="sd">            crossing the borders of the image so we have to add 1/2 to the pixels coords before computing the lonlat.</span>
-<span class="sd">            </span>
-<span class="sd">            The step between two pix_crd is set to `step_pix` but can be diminished to have a better precision at the </span>
-<span class="sd">            borders so that all the image is covered (a too big step does not retrieve all</span>
-<span class="sd">            the moc pix crossing the borders of the image).</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mf">0.5</span><span class="p">:(</span><span class="n">width</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">step_pix</span><span class="p">):</span><span class="n">step_pix</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">:(</span><span class="n">height</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">step_pix</span><span class="p">):</span><span class="n">step_pix</span><span class="p">]</span>
-            <span class="n">pix_crd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+            <span class="c1"># A mask is computed discarding nan floating values</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
+            <span class="c1"># If the BLANK keyword is set to a value then we mask those</span>
+            <span class="c1"># pixels too</span>
+            <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BLANK&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">discard_val</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;BLANK&#39;</span><span class="p">]</span>
+
+                <span class="c1"># We keep the finite values and those who are not equal to the BLANK field</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span> <span class="o">!=</span> <span class="n">discard_val</span><span class="p">)</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">world</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">wcs_pix2world</span><span class="p">(</span><span class="n">pix</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Remove coord containing inf/nan values</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">world</span><span class="p">)</span>
+
+        <span class="c1"># It is a good coordinates whether both its coordinate are good</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">good</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">good</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">world</span> <span class="o">=</span> <span class="n">world</span><span class="p">[</span><span class="n">good</span><span class="p">]</span>
+
+        <span class="c1"># Get the frame from the wcs</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">wcs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">wcs_to_celestial_frame</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-        <span class="n">world_crd</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">wcs_pix2world</span><span class="p">(</span><span class="n">pix_crd</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span><span class="o">.</span><span class="n">icrs</span>
+        <span class="n">skycrd</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+            <span class="n">world</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">frame</span>
+        <span class="p">)</span>
 
-        <span class="n">lon</span> <span class="o">=</span> <span class="n">world_crd</span><span class="o">.</span><span class="n">ra</span>
-        <span class="n">lat</span> <span class="o">=</span> <span class="n">world_crd</span><span class="o">.</span><span class="n">dec</span>
-        <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">,</span> <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span><span class="p">)</span>
+        <span class="c1"># Compute the order based on the CDELT</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;CDELT1&#39;</span><span class="p">]</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;CDELT2&#39;</span><span class="p">]</span>
+        <span class="n">max_res_px</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">c1</span><span class="o">*</span><span class="n">c1</span> <span class="o">+</span> <span class="n">c2</span><span class="o">*</span><span class="n">c2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+        <span class="n">max_depth_px</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">max_res_px</span> <span class="o">*</span> <span class="n">max_res_px</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">max_norder</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_norder</span><span class="p">,</span> <span class="n">max_depth_px</span><span class="p">)</span>
+
+        <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span>
+            <span class="n">lon</span><span class="o">=</span><span class="n">skycrd</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+            <span class="n">lat</span><span class="o">=</span><span class="n">skycrd</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+            <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">moc</span></div>
 
 <div class="viewcode-block" id="MOC.from_fits_images"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_images">[docs]</a>    <span class="nd">@classmethod</span>
@@ -431,13 +454,10 @@
 <span class="sd">        moc : `~mocpy.moc.MOC`</span>
 <span class="sd">            The union of all the MOCs created from the paths found in ``path_l``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">moc</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">path_l</span><span class="p">:</span>
-            <span class="n">header</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="n">current_moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_image</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">moc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">moc</span> <span class="o">=</span> <span class="n">current_moc</span>
-            <span class="k">else</span><span class="p">:</span>
+        <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">path_l</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdul</span><span class="p">:</span>
+                <span class="n">current_moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits_image</span><span class="p">(</span><span class="n">hdulist</span><span class="o">=</span><span class="n">hdul</span><span class="p">,</span> <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span><span class="p">)</span>
                 <span class="n">moc</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">current_moc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">moc</span></div>
@@ -744,10 +764,10 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ipix : `numpy.ndarray`</span>
-<span class="sd">            HEALPix cell indices. dtype must be np.uint64</span>
+<span class="sd">            HEALPix cell indices in the NESTED notation. dtype must be np.uint64</span>
 <span class="sd">        depth : `numpy.ndarray`</span>
 <span class="sd">            Depth of the HEALPix cells. Must be of the same size of `ipix`.</span>
-<span class="sd">            dtype must be np.uint8</span>
+<span class="sd">            dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.</span>
 <span class="sd">        fully_covered : `numpy.ndarray`, optional</span>
 <span class="sd">            HEALPix cells coverage flags. This flag informs whether a cell is</span>
 <span class="sd">            fully covered by a cone (resp. polygon, elliptical cone) or not.</span>

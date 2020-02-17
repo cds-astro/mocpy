@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.moc.plot.wcs &#8212; mocpy 0.8.0 documentation</title>
+    <title>mocpy.moc.plot.wcs &#8212; mocpy 0.8.1 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../../index.html">mocpy 0.8.0 documentation</a>
+	<a href="../../../../index.html">mocpy 0.8.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -69,9 +69,9 @@
 
 <span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">figure</span>
 
-<div class="viewcode-block" id="WCS"><a class="viewcode-back" href="../../../../stubs/mocpy.WCS.html#mocpy.WCS">[docs]</a><span class="k">class</span> <span class="nc">WCS</span><span class="p">:</span>
+<div class="viewcode-block" id="World2ScreenMPL"><a class="viewcode-back" href="../../../../stubs/mocpy.World2ScreenMPL.html#mocpy.World2ScreenMPL">[docs]</a><span class="k">class</span> <span class="nc">World2ScreenMPL</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a WCS for vizualizing a MOC in a matplotlib axis.</span>
+<span class="sd">    Create a World2ScreenMPL for vizualizing a MOC in a matplotlib axis.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -96,7 +96,7 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from mocpy import MOC, WCS</span>
+<span class="sd">    &gt;&gt;&gt; from mocpy import MOC, World2ScreenMPL</span>
 <span class="sd">    &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
 <span class="sd">    &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">    &gt;&gt;&gt; # Load a MOC</span>
@@ -105,8 +105,8 @@
 <span class="sd">    &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
 <span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">    &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
-<span class="sd">    &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">    &gt;&gt;&gt; with WCS(fig, </span>
+<span class="sd">    &gt;&gt;&gt; # Define a World2ScreenMPL as a context</span>
+<span class="sd">    &gt;&gt;&gt; with World2ScreenMPL(fig, </span>
 <span class="sd">    ...         fov=200 * u.deg,</span>
 <span class="sd">    ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
 <span class="sd">    ...         coordsys=&quot;icrs&quot;,</span>

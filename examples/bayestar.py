@@ -25,14 +25,14 @@ cumul_to = np.linspace(0.5, 0.9, 5)[::-1]
 colors = ['blue', 'green', 'yellow', 'orange', 'red']
 mocs = [MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_to=c) for c in cumul_to]
 
-from mocpy import WCS
+from mocpy import World2ScreenMPL
 from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
 # Plot the MOC using matplotlib
 import matplotlib.pyplot as plt
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
-with WCS(fig, 
+with World2ScreenMPL(fig, 
         fov=50 * u.deg,
         center=SkyCoord(315, 15, unit='deg', frame='icrs'),
         coordsys="icrs",

@@ -1,4 +1,4 @@
-from mocpy import MOC, WCS
+from mocpy import MOC, World2ScreenMPL
 from astropy.coordinates import SkyCoord, Angle
 
 from matplotlib.path import Path
@@ -13,7 +13,7 @@ skycoords = moc.get_boundaries()
 import matplotlib.pyplot as plt
 fig = plt.figure(111, figsize=(10, 10))
 # Define a astropy WCS easily
-with WCS(fig, 
+with World2ScreenMPL(fig, 
         fov=20 * u.deg,
         center=SkyCoord(10, 5, unit='deg', frame='icrs'),
         coordsys="icrs",
