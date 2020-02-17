@@ -1,4 +1,4 @@
-from ..moc import MOC, WCS
+from ..moc import MOC, World2ScreenMPL
 
 from astropy import units as u
 from astropy.coordinates import SkyCoord

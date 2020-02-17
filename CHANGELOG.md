@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - API Breaking change! from_image -> from_fits_image(hdulist, max_norder)
+- WCS -> World2ScreenMPL. It's a context manager class
 
 ## [0.7.4]
 ### Added

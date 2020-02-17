@@ -1,7 +1,7 @@
 from .moc import MOC
-from .plot.wcs import WCS
+from .plot.wcs import World2ScreenMPL
 
 __all__ = [
     'MOC',
-    'WCS'
+    'World2ScreenMPL'
 ]
