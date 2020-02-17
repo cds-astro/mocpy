@@ -190,7 +190,7 @@ class MOC(AbstractMOC):
         
         Examples
         --------
-        >>> from mocpy import MOC, WCS
+        >>> from mocpy import MOC, World2ScreenMPL
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -200,7 +200,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with WCS(fig, 
+        >>> with World2ScreenMPL(fig, 
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",
@@ -237,7 +237,7 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, WCS
+        >>> from mocpy import MOC, World2ScreenMPL
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -247,7 +247,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with WCS(fig, 
+        >>> with World2ScreenMPL(fig, 
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",

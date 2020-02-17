@@ -7,9 +7,9 @@ import astropy.units as u
 
 from matplotlib.pyplot import figure
 
-class WCS:
+class World2ScreenMPL:
     """
-    Create a WCS for vizualizing a MOC in a matplotlib axis.
+    Create a World2ScreenMPL for vizualizing a MOC in a matplotlib axis.
 
     Parameters
     ----------
@@ -34,7 +34,7 @@ class WCS:
 
     Examples
     --------
-    >>> from mocpy import MOC, WCS
+    >>> from mocpy import MOC, World2ScreenMPL
     >>> from astropy.coordinates import Angle, SkyCoord
     >>> import astropy.units as u
     >>> # Load a MOC
@@ -43,8 +43,8 @@ class WCS:
     >>> # Plot the MOC using matplotlib
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure(111, figsize=(15, 15))
-    >>> # Define a WCS as a context
-    >>> with WCS(fig, 
+    >>> # Define a World2ScreenMPL as a context
+    >>> with World2ScreenMPL(fig, 
     ...         fov=200 * u.deg,
     ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
     ...         coordsys="icrs",

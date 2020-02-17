@@ -7,7 +7,7 @@ An experimental support for TMOC (temporal MOC) has been added since version 0.4
 It allows creation, parsing and comparison of TMOCs.
 """
 
-from .moc import MOC, WCS
+from .moc import MOC, World2ScreenMPL
 from .tmoc import TimeMOC
 from .stmoc import STMOC
 
@@ -19,6 +19,6 @@ __all__ = [
     'MOC',
     'TimeMOC',
     'STMOC',
-    'WCS',
+    'World2ScreenMPL',
     'IntervalSet',
 ]

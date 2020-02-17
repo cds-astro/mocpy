@@ -14,9 +14,7 @@ Welcome to MOCPy's documentation!
 
 MOCPy is a Python library allowing easy creation, parsing and manipulation
 of MOCs (Multi-Order Coverage maps).
-As of the version 0.6.0, MOCPy is only distributed for Python 3.5/3.6
-and 3.7. Python 2 users can still refer to the
-`0.5.7 <https://github.com/cds-astro/mocpy/releases/tag/v0.5.7>`__ version.
+
 Its code is hosted on `GitHub <https://github.com/cds-astro/mocpy/>`__ and
 distributed under the BSD-3 license.
 

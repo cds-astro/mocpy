@@ -11,7 +11,7 @@ from astropy.io import fits
 
 import cdshealpix
 
-from ..moc import MOC, WCS
+from ..moc import MOC, World2ScreenMPL
 
 
 #### TESTING MOC creation ####
@@ -199,7 +199,7 @@ def test_mpl_fill():
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
+    with World2ScreenMPL(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",
@@ -215,7 +215,7 @@ def test_mpl_border():
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
+    with World2ScreenMPL(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",

@@ -1,4 +1,4 @@
-from mocpy import MOC, WCS
+from mocpy import MOC, World2ScreenMPL
 from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
 # Load a MOC
@@ -8,7 +8,7 @@ moc = MOC.from_fits(filename)
 import matplotlib.pyplot as plt
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
-with WCS(fig, 
+with World2ScreenMPL(fig, 
         fov=200 * u.deg,
         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         coordsys="icrs",
