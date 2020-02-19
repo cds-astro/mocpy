@@ -81,8 +81,8 @@ use intervals::valuedcell::valued_cells_to_moc;
 /// Must be of the same size of ``uniq`` and must sum to one.
 /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
 /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
-/// * ``max_depth`` - The largest depth of the output coverage, which must be larger or equals to the largest
-/// depth in the `uniq` values.
+/// * ``max_depth`` - the largest depth of the output MOC, which must be larger or equals to the largest
+///   depth in the `uniq` values
 ///
 /// # Precondition
 ///

@@ -374,7 +374,7 @@ def test_from_valued_healpix_cells_empty():
     uniq = np.array([])
     values = np.array([])
 
-    MOC.from_valued_healpix_cells(uniq, values, max_norder=10)
+    MOC.from_valued_healpix_cells(uniq, values)
 
 
 def test_from_valued_healpix_cells_different_sizes():
@@ -382,7 +382,7 @@ def test_from_valued_healpix_cells_different_sizes():
     values = np.array([])
 
     with pytest.raises(ValueError):
-        MOC.from_valued_healpix_cells(uniq, values, max_norder=10)
+        MOC.from_valued_healpix_cells(uniq, values)
 
 
 def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
@@ -390,7 +390,7 @@ def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
     values = np.array([1.0])
 
     with pytest.raises(ValueError):
-        MOC.from_valued_healpix_cells(uniq, values, max_norder=10, cumul_from=0.8, cumul_to=-5.0)
+        MOC.from_valued_healpix_cells(uniq, values, cumul_from=0.8, cumul_to=-5.0)
 
 
 @pytest.mark.parametrize("cumul_from, cumul_to", [
@@ -404,7 +404,7 @@ def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
     uniq = np.array([500])
     values = np.array([-1.0])
 
-    MOC.from_valued_healpix_cells(uniq, values, max_norder=10, cumul_from=cumul_from, cumul_to=cumul_to)
+    MOC.from_valued_healpix_cells(uniq, values, cumul_from=cumul_from, cumul_to=cumul_to)
 
 
 def test_from_valued_healpix_cells_bayestar():

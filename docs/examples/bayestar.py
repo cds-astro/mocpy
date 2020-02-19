@@ -23,7 +23,8 @@ from mocpy import MOC
 import numpy as np
 cumul_to = np.linspace(0.5, 0.9, 5)[::-1]
 colors = ['blue', 'green', 'yellow', 'orange', 'red']
-mocs = [MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_to=c) for c in cumul_to]
+mocs = [MOC.from_valued_healpix_cells(uniq, prob, cumul_to=c) for c in cumul_to]
+
 
 from mocpy import World2ScreenMPL
 from astropy.coordinates import Angle, SkyCoord

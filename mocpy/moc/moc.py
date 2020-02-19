@@ -512,7 +512,7 @@ class MOC(AbstractMOC):
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
-    def from_valued_healpix_cells(cls, uniq, values, max_norder, cumul_from=0.0, cumul_to=1.0):
+    def from_valued_healpix_cells(cls, uniq, values, max_depth=None, cumul_from=0.0, cumul_to=1.0):
         """
         Creates a MOC from a list of uniq associated with values.
 
@@ -528,8 +528,9 @@ class MOC(AbstractMOC):
             HEALPix cell indices written in uniq. dtype must be np.uint64
         values : `numpy.ndarray`
             Probabilities associated with each ``uniq`` cells. dtype must be np.float64
-        max_norder : int
-            Max depth of the MOC
+        max_depth : int, optional
+            The max depth of the MOC. If a depth is given, degrade the MOC to this depth before returning it to the user.
+            Otherwise choose as ``max_depth`` the depth corresponding to the smallest HEALPix cell found in ``uniq``.
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
@@ -540,14 +541,30 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
+        max_depth_tile = 0
+        if uniq.size > 0:
+            # Get the depth of the smallest uniq
+            # Bigger uniq corresponds to big depth HEALPix cells.
+            max_depth_tile = int(np.log2(uniq.max() >> 2)) >> 1
+            assert max_depth_tile >= 0 and max_depth_tile <= 29, "Invalid uniq numbers. Too big uniq or negative uniq numbers might the cause."
+
+        # Create the MOC at the max_depth equals to the smallest cell 
+        # found in the uniq array
         intervals = core.from_valued_hpx_cells(
-            max_norder,
+            np.uint8(max_depth_tile),
             uniq.astype(np.uint64),
             values.astype(np.float64),
             np.float64(cumul_from),
             np.float64(cumul_to)
         )
-        return cls(IntervalSet(intervals, make_consistent=False))
+        moc = cls(IntervalSet(intervals, make_consistent=False))
+
+        # Degrade the MOC to the depth requested by the user
+        if max_depth is not None:
+            assert max_depth >= 0 and max_depth <= 29, "Max depth must be in [0, 29]"
+            moc = moc.degrade_to_order(max_depth)
+
+        return moc
 
     @classmethod
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):

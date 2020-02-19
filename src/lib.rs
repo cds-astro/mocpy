@@ -149,8 +149,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// Must be of the same size of ``uniq`` and must sum to one.
     /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
     /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
-    /// * ``max_depth`` - The largest depth of the output coverage, which must be larger or equals to the largest
-    /// depth in the `uniq` values.
+    /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
+    ///   depth in the `uniq` values
     ///
     /// # Precondition
     ///
@@ -159,7 +159,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_valued_hpx_cells")]
     fn from_valued_hpx_cells(
         py: Python,
-        max_depth: i8,
+        max_depth: u8,
         uniq: &PyArray1<u64>,
         values: &PyArray1<f64>,
         cumul_from: f64,
