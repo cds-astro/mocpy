@@ -299,14 +299,14 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_fits_image(cls, hdulist, max_norder, mask=None):
+    def from_fits_image(cls, hdu, max_norder, mask=None):
         """
         Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
         Parameters
         ----------
-        header : `astropy.io.fits.Header`
-            FITS header containing all the info of where the image is located (position, size, etc...)
+        hdu : HDU object
+            HDU containing the data of the image
         max_norder : int
             The moc resolution.
         mask : `numpy.ndarray`, optional
@@ -319,7 +319,7 @@ class MOC(AbstractMOC):
             The resulting MOC.
         """
         # Only take the first HDU
-        header = hdulist[0].header
+        header = hdu.header
 
         height = header['NAXIS2']
         width = header['NAXIS1']
@@ -328,7 +328,7 @@ class MOC(AbstractMOC):
         w = wcs.WCS(header)
 
         if mask is None:
-            data = hdulist[0].data
+            data = hdu.data
             # A mask is computed discarding nan floating values
             mask = np.isfinite(data)
 
@@ -380,6 +380,9 @@ class MOC(AbstractMOC):
         """
         Loads a MOC from a set of FITS file images.
 
+        Assumes the data of the image is stored in the first HDU of the FITS file.
+        Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.
+
         Parameters
         ----------
         path_l : [str]
@@ -395,7 +398,7 @@ class MOC(AbstractMOC):
         moc = MOC()
         for filename in path_l:
             with fits.open(filename) as hdul:
-                current_moc = MOC.from_fits_image(hdulist=hdul, max_norder=max_norder)
+                current_moc = MOC.from_fits_image(hdu=hdul[0], max_norder=max_norder)
                 moc = moc.union(current_moc)
 
         return moc

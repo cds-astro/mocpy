@@ -102,7 +102,7 @@ def moc_from_fits_image():
     image_path = 'resources/image_with_mask.fits.gz'
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_fits_image(hdulist=hdulist, max_norder=7, mask=hdulist[0].data)
+        moc = MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
 
     return moc
 
