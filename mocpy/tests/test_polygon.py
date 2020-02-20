@@ -170,3 +170,12 @@ def test_polygon2_issue_44():
     moc = MOC.from_polygon(ra * u.deg, dec * u.deg)
 
     assert not moc.empty()
+
+# Test from https://github.com/cds-astro/mocpy/issues/50
+def test_polygon_issue_50():
+    from mocpy import MOC
+    from astropy.coordinates import SkyCoord
+    from astropy import units as u
+    coords = SkyCoord([(353.8156714, -56.33202193), (6.1843286, -56.33202193), (5.27558041, -49.49378172), (354.72441959, -49.49378172)], unit=u.deg)
+    moc = MOC.from_polygon_skycoord(coords)
+    assert not moc.empty()
