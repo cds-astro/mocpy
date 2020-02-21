@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Examples &#8212; mocpy 0.8.1 documentation</title>
+    <title>Examples &#8212; mocpy 0.8.2 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -57,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.1 documentation</a>
+	<a href="../index.html">mocpy 0.8.2 documentation</a>
 	 &#187;
       </li>
       
@@ -322,7 +322,8 @@ of containing a GW is the full sky MOC.</p>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">cumul_to</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">]</span>
-<span class="n">mocs</span> <span class="o">=</span> <span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_valued_healpix_cells</span><span class="p">(</span><span class="n">uniq</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">cumul_to</span><span class="o">=</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cumul_to</span><span class="p">]</span>
+<span class="n">mocs</span> <span class="o">=</span> <span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_valued_healpix_cells</span><span class="p">(</span><span class="n">uniq</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">cumul_to</span><span class="o">=</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cumul_to</span><span class="p">]</span>
+
 
 <span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">World2ScreenMPL</span>
 <span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>

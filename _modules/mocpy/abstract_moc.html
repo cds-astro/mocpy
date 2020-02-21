@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.abstract_moc &#8212; mocpy 0.8.1 documentation</title>
+    <title>mocpy.abstract_moc &#8212; mocpy 0.8.2 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">mocpy 0.8.1 documentation</a>
+	<a href="../../index.html">mocpy 0.8.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -281,7 +281,7 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
-<span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;2/2-25,28,29 4/0 6/&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;2/2-25 28 29 4/0 6/&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Import lark parser when from_str is called</span>
         <span class="c1"># at least one time</span>
@@ -330,7 +330,7 @@
 <span class="s2">                pixs : pix (sep+ pix)*</span>
 <span class="s2">                pix : INT? -&gt; uniq_pix</span>
 <span class="s2">                    | (INT &quot;-&quot; INT) -&gt; range_pix</span>
-<span class="s2">                sep : &quot; &quot; | &quot;,&quot; | &quot;\n&quot; | &quot;\r&quot;</span>
+<span class="s2">                sep : &quot; &quot; | &quot;\n&quot; | &quot;\r&quot;</span>
 
 <span class="s2">                </span><span class="si">%i</span><span class="s2">mport common.INT</span>
 <span class="s2">                &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
@@ -442,7 +442,7 @@
                         <span class="c1"># If the current pixel does not follow the previous one</span>
                         <span class="c1"># then we can end a range and serializes it</span>
                         <span class="k">if</span> <span class="n">ipix</span> <span class="o">&gt;</span> <span class="n">last_range</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
-                            <span class="n">res</span> <span class="o">=</span> <span class="n">write_cells</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">beg_range</span><span class="p">,</span> <span class="n">last_range</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                            <span class="n">res</span> <span class="o">=</span> <span class="n">write_cells</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">beg_range</span><span class="p">,</span> <span class="n">last_range</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
                             <span class="c1"># The current pixel is the beginning of a new range</span>
                             <span class="n">beg_range</span> <span class="o">=</span> <span class="n">ipix</span>
 

@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.MOC &#8212; mocpy 0.8.1 documentation</title>
+    <title>mocpy.MOC &#8212; mocpy 0.8.2 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -57,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.1 documentation</a>
+	<a href="../index.html">mocpy 0.8.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -164,7 +164,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_fits" title="mocpy.MOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
 <td><p>Loads a MOC from a FITS file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_fits_image" title="mocpy.MOC.from_fits_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits_image</span></code></a>(hdulist, max_norder[, mask])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_fits_image" title="mocpy.MOC.from_fits_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits_image</span></code></a>(hdu, max_norder[, mask])</p></td>
 <td><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> from an image stored as a FITS file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_fits_images" title="mocpy.MOC.from_fits_images"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits_images</span></code></a>(path_l, max_norder)</p></td>
@@ -197,7 +197,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_url" title="mocpy.MOC.from_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_url</span></code></a>(url)</p></td>
 <td><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> object from a given url.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_valued_healpix_cells" title="mocpy.MOC.from_valued_healpix_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_valued_healpix_cells</span></code></a>(uniq, values, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_valued_healpix_cells" title="mocpy.MOC.from_valued_healpix_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_valued_healpix_cells</span></code></a>(uniq, values[, …])</p></td>
 <td><p>Creates a MOC from a list of uniq associated with values.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_vizier_table" title="mocpy.MOC.from_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_vizier_table</span></code></a>(table_id[, nside])</p></td>
@@ -579,12 +579,12 @@ in a binary HDU table.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.from_fits_image">
-<em class="property">classmethod </em><code class="sig-name descname">from_fits_image</code><span class="sig-paren">(</span><em class="sig-param">hdulist</em>, <em class="sig-param">max_norder</em>, <em class="sig-param">mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_fits_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_fits_image" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_fits_image</code><span class="sig-paren">(</span><em class="sig-param">hdu</em>, <em class="sig-param">max_norder</em>, <em class="sig-param">mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_fits_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_fits_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> from an image stored as a FITS file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>header</strong><span class="classifier"><a class="reference external" href="http://docs.astropy.org/en/latest/io/fits/api/headers.html#astropy.io.fits.Header" title="(in Astropy v4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.Header</span></code></a></span></dt><dd><p>FITS header containing all the info of where the image is located (position, size, etc…)</p>
+<dt><strong>hdu</strong><span class="classifier">HDU object</span></dt><dd><p>HDU containing the data of the image</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The moc resolution.</p>
 </dd>
@@ -606,6 +606,8 @@ the final MOC and pixels having the value 0 are not.</p>
 <dt id="mocpy.MOC.from_fits_images">
 <em class="property">classmethod </em><code class="sig-name descname">from_fits_images</code><span class="sig-paren">(</span><em class="sig-param">path_l</em>, <em class="sig-param">max_norder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_fits_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_fits_images" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads a MOC from a set of FITS file images.</p>
+<p>Assumes the data of the image is stored in the first HDU of the FITS file.
+Please call <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits_image</span></code> for passing another hdu than the first one.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -819,7 +821,7 @@ specification at section 2.3.2.</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25,28,29 4/0 6/&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -846,7 +848,7 @@ specification at section 2.3.2.</p>
 
 <dl class="method">
 <dt id="mocpy.MOC.from_valued_healpix_cells">
-<em class="property">classmethod </em><code class="sig-name descname">from_valued_healpix_cells</code><span class="sig-paren">(</span><em class="sig-param">uniq</em>, <em class="sig-param">values</em>, <em class="sig-param">max_norder</em>, <em class="sig-param">cumul_from=0.0</em>, <em class="sig-param">cumul_to=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_valued_healpix_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_valued_healpix_cells" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_valued_healpix_cells</code><span class="sig-paren">(</span><em class="sig-param">uniq</em>, <em class="sig-param">values</em>, <em class="sig-param">max_depth=None</em>, <em class="sig-param">cumul_from=0.0</em>, <em class="sig-param">cumul_to=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_valued_healpix_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.MOC.from_valued_healpix_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a MOC from a list of uniq associated with values.</p>
 <p>HEALPix cells are first sorted by their values.
 The MOC contains the cells from which the cumulative value is between
@@ -860,7 +862,8 @@ until the depth of the cells is equal to <code class="docutils literal notransla
 </dd>
 <dt><strong>values</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></span></dt><dd><p>Probabilities associated with each <code class="docutils literal notranslate"><span class="pre">uniq</span></code> cells. dtype must be np.float64</p>
 </dd>
-<dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>Max depth of the MOC</p>
+<dt><strong>max_depth</strong><span class="classifier">int, optional</span></dt><dd><p>The max depth of the MOC. If a depth is given, degrade the MOC to this depth before returning it to the user.
+Otherwise choose as <code class="docutils literal notranslate"><span class="pre">max_depth</span></code> the depth corresponding to the smallest HEALPix cell found in <code class="docutils literal notranslate"><span class="pre">uniq</span></code>.</p>
 </dd>
 <dt><strong>cumul_from</strong><span class="classifier">float</span></dt><dd><p>Cumulative value from which cells will be added to the MOC</p>
 </dd>
