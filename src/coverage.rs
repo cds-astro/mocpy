@@ -92,16 +92,16 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<NestedRanges<u64>> {
 
     let mut ranges = Vec::<Range<u64>>::new();
 
-    for (depth, pixels) in input.into_iter() {
+    for (depth, pixels) in input {
         let depth = depth
-            .downcast_ref::<PyString>()
+            .downcast::<PyString>()
             .map_err(|_| exceptions::TypeError::py_err(TYPE_KEY_MSG_ERR))?
             .to_string()?
             .parse::<i8>()
             .unwrap();
 
         let pixels = pixels
-            .downcast_ref::<PyList>()
+            .downcast::<PyList>()
             .map_err(|_| exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR))?;
 
         let shift = ((<u64>::MAXDEPTH - depth) << 1) as u64;
