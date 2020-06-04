@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Examples &#8212; mocpy 0.8.2 documentation</title>
+    <title>Examples &#8212; mocpy 0.8.3 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -57,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.2 documentation</a>
+	<a href="../index.html">mocpy 0.8.3 documentation</a>
 	 &#187;
       </li>
       
@@ -239,7 +239,7 @@
 </div>
 <div class="section" id="get-the-border-s-of-a-moc">
 <h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this headline">¶</a></h3>
-<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
@@ -358,6 +358,64 @@ of containing a GW is the full sky MOC.</p>
 <img alt="../_images/bayestar.png" src="../_images/bayestar.png" />
 </div>
 </div>
+<div class="section" id="performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc">
+<h3>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Permalink to this headline">¶</a></h3>
+<p>This example shows how a MOC can filter pixels from a specific FITS image (i.e. associated with a WCS). These pixels can
+then be retrieved from the image for performing some computations on them: e.g. mean, variance analysis thanks to numpy/scikit-learn…</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span> <span class="k">as</span> <span class="n">WCS</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">simple_norm</span>
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># load 2MASS cutout covering the galactic plane</span>
+<span class="n">hdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS</span><span class="si">%2F</span><span class="s1">P</span><span class="si">%2F</span><span class="s1">2MASS</span><span class="si">%2F</span><span class="s1">K&amp;width=1200&amp;height=700&amp;fov=30&amp;projection=TAN&amp;coordsys=galactic&amp;rotation_angle=0.0&amp;object=gal</span><span class="si">%20c</span><span class="s1">enter&amp;format=fits&#39;</span><span class="p">)</span>
+
+<span class="c1"># load Spitzer MOC</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s1">&#39;http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits&#39;</span><span class="p">)</span>
+
+<span class="c1"># create WCS from 2MASS image header</span>
+<span class="n">twomass_wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+
+<span class="c1"># compute skycoords for every pixel of the image</span>
+<span class="n">width</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS1&#39;</span><span class="p">]</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS2&#39;</span><span class="p">]</span>
+
+<span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+<span class="n">skycoords</span> <span class="o">=</span> <span class="n">twomass_wcs</span><span class="o">.</span><span class="n">pixel_to_world</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">)</span>
+
+<span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">skycoords</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">skycoords</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span>
+<span class="c1"># Get the skycoord lying in the MOC mask</span>
+<span class="n">mask_in_moc</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">ra</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">dec</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+
+<span class="n">img</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+<span class="n">img_test</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Set to zero the pixels that do not belong to the MOC</span>
+<span class="n">img_test</span><span class="p">[</span><span class="o">~</span><span class="n">mask_in_moc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Plot the filtered pixels image</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">twomass_wcs</span><span class="p">)</span>
+
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img_test</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href="../examples/filter_image_pixels.py">Source code</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.png">png</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.hires.png">hires.png</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="../_images/filter_image_pixels_00_00.png" src="../_images/filter_image_pixels_00_00.png" />
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sum of pixels lying in the MOC</span>
+<span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="n">mask_in_moc</span><span class="p">])</span>
+
+<span class="c1"># Sum of pixels of the whole image</span>
+<span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="temporal-coverages">
 <h2>Temporal coverages<a class="headerlink" href="#temporal-coverages" title="Permalink to this headline">¶</a></h2>
@@ -371,7 +429,7 @@ an attempt initiated by the Virtual Observatory for binding spatial and temporal
 See its description formalized by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
 <p>Space-Time coverages allows you to:</p>
 <ol class="arabic simple">
-<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="http://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
@@ -393,6 +451,7 @@ See its description formalized by the IVOA <a class="reference external" href="h
 <li><a class="reference internal" href="#create-a-moc-from-a-concave-polygon">Create a MOC from a concave polygon</a></li>
 <li><a class="reference internal" href="#get-the-border-s-of-a-moc">Get the border(s) of a MOC</a></li>
 <li><a class="reference internal" href="#gravitational-waves-mocs">Gravitational Waves MOCs</a></li>
+<li><a class="reference internal" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc">Performing computation on the pixels of an FITS image lying in a MOC</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#temporal-coverages">Temporal coverages</a></li>

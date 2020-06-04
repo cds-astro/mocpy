@@ -73,6 +73,15 @@ of containing a GW is the full sky MOC.
 .. plot:: examples/bayestar.py
     :include-source:
 
+Performing computation on the pixels of an FITS image lying in a MOC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how a MOC can filter pixels from a specific FITS image (i.e. associated with a WCS). These pixels can
+then be retrieved from the image for performing some computations on them: e.g. mean, variance analysis thanks to numpy/scikit-learn...
+
+.. plot:: examples/filter_image_pixels.py
+    :include-source:
+
 Temporal coverages
 ------------------
 
