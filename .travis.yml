@@ -159,23 +159,23 @@ jobs:
           --env GH_TOKEN="${GH_TOKEN}"
           "${DOCKER_CONTAINER_DEPLOY_DOC}"
           sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
-    - name: "manylinux1_x86_64"
+    - name: "manylinux_x86_64"
       # Job generating the wheels for Linux 64-bit platforms
       os: linux
       sudo: required
       env:
-        - CIBW_SKIP="*manylinux1_i686* cp27-* cp34-*"
+        - CIBW_SKIP="*manylinux_i686* cp27-* cp34-* pp27-*"
         - PIP=pip
         - PYTHON=python3
       services:
         - docker
       script: ./travis/deploy.sh
-    - name: "manylinux1_i686"
+    - name: "manylinux_i686"
       # Job generating the wheels for Linux 32-bit platforms
       os: linux
       sudo: required
       env:
-        - CIBW_SKIP="*manylinux1_x86_64* cp27-* cp34-*"
+        - CIBW_SKIP="*manylinux_x86_64* cp34-* cp27-*"
         - PIP=pip
         - PYTHON=python3
       services:
