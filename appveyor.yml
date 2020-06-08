@@ -66,6 +66,8 @@ install:
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
 build_script:
+  # Update pip
+  - "%PYTHON%\\python.exe -m pip install --upgrade pip"
   # Install python dependencies for compiling
   # the dynamic library and run the tests
   - "%PYTHON%\\python.exe -m pip install -r requirements/contributing.txt"
