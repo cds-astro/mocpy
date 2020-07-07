@@ -69,6 +69,50 @@ pub fn create_from_position(
     Ok(result)
 }
 
+use intervals::valuedcell::valued_cells_to_moc;
+/// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
+///
+/// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
+///
+/// # Arguments
+///
+/// * ``uniq`` - Uniq HEALPix indices
+/// * ``values`` - Array containing the values associated for each cells.
+/// Must be of the same size of ``uniq`` and must sum to one.
+/// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
+/// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
+/// * ``max_depth`` - the largest depth of the output MOC, which must be larger or equals to the largest
+///   depth in the `uniq` values
+///
+/// # Precondition
+///
+/// * ``uniq`` and ``values`` must be of the same size
+pub fn from_valued_healpix_cells(
+    max_depth: u32,
+    uniq: Array1<u64>,
+    values: Array1<f64>,
+    cumul_from: f64,
+    cumul_to: f64
+) -> PyResult<NestedRanges<u64>> {
+    if uniq.len() != values.len() {
+        Err(
+            exceptions::ValueError::py_err(
+                "`uniq` and values do not have the same size."
+            )
+        )
+    } else if cumul_from >= cumul_to {
+        Err(
+            exceptions::ValueError::py_err(
+                "`cumul_from` has to be < to `cumul_to`."
+            )
+        )
+    } else {
+        // Uniq and values have the same size (can be empty)
+        let result = valued_cells_to_moc(max_depth, uniq, values, cumul_from, cumul_to);
+        Ok(result)
+    }
+}
+
 /// Performs the union between two spatial coverages
 ///
 /// # Arguments
@@ -118,8 +162,7 @@ pub fn complement(coverage: &NestedRanges<u64>) -> NestedRanges<u64> {
 }
 
 use crate::coverage;
-use ndarray::{Array, Array1, Array2, Axis, Zip};
-use ndarray_parallel::prelude::*;
+use ndarray::{Array1, Array2, Axis, Zip};
 /// Create a spatial coverage from a list of HEALPix cell indices.
 ///
 /// # Arguments
@@ -138,7 +181,8 @@ use ndarray_parallel::prelude::*;
 ///
 /// * ``depth`` and ``pixels`` have not the same length.
 pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResult<Array2<u64>> {
-    let mut pixels_1 = &pixels + &Array::ones(pixels.shape());
+    let ones: Array1<u64> = Array1::<u64>::ones(pixels.shape()[0]);
+    let mut pixels_1 = &pixels + &ones;
 
     if pixels.shape() != depth.shape() {
         return Err(exceptions::IndexError::py_err(

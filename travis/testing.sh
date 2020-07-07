@@ -4,8 +4,13 @@
 set -e
 
 $PYTHON -m pytest -v mocpy --cov-report=term --cov=mocpy
+
+# Remove notebooks execution from the testing pipelines
+# pytest tests should cover the whole project
+# Moreover this will fasten the testing pipeline process
+
 # Test notebooks
-$PIP install .
+# $PIP install .
 # Install other dependencies for running the notebooks
-$PIP install jupyter astroquery
-$PYTHON test_notebooks.py
+# $PIP install jupyter astroquery regions
+# $PYTHON test_notebooks.py

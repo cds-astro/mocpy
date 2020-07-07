@@ -11,7 +11,7 @@ from astropy.io import fits
 
 import cdshealpix
 
-from ..moc import MOC, WCS
+from ..moc import MOC, World2ScreenMPL
 
 
 #### TESTING MOC creation ####
@@ -90,8 +90,11 @@ def test_moc_consistent_with_aladin():
 def test_moc_from_fits_images():
     image_path = 'resources/image_with_mask.fits.gz'
 
-    moc = MOC.from_fits_images([image_path],
-                                max_norder=10)
+    moc = MOC.from_fits_images([image_path], max_norder=15)
+
+
+def test_from_fits_images_2():
+    MOC.from_fits_images(['resources/u_gal.fits'], max_norder=10)
 
 
 @pytest.fixture()
@@ -99,9 +102,8 @@ def moc_from_fits_image():
     image_path = 'resources/image_with_mask.fits.gz'
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_image(header=hdulist[0].header,
-                             max_norder=7,
-                             mask=hdulist[0].data)
+        moc = MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
+
     return moc
 
 
@@ -122,15 +124,22 @@ def test_moc_serialize_and_from_json(moc_from_json):
 
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10,42-46,54,8 6/4500 8/45'),
+    '5/8-10 42-46 54\n\r8 6/4500 8/45'),
     (MOC.from_json({}), '0/'),
     (MOC.from_json({'29': [101]}), '29/101'),
-    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1,9'),
-    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2,9'),
-    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r ,\n 8/8-10\n 11/'),
+    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
+    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2 9'),
+    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r \n 8/8-10\n 11/'),
 ])
 def test_from_str(expected, moc_str):
     assert MOC.from_str(moc_str) == expected
+
+
+def test_moc_full_skyfraction():
+    moc = MOC.from_json({
+        '0': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    })
+    assert moc.sky_fraction == 1.0
 
 
 def test_moc_skyfraction():
@@ -158,11 +167,11 @@ def test_moc_serialize_to_json(moc_from_fits_image):
 
 @pytest.mark.parametrize("moc, expected", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10,42-46,54 6/4500 8/45'),
+    '5/8-10 42-46 54 6/4500 8/45'),
     (MOC.from_json({}), ''),
     (MOC.from_json({'29': [101]}), '29/101'),
-    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1,9'),
-    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2,9'),
+    (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
+    (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2 9'),
 ])
 def test_serialize_to_str(moc, expected):
     assert moc.serialize(format="str") == expected
@@ -190,7 +199,7 @@ def test_mpl_fill():
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
+    with World2ScreenMPL(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",
@@ -206,7 +215,7 @@ def test_mpl_border():
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
-    with WCS(fig,
+    with World2ScreenMPL(fig,
          fov=50 * u.deg,
          center=SkyCoord(0, 20, unit='deg', frame='icrs'),
          coordsys="icrs",
@@ -350,3 +359,76 @@ def test_from_fits_old():
 ])
 def test_moc_complement(input, expected):
     assert input.complement() == expected
+
+
+def test_spatial_res_to_order():
+    order = np.arange(14)
+
+    res = MOC.order_to_spatial_resolution(order)
+    output = MOC.spatial_resolution_to_order(res)
+
+    assert (order == output).all()
+
+
+def test_from_valued_healpix_cells_empty():
+    uniq = np.array([])
+    values = np.array([])
+
+    MOC.from_valued_healpix_cells(uniq, values)
+
+
+def test_from_valued_healpix_cells_different_sizes():
+    uniq = np.array([500])
+    values = np.array([])
+
+    with pytest.raises(ValueError):
+        MOC.from_valued_healpix_cells(uniq, values)
+
+
+def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
+    uniq = np.array([500])
+    values = np.array([1.0])
+
+    with pytest.raises(ValueError):
+        MOC.from_valued_healpix_cells(uniq, values, cumul_from=0.8, cumul_to=-5.0)
+
+
+@pytest.mark.parametrize("cumul_from, cumul_to", [
+    (-5.0, 1.0),
+    (np.nan, np.inf),
+    (np.nan, np.nan),
+    (np.inf, np.nan),
+    (-10.0, -5.0)
+])
+def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
+    uniq = np.array([500])
+    values = np.array([-1.0])
+
+    MOC.from_valued_healpix_cells(uniq, values, cumul_from=cumul_from, cumul_to=cumul_to)
+
+
+def test_from_valued_healpix_cells_bayestar():
+    from astropy.io import fits
+    fits_image_filename = './resources/bayestar.multiorder.fits'
+
+    with fits.open(fits_image_filename) as hdul:
+        hdul.info()
+        hdul[1].columns
+
+        data = hdul[1].data
+
+    uniq = data['UNIQ']
+    probdensity = data['PROBDENSITY']
+
+    import astropy_healpix as ah
+    import astropy.units as u
+
+    level, ipix = ah.uniq_to_level_ipix(uniq)
+    area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
+
+    prob = probdensity * area
+
+    cumul_to = np.linspace(0.01, 2.0, num=10)
+
+    for b in cumul_to:
+        MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)

@@ -1,9 +1,9 @@
+#[cfg(feature = "rayon")]
 extern crate intervals;
 #[macro_use(stack)]
 
 extern crate ndarray;
 extern crate healpix;
-extern crate ndarray_parallel;
 extern crate num;
 extern crate numpy;
 extern crate rayon;
@@ -17,7 +17,7 @@ extern crate lazy_static;
 use ndarray::{Array, Array1, Array2, Axis};
 use numpy::{IntoPyArray, PyArray1, PyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use pyo3::{PyObject, ToPyObject};
 
 use intervals::nestedranges2d::NestedRanges2D;
@@ -137,55 +137,41 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
     }
-
-    /// Create a 2D Time-Space coverage from a list of
-    /// (time, longitude, latitude) tuples.
+    
+    /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
+    ///
+    /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
     ///
     /// # Arguments
     ///
-    /// * ``times`` - The times at which the sky coordinates have be given.
-    /// * ``d1`` - The depth along the Time axis.
-    /// * ``lon`` - The longitudes in radians
-    /// * ``lat`` - The latitudes in radians
-    /// * ``d2`` - The depth along the Space axis.
+    /// * ``uniq`` - Uniq HEALPix indices
+    /// * ``values`` - Array containing the values associated for each cells.
+    /// Must be of the same size of ``uniq`` and must sum to one.
+    /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
+    /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
+    /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
+    ///   depth in the `uniq` values
     ///
     /// # Precondition
     ///
-    /// * ``lon`` and ``lat`` must be expressed in radians.
-    /// * ``times`` must be expressed in jd.
-    ///
-    /// # Errors
-    ///
-    /// * ``lon``, ``lat`` and ``times`` do not have the same length.
-    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    ///
-    #[pyfn(m, "from_time_lonlat")]
-    fn from_time_lonlat(
-        index: usize,
-        times: &PyArray1<f64>,
-        d1: i8,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>,
-        d2: i8,
-    ) -> PyResult<()> {
-        let times = times.as_array()
-            .to_owned()
-            .into_raw_vec();
-        let lon = lon.as_array()
-            .to_owned()
-            .into_raw_vec();
-        let lat = lat.as_array()
-            .to_owned()
-            .into_raw_vec();
+    /// * ``uniq`` and ``values`` must be of the same size
+    /// * ``values`` must sum to one
+    #[pyfn(m, "from_valued_hpx_cells")]
+    fn from_valued_hpx_cells(
+        py: Python,
+        max_depth: u8,
+        uniq: &PyArray1<u64>,
+        values: &PyArray1<f64>,
+        cumul_from: f64,
+        cumul_to: f64,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let uniq = uniq.as_array().to_owned();
+        let values = values.as_array().to_owned();
 
-        let coverage = time_space_coverage::create_from_time_position(times, lon, lat, d1, d2)?;
+        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth as u32, uniq, values, cumul_from, cumul_to)?;
 
-        // Update a coverage in the COVERAGES_2D
-        // hash map and return its index key to python
-        update_coverage(index, coverage);
-
-        Ok(())
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
     }
 
     /// Create a 2D Time-Space coverage from a list of
@@ -209,21 +195,16 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    ///
-    #[pyfn(m, "from_time_ranges_lonlat")]
-    fn from_time_ranges_lonlat(
+    #[pyfn(m, "from_time_lonlat")]
+    fn from_time_lonlat(
         index: usize,
-        times_start: &PyArray1<f64>,
-        times_end: &PyArray1<f64>,
+        times: &PyArray1<f64>,
         d1: i8,
         lon: &PyArray1<f64>,
         lat: &PyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
-        let times_start = times_start.as_array()
-            .to_owned()
-            .into_raw_vec();
-        let times_end = times_end.as_array()
+        let times = times.as_array()
             .to_owned()
             .into_raw_vec();
         let lon = lon.as_array()
@@ -233,12 +214,111 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
-        let coverage = time_space_coverage::create_from_time_ranges_position(
-            times_start, times_end,
-            lon, lat,
-            d1,
-            d2
-        )?;
+        let coverage = time_space_coverage::create_from_times_positions(times, lon, lat, d1, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians
+    /// * ``lat`` - The latitudes in radians
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon`` and ``lat`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat`` and ``times`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_lonlat")]
+    fn from_time_ranges_lonlat(
+        index: usize,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
+        d1: i8,
+        lon: &PyArray1<f64>,
+        lat: &PyArray1<f64>,
+        d2: i8,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let times_max = times_max.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lon = lon.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let lat = lat.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let coverage = time_space_coverage::create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude, radius) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation.
+    /// * ``times_max`` - The ending time of observation.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians.
+    /// * ``lat`` - The latitudes in radians.
+    /// * ``radius`` - Radius in radians.
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon``, ``lat`` and ``radius`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_spatial_coverages")]
+    fn from_time_ranges_spatial_coverages(
+        py: Python,
+        index: usize,
+        times_min: &PyArray1<f64>,
+        times_max: &PyArray1<f64>,
+        d1: i8,
+        spatial_coverages: &PyList,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+            .to_owned()
+            .into_raw_vec();
+        let times_max = times_max.as_array()
+            .to_owned()
+            .into_raw_vec();
+
+        let coverage = time_space_coverage::from_time_ranges_spatial_coverages(py, times_min, times_max, d1, spatial_coverages)?;
 
         // Update a coverage in the COVERAGES_2D
         // hash map and return its index key to python
@@ -562,7 +642,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let cov_right = coverages.get(&id_right).unwrap();
 
             // Check the equality
-            (cov_left == cov_right)
+            cov_left == cov_right
         };
 
         // Return the index of the newly created
@@ -827,11 +907,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``coverage`` - The spatial coverage
     /// * ``max_depth`` - The max depth of the spatial coverage.
     #[pyfn(m, "coverage_sky_fraction")]
-    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>, max_depth: i8) -> f32 {
-
+    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>) -> f32 {
         let ranges = ranges.as_array().to_owned();
 
-        coverage::sky_fraction(ranges, max_depth)
+        coverage::sky_fraction(&ranges)
     }
 
     /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
@@ -849,7 +928,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let shape = (ranges.shape()[0], 1);
 
             let start = ranges.into_shape(shape).unwrap();
-            let end = &start + &Array::ones(shape);
+            let end = &start + &Array2::<u64>::ones(shape);
 
             let ranges = stack![Axis(1), start, end];
             let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();

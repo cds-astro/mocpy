@@ -65,28 +65,28 @@ jobs:
         # Move the dynamic lib to the python package folder
         - find build/ -name "*.so" -type f -exec cp {} ./mocpy \;
       script: ./travis/testing.sh
-    - name: "Python=3.5 Linux_i686"
-      os: linux
-      services:
-        - docker
-      before_install:
-        - docker pull "${DOCKER_IMAGE_LINUX_32}"
-        - >
-          docker run
-          --volume ${PWD}:/mnt/mocpy
-          --name "${DOCKER_CONTAINER_LINUX_32}"
-          --rm
-          --interactive
-          --tty
-          --detach
-          "${DOCKER_IMAGE_LINUX_32}"
-      script:
-        - >
-          docker exec 
-          --interactive
-          --tty
-          "${DOCKER_CONTAINER_LINUX_32}"
-          sh -c "cd /mnt/mocpy && ./travis/testing_i686.sh"
+    # - name: "Python=3.5 Linux_i686"
+    #   os: linux
+    #   services:
+    #     - docker
+    #   before_install:
+    #     - docker pull "${DOCKER_IMAGE_LINUX_32}"
+    #     - >
+    #       docker run
+    #       --volume ${PWD}:/mnt/mocpy
+    #       --name "${DOCKER_CONTAINER_LINUX_32}"
+    #       --rm
+    #       --interactive
+    #       --tty
+    #       --detach
+    #       "${DOCKER_IMAGE_LINUX_32}"
+    #   script:
+    #     - >
+    #       docker exec 
+    #       --interactive
+    #       --tty
+    #       "${DOCKER_CONTAINER_LINUX_32}"
+    #       sh -c "cd /mnt/mocpy && ./travis/testing_i686.sh"
     - name: "Python=3.7 OSX"
       os: osx
       python: 3.7
@@ -159,23 +159,23 @@ jobs:
           --env GH_TOKEN="${GH_TOKEN}"
           "${DOCKER_CONTAINER_DEPLOY_DOC}"
           sh -c "cd /mnt/mocpy && ./travis/deploy_doc.sh"
-    - name: "manylinux1_x86_64"
+    - name: "manylinux_x86_64"
       # Job generating the wheels for Linux 64-bit platforms
       os: linux
       sudo: required
       env:
-        - CIBW_SKIP="*manylinux1_i686* cp27-* cp34-*"
+        - CIBW_SKIP="*manylinux_i686* cp27-* cp34-* pp27-*"
         - PIP=pip
         - PYTHON=python3
       services:
         - docker
       script: ./travis/deploy.sh
-    - name: "manylinux1_i686"
+    - name: "manylinux_i686"
       # Job generating the wheels for Linux 32-bit platforms
       os: linux
       sudo: required
       env:
-        - CIBW_SKIP="*manylinux1_x86_64* cp27-* cp34-*"
+        - CIBW_SKIP="*manylinux_x86_64* cp34-* cp27-*"
         - PIP=pip
         - PYTHON=python3
       services:

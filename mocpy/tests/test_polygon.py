@@ -1,4 +1,4 @@
-from ..moc import MOC, WCS
+from ..moc import MOC, World2ScreenMPL
 
 from astropy import units as u
 from astropy.coordinates import SkyCoord
@@ -158,3 +158,24 @@ def test_create_from_polygon():
 
     moc_truth = MOC.from_json(truth_ipix_d)
     assert(moc == moc_truth)
+
+def test_polygon2_issue_44():
+    from astropy import units as u
+    from mocpy import MOC
+    import numpy as np
+
+    ra = [174.75937396073138, 185.24062603926856, 184.63292896369916, 175.3670710363009]
+    dec = [-49.16744206799886, -49.16744206799887, -42.32049830486584, -42.32049830486584]
+
+    moc = MOC.from_polygon(ra * u.deg, dec * u.deg)
+
+    assert not moc.empty()
+
+# Test from https://github.com/cds-astro/mocpy/issues/50
+def test_polygon_issue_50():
+    from mocpy import MOC
+    from astropy.coordinates import SkyCoord
+    from astropy import units as u
+    coords = SkyCoord([(353.8156714, -56.33202193), (6.1843286, -56.33202193), (5.27558041, -49.49378172), (354.72441959, -49.49378172)], unit=u.deg)
+    moc = MOC.from_polygon_skycoord(coords)
+    assert not moc.empty()

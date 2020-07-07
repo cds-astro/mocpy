@@ -8,7 +8,7 @@ from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Angle
 from astropy import wcs
 
 import cdshealpix
@@ -190,7 +190,7 @@ class MOC(AbstractMOC):
         
         Examples
         --------
-        >>> from mocpy import MOC, WCS
+        >>> from mocpy import MOC, World2ScreenMPL
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -200,7 +200,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with WCS(fig, 
+        >>> with World2ScreenMPL(fig, 
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",
@@ -237,7 +237,7 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, WCS
+        >>> from mocpy import MOC, World2ScreenMPL
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -247,7 +247,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with WCS(fig, 
+        >>> with World2ScreenMPL(fig, 
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",
@@ -299,14 +299,14 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_image(cls, header, max_norder, mask=None):
+    def from_fits_image(cls, hdu, max_norder, mask=None):
         """
         Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
         Parameters
         ----------
-        header : `astropy.io.fits.Header`
-            FITS header containing all the info of where the image is located (position, size, etc...)
+        hdu : HDU object
+            HDU containing the data of the image
         max_norder : int
             The moc resolution.
         mask : `numpy.ndarray`, optional
@@ -318,44 +318,70 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The resulting MOC.
         """
-        # load the image data
+        # Only take the first HDU
+        header = hdu.header
+
         height = header['NAXIS2']
         width = header['NAXIS1']
 
-        # use wcs from astropy to locate the image in the world coordinates
+        # Compute a WCS from the header of the image
         w = wcs.WCS(header)
 
-        if mask is not None:
-            # We have an array of pixels that are part of of survey
-            y, x = np.where(mask)
-            pix_crd = np.dstack((x, y))[0]
-        else:
-            # If we do not have a mask array we create the moc of all the image
-            #
-            step_pix = 1
-            """
-            Coords returned by wcs_pix2world method correspond to pixel centers. We want to retrieve the moc pix
-            crossing the borders of the image so we have to add 1/2 to the pixels coords before computing the lonlat.
-            
-            The step between two pix_crd is set to `step_pix` but can be diminished to have a better precision at the 
-            borders so that all the image is covered (a too big step does not retrieve all
-            the moc pix crossing the borders of the image).
-            """
-            x, y = np.mgrid[0.5:(width + 0.5 + step_pix):step_pix, 0.5:(height + 0.5 + step_pix):step_pix]
-            pix_crd = np.dstack((x.ravel(), y.ravel()))[0]
+        if mask is None:
+            data = hdu.data
+            # A mask is computed discarding nan floating values
+            mask = np.isfinite(data)
 
+            # If the BLANK keyword is set to a value then we mask those
+            # pixels too
+            if header.get('BLANK') is not None:
+                discard_val = header['BLANK']
+
+                # We keep the finite values and those who are not equal to the BLANK field
+                mask = mask & (data != discard_val)
+
+        y, x = np.where(mask)
+        pix = np.dstack((x, y))[0]
+
+        world = w.wcs_pix2world(pix, 0)
+
+        # Remove coord containing inf/nan values
+        good = np.isfinite(world)
+
+        # It is a good coordinates whether both its coordinate are good
+        good = good[:, 0] & good[:, 1]
+        world = world[good]
+
+        # Get the frame from the wcs
         frame = wcs.utils.wcs_to_celestial_frame(w)
-        world_crd = SkyCoord(w.wcs_pix2world(pix_crd, 1), unit="deg", frame=frame).icrs
+        skycrd = SkyCoord(
+            world,
+            unit="deg",
+            frame=frame
+        )
 
-        lon = world_crd.ra
-        lat = world_crd.dec
-        moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=max_norder)
+        # Compute the order based on the CDELT
+        c1 = header['CDELT1']
+        c2 = header['CDELT2']
+        max_res_px = np.sqrt(c1*c1 + c2*c2) * np.pi / 180.0
+        max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
+
+        max_norder = min(max_norder, max_depth_px)
+
+        moc = MOC.from_lonlat(
+            lon=skycrd.icrs.ra,
+            lat=skycrd.icrs.dec,
+            max_norder=max_norder
+        )
         return moc
 
     @classmethod
     def from_fits_images(cls, path_l, max_norder):
         """
         Loads a MOC from a set of FITS file images.
+
+        Assumes the data of the image is stored in the first HDU of the FITS file.
+        Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.
 
         Parameters
         ----------
@@ -369,13 +395,10 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = None
-        for path in path_l:
-            header = fits.getheader(path)
-            current_moc = MOC.from_image(header=header, max_norder=max_norder)
-            if moc is None:
-                moc = current_moc
-            else:
+        moc = MOC()
+        for filename in path_l:
+            with fits.open(filename) as hdul:
+                current_moc = MOC.from_fits_image(hdu=hdul[0], max_norder=max_norder)
                 moc = moc.union(current_moc)
 
         return moc
@@ -492,6 +515,61 @@ class MOC(AbstractMOC):
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
+    def from_valued_healpix_cells(cls, uniq, values, max_depth=None, cumul_from=0.0, cumul_to=1.0):
+        """
+        Creates a MOC from a list of uniq associated with values.
+
+        HEALPix cells are first sorted by their values.
+        The MOC contains the cells from which the cumulative value is between
+        ``cumul_from`` and ``cumul_to``.
+        Cells being on the fence are recursively splitted and added
+        until the depth of the cells is equal to ``max_norder``.
+
+        Parameters
+        ----------
+        uniq : `numpy.ndarray`
+            HEALPix cell indices written in uniq. dtype must be np.uint64
+        values : `numpy.ndarray`
+            Probabilities associated with each ``uniq`` cells. dtype must be np.float64
+        max_depth : int, optional
+            The max depth of the MOC. If a depth is given, degrade the MOC to this depth before returning it to the user.
+            Otherwise choose as ``max_depth`` the depth corresponding to the smallest HEALPix cell found in ``uniq``.
+        cumul_from : float
+            Cumulative value from which cells will be added to the MOC
+        cumul_to : float
+            Cumulative value to which cells will be added to the MOC
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        max_depth_tile = 0
+        if uniq.size > 0:
+            # Get the depth of the smallest uniq
+            # Bigger uniq corresponds to big depth HEALPix cells.
+            max_depth_tile = int(np.log2(uniq.max() >> 2)) >> 1
+            assert max_depth_tile >= 0 and max_depth_tile <= 29, "Invalid uniq numbers. Too big uniq or negative uniq numbers might the cause."
+
+        # Create the MOC at the max_depth equals to the smallest cell 
+        # found in the uniq array
+        intervals = core.from_valued_hpx_cells(
+            np.uint8(max_depth_tile),
+            uniq.astype(np.uint64),
+            values.astype(np.float64),
+            np.float64(cumul_from),
+            np.float64(cumul_to)
+        )
+        moc = cls(IntervalSet(intervals, make_consistent=False))
+
+        # Degrade the MOC to the depth requested by the user
+        if max_depth is not None:
+            assert max_depth >= 0 and max_depth <= 29, "Max depth must be in [0, 29]"
+            moc = moc.degrade_to_order(max_depth)
+
+        return moc
+
+    @classmethod
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
         """
         Creates a MOC from an elliptical cone
@@ -540,6 +618,50 @@ class MOC(AbstractMOC):
         ... )
         """
         pix, depth, fully_covered_flags = cdshealpix.elliptical_cone_search(lon, lat, a, b, pa, max_depth, delta_depth, flat=False)
+        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+
+    @classmethod
+    def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
+        """
+        Creates a MOC from a cone.
+
+        The cone is centered around the (`lon`, `lat`) position with a radius expressed by
+        `radius`.
+
+        Parameters
+        ----------
+        lon : `astropy.units.Quantity`
+            The longitude of the center of the cone.
+        lat : `astropy.units.Quantity`
+            The latitude of the center of the cone.
+        radius : `astropy.coordinates.Angle`
+            The radius angle of the cone.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle
+        >>> moc = MOC.from_cone(
+        ...  lon=0 * u.deg,
+        ...  lat=0 * u.deg,
+        ...  radius=Angle(10, u.deg),
+        ...  max_depth=10
+        ... )
+        """
+        pix, depth, fully_covered_flags = cdshealpix.cone_search(lon, lat, radius, max_depth, delta_depth, flat=False)
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
     @classmethod
@@ -600,10 +722,10 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         ipix : `numpy.ndarray`
-            HEALPix cell indices. dtype must be np.uint64
+            HEALPix cell indices in the NESTED notation. dtype must be np.uint64
         depth : `numpy.ndarray`
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
-            dtype must be np.uint8
+            dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.
         fully_covered : `numpy.ndarray`, optional
             HEALPix cells coverage flags. This flag informs whether a cell is
             fully covered by a cone (resp. polygon, elliptical cone) or not.
@@ -627,6 +749,44 @@ class MOC(AbstractMOC):
 
         intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
+
+    @staticmethod
+    def order_to_spatial_resolution(order):
+        """
+        Convert a depth to its equivalent spatial resolution.
+
+        Parameters
+        ----------
+        order : int
+            Spatial depth.
+
+        Returns
+        -------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution.
+
+        """
+        spatial_resolution = Angle(np.sqrt(np.pi/(3 * 4**(order))), unit='rad')
+        return spatial_resolution
+
+    @staticmethod
+    def spatial_resolution_to_order(spatial_resolution):
+        """
+        Convert a spatial resolution to a MOC order.
+
+        Parameters
+        ----------
+        spatial_resolution : `~astropy.coordinates.Angle`
+            Spatial resolution
+
+        Returns
+        -------
+        order : int
+            The order corresponding to the spatial resolution
+        """
+        res_rad = spatial_resolution.rad
+        order = np.ceil(np.log2(np.pi/(3*res_rad*res_rad))/2)
+        return np.uint8(order)
 
     @property
     def _fits_header_keywords(self):
@@ -652,8 +812,7 @@ class MOC(AbstractMOC):
         """
         Sky fraction covered by the MOC
         """
-        max_depth = self.max_order
-        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals, max_depth)
+        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals)
         return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region

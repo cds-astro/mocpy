@@ -12,4 +12,4 @@ Class overview
    mocpy.MOC
    mocpy.TimeMOC
    mocpy.STMOC
-   mocpy.WCS
+   mocpy.World2ScreenMPL

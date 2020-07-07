@@ -11,7 +11,7 @@ dependencies:
 - pip:
   - numpydoc
   - astropy-sphinx-theme
-  - networkx
+  - networkx=2.2
   - lark-parser
   - cdshealpix
   - astropy_healpix

@@ -219,7 +219,7 @@ class AbstractMOC(serializer.IO):
         Examples
         --------
         >>> from mocpy import MOC
-        >>> moc = MOC.from_str("2/2-25,28,29 4/0 6/")
+        >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
         """
         # Import lark parser when from_str is called
         # at least one time
@@ -268,7 +268,7 @@ class AbstractMOC(serializer.IO):
                 pixs : pix (sep+ pix)*
                 pix : INT? -> uniq_pix
                     | (INT "-" INT) -> range_pix
-                sep : " " | "," | "\n" | "\r"
+                sep : " " | "\n" | "\r"
 
                 %import common.INT
                 """, start='value')
@@ -380,7 +380,7 @@ class AbstractMOC(serializer.IO):
                         # If the current pixel does not follow the previous one
                         # then we can end a range and serializes it
                         if ipix > last_range + np.uint64(1):
-                            res = write_cells(res, beg_range, last_range, sep=',')
+                            res = write_cells(res, beg_range, last_range, sep=' ')
                             # The current pixel is the beginning of a new range
                             beg_range = ipix
 

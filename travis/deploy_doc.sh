@@ -21,7 +21,7 @@ rm -rf *
 
 git checkout cds-astro/master .
 
-curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y
 export PATH="$HOME/.cargo/bin:$PATH"
 
 ln -s /usr/bin/python3 /usr/bin/python

@@ -1,7 +1,7 @@
 astropy
 cdshealpix
 matplotlib
-networkx
+networkx==2.2
 sphinx
 sphinxcontrib-bibtex
 numpydoc

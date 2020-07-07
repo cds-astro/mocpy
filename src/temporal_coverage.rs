@@ -35,7 +35,7 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
         let min_times = min_times.mapv(|e| e as u64);
 
         let max_times = &max_times * &Array::from_elem(shape, 86400000000_f64);
-        let max_times = max_times.mapv(|e| e as u64 + 1);
+        let max_times = max_times.mapv(|e| e as u64);
 
         let ranges = stack![Axis(1), min_times, max_times].to_owned();
         let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
