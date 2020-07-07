@@ -97,10 +97,10 @@ class TimeMOC(AbstractMOC):
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
         
-        min_times = self._times_to_microseconds(min_times)
+        min_times = np.asarray(min_times.jd)
         min_times = np.atleast_1d(min_times)
 
-        max_times = self._times_to_microseconds(max_times)
+        max_times = np.asarray(max_times.jd)
         max_times = np.atleast_1d(max_times)
 
         assert min_times.shape == max_times.shape
