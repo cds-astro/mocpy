@@ -65,7 +65,7 @@ class TimeMOC(AbstractMOC):
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
         times = self._times_to_microseconds(times)
-        times = np.atleast_1d()
+        times = np.atleast_1d(times)
 
         times = times.reshape((times.shape[0], 1))
         intervals = np.hstack((times, times + np.uint64(1)))
