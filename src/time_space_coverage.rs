@@ -59,7 +59,7 @@ pub fn create_from_times_positions(
 
         let mut ipix = vec![0; lon.len()];
 
-        let layer = healpix::nested::get_or_create(ds as u8);
+        let layer = healpix::nested::get(ds as u8);
         ipix.par_iter_mut()
             .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
             .for_each(|(p, (l, b))| {
@@ -130,7 +130,7 @@ pub fn create_from_time_ranges_positions(
 
         let mut ipix = vec![0; lon.len()];
 
-        let layer = healpix::nested::get_or_create(ds as u8);
+        let layer = healpix::nested::get(ds as u8);
         ipix.par_iter_mut()
             .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
             .for_each(|(p, (l, b))| {
@@ -287,7 +287,7 @@ pub fn contains(
 
     // Retrieve the spatial depth of the Time-Space coverage
     let (_, s_depth) = coverage.depth();
-    let layer = healpix::nested::get_or_create(s_depth as u8);
+    let layer = healpix::nested::get(s_depth as u8);
     let shift = (<u64>::MAXDEPTH - s_depth) << 1;
     Zip::from(result)
         .and(&time)

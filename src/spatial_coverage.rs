@@ -53,7 +53,7 @@ pub fn create_from_position(
     data.resize(lon.len(), 0..1);
 
     let shift = (<u64>::MAXDEPTH - depth) << 1;
-    let layer = healpix::nested::get_or_create(depth as u8);
+    let layer = healpix::nested::get(depth as u8);
 
     data.par_iter_mut()
         .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
