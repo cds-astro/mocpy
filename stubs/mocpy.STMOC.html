@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>mocpy.STMOC &#8212; mocpy 0.8.3 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mocpy.STMOC &#8212; mocpy 0.8.4 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -57,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.3 documentation</a>
+	<a href="../index.html">mocpy 0.8.4 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -94,13 +95,13 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.contains" title="mocpy.STMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(self, times, lon, lat[, inside])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.contains" title="mocpy.STMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(times, lon, lat[, inside])</p></td>
 <td><p>Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.deserialization" title="mocpy.STMOC.deserialization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialization</span></code></a>(hdulist)</p></td>
 <td><p>Deserialization of an hdulist to a Time-Space coverage</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.difference" title="mocpy.STMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(self, other)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.difference" title="mocpy.STMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(other)</p></td>
 <td><p>Difference of two Space-Time coverages.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_fits" title="mocpy.STMOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
@@ -115,32 +116,32 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_times_positions" title="mocpy.STMOC.from_times_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times_positions</span></code></a>(times, time_depth, lon, …)</p></td>
 <td><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.intersection" title="mocpy.STMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(self, other)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.intersection" title="mocpy.STMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(other)</p></td>
 <td><p>Intersection of two Space-Time coverages.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.is_empty" title="mocpy.STMOC.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>(self)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.is_empty" title="mocpy.STMOC.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
 <td><p>Check whether the Space-Time coverage is empty</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_space" title="mocpy.STMOC.query_by_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></a>(self, spatial_coverage)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_space" title="mocpy.STMOC.query_by_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></a>(spatial_coverage)</p></td>
 <td><p>Query the ST-MOC by space coverage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_time" title="mocpy.STMOC.query_by_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code></a>(self, times)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_time" title="mocpy.STMOC.query_by_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code></a>(times)</p></td>
 <td><p>Query the ST-MOC by time ranges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.serialize" title="mocpy.STMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>(self[, format, optional_kw_dict])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.serialize" title="mocpy.STMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.union" title="mocpy.STMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(self, other)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.union" title="mocpy.STMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(other)</p></td>
 <td><p>Union of two Space-Time coverages.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.write" title="mocpy.STMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(self, path[, format, overwrite, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.write" title="mocpy.STMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, …])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt id="mocpy.STMOC.contains">
-<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">times</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">inside</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.contains" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">times</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">inside</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -178,7 +179,7 @@ lying inside the Space-Time coverage.</p>
 
 <dl class="py method">
 <dt id="mocpy.STMOC.difference">
-<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.difference" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">difference</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.difference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Difference of two Space-Time coverages.</p>
 <p>The difference is first performed along the Time axis of the
 coverage. The difference of space axis coverages is done on time
@@ -316,7 +317,7 @@ with <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 
 <dl class="py method">
 <dt id="mocpy.STMOC.intersection">
-<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.intersection" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersection of two Space-Time coverages.</p>
 <p>The intersection is first performed along the Time axis of the
 coverage. The intersection of space axis coverages is done on time
@@ -340,13 +341,13 @@ with <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 
 <dl class="py method">
 <dt id="mocpy.STMOC.is_empty">
-<code class="sig-name descname">is_empty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.is_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.is_empty" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.is_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.is_empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the Space-Time coverage is empty</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mocpy.STMOC.query_by_space">
-<code class="sig-name descname">query_by_space</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">spatial_coverage</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.query_by_space" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">query_by_space</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spatial_coverage</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.query_by_space" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query the ST-MOC by space coverage.</p>
 <p>This will perform the union of all the time ranges whose associated
 spatial coverages lie in <code class="docutils literal notranslate"><span class="pre">moc</span></code>.</p>
@@ -368,7 +369,7 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt id="mocpy.STMOC.query_by_time">
-<code class="sig-name descname">query_by_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">times</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">query_by_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">times</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query the ST-MOC by time ranges.</p>
 <p>This will perform the union of all the spatial coverages lying in a set of time ranges.</p>
 <dl class="field-list">
@@ -389,7 +390,7 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt id="mocpy.STMOC.serialize">
-<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'fits'</span></em>, <em class="sig-param"><span class="n">optional_kw_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.serialize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'fits'</span></em>, <em class="sig-param"><span class="n">optional_kw_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.serialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serializes the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
@@ -412,7 +413,7 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt id="mocpy.STMOC.union">
-<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.union" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">union</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mocpy.STMOC.union" title="Permalink to this definition">¶</a></dt>
 <dd><p>Union of two Space-Time coverages.</p>
 <p>The union is first performed along the Time axis of the
 coverage. The union of space axis coverages is done on time
@@ -436,7 +437,7 @@ with <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 
 <dl class="py method">
 <dt id="mocpy.STMOC.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'fits'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">optional_kw_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'fits'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">optional_kw_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -461,6 +462,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
