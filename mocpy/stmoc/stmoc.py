@@ -48,7 +48,7 @@ class STMOC(serializer.IO):
     @property
     def max_time(self):
         return Time(core.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
-    
+
     @property
     def min_time(self):
         return Time(core.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
@@ -66,7 +66,7 @@ class STMOC(serializer.IO):
 
         - Its first dimension refers to `astropy.time.Time` times.
         - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
-        
+
         Parameters
         ----------
         time : `astropy.time.Time`
@@ -79,7 +79,7 @@ class STMOC(serializer.IO):
             The latitudes of the sky coordinates observed at a specific time.
         spatial_depth : int
             Spatial depth.
-        
+
         Returns
         -------
         result : `~mocpy.stmoc.STMOC`
@@ -191,7 +191,7 @@ class STMOC(serializer.IO):
         ----------
         times : `astropy.time.Time`
             Time ranges. Must be a Nx2 shaped astropy time array.
-        
+
         Returns
         -------
         result : `~mocpy.moc.MOC`
@@ -417,5 +417,7 @@ class STMOC(serializer.IO):
             The resulting STMOC.
         """
         # Open the FITS file
-        hdulist = fits.open(filename)
-        return STMOC.deserialization(hdulist)
+        with fits.open(filename) as hdulist:
+            stmoc = STMOC.deserialization(hdulist)
+
+        return stmoc
