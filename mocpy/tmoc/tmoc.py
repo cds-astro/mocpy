@@ -9,7 +9,7 @@ from astropy.time import Time, TimeDelta
 from ..interval_set import IntervalSet
 from ..abstract_moc import AbstractMOC
 
-from .. import core
+from .. import mocpy
 
 __author__ = "Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -85,7 +85,7 @@ class TimeMOC(AbstractMOC):
 
         assert min_times.shape == max_times.shape
 
-        intervals = core.from_time_ranges(
+        intervals = mocpy.from_time_ranges(
             min_times.astype(np.float64),
             max_times.astype(np.float64),
         )

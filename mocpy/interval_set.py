@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import copy
 import numpy as np
 
-from . import core
+from . import mocpy
 
 __author__ = "Thomas Boch"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -62,12 +62,12 @@ class IntervalSet:
 
     @classmethod
     def from_uniq(cls, pix):
-        intervals = core.to_nested(pix)
+        intervals = mocpy.to_nested(pix)
         return cls(intervals=intervals, make_consistent=False)
 
     def _merge_nested_intervals(self, min_depth):
         if not self.empty():
-            self._intervals = core.coverage_merge_nested_intervals(self._intervals, min_depth)
+            self._intervals = mocpy.coverage_merge_nested_intervals(self._intervals, min_depth)
 
     def copy(self):
         """
@@ -114,26 +114,26 @@ class IntervalSet:
         return self._intervals.size == 0
 
     def union(self, other):
-        intervals = core.coverage_union(self._intervals, other._intervals)
+        intervals = mocpy.coverage_union(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def intersection(self, other):
-        intervals = core.coverage_intersection(self._intervals, other._intervals)
+        intervals = mocpy.coverage_intersection(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def difference(self, other):
-        intervals = core.coverage_difference(self._intervals, other._intervals)
+        intervals = mocpy.coverage_difference(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def complement(self):
-        intervals = core.coverage_complement(self._intervals)
+        intervals = mocpy.coverage_complement(self._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     @property
     def uniq(self):
         if self.empty():
             return self._intervals
-        return core.to_uniq(self._intervals)
+        return mocpy.to_uniq(self._intervals)
 
     @property
     def nested(self):

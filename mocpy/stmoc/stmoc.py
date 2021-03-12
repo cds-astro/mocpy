@@ -13,7 +13,7 @@ from astropy import wcs
 from astropy.time import Time
 
 import cdshealpix
-from .. import core
+from .. import mocpy
 
 from .. import MOC, serializer
 from ..interval_set import IntervalSet
@@ -32,32 +32,32 @@ class STMOC(serializer.IO):
     """
 
     def __init__(self):
-        self.__index = core.create_2d_coverage()
+        self.__index = mocpy.create_2d_coverage()
         self._fits_column_name = 'PIXELS'
 
     def __del__(self):
-        core.drop_2d_coverage(self.__index)
+        mocpy.drop_2d_coverage(self.__index)
 
     def __eq__(self, other):
-        return core.coverage_2d_equality_check(self.__index, other.__index)
+        return mocpy.coverage_2d_equality_check(self.__index, other.__index)
 
     @property
     def max_depth(self):
-        return core.coverage_2d_depth(self.__index)
+        return mocpy.coverage_2d_depth(self.__index)
 
     @property
     def max_time(self):
-        return Time(core.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
+        return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
 
     @property
     def min_time(self):
-        return Time(core.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
+        return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
 
     def is_empty(self):
         """
         Check whether the Space-Time coverage is empty
         """
-        return core.coverage_2d_is_empty(self.__index)
+        return mocpy.coverage_2d_is_empty(self.__index)
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -96,7 +96,7 @@ class STMOC(serializer.IO):
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        core.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
+        mocpy.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
         return result
 
     @classmethod
@@ -140,7 +140,7 @@ class STMOC(serializer.IO):
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        core.from_time_ranges_lonlat(result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth)
+        mocpy.from_time_ranges_lonlat(result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth)
         return result
 
     @classmethod
@@ -178,7 +178,7 @@ class STMOC(serializer.IO):
         result = cls()
         spatial_coverages = [spatial_coverage._interval_set._intervals for spatial_coverage in spatial_coverages]
 
-        core.from_time_ranges_spatial_coverages(result.__index, times_start, times_end, time_depth, spatial_coverages)
+        mocpy.from_time_ranges_spatial_coverages(result.__index, times_start, times_end, time_depth, spatial_coverages)
         return result
 
     def query_by_time(self, times):
@@ -201,7 +201,7 @@ class STMOC(serializer.IO):
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
 
         times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
-        ranges = core.project_on_second_dim(times, self.__index)
+        ranges = mocpy.project_on_second_dim(times, self.__index)
         return MOC(IntervalSet(ranges, make_consistent=False))
 
     def query_by_space(self, spatial_coverage):
@@ -222,7 +222,7 @@ class STMOC(serializer.IO):
             The time ranges observing in the ``spatial_coverage``
         """
         # Time ranges in µsec
-        time_ranges = core.project_on_first_dim(spatial_coverage._interval_set._intervals, self.__index)
+        time_ranges = mocpy.project_on_first_dim(spatial_coverage._interval_set._intervals, self.__index)
         return Time(time_ranges / 86400000000, format='jd', scale='tdb')
 
     def union(self, other):
@@ -245,7 +245,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        core.coverage_2d_union(result.__index, self.__index, other.__index)
+        mocpy.coverage_2d_union(result.__index, self.__index, other.__index)
         return result
 
     def intersection(self, other):
@@ -268,7 +268,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        core.coverage_2d_intersection(result.__index, self.__index, other.__index)
+        mocpy.coverage_2d_intersection(result.__index, self.__index, other.__index)
         return result
 
     def difference(self, other):
@@ -291,7 +291,7 @@ class STMOC(serializer.IO):
             with `other`.
         """
         result = STMOC()
-        core.coverage_2d_difference(result.__index, self.__index, other.__index)
+        mocpy.coverage_2d_difference(result.__index, self.__index, other.__index)
         return result
 
     def contains(self, times, lon, lat, inside=True):
@@ -329,7 +329,7 @@ class STMOC(serializer.IO):
         if times.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = core.coverage_2d_contains(self.__index, times, lon, lat)
+        result = mocpy.coverage_2d_contains(self.__index, times, lon, lat)
 
         if not inside:
             result = ~result
@@ -338,7 +338,7 @@ class STMOC(serializer.IO):
 
     @property
     def _fits_header_keywords(self):
-        t_depth, s_depth = core.coverage_2d_depth(self.__index)
+        t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
         return {
             'MOC': 'TIME.SPACE',
             'ORDERING': 'RANGE29',
@@ -356,7 +356,7 @@ class STMOC(serializer.IO):
         return '1K'
 
     def _uniq_format(self):
-        return core.coverage_2d_to_fits(self.__index)
+        return mocpy.coverage_2d_to_fits(self.__index)
 
     @classmethod
     def deserialization(cls, hdulist):
@@ -395,7 +395,7 @@ class STMOC(serializer.IO):
             second_dim_depth = header.get('MOCORDER')
 
         result = cls()
-        core.coverage_2d_from_fits(
+        mocpy.coverage_2d_from_fits(
             result.__index,
             bin_HDU_table.data[key].astype(np.int64)
         )

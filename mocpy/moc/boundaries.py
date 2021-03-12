@@ -11,7 +11,7 @@ from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel
 import astropy.units as u
 
-from .. import core
+from .. import mocpy
 
 class Boundaries():
     @staticmethod
@@ -35,7 +35,7 @@ class Boundaries():
                 moc = m.degrade_to_order(order)
 
         max_order = moc.max_order
-        ipixels = core.flatten_pixels(moc._interval_set._intervals, max_order)
+        ipixels = mocpy.flatten_pixels(moc._interval_set._intervals, max_order)
 
         # Take the complement if the MOC covers more than half of the sky => the perimeter(MOC) = perimeter(complement(MOC))
         # but we process less hpx cells

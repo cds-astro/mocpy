@@ -1,14 +1,40 @@
 [package]
-name = "moc"
-version = "0.8.4"
-authors = ["Matthieu Baumann <matthieu.baumann@astro.unistra.fr>"]
+name = "MOCPy"
+version = "0.8.5"
+authors = [
+  "Thomas Boch <thomas.boch@astro.unistra.fr>", 
+  "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
+  "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>"
+]
 edition = "2018"
+license = "BSD"
+readme = "README.rst"
+categories = ["algorithms", "science"]
+repository = "https://github.com/cds-astro/mocpy"
+description = "MOC parsing and manipulation in Python"
+documentation = "https://cds-astro.github.io/mocpy"
 
-[build-system]
-requires = ["setuptools", "wheel", "setuptools-rust"]
+[badges]
+maintenance = { status = "actively-developed" }
+
+[package.metadata.maturin]
+# Python dependencies
+requires-dist=[
+  "astropy",
+  "cdshealpix",
+  "matplotlib",  # Used in fill and border
+  "networkx",    # Used in get_boundaries
+  "lark-parser", # Used in from_str for parsing the string given and create the MOC from it
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: BSD License",
+  "Topic :: Scientific/Engineering :: Astronomy"
+]
 
 [lib]
-name = "moc"
+name = "mocpy"
 path = "src/lib.rs"
 test = true
 doctest = true
@@ -19,20 +45,22 @@ crate-type = ["cdylib"]
 rand = "0.7.3"
 intervals = { path = "./src/intervals" }
 healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
-numpy = "0.9.0"
 num = "0.2"
 time = "*"
 rayon = "1.3.0"
 lazy_static = "1.4.0"
 
+[dependencies.numpy]
+version = "0.13.0"
+
 [dependencies.ndarray]
-version = "0.13.1"
+version = "0.14.0"
 default-features = false # do not include the default features, and optionally
                          # cherry-pick individual features
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.10.1"
+version = "0.13.2"
 features = ["extension-module"]
 
 [profile.release]
@@ -40,3 +68,6 @@ opt-level = 3
 
 [profile.dev]
 opt-level = 0
+
+
+

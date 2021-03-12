@@ -37,13 +37,13 @@ pub fn create_from_position(
     depth: i8,
 ) -> PyResult<NestedRanges<u64>> {
     if lon.len() != lat.len() {
-        return Err(exceptions::ValueError::py_err(
+        return Err(exceptions::PyValueError::new_err(
             "Longitudes and Latitudes \
              do not have the same shapes.",
         ));
     }
     if depth < 0 || depth > <u64>::MAXDEPTH {
-        return Err(exceptions::ValueError::py_err(format!(
+        return Err(exceptions::PyValueError::new_err(format!(
             "Depth must be comprised between in [0, {0}]",
             <u64>::MAXDEPTH
         )));
@@ -96,13 +96,13 @@ pub fn from_valued_healpix_cells(
 ) -> PyResult<NestedRanges<u64>> {
     if uniq.len() != values.len() {
         Err(
-            exceptions::ValueError::py_err(
+            exceptions::PyValueError::new_err(
                 "`uniq` and values do not have the same size."
             )
         )
     } else if cumul_from >= cumul_to {
         Err(
-            exceptions::ValueError::py_err(
+            exceptions::PyValueError::new_err(
                 "`cumul_from` has to be < to `cumul_to`."
             )
         )
@@ -185,7 +185,7 @@ pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResul
     let mut pixels_1 = &pixels + &ones;
 
     if pixels.shape() != depth.shape() {
-        return Err(exceptions::IndexError::py_err(
+        return Err(exceptions::PyIndexError::new_err(
             "pixels and depth arrays must have the same shape",
         ));
     }
@@ -203,7 +203,7 @@ pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResul
     let pixels = pixels.into_shape(shape).unwrap();
     let pixels_1 = pixels_1.into_shape(shape).unwrap();
 
-    let ranges = stack![Axis(1), pixels, pixels_1].to_owned();
+    let ranges = concatenate![Axis(1), pixels, pixels_1].to_owned();
 
     let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
 

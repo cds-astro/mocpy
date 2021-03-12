@@ -2,9 +2,8 @@ astropy
 cdshealpix
 matplotlib
 networkx==2.2
-sphinx
-sphinxcontrib-bibtex
-numpydoc
 lark-parser
-astropy-sphinx-theme
+
 astropy_healpix
+
+pytest

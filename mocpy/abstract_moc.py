@@ -9,7 +9,7 @@ from astropy.table import Table
 from .interval_set import IntervalSet
 from . import utils, serializer
 
-from . import core
+from . import mocpy
 
 __author__ = "Thomas Boch, Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -71,7 +71,7 @@ class AbstractMOC(serializer.IO):
         """
         Depth of the smallest HEALPix cells found in the MOC instance.
         """
-        depth = core.coverage_depth(self._interval_set._intervals)
+        depth = mocpy.coverage_depth(self._interval_set._intervals)
         depth = np.uint8(depth)
         return depth
 
@@ -171,7 +171,7 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             the MOC.
         """
-        intervals = core.coverage_from_json(json_moc)
+        intervals = mocpy.coverage_from_json(json_moc)
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
@@ -195,7 +195,7 @@ class AbstractMOC(serializer.IO):
         """
         table = Table.read(filename)
         first_column_index = table.colnames[0]
-        intervals = core.to_nested(table[first_column_index].astype(np.uint64))
+        intervals = mocpy.to_nested(table[first_column_index].astype(np.uint64))
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
@@ -315,7 +315,7 @@ class AbstractMOC(serializer.IO):
                 result_json[str(d)] = ipix_depth.tolist()
 
         return result_json
-        #return core.coverage_to_json(intervals)
+        #return mocpy.coverage_to_json(intervals)
 
     @staticmethod
     def _to_str(uniq):
@@ -414,11 +414,11 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        intervals = core.coverage_degrade(self._interval_set._intervals, new_order)
+        intervals = mocpy.coverage_degrade(self._interval_set._intervals, new_order)
         return self.__class__(IntervalSet(intervals, make_consistent=False))
 
     def refine_to_order(self, min_depth):
-        intervals = core.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
+        intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
         interval_set = IntervalSet(intervals, make_consistent=False)
         return self.__class__(interval_set)
 
