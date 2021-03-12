@@ -19,7 +19,7 @@ use pyo3::prelude::PyResult;
 /// * If the number of ``min_times`` and ``max_times`` do not match.
 pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyResult<Array2<u64>> {
     if min_times.shape() != max_times.shape() {
-        Err(exceptions::ValueError::py_err(
+        Err(exceptions::PyValueError::new_err(
             "min and max ranges have not the same shape",
         ))
     } else {
@@ -37,7 +37,7 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
         let max_times = &max_times * &Array::from_elem(shape, 86400000000_f64);
         let max_times = max_times.mapv(|e| e as u64);
 
-        let ranges = stack![Axis(1), min_times, max_times].to_owned();
+        let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
         let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
 
         let result: Array2<u64> = ranges.into();

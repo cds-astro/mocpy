@@ -1,0 +1,6 @@
+# Build a MOCPy-x.x.x.tar.gz containing sources (from maturin).
+# We do not use it so far but decided not to remove it.
+[build-system]
+requires = ["maturin"]
+build-backend = "maturin"
+

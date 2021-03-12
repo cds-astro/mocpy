@@ -8,7 +8,7 @@ from astropy.utils.data import download_file
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord, Angle
+from astropy.coordinates import SkyCoord, Angle, Longitude, Latitude
 from astropy import wcs
 
 import cdshealpix
@@ -20,7 +20,7 @@ except ImportError:
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
 
-from .. import core
+from .. import mocpy
 
 from .boundaries import Boundaries
 from .plot import fill, border
@@ -91,7 +91,7 @@ class MOC(AbstractMOC):
         max_depth = self.max_order
         m = np.zeros(3 << (2*(max_depth + 1)), dtype=bool)
 
-        pix_id = core.flatten_pixels(self._interval_set._intervals, max_depth)
+        pix_id = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
         m[pix_id] = True
 
         if not keep_inside:
@@ -115,7 +115,7 @@ class MOC(AbstractMOC):
         max_depth = self.max_order
 
         # Get the pixels array of the MOC at the its max order.
-        ipix = core.flatten_pixels(self._interval_set._intervals, max_depth)
+        ipix = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
         # Get the HEALPix array containing the neighbors of ``ipix``.
         # This array "extends" ``ipix`` by one degree of neighbors.
         ipix_extended = cdshealpix.neighbours(ipix, max_depth)
@@ -127,11 +127,11 @@ class MOC(AbstractMOC):
         ipix_neighbors = np.setdiff1d(ipix_extended, ipix)
 
         depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.int8)
-        #intervals_neighbors = core.from_healpix_cells(ipix_neighbors, depth_neighbors)
+        #intervals_neighbors = mocpy.from_healpix_cells(ipix_neighbors, depth_neighbors)
         moc_neighbors = MOC.from_healpix_cells(ipix_neighbors, depth_neighbors)
         
         # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC
-        #self._interval_set._intervals = core.coverage_union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
+        #self._interval_set._intervals = mocpy.coverage_union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
         final = self.union(moc_neighbors)
         self._interval_set = final._interval_set
         return self
@@ -149,7 +149,7 @@ class MOC(AbstractMOC):
         """
         max_depth = self.max_order
         # Get the HEALPix cells of the MOC at its max depth
-        ipix = core.flatten_pixels(self._interval_set._intervals, max_depth)
+        ipix = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
         # Get the HEALPix array containing the neighbors of ``ipix``.
         # This array "extends" ``ipix`` by one degree of neighbors.
         ipix_extended = cdshealpix.neighbours(ipix, max_depth)
@@ -511,7 +511,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        intervals = core.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
+        intervals = mocpy.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @classmethod
@@ -553,7 +553,7 @@ class MOC(AbstractMOC):
 
         # Create the MOC at the max_depth equals to the smallest cell 
         # found in the uniq array
-        intervals = core.from_valued_hpx_cells(
+        intervals = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth_tile),
             uniq.astype(np.uint64),
             values.astype(np.float64),
@@ -580,9 +580,9 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        lon : `astropy.units.Quantity`
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             The longitude of the center of the elliptical cone.
-        lat : `astropy.units.Quantity`
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitude of the center of the elliptical cone.
         a : `astropy.coordinates.Angle`
             The semi-major axis angle of the elliptical cone.
@@ -607,16 +607,18 @@ class MOC(AbstractMOC):
         --------
         >>> from mocpy import MOC
         >>> import astropy.units as u
-        >>> from astropy.coordinates import Angle
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
         >>> moc = MOC.from_elliptical_cone(
-        ...  lon=0 * u.deg,
-        ...  lat=0 * u.deg,
+        ...  lon=Longitude(0 * u.deg),
+        ...  lat=Latitude(0 * u.deg),
         ...  a=Angle(10, u.deg),
         ...  b=Angle(5, u.deg),
         ...  pa=Angle(0, u.deg),
         ...  max_depth=10
         ... )
         """
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon) 
+        lat = lat if isinstance(lat, Latitude)  else Latitude(lat) 
         pix, depth, fully_covered_flags = cdshealpix.elliptical_cone_search(lon, lat, a, b, pa, max_depth, delta_depth, flat=False)
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
@@ -630,9 +632,9 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        lon : `astropy.units.Quantity`
+        lon : astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             The longitude of the center of the cone.
-        lat : `astropy.units.Quantity`
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitude of the center of the cone.
         radius : `astropy.coordinates.Angle`
             The radius angle of the cone.
@@ -653,14 +655,16 @@ class MOC(AbstractMOC):
         --------
         >>> from mocpy import MOC
         >>> import astropy.units as u
-        >>> from astropy.coordinates import Angle
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
         >>> moc = MOC.from_cone(
-        ...  lon=0 * u.deg,
-        ...  lat=0 * u.deg,
+        ...  lon=Longitude(0 * u.deg),
+        ...  lat=Latitude(0 * u.deg),
         ...  radius=Angle(10, u.deg),
         ...  max_depth=10
         ... )
         """
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
+        lat = lat if isinstance(lat, Latitude)  else Latitude(lat)
         pix, depth, fully_covered_flags = cdshealpix.cone_search(lon, lat, radius, max_depth, delta_depth, flat=False)
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
@@ -697,10 +701,10 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        lon : `astropy.units.Quantity`
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             The longitudes defining the polygon. Can describe convex and
             concave polygons but not self-intersecting ones.
-        lat : `astropy.units.Quantity`
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitudes defining the polygon. Can describe convex and concave
             polygons but not self-intersecting ones.
         max_depth : int, optional
@@ -711,6 +715,8 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)    
+        lat = lat if isinstance(lat, Latitude)  else Latitude(lat)
         pix, depth, fully_covered_flags = cdshealpix.polygon_search(lon, lat, max_depth)
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
@@ -747,7 +753,7 @@ class MOC(AbstractMOC):
         if fully_covered is not None and fully_covered.shape != ipix.shape:
             raise IndexError("fully covered and depth arrays must have the same shape")
 
-        intervals = core.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
+        intervals = mocpy.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
         return cls(IntervalSet(intervals, make_consistent=False))
 
     @staticmethod
@@ -812,7 +818,7 @@ class MOC(AbstractMOC):
         """
         Sky fraction covered by the MOC
         """
-        sky_fraction = core.coverage_sky_fraction(self._interval_set._intervals)
+        sky_fraction = mocpy.coverage_sky_fraction(self._interval_set._intervals)
         return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region
@@ -906,7 +912,7 @@ class MOC(AbstractMOC):
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
 
         m = np.zeros(12*4**(plotted_moc.max_order))
-        pix_id = core.flatten_pixels(plotted_moc._interval_set._intervals, plotted_moc.max_order)
+        pix_id = mocpy.flatten_pixels(plotted_moc._interval_set._intervals, plotted_moc.max_order)
 
         # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.
         if isinstance(frame, Galactic):

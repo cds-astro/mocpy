@@ -18,7 +18,7 @@ rayon = "1.2.0"
 healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 
 [dependencies.ndarray]
-version = "0.13.0"
+version = "0.14.0"
 default-features = false # do not include the default features, and optionally
                          # cherry-pick individual features
 features = ["rayon"]

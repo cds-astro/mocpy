@@ -22,7 +22,7 @@ use intervals::nestedranges::NestedRanges;
 /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
 pub fn degrade_nested_ranges(coverage: &mut NestedRanges<u64>, depth: i8) -> PyResult<()> {
     if depth < 0 || depth > <u64>::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
@@ -95,14 +95,14 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<NestedRanges<u64>> {
     for (depth, pixels) in input {
         let depth = depth
             .downcast::<PyString>()
-            .map_err(|_| exceptions::TypeError::py_err(TYPE_KEY_MSG_ERR))?
-            .to_string()?
+            .map_err(|_| exceptions::PyTypeError::new_err(TYPE_KEY_MSG_ERR))?
+            .to_string()
             .parse::<i8>()
             .unwrap();
 
         let pixels = pixels
             .downcast::<PyList>()
-            .map_err(|_| exceptions::TypeError::py_err(TYPE_VALUES_MSG_ERR))?;
+            .map_err(|_| exceptions::PyTypeError::new_err(TYPE_VALUES_MSG_ERR))?;
 
         let shift = ((<u64>::MAXDEPTH - depth) << 1) as u64;
 
@@ -110,7 +110,7 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<NestedRanges<u64>> {
             let pixel = p
                 .to_object(py)
                 .extract::<u64>(py)
-                .map_err(|_| exceptions::ValueError::py_err(EXTRACT_IPIX_FROM_LIST_MSG_ERR))?;
+                .map_err(|_| exceptions::PyValueError::new_err(EXTRACT_IPIX_FROM_LIST_MSG_ERR))?;
 
             let e1 = pixel << shift;
             let e2 = (pixel + 1) << shift;
@@ -150,7 +150,7 @@ pub fn to_json(py: Python, coverage: NestedRanges<u64>) -> PyResult<PyObject> {
     for (d, ipix) in &dict {
         if !ipix.is_empty() {
             result.set_item(d, ipix).map_err(|_| {
-                exceptions::ValueError::py_err(
+                exceptions::PyValueError::new_err(
                     "An error occured when inserting items into the PyDict",
                 )
             })?;
@@ -189,7 +189,7 @@ pub fn merge(coverage: NestedRanges<u64>, min_depth: i8) -> PyResult<NestedRange
         // Then we check its validity
         let max_depth = <u64>::MAXDEPTH;
         if min_depth < 0 || min_depth > max_depth {
-            return Err(exceptions::ValueError::py_err("Min depth is not valid."));
+            return Err(exceptions::PyValueError::new_err("Min depth is not valid."));
         }
 
         // And perform the division of the ranges

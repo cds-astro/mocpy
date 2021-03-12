@@ -40,18 +40,18 @@ pub fn create_from_times_positions(
     ds: i8,
 ) -> PyResult<NestedRanges2D<u64, u64>> {
     if dt < 0 || dt > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else if ds < 0 || ds > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Space depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else {
         if times.len() != lon.len() || times.len() != lat.len() {
-            return Err(exceptions::ValueError::py_err(
+            return Err(exceptions::PyValueError::new_err(
                 "Times, longitudes and latitudes do not have
                  the same shapes.",
             ));
@@ -110,12 +110,12 @@ pub fn create_from_time_ranges_positions(
     ds: i8,
 ) -> PyResult<NestedRanges2D<u64, u64>> {
     if ds < 0 || ds > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Space depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else if dt < 0 || dt > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
@@ -123,7 +123,7 @@ pub fn create_from_time_ranges_positions(
         if times_start.len() != lon.len() ||
            times_start.len() != lat.len() ||
            times_start.len() != times_end.len() {
-            return Err(exceptions::ValueError::py_err(
+            return Err(exceptions::PyValueError::new_err(
                 "Times, longitudes and latitudes do not have the same shapes.",
             ));
         }
@@ -151,7 +151,7 @@ pub fn create_from_time_ranges_positions(
             .collect::<Vec<_>>();
 
         if times.len() != ipix.len() {
-            return Err(exceptions::ValueError::py_err(
+            return Err(exceptions::PyValueError::new_err(
                 "Number of time ranges and sky coordinates do not match.",
             ));
         }
@@ -189,7 +189,7 @@ use intervals::nestedranges::NestedRanges;
 ///
 /// If the number of longitudes, latitudes and times do not match.
 use pyo3::types::PyList;
-use numpy::PyArray2;
+use numpy::PyReadonlyArray2;
 use pyo3::{ToPyObject, Python};
 
 pub fn from_time_ranges_spatial_coverages(
@@ -200,13 +200,13 @@ pub fn from_time_ranges_spatial_coverages(
     spatial_coverages: &PyList,
 ) -> PyResult<NestedRanges2D<u64, u64>> {
     if dt < 0 || dt > u64::MAXDEPTH {
-        Err(exceptions::ValueError::py_err(format!(
+        Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
             <u64>::MAXDEPTH
         )))
     } else {
         if times_start.len() != times_end.len() {
-            return Err(exceptions::ValueError::py_err(
+            return Err(exceptions::PyValueError::new_err(
                 "Invalid times.",
             ));
         }
@@ -220,8 +220,8 @@ pub fn from_time_ranges_spatial_coverages(
             // and finally to NestedRanges<u64>
             let spatial_cov = spatial_cov
                 .to_object(py)
-                .extract::<&PyArray2<u64>>(py)
-                .map_err(|_| exceptions::ValueError::py_err(ERR_CAST))?
+                .extract::<PyReadonlyArray2<u64>>(py)
+                .map_err(|_| exceptions::PyValueError::new_err(ERR_CAST))?
                 .as_array()
                 .to_owned()
                 .into();
@@ -280,7 +280,7 @@ pub fn contains(
     result: &mut Array1<bool>,
 ) -> PyResult<()> {
     if time.len() != lon.len() || time.len() != lat.len() {
-        return Err(exceptions::ValueError::py_err(
+        return Err(exceptions::PyValueError::new_err(
             "Times, longitudes and latitudes do not have the same shapes.",
         ));
     }
@@ -395,11 +395,11 @@ pub fn to_fits(coverage: &NestedRanges2D<u64, u64>) -> Array1<i64> {
 /// Time ranges are negatives so that one can distinguish them
 /// from space ranges.
 ///
-/// This method returns a `ValueError` if the `Array1` is not
+/// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
 use std::convert::TryFrom;
 pub fn from_fits(data: Array1<i64>) -> PyResult<NestedRanges2D<u64, u64>> {
-    NestedRanges2D::<u64, u64>::try_from(data).map_err(|msg| exceptions::ValueError::py_err(msg))
+    NestedRanges2D::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
 }
 
 /// Create a new empty Time-Space coverage
@@ -436,7 +436,7 @@ pub fn depth(coverage: &NestedRanges2D<u64, u64>) -> (i8, i8) {
 pub fn t_min(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
     let t_min = coverage
         .t_min()
-        .map_err(|msg| exceptions::ValueError::py_err(msg))?;
+        .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
 
     Ok((t_min as f64) / 86400000000_f64)
 }
@@ -449,7 +449,7 @@ pub fn t_min(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
 pub fn t_max(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
     let t_max = coverage
         .t_max()
-        .map_err(|msg| exceptions::ValueError::py_err(msg))?;
+        .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
 
     Ok((t_max as f64) / 86400000000_f64)
 }

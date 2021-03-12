@@ -1,6 +1,6 @@
 #[cfg(feature = "rayon")]
 extern crate intervals;
-#[macro_use(stack)]
+#[macro_use(concatenate)]
 
 extern crate ndarray;
 extern crate healpix;
@@ -15,7 +15,7 @@ extern crate pyo3;
 extern crate lazy_static;
 
 use ndarray::{Array, Array1, Array2, Axis};
-use numpy::{IntoPyArray, PyArray1, PyArray2};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList};
 use pyo3::{PyObject, ToPyObject};
@@ -104,7 +104,7 @@ fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
 }
 
 #[pymodule]
-fn core(_py: Python, m: &PyModule) -> PyResult<()> {
+fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// Create a 1D spatial coverage from a list of
     /// longitudes and latitudes
     ///
@@ -126,8 +126,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_lonlat(
         py: Python,
         depth: i8,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let lon = lon.as_array().to_owned().into_raw_vec();
         let lat = lat.as_array().to_owned().into_raw_vec();
@@ -160,8 +160,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_valued_hpx_cells(
         py: Python,
         max_depth: u8,
-        uniq: &PyArray1<u64>,
-        values: &PyArray1<f64>,
+        uniq: PyReadonlyArray1<u64>,
+        values: PyReadonlyArray1<f64>,
         cumul_from: f64,
         cumul_to: f64,
     ) -> PyResult<Py<PyArray2<u64>>> {
@@ -198,10 +198,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_lonlat")]
     fn from_time_lonlat(
         index: usize,
-        times: &PyArray1<f64>,
+        times: PyReadonlyArray1<f64>,
         d1: i8,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
         let times = times.as_array()
@@ -249,11 +249,11 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_ranges_lonlat")]
     fn from_time_ranges_lonlat(
         index: usize,
-        times_min: &PyArray1<f64>,
-        times_max: &PyArray1<f64>,
+        times_min: PyReadonlyArray1<f64>,
+        times_max: PyReadonlyArray1<f64>,
         d1: i8,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>,
         d2: i8,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
@@ -306,8 +306,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_time_ranges_spatial_coverages(
         py: Python,
         index: usize,
-        times_min: &PyArray1<f64>,
-        times_max: &PyArray1<f64>,
+        times_min: PyReadonlyArray1<f64>,
+        times_max: PyReadonlyArray1<f64>,
         d1: i8,
         spatial_coverages: &PyList,
     ) -> PyResult<()> {
@@ -328,7 +328,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     #[pyfn(m, "project_on_first_dim")]
-    fn project_on_first_dim(py: Python, ranges: &PyArray2<u64>, index: usize) -> Py<PyArray2<u64>> {
+    fn project_on_first_dim(py: Python, ranges: PyReadonlyArray2<u64>, index: usize) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
         let ranges = ranges.as_array().to_owned();
         let ranges = coverage::create_nested_ranges_from_py(ranges);
@@ -370,7 +370,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "project_on_second_dim")]
     fn project_on_second_dim(
         py: Python,
-        ranges: &PyArray2<u64>,
+        ranges: PyReadonlyArray2<u64>,
         index: usize,
     ) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
@@ -438,10 +438,10 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// Time ranges are negatives so that one can distinguish them
     /// from space ranges.
     ///
-    /// This method returns a `ValueError` if the `Array1` is not
+    /// This method returns a `PyValueError` if the `Array1` is not
     /// defined as above.
     #[pyfn(m, "coverage_2d_from_fits")]
-    fn coverage_2d_from_fits(index: usize, data: &PyArray1<i64>) -> PyResult<()> {
+    fn coverage_2d_from_fits(index: usize, data: PyReadonlyArray1<i64>) -> PyResult<()> {
         let data = data.as_array().to_owned();
         let coverage_from_fits = time_space_coverage::from_fits(data)?;
 
@@ -681,9 +681,9 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     fn coverage_2d_contains(
         py: Python,
         index: usize,
-        times: &PyArray1<f64>,
-        lon: &PyArray1<f64>,
-        lat: &PyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
+        times: PyReadonlyArray1<f64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
         let times = times.as_array().to_owned();
         let lon = lon.as_array().to_owned();
         let lat = lat.as_array().to_owned();
@@ -703,7 +703,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``a`` - The spatial coverage being the left operand
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_union")]
-    fn coverage_union(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    fn coverage_union(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
@@ -723,7 +723,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``a`` - The spatial coverage being the left operand
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_difference")]
-    fn coverage_difference(py: Python, a: &PyArray2<u64>, b: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    fn coverage_difference(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
@@ -745,8 +745,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "coverage_intersection")]
     fn coverage_intersection(
         py: Python,
-        a: &PyArray2<u64>,
-        b: &PyArray2<u64>,
+        a: PyReadonlyArray2<u64>,
+        b: PyReadonlyArray2<u64>,
     ) -> Py<PyArray2<u64>> {
         let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
@@ -766,7 +766,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// * ``ranges`` - The input spatial coverage
     #[pyfn(m, "coverage_complement")]
-    fn coverage_complement(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray2<u64>> {
+    fn coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
 
         let coverage = coverage::create_nested_ranges_from_py(ranges);
@@ -813,7 +813,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// * ``ranges`` - The spatial coverage ranges to serialize.
     #[pyfn(m, "coverage_to_json")]
-    fn coverage_to_json(py: Python, ranges: &PyArray2<u64>) -> PyResult<PyObject> {
+    fn coverage_to_json(py: Python, ranges: PyReadonlyArray2<u64>) -> PyResult<PyObject> {
         let ranges = ranges.as_array().to_owned();
 
         let coverage = coverage::create_nested_ranges_from_py(ranges);
@@ -835,7 +835,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "coverage_degrade")]
     fn coverage_degrade(
         py: Python,
-        ranges: &PyArray2<u64>,
+        ranges: PyReadonlyArray2<u64>,
         depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
@@ -872,7 +872,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "coverage_merge_nested_intervals")]
     fn coverage_merge_nested_intervals(
         py: Python,
-        ranges: &PyArray2<u64>,
+        ranges: PyReadonlyArray2<u64>,
         min_depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
@@ -892,7 +892,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// * ``ranges`` - The input coverage.
     #[pyfn(m, "coverage_depth")]
-    fn coverage_depth(_py: Python, ranges: &PyArray2<u64>) -> i8 {
+    fn coverage_depth(_py: Python, ranges: PyReadonlyArray2<u64>) -> i8 {
         let ranges = ranges.as_array().to_owned();
 
         let coverage = coverage::create_nested_ranges_from_py(ranges);
@@ -907,7 +907,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``coverage`` - The spatial coverage
     /// * ``max_depth`` - The max depth of the spatial coverage.
     #[pyfn(m, "coverage_sky_fraction")]
-    fn coverage_sky_fraction(_py: Python, ranges: &PyArray2<u64>) -> f32 {
+    fn coverage_sky_fraction(_py: Python, ranges: PyReadonlyArray2<u64>) -> f32 {
         let ranges = ranges.as_array().to_owned();
 
         coverage::sky_fraction(&ranges)
@@ -919,7 +919,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// * ``ranges`` - The HEALPix cells defined in the **uniq** format.
     #[pyfn(m, "to_nested")]
-    fn to_nested(py: Python, ranges: &PyArray1<u64>) -> Py<PyArray2<u64>> {
+    fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
 
         let result: Array2<u64> = if ranges.is_empty() {
@@ -930,7 +930,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
             let start = ranges.into_shape(shape).unwrap();
             let end = &start + &Array2::<u64>::ones(shape);
 
-            let ranges = stack![Axis(1), start, end];
+            let ranges = concatenate![Axis(1), start, end];
             let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();
 
             let nested_coverage = spatial_coverage::to_nested(uniq_coverage);
@@ -946,7 +946,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
     #[pyfn(m, "to_uniq")]
-    fn to_uniq(py: Python, ranges: &PyArray2<u64>) -> Py<PyArray1<u64>> {
+    fn to_uniq(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray1<u64>> {
         let ranges = ranges.as_array().to_owned();
 
         let result: Array1<u64> = if ranges.is_empty() {
@@ -974,8 +974,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_time_ranges")]
     fn from_time_ranges(
         py: Python,
-        min_times: &PyArray1<f64>,
-        max_times: &PyArray1<f64>,
+        min_times: PyReadonlyArray1<f64>,
+        max_times: PyReadonlyArray1<f64>,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let min_times = min_times.as_array().to_owned();
         let max_times = max_times.as_array().to_owned();
@@ -993,7 +993,7 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``data`` - The spatial coverage
     /// * ``depth`` - The depth to flatten the coverage to.
     #[pyfn(m, "flatten_pixels")]
-    fn flatten_pixels(py: Python, data: &PyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
+    fn flatten_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
         let data = data.as_array().to_owned();
 
         let result = coverage::flatten_pixels(data, depth);
@@ -1021,8 +1021,8 @@ fn core(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_healpix_cells")]
     fn from_healpix_cells(
         py: Python,
-        pixels: &PyArray1<u64>,
-        depth: &PyArray1<i8>,
+        pixels: PyReadonlyArray1<u64>,
+        depth: PyReadonlyArray1<i8>,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let pixels = pixels.as_array().to_owned();
         let depth = depth.as_array().to_owned();
