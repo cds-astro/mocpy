@@ -1,7 +1,7 @@
 astropy
 cdshealpix
 matplotlib
-networkx==2.2
+networkx>=2.5
 lark-parser
 
 astropy_healpix
