@@ -52,6 +52,7 @@ extensions = [
     # see https://numpydoc.readthedocs.io/en/latest/install.html
     'numpydoc',
 ]
+bibtex_bibfiles = ['references.bib']
 
 default_role = 'py:obj'
 numpydoc_class_members_toctree = False
