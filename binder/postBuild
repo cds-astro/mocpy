@@ -2,8 +2,7 @@
 
 # Install cargo 
 curl https://sh.rustup.rs -sSf | sh -s -- -y
-export PATH="$HOME/.cargo/bin:$PATH"
+source $HOME/.cargo/env
 # Install the MOCPy version from the remote repo
-# ?? ./env/bin/pip install -r requirements.txt
-# ?? maturin develop --release
-pip install .
+# pip install .
+maturin develop --release
