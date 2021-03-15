@@ -290,12 +290,11 @@ class MOC(AbstractMOC):
         DeprecationWarning
             This method is not stable and not tested! A future more stable algorithm will be implemented!
 
-        Return
-        ------
+        Returns
+        -------
         coords: [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
-
         import warnings
         warnings.simplefilter('default')
         warnings.warn('This method is not stable. A future more stable algorithm will be implemented!', DeprecationWarning)
