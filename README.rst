@@ -1,7 +1,7 @@
 *****
 MOCPy
 *****
-|Travis Status| |AppVeyor status| |Notebook Binder| |Doc|
+|PyPI version| |Build/Test status| |Notebook Binder| |Doc|
 
 MOCPy is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).   
 
@@ -26,15 +26,16 @@ for more details about installing MOCPy and using it.
 
    *Rendered with MOCpy!*
 
+.. |PyPI version| image:: https://badge.fury.io/py/mocpy.svg
+    :target: https://badge.fury.io/py/mocpy
 
-.. |Travis Status| image:: http://img.shields.io/travis/cds-astro/mocpy.svg?branch=master
-    :target: https://travis-ci.org/cds-astro/mocpy
-
-.. |AppVeyor status| image:: https://ci.appveyor.com/api/projects/status/26xwvddah60lhxrx/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/bmatthieu3/mocpy/branch/master
+.. |Build/Test status| image:: https://github.com/cds-astro/mocpy/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/cds-astro/mocpy/actions/workflows/test.yml
 
 .. |Notebook Binder| image:: http://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/cds-astro/mocpy/master
 
 .. |Doc| image:: https://img.shields.io/badge/Documentation-link-green.svg
     :target: https://cds-astro.github.io/mocpy/
+
+
