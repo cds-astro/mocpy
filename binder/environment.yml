@@ -11,4 +11,4 @@ dependencies:
 - astropy-healpix # Optional dependency for boundaries notebook
 - requests
 - matplotlib # Used in fill and border
-- networkx # Used in get_boundaries
+- networkx>=2.5 # Used in get_boundaries
