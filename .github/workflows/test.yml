@@ -1,7 +1,7 @@
 name: test-mocpy
 on: [push]
 jobs:  
-  # Linux is specific because of manylinux, we have to use a docker file 
+  # Linux is specific: because of manylinux, we have to use a docker file 
   test-linux64-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux64-wheels' executes in.
@@ -49,7 +49,7 @@ jobs:
      - name: "Intsall Rust"
        run: |
          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host i686-unknown-linux-gnu -y
-     # Build wheels for all pre-installed python version (in /opt/python/, see docker image comment)
+     # Build wheels for all pre-installed python versions (in /opt/python/, see docker image comment)
      # We use maturin: https://github.com/PyO3/maturin#pypy
      - name: "Build and test wheels"
        run: |
@@ -177,6 +177,6 @@ jobs:
           # * Run the API test examples
           make doctest
           cd ..
-          # Switch of the virtualenv
+          # Switch off the virtualenv
           deactivate
 
