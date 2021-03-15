@@ -4,7 +4,7 @@ on:
     tags:
        - v*
 jobs:
-  # Linux is specifi because of manylinux, we have to use a docker file 
+  # Linux is specific: because of manylinux, we have to use a docker file 
   build-linux64-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
@@ -30,7 +30,7 @@ jobs:
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
          done
 
-  # Linux is specifi because of manylinux, we have to use a docker file 
+  # Linux is specific: because of manylinux, we have to use a docker file 
   build-linux32-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
@@ -56,10 +56,12 @@ jobs:
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
          done 
 
+  # Deploy for Windows and MoxOS 64 bits.
+  # If Windows 32 bits neede, check e.g. https://github.com/marketplace/actions/setup-msys2
   build-macos-and-windows-wheels:      
     runs-on: ${{ matrix.os }}
     strategy:
-      # Run all matrix jobs even if on is failling (default behaviour is to stop all jobs)
+      # Run all matrix jobs even if one is failling (default behaviour is to stop all jobs)
       # To be changed when option --skip-existing will be available in maturin
       fail-fast: false      
       matrix:
@@ -112,7 +114,7 @@ jobs:
           cd ./docs
           make html
           cd ..
-          # Switch of the virtualenv
+          # Switch off the virtualenv
           deactivate
       - name: "Publish doc on github pages (commit on branch gh-pages)"
         uses: JamesIves/github-pages-deploy-action@4.1.0
