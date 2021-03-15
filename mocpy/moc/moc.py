@@ -75,9 +75,9 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        ra : `astropy.units.Quantity`
+        ra : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             Right ascension array
-        dec : `astropy.units.Quantity`
+        dec : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             Declination array
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
@@ -96,6 +96,9 @@ class MOC(AbstractMOC):
 
         if not keep_inside:
             m = np.logical_not(m)
+
+        ra  = ra  if isinstance(ra, Longitude) else Longitude(ra)
+        dec = dec if isinstance(dec, Latitude) else Latitude(dec)
 
         pix = cdshealpix.lonlat_to_healpix(ra, dec, max_depth)
 
@@ -499,9 +502,9 @@ class MOC(AbstractMOC):
         
         Parameters
         ----------
-        lon : `astropy.units.Quantity`
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             The longitudes of the sky coordinates belonging to the MOC.
-        lat : `astropy.units.Quantity`
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitudes of the sky coordinates belonging to the MOC.
         max_norder : int
             The depth of the smallest HEALPix cells contained in the MOC.
@@ -632,7 +635,7 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        lon : astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             The longitude of the center of the cone.
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitude of the center of the cone.
