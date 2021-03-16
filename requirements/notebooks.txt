@@ -1,0 +1,9 @@
+nbformat
+nbconvert
+astroquery
+regions
+requests
+astropy
+astropy_healpix
+matplotlib
+networkx>=2.5
