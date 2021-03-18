@@ -10,7 +10,7 @@ for notebook_filename in notebook_filenames_l:
     with open(notebook_filename) as f:
         print("Executing notebook : {0}".format(notebook_filename))
         nb = nbformat.read(f, as_version=4)
-        ep = ExecutePreprocessor(timeout=1000, kernel_name='python3')
+        ep = ExecutePreprocessor(timeout=1000, kernel_name='mocpy-env')
         try:
             ep.preprocess(nb, {'metadata': {'path': 'notebooks/'}})
         except CellExecutionError as e:
