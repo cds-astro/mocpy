@@ -4,16 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Examples &#8212; mocpy 0.8.4 documentation</title>
-    <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Examples &#8212; mocpy 0.8.5 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
     
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -58,7 +57,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.4 documentation</a>
+	<a href="../index.html">mocpy 0.8.5 documentation</a>
 	 &#187;
       </li>
       
@@ -240,7 +239,7 @@
 </div>
 <div class="section" id="get-the-border-s-of-a-moc">
 <h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this headline">¶</a></h3>
-<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
@@ -430,7 +429,7 @@ an attempt initiated by the Virtual Observatory for binding spatial and temporal
 See its description formalized by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
 <p>Space-Time coverages allows you to:</p>
 <ol class="arabic simple">
-<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
