@@ -1,9 +1,14 @@
 nbformat
 nbconvert
 astroquery
+ipykernel
 regions
 requests
+cdshealpix
+lark-parser
 astropy
 astropy_healpix
+ipywidgets
+ipyaladin
 matplotlib
 networkx>=2.5
