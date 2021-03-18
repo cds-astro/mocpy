@@ -109,7 +109,7 @@ jobs:
           # - Build and install mocpy
           maturin develop --release
           # - Install dependencies needed to run benches
-          pip install -r requirements-doc.txt
+          pip install -r requirements/docs.txt
           # - Build the doc: once done, it is in docs/_build/html/
           cd ./docs
           make html
