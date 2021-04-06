@@ -16,7 +16,7 @@ Space & Time coverages (STMOC) are an extension of MOC to add time information.
 It is possible to get a TMOC by querying a STMOC with a MOC and/or get a MOC 
 by querying a STMOC with a TMOC.
 
-Please check the mocpy's `documentation <https://cds-astro.github.io/mocpy/>` __
+Please check the mocpy's `documentation <https://cds-astro.github.io/mocpy/>`__
 for more details about installing MOCPy and using it.
 
 .. figure:: ./resources/readme.png

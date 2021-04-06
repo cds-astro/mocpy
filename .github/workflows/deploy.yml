@@ -26,8 +26,7 @@ jobs:
          source $HOME/.cargo/env
          for PYBIN in /opt/python/cp3[6789]*/bin; do
            "${PYBIN}/pip" install maturin
-           # --skip-existing is a recent option, not yet in the binaries!
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
          done
 
   # Linux is specific: because of manylinux, we have to use a docker file 
@@ -52,8 +51,7 @@ jobs:
          source $HOME/.cargo/env
          for PYBIN in /opt/python/cp3[6789]*/bin; do
            "${PYBIN}/pip" install maturin
-           # --skip-existing is a recent option, not yet in the binaries!
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
          done 
 
   # Deploy for Windows and MoxOS 64 bits.
@@ -82,8 +80,7 @@ jobs:
        run: |
          #python3 -m pip install maturin
          pip install maturin
-         # --skip-existing is a recent option, not yet in the binaries!
-         maturin publish --interpreter python${{matrix.python_version}} --no-sdist --username fxpineau 
+         maturin publish --interpreter python${{matrix.python_version}} --skip-existing --no-sdist --username fxpineau 
 
   deploy-doc:
     runs-on: ubuntu-latest
