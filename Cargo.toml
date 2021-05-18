@@ -7,7 +7,7 @@ authors = [
   "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>"
 ]
 edition = "2018"
-license = "BSD"
+license = "BSD-3-Clause"
 readme = "README.rst"
 categories = ["algorithms", "science"]
 repository = "https://github.com/cds-astro/mocpy"
