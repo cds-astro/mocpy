@@ -19,15 +19,6 @@ def test_interval_set_consistency(isets):
     assert isets['b'] == IntervalSet(np.array([[9, 61], [68, 105]], dtype=np.uint64))
 
 
-def test_interval_min_depth():
-    big_cells = np.array([[0, 4**29]], dtype=np.uint64)
-    itv_result = IntervalSet(big_cells, min_depth=1)
-    
-    small_cells = np.array([[0, 4**28], [4**28, 2*4**28], [2*4**28, 3*4**28], [3*4**28, 4**29]], dtype=np.uint64)
-    itv_small_cells = IntervalSet(small_cells, make_consistent=False)
-    assert itv_result == itv_small_cells
-
-
 def test_interval_set_union(isets):
     assert isets['a'].union(isets['b']) == IntervalSet(np.array([[9, 126]], dtype=np.uint64))
     assert isets['a'].union(IntervalSet()) == IntervalSet(np.array([[27, 126]], dtype=np.uint64))
@@ -45,13 +36,6 @@ def test_interval_set_difference(isets):
     assert isets['b'].difference(isets['a']) == IntervalSet(np.array([[9, 27]], dtype=np.uint64))
     assert IntervalSet().difference(isets['a']) == IntervalSet()
     assert isets['a'].difference(IntervalSet()) == isets['a']
-
-
-def test_interval_set_complement():
-    assert IntervalSet().complement() == IntervalSet(np.array([[0, 12*4**29]], dtype=np.uint64))
-    assert IntervalSet().complement().complement() == IntervalSet()
-    assert IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)).complement() == \
-        IntervalSet(np.array([[0, 1], [2, 5], [8, 12*4**29]], dtype=np.uint64))
 
 
 @pytest.fixture()

@@ -66,8 +66,82 @@ class MOC(AbstractMOC):
     5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
     """
 
-    def __init__(self, interval_set=None):
+    # I introduced, but do not like, the double `make_consistent` (MOC + IntervalSet)
+    # but `coverage_merge_time_intervals` is no more genric
+    # and I can't remove `make_consistent` from `IntervalSet` without changing tests
+    def __init__(self, interval_set=None, make_consistent=True, min_depth=None):
+        """
+        Moc constructor.
+
+        The merging step of the overlapping intervals is done here.
+
+        Parameters
+        ----------
+        intervals : `~numpy.ndarray`
+            a N x 2 numpy array representing the set of intervals.
+        make_consistent : bool, optional
+            True by default. Remove the overlapping intervals that makes
+            a valid MOC (i.e. can be plot, serialized, manipulated).
+        """
         super(MOC, self).__init__(interval_set)
+
+        if make_consistent:
+            if min_depth is None:
+                min_depth = -1
+
+            min_depth = np.int8(min_depth)
+            self._merge_intervals(min_depth)
+
+    def _merge_intervals(self, min_depth):
+        if not self.empty():
+            self._interval_set._intervals = mocpy.coverage_merge_hpx_intervals(self._interval_set._intervals, min_depth)
+
+    @property
+    def max_order(self):
+        """
+        Depth of the smallest HEALPix cells found in the MOC instance.
+        """
+        depth = mocpy.hpx_coverage_depth(self._interval_set._intervals)
+        depth = np.uint8(depth)
+        return depth
+
+    def refine_to_order(self, min_depth):
+        intervals = mocpy.coverage_merge_hpx_intervals(self._interval_set._intervals, min_depth)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return MOC(interval_set, make_consistent=False)
+
+    def complement(self):
+        """
+        Returns the complement of the MOC instance.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC.
+        """
+        intervals = mocpy.hpx_coverage_complement(self._interval_set._intervals)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return MOC(interval_set, make_consistent=False)
+
+    def degrade_to_order(self, new_order):
+        """
+        Degrades the MOC instance to a new, less precise, MOC.
+
+        The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
+        degraded MOC is set to ``new_order``.
+
+        Parameters
+        ----------
+        new_order : int
+            Maximum depth of the output degraded MOC.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            The degraded MOC.
+        """
+        intervals = mocpy.hpx_coverage_degrade(self._interval_set._intervals, new_order)
+        return MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     def contains(self, ra, dec, keep_inside=True):
         """
@@ -129,7 +203,7 @@ class MOC(AbstractMOC):
         # located at the border of the MOC.
         ipix_neighbors = np.setdiff1d(ipix_extended, ipix)
 
-        depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.int8)
+        depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.uint8)
         #intervals_neighbors = mocpy.from_healpix_cells(ipix_neighbors, depth_neighbors)
         moc_neighbors = MOC.from_healpix_cells(ipix_neighbors, depth_neighbors)
         
@@ -167,7 +241,7 @@ class MOC(AbstractMOC):
         ipix_around_border = ipix_around_border.astype(np.uint64)
 
         final_ipix = np.setdiff1d(ipix, ipix_around_border)
-        final_depth = np.full(shape=final_ipix.shape, fill_value=max_depth, dtype=np.int8)
+        final_depth = np.full(shape=final_ipix.shape, fill_value=max_depth, dtype=np.uint8)
 
         # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
         final = MOC.from_healpix_cells(final_ipix, final_depth)
@@ -514,7 +588,7 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         intervals = mocpy.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
-        return cls(IntervalSet(intervals, make_consistent=False))
+        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     @classmethod
     def from_valued_healpix_cells(cls, uniq, values, max_depth=None, cumul_from=0.0, cumul_to=1.0):
@@ -562,7 +636,7 @@ class MOC(AbstractMOC):
             np.float64(cumul_from),
             np.float64(cumul_to)
         )
-        moc = cls(IntervalSet(intervals, make_consistent=False))
+        moc = cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
         # Degrade the MOC to the depth requested by the user
         if max_depth is not None:
@@ -755,8 +829,8 @@ class MOC(AbstractMOC):
         if fully_covered is not None and fully_covered.shape != ipix.shape:
             raise IndexError("fully covered and depth arrays must have the same shape")
 
-        intervals = mocpy.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.int8))
-        return cls(IntervalSet(intervals, make_consistent=False))
+        intervals = mocpy.from_healpix_cells(ipix.astype(np.uint64), depth.astype(np.uint8))
+        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     @staticmethod
     def order_to_spatial_resolution(order):

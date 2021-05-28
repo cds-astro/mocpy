@@ -14,23 +14,26 @@ extern crate pyo3;
 #[macro_use]
 extern crate lazy_static;
 
-use ndarray::{Array, Array1, Array2, Axis};
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+use ndarray::{Array, Array1, Array2, Axis, Ix2};
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList};
 use pyo3::{PyObject, ToPyObject};
 
-use intervals::nestedranges2d::NestedRanges2D;
-
-use std::collections::HashMap;
-use std::sync::Mutex;
+use intervals::ranges::{SNORanges, Ranges};
+use intervals::mocqty::MocQty;
+use intervals::mocranges::MocRanges;
+use intervals::hpxranges2d::TimeSpaceMoc;
 
 pub mod coverage;
 pub mod spatial_coverage;
 pub mod temporal_coverage;
 pub mod time_space_coverage;
 
-type Coverage2DHashMap = HashMap<usize, NestedRanges2D<u64, u64>>;
+type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
 lazy_static! {
     static ref COVERAGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
@@ -48,7 +51,7 @@ lazy_static! {
 ///
 /// * This will panic if the `COVERAGES_2D` or `NUM_COVERAGES_2D`
 ///   are already held by the current thread
-fn insert_new_coverage(coverage: NestedRanges2D<u64, u64>) -> usize {
+fn insert_new_coverage(coverage: TimeSpaceMoc<u64, u64>) -> usize {
     let mut coverages = COVERAGES_2D.lock().unwrap();
     let mut num_coverages = NUM_COVERAGES_2D.lock().unwrap();
 
@@ -93,7 +96,7 @@ fn remove_coverage(index: usize) {
 /// * If no Time-Space coverage has been found in the hash map
 /// for this specific `index`.
 /// * If `COVERAGES_2D` is already held by the current thread.
-fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
+fn update_coverage(index: usize, coverage: TimeSpaceMoc<u64, u64>) {
     let mut coverages = COVERAGES_2D.lock().unwrap();
     coverages
         .insert(index, coverage)
@@ -101,6 +104,87 @@ fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
         // because we suppose there should be a coverage
         // stored in the hash map at the `index` key.
         .expect("There is no coverage present");
+}
+
+fn coverage_op<O>(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>, op: O)
+                  -> Py<PyArray2<u64>>
+    where
+      O: Fn(Ranges<u64>, Ranges<u64>) -> Ranges<u64>
+{
+    let ranges_a = a.as_array().to_owned();
+    let ranges_b = b.as_array().to_owned();
+
+    let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
+    let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
+
+    let result = op(cov_a, cov_b);
+
+    let result: Array2<u64> = result.into();
+    result.to_owned().into_pyarray(py).to_owned()
+}
+
+fn coverage_complement<Q, F>(py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> Py<PyArray2<u64>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    let ranges = ranges.as_array().to_owned();
+
+    let coverage = to_moc_ranges(ranges);
+    let result = coverage.complement();
+
+    let result = if !result.is_empty() {
+        result.into()
+    } else {
+        // TODO: try without this condition
+        Array::zeros((1, 0))
+    };
+
+    result.into_pyarray(py).to_owned()
+}
+
+
+fn coverage_degrade<Q, F>(
+    py: Python,
+    ranges: PyReadonlyArray2<u64>,
+    depth: u8,
+    to_moc_ranges: F,
+) -> PyResult<Py<PyArray2<u64>>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    // let ranges = ranges.as_array().to_owned();
+    if ranges.len() == 0 {
+        Ok(Array::zeros((1, 0)).into_pyarray(py).to_owned())
+    } else {
+        let ranges = ranges.as_array().to_owned();
+        let mut ranges = to_moc_ranges(ranges);
+        coverage::degrade_ranges(&mut ranges, depth)?;
+        // The result is already consistent
+
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+}
+
+fn coverage_merge_intervals<Q, F>(
+    py: Python,
+    ranges: PyReadonlyArray2<u64>,
+    min_depth: i8,
+    to_moc_ranges: F,
+) -> PyResult<Py<PyArray2<u64>>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    let ranges = ranges.as_array().to_owned();
+
+    let mut coverage = to_moc_ranges(ranges);
+    coverage = coverage::merge(coverage, min_depth)?;
+
+    let result: Array2<u64> = coverage.into();
+    Ok(result.into_pyarray(py).to_owned())
 }
 
 #[pymodule]
@@ -125,7 +209,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_lonlat")]
     fn from_lonlat(
         py: Python,
-        depth: i8,
+        depth: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
     ) -> PyResult<Py<PyArray2<u64>>> {
@@ -168,7 +252,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let uniq = uniq.as_array().to_owned();
         let values = values.as_array().to_owned();
 
-        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth as u32, uniq, values, cumul_from, cumul_to)?;
+        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
 
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
@@ -199,10 +283,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_time_lonlat(
         index: usize,
         times: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
-        d2: i8,
+        d2: u8,
     ) -> PyResult<()> {
         let times = times.as_array()
             .to_owned()
@@ -251,10 +335,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         index: usize,
         times_min: PyReadonlyArray1<f64>,
         times_max: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
-        d2: i8,
+        d2: u8,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
             .to_owned()
@@ -308,7 +392,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         index: usize,
         times_min: PyReadonlyArray1<f64>,
         times_max: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         spatial_coverages: &PyList,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
@@ -331,7 +415,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn project_on_first_dim(py: Python, ranges: PyReadonlyArray2<u64>, index: usize) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
         let ranges = ranges.as_array().to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges);
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
         // Get the coverage and perform the projection
         let result = {
@@ -375,7 +459,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
         let ranges = ranges.as_array().to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges);
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
 
         // Get the coverage and perform the projection
         let result = {
@@ -492,7 +576,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// If the Time-Space coverage is empty, the returned
     /// depth is `(0, 0)`.
     #[pyfn(m, "coverage_2d_depth")]
-    fn coverage_2d_depth(_py: Python, index: usize) -> (i8, i8) {
+    fn coverage_2d_depth(_py: Python, index: usize) -> (u8, u8) {
         // Get the coverage and computes its depth
         // If the coverage is empty, the depth will be
         // (0, 0)
@@ -696,7 +780,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
-    /// Perform the union between two spatial coverages
+
+
+
+    /// Perform the union between two generic coverages
     ///
     /// # Arguments
     ///
@@ -704,19 +791,22 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_union")]
     fn coverage_union(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
+        let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
 
-        let result = spatial_coverage::union(&cov_a, &cov_b);
+        let result = cov_a.union(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.to_owned().into_pyarray(py).to_owned()
+        result.to_owned().into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.union(&cov_b))
     }
 
-    /// Perform the difference between two spatial coverages
+
+
+    /// Perform the difference between two generic coverages
     ///
     /// # Arguments
     ///
@@ -724,16 +814,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_difference")]
     fn coverage_difference(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py(ranges_a);
+        let cov_b = coverage::create_ranges_from_py(ranges_b);
 
-        let result = spatial_coverage::difference(&cov_a, &cov_b);
+        let result = cov_a.difference(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.into_pyarray(py).to_owned()
+        result.into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.difference(&cov_b))
     }
 
     /// Perform the intersection between two spatial coverages
@@ -748,39 +839,40 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         a: PyReadonlyArray2<u64>,
         b: PyReadonlyArray2<u64>,
     ) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py(ranges_a);
+        let cov_b = coverage::create_ranges_from_py(ranges_b);
 
-        let result = spatial_coverage::intersection(&cov_a, &cov_b);
+        let result = cov_a.intersection(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.into_pyarray(py).to_owned()
+        result.into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.intersection(&cov_b))
     }
 
-    /// Computes the complement of the coverage
+    /// Computes the complement of the given nested/ring coverage
     ///
     /// # Arguments
     ///
     /// * ``ranges`` - The input spatial coverage
-    #[pyfn(m, "coverage_complement")]
-    fn coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges = ranges.as_array().to_owned();
-
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
-        let result = spatial_coverage::complement(&coverage);
-
-        let result = if !result.is_empty() {
-            result.into()
-        } else {
-            // TODO: try without this condition
-            Array::zeros((1, 0))
-        };
-
-        result.into_pyarray(py).to_owned()
+    #[pyfn(m, "hpx_coverage_complement")]
+    fn hpx_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
+        coverage_complement(py, ranges, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
     }
+
+    /// Computes the complement of the given time coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The input time coverage
+    #[pyfn(m, "time_coverage_complement")]
+    fn time_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
+        coverage_complement(py, ranges, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+    }
+
+
 
     /// Deserialize a spatial coverage from a json python dictionary
     ///
@@ -816,7 +908,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn coverage_to_json(py: Python, ranges: PyReadonlyArray2<u64>) -> PyResult<PyObject> {
         let ranges = ranges.as_array().to_owned();
 
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
         let result = coverage::to_json(py, coverage)?;
         Ok(result.to_object(py))
@@ -831,22 +923,56 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Errors
     ///
-    /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-    #[pyfn(m, "coverage_degrade")]
-    fn coverage_degrade(
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_degrade")]
+    fn hpx_coverage_degrade(
         py: Python,
         ranges: PyReadonlyArray2<u64>,
-        depth: i8,
+        depth: u8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_degrade(py, ranges, depth, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
+    }
+
+    /// Degrade a time coverage to a specific depth.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The time coverage ranges to degrade.
+    /// * ``depth`` - The depth to degrade the time coverage to.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
+    #[pyfn(m, "time_coverage_degrade")]
+    fn time_coverage_degrade(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>,
+        depth: u8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_degrade(py, ranges, depth, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+    }
+
+
+    /// Make a generic coverage consistent
+    ///
+    /// # Infos
+    ///
+    /// This is an internal method whose purpose is not to be called
+    /// by an user. It is called inside of the `mocpy.IntervalSet` class.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The coverage ranges to make consistent.
+    #[pyfn(m, "coverage_merge_gen_intervals")]
+    fn coverage_merge_gen_intervals(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>
     ) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
 
-        let mut ranges = coverage::create_nested_ranges_from_py(ranges);
-        coverage::degrade_nested_ranges(&mut ranges, depth)?;
+        let coverage = coverage::build_ranges_from_py(ranges);
 
-        // Merge the overlapping intervals after degradation
-        let ranges = ranges.make_consistent();
-
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = coverage.into();
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -868,22 +994,42 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Errors
     ///
-    /// * ``min_depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-    #[pyfn(m, "coverage_merge_nested_intervals")]
-    fn coverage_merge_nested_intervals(
+    /// * ``min_depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "coverage_merge_hpx_intervals")]
+    fn coverage_merge_hpx_intervals(
         py: Python,
         ranges: PyReadonlyArray2<u64>,
         min_depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        let ranges = ranges.as_array().to_owned();
+        coverage_merge_intervals(py, ranges, min_depth, |ranges| coverage::build_hpx_ranges_from_py(ranges))
+    }
 
-        // Convert the Array2<u64> to a NestedRanges<u64>
-        // and make it consistent
-        let mut coverage = coverage::create_nested_ranges_from_py(ranges);
-        coverage = coverage::merge(coverage, min_depth)?;
-
-        let result: Array2<u64> = coverage.into();
-        Ok(result.into_pyarray(py).to_owned())
+    /// Make a time coverage consistent
+    ///
+    /// # Infos
+    ///
+    /// This is an internal method whose purpose is not to be called
+    /// by an user. It is called inside of the `mocpy.IntervalSet` class.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The time coverage ranges to make consistent.
+    /// * ``min_depth`` - A minimum depth. This argument is optional.
+    ///   A min depth means that we do not want any cells to be
+    ///   of depth < to ``min_depth``. This argument is used for example for
+    ///   plotting a time coverage. All time cells of depth < 2 are splitted
+    ///   into cells of depth 2.
+    ///
+    /// # Errors
+    ///
+    /// * ``min_depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
+    #[pyfn(m, "coverage_merge_time_intervals")]
+    fn coverage_merge_time_intervals(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>,
+        min_depth: i8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_merge_intervals(py, ranges, min_depth, |ranges| coverage::build_time_ranges_from_py(ranges))
     }
 
     /// Compute the depth of a spatial coverage
@@ -891,12 +1037,28 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``ranges`` - The input coverage.
-    #[pyfn(m, "coverage_depth")]
-    fn coverage_depth(_py: Python, ranges: PyReadonlyArray2<u64>) -> i8 {
+    #[pyfn(m, "hpx_coverage_depth")]
+    fn hpx_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
+        coverage_depth(py, ranges, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
+    }
+
+    /// Compute the depth of a time coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The input coverage.
+    #[pyfn(m, "time_coverage_depth")]
+    fn time_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
+        coverage_depth(py, ranges, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+    }
+
+    fn coverage_depth<Q, F>(_py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> u8
+        where
+          Q: MocQty<u64>,
+          F: Fn(Array<u64, Ix2>) -> MocRanges<u64, Q>
+    {
         let ranges = ranges.as_array().to_owned();
-
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
-
+        let coverage = to_moc_ranges(ranges);
         coverage::depth(&coverage)
     }
 
@@ -931,7 +1093,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let end = &start + &Array2::<u64>::ones(shape);
 
             let ranges = concatenate![Axis(1), start, end];
-            let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();
+            // We assume the input ranges are already sorted, and we perform the "make_consistent"
+            // at the creation.
+            let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges);
 
             let nested_coverage = spatial_coverage::to_nested(uniq_coverage);
             nested_coverage.into()
@@ -952,9 +1116,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result: Array1<u64> = if ranges.is_empty() {
             Array::zeros((0,))
         } else {
-            let nested_coverage = coverage::create_nested_ranges_from_py(ranges);
+            let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
-            let uniq_coverage = nested_coverage.to_uniq();
+            let uniq_coverage = nested_coverage.to_hpx_uniq();
             uniq_coverage.into()
         };
 
@@ -993,10 +1157,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``data`` - The spatial coverage
     /// * ``depth`` - The depth to flatten the coverage to.
     #[pyfn(m, "flatten_pixels")]
-    fn flatten_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
+    fn flatten_hpx_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: u8) -> Py<PyArray1<u64>> {
         let data = data.as_array().to_owned();
 
-        let result = coverage::flatten_pixels(data, depth);
+        let result = coverage::flatten_hpx_pixels(data, depth);
 
         result.into_pyarray(py).to_owned()
     }
@@ -1022,7 +1186,34 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_healpix_cells(
         py: Python,
         pixels: PyReadonlyArray1<u64>,
-        depth: PyReadonlyArray1<i8>,
+        depth: PyReadonlyArray1<u8>,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let pixels = pixels.as_array().to_owned();
+        let depth = depth.as_array().to_owned();
+
+        let result = spatial_coverage::from_healpix_cells(pixels, depth)?;
+
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+
+    /// Create a spatial coverage from an HEALPix map, i.e. from a list of HEALPix cell indices
+    /// at the same depth.
+    ///
+    /// # Arguments
+    ///
+    /// * ``pixels`` - A set of HEALPix cell indices
+    /// * ``depth`` - The depths of each HEALPix cell indices
+    ///
+    /// # Precondition
+    ///
+    /// * ``depth`` is a value in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
+    #[pyfn(m, "from_healpix_cells")]
+    fn from_healpix_map(
+        py: Python,
+        pixels: PyReadonlyArray1<u64>,
+        depth: PyReadonlyArray1<u8>,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let pixels = pixels.as_array().to_owned();
         let depth = depth.as_array().to_owned();

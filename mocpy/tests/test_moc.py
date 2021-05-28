@@ -11,8 +11,24 @@ from astropy.io import fits
 
 import cdshealpix
 
+from ..interval_set import IntervalSet
 from ..moc import MOC, World2ScreenMPL
 
+
+
+def test_interval_min_depth():
+    big_cells = np.array([[0, 4**29]], dtype=np.uint64)
+    itv_result = MOC(IntervalSet(big_cells, make_consistent=False), min_depth=1)
+
+    small_cells = np.array([[0, 4**28], [4**28, 2*4**28], [2*4**28, 3*4**28], [3*4**28, 4**29]], dtype=np.uint64)
+    itv_small_cells = MOC(IntervalSet(small_cells, make_consistent=False), make_consistent=False)
+    assert itv_result == itv_small_cells
+
+def test_interval_set_complement():
+    assert MOC().complement() == MOC(IntervalSet(np.array([[0, 12*4**29]], dtype=np.uint64)))
+    assert MOC().complement().complement() == MOC()
+    assert MOC(IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))).complement() == \
+        MOC(IntervalSet(np.array([[0, 1], [2, 5], [8, 12*4**29]], dtype=np.uint64)))
 
 #### TESTING MOC creation ####
 def get_random_skycoords(size):

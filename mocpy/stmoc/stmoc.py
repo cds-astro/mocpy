@@ -31,7 +31,7 @@ class STMOC(serializer.IO):
 
     """
 
-    def __init__(self):
+    def __init__(self, make_consistent=True):
         self.__index = mocpy.create_2d_coverage()
         self._fits_column_name = 'PIXELS'
 

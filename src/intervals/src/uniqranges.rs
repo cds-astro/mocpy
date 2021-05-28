@@ -1,45 +1,33 @@
-use num::{Integer, PrimInt};
-
-use crate::bounded::Bounded;
-use crate::nestedranges::NestedRanges;
-use crate::ranges::{Ranges, UniqToNestedIter};
-use num::One;
-
 use std::ops::Range;
 use std::slice::Iter;
 
+use num::One;
+use ndarray::Array1;
+
+use crate::ranges::Idx;
+use crate::mocranges::HpxRanges;
+use crate::hpxranges::UniqToHpxIter;
+
+
 #[derive(Debug)]
-pub struct UniqRanges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + Clone + std::fmt::Debug,
-{
-    ranges: Ranges<T>,
+pub struct HpxUniqRanges<T: Idx> {
+    ranges: HpxRanges<T>,
 }
 
-impl<T> UniqRanges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    pub fn new(data: Vec<Range<T>>) -> Self {
-        let ranges = Ranges::<T>::new(data);
-
-        UniqRanges { ranges }
+impl<T: Idx> HpxUniqRanges<T> {
+    pub fn new_unchecked(data: Vec<Range<T>>) -> Self {
+        let ranges = HpxRanges::<T>::new_unchecked(data);
+        HpxUniqRanges { ranges }
     }
 
-    /// Make the UniqRanges<T> consistent
-    ///
-    /// # Info
-    ///
-    /// By construction, the data are sorted so that it is possible (see the new
-    /// method definition above) to merge the overlapping ranges.
-    pub fn make_consistent(mut self) -> Self {
-        self.ranges = self.ranges.make_consistent();
-        self
+    pub fn new_from_sorted(data: Vec<Range<T>>) -> Self {
+        let ranges = HpxRanges::<T>::new_from_sorted(data);
+        HpxUniqRanges { ranges }
     }
 
-    pub fn to_nested(self) -> NestedRanges<T> {
-        let nested_data = UniqToNestedIter::new(self.ranges).collect::<Vec<_>>();
-        NestedRanges::<T>::new(nested_data).make_consistent()
+    pub fn to_hpx(self) -> HpxRanges<T> {
+        let nested_data = UniqToHpxIter::new(self.ranges).collect::<Vec<_>>();
+        HpxRanges::<T>::new_from(nested_data)
     }
 
     pub fn iter(&self) -> Iter<Range<T>> {
@@ -47,48 +35,35 @@ where
     }
 }
 
-impl<T> PartialEq for UniqRanges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
+impl<T: Idx> PartialEq for HpxUniqRanges<T> {
     fn eq(&self, other: &Self) -> bool {
         self.ranges == other.ranges
     }
 }
 
-impl<T> Eq for UniqRanges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
+impl<T> Eq for HpxUniqRanges<T> where T: Idx {}
 
-impl<T> From<Ranges<T>> for UniqRanges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    fn from(ranges: Ranges<T>) -> Self {
-        UniqRanges::<T> { ranges }
+impl<T: Idx> From<HpxRanges<T>> for HpxUniqRanges<T> {
+    fn from(ranges: HpxRanges<T>) -> Self {
+        HpxUniqRanges::<T> { ranges }
     }
 }
 
-impl<T> From<UniqRanges<T>> for Ranges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    fn from(uniq_ranges: UniqRanges<T>) -> Self {
+impl<T: Idx> From<HpxUniqRanges<T>> for HpxRanges<T> {
+    fn from(uniq_ranges: HpxUniqRanges<T>) -> Self {
         uniq_ranges.ranges
     }
 }
 
 use ndarray::Array2;
 
-impl From<UniqRanges<u64>> for Array2<u64> {
-    fn from(input: UniqRanges<u64>) -> Self {
+impl From<HpxUniqRanges<u64>> for Array2<u64> {
+    fn from(input: HpxUniqRanges<u64>) -> Self {
         input.ranges.into()
     }
 }
 
-use ndarray::Array1;
-fn uniq_ranges_to_array1d<T>(input: UniqRanges<T>) -> Array1<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
+fn uniq_ranges_to_array1d<T: Idx>(input: HpxUniqRanges<T>) -> Array1<T> {
     let ranges = input.ranges;
 
     let mut result: Vec<T> = Vec::<T>::new();
@@ -103,13 +78,13 @@ where
     let result: Array1<T> = result.into();
     result.to_owned()
 }
-impl From<UniqRanges<u64>> for Array1<u64> {
-    fn from(input: UniqRanges<u64>) -> Self {
+impl From<HpxUniqRanges<u64>> for Array1<u64> {
+    fn from(input: HpxUniqRanges<u64>) -> Self {
         uniq_ranges_to_array1d(input)
     }
 }
-impl From<UniqRanges<i64>> for Array1<i64> {
-    fn from(input: UniqRanges<i64>) -> Self {
+impl From<HpxUniqRanges<i64>> for Array1<i64> {
+    fn from(input: HpxUniqRanges<i64>) -> Self {
         uniq_ranges_to_array1d(input)
     }
 }

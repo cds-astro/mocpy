@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.9.0]
+### Changed
+* Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]` 
+* Add `from_time_ranges_in_microsec_since_jd_origin` in `temporal_coverage.rs`
+### Internal Python changes
+* `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
+* 
+### Internal changes
+* Generalize the code to support various quantities with different dimensions (HEALPix indices, Time, ...)
+    +  create `MocableQty` and `MocQty` implemented by `Hpx` and `Time`
+* Remove depth/qty dependent operations from `Ranges` (depth/complement/degrade), create a trait for generic operations
+* Add `MocRange(s)` since we introduced `MocQty` for depth dependent operations, and introduce both: `HpxRange(s)` and `TimeRange(s)`
+* Add `MocRanges2D` for depth dependent operations
+* Rename `NestedXX` in `HpxXX` to possibly support Ring indices (the code should be the same as far as the NSIDE is a power of 2)
+* TBD? Introduce `uniq` notation based on a sentinel bit (more generic than the HEALPix uniq numbergin, but requires an extra bit)
+* TBD? Introduce the multi-order map numbering
+
+
+## [0.8.5]
+### Changed
+- change the CI: replace travis and appveyor by github actions
+- replace setuptools rust by maturin
+- update dependencies
+
+
 ## [0.8.2]
 ### Changed
 - remove ',' separator when deserializing MOC from ascii (this follows the MOC 1.1 standard http://ivoa.net/documents/MOC/20191007/REC-MOC-1.1-20191007.pdf)

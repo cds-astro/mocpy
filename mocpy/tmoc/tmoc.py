@@ -23,8 +23,82 @@ class TimeMOC(AbstractMOC):
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
-    def __init__(self, interval_set=None):
+    # I introduced, but do not like, the double `make_consistent` (MOC + IntervalSet)
+    # but `coverage_merge_time_intervals` is no more genric
+    # and I can't remove `make_consistent` from `IntervalSet` without changing tests
+    def __init__(self, interval_set=None, make_consistent=True, min_depth=None):
+        """
+        TimeMoc constructor.
+
+        The merging step of the overlapping intervals is done here.
+
+        Parameters
+        ----------
+        intervals : `~numpy.ndarray`
+            a N x 2 numpy array representing the set of intervals.
+        make_consistent : bool, optional
+            True by default. Remove the overlapping intervals that makes
+            a valid MOC (i.e. can be plot, serialized, manipulated).
+        """
         super(TimeMOC, self).__init__(interval_set)
+
+        if make_consistent:
+            if min_depth is None:
+                min_depth = -1
+
+            min_depth = np.int8(min_depth)
+            self._merge_intervals(min_depth)
+
+    def _merge_intervals(self, min_depth):
+        if not self.empty():
+            self._interval_set._intervals = mocpy.coverage_merge_time_intervals(self._interval_set._intervals, min_depth)
+
+    @property
+    def max_order(self):
+        """
+        Depth of the smallest Time cells found in the MOC instance.
+        """
+        depth = mocpy.time_coverage_depth(self._interval_set._intervals)
+        depth = np.uint8(depth)
+        return depth
+
+    def refine_to_order(self, min_depth):
+        intervals = mocpy.coverage_merge_time_intervals(self._interval_set._intervals, min_depth)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return TimeMOC(interval_set, make_consistent=False)
+
+    def complement(self):
+        """
+        Returns the complement of the TimeMOC instance.
+
+        Returns
+        -------
+        result : `~mocpy.moc.TimeMOC`
+            The resulting TimeMOC.
+        """
+        intervals = mocpy.time_coverage_complement(self._interval_set._intervals)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return TimeMOC(interval_set, make_consistent=False)
+
+    def degrade_to_order(self, new_order):
+        """
+        Degrades the MOC instance to a new, less precise, MOC.
+
+        The maximum depth (i.e. the depth of the smallest Time cells that can be found in the MOC) of the
+        degraded MOC is set to ``new_order``.
+
+        Parameters
+        ----------
+        new_order : int
+            Maximum depth of the output degraded MOC.
+
+        Returns
+        -------
+        moc : `~mocpy.tmoc.TimeMOC`
+            The degraded MOC.
+        """
+        intervals = mocpy.time_coverage_degrade(self._interval_set._intervals, new_order)
+        return TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -52,7 +126,10 @@ class TimeMOC(AbstractMOC):
 
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
-        return TimeMOC(IntervalSet(intervals)).degrade_to_order(depth)
+        print(depth)
+        tmoc = TimeMOC(IntervalSet(intervals))
+        return tmoc.degrade_to_order(depth)
+
 
     @classmethod
     def from_time_ranges(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -90,7 +167,7 @@ class TimeMOC(AbstractMOC):
             max_times.astype(np.float64),
         )
 
-        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
+        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
         return tmoc.degrade_to_order(depth)
 
     def add_neighbours(self):
@@ -102,7 +179,7 @@ class TimeMOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMOC`
             self extended by one degree of neighbors.
         """
-        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (IntervalSet.TIME_MAX_ORDER - self.max_order)
 
         intervals = self._interval_set._intervals
         # WARN: astype gives the ownership/writeable of the array to python
@@ -111,7 +188,7 @@ class TimeMOC(AbstractMOC):
         intervals = intervals.astype(np.uint64)
 
         intervals[:, 0] = np.maximum(intervals[:, 0] - time_delta, np.uint64(0))
-        intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 62) - 1))
 
         self._interval_set = IntervalSet(intervals)
         return self
@@ -125,7 +202,7 @@ class TimeMOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMOC`
             self shrinked by one degree of neighbors.
         """
-        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (IntervalSet.TIME_MAX_ORDER - self.max_order)
 
         intervals = self._interval_set._intervals
         # WARN: astype gives the ownership/writeable of the array to python
@@ -133,7 +210,7 @@ class TimeMOC(AbstractMOC):
         # This will be removed as soon as this code is ported in rust
         intervals = intervals.astype(np.uint64)
 
-        intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 62) - 1))
         intervals[:, 1] = np.maximum(intervals[:, 1] - time_delta, np.uint64(0))
 
         good_intervals = intervals[:, 1] > intervals[:, 0]
@@ -407,7 +484,7 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        delta_t = TimeDelta(4**(29 - order) / 1e6, format='sec', scale='tdb')
+        delta_t = TimeDelta(2**(61 - order) / 1e6, format='sec', scale='tdb')
         return delta_t
 
     @staticmethod
@@ -427,7 +504,7 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        order = 29 - int(np.log2(delta_time.sec * 1e6) / 2)
+        order = 61 - int(np.log2(delta_time.sec * 1e6))
         return np.uint8(order)
 
     def plot(self, title='TimeMoc', view=(None, None), figsize=(9.5, 5), **kwargs):

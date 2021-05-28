@@ -1,31 +1,122 @@
+//! Very generic ranges operations
+
 use std::cmp;
+use std::fmt::Debug;
 use std::collections::VecDeque;
-use std::ops::Range;
+use std::ops::{Range, Index};
 use std::slice::Iter;
+use std::ptr::slice_from_raw_parts;
 
+use num::{Integer, One, PrimInt, Zero};
 use rayon::prelude::*;
-
-use crate::bounded::Bounded;
-use num::{CheckedAdd, Integer, One, PrimInt, Zero};
+use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
+use ndarray::{Array1, Array2};
 
 pub mod ranges2d;
 
-#[derive(Debug, Clone, Eq)]
-pub struct Ranges<T>(Vec<Range<T>>)
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug;
+use crate::utils;
 
-impl<T> Ranges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    pub fn new(mut data: Vec<Range<T>>) -> Ranges<T> {
-        (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
+// 'static mean that Idx does not contains any reference
+pub trait Idx: 'static + Integer + PrimInt + From<u8> + Send + Sync + Debug { }
+impl<T> Idx for T where T: 'static + Integer + PrimInt + From<u8> + Send + Sync + Debug {}
 
+/// Generic operations on a set of Sorted and Non-Overlapping ranges.
+/// SNO = Sorted Non-Overlapping
+pub trait SNORanges<'a, T: Idx>: Sized {
+
+    type Iter: Iterator<Item = &'a Range<T>>;
+    type ParIter: ParallelIterator<Item = &'a Range<T>>;
+
+    fn is_empty(&self) -> bool;
+
+    /// The iterator **MUST** return sorted and non-overlapping ranges
+    fn iter(&'a self) -> Self::Iter;
+
+    fn par_iter(&'a self) -> Self::ParIter;
+
+    fn intersects(&self, x: &Range<T>) -> bool;
+    fn par_intersects(&'a self, x: &Range<T>) -> bool {
+        self.par_iter()
+          .map(|r| !(x.start >= r.end || x.end <= r.start))
+          .any(|a| a)
+    }
+
+    fn contains_val(&self, x: &T) -> bool;
+
+    fn contains(&self, x: &Range<T>) -> bool;
+    fn par_contains(&'a self, x: &Range<T>) -> bool {
+        self.par_iter()
+          .map(|r| x.start >= r.start && x.end <= r.end)
+          .any(|a| a)
+    }
+
+    fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self;
+
+    fn union(&self, other: &Self) -> Self {
+        self.merge(other, |a, b| a || b)
+    }
+
+    fn intersection(&self, other: &Self) -> Self {
+        self.merge(other, |a, b| a && b)
+    }
+
+    fn difference(&self, other: &Self) -> Self {
+        self.merge(other, |a, b| a && !b)
+    }
+
+    /// Returns the complement assuming that the possible values are
+    /// in `[0, upper_bound_exclusive[`.
+    fn complement_with_upper_bound(&self, upper_bound_exclusive: T) -> Self;
+
+    /// Performs a logical OR between all the bounds of all ranges,
+    /// and returns the number of trailing zeros.
+    fn trailing_zeros(&'a self) -> u8 {
+        let all_vals_or: T = self.iter()
+          .fold(Zero::zero(), |res, x| res | x.start | x.end);
+        all_vals_or.trailing_zeros() as u8
+    }
+
+    /// Performs a logical OR between all the bounds of all ranges,
+    /// and returns the number of trailing zeros.
+    fn par_trailing_zeros(&'a self) -> u8 {
+        let all_vals_or: T = self.par_iter()
+          .fold(|| T::zero(), |res, x| res | x.start | x.end)
+          .reduce(|| T::zero(), |a, b| a | b);
+        all_vals_or.trailing_zeros() as u8
+    }
+}
+
+/// Generic Range operations
+#[derive(Clone, Debug)]
+pub struct Ranges<T: Idx>(pub Vec<Range<T>>);
+
+impl<T: Idx> Default for Ranges<T> {
+    fn default() -> Self {
+        Ranges(Default::default())
+    }
+}
+
+impl<T: Idx> Ranges<T> {
+
+    /// Assumes (without checking!) that the input vector of range is already sorted and do not
+    /// contains overlapping (or consecutive) ranges
+    pub fn new_unchecked(data: Vec<Range<T>>) -> Self {
         Ranges(data)
     }
 
-    /// Make the `Ranges<T>` consistent
+    /// Assumes (without checking!) that the input vector of range is already sorted **BUT**
+    /// may contains overlapping (or consecutive) ranges.
+    pub fn new_from_sorted(data: Vec<Range<T>>) -> Self {
+        Ranges(MergeOverlappingRangesIter::new(data.iter(), None).collect::<Vec<_>>())
+    }
+
+    /// Internally sorts the input vector and ensures there is no overlapping (or consecutive) ranges.
+    pub fn new_from(mut data: Vec<Range<T>>) -> Self {
+        (&mut data).par_sort_unstable_by(|left, right| left.start.cmp(&right.start));
+        Self::new_from_sorted(data)
+    }
+
+    /*/// Make the `Ranges<T>` consistent
     ///
     /// # Info
     ///
@@ -34,17 +125,85 @@ where
     pub fn make_consistent(mut self) -> Self {
         self.0 = MergeOverlappingRangesIter::new(self.iter(), None).collect::<Vec<_>>();
         self
+    }*/
+}
+
+impl<T: Idx> PartialEq for Ranges<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<T: Idx> Index<usize> for Ranges<T> {
+    type Output = Range<T>;
+
+    fn index(&self, index: usize) -> &Range<T> {
+        &self.0[index]
+    }
+}
+
+impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
+
+    type Iter = Iter<'a, Range<T>>;
+    type ParIter = rayon::slice::Iter<'a, Range<T>>;
+
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
-    /// Divide the nested ranges into ranges of length
-    /// `4**(<T>::MAXDEPTH - min_depth)`
-    ///
-    /// # Info
-    ///
-    /// This requires min_depth to be defined between `[0, <T>::MAXDEPTH]`
-    pub fn divide(mut self, min_depth: i8) -> Self {
-        self.0 = MergeOverlappingRangesIter::new(self.iter(), Some(min_depth)).collect::<Vec<_>>();
-        self
+    fn iter(&'a self) -> Self::Iter {
+        self.0.iter()
+    }
+
+    fn par_iter(&'a self) -> Self::ParIter {
+        self.0.par_iter()
+    }
+
+    // The MOC **MUST BE** consistent!
+    fn intersects(&self, x: &Range<T>) -> bool {
+        let len = self.0.len() << 1;
+        let ptr = self.0.as_ptr();
+        let result: &[T] = unsafe {
+            &* slice_from_raw_parts(ptr as *const T, len)
+        };
+        match result.binary_search(&x.start) {
+            Ok(i) => {
+                i & 1 == 0 // even index => x.start = range.start => Ok
+                || (i + 1 < len && x.end > result[i + 1]) // else (odd index) => upper bound => Check x.end > next range.start
+            },
+            Err(i) => {
+                i & 1 == 1 // index is odd => x.start inside the range
+                || x.end > result[i] // else (even index) => Check x.end > range.start
+            },
+        }
+    }
+
+    // The MOC **MUST BE** consistent!
+    fn contains_val(&self, x: &T) -> bool {
+        let len = self.0.len() << 1;
+        let ptr = self.0.as_ptr();
+        let result: &[T] = unsafe {
+            &* slice_from_raw_parts(ptr as *const T, len)
+        };
+        // Performs a binary search in it
+        match result.binary_search(x) {
+            Ok(i) => i & 1 == 0, // index must be even (lower bound of a range)
+            Err(i) => i & 1 == 1, // index must be odd (inside a range)
+        }
+    }
+
+    // The MOC **MUST BE** consistent!
+    fn contains(&self, x: &Range<T>) -> bool {
+        let len = self.0.len() << 1;
+        let ptr = self.0.as_ptr();
+        let result: &[T] = unsafe {
+            &* slice_from_raw_parts(ptr as *const T, len)
+        };
+        // Performs a binary search in it
+        match result.binary_search(&x.start) {
+            Ok(i) => i & 1 == 0 && x.end <= result[i | 1], // index must be even (lower bound of a range)
+            Err(i) => i & 1 == 1 && x.end <= result[i], // index must be odd (inside a range)
+        }
     }
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {
@@ -127,181 +286,54 @@ where
                 result.push(c);
             }
         }
-
         Ranges(utils::unflatten(&mut result))
     }
 
-    pub fn union(&self, other: &Self) -> Self {
-        self.merge(other, |a, b| a || b)
-    }
-
-    pub fn intersection(&self, other: &Self) -> Self {
-        self.merge(other, |a, b| a && b)
-    }
-
-    pub fn difference(&self, other: &Self) -> Self {
-        self.merge(other, |a, b| a && !b)
-    }
-
-    pub fn complement(&self) -> Self {
-        let mut result = Vec::<Range<T>>::with_capacity((self.0.len() + 1) as usize);
+    fn complement_with_upper_bound(&self, upper_bound_exclusive: T) -> Self {
+        let ranges = &self.0;
+        let mut result = Vec::<Range<T>>::with_capacity((ranges.len() + 1) as usize);
 
         if self.is_empty() {
-            result.push(Zero::zero()..<T>::MAXPIX);
+            result.push(T::zero()..upper_bound_exclusive);
         } else {
             let mut s = 0;
-            let mut last = if self[0].start == Zero::zero() {
+            let mut last = if ranges[0].start == T::zero() {
                 s = 1;
-                self[0].end
+                ranges[0].end
             } else {
-                Zero::zero()
+                T::zero()
             };
 
-            result = self
-                .0
-                .iter()
-                .skip(s)
-                .map(|range| {
-                    let r = last..range.start;
-                    last = range.end;
-                    r
-                })
-                .collect::<Vec<_>>();
+            result = ranges.iter()
+              .skip(s)
+              .map(|range| {
+                  let r = last..range.start;
+                  last = range.end;
+                  r
+              })
+              .collect::<Vec<_>>();
 
-            if last < <T>::MAXPIX {
-                result.push(last..<T>::MAXPIX);
+            if last < upper_bound_exclusive {
+                result.push(last..upper_bound_exclusive);
             }
         }
         Ranges(result)
     }
+}
 
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
+impl From<Ranges<u64>> for Array2<u64> {
+    fn from(input: Ranges<u64>) -> Self {
+        ranges_to_array2d(input)
     }
-
-    pub fn iter(&self) -> Iter<Range<T>> {
-        self.0.iter()
-    }
-
-    pub fn intersects(&self, x: &Range<T>) -> bool {
-        let result = self
-            .0
-            .par_iter()
-            .map(|r| {
-                if x.start >= r.end || x.end <= r.start {
-                    false
-                } else {
-                    true
-                }
-            })
-            .any(|a| a);
-
-        result
-    }
-
-    pub fn contains(&self, x: &Range<T>) -> bool {
-        let result = self
-            .0
-            .par_iter()
-            .map(|r| {
-                if x.start >= r.start && x.end <= r.end {
-                    true
-                } else {
-                    false
-                }
-            })
-            .any(|a| a);
-
-        result
-    }
-
-    pub fn degrade(&mut self, depth: i8) {
-        let shift = ((<T>::MAXDEPTH - depth) << 1) as u32;
-
-        let mut offset: T = One::one();
-        offset = offset.unsigned_shl(shift) - One::one();
-
-        let mut mask: T = One::one();
-        mask = mask.checked_mul(&!offset).unwrap();
-
-        let adda: T = Zero::zero();
-        let mut addb: T = One::one();
-        addb = addb.checked_mul(&offset).unwrap();
-
-        let capacity = self.0.len();
-        let mut result = Vec::<Range<T>>::with_capacity(capacity);
-
-        for range in self.iter() {
-            let a: T = range.start.checked_add(&adda).unwrap() & mask;
-            let b: T = range.end.checked_add(&addb).unwrap() & mask;
-
-            if b > a {
-                result.push(a..b);
-            }
-        }
-
-        self.0 = result;
-    }
-
-    pub fn depth(&self) -> i8 {
-        let total: T = self
-            .iter()
-            .fold(Zero::zero(), |res, x| res | x.start | x.end);
-
-        let mut depth: i8 = <T>::MAXDEPTH - (total.trailing_zeros() >> 1) as i8;
-
-        if depth < 0 {
-            depth = 0;
-        }
-        depth
+}
+impl From<Ranges<i64>> for Array2<i64> {
+    fn from(input: Ranges<i64>) -> Self {
+        ranges_to_array2d(input)
     }
 }
 
-impl<T> PartialEq for Ranges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
 
-//impl<T> Eq for Ranges<T> where T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug {}
-
-use std::ops::Index;
-impl<T> Index<usize> for Ranges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    type Output = Range<T>;
-
-    fn index(&self, index: usize) -> &Range<T> {
-        &self.0[index]
-    }
-}
-
-use std::iter::FromIterator;
-impl<T> FromIterator<Range<T>> for Ranges<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    fn from_iter<I: IntoIterator<Item = Range<T>>>(iter: I) -> Self {
-        let mut ranges = Ranges(Vec::<Range<T>>::new());
-
-        for range in iter {
-            ranges.0.push(range);
-        }
-
-        ranges
-    }
-}
-
-use crate::utils;
-use ndarray::{Array1, Array2};
-pub fn ranges_to_array2d<T>(input: Ranges<T>) -> Array2<T>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
+pub fn ranges_to_array2d<T: Idx>(input: Ranges<T>) -> Array2<T> {
     if input.is_empty() {
         // Warning: Empty 2D numpy arrays coming from python
         // have the shape (1, 0).
@@ -322,35 +354,25 @@ where
     }
 }
 
-impl From<Ranges<u64>> for Array2<u64> {
-    fn from(input: Ranges<u64>) -> Self {
-        ranges_to_array2d(input)
-    }
-}
-impl From<Ranges<i64>> for Array2<i64> {
-    fn from(input: Ranges<i64>) -> Self {
-        ranges_to_array2d(input)
-    }
-}
 
 #[derive(Debug)]
-struct MergeOverlappingRangesIter<'a, T>
+pub struct MergeOverlappingRangesIter<'a, T>
 where
     T: Integer,
 {
     last: Option<Range<T>>,
     ranges: Iter<'a, Range<T>>,
     split_ranges: VecDeque<Range<T>>,
-    min_depth: Option<i8>,
+    shift: Option<u32>,
 }
 
 impl<'a, T> MergeOverlappingRangesIter<'a, T>
 where
     T: Integer + PrimInt,
 {
-    fn new(
+    pub fn new(
         mut ranges: Iter<'a, Range<T>>,
-        min_depth: Option<i8>,
+        shift: Option<u32>,
     ) -> MergeOverlappingRangesIter<'a, T> {
         let last = ranges.next().cloned();
         let split_ranges = VecDeque::<Range<T>>::new();
@@ -358,19 +380,17 @@ where
             last,
             ranges,
             split_ranges,
-            min_depth,
+            shift,
         }
     }
 
     fn split_range(&self, range: Range<T>) -> VecDeque<Range<T>> {
         let mut ranges = VecDeque::<Range<T>>::new();
-        match self.min_depth {
+        match self.shift {
             None => {
                 ranges.push_back(range);
             }
-            Some(ref val) => {
-                let shift = 2 * (29 - val) as u32;
-
+            Some(shift) => {
                 let mut mask: T = One::one();
                 mask = mask.unsigned_shl(shift) - One::one();
 
@@ -434,289 +454,13 @@ where
     }
 }
 
-pub struct NestedToUniqIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    ranges: Ranges<T>,
-    id: usize,
-    buffer: Vec<Range<T>>,
-    depth: i8,
-    shift: u32,
-    off: T,
-    depth_off: T,
-}
 
-impl<T> NestedToUniqIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    pub fn new(ranges: Ranges<T>) -> NestedToUniqIter<T> {
-        let id = 0;
-        let buffer = Vec::<Range<T>>::new();
-        let depth = 0;
-        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
-
-        let mut off: T = One::one();
-        off = off.unsigned_shl(shift) - One::one();
-
-        let mut depth_off: T = One::one();
-        depth_off = depth_off.unsigned_shl((2 * depth + 2) as u32);
-
-        NestedToUniqIter {
-            ranges,
-            id,
-            buffer,
-
-            depth,
-            shift,
-            off,
-            depth_off,
-        }
-    }
-}
-
-impl<T> Iterator for NestedToUniqIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    type Item = Range<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while !self.ranges.is_empty() {
-            let start_id = self.id;
-            let end_id = self.ranges.0.len();
-            for i in start_id..end_id {
-                let range = &self.ranges[i];
-                self.id += 1;
-
-                let t1 = range.start + self.off;
-                let t2 = range.end;
-
-                let pix1 = t1.unsigned_shr(self.shift);
-                let pix2 = t2.unsigned_shr(self.shift);
-
-                let c1 = pix1.unsigned_shl(self.shift);
-                let c2 = pix2.unsigned_shl(self.shift);
-
-                if c2 > c1 {
-                    self.buffer.push(c1..c2);
-
-                    let e1 = self.depth_off.checked_add(&pix1).unwrap();
-                    let e2 = self.depth_off.checked_add(&pix2).unwrap();
-
-                    return Some(e1..e2);
-                }
-            }
-
-            let mut buffer_ranges = Ranges::<T>::new(self.buffer.clone()).make_consistent();
-            self.ranges = self.ranges.difference(&mut buffer_ranges);
-            self.id = 0;
-            self.buffer.clear();
-
-            self.depth += 1;
-            assert!(
-                self.depth <= <T>::MAXDEPTH
-                    || (self.depth > <T>::MAXDEPTH && self.ranges.is_empty())
-            );
-            if self.depth > <T>::MAXDEPTH && self.ranges.is_empty() {
-                break;
-            }
-
-            // Recompute the constants for the new depth
-            self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
-            self.off = One::one();
-            self.off = self.off.unsigned_shl(self.shift) - One::one();
-
-            self.depth_off = One::one();
-            self.depth_off = self.depth_off.unsigned_shl((2 * self.depth + 2) as u32);
-        }
-        None
-    }
-}
-
-pub struct DepthPixIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    ranges: Ranges<T>,
-    current: Option<Range<T>>,
-
-    last: Option<T>,
-    depth: i8,
-    shift: u32,
-
-    offset: T,
-    depth_offset: T,
-}
-
-impl<T> DepthPixIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    pub fn new(ranges: Ranges<T>) -> DepthPixIter<T> {
-        let depth = 0;
-        let shift = ((T::MAXDEPTH - depth) << 1) as u32;
-
-        let mut offset: T = One::one();
-        offset = offset.unsigned_shl(shift) - One::one();
-
-        let mut depth_offset: T = One::one();
-        depth_offset = depth_offset.unsigned_shl((2 * depth + 2) as u32);
-
-        let current = None;
-        let last = None;
-        DepthPixIter {
-            ranges,
-            current,
-            last,
-            depth,
-            shift,
-            offset,
-            depth_offset,
-        }
-    }
-
-    fn next_item_range(&mut self) -> Option<(i8, T)> {
-        if let Some(current) = self.current.clone() {
-            let last = self.last.unwrap();
-            if last < current.end {
-                let (depth, pix) = <T>::pix_depth(last);
-                self.last = last.checked_add(&One::one());
-
-                Some((depth as i8, pix))
-            } else {
-                self.current = None;
-                self.last = None;
-                None
-            }
-        } else {
-            None
-        }
-    }
-}
-
-impl<T> Iterator for DepthPixIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
-    type Item = (i8, T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next_depth_pix = self.next_item_range();
-        if next_depth_pix.is_some() {
-            next_depth_pix
-        } else {
-            while !self.ranges.is_empty() {
-                for range in self.ranges.iter() {
-                    let t1 = range.start + self.offset;
-                    let t2 = range.end;
-
-                    let pix1 = t1.unsigned_shr(self.shift);
-                    let pix2 = t2.unsigned_shr(self.shift);
-
-                    let c1 = pix1.unsigned_shl(self.shift);
-                    let c2 = pix2.unsigned_shl(self.shift);
-
-                    if c2 > c1 {
-                        let mut range_to_remove = Ranges::<T>::new(vec![c1..c2]);
-                        self.ranges = self.ranges.difference(&mut range_to_remove);
-
-                        let e1 = self.depth_offset.checked_add(&pix1).unwrap();
-                        let e2 = self.depth_offset.checked_add(&pix2).unwrap();
-
-                        self.last = Some(e1);
-                        self.current = Some(e1..e2);
-
-                        return self.next_item_range();
-                    }
-                }
-                self.depth += 1;
-
-                // Recompute the constants for the new depth
-                self.shift = ((T::MAXDEPTH - self.depth) << 1) as u32;
-                self.offset = One::one();
-                self.offset = self.offset.unsigned_shl(self.shift) - One::one();
-
-                self.depth_offset = One::one();
-                self.depth_offset = self.depth_offset.unsigned_shl((2 * self.depth + 2) as u32);
-            }
-            None
-        }
-    }
-}
-
-// Iterator responsible for converting
-// ranges of uniq numbers to ranges of
-// nested numbers
-pub struct UniqToNestedIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    ranges: Ranges<T>,
-    cur: T,
-    id: usize,
-}
-
-impl<T> UniqToNestedIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    pub fn new(ranges: Ranges<T>) -> UniqToNestedIter<T> {
-        let id = 0;
-
-        let cur = if ranges.0.len() > 0 {
-            ranges[id].start
-        } else {
-            Zero::zero()
-        };
-        UniqToNestedIter { ranges, cur, id }
-    }
-}
-
-impl<T> Iterator for UniqToNestedIter<T>
-where
-    T: Integer + PrimInt + CheckedAdd + Bounded<T> + Sync + Send + std::fmt::Debug,
-{
-    type Item = Range<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Iteration through the ranges
-        while self.id < self.ranges.0.len() {
-            // We get the depth/ipix values of the
-            // current uniq number
-            let (depth, ipix) = T::pix_depth(self.cur);
-
-            // We compute the number of bit to shift
-            let shift = (T::MAXDEPTH as u32 - depth) << 1;
-
-            let one: T = One::one();
-            // Compute the final nested range
-            // for the depth given
-            let e1 = ipix.unsigned_shl(shift);
-            let e2 = ipix.checked_add(&one).unwrap().unsigned_shl(shift);
-
-            self.cur = self.cur.checked_add(&one).unwrap();
-
-            let end = self.ranges[self.id].end;
-            if self.cur == end {
-                self.id += 1;
-
-                if self.id < self.ranges.0.len() {
-                    self.cur = self.ranges[self.id].start;
-                }
-            }
-
-            return Some(e1..e2);
-        }
-        None
-    }
-}
 
 #[cfg(test)]
 mod tests {
-    use crate::bounded::Bounded;
-    use crate::ranges::Ranges;
+    use crate::mocqty::{MocQty, Hpx};
+    use crate::ranges::{SNORanges, Ranges};
+
 
     use num::PrimInt;
     use rand::Rng;
@@ -726,7 +470,7 @@ mod tests {
     use ndarray::Array2;
     #[test]
     fn empty_ranges_to_array2d() {
-        let ranges = Ranges::<u64>::new(vec![]).make_consistent();
+        let ranges = Ranges::<u64>::new_unchecked(vec![]);
 
         let result = ranges_to_array2d(ranges);
         assert_eq!(result, Array2::<u64>::zeros((1, 0)));
@@ -735,8 +479,8 @@ mod tests {
     #[test]
     fn merge_range() {
         fn assert_merge(a: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(a).make_consistent();
-            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
+            let ranges = Ranges::<u64>::new_from(a);
+            let expected_ranges = Ranges::<u64>::new_unchecked(expected);
 
             assert_eq!(ranges, expected_ranges);
         }
@@ -747,28 +491,14 @@ mod tests {
         assert_merge(vec![0..6, 7..9, 8..13], vec![0..6, 7..13]);
     }
 
-    #[test]
-    fn merge_range_min_depth() {
-        let ranges = Ranges::<u64>::new(vec![0..(1 << 58)])
-            .make_consistent()
-            .divide(1);
-        let expected_ranges = vec![
-            0..(1 << 56),
-            (1 << 56)..(1 << 57),
-            (1 << 57)..3 * (1 << 56),
-            3 * (1 << 56)..(1 << 58),
-        ];
-
-        assert_eq!(ranges.0, expected_ranges);
-    }
 
     #[test]
     fn test_union() {
         fn assert_union(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a).make_consistent();
-            let b = Ranges::<u64>::new(b).make_consistent();
+            let a = Ranges::<u64>::new_from(a);
+            let b = Ranges::<u64>::new_from(b);
 
-            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
+            let expected_ranges = Ranges::<u64>::new_unchecked(expected);
             let ranges = a.union(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -793,10 +523,10 @@ mod tests {
     #[test]
     fn test_intersection() {
         fn assert_intersection(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a).make_consistent();
-            let b = Ranges::<u64>::new(b).make_consistent();
+            let a = Ranges::<u64>::new_from(a);
+            let b = Ranges::<u64>::new_from(b);
 
-            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
+            let expected_ranges = Ranges::<u64>::new_unchecked(expected);
             let ranges = a.intersection(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -812,10 +542,10 @@ mod tests {
     #[test]
     fn test_difference() {
         fn assert_difference(a: Vec<Range<u64>>, b: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let a = Ranges::<u64>::new(a).make_consistent();
-            let b = Ranges::<u64>::new(b).make_consistent();
+            let a = Ranges::<u64>::new_from(a);
+            let b = Ranges::<u64>::new_from(b);
 
-            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
+            let expected_ranges = Ranges::<u64>::new_unchecked(expected);
             let ranges = a.difference(&b);
             assert_eq!(ranges, expected_ranges);
         }
@@ -833,84 +563,7 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_complement() {
-        fn assert_complement(input: Vec<Range<u64>>, expected: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(input).make_consistent();
-            let expected_ranges = Ranges::<u64>::new(expected).make_consistent();
 
-            let result = ranges.complement();
-            assert_eq!(result, expected_ranges);
-        }
-
-        fn assert_complement_pow_2(input: Vec<Range<u64>>) {
-            let ranges = Ranges::<u64>::new(input.clone()).make_consistent();
-            let start_ranges = Ranges::<u64>::new(input).make_consistent();
-
-            let result = ranges.complement();
-            let result = result.complement();
-
-            assert_eq!(result, start_ranges);
-        }
-
-        assert_complement(vec![5..10], vec![0..5, 10..u64::MAXPIX]);
-        assert_complement_pow_2(vec![5..10]);
-
-        assert_complement(vec![0..10], vec![10..u64::MAXPIX]);
-        assert_complement_pow_2(vec![0..10]);
-
-        assert_complement(
-            vec![0..1, 2..3, 4..5, 6..u64::MAXPIX],
-            vec![1..2, 3..4, 5..6],
-        );
-        assert_complement_pow_2(vec![0..1, 2..3, 4..5, 6..u64::MAXPIX]);
-
-        assert_complement(vec![], vec![0..u64::MAXPIX]);
-        assert_complement_pow_2(vec![]);
-
-        assert_complement(vec![0..u64::MAXPIX], vec![]);
-    }
-
-    #[test]
-    fn test_depth() {
-        let r1 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 1)]);
-        assert_eq!(r1.depth(), 0);
-
-        let r2 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
-        assert_eq!(r2.depth(), 2);
-
-        let r3 = Ranges::<u64>::new(vec![0..3 * 4.pow(29 - 3)]);
-        assert_eq!(r3.depth(), 3);
-
-        let r4 = Ranges::<u64>::new(vec![0..12 * 4.pow(29)]);
-        assert_eq!(r4.depth(), 0);
-
-        let r5 = Ranges::<u64>::new(vec![]);
-        assert_eq!(r5.depth(), 0);
-    }
-
-    #[test]
-    fn test_degrade() {
-        let mut r1 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 1)]);
-        r1.degrade(0);
-        assert_eq!(r1.depth(), 0);
-
-        let mut r2 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
-        r2.degrade(1);
-        assert_eq!(r2.depth(), 1);
-
-        let mut r3 = Ranges::<u64>::new(vec![0..3 * 4.pow(29 - 3)]);
-        r3.degrade(1);
-        assert_eq!(r3.depth(), 1);
-
-        let mut r4 = Ranges::<u64>::new(vec![0..12 * 4.pow(29)]);
-        r4.degrade(0);
-        assert_eq!(r4.depth(), 0);
-
-        let mut r5 = Ranges::<u64>::new(vec![0..4 * 4.pow(29 - 3)]);
-        r5.degrade(5);
-        assert_eq!(r5.depth(), 2);
-    }
 
     #[test]
     fn test_uniq_decompose() {
@@ -919,13 +572,13 @@ mod tests {
                 let mut rng = rand::thread_rng();
 
                 (0..$size).for_each(|_| {
-                    let depth = rng.gen_range(0, <$t>::MAXDEPTH) as u32;
+                    let depth = rng.gen_range(0, Hpx::<$t>::MAX_DEPTH);
 
-                    let npix = 12 * 4.pow(depth);
+                    let npix = 12 * 4.pow(depth as u32);
                     let pix = rng.gen_range(0, npix);
 
-                    let uniq = 4 * 4.pow(depth) + pix;
-                    assert_eq!(<$t>::pix_depth(uniq), (depth, pix));
+                    let uniq = 4 * 4.pow(depth as u32) + pix;
+                    assert_eq!(Hpx::<$t>::from_uniq_hpx(uniq), (depth, pix));
                 });
             };
         }

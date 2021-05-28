@@ -1,6 +1,10 @@
 use std::mem;
 use std::ops::Range;
 
+use ndarray::Array2;
+
+use crate::ranges::Idx;
+
 pub fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
     let mut owned_input = Vec::<Range<T>>::new();
     // We swap the content refered by input with a new
@@ -39,14 +43,7 @@ pub fn unflatten<T>(input: &mut Vec<T>) -> Vec<Range<T>> {
     result
 }
 
-use crate::bounded::Bounded;
-use ndarray::Array2;
-use num::{Integer, PrimInt};
-
-pub fn array2_to_vec_ranges<T>(mut input: Array2<T>) -> Vec<Range<T>>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-{
+pub fn array2_to_vec_ranges<T: Idx>(mut input: Array2<T>) -> Vec<Range<T>> {
     let shape = input.shape();
     // Warning: empty Array2 objects coming from MOCPy
     // do have a shape equal to (1, 0).

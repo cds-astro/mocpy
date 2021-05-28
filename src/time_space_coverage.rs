@@ -2,13 +2,17 @@
 //! related to the creation and manipulation of
 //! Time-Space 2D coverages.
 
+use std::convert::TryFrom;
+
 use rayon::prelude::*;
 
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
-use intervals::bounded::Bounded;
-use intervals::nestedranges2d::NestedRanges2D;
+use intervals::mocqty::{MocQty, Hpx, Time};
+use intervals::hpxranges2d::TimeSpaceMoc;
+use intervals::mocranges::{HpxRanges, TimeRanges};
+
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and times.
 ///
@@ -36,18 +40,18 @@ pub fn create_from_times_positions(
     times: Vec<f64>,
     lon: Vec<f64>,
     lat: Vec<f64>,
-    dt: i8,
-    ds: i8,
-) -> PyResult<NestedRanges2D<u64, u64>> {
-    if dt < 0 || dt > u64::MAXDEPTH {
+    dt: u8,
+    ds: u8,
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    if dt > Time::<u64>::MAX_DEPTH {
         Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
+            Time::<u64>::MAX_DEPTH
         )))
-    } else if ds < 0 || ds > u64::MAXDEPTH {
+    } else if ds > Hpx::<u64>::MAX_DEPTH {
         Err(exceptions::PyValueError::new_err(format!(
             "Space depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
+            Hpx::<u64>::MAX_DEPTH
         )))
     } else {
         if times.len() != lon.len() || times.len() != lat.len() {
@@ -71,7 +75,7 @@ pub fn create_from_times_positions(
             .map(|t| (t * 86400000000_f64).floor() as u64)
             .collect::<Vec<_>>();
 
-        Ok(NestedRanges2D::<u64, u64>::create_from_times_positions(
+        Ok(TimeSpaceMoc::<u64, u64>::create_from_times_positions(
             times, ipix, dt, ds,
         ))
     }
@@ -104,20 +108,20 @@ pub fn create_from_times_positions(
 pub fn create_from_time_ranges_positions(
     times_start: Vec<f64>,
     times_end: Vec<f64>,
-    dt: i8,
+    dt: u8,
     lon: Vec<f64>,
     lat: Vec<f64>,
-    ds: i8,
-) -> PyResult<NestedRanges2D<u64, u64>> {
-    if ds < 0 || ds > u64::MAXDEPTH {
+    ds: u8,
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    if ds > Hpx::<u64>::MAX_DEPTH {
         Err(exceptions::PyValueError::new_err(format!(
             "Space depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
+            Hpx::<u64>::MAX_DEPTH
         )))
-    } else if dt < 0 || dt > u64::MAXDEPTH {
+    } else if dt > Time::<u64>::MAX_DEPTH {
         Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
+            Time::<u64>::MAX_DEPTH
         )))
     } else {
         if times_start.len() != lon.len() ||
@@ -156,13 +160,12 @@ pub fn create_from_time_ranges_positions(
             ));
         }
 
-        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_positions(
+        Ok(TimeSpaceMoc::<u64, u64>::create_from_time_ranges_positions(
             times, ipix, dt, ds,
         ))
     }
 }
 
-use intervals::nestedranges::NestedRanges;
 /// Create a time-spatial coverage (2D) from a list of cones
 /// and time ranges.
 ///
@@ -196,13 +199,13 @@ pub fn from_time_ranges_spatial_coverages(
     py: Python,
     times_start: Vec<f64>,
     times_end: Vec<f64>,
-    dt: i8,
+    dt: u8,
     spatial_coverages: &PyList,
-) -> PyResult<NestedRanges2D<u64, u64>> {
-    if dt < 0 || dt > u64::MAXDEPTH {
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    if dt > Time::<u64>::MAX_DEPTH {
         Err(exceptions::PyValueError::new_err(format!(
             "Time depth must be in [0, {0}]",
-            <u64>::MAXDEPTH
+            Time::<u64>::MAX_DEPTH
         )))
     } else {
         if times_start.len() != times_end.len() {
@@ -212,12 +215,12 @@ pub fn from_time_ranges_spatial_coverages(
         }
 
         const ERR_CAST: &'static str = "Cannot cast spatial coverages to Array2<u64>";
-        let mut spatial_coverages_res: Vec<NestedRanges<u64>> = vec![];
+        let mut spatial_coverages_res: Vec<HpxRanges<u64>> = vec![];
 
         for spatial_cov in spatial_coverages.into_iter() {
             // Loop over the python list and cast its elements
             // to numpy PyArray2<u64> types first, to ndarray Array2<u64> secondly
-            // and finally to NestedRanges<u64>
+            // and finally to HpxRanges<u64>
             let spatial_cov = spatial_cov
                 .to_object(py)
                 .extract::<PyReadonlyArray2<u64>>(py)
@@ -242,7 +245,7 @@ pub fn from_time_ranges_spatial_coverages(
             })
             .collect::<Vec<_>>();
 
-        Ok(NestedRanges2D::<u64, u64>::create_from_time_ranges_spatial_coverage(
+        Ok(TimeSpaceMoc::<u64, u64>::create_from_time_ranges_spatial_coverage(
             times, spatial_coverages_res, dt,
         ))
     }
@@ -273,7 +276,7 @@ use ndarray::Zip;
 ///
 /// If the number of longitudes, latitudes and times do not match.
 pub fn contains(
-    coverage: &NestedRanges2D<u64, u64>,
+    coverage: &TimeSpaceMoc<u64, u64>,
     time: Array1<f64>,
     lon: Array1<f64>,
     lat: Array1<f64>,
@@ -286,9 +289,9 @@ pub fn contains(
     }
 
     // Retrieve the spatial depth of the Time-Space coverage
-    let (_, s_depth) = coverage.depth();
+    let (_, s_depth) = coverage.compute_min_depth();
     let layer = healpix::nested::get(s_depth as u8);
-    let shift = (<u64>::MAXDEPTH - s_depth) << 1;
+    let shift = (Hpx::<u64>::MAX_DEPTH - s_depth) << 1;
     Zip::from(result)
         .and(&time)
         .and(&lon)
@@ -326,10 +329,10 @@ pub fn contains(
 /// It then performs the union of the `T` axis ranges corresponding to the
 /// matching ranges along the `S` axis.
 pub fn project_on_first_dim(
-    y: &NestedRanges<u64>,
-    coverage: &NestedRanges2D<u64, u64>,
-) -> NestedRanges<u64> {
-    NestedRanges2D::project_on_first_dim(y, coverage)
+    y: &HpxRanges<u64>,
+    coverage: &TimeSpaceMoc<u64, u64>,
+) -> TimeRanges<u64> {
+    TimeSpaceMoc::project_on_first_dim(y, coverage)
 }
 
 /// Returns the union of the ranges along the `S` axis for which their
@@ -348,14 +351,14 @@ pub fn project_on_first_dim(
 /// It then performs the union of the `S` axis ranges corresponding to the
 /// matching ranges along the `T` axis.
 pub fn project_on_second_dim(
-    x: &NestedRanges<u64>,
-    coverage: &NestedRanges2D<u64, u64>,
-) -> NestedRanges<u64> {
-    NestedRanges2D::project_on_second_dim(x, coverage)
+    x: &TimeRanges<u64>,
+    coverage: &TimeSpaceMoc<u64, u64>,
+) -> HpxRanges<u64> {
+    TimeSpaceMoc::project_on_second_dim(x, coverage)
 }
 
 use ndarray::Array1;
-/// Create a Array1<i64> from a NestedRanges2D<u64, u64>
+/// Create a Array1<i64> from a TimeSpaceMoc<u64, u64>
 ///
 /// This is used when storing a STMOC into a FITS file
 ///
@@ -369,7 +372,7 @@ use ndarray::Array1;
 ///
 /// Content example of an Array1 coming from a FITS file:
 /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
-pub fn to_fits(coverage: &NestedRanges2D<u64, u64>) -> Array1<i64> {
+pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
     coverage.into()
 }
 
@@ -397,18 +400,17 @@ pub fn to_fits(coverage: &NestedRanges2D<u64, u64>) -> Array1<i64> {
 ///
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
-use std::convert::TryFrom;
-pub fn from_fits(data: Array1<i64>) -> PyResult<NestedRanges2D<u64, u64>> {
-    NestedRanges2D::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
+pub fn from_fits(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
 }
 
 /// Create a new empty Time-Space coverage
 ///
 /// This method is called in the constructor of the
 /// `mocpy.STMOC` class
-pub fn new() -> NestedRanges2D<u64, u64> {
+pub fn new() -> TimeSpaceMoc<u64, u64> {
     // Create new empty coverage
-    NestedRanges2D::new()
+    TimeSpaceMoc::new()
 }
 
 /// Compute the depth of the coverage
@@ -422,18 +424,18 @@ pub fn new() -> NestedRanges2D<u64, u64> {
 ///
 /// # Info
 ///
-/// If the `NestedRanges2D<T, S>` is empty, the depth returned
+/// If the `TimeSpaceMoc<T, S>` is empty, the depth returned
 /// is set to (0, 0)
-pub fn depth(coverage: &NestedRanges2D<u64, u64>) -> (i8, i8) {
-    coverage.depth()
+pub fn depth(coverage: &TimeSpaceMoc<u64, u64>) -> (u8, u8) {
+    coverage.compute_min_depth()
 }
 
 /// Returns the minimum value along the `T` dimension
 ///
 /// # Errors
 ///
-/// When the `NestedRanges2D<T, S>` is empty.
-pub fn t_min(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
+/// When the `TimeSpaceMoc<T, S>` is empty.
+pub fn t_min(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
     let t_min = coverage
         .t_min()
         .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
@@ -445,8 +447,8 @@ pub fn t_min(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
 ///
 /// # Errors
 ///
-/// When the `NestedRanges2D<T, S>` is empty.
-pub fn t_max(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
+/// When the `TimeSpaceMoc<T, S>` is empty.
+pub fn t_max(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
     let t_max = coverage
         .t_max()
         .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
@@ -454,41 +456,41 @@ pub fn t_max(coverage: &NestedRanges2D<u64, u64>) -> PyResult<f64> {
     Ok((t_max as f64) / 86400000000_f64)
 }
 
-/// Performs the union between two `NestedRanges2D<T, S>`
+/// Performs the union between two `TimeSpaceMoc<T, S>`
 ///
 /// # Arguments
 ///
-/// * ``other`` - The other `NestedRanges2D<T, S>` to
+/// * ``other`` - The other `TimeSpaceMoc<T, S>` to
 ///   perform the union with.
 pub fn union(
-    coverage_left: &NestedRanges2D<u64, u64>,
-    coverage_right: &NestedRanges2D<u64, u64>,
-) -> NestedRanges2D<u64, u64> {
+    coverage_left: &TimeSpaceMoc<u64, u64>,
+    coverage_right: &TimeSpaceMoc<u64, u64>,
+) -> TimeSpaceMoc<u64, u64> {
     coverage_left.union(coverage_right)
 }
 
-/// Performs the intersection between two `NestedRanges2D<T, S>`
+/// Performs the intersection between two `TimeSpaceMoc<T, S>`
 ///
 /// # Arguments
 ///
-/// * ``other`` - The other `NestedRanges2D<T, S>` to
+/// * ``other`` - The other `TimeSpaceMoc<T, S>` to
 ///   perform the intersection with.
 pub fn intersection(
-    coverage_left: &NestedRanges2D<u64, u64>,
-    coverage_right: &NestedRanges2D<u64, u64>,
-) -> NestedRanges2D<u64, u64> {
+    coverage_left: &TimeSpaceMoc<u64, u64>,
+    coverage_right: &TimeSpaceMoc<u64, u64>,
+) -> TimeSpaceMoc<u64, u64> {
     coverage_left.intersection(coverage_right)
 }
 
-/// Performs the difference between two `NestedRanges2D<T, S>`
+/// Performs the difference between two `TimeSpaceMoc<T, S>`
 ///
 /// # Arguments
 ///
-/// * ``other`` - The other `NestedRanges2D<T, S>` to
+/// * ``other`` - The other `TimeSpaceMoc<T, S>` to
 ///   perform the difference with.
 pub fn difference(
-    coverage_left: &NestedRanges2D<u64, u64>,
-    coverage_right: &NestedRanges2D<u64, u64>,
-) -> NestedRanges2D<u64, u64> {
+    coverage_left: &TimeSpaceMoc<u64, u64>,
+    coverage_right: &TimeSpaceMoc<u64, u64>,
+) -> TimeSpaceMoc<u64, u64> {
     coverage_left.difference(coverage_right)
 }

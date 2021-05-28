@@ -36,7 +36,7 @@ def test_is_empty():
 
 def test_max_depth():
     decals = STMOC.from_fits('resources/STMOC/STMoc-DECaLS-g.fits')
-    assert(decals.max_depth == (29, 9))
+    assert(decals.max_depth == (61, 9))
 
 
 def test_union_decals():

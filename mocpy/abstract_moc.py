@@ -69,11 +69,13 @@ class AbstractMOC(serializer.IO):
     @property
     def max_order(self):
         """
-        Depth of the smallest HEALPix cells found in the MOC instance.
+        Depth of the smallest cells found in the MOC instance.
         """
-        depth = mocpy.coverage_depth(self._interval_set._intervals)
-        depth = np.uint8(depth)
-        return depth
+        #depth = mocpy.coverage_depth(self._interval_set._intervals)
+        #depth = np.uint8(depth)
+        #return depth
+        raise NotImplementedError("Method max_order not implemented")
+
 
     def intersection(self, another_moc, *args):
         """
@@ -153,8 +155,9 @@ class AbstractMOC(serializer.IO):
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        intervals = self._interval_set.complement()
-        return self.__class__(intervals)
+        # intervals = self._interval_set.complement()
+        # return self.__class__(intervals)
+        raise NotImplementedError("Method complement not implemented")
 
     @classmethod
     def from_json(cls, json_moc):
@@ -401,7 +404,7 @@ class AbstractMOC(serializer.IO):
         """
         Degrades the MOC instance to a new, less precise, MOC.
 
-        The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
+        The maximum depth (i.e. the depth of the smallest cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``. 
 
         Parameters
@@ -414,11 +417,16 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        intervals = mocpy.coverage_degrade(self._interval_set._intervals, new_order)
-        return self.__class__(IntervalSet(intervals, make_consistent=False))
+        #intervals = mocpy.coverage_degrade(self._interval_set._intervals, new_order)
+        #return self.__class__(IntervalSet(intervals, make_consistent=False))
+        raise NotImplementedError("Method degrade_to_order not implemented")
 
     def refine_to_order(self, min_depth):
-        intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
-        interval_set = IntervalSet(intervals, make_consistent=False)
-        return self.__class__(interval_set)
+        """
+        Internal method
+        """
+        #intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
+        #interval_set = IntervalSet(intervals, make_consistent=False)
+        #return self.__class__(interval_set)
+        raise NotImplementedError("Method refine_to_order not implemented")
 

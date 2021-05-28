@@ -28,17 +28,43 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
         }
         let shape = (min_times.shape()[0], 1);
 
+        let min_times = min_times.into_shape(shape).unwrap().mapv(|e| (e * 86400000000_f64) as u64);
+        let max_times = max_times.into_shape(shape).unwrap().mapv(|e| (e * 86400000000_f64) as u64);
+
+        let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
+        let ranges = coverage::build_time_ranges_from_py(ranges);
+
+        let result: Array2<u64> = ranges.into();
+        Ok(result)
+    }
+}
+
+/// Create a temporal coverage from a list of time ranges expressed in microseconds since jd=0.
+///
+/// # Arguments
+///
+/// * ``min_times`` - The list of inf bounds (inclusive) of the time ranges expressed in **microseconds** since **jd=0**
+/// * ``max_times`` - The list of sup bounds (exclusive) of the time ranges expressed in **microseconds** since **jd=0**
+///
+/// # Errors
+///
+/// * If the number of ``min_times`` and ``max_times`` do not match.
+pub fn from_time_ranges_in_microsec_since_jd_origin(min_times: Array1<u64>, max_times: Array1<u64>) -> PyResult<Array2<u64>> {
+    if min_times.shape() != max_times.shape() {
+        Err(exceptions::PyValueError::new_err(
+            "min and max ranges have not the same shape",
+        ))
+    } else {
+        if min_times.is_empty() {
+            return Ok(Array::zeros((1, 0)));
+        }
+        let shape = (min_times.shape()[0], 1);
+
         let min_times = min_times.into_shape(shape).unwrap();
         let max_times = max_times.into_shape(shape).unwrap();
 
-        let min_times = &min_times * &Array::from_elem(shape, 86400000000_f64);
-        let min_times = min_times.mapv(|e| e as u64);
-
-        let max_times = &max_times * &Array::from_elem(shape, 86400000000_f64);
-        let max_times = max_times.mapv(|e| e as u64);
-
         let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
+        let ranges = coverage::build_time_ranges_from_py(ranges);
 
         let result: Array2<u64> = ranges.into();
         Ok(result)

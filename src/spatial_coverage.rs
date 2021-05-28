@@ -2,14 +2,16 @@
 //! related to the creation and manipulation of
 //! spatial coverages.
 
-use intervals::nestedranges::NestedRanges;
-
-use intervals::bounded::Bounded;
 use std::ops::Range;
+
+use rayon::prelude::*;
 
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
-use rayon::prelude::*;
+
+use intervals::ranges::SNORanges;
+use intervals::mocqty::{MocQty, Hpx};
+
 
 /// Create a spatial coverage from a list of sky coordinates
 ///
@@ -34,25 +36,25 @@ use rayon::prelude::*;
 pub fn create_from_position(
     lon: Vec<f64>,
     lat: Vec<f64>,
-    depth: i8,
-) -> PyResult<NestedRanges<u64>> {
+    depth: u8,
+) -> PyResult<HpxRanges<u64>> {
     if lon.len() != lat.len() {
         return Err(exceptions::PyValueError::new_err(
             "Longitudes and Latitudes \
              do not have the same shapes.",
         ));
     }
-    if depth < 0 || depth > <u64>::MAXDEPTH {
+    if depth > Hpx::<u64>::MAX_DEPTH {
         return Err(exceptions::PyValueError::new_err(format!(
             "Depth must be comprised between in [0, {0}]",
-            <u64>::MAXDEPTH
+            Hpx::<u64>::MAX_DEPTH
         )));
     }
 
     let mut data = Vec::<Range<u64>>::with_capacity(lon.len());
     data.resize(lon.len(), 0..1);
 
-    let shift = (<u64>::MAXDEPTH - depth) << 1;
+    let shift = (Hpx::<u64>::MAX_DEPTH - depth) << 1;
     let layer = healpix::nested::get(depth as u8);
 
     data.par_iter_mut()
@@ -65,7 +67,7 @@ pub fn create_from_position(
             *p = e1..e2;
         });
 
-    let result = NestedRanges::<u64>::new(data).make_consistent();
+    let result = HpxRanges::<u64>::new_from(data);
     Ok(result)
 }
 
@@ -88,12 +90,12 @@ use intervals::valuedcell::valued_cells_to_moc;
 ///
 /// * ``uniq`` and ``values`` must be of the same size
 pub fn from_valued_healpix_cells(
-    max_depth: u32,
+    max_depth: u8,
     uniq: Array1<u64>,
     values: Array1<f64>,
     cumul_from: f64,
     cumul_to: f64
-) -> PyResult<NestedRanges<u64>> {
+) -> PyResult<HpxRanges<u64>> {
     if uniq.len() != values.len() {
         Err(
             exceptions::PyValueError::new_err(
@@ -120,9 +122,9 @@ pub fn from_valued_healpix_cells(
 /// * `coverage_left` - Left operand
 /// * `coverage_right` - Right operand
 pub fn union(
-    coverage_left: &NestedRanges<u64>,
-    coverage_right: &NestedRanges<u64>,
-) -> NestedRanges<u64> {
+    coverage_left: &HpxRanges<u64>,
+    coverage_right: &HpxRanges<u64>,
+) -> HpxRanges<u64> {
     coverage_left.union(coverage_right)
 }
 
@@ -133,9 +135,9 @@ pub fn union(
 /// * `coverage_left` - Left operand
 /// * `coverage_right` - Right operand
 pub fn intersection(
-    coverage_left: &NestedRanges<u64>,
-    coverage_right: &NestedRanges<u64>,
-) -> NestedRanges<u64> {
+    coverage_left: &HpxRanges<u64>,
+    coverage_right: &HpxRanges<u64>,
+) -> HpxRanges<u64> {
     coverage_left.intersection(coverage_right)
 }
 
@@ -146,9 +148,9 @@ pub fn intersection(
 /// * `coverage_left` - Left operand
 /// * `coverage_right` - Right operand
 pub fn difference(
-    coverage_left: &NestedRanges<u64>,
-    coverage_right: &NestedRanges<u64>,
-) -> NestedRanges<u64> {
+    coverage_left: &HpxRanges<u64>,
+    coverage_right: &HpxRanges<u64>,
+) -> HpxRanges<u64> {
     coverage_left.difference(coverage_right)
 }
 
@@ -157,7 +159,7 @@ pub fn difference(
 /// # Arguments
 ///
 /// * `coverage` - The input spatial coverage
-pub fn complement(coverage: &NestedRanges<u64>) -> NestedRanges<u64> {
+pub fn complement(coverage: &HpxRanges<u64>) -> HpxRanges<u64> {
     coverage.complement()
 }
 
@@ -180,7 +182,7 @@ use ndarray::{Array1, Array2, Axis, Zip};
 /// # Errors
 ///
 /// * ``depth`` and ``pixels`` have not the same length.
-pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResult<Array2<u64>> {
+pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<u8>) -> PyResult<Array2<u64>> {
     let ones: Array1<u64> = Array1::<u64>::ones(pixels.shape()[0]);
     let mut pixels_1 = &pixels + &ones;
 
@@ -190,35 +192,73 @@ pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<i8>) -> PyResul
         ));
     }
 
+    // ndarray 15.2: par_apply -> par_for_each
+    //   see https://docs.rs/ndarray/0.15.2/ndarray/struct.Zip.html#method.par_for_each
     Zip::from(&mut pixels)
         .and(&mut pixels_1)
         .and(&depth)
         .par_apply(|pix, pix1, &d| {
-            let factor = 2 * (<u64>::MAXDEPTH - d);
+            let factor = (Hpx::<u64>::MAX_DEPTH - d) << 1;
             *pix <<= factor;
             *pix1 <<= factor;
         });
 
-    let shape = (pixels.shape()[0], 1);
+    /*let shape = (pixels.shape()[0], 1);
     let pixels = pixels.into_shape(shape).unwrap();
     let pixels_1 = pixels_1.into_shape(shape).unwrap();
 
     let ranges = concatenate![Axis(1), pixels, pixels_1].to_owned();
 
-    let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
+    let ranges = coverage::create_hpx_ranges_from_py(ranges).make_consistent();
 
     let result: Array2<u64> = ranges.into();
-    Ok(result)
+    Ok(result)*/
+
+    Ok(from_lower_and_upperd_bounds(pixels, pixels_1))
 }
 
-use intervals::uniqranges::UniqRanges;
+/// Create a spatial coverage from an HEALPix map, i.e. from a list of HEALPix cell indices
+/// at the same depth.
+///
+/// # Arguments
+///
+/// * ``pixels`` - A set of HEALPix cell indices
+/// * ``depth`` - The depths of each HEALPix cell indices
+///
+/// # Precondition
+///
+/// * ``depth`` is a value in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+/// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
+pub fn from_healpix_map(depth: u8, mut pixels: Array1<u64>) -> PyResult<Array2<u64>> {
+    let factor = (Hpx::<u64>::MAX_DEPTH - depth ) << 1;
+    let ones: Array1<u64> = Array1::<u64>::ones(pixels.shape()[0]);
+    let mut pixels_1 = &pixels + &ones; // Probably better to clone and +1 in par_map_inplace
+    let to_max_depth = |pix: &mut u64| *pix <<= factor;
+    pixels.par_map_inplace(to_max_depth);
+    pixels_1.par_map_inplace(to_max_depth);
+    Ok(from_lower_and_upperd_bounds(pixels, pixels_1))
+}
+
+fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u64> {
+    let shape = (low.shape()[0], 1);
+    let low = low.into_shape(shape).unwrap();
+    let upp = upp.into_shape(shape).unwrap();
+    let ranges = concatenate![Axis(1), low, upp].to_owned();
+    let ranges = coverage::build_hpx_ranges_from_py(ranges);
+    ranges.into()
+}
+
+
+use intervals::uniqranges::HpxUniqRanges;
+use intervals::mocranges::HpxRanges;
+
 /// Convert a spatial coverage from the **uniq** to the **nested** format.
 ///
 /// # Arguments
 ///
 /// * ``coverage`` - The spatial coverage defined in the **uniq** format.
-pub fn to_nested(coverage: UniqRanges<u64>) -> NestedRanges<u64> {
-    coverage.to_nested()
+pub fn to_nested(coverage: HpxUniqRanges<u64>) -> HpxRanges<u64> {
+    coverage.to_hpx()
 }
 
 /// Convert a spatial coverage from the **nested** to the **uniq** format.
@@ -226,6 +266,6 @@ pub fn to_nested(coverage: UniqRanges<u64>) -> NestedRanges<u64> {
 /// # Arguments
 ///
 /// * ``coverage`` - The spatial coverage defined in the **nested** format.
-pub fn to_uniq(coverage: NestedRanges<u64>) -> UniqRanges<u64> {
-    coverage.to_uniq()
+pub fn to_uniq(coverage: HpxRanges<u64>) -> HpxUniqRanges<u64> {
+    coverage.to_hpx_uniq()
 }

@@ -1,32 +1,35 @@
-use crate::bounded::Bounded;
-use crate::nestedranges::NestedRanges;
-use crate::ranges::ranges2d::Ranges2D;
-use crate::ranges::Ranges;
-use num::{Integer, One, PrimInt};
-
-use rayon::prelude::*;
 
 use std::ops::Range;
+use std::convert::TryFrom;
 
+use num::One;
+use rayon::prelude::*;
+
+use crate::utils;
+use crate::mocqty::{MocQty, Hpx, Time};
+use crate::ranges::{SNORanges, Idx, ranges2d::SNORanges2D, Ranges};
+use crate::mocranges::{HpxRanges, MocRanges};
+use crate::mocranges2d::Moc2DRanges;
+// use healpix::nested::moc::HpxHash;
+
+
+/// Declaration of the ST-MOC type
+pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
+
+// Just to be able to define specific methods on this struct
 #[derive(Debug)]
-pub struct NestedRanges2D<T, S>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
-{
-    ranges: Ranges2D<T, S>,
-}
+pub struct HpxRanges2D<TT: Idx, T: MocQty<TT>, ST: Idx>(pub Moc2DRanges<TT, T, ST, Hpx<ST>>);
 
-impl<T, S> NestedRanges2D<T, S>
+impl<TT, T, ST> HpxRanges2D<TT, T, ST>
 where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+    TT: Idx,
+    T: MocQty<TT>,
+    ST: Idx,
 {
     /// Create a new empty `NestedRanges2D<T, S>`
-    pub fn new() -> NestedRanges2D<T, S> {
-        let ranges = Ranges2D::new(vec![], vec![]);
-
-        NestedRanges2D { ranges }
+    pub fn new() -> HpxRanges2D<TT, T, ST> {
+        let ranges = Moc2DRanges::new(vec![], vec![]);
+        HpxRanges2D(ranges)
     }
 
     /// Create a Quantity/Space 2D coverage
@@ -50,23 +53,23 @@ where
     /// - `d2` must be valid (within `[0, <S>::MAXDEPTH]`)
     /// - `x` and `y` must have the same size.
     pub fn create_from_times_positions(
-        x: Vec<T>,
-        y: Vec<S>,
-        d1: i8,
-        d2: i8,
-    ) -> NestedRanges2D<T, S> {
-        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
-        let mut off1: T = One::one();
-        off1 = off1.unsigned_shl(s1) - One::one();
+        x: Vec<TT>,
+        y: Vec<ST>,
+        d1: u8,
+        d2: u8,
+    ) -> HpxRanges2D<TT, T, ST> {
+        let s1 = T::shift_from_depth_max(d1); // ((Self::<T>::MAX_DEPTH - d1) << 1) as u32;
+        let mut off1: TT = One::one();
+        off1 = off1.unsigned_shl(s1 as u32) - One::one();
 
-        let mut m1: T = One::one();
+        let mut m1: TT = One::one();
         m1 = m1.checked_mul(&!off1).unwrap();
 
         let x = x
             .into_par_iter()
             .map(|r| {
-                let a: T = r & m1;
-                let b: T = r
+                let a: TT = r & m1;
+                let b: TT = r
                     .checked_add(&One::one())
                     .unwrap()
                     .checked_add(&off1)
@@ -76,21 +79,22 @@ where
             })
             .collect::<Vec<_>>();
 
-        let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
+        // More generic: Hpx::<ST>::shift_from_depth_max(d2)
+        let s2 = ((Hpx::<ST>::MAX_DEPTH - d2) << 1) as u32;
         let y = y
             .into_par_iter()
             .map(|r| {
                 let a = r.unsigned_shl(s2);
                 let b = r.checked_add(&One::one()).unwrap().unsigned_shl(s2);
                 // We do not want a min_depth along the 2nd dimension
-                // making sure that the created Ranges<S> is valid.
-                Ranges::<S>::new(vec![a..b])
+                // making sure that the created Ranges<ST> is valid.
+                Ranges::<ST>::new_unchecked(vec![a..b])
             })
             .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y).make_consistent();
+        let ranges = Ranges2D::<TT, ST>::new(x, y).make_consistent();
 
-        NestedRanges2D { ranges }
+        HpxRanges2D(ranges.into())
     }
 
     /// Create a Quantity/Space 2D coverage
@@ -112,23 +116,23 @@ where
     /// - `x` and `y` must have the same size.
     /// - `x` must contain `[a..b]` ranges where `b > a`.
     pub fn create_from_time_ranges_positions(
-        x: Vec<Range<T>>,
-        y: Vec<S>,
-        d1: i8,
-        d2: i8,
-    ) -> NestedRanges2D<T, S> {
-        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
-        let mut off1: T = One::one();
-        off1 = off1.unsigned_shl(s1) - One::one();
+        x: Vec<Range<TT>>,
+        y: Vec<ST>,
+        d1: u8,
+        d2: u8,
+    ) -> HpxRanges2D<TT, T, ST> {
+        let s1 = T::shift_from_depth_max(d1);
+        let mut off1: TT = One::one();
+        off1 = off1.unsigned_shl(s1 as u32) - One::one();
 
-        let mut m1: T = One::one();
+        let mut m1: TT = One::one();
         m1 = m1.checked_mul(&!off1).unwrap();
 
         let x = x
             .into_par_iter()
             .filter_map(|r| {
-                let a: T = r.start & m1;
-                let b: T = r.end
+                let a: TT = r.start & m1;
+                let b: TT = r.end
                     .checked_add(&off1)
                     .unwrap()
                     & m1;
@@ -140,7 +144,8 @@ where
             })
             .collect::<Vec<_>>();
 
-        let s2 = ((<S>::MAXDEPTH - d2) << 1) as u32;
+        // More generic: Hpx::<ST>::shift_from_depth_max(d2)
+        let s2 = ((Hpx::<ST>::MAX_DEPTH - d2) << 1) as u32;
         let y = y
             .into_par_iter()
             .map(|r| {
@@ -148,14 +153,14 @@ where
                 let b = r.checked_add(&One::one()).unwrap().unsigned_shl(s2);
                 // We do not want a min_depth along the 2nd dimension
                 // making sure that the created Ranges<S> is valid.
-                Ranges::<S>::new(vec![a..b])
+                Ranges::<ST>::new_unchecked(vec![a..b])
             })
             .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y)
+        let ranges = Moc2DRanges::<TT, T, ST, Hpx<ST>>::new(x, y)
             .make_consistent();
 
-        NestedRanges2D { ranges }
+        HpxRanges2D(ranges)
     }
 
     /// Create a Quantity/Space 2D coverage
@@ -177,22 +182,22 @@ where
     /// - `x` and `y` must have the same size.
     /// - `x` must contain `[a..b]` ranges where `b > a`.
     pub fn create_from_time_ranges_spatial_coverage(
-        x: Vec<Range<T>>,
-        y: Vec<NestedRanges<S>>,
-        d1: i8,
-    ) -> NestedRanges2D<T, S> {
-        let s1 = ((<T>::MAXDEPTH - d1) << 1) as u32;
-        let mut off1: T = One::one();
+        x: Vec<Range<TT>>,
+        y: Vec<HpxRanges<ST>>,
+        d1: u8,
+    ) -> HpxRanges2D<TT, T, ST> {
+        let s1 = T::shift_from_depth_max (d1) as u32;
+        let mut off1: TT = One::one();
         off1 = off1.unsigned_shl(s1) - One::one();
 
-        let mut m1: T = One::one();
+        let mut m1: TT = One::one();
         m1 = m1.checked_mul(&!off1).unwrap();
 
         let x = x
             .into_par_iter()
             .filter_map(|r| {
-                let a: T = r.start & m1;
-                let b: T = r.end
+                let a: TT = r.start & m1;
+                let b: TT = r.end
                     .checked_add(&off1)
                     .unwrap()
                     & m1;
@@ -206,13 +211,13 @@ where
 
         let y = y
             .into_par_iter()
-            .map(|r| r.into())
+            .map(|r| r.0)
             .collect::<Vec<_>>();
 
-        let ranges = Ranges2D::<T, S>::new(x, y)
+        let ranges = Moc2DRanges::<TT, T, ST, Hpx<ST>>::new(x, y)
             .make_consistent();
 
-        NestedRanges2D { ranges }
+        HpxRanges2D(ranges)
     }
 
     /// Returns the union of the ranges along the `S` axis for which their
@@ -231,10 +236,10 @@ where
     /// It then performs the union of the `S` axis ranges corresponding to the
     /// matching ranges along the `T` axis.
     pub fn project_on_second_dim(
-        x: &NestedRanges<T>,
-        coverage: &NestedRanges2D<T, S>,
-    ) -> NestedRanges<S> {
-        let coverage = &coverage.ranges;
+        x: &MocRanges<TT, T>,
+        coverage: &HpxRanges2D<TT, T, ST>,
+    ) -> HpxRanges<ST> {
+        let coverage = &coverage.0.ranges2d;
         let ranges = coverage.x
             .par_iter()
             .zip_eq(coverage.y.par_iter())
@@ -250,7 +255,7 @@ where
             // Compute the union of all the 2nd
             // dim ranges that have been kept
             .reduce(
-                || Ranges::<S>::new(vec![]),
+                || Ranges::<ST>::default(),
                 |s1, s2| s1.union(&s2),
             );
 
@@ -273,13 +278,11 @@ where
     /// It then performs the union of the `T` axis ranges corresponding to the
     /// matching ranges along the `S` axis.
     pub fn project_on_first_dim(
-        y: &NestedRanges<S>,
-        coverage: &NestedRanges2D<T, S>,
-    ) -> NestedRanges<T> {
-        let coverage = &coverage.ranges;
-        let t_ranges = coverage
-            .x
-            .par_iter()
+        y: &HpxRanges<ST>,
+        coverage: &HpxRanges2D<TT, T, ST>,
+    ) -> MocRanges<TT, T> {
+        let coverage = &coverage.0.ranges2d;
+        let t_ranges = coverage.x.par_iter()
             .zip_eq(coverage.y.par_iter())
             // Filter the time ranges to keep only those
             // that lie into ``x``
@@ -295,8 +298,8 @@ where
                 Some(t.clone())
             })
             .collect::<Vec<_>>();
-
-        NestedRanges::<T>::new(t_ranges).make_consistent()
+        // TODO: debug_assert: check is sorted!!
+        MocRanges::<TT, T>::new_from_sorted(t_ranges)
     }
 
     /// Compute the depth of the coverage
@@ -312,8 +315,8 @@ where
     ///
     /// If the `NestedRanges2D<T, S>` is empty, the depth returned
     /// is set to (0, 0)
-    pub fn depth(&self) -> (i8, i8) {
-        self.ranges.depth()
+    pub fn compute_min_depth(&self) -> (u8, u8) {
+        self.0.compute_min_depth()
     }
 
     /// Returns the minimum value along the `T` dimension
@@ -321,11 +324,11 @@ where
     /// # Errors
     ///
     /// When the `NestedRanges2D<T, S>` is empty.
-    pub fn t_min(&self) -> Result<T, &'static str> {
-        if self.ranges.is_empty() {
+    pub fn t_min(&self) -> Result<TT, &'static str> {
+        if self.0.ranges2d.is_empty() {
             Err("The coverage is empty")
         } else {
-            Ok(self.ranges.x[0].start)
+            Ok(self.0.ranges2d.x[0].start)
         }
     }
 
@@ -334,11 +337,11 @@ where
     /// # Errors
     ///
     /// When the `NestedRanges2D<T, S>` is empty.
-    pub fn t_max(&self) -> Result<T, &'static str> {
-        if self.ranges.is_empty() {
+    pub fn t_max(&self) -> Result<TT, &'static str> {
+        if self.0.is_empty() {
             Err("The coverage is empty")
         } else {
-            Ok(self.ranges.x.last().unwrap().end)
+            Ok(self.0.ranges2d.x.last().unwrap().end)
         }
     }
 
@@ -349,8 +352,8 @@ where
     /// * ``other`` - The other `NestedRanges2D<T, S>` to
     ///   perform the union with.
     pub fn union(&self, other: &Self) -> Self {
-        let ranges = self.ranges.union(&other.ranges);
-        NestedRanges2D { ranges }
+        let ranges = self.0.union(&other.0);
+        HpxRanges2D(ranges)
     }
 
     /// Performs the intersection between two `NestedRanges2D<T, S>`
@@ -360,8 +363,8 @@ where
     /// * ``other`` - The other `NestedRanges2D<T, S>` to
     ///   perform the intersection with.
     pub fn intersection(&self, other: &Self) -> Self {
-        let ranges = self.ranges.intersection(&other.ranges);
-        NestedRanges2D { ranges }
+        let ranges = self.0.intersection(&other.0);
+        HpxRanges2D(ranges)
     }
 
     /// Performs the difference between two `NestedRanges2D<T, S>`
@@ -371,8 +374,8 @@ where
     /// * ``other`` - The other `NestedRanges2D<T, S>` to
     ///   perform the difference with.
     pub fn difference(&self, other: &Self) -> Self {
-        let ranges = self.ranges.difference(&other.ranges);
-        NestedRanges2D { ranges }
+        let ranges = self.0.difference(&other.0);
+        HpxRanges2D(ranges)
     }
 
     /// Check whether a `NestedRanges2D<T, S>` has data in
@@ -382,18 +385,20 @@ where
     ///
     /// * ``time`` - The time of the tuple
     /// * ``range`` - The position that has been converted to a nested range
-    pub fn contains(&self, time: T, range: &Range<S>) -> bool {
-        self.ranges.contains(time, range)
+    pub fn contains(&self, time: TT, range: &Range<ST>) -> bool {
+        self.0.contains(time, range)
     }
 
     /// Check whether a `NestedRanges2D<T, S>` is empty
     pub fn is_empty(&self) -> bool {
-        self.ranges.is_empty()
+        self.0.is_empty()
     }
 }
 
 use ndarray::Array1;
-impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
+use crate::ranges::ranges2d::Ranges2D;
+
+impl<T: MocQty<u64>> From<&HpxRanges2D<u64, T, u64>> for Array1<i64> {
     /// Create a Array1<i64> from a NestedRanges2D<u64, u64>
     ///
     /// This is used when storing a STMOC into a FITS file
@@ -408,8 +413,8 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
     ///
     /// Content example of an Array1 coming from a FITS file:
     /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
-    fn from(input: &NestedRanges2D<u64, u64>) -> Self {
-        let ranges = &input.ranges;
+    fn from(input: &HpxRanges2D<u64, T, u64>) -> Self {
+        let ranges = &input.0.ranges2d;
 
         let first_dim_ranges = &ranges.x;
         let second_dim_ranges = &ranges.y;
@@ -437,26 +442,26 @@ impl From<&NestedRanges2D<u64, u64>> for Array1<i64> {
     }
 }
 
-impl<T, S> PartialEq for NestedRanges2D<T, S>
+impl<TT, T, ST> PartialEq for HpxRanges2D<TT, T, ST>
 where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+    TT: Idx,
+    T: MocQty<TT>,
+    ST: Idx,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.ranges.eq(&other.ranges)
+        self.0.eq(&other.0)
     }
 }
 
-impl<T, S> Eq for NestedRanges2D<T, S>
+impl<TT, T, ST> Eq for HpxRanges2D<TT, T, ST>
 where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
+    TT: Idx,
+    T: MocQty<TT>,
+    ST: Idx,
 {
 }
 
-use crate::utils;
-use std::convert::TryFrom;
-impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
+impl<T:MocQty<u64>> TryFrom<Array1<i64>> for HpxRanges2D<u64, T, u64> {
     type Error = &'static str;
     /// Create a NestedRanges2D<u64, u64> from a Array1<i64>
     ///
@@ -485,7 +490,7 @@ impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
         let ranges = if input.is_empty() {
             // If the input array is empty
             // then we return an empty coverage
-            Ranges2D::<u64, u64>::new(vec![], vec![])
+            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(vec![], vec![])
         } else {
             let mut input = input.into_raw_vec();
             let input = utils::unflatten(&mut input);
@@ -506,7 +511,7 @@ impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
                         // Warning: We suppose all the STMOCS read from FITS files
                         // are already consistent when they have been saved!
                         // That is why we do not check the consistency of the MOCs here!
-                        s.push(Ranges::<u64>::new(cur_s.clone()));
+                        s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
                         cur_s.clear();
                     }
                 } else {
@@ -518,7 +523,7 @@ impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
             }
 
             // Push the last second dim coverage
-            s.push(Ranges::<u64>::new(cur_s));
+            s.push(Ranges::<u64>::new_unchecked(cur_s));
 
             // Propagate invalid Coverage FITS errors.
             if t.len() != s.len() {
@@ -527,17 +532,18 @@ impl TryFrom<Array1<i64>> for NestedRanges2D<u64, u64> {
             }
             // No need to make it consistent because it comes
             // from python
-            Ranges2D::<u64, u64>::new(t, s)
+            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(t, s)
         };
 
-        Ok(NestedRanges2D { ranges })
+        Ok(HpxRanges2D(ranges))
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
-    use crate::nestedranges2d::NestedRanges2D;
+    use crate::nestedranges2d::HpxRanges2D;
 
     use num::{Integer, PrimInt};
     use std::ops::Range;
-}
+}*/
