@@ -91,7 +91,7 @@ mod tests {
 
         let result = flatten(&mut empty_ranges);
 
-        assert_eq!(result, vec![]);
+        assert_eq!(result, Vec::<u64>::default());
     }
 
     use crate::utils::unflatten;

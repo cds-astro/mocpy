@@ -1,9 +1,9 @@
 //! Very generic ranges operations
 
-use std::cmp;
+use std::{cmp, mem};
 use std::fmt::Debug;
 use std::collections::VecDeque;
-use std::ops::{Range, Index};
+use std::ops::{Range, Index, AddAssign};
 use std::slice::Iter;
 use std::ptr::slice_from_raw_parts;
 
@@ -17,8 +17,11 @@ pub mod ranges2d;
 use crate::utils;
 
 // 'static mean that Idx does not contains any reference
-pub trait Idx: 'static + Integer + PrimInt + From<u8> + Send + Sync + Debug { }
-impl<T> Idx for T where T: 'static + Integer + PrimInt + From<u8> + Send + Sync + Debug {}
+pub trait Idx: 'static + Integer + AddAssign + PrimInt + From<u8> + Send + Sync + Debug {
+    const N_BYTES: u8 = mem::size_of::<Self>() as u8;
+    const N_BITS: u8 = Self::N_BYTES << 3;
+}
+impl<T> Idx for T where T: 'static + Integer + AddAssign + PrimInt + From<u8> + Send + Sync + Debug {}
 
 /// Generic operations on a set of Sorted and Non-Overlapping ranges.
 /// SNO = Sorted Non-Overlapping
@@ -461,7 +464,6 @@ mod tests {
     use crate::mocqty::{MocQty, Hpx};
     use crate::ranges::{SNORanges, Ranges};
 
-
     use num::PrimInt;
     use rand::Rng;
     use std::ops::Range;
@@ -572,10 +574,10 @@ mod tests {
                 let mut rng = rand::thread_rng();
 
                 (0..$size).for_each(|_| {
-                    let depth = rng.gen_range(0, Hpx::<$t>::MAX_DEPTH);
+                    let depth = rng.gen_range(Range{start: 0, end: Hpx::<$t>::MAX_DEPTH});
 
                     let npix = 12 * 4.pow(depth as u32);
-                    let pix = rng.gen_range(0, npix);
+                    let pix = rng.gen_range(Range{start: 0, end: npix});
 
                     let uniq = 4 * 4.pow(depth as u32) + pix;
                     assert_eq!(Hpx::<$t>::from_uniq_hpx(uniq), (depth, pix));

@@ -3,7 +3,6 @@
 extern crate healpix;
 extern crate ndarray;
 extern crate num;
-extern crate rand;
 extern crate rayon;
 
 #[cfg(nightly)]
@@ -13,10 +12,14 @@ pub mod mocqty;
 mod utils;
 
 pub mod ranges;
+
+pub mod moc;
 pub mod mocrange;
 pub mod mocranges;
 pub mod hpxranges;
 pub mod uniqranges;
+
+pub mod mocell;
 
 pub mod valuedcell;
 
@@ -87,7 +90,7 @@ where
 #[cfg(test)]
 mod tests {
     use num::PrimInt;
-
+    use rand;
     use crate::mocranges::HpxRanges;
     use crate::uniqranges::HpxUniqRanges;
 

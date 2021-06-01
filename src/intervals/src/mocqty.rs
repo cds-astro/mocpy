@@ -5,11 +5,6 @@ use std::ops::Range;
 use std::marker::PhantomData;
 use crate::ranges::Idx;
 
-#[inline(always)]
-const fn num_bits<T>() -> usize {
-    std::mem::size_of::<T>() << 3 // << 3 <=> * 8
-}
-
 /// Number of bits reserved to code the quantity type
 const N_RESERVED_BITS: u8 = 2;
 
@@ -29,6 +24,8 @@ impl<T, Q> Bounded<T> for Q where T: Idx, Q: MocQty<T> {
 /// Generic constants defining a quantity that can be put in a MOC,
 /// independently of it the precise integer type used to represent it.
 pub trait MocableQty: Send + Sync {
+    /// A simple char prefix to identify the quantity (e.g. in ASCII serialisation)
+    const PREFIX: char;
     /// Dimension of the qty, i.e. number of bits needed to code a sub-cell relative index
     const DIM: u8;
     /// Number of base cells, i.e. number of cell at depth 0
@@ -36,6 +33,11 @@ pub trait MocableQty: Send + Sync {
     const N_D0_CELLS: u8;
     /// Number of bits needed to code the base cell index
     const N_D0_BITS: u8 = n_bits_to_code_from_0_to_n_exclusive(Self::N_D0_CELLS);
+    /// Mask to select the bit(s) of a level > 0:
+    /// * dim 1: 001
+    /// * dim 2: 011
+    /// * dim 3: 111
+    const LEVEL_MASK: u8 = (1 << Self::DIM) - 1;
 
     fn shift(delta_depth: u8) -> u8 {
         Self::DIM * delta_depth
@@ -45,7 +47,7 @@ pub trait MocableQty: Send + Sync {
 /// Returns the number of bits needed to code `n` values, with indices
 /// from 0 (inclusive) to n (exclusive).
 const fn n_bits_to_code_from_0_to_n_exclusive(n: u8) -> u8 {
-    let n_bits_in_u8 = num_bits::<u8>() as u32; // = 8
+    let n_bits_in_u8 = u8::N_BITS as u32; // = 8
     let index_max = n - 1;
     (n_bits_in_u8 - index_max.leading_zeros()) as u8
 }
@@ -53,7 +55,7 @@ const fn n_bits_to_code_from_0_to_n_exclusive(n: u8) -> u8 {
 /// A quantity with its exact integer representation. (Replace Bounded?)
 pub trait MocQty<T>: MocableQty where T: Idx
 {
-    const MAX_DEPTH: u8 = (num_bits::<T>() as u8 - (N_RESERVED_BITS + Self::N_D0_BITS)) / Self::DIM;
+    const MAX_DEPTH: u8 = (T::N_BITS - (N_RESERVED_BITS + Self::N_D0_BITS)) / Self::DIM;
     const MAX_SHIFT: u32 = (Self::DIM * Self::MAX_DEPTH) as u32;
     // const MAX_VALUE : T = Self::N_D0_CELLS).into().unsigned_shl((Self::DIM * Self::MAX_DEPTH) as u32);
 
@@ -62,6 +64,19 @@ pub trait MocQty<T>: MocableQty where T: Idx
     fn n_cells_max() -> T {
         let nd0: T = Self::N_D0_CELLS.into();
         nd0.unsigned_shl(Self::MAX_SHIFT)
+    }
+
+    /// Upper bound on the maximum number of depths that can be coded using `n_bits`of a MOC index.
+    /// I.e., maximum possible hierarchy depth on a
+    /// `len = [0, 2^(delta_depth)^dim]` => `(log(len) / log(2)) / dim = delta_depth`
+    fn delta_depth_max_from_n_bits(n_bits: u8) -> u8 {
+        Self::delta_depth_max_from_n_bits_unchecked(n_bits).min(Self::MAX_DEPTH)
+    }
+
+    /// Same as `delta_depth_max_from_n_bits` without cecking that the result is smaller than
+    /// depth_max.
+    fn delta_depth_max_from_n_bits_unchecked(n_bits: u8) -> u8 {
+        n_bits >> (Self::DIM - 1)
     }
 
     fn delta_with_depth_max(depth: u8) -> u8 {
@@ -76,7 +91,7 @@ pub trait MocQty<T>: MocableQty where T: Idx
 
     #[inline(always)]
     fn get_msb(x: T) -> u32 {
-        num_bits::<T>() as u32 - x.leading_zeros() - 1
+        T::N_BITS as u32 - x.leading_zeros() - 1
     }
 
     #[inline(always)]
@@ -129,6 +144,7 @@ pub trait MocQty<T>: MocableQty where T: Idx
 pub struct Hpx<T: Idx> (std::marker::PhantomData<T>);
 
 impl<T: Idx> MocableQty for Hpx<T> {
+    const PREFIX: char = 's';
     const DIM: u8 = 2;
     const N_D0_CELLS: u8 = 12;
 }
@@ -163,6 +179,7 @@ impl<T: Idx> Hpx<T> {
 #[derive(Clone, Debug)]
 pub struct Time<T: Idx> (PhantomData<T>);
 impl<T: Idx> MocableQty for Time<T> {
+    const PREFIX: char = 't';
     const DIM: u8 = 1;
     const N_D0_CELLS: u8 = 2;
 }
@@ -238,6 +255,7 @@ mod tests {
         assert_eq!(Hpx::<u64>::DIM, 2);
         assert_eq!(Hpx::<u64>::N_D0_CELLS, 12);
         assert_eq!(Hpx::<u64>::N_D0_BITS, 4);
+        assert_eq!(Hpx::<u64>::LEVEL_MASK, 3);
         assert_eq!(Hpx::<u64>::shift(1), 2);
         assert_eq!(Hpx::<u64>::shift(10), 20);
         // Depends on T
@@ -252,6 +270,7 @@ mod tests {
         assert_eq!(Time::<u64>::DIM, 1);
         assert_eq!(Time::<u64>::N_D0_CELLS, 2);
         assert_eq!(Time::<u64>::N_D0_BITS, 1);
+        assert_eq!(Time::<u64>::LEVEL_MASK, 1);
         assert_eq!(Time::<u64>::shift(1), 1);
         assert_eq!(Time::<u64>::shift(10), 10);
         // Depends on T

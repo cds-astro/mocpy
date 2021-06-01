@@ -13,7 +13,6 @@ bench = true
 
 [dependencies]
 num = "0.4"
-rand = "0.8.3"
 rayon = "1.5.1"
 healpix = { package = "cdshealpix", version = "0.5.4" }
 #healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
@@ -23,6 +22,15 @@ version = "0.14"
 default-features = false # do not include the default features, and optionally
                          # cherry-pick individual features
 features = ["rayon"]
+
+
+[dev-dependencies]
+rand = "0.8.3"
+criterion = "0.3"
+
+[[bench]]
+name = "ranges2cells"
+harness = false
 
 [profile.release]
 opt-level = 3
