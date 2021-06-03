@@ -181,7 +181,10 @@ impl<T> Iterator for UniqToHpxIter<T>
 }
 
 
-
+/// IMPORTANT: the iterator is ordered according first to the cell depth
+/// and then to the cell index.
+/// See `ranges2cells` bench, using `CellMOCIteratorFromRanges` and then sorting the result
+/// may be more efficient (x3 on the only bench done so far).
 pub struct HpxUniq2DepthIdxIter<T>
     where
       T: Idx + CheckedAdd,

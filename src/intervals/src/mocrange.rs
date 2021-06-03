@@ -7,12 +7,13 @@ use num::One;
 use crate::mocqty::{MocQty, Hpx, Time};
 use crate::ranges::Idx;
 use crate::mocell::{MocCell, Cell};
-use healpix::nested::moc::HpxCell;
 
 // Commodity type definitions
 pub type HpxRange<T> = MocRange<T, Hpx<T>>;
 pub type TimeRange<T> = MocRange<T, Time<T>>;
 
+/// Range at the deepest possible depth.
+#[repr(transparent)] // To be able to transmute Vec<Range<T>> into Vec<MocRange<T, _>>
 #[derive(Debug)]
 pub struct MocRange<T: Idx, Q: MocQty<T>>(pub Range<T>, PhantomData<Q>);
 
@@ -36,7 +37,7 @@ impl<T: Idx, Q: MocQty<T>> MocRange<T, Q> {
   /// # Remark:
   /// We can deduce `shift_dd` and `range_len_min` from `Q::<T>` and `depth_max`, but we pass them
   /// to avoid recomputing them (even if it is fast)
-  pub fn next_with_knowledge(&mut self, depth_max: u8, shift_dd: usize, range_len_min: T, mask: T) -> Option<MocCell<T, Q>> {
+  pub fn next_cell_with_knowledge(&mut self, depth_max: u8, shift_dd: usize, range_len_min: T, mask: T) -> Option<MocCell<T, Q>> {
     let len = self.0.end - self.0.start;
     if len < T::one() {
       None
@@ -48,7 +49,7 @@ impl<T: Idx, Q: MocQty<T>> MocRange<T, Q> {
     } else {
       // dd max from number of bits to code from 0 to len
       let dd_max_from_len = Q::delta_depth_max_from_n_bits_unchecked(T::N_BITS - 1 - len.leading_zeros() as u8);
-      // starting dd max from the smallest possible depth og the range lower bound
+      // starting dd max from the smallest possible depth of the range lower bound
       let dd_max_from_low = Q::delta_depth_max_from_n_bits_unchecked(self.0.start.trailing_zeros() as u8);
       let delta_depth = dd_max_from_len.min(dd_max_from_low).min(Q::MAX_DEPTH);
       let delta_depth_shift = Q::shift(delta_depth) as usize;
@@ -57,6 +58,35 @@ impl<T: Idx, Q: MocQty<T>> MocRange<T, Q> {
       Some(c)
     }
   }
+
+
+  // TODO TO BE CONTINUED...
+  /*pub fn next_cellrange_with_knowledge(&mut self, depth_max: u8, shift_dd: usize, range_len_min: T, mask: T) -> Option<MocCellOrCellRange<T, Q>> {
+    let len = self.0.end - self.0.start;
+    if len < T::one() {
+      None
+    } else if len == range_len_min {
+      // A range of 1 cell at depth_max
+      let c = Cell::new(depth_max, self.0.start >> shift_dd).into();
+      self.0.start += range_len_min;
+      Some(MocCellOrCellRange::MocCell(c))
+    } else if Q::DIM > 1 && self.0.start & mask != T::zero() {
+
+    } else {
+      // dd max from number of bits to code from 0 to len
+      let dd_max_from_len = Q::delta_depth_max_from_n_bits_unchecked(T::N_BITS - 1 - len.leading_zeros() as u8);
+      // starting dd max from the smallest possible depth of the range lower bound
+      let dd_max_from_low = Q::delta_depth_max_from_n_bits_unchecked(self.0.start.trailing_zeros() as u8);
+      let delta_depth = dd_max_from_len.min(dd_max_from_low).min(Q::MAX_DEPTH);
+      let delta_depth_shift = Q::shift(delta_depth) as usize;
+
+
+
+      let c = Cell::new(Q::MAX_DEPTH - delta_depth, self.0.start >> delta_depth_shift).into();
+      self.0.start += T::one() << delta_depth_shift;
+      Some(c)
+    }
+  }*/
 }
 
 

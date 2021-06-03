@@ -1,13 +1,14 @@
 //! Very generic ranges operations
 
 use std::{cmp, mem};
-use std::fmt::Debug;
+use std::str::FromStr;
+use std::fmt::{Debug, Display};
 use std::collections::VecDeque;
 use std::ops::{Range, Index, AddAssign};
 use std::slice::Iter;
 use std::ptr::slice_from_raw_parts;
 
-use num::{Integer, One, PrimInt, Zero};
+use num::{Integer, One, PrimInt, Zero, ToPrimitive};
 use rayon::prelude::*;
 use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
 use ndarray::{Array1, Array2};
@@ -15,13 +16,18 @@ use ndarray::{Array1, Array2};
 pub mod ranges2d;
 
 use crate::utils;
+use std::convert::TryFrom;
 
 // 'static mean that Idx does not contains any reference
-pub trait Idx: 'static + Integer + AddAssign + PrimInt + From<u8> + Send + Sync + Debug {
+pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
+                       + FromStr + From<u8> + TryFrom<u64>
+                       + Send + Sync + Debug + Display + Copy {
     const N_BYTES: u8 = mem::size_of::<Self>() as u8;
     const N_BITS: u8 = Self::N_BYTES << 3;
 }
-impl<T> Idx for T where T: 'static + Integer + AddAssign + PrimInt + From<u8> + Send + Sync + Debug {}
+impl<T> Idx for T where T: 'static + Integer + PrimInt + ToPrimitive + AddAssign
+                                   + FromStr + From<u8> + TryFrom<u64>
+                                   + Send + Sync + Debug + Display + Copy {}
 
 /// Generic operations on a set of Sorted and Non-Overlapping ranges.
 /// SNO = Sorted Non-Overlapping
@@ -199,6 +205,10 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
     fn contains(&self, x: &Range<T>) -> bool {
         let len = self.0.len() << 1;
         let ptr = self.0.as_ptr();
+        // It is ok because:
+        // * T is a primitive type in practice, and size_of(T) << 1 == size_of(Range<T>)
+        // * the alignment of Range<T> is the same as the alignment of T (see test_alignment)
+        // But: https://rust-lang.github.io/unsafe-code-guidelines/layout/structs-and-tuples.html
         let result: &[T] = unsafe {
             &* slice_from_raw_parts(ptr as *const T, len)
         };
@@ -461,15 +471,33 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::mocqty::{MocQty, Hpx};
-    use crate::ranges::{SNORanges, Ranges};
+
+
+    use std::ops::Range;
+    use std::mem::{align_of, size_of};
 
     use num::PrimInt;
     use rand::Rng;
-    use std::ops::Range;
-
-    use crate::ranges::ranges_to_array2d;
     use ndarray::Array2;
+
+    use crate::mocqty::{MocQty, Hpx};
+    use crate::ranges::{SNORanges, Ranges};
+    use crate::ranges::ranges_to_array2d;
+
+    #[test]
+    fn test_alignment() {
+        // Ensure alignement for unsafe code in contains
+        assert_eq!(align_of::<u32>(), align_of::<Range<u32>>());
+        assert_eq!(align_of::<u64>(), align_of::<Range<u64>>());
+        assert_eq!(align_of::<i32>(), align_of::<Range<i32>>());
+        assert_eq!(align_of::<i64>(), align_of::<Range<i64>>());
+
+        assert_eq!(size_of::<u32>() << 1, size_of::<Range<u32>>());
+        assert_eq!(size_of::<u64>() << 1, size_of::<Range<u64>>());
+        assert_eq!(size_of::<i32>() << 1, size_of::<Range<i32>>());
+        assert_eq!(size_of::<i64>() << 1, size_of::<Range<i64>>());
+    }
+
     #[test]
     fn empty_ranges_to_array2d() {
         let ranges = Ranges::<u64>::new_unchecked(vec![]);

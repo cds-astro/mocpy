@@ -1,28 +1,32 @@
 
+use std::io::Write;
 use std::slice;
 use std::ops::Range;
-use std::vec::{Vec, IntoIter};
+use std::vec::{IntoIter};
 use std::marker::PhantomData;
 
 use crate::mocrange::MocRange;
 use crate::ranges::Idx;
 use crate::mocqty::MocQty;
 use crate::mocranges::MocRanges;
-use crate::mocell::{MocCell, Cell};
-
+use crate::mocell::{Cell, CellOrCellRange, CellRange};
+use crate::deser;
+use crate::mocells::{MocCellOrCellRanges, MocCells};
 
 /// Returns the maximum depth of an item the implementor contains.
 pub trait HasMaxDepth {
   fn depth_max(&self) -> u8;
 }
 
-/// Marker trait telling that something the implementor is sorted
-pub trait Sorted {}
+/// Marker trait telling that ranges lower bound or cells or indices in the implementor are sorted
+/// according to the natural Z-order curve order (no hierarchical order => cells of various depth
+/// are mixed).
+pub trait ZSorted {}
 
 /// Marker trait telling that something the implementor contains non-overlapping items.
 pub trait NonOverlapping {}
 
-pub trait MOCProperties: HasMaxDepth + Sorted + NonOverlapping { }
+pub trait MOCProperties: HasMaxDepth + ZSorted + NonOverlapping { }
 
 /*pub trait MOC: MOCProperties {
   type Qty: MocQty<T>;
@@ -50,10 +54,106 @@ impl<T, Q, R> CellMOCIterator<T, Q> for R
 
 pub trait CellMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Cell<T>> {
   type Qty: MocQty<T>;
+  fn cellranges(self) -> CellOrCellRangeMOCIteratorFromCells<T, Self::Qty, Self> {
+    CellOrCellRangeMOCIteratorFromCells::new(self)
+  }
+  fn to_json_aladin<W: Write>(self, fold: Option<usize>, writer: W) -> std::io::Result<()> {
+    deser::json::to_json_aladin(self, fold, writer)
+  }
 }
 
-pub trait CellMOCIntoIterator<T: Idx>: Sized + MOCProperties + IntoIterator<Item=Cell<T>> {
+pub trait CellMOCIntoIterator<T: Idx>: Sized {
   type Qty: MocQty<T>;
+  type IntoCellMOCIter: CellMOCIterator<T, Qty=Self::Qty>;
+
+  fn into_cell_moc_iter(self) -> Self::IntoCellMOCIter;
+}
+
+
+
+pub trait CellOrCellRangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=CellOrCellRange<T>> {
+  type Qty: MocQty<T>;
+
+  /// # WARNING
+  /// - `use_offset=true` is not compatible with the current IVOA standard!
+  fn to_ascii_ivoa<W: Write>(self, fold: Option<usize>, use_offset: bool, writer: W) -> std::io::Result<()> {
+    deser::ascii::to_ascii_ivoa(self, fold, use_offset, writer)
+  }
+  /// # WARNING
+  /// - this is not compatible with the current IVOA standard!
+  fn to_ascii_stream<W: Write>(self, use_offset: bool, writer: W) -> std::io::Result<()> {
+    deser::ascii::to_ascii_stream(self, use_offset, writer)
+  }
+}
+
+/// Transforms a `CellMOCIterator` into a `CellOrCellRangeMOCIterator`.
+pub struct CellOrCellRangeMOCIteratorFromCells<T, Q, R>
+  where
+    T: Idx,
+    Q: MocQty<T>,
+    R: CellMOCIterator<T, Qty=Q>
+{
+  it: R,
+  curr: Option<Cell<T>>,
+}
+
+impl<T, Q, R> CellOrCellRangeMOCIteratorFromCells<T, Q, R>
+  where
+    T: Idx,
+    Q: MocQty<T>,
+    R: CellMOCIterator<T, Qty=Q>
+{
+  fn new(mut it: R) -> CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
+    let curr = it.next();
+    CellOrCellRangeMOCIteratorFromCells {
+      it,
+      curr,
+    }
+  }
+}
+
+impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> HasMaxDepth for CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
+  fn depth_max(&self) -> u8 {
+    self.it.depth_max()
+  }
+}
+impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> ZSorted for CellOrCellRangeMOCIteratorFromCells<T, Q, R> { }
+impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> NonOverlapping for CellOrCellRangeMOCIteratorFromCells<T, Q, R> { }
+impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> MOCProperties for CellOrCellRangeMOCIteratorFromCells<T, Q, R> { }
+
+impl<T, Q, R> Iterator for CellOrCellRangeMOCIteratorFromCells<T, Q, R>
+  where
+    T: Idx,
+    Q: MocQty<T>,
+    R: CellMOCIterator<T, Qty=Q>
+{
+  type Item = CellOrCellRange<T>;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(Cell{ depth: left_d, idx: left_i}) = &self.curr {
+      let mut n = T::one();
+      let mut next = self.it.next();
+      while let Some(Cell { depth: right_d, idx: right_i}) = &next {
+        if *left_d == *right_d && *left_i + n == *right_i {
+            n += T::one();
+           next = self.it.next();
+        } else {
+          break;
+        }
+      }
+      std::mem::replace(&mut self.curr, next)
+        .map(move |c| if n == T::one() {
+          CellOrCellRange::Cell(c)
+        } else {
+          CellOrCellRange::CellRange(CellRange::new(c.depth, c.idx, c.idx + n))
+        })
+    } else {
+      None
+    }
+  }
+}
+impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> CellOrCellRangeMOCIterator<T> for CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
+  type Qty = Q;
 }
 
 // RangeMOCIterator<T, Q, B>: Sized + MOCProperties + Iterator<Item=B>
@@ -87,6 +187,7 @@ pub trait RangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Range<
   fn cells(self) -> CellMOCIteratorFromRanges<T, Self::Qty, Self> {
     CellMOCIteratorFromRanges::new(self)
   }
+
 }
 
 pub trait RangeMOCIntoIterator<T: Idx>: Sized {
@@ -105,7 +206,6 @@ pub struct CellMOCIteratorFromRanges<T, Q, R>
 {
   it: R,
   curr: Option<MocRange<T, Q>>,
-  depth_max: u8,
   shift_dd: usize,
   range_len_min: T,
   mask: T,
@@ -120,14 +220,12 @@ impl<T, Q, R> CellMOCIteratorFromRanges<T, Q, R>
 
   fn new(mut it: R) -> CellMOCIteratorFromRanges<T, Q, R> {
     let curr = it.next().map(|range| range.into());
-    let depth_max = it.depth_max();
-    let shift_dd = Q::shift_from_depth_max (depth_max) as usize;
+    let shift_dd = Q::shift_from_depth_max (it.depth_max()) as usize;
     let range_len_min = T::one() << shift_dd;
     let mask = From::from(Q::LEVEL_MASK << shift_dd);
     CellMOCIteratorFromRanges {
       it,
       curr,
-      depth_max,
       shift_dd,
       range_len_min,
       mask,
@@ -140,9 +238,12 @@ impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> HasMaxDepth for CellMO
     self.it.depth_max()
   }
 }
-impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> Sorted for CellMOCIteratorFromRanges<T, Q, R> { }
+impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> ZSorted for CellMOCIteratorFromRanges<T, Q, R> { }
 impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> NonOverlapping for CellMOCIteratorFromRanges<T, Q, R> { }
-
+impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> MOCProperties for CellMOCIteratorFromRanges<T, Q, R> { }
+impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> CellMOCIterator<T> for CellMOCIteratorFromRanges<T, Q, R> {
+  type Qty = Q;
+}
 impl<T, Q, R> Iterator for CellMOCIteratorFromRanges<T, Q, R>
   where
     T: Idx,
@@ -154,7 +255,7 @@ impl<T, Q, R> Iterator for CellMOCIteratorFromRanges<T, Q, R>
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(c) = &mut self.curr {
-      let res = c.next_with_knowledge(self.depth_max, self.shift_dd, self.range_len_min, self.mask);
+      let res = c.next_cell_with_knowledge(self.it.depth_max(), self.shift_dd, self.range_len_min, self.mask);
       if res.is_none() {
         self.curr = self.it.next().map(|range| range.into());
         self.next()
@@ -168,14 +269,132 @@ impl<T, Q, R> Iterator for CellMOCIteratorFromRanges<T, Q, R>
 }
 
 
+// CELL/CELLRANGE MOC IMPLEMENTATION
+
+/// A MOC made of a mix of (ordered and non-overlaping) cells and cells range
+/// (a cell range is a range at the cell depth, while regular ranges are at the
+/// largest possible depth and depends on type  `T`).
+/// This is used for ASCII serialization/deserialization.
+pub struct CellOrCellRangeMOC<T: Idx, Q: MocQty<T>> {
+  depth_max: u8,
+  ranges: MocCellOrCellRanges<T, Q>
+}
+impl<T: Idx, Q: MocQty<T>> CellOrCellRangeMOC<T, Q> {
+  pub fn new(depth_max: u8, ranges: MocCellOrCellRanges<T, Q>) -> Self {
+    Self { depth_max, ranges }
+  }
+  pub fn into_cellcellrange_moc_iter(self) -> CellOrCellRangeMocIter<T, Q> {
+    CellOrCellRangeMocIter {
+      depth_max: self.depth_max,
+      iter: self.ranges.0.0.into_iter(),
+      _qty: PhantomData
+    }
+  }
+}
+
+impl<T: Idx, Q: MocQty<T>> HasMaxDepth for CellOrCellRangeMOC<T, Q> {
+  fn depth_max(&self) -> u8 {
+    self.depth_max
+  }
+}
+impl<T: Idx, Q: MocQty<T>> ZSorted for CellOrCellRangeMOC<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> NonOverlapping for CellOrCellRangeMOC<T, Q> { }
+
+
+pub struct CellOrCellRangeMocIter<T: Idx, Q: MocQty<T>> {
+  depth_max: u8,
+  iter: IntoIter<CellOrCellRange<T>>,
+  _qty: PhantomData<Q>,
+}
+impl<T: Idx, Q: MocQty<T>> HasMaxDepth for CellOrCellRangeMocIter<T, Q> {
+  fn depth_max(&self) -> u8 {
+    self.depth_max
+  }
+}
+impl<T: Idx, Q: MocQty<T>> ZSorted for CellOrCellRangeMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> NonOverlapping for CellOrCellRangeMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> MOCProperties for CellOrCellRangeMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> Iterator for CellOrCellRangeMocIter<T, Q> {
+  type Item = CellOrCellRange<T>;
+  fn next(&mut self) -> Option<Self::Item> {
+    self.iter.next()
+  }
+}
+impl<T: Idx, Q: MocQty<T>> CellOrCellRangeMOCIterator<T> for CellOrCellRangeMocIter<T, Q> {
+  type Qty = Q;
+}
+
+// CELL MOC IMPLEMENTATION
+pub struct CellMOC<T: Idx, Q: MocQty<T>> {
+  depth_max: u8,
+  cells: MocCells<T, Q>
+}
+impl<T: Idx, Q: MocQty<T>> CellMOC<T, Q> {
+  pub fn new(depth_max: u8, cells: MocCells<T, Q>) -> Self {
+    Self { depth_max, cells }
+  }
+
+}
+impl<T: Idx, Q: MocQty<T>> HasMaxDepth for CellMOC<T, Q> {
+  fn depth_max(&self) -> u8 {
+    self.depth_max
+  }
+}
+impl<T: Idx, Q: MocQty<T>> ZSorted for CellMOC<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> NonOverlapping for CellMOC<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> MOCProperties for CellMOC<T, Q> { }
+
+
+pub struct CellMocIter<T: Idx, Q: MocQty<T>> {
+  depth_max: u8,
+  iter: IntoIter<Cell<T>>,
+  _qty: PhantomData<Q>,
+}
+impl<T: Idx, Q: MocQty<T>> HasMaxDepth for CellMocIter<T, Q> {
+  fn depth_max(&self) -> u8 {
+    self.depth_max
+  }
+}
+impl<T: Idx, Q: MocQty<T>> ZSorted for CellMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> NonOverlapping for CellMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> MOCProperties for CellMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> Iterator for CellMocIter<T, Q> {
+  type Item = Cell<T>;
+  fn next(&mut self) -> Option<Self::Item> {
+    self.iter.next()
+  }
+}
+impl<T: Idx, Q: MocQty<T>> CellMOCIterator<T> for CellMocIter<T, Q> {
+  type Qty = Q;
+}
+impl<T: Idx, Q: MocQty<T>> CellMOCIntoIterator<T> for CellMOC<T, Q> {
+  type Qty = Q;
+  type IntoCellMOCIter = CellMocIter<T, Self::Qty>;
+
+  fn into_cell_moc_iter(self) -> Self::IntoCellMOCIter {
+    CellMocIter {
+      depth_max: self.depth_max,
+      iter: self.cells.0.0.into_iter(),
+      _qty: PhantomData
+    }
+  }
+}
+
+// + Iterator<Item=Cell<T>>
+// TODO: implementer l'iterateur, ...
+
+
 // RANGE MOC IMPLEMENTATION
 
+/// A MOC made of (ordered and non-overlaping) ranges
 pub struct RangeMOC<T: Idx, Q: MocQty<T>> {
-  pub depth_max: u8,
-  pub ranges: MocRanges<T, Q>
+  depth_max: u8,
+  ranges: MocRanges<T, Q>
 }
 impl<T: Idx, Q: MocQty<T>> RangeMOC<T, Q> {
-
+  pub fn new(depth_max: u8, ranges: MocRanges<T, Q>) -> Self {
+    Self {depth_max, ranges }
+  }
   /*pub fn into_range_moc_iter(self) -> LazyRangeMOCIter<T, Q, IntoIter<Range<T>>> {
     LazyRangeMOCIter::new(self.depth_max, self.ranges.0.0.into_iter())
   }*/
@@ -195,7 +414,7 @@ impl<T: Idx, Q: MocQty<T>> HasMaxDepth for RangeMOC<T, Q> {
     self.depth_max
   }
 }
-impl<T: Idx, Q: MocQty<T>> Sorted for RangeMOC<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> ZSorted for RangeMOC<T, Q> { }
 impl<T: Idx, Q: MocQty<T>> NonOverlapping for RangeMOC<T, Q> { }
 
 
@@ -209,7 +428,7 @@ impl<T: Idx, Q: MocQty<T>> HasMaxDepth for RangeMocIter<T, Q> {
     self.depth_max
   }
 }
-impl<T: Idx, Q: MocQty<T>> Sorted for RangeMocIter<T, Q> { }
+impl<T: Idx, Q: MocQty<T>> ZSorted for RangeMocIter<T, Q> { }
 impl<T: Idx, Q: MocQty<T>> NonOverlapping for RangeMocIter<T, Q> { }
 impl<T: Idx, Q: MocQty<T>> MOCProperties for RangeMocIter<T, Q> { }
 impl<T: Idx, Q: MocQty<T>> Iterator for RangeMocIter<T, Q> {
@@ -244,7 +463,7 @@ impl<'a, T: Idx, Q: MocQty<T>> HasMaxDepth for RangeRefMocIter<'a, T, Q> {
     self.depth_max
   }
 }
-impl<'a, T: Idx, Q: MocQty<T>> Sorted for RangeRefMocIter<'a, T, Q> { }
+impl<'a, T: Idx, Q: MocQty<T>> ZSorted for RangeRefMocIter<'a, T, Q> { }
 impl<'a, T: Idx, Q: MocQty<T>> NonOverlapping for RangeRefMocIter<'a, T, Q> { }
 impl<'a, T: Idx, Q: MocQty<T>> MOCProperties for RangeRefMocIter<'a, T, Q> { }
 impl<'a, T: Idx, Q: MocQty<T>> Iterator for RangeRefMocIter<'a, T, Q> {
@@ -360,14 +579,15 @@ impl<'a, H> Iterator for LazyRangeMOCVecIter<'a, H>
 
 #[cfg(test)]
 mod tests {
-  use std::marker::PhantomData;
-
-  use crate::moc::{RangeMOC, RangeMocIter, RangeMOCIntoIterator, CellMOCIteratorFromRanges, RangeMOCIterator};
+  use crate::moc::{
+    RangeMOC, RangeMOCIterator, RangeMOCIntoIterator,
+    CellMOCIterator, CellOrCellRangeMOCIterator
+  };
   use crate::mocranges::MocRanges;
-  use crate::ranges::Ranges;
   use crate::mocqty::Hpx;
-  use crate::mocell::Cell;
+  use crate::mocell::{Cell, CellRange, CellOrCellRange};
   use crate::hpxranges::HpxUniq2DepthIdxIter;
+  use std::cmp::Ordering;
 
   #[test]
   fn test_range2cells_1() {
@@ -424,12 +644,124 @@ mod tests {
       ])
     };
     let rit = (&rm).into_range_moc_iter();
-    let v1: Vec<Cell<u64>> = rit.cells().collect();
-    println!("{:?}", v1);
+    let mut v1: Vec<Cell<u64>> = rit.cells().collect();
+    // println!("{:?}", v1);
+    v1.sort_by(
+      |a, b| match a.depth.cmp(&b.depth) {
+        Ordering::Less => Ordering::Less,
+        Ordering::Greater => Ordering::Greater,
+        Ordering::Equal => a.idx.cmp(&b.idx)
+      });
 
     let v2: Vec<(i8, u64)> = HpxUniq2DepthIdxIter::new(rm.ranges).collect();
-    println!("{:?}", v2);
+    // println!("{:?}", v2);
+    assert_eq!(v1.len(), v2.len());
+    for (Cell{depth, idx}, (depth2, idx2)) in v1.into_iter().zip(v2.into_iter())  {
+      assert_eq!(depth, depth2 as u8);
+      assert_eq!(idx, idx2);
+    }
+  }
 
+  #[test]
+  fn test_range2cellrange() {
+    let rm = RangeMOC {
+      depth_max: 29,
+      ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![2..8])
+    };
+    let res: Vec<CellOrCellRange<u64>> = (&rm).into_range_moc_iter().cells().cellranges().collect();
+    assert_eq!(res, vec![
+      CellOrCellRange::CellRange(CellRange::new(29, 2, 4)),
+      CellOrCellRange::Cell(Cell::new(28, 1)),
+    ]);
+
+  }
+
+  #[test]
+  fn test_to_ascii() {
+    let rm = RangeMOC {
+      depth_max: 29,
+      ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![
+        0..5,
+        6..59,
+        78..6953,
+        12458..55587,
+        55787..65587
+      ])
+    };
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(Some(80), false, &mut sink)
+      .unwrap();
+    // println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(Some(80), true, &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(None, false, &mut sink)
+      .unwrap();
+    println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(None, true, &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_stream(false, &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_stream(true, &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
+  }
+
+  #[test]
+  fn test_to_json() {
+    let rm = RangeMOC {
+      depth_max: 29,
+      ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![
+        0..5,
+        6..59,
+        78..6953,
+        12458..55587,
+        55787..65587
+      ])
+    };
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .to_json_aladin(Some(40), &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
+
+    let mut sink = Vec::new();
+    (&rm).into_range_moc_iter()
+      .cells()
+      .to_json_aladin(None, &mut sink)
+      .unwrap();
+    //  println!("{}\n", &String::from_utf8_lossy(&sink));
   }
 
 }

@@ -23,7 +23,9 @@ impl<T, Q> Bounded<T> for Q where T: Idx, Q: MocQty<T> {
 
 /// Generic constants defining a quantity that can be put in a MOC,
 /// independently of it the precise integer type used to represent it.
-pub trait MocableQty: Send + Sync {
+pub trait MocableQty: PartialEq + Eq + Send + Sync {
+    /// A simple str to identify the quantity (e.g. in ASCII serialisation)
+    const NAME: &'static str;
     /// A simple char prefix to identify the quantity (e.g. in ASCII serialisation)
     const PREFIX: char;
     /// Dimension of the qty, i.e. number of bits needed to code a sub-cell relative index
@@ -39,6 +41,9 @@ pub trait MocableQty: Send + Sync {
     /// * dim 3: 111
     const LEVEL_MASK: u8 = (1 << Self::DIM) - 1;
 
+    // dim 1: delta_depth
+    // dim 2: delta_depth << 1
+    // dim 3:
     fn shift(delta_depth: u8) -> u8 {
         Self::DIM * delta_depth
     }
@@ -140,10 +145,11 @@ pub trait MocQty<T>: MocableQty where T: Idx
 }
 
 /// HEALPix index (either Ring or Nested)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Hpx<T: Idx> (std::marker::PhantomData<T>);
 
 impl<T: Idx> MocableQty for Hpx<T> {
+    const NAME: &'static str = "HPX";
     const PREFIX: char = 's';
     const DIM: u8 = 2;
     const N_D0_CELLS: u8 = 12;
@@ -176,9 +182,10 @@ impl<T: Idx> Hpx<T> {
 
 
 /// Time index (microsec since JD=0)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Time<T: Idx> (PhantomData<T>);
 impl<T: Idx> MocableQty for Time<T> {
+    const NAME: &'static str = "TIME";
     const PREFIX: char = 't';
     const DIM: u8 = 1;
     const N_D0_CELLS: u8 = 2;

@@ -20,11 +20,14 @@ pub mod hpxranges;
 pub mod uniqranges;
 
 pub mod mocell;
+pub mod mocells;
 
 pub mod valuedcell;
 
 pub mod mocranges2d;
 pub mod hpxranges2d;
+
+pub mod deser;
 
 use ndarray::Array2;
 
@@ -90,7 +93,6 @@ where
 #[cfg(test)]
 mod tests {
     use num::PrimInt;
-    use rand;
     use crate::mocranges::HpxRanges;
     use crate::uniqranges::HpxUniqRanges;
 
