@@ -1,5 +1,5 @@
 use crate::ranges::Idx;
-use crate::mocqty::MocQty;
+use crate::mocqty::{MocQty, Hpx};
 use std::marker::PhantomData;
 use std::ops::Range;
 use std::cmp::Ordering;
@@ -9,6 +9,9 @@ use std::cmp::Ordering;
 /// Mixing single cells and cells range.
 /// This is usefull for Qty having a DIM > 1, because at DIM = 1 a cell is only divided in 2
 /// (so we get a super cell instead of a range).
+/// This is not mempry efficient (size_of_u8 + 2 x size_of T + extra tag bytes) and should be
+/// used in intermediary representations only (with ASCII file which are not supposed
+/// to be very large).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CellOrCellRange<T: Idx> {
   Cell(Cell<T>),
@@ -60,7 +63,22 @@ impl<T: Idx> Cell<T> {
     }
   }
 }
-
+impl<T: Idx> Cell<T> {
+  pub fn from_uniq_hpx(uniq: T) -> Self {
+    let (depth, idx) = Hpx::<T>::from_uniq_hpx(uniq);
+    Self { depth, idx }
+  }
+  pub fn to_uniq_hpx(&self) -> T {
+    Hpx::<T>::to_uniq_hpx(self.depth, self.idx)
+  }
+  pub fn from_uniq<Q: MocQty<T>>(uniq: T) -> Self {
+    let (depth, idx) = Q::from_uniq_gen(uniq);
+    Self { depth, idx }
+  }
+  pub fn to_uniq<Q: MocQty<T>>(&self) -> T {
+    Q::to_uniq_gen(self.depth, self.idx)
+  }
+}
 impl<T: Idx, Q: MocQty<T>> From<MocCell<T, Q>> for Cell<T> {
   fn from(cell: MocCell<T, Q>) -> Self {
     cell.0

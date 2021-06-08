@@ -268,7 +268,8 @@ pub fn to_ascii_stream<T, Q, I, W>(it: I, use_range_len: bool, mut writer: W)
 
 
 // TODO: add a beter error handling with quickerror!
-pub fn from_ascii_stream<T, Q, R>(reader: R) -> Result<MOCFromAsciiStream<T, Q, R>, Box<dyn Error>>
+pub fn from_ascii_stream<T, Q, R>(reader: R)
+  -> Result<MOCFromAsciiStream<T, Q, R>, Box<dyn Error>>
   where
     T: Idx,
     Q: MocQty<T>,
@@ -329,6 +330,9 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> Iterator for MOCFromAsciiStream<T, Q, R> 
           if !line.is_empty() {
             match line.split_once('/') {
               Some((depth, cell_or_range)) => {
+                // Would be more efficient to work on a &[u8]
+                // to iterate while we get numbers and then check for - or +.
+                // To be change if we encounter performance issues
                 if let Ok(depth) = depth.parse::<u8>() {
                   if cell_or_range.contains('-') {
                     // Parse range start-end

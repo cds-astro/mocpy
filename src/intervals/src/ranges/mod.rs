@@ -12,11 +12,13 @@ use num::{Integer, One, PrimInt, Zero, ToPrimitive};
 use rayon::prelude::*;
 use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
 use ndarray::{Array1, Array2};
+use byteorder::{ByteOrder, ReadBytesExt};
 
 pub mod ranges2d;
 
 use crate::utils;
 use std::convert::TryFrom;
+use std::io::Read;
 
 // 'static mean that Idx does not contains any reference
 pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
@@ -24,10 +26,54 @@ pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
                        + Send + Sync + Debug + Display + Copy {
     const N_BYTES: u8 = mem::size_of::<Self>() as u8;
     const N_BITS: u8 = Self::N_BYTES << 3;
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error>;
 }
-impl<T> Idx for T where T: 'static + Integer + PrimInt + ToPrimitive + AddAssign
+
+impl Idx for u8 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_u8()
+    }
+}
+impl Idx for u16 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_u16::<B>()
+    }
+}
+impl Idx for u32 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_u32::<B>()
+    }
+}
+impl Idx for u64 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_u64::<B>()
+    }
+}
+impl Idx for u128 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_u128::<B>()
+    }
+}
+
+impl Idx for i16 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_i16::<B>()
+    }
+}
+impl Idx for i32 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_i32::<B>()
+    }
+}
+impl Idx for i64 {
+    fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
+        reader.read_i64::<B>()
+    }
+}
+
+/*impl<T> Idx for T where T: 'static + Integer + PrimInt + ToPrimitive + AddAssign
                                    + FromStr + From<u8> + TryFrom<u64>
-                                   + Send + Sync + Debug + Display + Copy {}
+                                   + Send + Sync + Debug + Display + Copy {}*/
 
 /// Generic operations on a set of Sorted and Non-Overlapping ranges.
 /// SNO = Sorted Non-Overlapping

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
 * 
 ### Internal changes
+* Add FITS serialization/deserialization on the Rust code.
 * Add ASCII and JSON serialization/deserialization on the Rust code.
 * Move `rand` from dependencies to dev-dependenciies
 * Generalize the code to support various quantities with different dimensions (HEALPix indices, Time, ...)

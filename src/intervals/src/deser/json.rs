@@ -12,7 +12,7 @@ use crate::mocell::Cell;
 use serde_json::value::Value::Array;
 use crate::mocells::{MocCells, Cells};
 
-/// Write a JSON following the Aladin JSON format
+/// Write a JSON following the Aladin JSON format.
 pub fn to_json_aladin<T, Q, I, W>(it: I, fold: Option<usize>, mut writer: W)
   -> std::io::Result<()>
   where

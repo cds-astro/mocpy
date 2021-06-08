@@ -151,6 +151,8 @@ impl<T, Q, R> Iterator for CellOrCellRangeMOCIteratorFromCells<T, Q, R>
       None
     }
   }
+  // We do not declare a size_hint so far because we use it only in streaming mode when producing
+  // ASCII output.
 }
 impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> CellOrCellRangeMOCIterator<T> for CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
   type Qty = Q;
@@ -333,7 +335,9 @@ impl<T: Idx, Q: MocQty<T>> CellMOC<T, Q> {
   pub fn new(depth_max: u8, cells: MocCells<T, Q>) -> Self {
     Self { depth_max, cells }
   }
-
+  pub fn len(&self) -> usize {
+    self.cells.cells().cells().len()
+  }
 }
 impl<T: Idx, Q: MocQty<T>> HasMaxDepth for CellMOC<T, Q> {
   fn depth_max(&self) -> u8 {
@@ -436,6 +440,10 @@ impl<T: Idx, Q: MocQty<T>> Iterator for RangeMocIter<T, Q> {
   fn next(&mut self) -> Option<Self::Item> {
     self.iter.next()
   }
+  // Declaring size_hint, a 'collect' can directly allocate the right number of elements
+  fn size_hint(&self) -> (usize, Option<usize>) {
+    self.iter.size_hint()
+  }
 }
 impl<T: Idx, Q: MocQty<T>> RangeMOCIterator<T> for RangeMocIter<T, Q> {
   type Qty = Q;
@@ -471,6 +479,10 @@ impl<'a, T: Idx, Q: MocQty<T>> Iterator for RangeRefMocIter<'a, T, Q> {
   fn next(&mut self) -> Option<Self::Item> {
     self.iter.next().map(|e| e.clone())
   }
+  // Declaring size_hint, a 'collect' can directly allocate the right number of elements
+  fn size_hint(&self) -> (usize, Option<usize>) {
+    self.iter.size_hint()
+  }
 }
 impl<'a, T: Idx, Q: MocQty<T>> RangeMOCIterator<T> for RangeRefMocIter<'a, T, Q> {
   type Qty = Q;
@@ -487,6 +499,25 @@ impl<'a, T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for &'a RangeMOC<T, Q> {
     }
   }
 }
+
+// NUniq MOC
+pub struct NUniqMOC<T: Idx> {
+  depth_max: u8,
+  zsorted_nuniq: Vec<T>
+}
+impl<T: Idx> NUniqMOC<T> {
+  fn new(depth_max: u8, zsorted_nuniq: Vec<T>) -> Self {
+    Self { depth_max, zsorted_nuniq}
+  }
+  /*fn from_unsorted(depth_max: u8, mut unsorted_nuniq: Vec<T>) -> Self {
+    unsorted_nuniq.sort_by()
+    Slef::new(depth_max, unsorted_nuniq)
+  }*/
+}
+
+
+
+
 
 /*
 /// A very basic, unchecked, Range MOC iterator.
