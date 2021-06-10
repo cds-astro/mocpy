@@ -3,9 +3,10 @@
 use std::str;
 use std::fmt;
 
-use crate::deser::fits::common::{get_str_val_no_quote, get_keyword, parse_uint_val};
+use crate::deser::fits::common::{get_str_val_no_quote, get_keyword, parse_uint_val, write_keyword_record};
 use crate::deser::fits::error::FitsError;
 use std::marker::PhantomData;
+use std::slice::ChunksMut;
 
 pub trait FitsCard: Sized {
   const KEYWORD: &'static [u8; 8];
@@ -18,27 +19,29 @@ pub trait FitsCard: Sized {
     unsafe { String::from_utf8_unchecked(Self::KEYWORD.to_vec()) }
   }
 
-  fn parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    debug_assert_eq!(get_keyword(keyword_record), Self::KEYWORD,
-                     "{} != {}",
-                     str::from_utf8(get_keyword(keyword_record)).unwrap(),
-                     str::from_utf8(get_keyword(Self::KEYWORD)).unwrap());
-    Self::specific_parse_value(context, keyword_record)
+  fn parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    Self::specific_parse_value(keyword_record)
   }
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError>;
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError>;
+
+  fn write_keyword_record(&self, keyword_record: &mut [u8]) -> Result<(), FitsError> {
+    write_keyword_record(keyword_record, Self::KEYWORD, &self.to_fits_value());
+    Ok(())
+  }
+
+  /// Must be in quotes `'val'` is value type is string
+  fn to_fits_value(&self) -> String;
 
   /// Generate an error in case the parsed value does not match a pre-define list of possible values
   /// To be called in `specific_parse_value`.
   /// Essentially, it converts &str in String (because once the error is raised, the str in the
   /// read buffer are out-of-scope.
   fn predefine_val_err(
-    context: &str,
     parsed_value: &[u8],
     expected_values: &[&[u8]],
   ) -> FitsError {
     FitsError::UnexpectedValue(
-      String::from(context),
       Self::keyword_string(),
       format!("{:?}", expected_values.iter()
         .map(|v| unsafe { String::from_utf8_unchecked(v.to_vec()) })
@@ -57,12 +60,19 @@ pub enum MocVers {
 impl FitsCard for MocVers {
   const KEYWORD: &'static [u8; 8] = b"MOCVERS ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"1.1" => Ok(MocVers::V1_1),
       b"2.0" => Ok(MocVers::V2_0),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"1.1", b"2.0"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"1.1", b"2.0"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from(match self {
+      MocVers::V1_1 => "'1.1'",
+      MocVers::V2_0 => "'2.0'",
+    })
   }
 }
 
@@ -75,13 +85,21 @@ pub enum MocDim {
 impl FitsCard for MocDim {
   const KEYWORD: &'static [u8; 8] = b"MOCDIM  ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"TIME" => Ok(MocDim::Time),
       b"SPACE" => Ok(MocDim::Space),
       b"TIME.SPACE" => Ok(MocDim::TimeSpace),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"TIME", b"SPACE", b"TIME.SPACE"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"TIME", b"SPACE", b"TIME.SPACE"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from(match self {
+      MocDim::Time => "'TIME'",
+      MocDim::Space => "'SPACE'",
+      MocDim::TimeSpace => "'TIME.SPACE'",
+    })
   }
 }
 
@@ -93,12 +111,19 @@ pub enum Ordering {
 impl FitsCard for Ordering {
   const KEYWORD: &'static [u8; 8] = b"ORDERING";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"NUNIQ" => Ok(Ordering::Nuniq),
       b"RANGE" => Ok(Ordering::Range),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"NUNIQ", b"RANGE"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"NUNIQ", b"RANGE"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from(match self {
+      Ordering::Nuniq => "'NUNIQ'",
+      Ordering::Range => "'RANGE'",
+    })
   }
 }
 
@@ -109,11 +134,15 @@ pub enum CoordSys {
 impl FitsCard for CoordSys {
   const KEYWORD: &'static [u8; 8] = b"COORDSYS";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"C" => Ok(CoordSys::ICRS),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"C"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"C"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from("'C'")
   }
 }
 
@@ -124,11 +153,15 @@ pub enum TimeSys {
 impl FitsCard for TimeSys {
   const KEYWORD: &'static [u8; 8] = b"TIMESYS ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"TCB" => Ok(TimeSys::TCB),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"TCB"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"TCB"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from("'TCB'")
   }
 }
 
@@ -141,12 +174,19 @@ pub enum MocType {
 impl FitsCard for MocType {
   const KEYWORD: &'static [u8; 8] = b"MOCTYPE ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"IMAGE" => Ok(MocType::Image),
-      b"CATALOGUE" => Ok(MocType::Catalog),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"IMAGE", b"CATALOGUE"])),
+      b"CATALOG" => Ok(MocType::Catalog),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"IMAGE", b"CATALOG"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from(match self {
+      MocType::Image => "'IMAGE'",
+      MocType::Catalog => "'CATALOG'",
+    })
   }
 }
 
@@ -157,37 +197,49 @@ pub enum PixType {
 impl FitsCard for PixType {
   const KEYWORD: &'static [u8; 8] = b"PIXTYPE ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
       b"HEALPIX" => Ok(PixType::Healpix),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"TCB"])),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"TCB"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from("'HEALPIX'")
   }
 }
 
 #[derive(Debug)]
 pub struct MocId {
-  id: String,
+  pub id: String,
 }
 impl FitsCard for MocId {
   const KEYWORD: &'static [u8; 8] = b"MOCID   ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    get_str_val_no_quote(context, keyword_record)
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    get_str_val_no_quote(keyword_record)
       .map(|s| MocId { id: String::from_utf8_lossy(s).to_string() })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("'{}'", &self.id)
   }
 }
 
 #[derive(Debug)]
 pub struct MocTool {
-  tool: String,
+  pub tool: String,
 }
 impl FitsCard for MocTool {
   const KEYWORD: &'static [u8; 8] = b"MOCTOOL ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    get_str_val_no_quote(context, keyword_record)
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    get_str_val_no_quote(keyword_record)
       .map(|s| MocTool { tool: String::from_utf8_lossy(s).to_string() })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("'{}'", &self.tool)
   }
 }
 
@@ -198,8 +250,12 @@ pub struct MocOrder {
 impl FitsCard for MocOrder {
   const KEYWORD: &'static [u8; 8] = b"MOCORDER";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    parse_uint_val::<u8>(context, keyword_record).map(|depth| MocOrder { depth })
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    parse_uint_val::<u8>(keyword_record).map(|depth| MocOrder { depth })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("{}", &self.depth)
   }
 }
 
@@ -210,8 +266,12 @@ pub struct MocOrdS {
 impl FitsCard for MocOrdS {
   const KEYWORD: &'static [u8; 8] = b"MOCORD_S";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    parse_uint_val::<u8>(context, keyword_record).map(|depth| MocOrdS { depth })
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    parse_uint_val::<u8>(keyword_record).map(|depth| MocOrdS { depth })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("{}", &self.depth)
   }
 }
 
@@ -222,50 +282,69 @@ pub struct MocOrdT {
 impl FitsCard for MocOrdT {
   const KEYWORD: &'static [u8; 8] = b"MOCORD_T";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    parse_uint_val::<u8>(context, keyword_record).map(|depth| MocOrdT { depth })
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    parse_uint_val::<u8>(keyword_record).map(|depth| MocOrdT { depth })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("{}", &self.depth)
   }
 }
 
 #[derive(Debug)]
 pub enum TForm1 {
+  OneB, // for u8
   OneI, // for i/u16
   OneJ, // for i/u32
   OneK, // for i/u64
+  TwoK, // for i/u128 (invented!)
 }
 impl fmt::Display for TForm1 {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    let kw_str = Self::keyword_str();
-    match &self {
-      TForm1::OneI => write!(f, "{} = '1I'", kw_str),
-      TForm1::OneJ => write!(f, "{} = '1J'", kw_str),
-      TForm1::OneK => write!(f, "{} = '1K'", kw_str),
-    }
+    write!(f, "{} = {}", Self::keyword_str(), self.to_fits_value())
   }
 }
 impl FitsCard for TForm1 {
   const KEYWORD: &'static [u8; 8] = b"TFORM1  ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    match get_str_val_no_quote(context, keyword_record)? {
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    match get_str_val_no_quote(keyword_record)? {
+      b"1B" => Ok(TForm1::OneB),
       b"1I" => Ok(TForm1::OneI),
       b"1J" => Ok(TForm1::OneJ),
       b"1K" => Ok(TForm1::OneK),
-      parsed_val => Err(Self::predefine_val_err(context, parsed_val, &[b"1I", b"1J", b"1K"])),
+      b"2K" => Ok(TForm1::TwoK),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"1I", b"1J", b"1K"])),
     }
+  }
+
+  fn to_fits_value(&self) -> String {
+    String::from(
+      match self {
+        TForm1::OneB => "'1B'",
+        TForm1::OneI => "'1I'",
+        TForm1::OneJ => "'1J'",
+        TForm1::OneK => "'1K'",
+        TForm1::TwoK => "'2K'",
+      }
+    )
   }
 }
 
 #[derive(Debug)]
 pub struct TType1 {
-  ttype: String,
+  pub ttype: String,
 }
 impl FitsCard for TType1 {
   const KEYWORD: &'static [u8; 8] = b"TTYPE1  ";
 
-  fn specific_parse_value(context: &str, keyword_record: &[u8]) -> Result<Self, FitsError> {
-    get_str_val_no_quote(context, keyword_record)
+  fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
+    get_str_val_no_quote(keyword_record)
       .map(|s| TType1 { ttype: String::from_utf8_lossy(s).to_string() })
+  }
+
+  fn to_fits_value(&self) -> String {
+    format!("'{}'", &self.ttype)
   }
 }
 
@@ -304,11 +383,18 @@ impl MocKeywordsMap {
   pub(super) fn get<T: MocCard>(&self, _phantom: PhantomData<T>) -> Option<&MocKeywords> {
     self.entries[T::INDEX as usize].as_ref()
   }
+
+  pub(super) fn write_all(&self, keyword_records: &mut ChunksMut<u8>) -> Result<(), FitsError> {
+    for kw in self.entries.iter().filter_map(|v| v.as_ref()) {
+      kw.write_keyword_record(keyword_records.next().unwrap())?;
+    }
+    Ok(())
+  }
 }
 
 #[derive(Debug)]
 pub enum MocKeywords {
-  MOCVers(MocVers),     //      v2.0
+  MOCVers(MocVers),   //      v2.0
   MOCDim(MocDim),     //      v2.0
   Ordering(Ordering), // v1.1 v2.0
   CoordSys(CoordSys), // v1.1 v2.0 if MOCDIM = SPACE
@@ -326,26 +412,26 @@ pub enum MocKeywords {
 }
 impl MocKeywords  {
 
-  pub(super) fn is_moc_kw(context: &str, keyword_record: &[u8])
+  pub(super) fn is_moc_kw(keyword_record: &[u8])
     -> Option<Result<Self, FitsError>>
   {
     // I have not yet found how to match on the FitsCard::KEYWORD associated constant :o/
     match get_keyword(keyword_record) {
-      b"MOCVERS " => Some(MocVers::parse_value(context, keyword_record).map(MocKeywords::MOCVers)),
-      b"MOCDIM  " => Some(MocDim::parse_value(context, keyword_record).map(MocKeywords::MOCDim)),
-      b"ORDERING" => Some(Ordering::parse_value(context, keyword_record).map(MocKeywords::Ordering)),
-      b"COORDSYS" => Some(CoordSys::parse_value(context, keyword_record).map(MocKeywords::CoordSys)),
-      b"TIMESYS " => Some(TimeSys::parse_value(context, keyword_record).map(MocKeywords::TimeSys)),
-      b"MOCID   " => Some(MocId::parse_value(context, keyword_record).map(MocKeywords::MOCId)),
-      b"MOCTOOL " => Some(MocTool::parse_value(context, keyword_record).map(MocKeywords::MOCTool)),
-      b"MOCTYPE " => Some(MocType::parse_value(context, keyword_record).map(MocKeywords::MOCType)),
-      b"MOCORD_S" => Some(MocOrdS::parse_value(context, keyword_record).map(MocKeywords::MOCOrdS)),
-      b"MOCORD_T" => Some(MocOrdT::parse_value(context, keyword_record).map(MocKeywords::MOCOrdT)),
-      b"MOCORDER" => Some(MocOrder::parse_value(context, keyword_record).map(MocKeywords::MOCOrder)),
-      b"PIXTYPE " => Some(PixType::parse_value(context, keyword_record).map(MocKeywords::PixType)),
+      b"MOCVERS " => Some(MocVers::parse_value(keyword_record).map(MocKeywords::MOCVers)),
+      b"MOCDIM  " => Some(MocDim::parse_value(keyword_record).map(MocKeywords::MOCDim)),
+      b"ORDERING" => Some(Ordering::parse_value(keyword_record).map(MocKeywords::Ordering)),
+      b"COORDSYS" => Some(CoordSys::parse_value(keyword_record).map(MocKeywords::CoordSys)),
+      b"TIMESYS " => Some(TimeSys::parse_value(keyword_record).map(MocKeywords::TimeSys)),
+      b"MOCID   " => Some(MocId::parse_value(keyword_record).map(MocKeywords::MOCId)),
+      b"MOCTOOL " => Some(MocTool::parse_value(keyword_record).map(MocKeywords::MOCTool)),
+      b"MOCTYPE " => Some(MocType::parse_value(keyword_record).map(MocKeywords::MOCType)),
+      b"MOCORD_S" => Some(MocOrdS::parse_value(keyword_record).map(MocKeywords::MOCOrdS)),
+      b"MOCORD_T" => Some(MocOrdT::parse_value(keyword_record).map(MocKeywords::MOCOrdT)),
+      b"MOCORDER" => Some(MocOrder::parse_value(keyword_record).map(MocKeywords::MOCOrder)),
+      b"PIXTYPE " => Some(PixType::parse_value(keyword_record).map(MocKeywords::PixType)),
       // BINTABLE
-      b"TFORM1  " => Some(TForm1::parse_value(context, keyword_record).map(MocKeywords::TForm1)),
-      b"TTYPE1  " => Some(TType1::parse_value(context, keyword_record).map(MocKeywords::TType1)),
+      b"TFORM1  " => Some(TForm1::parse_value(keyword_record).map(MocKeywords::TForm1)),
+      b"TTYPE1  " => Some(TType1::parse_value(keyword_record).map(MocKeywords::TType1)),
       _ => None,
     }
   }
@@ -392,5 +478,25 @@ impl MocKeywords  {
 
   pub(super) fn keyword_str(&self) -> &str {
     unsafe{ str::from_utf8_unchecked(self.keyword()) }.trim_end()
+  }
+
+  fn write_keyword_record(&self, keyword_record: &mut [u8]) -> Result<(), FitsError> {
+    match self {
+      MocKeywords::MOCVers(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCDim(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::Ordering(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::CoordSys(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::TimeSys(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCId(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCTool(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCType(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCOrdS(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCOrdT(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::MOCOrder(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::PixType(kw) => kw.write_keyword_record(keyword_record),
+      // BINTABLE
+      MocKeywords::TForm1(kw) => kw.write_keyword_record(keyword_record),
+      MocKeywords::TType1(kw) => kw.write_keyword_record(keyword_record),
+    }
   }
 }

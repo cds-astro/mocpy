@@ -3,7 +3,7 @@ use std::str;
 use std::ops::Range;
 use std::marker::PhantomData;
 use std::hint::unreachable_unchecked;
-use std::io::{self, Read, BufRead};
+use std::io::{self, Read, BufRead, Write, Cursor, SeekFrom, Seek};
 use std::str::FromStr;
 use std::num::ParseIntError;
 use std::collections::HashMap;
@@ -12,19 +12,14 @@ use byteorder::BigEndian;
 use quick_error::ResultExt;
 
 use crate::ranges::Idx;
-use crate::mocqty::{MocQty, Hpx, Time};
+use crate::mocqty::{MocQty, Hpx, Time, MocableQty};
 use crate::deser::fits::error::FitsError;
-use crate::deser::fits::common::{
-  consume_primary_hdu, next_80_chunks_of_80_bytes,
-  check_keyword_and_val, check_keyword_and_parse_uint_val
-};
-use crate::deser::fits::keywords::{
-  MocKeywordsMap, MocKeywords,
-  MocVers, MocDim, Ordering, FitsCard, MocOrder, TForm1, MocOrdS, MocOrdT
-};
+use crate::deser::fits::common::{consume_primary_hdu, next_36_chunks_of_80_bytes, check_keyword_and_val, check_keyword_and_parse_uint_val, write_primary_hdu, write_uint_keyword_record, write_uint_mandatory_keyword_record};
+use crate::deser::fits::keywords::{MocKeywordsMap, MocKeywords, MocVers, MocDim, Ordering, FitsCard, MocOrder, TForm1, MocOrdS, MocOrdT, TimeSys, MocId, MocTool, CoordSys, TType1};
 use crate::mocell::{Cell, MocCell};
-use crate::moc::{CellMOC, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator};
+use crate::moc::{CellMOC, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator, CellMOCIterator};
 use crate::mocells::{MocCells, Cells};
+use crate::deser::fits::keywords::MocKeywords::MOCVers;
 
 // FITS standard
 // https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf
@@ -52,23 +47,269 @@ pub enum MocType<T: Idx, Q: MocQty<T>, R: BufRead> {
   // RMixed(),
 }
 
+/*
+pub fn cells_to_fits_ivoa<T, I, W>( // using GUNIQ (to be done
+  moc_it: I,
+  moc_id: Option<String>,
+  moc_type: Option<keywords::MocType>,
+  mut writer: W
+) -> Result<(), FitsError>
+  where
+    T: Idx,
+    I: CellMOCIterator<T, Qty=Hpx<T>>,
+    W: Write
+{
+  let depth_max = moc_it.depth_max();
+  let moc_kw_map = build_hpx_uniq_moc_keywords(depth_max, moc_id, moc_type, PhantomData::<T>);
+  match moc_it.size_hint() {
+    (len_min, Some(len_max)) if len_min == len_max =>
+      hpx_cells_to_fits_ivoa_internal(len_max, moc_it, moc_kw_map, writer),
+    _ => {
+      // We don't know the size, so we can't stream (since the size must be known in advance in FITS)
+      let ranges: Vec<Range<T>> = moc_it.collect();
+      hpx_cells_to_fits_ivoa_internal(ranges.len(), ranges.into_iter(), moc_kw_map, writer)
+    },
+  }
+}*/
 
-/// # Parameters
-/// - `context`: information printed in the error. Typically the file name the reader comes from.
-fn from_fits_ivoa<R: BufRead>(context: &str, mut reader: R) -> Result<MocIdxType<R>, FitsError> {
-  let mut header_block = [0_u8; 2880];
-  consume_primary_hdu(context, &mut reader,  &mut header_block)?;
+// We could have avoided to create Cell and directly write uniq, to be changed later.
+// we lazily re-use the Cell iterator made to save in JSON format.
+pub fn hpx_cells_to_fits_ivoa<T, I, W>(
+  moc_it: I,
+  moc_id: Option<String>,
+  moc_type: Option<keywords::MocType>,
+  mut writer: W
+) -> Result<(), FitsError>
+  where
+    T: Idx,
+    I: CellMOCIterator<T, Qty=Hpx<T>>,
+    W: Write
+{
+  let depth_max = moc_it.depth_max();
+  let moc_kw_map = build_hpx_uniq_moc_keywords(depth_max, moc_id, moc_type, PhantomData::<T>);
+  let mut buffers: Vec<Cursor<Vec<u8>>> = Vec::with_capacity((depth_max + 1) as usize);
+  let n_cells_guess = moc_it.size_hint().0.max(10_000);
+  for d in 0..=depth_max {
+    // TODO: look at MOCs to find a better relation
+    let size_guess = (n_cells_guess / 4_usize.pow((depth_max - d) as u32)).max(100);
+    buffers.push(Cursor::new(Vec::with_capacity(size_guess)));
+  }
+  let mut n_cells = 0_u64;
+  for e in moc_it {
+    let d = e.depth;
+    if d > depth_max {
+      return Err(FitsError::UnexpectedDepth(d, depth_max));
+    }
+    e.to_uniq_hpx().write::<_, BigEndian>(&mut buffers[d as usize]);
+    n_cells += 1;
+  }
+  write_fits_header(&mut writer,T::N_BYTES, n_cells, moc_kw_map)?;
+  let mut len = 0;
+  for buf in &mut buffers {
+    // buf.seek(SeekFrom::Start(0))?; // or buf.set_position(0); ?
+    let buf_ref = buf.get_ref();
+    len += buf_ref.len();
+    writer.write_all(buf_ref)?;
+  }
+  let mod2880 = len % 2880;
+  if mod2880 != 0 {
+    writer.write_all(&vec![0_u8; 2880 - mod2880])?;
+  }
+  Ok(())
+}
+
+fn build_hpx_uniq_moc_keywords<T: Idx>(
+  depth_max: u8,
+  moc_id: Option<String>,
+  moc_type: Option<keywords::MocType>,
+  _t_type: PhantomData<T>
+) -> MocKeywordsMap {
+  let mut moc_kws = MocKeywordsMap::new();
+  moc_kws.insert(MocKeywords::MOCVers(MocVers::V2_0));
+  moc_kws.insert(MocKeywords::MOCDim(Hpx::<T>::MOC_DIM));
+  moc_kws.insert(MocKeywords::Ordering(Ordering::Nuniq));
+  moc_kws.insert(MocKeywords::CoordSys(CoordSys::ICRS));
+  moc_kws.insert(MocKeywords::MOCOrdS(MocOrdS{depth: depth_max}));
+  moc_kws.insert(MocKeywords::MOCOrder(MocOrder{depth: depth_max})); // For compatibility with v1
+  if let Some(id) = moc_id {
+    moc_kws.insert(MocKeywords::MOCId(MocId{id}));
+  }
+  moc_kws.insert(MocKeywords::MOCTool(MocTool{tool: String::from("CDS MOC Rust lib") }));
+  if let Some(mtype) = moc_type {
+    moc_kws.insert(MocKeywords::MOCType(mtype));
+  }
+  // BINTABLE specific
+  moc_kws.insert(MocKeywords::TForm1(T::TFORM));
+  moc_kws.insert(MocKeywords::TType1(TType1{ ttype: String::from("UNIQ") }));
+  moc_kws
+}
+
+
+fn write_fits_header<R: Write>(
+  mut writer: R,
+  naxis1_n_bytes: u8,
+  naxis2_n_elems: u64,
+  moc_kw_map: MocKeywordsMap
+) -> Result<(), FitsError> {
+  write_primary_hdu(&mut writer)?;
+  let mut header_block = [b' '; 2880];
+  let mut it = header_block.chunks_mut(80);
+  // Write BINTABLE specific keywords in the buffer
+  it.next().unwrap()[0..20].copy_from_slice(b"XTENSION= 'BINTABLE'");
+  it.next().unwrap()[0..30].copy_from_slice(b"BITPIX  =                    8");
+  it.next().unwrap()[0..30].copy_from_slice(b"NAXIS   =                    2");
+  write_uint_mandatory_keyword_record(it.next().unwrap(), b"NAXIS1  ", naxis1_n_bytes as u64);
+  write_uint_mandatory_keyword_record(it.next().unwrap(), b"NAXIS2  ", naxis2_n_elems);
+  it.next().unwrap()[0..30].copy_from_slice(b"PCOUNT  =                    0");
+  it.next().unwrap()[0..30].copy_from_slice(b"GCOUNT  =                    1");
+  it.next().unwrap()[0..30].copy_from_slice(b"TFIELDS =                    1");
+  // Write MOC (+BINTABLE) specific keywords in the buffer
+  moc_kw_map.write_all(&mut it);
+  it.next().unwrap()[0..3].copy_from_slice(b"END");
+  // Do write the header
+  writer.write_all(&header_block[..])?;
+  Ok(())
+}
+
+/*fn cells_to_fits_internal<T, I, W>(
+  n_cells: usize,
+  mut range_it: I,
+  moc_kw_map: MocKeywordsMap,
+  mut writer: W
+) -> Result<(), FitsError>
+  where
+    T: Idx,
+    I: Iterator<Item=Cell<T>>,
+    W: Write
+{
+  write_fits_header(T::N_BYTES, n_cells as u64, moc_kw_map)?;
+  // Write data part
+  for _ in 0..n_ranges {
+    if let Some(Range {start, end}) = range_it.next() {
+      start.write::<_, BigEndian>(&mut writer)?;
+    } else {
+      return Err(FitsError::PrematureEndOfData);
+    }
+  }
+  if range_it.next().is_some() {
+    Err(FitsError::RemainingData)
+  } else {
+    Ok(())
+  }
+}*/
+
+///
+/// # Info
+/// * If the number of elements in the iterator is not known in advance, a collect is necessary
+/// * Compatible with the MOC2.0 IVOA standard
+/// * For best performances when writing in a file, use a `BufWriter` in input.
+pub fn ranges_to_fits_ivoa<T, Q, I, W>(
+  moc_it: I,
+  moc_id: Option<String>,
+  moc_type: Option<keywords::MocType>,
+  mut writer: W
+) -> Result<(), FitsError>
+where
+  T: Idx,
+  Q: MocQty<T>,
+  I: RangeMOCIterator<T, Qty=Q>,
+  W: Write
+{
+  let depth_max = moc_it.depth_max();
+  let moc_kw_map = build_range_moc_keywords(depth_max, moc_id, moc_type, PhantomData::<T>, PhantomData::<Q>);
+  match moc_it.size_hint() {
+    (len_min, Some(len_max)) if len_min == len_max =>
+      ranges_to_fits_ivoa_internal(len_max, moc_it, moc_kw_map, writer),
+    _ => {
+      // We don't know the size, so we can't stream (since the size must be known in advance in FITS)
+      let ranges: Vec<Range<T>> = moc_it.collect();
+      ranges_to_fits_ivoa_internal(ranges.len(), ranges.into_iter(), moc_kw_map, writer)
+    },
+  }
+}
+
+fn build_range_moc_keywords<T: Idx, Q: MocQty<T>>(
+  depth_max: u8,
+  moc_id: Option<String>,
+  moc_type: Option<keywords::MocType>,
+  _t_type: PhantomData<T>,
+  _q_type: PhantomData<Q>,
+) -> MocKeywordsMap {
+  let mut moc_kws = MocKeywordsMap::new();
+  moc_kws.insert(MocKeywords::MOCVers(MocVers::V2_0));
+  moc_kws.insert(MocKeywords::MOCDim(Q::MOC_DIM));
+  moc_kws.insert(MocKeywords::Ordering(Ordering::Range));
+  if Q::HAS_COOSYS {
+    moc_kws.insert(MocKeywords::CoordSys(CoordSys::ICRS));
+    moc_kws.insert(MocKeywords::MOCOrdS(MocOrdS{depth: depth_max}));
+  }
+  if Q::HAS_TIMESYS {
+    moc_kws.insert(MocKeywords::TimeSys(TimeSys::TCB));
+    moc_kws.insert(MocKeywords::MOCOrdT(MocOrdT{depth: depth_max}));
+
+  }
+  if let Some(id) = moc_id {
+    moc_kws.insert(MocKeywords::MOCId(MocId{id}));
+  }
+  moc_kws.insert(MocKeywords::MOCTool(MocTool{tool: String::from("CDS MOC Rust lib") }));
+  if let Some(mtype) = moc_type {
+    moc_kws.insert(MocKeywords::MOCType(mtype));
+  }
+  // BINTABLE specific
+  moc_kws.insert(MocKeywords::TForm1(T::TFORM));
+  // No ttype
+  moc_kws
+}
+
+fn ranges_to_fits_ivoa_internal<T, I, W>(
+  n_ranges: usize,
+  mut range_it: I,
+  moc_kw_map: MocKeywordsMap,
+  mut writer: W
+) -> Result<(), FitsError>
+  where
+    T: Idx,
+    I: Iterator<Item=Range<T>>,
+    W: Write
+{
+  write_fits_header(&mut writer, T::N_BYTES, (n_ranges as u64) << 1, moc_kw_map)?;
+  // Write data part
+  for _ in 0..n_ranges {
+    if let Some(Range {start, end}) = range_it.next() {
+      start.write::<_, BigEndian>(&mut writer)?;
+      end.write::<_, BigEndian>(&mut writer)?;
+    } else {
+      return Err(FitsError::PrematureEndOfData);
+    }
+  }
+  // Comple FITS block of 2880 bytes
+  let mod2880 = ((n_ranges << 1) * T::N_BYTES as usize) % 2880;
+  if mod2880 != 0 {
+    writer.write_all(&vec![0_u8; 2880 - mod2880])?;
+  }
+  // Ensure no more data in the iterator
+  if range_it.next().is_some() {
+    Err(FitsError::RemainingData)
+  } else {
+    Ok(())
+  }
+}
+
+
+pub fn from_fits_ivoa<R: BufRead>(mut reader: R) -> Result<MocIdxType<R>, FitsError> {
+  let mut header_block = [b' '; 2880];
+  consume_primary_hdu(&mut reader,  &mut header_block)?;
   // Read the extention HDU
-  let mut it80 = next_80_chunks_of_80_bytes(context, &mut reader,  &mut header_block)?;
+  let mut it80 = next_36_chunks_of_80_bytes(&mut reader,  &mut header_block)?;
   // See Table 10 and 17 in https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf
-  check_keyword_and_val(context, it80.next().unwrap(), b"XTENSION", b"'BINTABLE'")?;
-  check_keyword_and_val(context, it80.next().unwrap(), b"BITPIX  ", b"8")?;
-  check_keyword_and_val(context, it80.next().unwrap(), b"NAXIS  ", b"2")?;
-  let n_bytes = check_keyword_and_parse_uint_val::<u8>(context, it80.next().unwrap(), b"NAXIS1  ")?;
-  let n_elems = check_keyword_and_parse_uint_val::<u64>(context, it80.next().unwrap(), b"NAXIS2 ")?;
-  check_keyword_and_val(context, it80.next().unwrap(), b"PCOUNT  ", b"0")?;
-  check_keyword_and_val(context, it80.next().unwrap(), b"GCOUNT  ", b"1")?;
-  check_keyword_and_val(context, it80.next().unwrap(), b"TFIELDS ", b"1")?;
+  check_keyword_and_val(it80.next().unwrap(), b"XTENSION", b"'BINTABLE'")?;
+  check_keyword_and_val(it80.next().unwrap(), b"BITPIX  ", b"8")?;
+  check_keyword_and_val(it80.next().unwrap(), b"NAXIS  ", b"2")?;
+  let n_bytes = check_keyword_and_parse_uint_val::<u8>(it80.next().unwrap(), b"NAXIS1  ")?;
+  let n_elems = check_keyword_and_parse_uint_val::<u64>(it80.next().unwrap(), b"NAXIS2 ")?;
+  check_keyword_and_val(it80.next().unwrap(), b"PCOUNT  ", b"0")?;
+  check_keyword_and_val(it80.next().unwrap(), b"GCOUNT  ", b"1")?;
+  check_keyword_and_val(it80.next().unwrap(), b"TFIELDS ", b"1")?;
   // nbits = |BITPIX|xGCOUNTx(PCOUNT+NAXIS1xNAXIS2x...xNAXISn)
   // In our case (bitpix = 8, GCOUNT = 1, PCOUNT = 0) => nbytes = n_cells * size_of(T)
   // let data_size n_bytes as usize * n_cells as usize; // N_BYTES ok since BITPIX = 8
@@ -77,11 +318,11 @@ fn from_fits_ivoa<R: BufRead>(context: &str, mut reader: R) -> Result<MocIdxType
   'hr: loop {
     while let Some(kw_record) = it80.next() {
       // Parse only MOC related keywords and ignore others
-      if let Some(mkw) = MocKeywords::is_moc_kw(context, kw_record) {
+      if let Some(mkw) = MocKeywords::is_moc_kw(kw_record) {
         if let Some(previous_mkw) = moc_kws.insert(mkw?) {
           // A FITS keyword MUST BE uniq (I may be more relax here, taking the last one and not complaining)
-          // return Err(FitsError::MultipleKeyword(context.to_string(), previous_mkw.keyword_str().to_string()))
-          eprintln!("WARNING: Keyword '{}' found more than once in {}", previous_mkw.keyword_str(), context);
+          // return Err(FitsError::MultipleKeyword(previous_mkw.keyword_str().to_string()))
+          eprintln!("WARNING: Keyword '{}' found more than once in a same HDU!", previous_mkw.keyword_str());
         }
         // else keyword added without error
       } else if &kw_record[0..4] == b"END " {
@@ -89,7 +330,7 @@ fn from_fits_ivoa<R: BufRead>(context: &str, mut reader: R) -> Result<MocIdxType
       }
     }
     // Read next 2880 bytes
-    it80 = next_80_chunks_of_80_bytes(context, &mut reader,  &mut header_block)?;
+    it80 = next_36_chunks_of_80_bytes(&mut reader,  &mut header_block)?;
   }
   // CREATE A GUNIQ => General UNIQ in which the order is the order at the maximum depth
   // (and does not depends on the depth).
@@ -105,49 +346,48 @@ fn from_fits_ivoa<R: BufRead>(context: &str, mut reader: R) -> Result<MocIdxType
         Some(MocKeywords::MOCDim(MocDim::Space)) => {
           let depth_max = match moc_kws.get(PhantomData::<MocOrdS>) {
             Some(MocKeywords::MOCOrdS(MocOrdS { depth })) => *depth,
-            _ => return Err(FitsError::MissingKeyword(context.to_string(), MocOrder::keyword_string())),
+            _ => return Err(FitsError::MissingKeyword(MocOrder::keyword_string())),
           };
           match moc_kws.get(PhantomData::<Ordering>) {
-            Some(MocKeywords::Ordering(Ordering::Nuniq)) => load_s_moc_nuniq(context, reader, n_bytes, n_elems, depth_max, &moc_kws),
-            Some(MocKeywords::Ordering(Ordering::Range)) => load_s_moc_range(context, reader, n_bytes, n_elems, depth_max, &moc_kws),
+            Some(MocKeywords::Ordering(Ordering::Nuniq)) => load_s_moc_nuniq(reader, n_bytes, n_elems, depth_max, &moc_kws),
+            Some(MocKeywords::Ordering(Ordering::Range)) => load_s_moc_range(reader, n_bytes, n_elems, depth_max, &moc_kws),
             // ADD GUNIQ? RUNIQ? RMIXED?
-            _ => Err(FitsError::MissingKeyword(context.to_string(), Ordering::keyword_string())),
+            _ => Err(FitsError::MissingKeyword(Ordering::keyword_string())),
           }
         },
         Some(MocKeywords::MOCDim(MocDim::Time)) => {
           let depth_max = match moc_kws.get(PhantomData::<MocOrdT>) {
             Some(MocKeywords::MOCOrdT(MocOrdT { depth })) => *depth,
-            _ => return Err(FitsError::MissingKeyword(context.to_string(), MocOrder::keyword_string())),
+            _ => return Err(FitsError::MissingKeyword(MocOrder::keyword_string())),
           };
           match moc_kws.get(PhantomData::<Ordering>) {
             Some(MocKeywords::Ordering(Ordering::Nuniq)) => Err(FitsError::UncompatibleKeywordContent(
-              context.to_string(), String::from("MOCDIM  = 'TIME'"), String::from("ORDERING= 'NUNIQ'"))),
-            Some(MocKeywords::Ordering(Ordering::Range)) => load_t_moc_range(context, reader, n_bytes, n_elems, depth_max, &moc_kws),
+              String::from("MOCDIM  = 'TIME'"), String::from("ORDERING= 'NUNIQ'"))),
+            Some(MocKeywords::Ordering(Ordering::Range)) => load_t_moc_range(reader, n_bytes, n_elems, depth_max, &moc_kws),
             // ADD GUNIQ? RUNIQ? RMIXED?
-            _ => Err(FitsError::MissingKeyword(context.to_string(), Ordering::keyword_string())),
+            _ => Err(FitsError::MissingKeyword(Ordering::keyword_string())),
           }
         },
         Some(MocKeywords::MOCDim(MocDim::TimeSpace)) =>  todo!(),
-        _ => Err(FitsError::MissingKeyword(context.to_string(), MocDim::keyword_string())),
+        _ => Err(FitsError::MissingKeyword(MocDim::keyword_string())),
       }
     },
     _ => {
       // MOC v1.0 => SMOC only
       let depth_max = match moc_kws.get(PhantomData::<MocOrder>) {
         Some(MocKeywords::MOCOrder(MocOrder { depth })) => *depth,
-        _ => return Err(FitsError::MissingKeyword(context.to_string(), MocOrder::keyword_string())),
+        _ => return Err(FitsError::MissingKeyword(MocOrder::keyword_string())),
       };
       match moc_kws.get(PhantomData::<Ordering>) {
-        Some(MocKeywords::Ordering(Ordering::Nuniq)) => load_s_moc_nuniq(context, reader, n_bytes, n_elems, depth_max, &moc_kws),
-        Some(MocKeywords::Ordering(Ordering::Range)) => load_s_moc_range(context, reader, n_bytes, n_elems, depth_max, &moc_kws),
-        _ => Err(FitsError::MissingKeyword(context.to_string(), Ordering::keyword_string())),
+        Some(MocKeywords::Ordering(Ordering::Nuniq)) => load_s_moc_nuniq(reader, n_bytes, n_elems, depth_max, &moc_kws),
+        Some(MocKeywords::Ordering(Ordering::Range)) => load_s_moc_range(reader, n_bytes, n_elems, depth_max, &moc_kws),
+        _ => Err(FitsError::MissingKeyword(Ordering::keyword_string())),
       }
     },
   }
 }
 
 fn load_s_moc_nuniq<R: BufRead>(
-  context: &str,
   mut reader: R,
   n_bytes: u8,
   n_elems: u64,
@@ -158,26 +398,25 @@ fn load_s_moc_nuniq<R: BufRead>(
   match (moc_kws.get(PhantomData::<TForm1>), n_bytes) {
     (Some(MocKeywords::TForm1(TForm1::OneI)), u16::N_BYTES) =>
       Ok(MocIdxType::U16(MocQtyType::Hpx(MocType::Cells(
-        from_fits_nuniq::<u16, R>(context, reader, depth_max, n_elems as usize)?
+        from_fits_nuniq::<u16, R>(reader, depth_max, n_elems as usize)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneJ)), u32::N_BYTES) =>
       Ok(MocIdxType::U32(MocQtyType::Hpx(MocType::Cells(
-        from_fits_nuniq::<u32, R>(context, reader, depth_max, n_elems as usize)?
+        from_fits_nuniq::<u32, R>(reader, depth_max, n_elems as usize)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneK)), u64::N_BYTES) =>
          Ok(MocIdxType::U64(MocQtyType::Hpx(MocType::Cells(
-        from_fits_nuniq::<u64, R>(context, reader, depth_max, n_elems as usize)?
+        from_fits_nuniq::<u64, R>(reader, depth_max, n_elems as usize)?
       )))),
     (Some(MocKeywords::TForm1(tform)), nb) =>
-      Err(FitsError::UncompatibleKeywordContent(context.to_string(), format!("NAXIS1  = {}", nb), tform.to_string())),
+      Err(FitsError::UncompatibleKeywordContent(format!("NAXIS1  = {}", nb), tform.to_string())),
     (None, _) =>
-      Err(FitsError::MissingKeyword(context.to_string(), TForm1::keyword_string())),
+      Err(FitsError::MissingKeyword(TForm1::keyword_string())),
     (_, _) => unreachable!(), // Except if a bug in the code, we are sure to get a TForm1
   }
 }
 
 fn load_s_moc_range<R: BufRead>(
-  context: &str,
   mut reader: R,
   n_bytes: u8,
   n_elems: u64,
@@ -188,26 +427,25 @@ fn load_s_moc_range<R: BufRead>(
   match (moc_kws.get(PhantomData::<TForm1>), n_bytes) {
     (Some(MocKeywords::TForm1(TForm1::OneI)), u16::N_BYTES) =>
       Ok(MocIdxType::U16(MocQtyType::Hpx(MocType::Ranges(
-        from_fits_range::<u16, Hpx::<u16>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u16, Hpx::<u16>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneJ)), u32::N_BYTES) =>
       Ok(MocIdxType::U32(MocQtyType::Hpx(MocType::Ranges(
-        from_fits_range::<u32, Hpx::<u32>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u32, Hpx::<u32>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneK)), u64::N_BYTES) =>
       Ok(MocIdxType::U64(MocQtyType::Hpx(MocType::Ranges(
-        from_fits_range::<u64, Hpx::<u64>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u64, Hpx::<u64>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(tform)), nb) =>
-      return Err(FitsError::UncompatibleKeywordContent(context.to_string(), format!("NAXIS1  = {}", nb), tform.to_string())),
+      return Err(FitsError::UncompatibleKeywordContent(format!("NAXIS1  = {}", nb), tform.to_string())),
     (None, _) =>
-      return Err(FitsError::MissingKeyword(context.to_string(), TForm1::keyword_string())),
+      return Err(FitsError::MissingKeyword(TForm1::keyword_string())),
     (_, _) => unreachable!(), // Except if a bug in the code, we are sure to get a TForm1
   }
 }
 
 fn load_t_moc_range<R: BufRead>(
-  context: &str,
   mut reader: R,
   n_bytes: u8,
   n_elems: u64,
@@ -218,36 +456,39 @@ fn load_t_moc_range<R: BufRead>(
   match (moc_kws.get(PhantomData::<TForm1>), n_bytes) {
     (Some(MocKeywords::TForm1(TForm1::OneI)), u16::N_BYTES) =>
       Ok(MocIdxType::U16(MocQtyType::Time(MocType::Ranges(
-        from_fits_range::<u16, Time::<u16>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u16, Time::<u16>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneJ)), u32::N_BYTES) =>
       Ok(MocIdxType::U32(MocQtyType::Time(MocType::Ranges(
-        from_fits_range::<u32, Time::<u32>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u32, Time::<u32>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::OneK)), u64::N_BYTES) =>
       Ok(MocIdxType::U64(MocQtyType::Time(MocType::Ranges(
-        from_fits_range::<u64, Time::<u64>, R>(context, reader, depth_max, n_elems >> 1)?
+        from_fits_range::<u64, Time::<u64>, R>(reader, depth_max, n_elems >> 1)?
       )))),
     (Some(MocKeywords::TForm1(tform)), nb) => {
       //println!("u64: {}", u64::N_BYTES);
-      return Err(FitsError::UncompatibleKeywordContent(context.to_string(), format!("NAXIS1  = {}", nb), tform.to_string()));
+      return Err(FitsError::UncompatibleKeywordContent(format!("NAXIS1  = {}", nb), tform.to_string()));
     },
-    (None, _) => return Err(FitsError::MissingKeyword(context.to_string(), TForm1::keyword_string())),
+    (None, _) => return Err(FitsError::MissingKeyword(TForm1::keyword_string())),
     (_, _) => unreachable!(), // Except if a bug in the code, we are sure to get a TForm1
   }
 }
 
 /// Official HEALPix Uniq numbering.
 /// The file is sorted first by depth and then by cell number.
-fn from_fits_nuniq<T, R>(context: &str, mut reader: R, depth_max: u8, n_elems: usize)
-                           -> Result<CellMOC<T, Hpx<T>>, FitsError>
+fn from_fits_nuniq<T, R>(
+  mut reader: R,
+  depth_max: u8,
+  n_elems: usize
+) -> Result<CellMOC<T, Hpx<T>>, FitsError>
   where
     T: Idx,
     R: BufRead
 {
   let mut v: Vec<Cell<T>> = Vec::with_capacity(n_elems);
   for _ in 0..n_elems {
-    v.push(Cell::from_uniq_hpx(T::read::<_, BigEndian>(&mut reader).context(context)?));
+    v.push(Cell::from_uniq_hpx(T::read::<_, BigEndian>(&mut reader)?));
   }
   v.sort_by(|a, b| a.cmp::<Hpx::<T>>(b));
   Ok(CellMOC::new(depth_max, MocCells::<T, Hpx::<T>>::new(Cells(v))))
@@ -257,7 +498,7 @@ fn from_fits_nuniq<T, R>(context: &str, mut reader: R, depth_max: u8, n_elems: u
 /// The file is sorted in a way which is independent of the depth of each cell so we can return
 /// an iterator.
 /// TODO: replace return type by an iterator
-fn from_fits_guniq<T, Q, R>(context: &str, mut reader: R, depth_max: u8, n_elems: usize)
+fn from_fits_guniq<T, Q, R>(mut reader: R, depth_max: u8, n_elems: usize)
                          -> Result<CellMOC<T, Q>, FitsError>
   where
     T: Idx,
@@ -266,14 +507,14 @@ fn from_fits_guniq<T, Q, R>(context: &str, mut reader: R, depth_max: u8, n_elems
 {
   let mut v: Vec<Cell<T>> = Vec::with_capacity(n_elems);
   for _ in 0..n_elems {
-    v.push(Cell::from_uniq::<Q>(T::read::<_, BigEndian>(&mut reader).context(context)?));
+    v.push(Cell::from_uniq::<Q>(T::read::<_, BigEndian>(&mut reader)?));
   }
   // Check is_osrted (a function already exists in nighlty rust)
   // v.sort_by(|a, b| a.cmp::<Q>(b));
   Ok(CellMOC::new(depth_max, MocCells::<T, Q>::new(Cells(v))))
 }
 
-fn from_fits_range<T, Q, R>(_context: &str, mut reader: R, depth_max: u8, n_elems: u64)
+fn from_fits_range<T, Q, R>(mut reader: R, depth_max: u8, n_elems: u64)
                             -> Result<RangeMocIterFromFits<T, Q, R>, FitsError>
   where
     T: Idx,
@@ -339,35 +580,35 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> RangeMOCIterator<T> for RangeMocIterFromF
 
 #[cfg(test)]
 mod tests {
-  use std::io::BufReader;
+  use std::io::{BufReader, BufWriter};
 
-  use crate::mocqty::Hpx;
-  use crate::deser::fits::{from_fits_ivoa, FitsError, MocIdxType, MocQtyType, MocType};
+  use crate::mocqty::{Hpx, Time};
+  use crate::deser::fits::{from_fits_ivoa, FitsError, MocIdxType, MocQtyType, MocType, hpx_cells_to_fits_ivoa, ranges_to_fits_ivoa_internal, ranges_to_fits_ivoa};
   use std::path::PathBuf;
   use std::fs::File;
-  use crate::moc::{HasMaxDepth, CellMOC, CellMOCIntoIterator};
+  use crate::moc::{HasMaxDepth, CellMOC, CellMOCIntoIterator, RangeMOC, RangeMOCIntoIterator};
   use crate::mocells::{MocCells, Cells};
   use crate::mocell::Cell;
   use std::ops::Range;
+  use crate::mocranges::MocRanges;
 
   #[test]
   fn test_err() {
     let mut buff = [0_u8; 10];
     let reader = BufReader::new(&buff[..]);
-    match from_fits_ivoa("toto", reader) {
-      Err(e) => assert!(matches!(e, FitsError::ReadIo(..))),
+    match from_fits_ivoa(reader) {
+      Err(e) => assert!(matches!(e, FitsError::Io(..))),
       _ => assert!(false),
     }
   }
 
   #[test]
   fn test_read_v1_smoc_fits() {
-    let mut path_buf = PathBuf::from("resources");
-    path_buf.push("MOC2.0");
-    path_buf.push("SMOC.fits");
-    let file = File::open(&path_buf).unwrap();
+    let path_buf1 = PathBuf::from("resources/MOC2.0/SMOC_test.fits");
+    let path_buf2 = PathBuf::from("../resources/MOC2.0/SMOC_test.fits");
+    let file = File::open(&path_buf1).or_else(|_| File::open(&path_buf2)).unwrap();
     let reader = BufReader::new(file);
-    match from_fits_ivoa(path_buf.to_str().unwrap(), reader) {
+    match from_fits_ivoa(reader) {
       Ok(MocIdxType::U64(MocQtyType::Hpx(MocType::Cells(moc1)))) => {
         assert_eq!(moc1.depth_max(), 29);
         assert_eq!(moc1.len(), 10);
@@ -395,12 +636,11 @@ mod tests {
 
   #[test]
   fn test_read_v2_tmoc_fits() {
-    let mut path_buf = PathBuf::from("resources");
-    path_buf.push("MOC2.0");
-    path_buf.push("TMOC.fits");
-    let file = File::open(&path_buf).unwrap();
+    let path_buf1 = PathBuf::from("resources/MOC2.0/TMOC_test.fits");
+    let path_buf2 = PathBuf::from("../resources/MOC2.0/TMOC_test.fits");
+    let file = File::open(&path_buf1).or_else(|_| File::open(&path_buf2)).unwrap();
     let reader = BufReader::new(file);
-    match from_fits_ivoa(path_buf.to_str().unwrap(), reader) {
+    match from_fits_ivoa(reader) {
       Ok(MocIdxType::U64(MocQtyType::Time(MocType::Ranges(mut moc)))) => {
         assert_eq!(moc.depth_max(), 35);
         assert_eq!(moc.size_hint(), (1, Some(1)));
@@ -411,4 +651,38 @@ mod tests {
       _ => assert!(false),
     }
   }
+
+  #[test]
+  fn test_write_ranges_fits() {
+    let ranges = vec![Range { start: 1073741824_u64, end: 2684354560_u64}];
+    let moc: RangeMOC<u64, Time<u64>> = RangeMOC::new(35, MocRanges::new_unchecked(ranges));
+    let path_buf1 = PathBuf::from("resources/MOC2.0/TMOC_test.fits");
+    let path_buf2 = PathBuf::from("../resources/MOC2.0/TMOC_test.fits");
+    let file = File::create(&path_buf1).or_else(|_| File::create(&path_buf2)).unwrap();
+    let writer = BufWriter::new(file);
+    ranges_to_fits_ivoa(moc.into_range_moc_iter(), None, None, writer).unwrap();
+  }
+
+  #[test]
+  fn test_write_cells_fits() {
+    let moc = CellMOC::<u64, Hpx<u64>>::new(29, MocCells::new(Cells(
+      vec![
+        Cell::from_uniq_hpx(259_u64),
+        Cell::from_uniq_hpx(266_u64),
+        Cell::from_uniq_hpx(1040_u64),
+        Cell::from_uniq_hpx(1041_u64),
+        Cell::from_uniq_hpx(1042_u64),
+        Cell::from_uniq_hpx(1046_u64),
+        Cell::from_uniq_hpx(4115_u64),
+        Cell::from_uniq_hpx(4116_u64),
+        Cell::from_uniq_hpx(68719476958_u64),
+        Cell::from_uniq_hpx(288230376275168533_u64)
+      ])));
+    let path_buf1 = PathBuf::from("resources/MOC2.0/SMOC_test.fits");
+    let path_buf2 = PathBuf::from("../resources/MOC2.0/SMOC_test.fits");
+    let file = File::create(&path_buf1).or_else(|_| File::create(&path_buf2)).unwrap();
+    let writer = BufWriter::new(file);
+    hpx_cells_to_fits_ivoa(moc.into_cell_moc_iter(), None, None, writer).unwrap();
+  }
+
 }

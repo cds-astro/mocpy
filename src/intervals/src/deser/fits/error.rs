@@ -10,37 +10,47 @@ quick_error! {
   #[derive(Debug)]
   pub enum FitsError {
     /// IO error
-    ReadIo(context: String, err: io::Error) {
-      context(context: &'a str, err: io::Error) -> (String::from(context), err)
-      display("I/O error reading '{}': {}", context, err)
+    Io(err: io::Error) {
+      from()
+      display("I/O error: {}", err)
     }
-    UnexpectedKeyword(context: String, expected: String, actual: String) {
-      display("Wrong keyword in '{}'. Expected: '{}'. Actual: '{}'.", context, expected, actual)
+    UnexpectedKeyword(expected: String, actual: String) {
+      display("Wrong keyword. Expected: '{}'. Actual: '{}'.", expected, actual)
     }
-    ValueIndicatorNotFound(context: String, keyword_record: String) {
-      display("Value indicator expected but not found in '{}' for keyword record '{}'.", context, keyword_record)
+    ValueIndicatorNotFound(keyword_record: String) {
+      display("Value indicator not found in keyword record '{}'.", keyword_record)
     }
-    UnexpectedValue(context: String, keyword: String, expected: String, actual: String) {
-      display("Wrong value in '{}' for keyword '{}'. Expected: '{}'. Actual: '{}'.", context, keyword, expected, actual)
+    UnexpectedValue(keyword: String, expected: String, actual: String) {
+      display("Wrong value for keyword '{}'. Expected: '{}'. Actual: '{}'.", keyword, expected, actual)
     }
-    UintValueNotFound(context: String, keyword_record: String) {
-      display("Unsigned int value not found in '{}', keyword record '{}'.", context, keyword_record)
+    UintValueNotFound(keyword_record: String) {
+      display("Unsigned int value not found in keyword record '{}'.", keyword_record)
     }
-    StringValueNotFound(context: String, keyword_record: String) {
-      display("String value no found in '{}', keyword record '{}'", context, keyword_record)
+    StringValueNotFound(keyword_record: String) {
+      display("String value no found in keyword record '{}'", keyword_record)
     }
     WrongUintValue(context: String, err: ParseIntError) {
       context(context: String, err: ParseIntError) -> (context, err)
-      display("Parse error in {}: {}", context, err)
+      display("Parse {} error: {}", context, err)
     }
-    MultipleKeyword(context: String, keyword: String) {
-      display("FITS {} not valid. Keyword '{}' found more than once.", context, keyword)
+    MultipleKeyword(keyword: String) {
+      display("FITS not valid. Multiple Keyword '{}'", keyword)
     }
-    MissingKeyword(context: String, keyword: String) {
-      display("Missing keyword in {}. Not found: '{}'", context, keyword)
+    MissingKeyword(keyword: String) {
+      display("Missing keyword '{}'", keyword)
     }
-    UncompatibleKeywordContent(context: String, keyword1: String, keyword2: String) {
-      display("In {}, incompatible keyword values for {} and {}", context, keyword1, keyword2)
+    UncompatibleKeywordContent(keyword1: String, keyword2: String) {
+      display("Incompatible keyword values for {} and {}", keyword1, keyword2)
     }
+    RemainingData {
+      display("More data than the expected!")
+    }
+    PrematureEndOfData {
+      display("Less data than the expected!")
+    }
+    UnexpectedDepth(depth: u8, depth_max: u8) {
+      display("unexpected depth. Max expected: {}. Actual: {}", depth_max, depth)
+    }
+
   }
 }

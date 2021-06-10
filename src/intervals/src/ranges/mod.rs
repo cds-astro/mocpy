@@ -12,13 +12,14 @@ use num::{Integer, One, PrimInt, Zero, ToPrimitive};
 use rayon::prelude::*;
 use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
 use ndarray::{Array1, Array2};
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 
 pub mod ranges2d;
 
 use crate::utils;
 use std::convert::TryFrom;
-use std::io::Read;
+use std::io::{Read, Write};
+use crate::deser::fits::keywords::TForm1;
 
 // 'static mean that Idx does not contains any reference
 pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
@@ -26,48 +27,81 @@ pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
                        + Send + Sync + Debug + Display + Copy {
     const N_BYTES: u8 = mem::size_of::<Self>() as u8;
     const N_BITS: u8 = Self::N_BYTES << 3;
+    const TFORM: TForm1;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error>;
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error>;
 }
 
 impl Idx for u8 {
+    const TFORM: TForm1 = TForm1::OneB;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u8()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_u8(self)
+    }
 }
 impl Idx for u16 {
+    const TFORM: TForm1 = TForm1::OneI;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u16::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_u16::<B>(self)
+    }
 }
 impl Idx for u32 {
+    const TFORM: TForm1 = TForm1::OneJ;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u32::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_u32::<B>(self)
+    }
 }
 impl Idx for u64 {
+    const TFORM: TForm1 = TForm1::OneK;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u64::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_u64::<B>(self)
+    }
 }
 impl Idx for u128 {
+    const TFORM: TForm1 = TForm1::TwoK;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u128::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_u128::<B>(self)
+    }
 }
-
 impl Idx for i16 {
+    const TFORM: TForm1 = TForm1::OneI;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i16::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_i16::<B>(self)
+    }
 }
 impl Idx for i32 {
+    const TFORM: TForm1 = TForm1::OneJ;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i32::<B>()
     }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_i32::<B>(self)
+    }
 }
 impl Idx for i64 {
+    const TFORM: TForm1 = TForm1::OneK;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i64::<B>()
+    }
+    fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
+        writer.write_i64::<B>(self)
     }
 }
 

@@ -4,6 +4,7 @@ use std::fmt::Debug;
 use std::ops::Range;
 use std::marker::PhantomData;
 use crate::ranges::Idx;
+use crate::deser::fits::keywords::MocDim;
 
 /// Number of bits reserved to code the quantity type
 const N_RESERVED_BITS: u8 = 2;
@@ -40,6 +41,13 @@ pub trait MocableQty: PartialEq + Eq + Send + Sync {
     /// * dim 2: 011
     /// * dim 3: 111
     const LEVEL_MASK: u8 = (1 << Self::DIM) - 1;
+
+    /// FITS keyword
+    const MOC_DIM: MocDim;
+    /// For FITS serialization (TODO: find a better approach)
+    const HAS_COOSYS: bool;
+    /// For FITS serialization (TODO: find a better approach)
+    const HAS_TIMESYS: bool;
 
     // dim 1: delta_depth
     // dim 2: delta_depth << 1
@@ -166,6 +174,10 @@ impl<T: Idx> MocableQty for Hpx<T> {
     const PREFIX: char = 's';
     const DIM: u8 = 2;
     const N_D0_CELLS: u8 = 12;
+    // FITS specific
+    const MOC_DIM: MocDim = MocDim::Space;
+    const HAS_COOSYS: bool = true;
+    const HAS_TIMESYS: bool = false;
 }
 
 impl<T> MocQty<T> for Hpx<T> where T: Idx { }
@@ -209,6 +221,10 @@ impl<T: Idx> MocableQty for Time<T> {
     const PREFIX: char = 't';
     const DIM: u8 = 1;
     const N_D0_CELLS: u8 = 2;
+    // FITS specific
+    const MOC_DIM: MocDim = MocDim::Time;
+    const HAS_COOSYS: bool = false;
+    const HAS_TIMESYS: bool = true;
 }
 impl<T> MocQty<T> for Time<T> where T: Idx { }
 
