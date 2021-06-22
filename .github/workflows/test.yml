@@ -159,6 +159,8 @@ jobs:
           # Create and activate a new virtualenv
           virtualenv mocpy-env
           source mocpy-env/bin/activate
+          # For debug purpose (see dependencies)
+          cargo tree
           # Install maturin
           pip install maturin
           # Build and install mocpy
