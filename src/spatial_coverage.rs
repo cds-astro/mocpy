@@ -197,7 +197,7 @@ pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<u8>) -> PyResul
     Zip::from(&mut pixels)
         .and(&mut pixels_1)
         .and(&depth)
-        .par_apply(|pix, pix1, &d| {
+        .par_for_each(|pix, pix1, &d| {
             let factor = (Hpx::<u64>::MAX_DEPTH - d) << 1;
             *pix <<= factor;
             *pix1 <<= factor;

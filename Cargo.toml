@@ -51,10 +51,10 @@ rayon = "1.5.1"
 lazy_static = "1.4.0"
 
 [dependencies.numpy]
-version = "0.13.1"
+version = "0.13.2"
 
 [dependencies.ndarray]
-version = "0.14"
+version = "0.15.3"
 default-features = false # do not include the default features, and optionally
                          # cherry-pick individual features
 features = ["rayon"]

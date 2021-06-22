@@ -223,7 +223,7 @@ pub fn sky_fraction(coverage: &Array2<u64>) -> f32 {
         return 0_f32;
     }
 
-    let sum = coverage.genrows()
+    let sum = coverage.rows()
         .into_iter()
         .fold(0_u64, |acc, r| acc + r[1] - r[0]);
 

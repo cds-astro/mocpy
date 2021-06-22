@@ -300,7 +300,7 @@ pub fn contains(
         .and(&time)
         .and(&lon)
         .and(&lat)
-        .par_apply(|r, &t, &l, &b| {
+        .par_for_each(|r, &t, &l, &b| {
             // Compute the HEALPix cell range at the max depth
             // along the spatial dimension
             let pix = layer.hash(l, b);
