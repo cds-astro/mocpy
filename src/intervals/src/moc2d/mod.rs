@@ -1,26 +1,15 @@
 
-use std::slice;
 use std::io::Write;
-use std::vec::{IntoIter};
-
 
 use crate::ranges::Idx;
 use crate::mocqty::MocQty;
-use crate::mocells::MocCellOrCellRanges;
 use crate::moc::{
   ZSorted, NonOverlapping, 
-  CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator, CellOrCellRangeMOC, 
-  CellOrCellRangeMocIter, CellOrCellRangeRefMocIter,
-  CellMOCIterator, CellMOCIntoIterator, CellMOC, CellMocIter, CellRefMocIter,
-  RangeMOCIterator
+  CellOrCellRangeMOCIterator, CellMOCIterator, RangeMOCIterator
 };
 
-use crate::deser;
 use crate::deser::ascii::{AsciiError, moc2d_to_ascii_ivoa};
 use crate::deser::json::cellmoc2d_to_json_aladin;
-use crate::deser::fits::{ranges2d_to_fits_ivoa};
-use crate::deser::fits::error::FitsError;
-use crate::deser::fits::keywords::MocType;
 
 pub mod cell;
 pub mod range;
@@ -91,7 +80,7 @@ pub trait CellMOC2Iterator<
     deser::ascii::moc2d_to_ascii_ivoa(self, &fold, use_offset, writer)
   }*/
 
-  fn to_json_aladin<W: Write>(self, fold: &Option<usize>, mut writer: W) -> std::io::Result<()> {
+  fn to_json_aladin<W: Write>(self, fold: &Option<usize>, writer: W) -> std::io::Result<()> {
     cellmoc2d_to_json_aladin(self, fold, writer)
   }
 }

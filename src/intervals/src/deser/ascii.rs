@@ -1,11 +1,9 @@
 
 use std::str::FromStr;
 use std::io::{self, Write, BufRead, Lines};
-use std::error::Error;
 use std::marker::PhantomData;
 
-use quick_error::{quick_error, ResultExt};
-
+use quick_error::quick_error;
 use byteorder::WriteBytesExt;
 
 use nom::{IResult};
@@ -24,7 +22,6 @@ use crate::mocell::{CellOrCellRange, Cell, CellRange};
 use crate::mocells::{MocCellOrCellRanges, CellOrCellRanges};
 use crate::moc2d::cellcellrange::{CellOrCellRangeMOC2, CellOrCellRangeMOC2Elem};
 use crate::moc2d::{CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator};
-use std::ops::Range;
 
 quick_error! {
   #[derive(Debug)]
@@ -137,9 +134,6 @@ pub fn to_ascii_ivoa<T, Q, I, W>(it: I, fold: &Option<usize>, use_range_len: boo
 /*fn parse_val<T: Idx>(buf: &str) -> IResult<&str,  T> {
   map_res(digit1, |s: &str| s.parse::<T>())(buf)
 }*/
-
-use crate::mocrange::MocRange;
-
 
 /// # Info
 /// Internally, we use the `nom` parser with the full file content un memory.

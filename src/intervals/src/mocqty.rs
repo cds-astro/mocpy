@@ -9,9 +9,6 @@ use crate::deser::fits::keywords::MocDim;
 /// Number of bits reserved to code the quantity type
 const N_RESERVED_BITS: u8 = 2;
 
-/// Mask selecting all but the LSB (applying the mask <=> a = if (a is even) { a } else { a - 1 }
-const TO_EVEN_MASK: u32 = !0x1;
-
 pub trait Bounded<T> {
     fn upper_bound_exclusive() -> T;
 }

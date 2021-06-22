@@ -1,26 +1,31 @@
 
-use std::str;
 use std::ops::Range;
 use std::marker::PhantomData;
-use std::hint::unreachable_unchecked;
-use std::io::{self, Read, BufRead, Write, Cursor, SeekFrom, Seek};
-use std::str::FromStr;
-use std::num::ParseIntError;
-use std::collections::HashMap;
+use std::io::{BufRead, Write, Cursor};
 
 use byteorder::BigEndian;
-use quick_error::ResultExt;
 
 use crate::ranges::Idx;
 use crate::mocqty::{MocQty, Hpx, Time, MocableQty};
 use crate::deser::fits::error::FitsError;
-use crate::deser::fits::common::{consume_primary_hdu, next_36_chunks_of_80_bytes, check_keyword_and_val, check_keyword_and_parse_uint_val, write_primary_hdu, write_uint_keyword_record, write_uint_mandatory_keyword_record};
-use crate::deser::fits::keywords::{MocKeywordsMap, MocKeywords, MocVers, MocDim, Ordering, FitsCard, MocOrder, TForm1, MocOrdS, MocOrdT, TimeSys, MocId, MocTool, CoordSys, TType1};
-use crate::mocell::{Cell, MocCell};
-use crate::moc::{CellMOC, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, RangeMOC};
+use crate::deser::fits::common::{
+  consume_primary_hdu, next_36_chunks_of_80_bytes, check_keyword_and_val,
+  check_keyword_and_parse_uint_val, write_primary_hdu, write_uint_mandatory_keyword_record
+};
+use crate::deser::fits::keywords::{
+  MocKeywordsMap, MocKeywords, MocVers, MocDim, Ordering, FitsCard, MocOrder, TForm1,
+  MocOrdS, MocOrdT, TimeSys, MocId, MocTool, CoordSys, TType1
+};
+use crate::mocell::Cell;
+use crate::moc::{
+  CellMOC, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator, CellMOCIterator, 
+  RangeMOC
+};
 use crate::mocells::{MocCells, Cells};
-use crate::deser::fits::keywords::MocKeywords::MOCVers;
-use crate::moc2d::{HasTwoMaxDepth, CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator, RangeMOC2ElemIt, RangeMOC2Iterator, RangeMOC2IntoIterator, MOC2Properties};
+use crate::moc2d::{
+  HasTwoMaxDepth, RangeMOC2ElemIt, 
+  RangeMOC2Iterator, RangeMOC2IntoIterator, MOC2Properties
+};
 use crate::moc2d::range::{RangeMOC2, RangeMOC2Elem};
 use crate::mocranges::MocRanges;
 
@@ -107,7 +112,7 @@ pub fn hpx_cells_to_fits_ivoa<T, I, W>(
     if d > depth_max {
       return Err(FitsError::UnexpectedDepth(d, depth_max));
     }
-    e.to_uniq_hpx().write::<_, BigEndian>(&mut buffers[d as usize]);
+    e.to_uniq_hpx().write::<_, BigEndian>(&mut buffers[d as usize])?;
     n_cells += 1;
   }
   write_fits_header(&mut writer,T::N_BYTES, n_cells, moc_kw_map)?;
@@ -171,7 +176,7 @@ fn write_fits_header<R: Write>(
   it.next().unwrap()[0..30].copy_from_slice(b"GCOUNT  =                    1");
   it.next().unwrap()[0..30].copy_from_slice(b"TFIELDS =                    1");
   // Write MOC (+BINTABLE) specific keywords in the buffer
-  moc_kw_map.write_all(&mut it);
+  moc_kw_map.write_all(&mut it)?;
   it.next().unwrap()[0..3].copy_from_slice(b"END");
   // Do write the header
   writer.write_all(&header_block[..])?;
@@ -214,7 +219,7 @@ pub fn ranges_to_fits_ivoa<T, Q, I, W>(
   moc_it: I,
   moc_id: Option<String>,
   moc_type: Option<keywords::MocType>,
-  mut writer: W
+  writer: W
 ) -> Result<(), FitsError>
 where
   T: Idx,
@@ -537,7 +542,7 @@ pub fn from_fits_ivoa<R: BufRead>(mut reader: R) -> Result<MocIdxType<R>, FitsEr
 }
 
 fn load_s_moc_nuniq<R: BufRead>(
-  mut reader: R,
+  reader: R,
   n_bytes: u8,
   n_elems: u64,
   depth_max: u8,
@@ -566,7 +571,7 @@ fn load_s_moc_nuniq<R: BufRead>(
 }
 
 fn load_s_moc_range<R: BufRead>(
-  mut reader: R,
+  reader: R,
   n_bytes: u8,
   n_elems: u64,
   depth_max: u8,
@@ -595,7 +600,7 @@ fn load_s_moc_range<R: BufRead>(
 }
 
 fn load_t_moc_range<R: BufRead>(
-  mut reader: R,
+  reader: R,
   n_bytes: u8,
   n_elems: u64,
   depth_max: u8,
@@ -634,7 +639,7 @@ fn load_t_moc_range<R: BufRead>(
 }
 
 fn load_st_moc_range<R: BufRead>(
-  mut reader: R,
+  reader: R,
   n_bytes: u8,
   n_elems: u64,
   depth_max_time: u8,
@@ -696,6 +701,7 @@ fn from_fits_nuniq<T, R>(
 /// The file is sorted in a way which is independent of the depth of each cell so we can return
 /// an iterator.
 /// TODO: replace return type by an iterator
+#[allow(dead_code)]
 fn from_fits_guniq<T, Q, R>(mut reader: R, depth_max: u8, n_elems: usize)
                          -> Result<CellMOC<T, Q>, FitsError>
   where
@@ -707,12 +713,12 @@ fn from_fits_guniq<T, Q, R>(mut reader: R, depth_max: u8, n_elems: usize)
   for _ in 0..n_elems {
     v.push(Cell::from_uniq::<Q>(T::read::<_, BigEndian>(&mut reader)?));
   }
-  // Check is_osrted (a function already exists in nighlty rust)
+  // Check is_sorted (a function already exists in nighlty rust)
   // v.sort_by(|a, b| a.cmp::<Q>(b));
   Ok(CellMOC::new(depth_max, MocCells::<T, Q>::new(Cells(v))))
 }
 
-fn from_fits_range<T, Q, R>(mut reader: R, depth_max: u8, n_ranges: u64)
+fn from_fits_range<T, Q, R>(reader: R, depth_max: u8, n_ranges: u64)
                             -> Result<RangeMocIterFromFits<T, Q, R>, FitsError>
   where
     T: Idx,
@@ -778,7 +784,7 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> RangeMOCIterator<T> for RangeMocIterFromF
 
 // st-moc read iterator
 
-fn from_fits_range2d<T, R>(mut reader: R, depth_max_time: u8, depth_max_hpx: u8, n_ranges: u64)
+fn from_fits_range2d<T, R>(reader: R, depth_max_time: u8, depth_max_hpx: u8, n_ranges: u64)
                             -> Result<RangeMoc2DIterFromFits<T, R>, FitsError>
   where
     T: Idx,

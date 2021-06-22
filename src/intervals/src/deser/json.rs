@@ -10,10 +10,10 @@ use serde_json::value::Value::Array;
 
 use crate::ranges::Idx;
 use crate::mocqty::MocQty;
-use crate::moc::{CellMOCIterator, CellMOC, RangeMOCIterator, HasMaxDepth};
+use crate::moc::{CellMOCIterator, CellMOC, HasMaxDepth};
 use crate::mocell::Cell;
 use crate::mocells::{MocCells, Cells};
-use crate::moc2d::{CellMOC2ElemIt, CellMOC2Iterator, RangeMOC2ElemIt, RangeMOC2Iterator};
+use crate::moc2d::{CellMOC2ElemIt, CellMOC2Iterator};
 use crate::moc2d::cell::{CellMOC2Elem, CellMOC2};
 
 

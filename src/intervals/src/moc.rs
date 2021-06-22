@@ -164,7 +164,7 @@ impl<T, Q, R> Iterator for RangeMOCIteratorFromCells<T, Q, R>
 
   fn next(&mut self) -> Option<Self::Item> {
     match &mut self.curr {
-      Some(Range { start: lstart, end: lend }) => {
+      Some(Range { start: _, end: lend }) => {
         let mut next = self.it.next().map(|e| MocRange::<T, Q>::from(e).0);
         while let Some(Range { start: rstart, end: rend }) = next {
           if rstart <= *lend {
@@ -241,7 +241,7 @@ impl<T, Q, R> Iterator for RangeMOCIteratorFromCellOrCellRanges<T, Q, R>
 
   fn next(&mut self) -> Option<Self::Item> {
     match &mut self.curr {
-      Some(Range { start: lstart, end: lend }) => {
+      Some(Range { start: _, end: lend }) => {
         let mut next = self.it.next().map(|e| MocRange::<T, Q>::from(e).0);
         while let Some(Range { start: rstart, end: rend }) = next {
           if rstart <= *lend {
@@ -798,22 +798,14 @@ impl<'a, T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for &'a RangeMOC<T, Q> {
 
 // NUniq MOC
 pub struct NUniqMOC<T: Idx> {
-  depth_max: u8,
-  zsorted_nuniq: Vec<T>
+  pub depth_max: u8,
+  pub zsorted_nuniq: Vec<T>
 }
 impl<T: Idx> NUniqMOC<T> {
-  fn new(depth_max: u8, zsorted_nuniq: Vec<T>) -> Self {
+  pub fn new(depth_max: u8, zsorted_nuniq: Vec<T>) -> Self {
     Self { depth_max, zsorted_nuniq}
   }
-  /*fn from_unsorted(depth_max: u8, mut unsorted_nuniq: Vec<T>) -> Self {
-    unsorted_nuniq.sort_by()
-    Slef::new(depth_max, unsorted_nuniq)
-  }*/
 }
-
-
-
-
 
 /*
 /// A very basic, unchecked, Range MOC iterator.

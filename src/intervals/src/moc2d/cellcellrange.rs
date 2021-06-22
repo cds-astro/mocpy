@@ -6,7 +6,7 @@ use crate::ranges::Idx;
 use crate::mocqty::MocQty;
 use crate::moc::{
   ZSorted, NonOverlapping,
-  CellOrCellRangeMOC, CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator,
+  CellOrCellRangeMOC, CellOrCellRangeMOCIntoIterator,
   CellOrCellRangeMocIter, CellOrCellRangeRefMocIter
 };
 use crate::moc2d::{

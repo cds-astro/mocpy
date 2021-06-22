@@ -218,7 +218,7 @@ pub fn from_time_ranges_spatial_coverages(
             ));
         }
 
-        const ERR_CAST: &'static str = "Cannot cast spatial coverages to Array2<u64>";
+        const ERR_CAST: &str = "Cannot cast spatial coverages to Array2<u64>";
         let mut spatial_coverages_res: Vec<HpxRanges<u64>> = vec![];
 
         for spatial_cov in spatial_coverages.into_iter() {
@@ -365,9 +365,7 @@ use ndarray::Array1;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
-use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, rangemoc2d_to_fits_ivoa, ranges2d_to_fits_ivoa};
-use intervals::moc2d::RangeMOC2Iterator;
-use intervals::deser::fits::error::FitsError;
+use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa};
 use std::error::Error;
 use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
 use intervals::deser::json::cellmoc2d_from_json_aladin;
@@ -416,7 +414,7 @@ pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
 pub fn from_fits_pre_v2(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
-    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
+    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(exceptions::PyValueError::new_err)
 }
 
 /// Deserialize a Time-Space coverage from FITS, using the MOC2.0 standard.
@@ -444,7 +442,7 @@ pub fn from_fits_pre_v2(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
 pub fn from_fits(data: Array1<u64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
-    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
+    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(exceptions::PyValueError::new_err)
 }
 
 /// Deserialize a Time-Space coverage from a FITS file, using the MOC2.0 standard.
@@ -463,9 +461,9 @@ pub fn from_fits(data: Array1<u64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// (I/O error, format not recognized, ...).
 pub fn from_fits_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
     // See https://github.com/PyO3/pyo3/blob/88d86a65aa78bf2d001753f994fe3f6db1d8d75e/src/err/impls.rs
-    let file = File::open(&path).map_err(|err| exceptions::PyValueError::new_err(err))?;
-    let mut reader = BufReader::new(file);
-    let mut it = match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
+    let file = File::open(&path).map_err(exceptions::PyValueError::new_err)?;
+    let reader = BufReader::new(file);
+    let it = match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
         MocIdxType::U64(MocQtyType::TimeHpx(it)) => it,
         _ => return Err(exceptions::PyIOError::new_err("Only ST-MOC of u64 ranges supported!")),
     };
@@ -496,7 +494,7 @@ pub fn from_json_str(json: String) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// (I/O error, format not recognized, ...).
 pub fn from_json_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
     let file_content = fs::read_to_string(&path)
-      .map_err(|e| exceptions::PyIOError::new_err(e))?;
+      .map_err(exceptions::PyIOError::new_err)?;
     from_json_str(file_content)
 }
 
@@ -524,7 +522,7 @@ pub fn from_ascii_str(ascii: String) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// (I/O error, format not recognized, ...).
 pub fn from_ascii_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
     let file_content = fs::read_to_string(&path)
-      .map_err(|e| exceptions::PyIOError::new_err(e))?;
+      .map_err(exceptions::PyIOError::new_err)?;
     from_ascii_str(file_content)
 }
 
@@ -561,9 +559,7 @@ pub fn depth(coverage: &TimeSpaceMoc<u64, u64>) -> (u8, u8) {
 ///
 /// When the `TimeSpaceMoc<T, S>` is empty.
 pub fn t_min(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
-    let t_min = coverage
-        .t_min()
-        .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
+    let t_min = coverage.t_min().map_err(exceptions::PyValueError::new_err)?;
 
     Ok((t_min as f64) / 86400000000_f64)
 }
@@ -574,9 +570,7 @@ pub fn t_min(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
 ///
 /// When the `TimeSpaceMoc<T, S>` is empty.
 pub fn t_max(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
-    let t_max = coverage
-        .t_max()
-        .map_err(|msg| exceptions::PyValueError::new_err(msg))?;
+    let t_max = coverage.t_max().map_err(exceptions::PyValueError::new_err)?;
 
     Ok((t_max as f64) / 86400000000_f64)
 }

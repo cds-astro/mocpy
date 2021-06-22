@@ -15,6 +15,7 @@ extern crate pyo3;
 extern crate lazy_static;
 
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 
 use ndarray::{Array, Array1, Array2, Axis, Ix2};
@@ -28,8 +29,6 @@ use intervals::mocqty::MocQty;
 use intervals::mocranges::MocRanges;
 use intervals::hpxranges2d::TimeSpaceMoc;
 use std::path::Path;
-use intervals::moc::RangeMOC;
-use pyo3::ffi::PyMarshal_WriteObjectToString;
 
 pub mod coverage;
 pub mod spatial_coverage;
@@ -40,7 +39,7 @@ type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
 lazy_static! {
     static ref COVERAGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
-    static ref NUM_COVERAGES_2D: Mutex<usize> = Mutex::new(0);
+    static ref NUM_COVERAGES_2D: AtomicUsize = AtomicUsize::new(0);
 }
 
 /// Insert a Time-Space coverage in the Hash Map
@@ -56,14 +55,10 @@ lazy_static! {
 ///   are already held by the current thread
 fn insert_new_coverage(coverage: TimeSpaceMoc<u64, u64>) -> usize {
     let mut coverages = COVERAGES_2D.lock().unwrap();
-    let mut num_coverages = NUM_COVERAGES_2D.lock().unwrap();
-
-    let index = *num_coverages;
+    let index = NUM_COVERAGES_2D.fetch_add(1, Ordering::SeqCst );
     if let Some(_v) = coverages.insert(index, coverage) {
         panic!("There is already a coverage at this index.");
     }
-    *num_coverages += 1;
-
     index
 }
 
@@ -829,9 +824,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         // Insert a new coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        let result = insert_new_coverage(empty_coverage);
-
-        result
+        insert_new_coverage(empty_coverage)
     }
 
     /// Drop the content of a Time-Space coverage
@@ -923,9 +916,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the union
-            let result = time_space_coverage::union(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::union(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
@@ -950,14 +941,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the intersection
-            let result = time_space_coverage::intersection(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::intersection(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        update_coverage(index, result);
+        update_coverage(index, result)
     }
 
     /// Perform the difference between two Time-Space coverages.
@@ -977,9 +966,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the difference
-            let result = time_space_coverage::difference(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::difference(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
@@ -1137,7 +1124,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The input spatial coverage
     #[pyfn(m, "hpx_coverage_complement")]
     fn hpx_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        coverage_complement(py, ranges, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
+        coverage_complement(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
     }
 
     /// Computes the complement of the given time coverage
@@ -1147,7 +1134,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The input time coverage
     #[pyfn(m, "time_coverage_complement")]
     fn time_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        coverage_complement(py, ranges, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+        coverage_complement(py, ranges, coverage::create_time_ranges_from_py_uncheked)
     }
 
 
@@ -1230,7 +1217,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         spatial_coverage::to_ascii_file(depth, ranges, path)
-          .map_err(|e| exceptions::PyIOError::new_err(e))
+          .map_err(exceptions::PyIOError::new_err)
     }
 
     /// Serialize a spatial MOC into a ASCII string.
@@ -1268,7 +1255,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         spatial_coverage::to_json_file(depth, ranges, path)
-          .map_err(|e| exceptions::PyIOError::new_err(e))
+          .map_err(exceptions::PyIOError::new_err)
     }
 
     /// Serialize a spatial MOC into a JSON string.
@@ -1389,7 +1376,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
         temporal_coverage::to_ascii_file(depth, ranges, path)
-          .map_err(|e| exceptions::PyIOError::new_err(e))
+          .map_err(exceptions::PyIOError::new_err)
     }
 
     /// Serialize a time MOC into a ASCII string.
@@ -1427,7 +1414,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
         temporal_coverage::to_json_file(depth, ranges, path)
-          .map_err(|e| exceptions::PyIOError::new_err(e))
+          .map_err(exceptions::PyIOError::new_err)
     }
 
     /// Serialize a time MOC into a JSON string.
@@ -1525,7 +1512,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         ranges: PyReadonlyArray2<u64>,
         depth: u8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        coverage_degrade(py, ranges, depth, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
+        coverage_degrade(py, ranges, depth, coverage::create_hpx_ranges_from_py_unchecked)
     }
 
     /// Degrade a time coverage to a specific depth.
@@ -1544,7 +1531,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         ranges: PyReadonlyArray2<u64>,
         depth: u8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        coverage_degrade(py, ranges, depth, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+        coverage_degrade(py, ranges, depth, coverage::create_time_ranges_from_py_uncheked)
     }
 
 
@@ -1596,7 +1583,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         ranges: PyReadonlyArray2<u64>,
         min_depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        coverage_merge_intervals(py, ranges, min_depth, |ranges| coverage::build_hpx_ranges_from_py(ranges))
+        coverage_merge_intervals(py, ranges, min_depth, coverage::build_hpx_ranges_from_py)
     }
 
     /// Make a time coverage consistent
@@ -1624,7 +1611,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         ranges: PyReadonlyArray2<u64>,
         min_depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        coverage_merge_intervals(py, ranges, min_depth, |ranges| coverage::build_time_ranges_from_py(ranges))
+        coverage_merge_intervals(py, ranges, min_depth, coverage::build_time_ranges_from_py)
     }
 
     /// Compute the depth of a spatial coverage
@@ -1634,7 +1621,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The input coverage.
     #[pyfn(m, "hpx_coverage_depth")]
     fn hpx_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
-        coverage_depth(py, ranges, |ranges| coverage::create_hpx_ranges_from_py_unchecked(ranges))
+        coverage_depth(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
     }
 
     /// Compute the depth of a time coverage
@@ -1644,7 +1631,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The input coverage.
     #[pyfn(m, "time_coverage_depth")]
     fn time_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
-        coverage_depth(py, ranges, |ranges| coverage::create_time_ranges_from_py_uncheked(ranges))
+        coverage_depth(py, ranges, coverage::create_time_ranges_from_py_uncheked)
     }
 
     fn coverage_depth<Q, F>(_py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> u8
@@ -1739,10 +1726,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let min_times = min_times.as_array().to_owned();
         let max_times = max_times.as_array().to_owned();
 
-        let coverage = temporal_coverage::from_time_ranges(min_times, max_times)?;
+        let coverage: Array2<u64> = temporal_coverage::from_time_ranges(min_times, max_times)?;
 
-        let result: Array2<u64> = coverage.into();
-        Ok(result.into_pyarray(py).to_owned())
+        Ok(coverage.into_pyarray(py).to_owned())
     }
 
     /// Flatten HEALPix cells to a specific depth
@@ -1818,5 +1804,5 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
-    Ok(())
+   Ok(())
 }

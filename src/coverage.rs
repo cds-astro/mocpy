@@ -78,13 +78,13 @@ pub fn flatten_hpx_pixels(data: Array2<u64>, depth: u8) -> Array1<u64> {
 /// * ``input`` dict values must be a list of unsigned integer encoded
 ///   on 64 bits (i.e. an array of `u64`).
 pub fn from_json(py: Python, input: &PyDict) -> PyResult<HpxRanges<u64>> {
-    const TYPE_KEY_MSG_ERR: &'static str =
+    const TYPE_KEY_MSG_ERR: &str =
         "The key must be a python str that \n \
          encodes an integer on 1 byte. Ex: {'5': [0, 6, 7, ..., 9]}";
-    const TYPE_VALUES_MSG_ERR: &'static str =
+    const TYPE_VALUES_MSG_ERR: &str =
         "The values must be a list of unsigned \n \
          integer on 64 bits (8 bytes). Ex: {'5': [0, 6, 7, ..., 9]}";
-    const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &'static str =
+    const EXTRACT_IPIX_FROM_LIST_MSG_ERR: &str =
         "Cannot extract 64 bits unsigned integer from the python list!";
 
     let mut ranges = Vec::<Range<u64>>::new();

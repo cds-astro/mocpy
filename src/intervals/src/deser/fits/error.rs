@@ -1,9 +1,9 @@
 //! Module defining the MOC FITS read/write/parsing errors
 
-use std::io::{self, BufRead};
+use std::io;
 use std::num::ParseIntError;
 
-use quick_error::{quick_error, ResultExt};
+use quick_error::quick_error;
 
 // https://docs.rs/quick-error/2.0.1/quick_error/
 quick_error! {

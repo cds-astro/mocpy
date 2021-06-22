@@ -251,12 +251,6 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
 
 use intervals::uniqranges::HpxUniqRanges;
 use intervals::mocranges::HpxRanges;
-use intervals::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellOrCellRangeMOCIterator, CellMOCIterator};
-use std::fs::File;
-use std::path::Path;
-use std::error::Error;
-use std::io::BufWriter;
-use intervals::deser::fits::ranges_to_fits_ivoa;
 use intervals::deser::fits::error::FitsError;
 
 /// Convert a spatial coverage from the **uniq** to the **nested** format.

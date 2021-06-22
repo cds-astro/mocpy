@@ -1,6 +1,5 @@
 
 use std::slice;
-use std::iter;
 use std::ops::Range;
 use std::convert::{From, TryFrom};
 
@@ -11,17 +10,14 @@ use crate::utils;
 use crate::moc::{ZSorted, NonOverlapping, RangeMOC, RangeMocIter, RangeMOCIntoIterator, CellMOCIntoIterator, CellMOCIterator, CellOrCellRangeMOCIterator};
 use crate::moc2d::{
     HasTwoMaxDepth, MOC2Properties,
-    RangeMOC2ElemIt, RangeMOC2Iterator,
+    RangeMOC2Iterator,
     range::RangeMOC2Elem
 };
 use crate::mocqty::{MocQty, Hpx, Time};
 use crate::ranges::{SNORanges, Idx, ranges2d::SNORanges2D, Ranges};
 use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
-// use healpix::nested::moc::HpxHash;
-use crate::deser::fits::{
-    RangeMocIterFromFits, RangeMoc2DIterFromFits
-};
+use crate::deser::fits::RangeMoc2DIterFromFits;
 
 /// Declaration of the ST-MOC type
 pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
@@ -681,7 +677,7 @@ impl<R: BufRead> From<RangeMoc2DIterFromFits<u64, R>> for HpxRanges2D<u64, Time<
 impl From<CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Time<u64>, u64> {
 
     fn from(it: CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>) -> Self {
-        let (low, upp) = it.size_hint();
+        let (_, upp) = it.size_hint();
         let ub = upp.unwrap_or(100);
         let mut t: Vec::<Range<u64>> = Vec::with_capacity(ub);
         let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(ub);
@@ -711,7 +707,7 @@ impl From<CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRange
 impl From<CellMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Time<u64>, u64> {
 
     fn from(it: CellMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>) -> Self {
-        let (low, upp) = it.size_hint();
+        let (_, upp) = it.size_hint();
         let ub = upp.unwrap_or(100);
         let mut t: Vec::<Range<u64>> = Vec::with_capacity(ub);
         let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(ub);
@@ -766,7 +762,7 @@ impl<'a, T: Idx> Iterator for TimeSpaceRangesIter<'a, T> {
             let mut t = Vec::<Range<T>>::new();
             t.push(t_range.clone());
             while let Some(next_s_ranges) = self.it_s.peek() {
-                if (next_s_ranges == &s_ranges) {
+                if next_s_ranges == &s_ranges {
                     t.push(self.it_t.next().unwrap().clone());
                     self.it_s.next().unwrap();
                 } else {

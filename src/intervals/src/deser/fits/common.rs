@@ -24,14 +24,17 @@ pub(super) fn write_primary_hdu<R: Write>(
   Ok(())
 }
 
+
 /// # Params
 /// - `dest` the
+#[allow(dead_code)]
 pub(super) fn write_uint_keyword_record(dest: &mut [u8], keyword: &[u8; 8], val: u64) {
   write_keyword_record(dest, keyword, &val.to_string())
 }
 
 /// # Params
 /// - `dest` the
+#[allow(dead_code)]
 pub(super) fn write_str_keyword_record(dest: &mut [u8], keyword: &[u8; 8], val: &str) {
   write_keyword_record(dest, keyword, &format!("'{}'", val))
 }
@@ -104,7 +107,7 @@ pub(super) fn check_keyword_and_val(
   expected_val: &[u8]
 ) -> Result<(), FitsError> {
   check_expected_keyword(keyword_record, expected_kw)?;
-  check_for_value_indicator(keyword_record);
+  check_for_value_indicator(keyword_record)?;
   check_expected_value(keyword_record, expected_val)
 }
 
@@ -116,7 +119,7 @@ pub(super) fn check_keyword_and_parse_uint_val<T>(
     T: Into<u64> + FromStr<Err=ParseIntError>
 {
   check_expected_keyword(keyword_record, expected_kw)?;
-  check_for_value_indicator(keyword_record);
+  check_for_value_indicator(keyword_record)?;
   parse_uint_val::<T>(keyword_record)
 }
 
