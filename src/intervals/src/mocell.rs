@@ -29,8 +29,8 @@ impl<T: Idx> CellOrCellRange<T> {
     let (d2, i_r) = other.get_depth_idx_low();
     match d1.cmp(&d2) {
       Ordering::Equal => i_l.cmp(i_r),
-      Ordering::Less => i_l.unsigned_shr(Q::shift(d2 - d1) as u32).cmp(i_r),
-      Ordering::Greater => i_l.cmp(&i_r.unsigned_shr(Q::shift(d1 - d2) as u32)),
+      Ordering::Less => i_l.unsigned_shl(Q::shift(d2 - d1) as u32).cmp(i_r),
+      Ordering::Greater => i_l.cmp(&i_r.unsigned_shl(Q::shift(d1 - d2) as u32)),
     }
   }
 }
@@ -58,8 +58,8 @@ impl<T: Idx> Cell<T> {
   pub fn cmp<Q: MocQty<T>>(&self, other: &Self) -> Ordering {
     match self.depth.cmp(&other.depth) {
       Ordering::Equal => self.idx.cmp(&other.idx),
-      Ordering::Less => self.idx.unsigned_shr(Q::shift(other.depth - self.depth) as u32).cmp(&other.idx),
-      Ordering::Greater => self.idx.cmp(&other.idx.unsigned_shr(Q::shift(self.depth - other.depth) as u32)),
+      Ordering::Less => self.idx.unsigned_shl(Q::shift(other.depth - self.depth) as u32).cmp(&other.idx),
+      Ordering::Greater => self.idx.cmp(&other.idx.unsigned_shl(Q::shift(self.depth - other.depth) as u32)),
     }
   }
 }
@@ -94,8 +94,8 @@ impl<T: Idx, Q: MocQty<T>> Ord for MocCell<T, Q> {
   fn cmp(&self, other: &Self) -> Ordering {
     match self.0.depth.cmp(&other.0.depth) {
       Ordering::Equal => self.0.idx.cmp(&other.0.idx),
-      Ordering::Less => self.0.idx.unsigned_shr(Q::shift(other.0.depth - self.0.depth) as u32).cmp(&other.0.idx),
-      Ordering::Greater => self.0.idx.cmp(&other.0.idx.unsigned_shr(Q::shift(self.0.depth - other.0.depth) as u32)),
+      Ordering::Less => self.0.idx.unsigned_shl(Q::shift(other.0.depth - self.0.depth) as u32).cmp(&other.0.idx),
+      Ordering::Greater => self.0.idx.cmp(&other.0.idx.unsigned_shl(Q::shift(self.0.depth - other.0.depth) as u32)),
     }
   }
 }
@@ -128,8 +128,8 @@ impl<T: Idx> CellRange<T> {
   pub fn cmp<Q: MocQty<T>>(&self, other: &Self) -> Ordering {
     match self.depth.cmp(&other.depth) {
       Ordering::Equal => self.range.start.cmp(&other.range.start),
-      Ordering::Less => self.range.start.unsigned_shr(Q::shift(other.depth - self.depth) as u32).cmp(&other.range.start),
-      Ordering::Greater => self.range.start.cmp(&other.range.start.unsigned_shr(Q::shift(self.depth - other.depth) as u32)),
+      Ordering::Less => self.range.start.unsigned_shl(Q::shift(other.depth - self.depth) as u32).cmp(&other.range.start),
+      Ordering::Greater => self.range.start.cmp(&other.range.start.unsigned_shl(Q::shift(self.depth - other.depth) as u32)),
     }
   }
 }
@@ -143,8 +143,8 @@ impl<T: Idx, Q: MocQty<T>> Ord for MocCellRange<T, Q> {
   fn cmp(&self, other: &Self) -> Ordering {
     match self.0.depth.cmp(&other.0.depth) {
       Ordering::Equal => self.0.range.start.cmp(&other.0.range.start),
-      Ordering::Less => self.0.range.start.unsigned_shr(Q::shift(other.0.depth - self.0.depth) as u32).cmp(&other.0.range.start),
-      Ordering::Greater => self.0.range.start.cmp(&other.0.range.start.unsigned_shr(Q::shift(self.0.depth - other.0.depth) as u32)),
+      Ordering::Less => self.0.range.start.unsigned_shl(Q::shift(other.0.depth - self.0.depth) as u32).cmp(&other.0.range.start),
+      Ordering::Greater => self.0.range.start.cmp(&other.0.range.start.unsigned_shl(Q::shift(self.0.depth - other.0.depth) as u32)),
     }
   }
 }

@@ -54,9 +54,6 @@ pub(super) fn write_uint_mandatory_keyword_record(dest: &mut [u8], keyword: &[u8
   dest[8..10].copy_from_slice(VALUE_INDICATOR);
   let val = val.to_string();
   let val_bytes = val.as_bytes();
-  // Strange behaviour!! The following line is supposed to be useless but the code does not work
-  // properly without it
-  // dest[10..30 - val_bytes.len()].copy_from_slice(&vec![b' '; 20 -  val_bytes.len()]);
   dest[30 - val_bytes.len()..30].copy_from_slice(val_bytes);
 }
 

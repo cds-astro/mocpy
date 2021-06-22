@@ -12,6 +12,10 @@ use pyo3::prelude::PyResult;
 use intervals::mocqty::{MocQty, Hpx, Time};
 use intervals::hpxranges2d::TimeSpaceMoc;
 use intervals::mocranges::{HpxRanges, TimeRanges};
+use intervals::moc2d::{
+    CellMOC2Iterator, CellMOC2IntoIterator,
+    CellOrCellRangeMOC2Iterator, CellOrCellRangeMOC2IntoIterator
+};
 
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and times.
@@ -358,6 +362,17 @@ pub fn project_on_second_dim(
 }
 
 use ndarray::Array1;
+use std::path::Path;
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
+use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, rangemoc2d_to_fits_ivoa, ranges2d_to_fits_ivoa};
+use intervals::moc2d::RangeMOC2Iterator;
+use intervals::deser::fits::error::FitsError;
+use std::error::Error;
+use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
+use intervals::deser::json::cellmoc2d_from_json_aladin;
+use std::fs;
+
 /// Create a Array1<i64> from a TimeSpaceMoc<u64, u64>
 ///
 /// This is used when storing a STMOC into a FITS file
@@ -376,7 +391,7 @@ pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
     coverage.into()
 }
 
-/// Deserialize a Time-Space coverage from FITS
+/// Deserialize a Time-Space coverage from FITS, using the pre-version 2.0 MOC standard.
 ///
 /// # Context
 ///
@@ -400,9 +415,119 @@ pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
 ///
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
-pub fn from_fits(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
+pub fn from_fits_pre_v2(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
     TimeSpaceMoc::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
 }
+
+/// Deserialize a Time-Space coverage from FITS, using the MOC2.0 standard.
+///
+/// # Context
+///
+/// This is wrapped around the `from_fits` method
+/// of MOCPy to load a Time-Space coverage from a
+/// FITS file.
+///
+/// # Arguments
+///
+/// * ``data`` - A 1d array buffer containing the time and
+///   space axis ranges data.
+///
+/// # Errors
+///
+/// The `Array1` object stores the Time-Space coverage
+/// under the nested format.
+/// Its memory layout contains each time range followed by the
+/// list of space ranges referred to that time range.
+/// Time ranges are negatives so that one can distinguish them
+/// from space ranges.
+///
+/// This method returns a `PyValueError` if the `Array1` is not
+/// defined as above.
+pub fn from_fits(data: Array1<u64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(|msg| exceptions::PyValueError::new_err(msg))
+}
+
+/// Deserialize a Time-Space coverage from a FITS file, using the MOC2.0 standard.
+///
+/// # Arguments
+///
+/// * ``path`` - path of the ST-MOC fits file
+///
+/// # Warning
+/// 
+/// This function is not compatible with pre-v2.0 ST-MOCs.
+/// 
+/// # Errors
+///
+/// This method returns a `PyIOError` if the the function fails in reading the FITS file
+/// (I/O error, format not recognized, ...).
+pub fn from_fits_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    // See https://github.com/PyO3/pyo3/blob/88d86a65aa78bf2d001753f994fe3f6db1d8d75e/src/err/impls.rs
+    let file = File::open(&path).map_err(|err| exceptions::PyValueError::new_err(err))?;
+    let mut reader = BufReader::new(file);
+    let mut it = match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
+        MocIdxType::U64(MocQtyType::TimeHpx(it)) => it,
+        _ => return Err(exceptions::PyIOError::new_err("Only ST-MOC of u64 ranges supported!")),
+    };
+    Ok(TimeSpaceMoc::<u64, u64>::from(it))
+}
+
+/// Deserialize a Time-Space coverage from a JSON string, using the MOC2.0 standard.
+///
+/// # Arguments
+///
+/// * ``json`` - the ST-MOC JSON string
+///
+pub fn from_json_str(json: String) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    let cellmoc2 = cellmoc2d_from_json_aladin::<u64, Time::<u64>, u64, Hpx::<u64>>(&json)
+      .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))?;
+    Ok(TimeSpaceMoc::<u64, u64>::from(cellmoc2.into_cell_moc2_iter()))
+}
+
+/// Deserialize a Time-Space coverage from a JSON file.
+///
+/// # Arguments
+///
+/// * ``path`` - path of the ST-MOC JSON file
+///
+/// # Errors
+///
+/// This method returns a `PyIOError` if the the function fails in reading the JSON file
+/// (I/O error, format not recognized, ...).
+pub fn from_json_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    let file_content = fs::read_to_string(&path)
+      .map_err(|e| exceptions::PyIOError::new_err(e))?;
+    from_json_str(file_content)
+}
+
+/// Deserialize a Time-Space coverage from a ASCII string, using the MOC2.0 standard.
+///
+/// # Arguments
+///
+/// * ``ascii`` - the ST-MOC ASCIi string
+///
+pub fn from_ascii_str(ascii: String) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    let cellmoc2 = moc2d_from_ascii_ivoa::<u64, Time::<u64>, u64, Hpx::<u64>>(&ascii)
+      .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))?;
+    Ok(TimeSpaceMoc::<u64, u64>::from(cellmoc2.into_cellcellrange_moc2_iter()))
+}
+
+/// Deserialize a Time-Space coverage from a ASCII file, using the MOC2.0 standard.
+///
+/// # Arguments
+///
+/// * ``path`` - path of the ST-MOC ASCII file
+///
+/// # Errors
+///
+/// This method returns a `PyIOError` if the the function fails in reading the ASCII file
+/// (I/O error, format not recognized, ...).
+pub fn from_ascii_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    let file_content = fs::read_to_string(&path)
+      .map_err(|e| exceptions::PyIOError::new_err(e))?;
+    from_ascii_str(file_content)
+}
+
 
 /// Create a new empty Time-Space coverage
 ///
@@ -493,4 +618,54 @@ pub fn difference(
     coverage_right: &TimeSpaceMoc<u64, u64>,
 ) -> TimeSpaceMoc<u64, u64> {
     coverage_left.difference(coverage_right)
+}
+
+
+pub fn to_ascii_str(depth_max_t: u8, depth_max_s: u8, coverage: &TimeSpaceMoc<u64, u64>) -> String {
+    let mut ascii = Vec::new();
+    coverage.time_space_iter(depth_max_t, depth_max_s)
+      .into_cellcellrange_moc2_iter()
+      .to_ascii_ivoa(Some(80), false, &mut ascii)
+      .unwrap(); // unwrap since we do not write in a file but in a string
+    unsafe{ String::from_utf8_unchecked(ascii) }
+}
+
+pub fn to_ascii_file(depth_max_t: u8, depth_max_s: u8, coverage: &TimeSpaceMoc<u64, u64>, path: String) ->Result<(), AsciiError> {
+    let file = File::create(Path::new(&path))?;
+    let writer = BufWriter::new(file);
+    coverage.time_space_iter(depth_max_t, depth_max_s)
+      .into_cellcellrange_moc2_iter()
+      .to_ascii_ivoa(Some(80), false, writer)
+}
+
+pub fn to_json_str(depth_max_t: u8, depth_max_s: u8, coverage: &TimeSpaceMoc<u64, u64>) -> String {
+    let mut json = Vec::new();
+    coverage.time_space_iter(depth_max_t, depth_max_s)
+      .into_cell_moc2_iter()
+      .to_json_aladin(&Some(80), &mut json)
+      .unwrap(); // unwrap since we do not write in a file but in a string
+    unsafe{ String::from_utf8_unchecked(json) }
+}
+
+pub fn to_json_file(depth_max_t: u8, depth_max_s: u8, coverage: &TimeSpaceMoc<u64, u64>, path: String) -> std::io::Result<()> {
+    let file = File::create(Path::new(&path))?;
+    let writer = BufWriter::new(file);
+    coverage.time_space_iter(depth_max_t, depth_max_s)
+      .into_cell_moc2_iter()
+      .to_json_aladin(&Some(80), writer)
+}
+
+
+/// Write the given coverage into a FITS file of given path.
+// TODO: add MOCID and MOCTYPE using Option<&PyDic>
+pub fn to_fits_file(depth_max_t: u8, depth_max_s: u8, coverage: &TimeSpaceMoc<u64, u64>, path: &Path) -> Result<(), Box<dyn Error>> {
+    let file = File::create(path).map_err(Box::new)?;
+    let writer = BufWriter::new(file);
+    /*coverage.time_space_iter(depth_max_t, depth_max_s)
+      .to_fits_ivoa(None, None, writer)
+      .map_err(|err| exceptions::PyIOError::new_err(err.to_string()))*/
+    ranges2d_to_fits_ivoa(
+        coverage.time_space_iter(depth_max_t, depth_max_s),
+        None, None, writer
+    ).map_err(|e| e.into())
 }

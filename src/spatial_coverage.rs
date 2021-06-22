@@ -12,6 +12,7 @@ use pyo3::prelude::PyResult;
 use intervals::ranges::SNORanges;
 use intervals::mocqty::{MocQty, Hpx};
 
+use super::coverage;
 
 /// Create a spatial coverage from a list of sky coordinates
 ///
@@ -163,7 +164,6 @@ pub fn complement(coverage: &HpxRanges<u64>) -> HpxRanges<u64> {
     coverage.complement()
 }
 
-use crate::coverage;
 use ndarray::{Array1, Array2, Axis, Zip};
 /// Create a spatial coverage from a list of HEALPix cell indices.
 ///
@@ -251,6 +251,13 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
 
 use intervals::uniqranges::HpxUniqRanges;
 use intervals::mocranges::HpxRanges;
+use intervals::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellOrCellRangeMOCIterator, CellMOCIterator};
+use std::fs::File;
+use std::path::Path;
+use std::error::Error;
+use std::io::BufWriter;
+use intervals::deser::fits::ranges_to_fits_ivoa;
+use intervals::deser::fits::error::FitsError;
 
 /// Convert a spatial coverage from the **uniq** to the **nested** format.
 ///
@@ -268,4 +275,36 @@ pub fn to_nested(coverage: HpxUniqRanges<u64>) -> HpxRanges<u64> {
 /// * ``coverage`` - The spatial coverage defined in the **nested** format.
 pub fn to_uniq(coverage: HpxRanges<u64>) -> HpxUniqRanges<u64> {
     coverage.to_hpx_uniq()
+}
+
+pub fn to_ascii_str(depth_max: u8, ranges: HpxRanges<u64>) -> String {
+    coverage::to_ascii_str(depth_max, ranges)
+}
+pub fn to_ascii_file(depth_max: u8, ranges: HpxRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_ascii_file(depth_max, ranges, path)
+}
+pub fn to_json_str(depth_max: u8, ranges: HpxRanges<u64>) -> String {
+    coverage::to_json_str(depth_max, ranges)
+}
+pub fn to_json_file(depth_max: u8, ranges: HpxRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_json_file(depth_max, ranges, path)
+}
+pub fn to_fits_file(depth_max: u8, ranges: HpxRanges<u64>, path: String) -> Result<(), FitsError> {
+    coverage::to_fits_file(depth_max, ranges, path)
+}
+
+pub fn from_ascii_str(ascii: String) -> PyResult<HpxRanges<u64>> {
+    coverage::from_ascii_str(ascii).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_ascii_file(path: String) -> PyResult<HpxRanges<u64>> {
+    coverage::from_ascii_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_str(json: String) -> PyResult<HpxRanges<u64>> {
+    coverage::from_json_str(json).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_file(path: String) -> PyResult<HpxRanges<u64>> {
+    coverage::from_json_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_fits_file(path: String) -> PyResult<HpxRanges<u64>> {
+    coverage::from_fits_file_spatial(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
 }

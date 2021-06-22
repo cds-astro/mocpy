@@ -182,3 +182,30 @@ def test_intersection(a, b, expect):
     res = a.intersection(b)
 
     assert res == expect
+
+
+#### TESTING new features ####
+def test_tmoc_save_load_deser():
+    tmoc = mocpy.TimeMOC.from_string("31/1 32/4 35/")
+    tmoc_ascii = tmoc.to_string('ascii')
+    tmoc_ascii
+    tmoc_json = tmoc.to_string('json')
+    tmoc_json
+    tmoc_bis = mocpy.TimeMOC.from_string(tmoc_json, 'json')
+    assert tmoc == tmoc_bis
+
+    tmoc_bis = mocpy.TimeMOC.load('resources/MOC2.0/tmoc.ascii.txt', 'ascii')
+    assert tmoc == tmoc_bis
+
+    tmoc_bis = mocpy.TimeMOC.load('resources/MOC2.0/TMOC.fits', 'fits')
+    assert tmoc == tmoc_bis
+
+    tmoc.save('resources/MOC2.0/tmoc.py.test.fits', 'fits')
+    tmoc.save('resources/MOC2.0/tmoc.py.test.json', 'json')
+    tmoc.save('resources/MOC2.0/tmoc.py.test.ascii', 'ascii')
+    tmoc_bis = mocpy.TimeMOC.load('resources/MOC2.0/tmoc.py.test.fits', 'fits')
+    assert tmoc == tmoc_bis
+    tmoc_bis = mocpy.TimeMOC.load('resources/MOC2.0/tmoc.py.test.json', 'json')
+    assert tmoc == tmoc_bis
+    tmoc_bis = mocpy.TimeMOC.load('resources/MOC2.0/tmoc.py.test.ascii', 'ascii')
+    assert tmoc == tmoc_bis

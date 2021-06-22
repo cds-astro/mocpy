@@ -7,6 +7,9 @@ use ndarray::{Array, Array1, Array2, Axis};
 use crate::coverage;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
+use intervals::mocranges::TimeRanges;
+use intervals::deser::fits::error::FitsError;
+
 /// Create a temporal coverage from a list of time ranges expressed in jd.
 ///
 /// # Arguments
@@ -69,4 +72,36 @@ pub fn from_time_ranges_in_microsec_since_jd_origin(min_times: Array1<u64>, max_
         let result: Array2<u64> = ranges.into();
         Ok(result)
     }
+}
+
+pub fn to_ascii_str(depth_max: u8, ranges: TimeRanges<u64>) -> String {
+    coverage::to_ascii_str(depth_max, ranges)
+}
+pub fn to_ascii_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_ascii_file(depth_max, ranges, path)
+}
+pub fn to_json_str(depth_max: u8, ranges: TimeRanges<u64>) -> String {
+    coverage::to_json_str(depth_max, ranges)
+}
+pub fn to_json_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_json_file(depth_max, ranges, path)
+}
+pub fn to_fits_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> Result<(), FitsError> {
+    coverage::to_fits_file(depth_max, ranges, path)
+}
+
+pub fn from_ascii_str(ascii: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_ascii_str(ascii).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_ascii_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_ascii_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_str(json: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_json_str(json).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_json_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_fits_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_fits_file_time(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
 }

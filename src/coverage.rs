@@ -14,9 +14,11 @@ use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject};
 
 use intervals::ranges::Ranges;
-use intervals::mocqty::{MocQty, Hpx};
+use intervals::mocqty::{MocQty, Hpx, Time};
 use intervals::mocranges::{MocRanges, HpxRanges, TimeRanges};
 use intervals::uniqranges::HpxUniqRanges;
+
+use intervals::deser::fits::error::FitsError;
 
 /// Degrade a coverage.
 ///
@@ -118,6 +120,16 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<HpxRanges<u64>> {
 }
 
 use std::collections::HashMap;
+use intervals::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, CellMOCIntoIterator};
+use std::fs::File;
+use std::io::{BufWriter, BufReader};
+use std::path::Path;
+use intervals::deser::fits::{ranges_to_fits_ivoa, from_fits_ivoa, MocIdxType, MocQtyType, MocType};
+use std::fs;
+use intervals::deser::ascii::from_ascii_ivoa;
+use std::error::Error;
+use intervals::deser::json::from_json_aladin;
+
 /// Serializes a spatial coverage to a JSON format
 ///
 /// # Arguments
@@ -254,4 +266,105 @@ pub fn build_time_ranges_from_py(data: Array2<u64>) -> TimeRanges<u64> {
 /// an `HpxUniqRanges<u64>` object.
 pub fn create_uniq_ranges_from_py(data: Array2<u64>) -> HpxUniqRanges<u64> {
     HpxUniqRanges::new_from_sorted(create_ranges_from_py_unchecked(data).0)
+}
+
+
+
+// Save/Serialize
+
+pub fn to_ascii_str<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>) -> String {
+    let moc = RangeMOC::new(depth_max, ranges);
+    let mut ascii = Vec::new();
+    moc.into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(None,false, &mut ascii)
+      .unwrap(); // unwrap since we do not write in a file but in a string
+    unsafe{ String::from_utf8_unchecked(ascii) }
+}
+
+pub fn to_ascii_file<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>, path: String) -> std::io::Result<()> {
+    let moc = RangeMOC::new(depth_max, ranges);
+    let file = File::create(Path::new(&path))?;
+    let writer = BufWriter::new(file);
+    moc.into_range_moc_iter()
+      .cells()
+      .cellranges()
+      .to_ascii_ivoa(Some(80),false, writer)
+}
+
+pub fn to_json_str<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>) -> String {
+    let moc = RangeMOC::new(depth_max, ranges);
+    let mut json = Vec::new();
+    moc.into_range_moc_iter()
+      .cells()
+      .to_json_aladin(Some(80), &mut json)
+      .unwrap(); // unwrap since we do not write in a file but in a string
+    unsafe{ String::from_utf8_unchecked(json) }
+}
+
+pub fn to_json_file<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>, path: String) -> std::io::Result<()> {
+    let moc = RangeMOC::new(depth_max, ranges);
+    let file = File::create(Path::new(&path))?;
+    let writer = BufWriter::new(file);
+    moc.into_range_moc_iter()
+      .cells()
+      .to_json_aladin(Some(80), writer)
+}
+
+pub fn to_fits_file<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>, path: String) -> Result<(), FitsError> {
+    let moc = RangeMOC::new(depth_max, ranges);
+    let file = File::create(Path::new(&path))?;
+    let writer = BufWriter::new(file);
+    ranges_to_fits_ivoa(moc.into_range_moc_iter(), None, None, writer)
+}
+
+// Load/deserialize
+pub fn from_fits_file_spatial(path: String) -> Result<MocRanges<u64, Hpx::<u64>>, Box<dyn Error>> {
+  let file = File::open(&path).map_err(Box::new)?;
+  let reader = BufReader::new(file);
+    let ranges: Vec<Range<u64>> = match from_fits_ivoa(reader).map_err(Box::new)? {
+    MocIdxType::U64(MocQtyType::Hpx(MocType::Cells(moc))) => moc.into_cell_moc_iter().ranges().collect(),
+    MocIdxType::U64(MocQtyType::Hpx(MocType::Ranges(moc))) => moc.collect(),
+    _ => return Err(String::from("FITS file  content not compatible with a space moc of u64").into())
+  };
+  Ok(MocRanges::new_unchecked(ranges))
+}
+
+pub fn from_fits_file_time(path: String) -> Result<MocRanges<u64, Time::<u64>>, Box<dyn Error>> {
+    let file = File::open(&path).map_err(Box::new)?;
+    let reader = BufReader::new(file);
+    let ranges: Vec<Range<u64>> = match from_fits_ivoa(reader).map_err(Box::new)? {
+        MocIdxType::U64(MocQtyType::Time(MocType::Cells(moc))) => moc.into_cell_moc_iter().ranges().collect(),
+        MocIdxType::U64(MocQtyType::Time(MocType::Ranges(moc))) => moc.collect(),
+        _ => return Err(String::from("FITS file content not compatible with a time moc of u64").into())
+    };
+    Ok(MocRanges::new_unchecked(ranges))
+}
+
+pub fn from_ascii_file<Q: MocQty<u64>>(path: String) -> Result<MocRanges<u64, Q>, Box<dyn Error>> {
+    let file_content = fs::read_to_string(&path).map_err(Box::new)?;
+    from_ascii_str(file_content)
+}
+
+pub fn from_ascii_str<Q: MocQty<u64>>(ascii: String) -> Result<MocRanges<u64, Q>, Box<dyn Error>> {
+    let ranges: Vec<Range<u64>> = from_ascii_ivoa::<u64, Q>(&ascii)
+      .map_err(Box::new)?
+      .into_cellcellrange_moc_iter()
+      .ranges()
+      .collect();
+    Ok(MocRanges::new_unchecked(ranges))
+}
+
+pub fn from_json_file<Q: MocQty<u64>>(path: String) -> Result<MocRanges<u64, Q>, Box<dyn Error>> {
+    let file_content = fs::read_to_string(&path).map_err(Box::new)?;
+    from_json_str(file_content)
+}
+
+pub fn from_json_str<Q: MocQty<u64>>(json: String) -> Result<MocRanges<u64, Q>, Box<dyn Error>> {
+    let ranges: Vec<Range<u64>> = from_json_aladin::<u64, Q>(&json)?
+      .into_cell_moc_iter()
+      .ranges()
+      .collect();
+    Ok(MocRanges::new_unchecked(ranges))
 }

@@ -1,10 +1,15 @@
 
 use std::str::FromStr;
-use std::io::{Write, BufRead, Lines};
+use std::io::{self, Write, BufRead, Lines};
 use std::error::Error;
 use std::marker::PhantomData;
 
+use quick_error::{quick_error, ResultExt};
+
+use byteorder::WriteBytesExt;
+
 use nom::{IResult};
+use nom::multi::many1;
 use nom::branch::alt;
 use nom::sequence::{preceded, tuple, terminated};
 use nom::combinator::{cut, map, map_res, opt};
@@ -16,8 +21,49 @@ use crate::ranges::Idx;
 use crate::mocqty::MocQty;
 use crate::moc::{CellOrCellRangeMOCIterator, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, CellOrCellRangeMOC};
 use crate::mocell::{CellOrCellRange, Cell, CellRange};
-use nom::multi::many1;
 use crate::mocells::{MocCellOrCellRanges, CellOrCellRanges};
+use crate::moc2d::cellcellrange::{CellOrCellRangeMOC2, CellOrCellRangeMOC2Elem};
+use crate::moc2d::{CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator};
+use std::ops::Range;
+
+quick_error! {
+  #[derive(Debug)]
+  pub enum AsciiError {
+    /// IO error
+    Io(err: io::Error) {
+      from()
+      display("I/O error: {}", err)
+    }
+    ParseError(error: String) {
+      display("Parse error: {}", error)
+    }
+    EmptyReader {
+      display("Empty reader!")
+    }
+    NoData {
+      display("No data to be read!")
+    }
+    QtyExpectedAtFirstLine(qty: String, line: String) {
+      display("Error at first line. Expected: 'qty={}'. Actual: {}", qty, line)
+    }
+    DepthExpectedAtSecondLine(line: String) {
+      display("Error at second line. Expected: 'depth=DEPTH'. Actual: {}", line)
+    }
+    WrongFirstTokenDepthExpected(token: String) {
+      display("Wrong first token. Expected: depth. Actual: {}", token)
+    }
+    RemainingData {
+      display("No all data have been parsed!")
+    }
+    WrongDepthType(depth: String) {
+      display("Wrong depth type. Expected type: u8. Actual value: {}", depth)
+    }
+    ElemNotFound(elem: String, line: String) {
+      display("Element '{}' not found in '{}'.", elem, line)
+    }
+  }
+}
+
 
 /// # Parameters
 /// - `fold` inspired from the unix command `fold`: wrap (more or less) each input line to fit in
@@ -28,7 +74,7 @@ use crate::mocells::{MocCellOrCellRanges, CellOrCellRanges};
 /// - The full ASCII serialization is put in memory (one buffer per possible depth) due to
 ///   the hierarchical ASCII representation.
 /// - To stay compatible with the IVOA standard, ranges are express with an inclusive upper bound
-pub fn to_ascii_ivoa<T, Q, I, W>(it: I, fold: Option<usize>, use_range_len: bool, mut writer: W)
+pub fn to_ascii_ivoa<T, Q, I, W>(it: I, fold: &Option<usize>, use_range_len: bool, mut writer: W)
   -> std::io::Result<()>
   where
     T: Idx,
@@ -62,7 +108,7 @@ pub fn to_ascii_ivoa<T, Q, I, W>(it: I, fold: Option<usize>, use_range_len: bool
       Some(n_chars) => {
         // Using rfind is not very efficient. We should store the length till last '\n'
         let l = s_by_depth[d].rfind('\n').unwrap_or(0);
-        if s_by_depth[d].len() - l + s.len() > n_chars {
+        if s_by_depth[d].len() - l + s.len() > *n_chars {
           s_by_depth[d].push_str("\n ");
         }
         s_by_depth[d].push_str(&s)
@@ -92,11 +138,14 @@ pub fn to_ascii_ivoa<T, Q, I, W>(it: I, fold: Option<usize>, use_range_len: bool
   map_res(digit1, |s: &str| s.parse::<T>())(buf)
 }*/
 
+use crate::mocrange::MocRange;
+
+
 /// # Info
 /// Internally, we use the `nom` parser with the full file content un memory.
 /// Because we use intermediary tokens, this function is neither made to be especially fast
 /// nor to have a small memory footprint.
-pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, Box<dyn Error>>
+pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, AsciiError>
   where
     T: Idx,
     Q: MocQty<T>,
@@ -181,12 +230,13 @@ pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, Bo
       multispace0
     )(buf)
   }
+
   let (remain, tokens) = tokenizer::<T, VerboseError<&str>>(input).map_err(|err| match err {
-    nom::Err::Error(e) | nom::Err::Failure(e) => convert_error(input, e),
-    nom::Err::Incomplete(e) => format!("Missing data to be parsed: {:?}", e),
+    nom::Err::Error(e) | nom::Err::Failure(e) => AsciiError::ParseError(convert_error(input, e)),
+    nom::Err::Incomplete(e) => AsciiError::ParseError(format!("Missing data to be parsed: {:?}", e)),
   })?;
   if remain != "" {
-    return Err(format!("Unparsed string: {}", remain).into());
+    return Err(AsciiError::RemainingData);
   }
   // Read tokens to build the list (again, we store the full list in memory. We then sort it).
   // We may have create n lists (one per depth) and performed a kind of n-way merge to get an
@@ -197,16 +247,16 @@ pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, Bo
   let mut tokens = tokens.into_iter();
   // The first token **must** be a depth
   let mut cur_depth = match tokens.next() {
-    Some(Token::Depth(depth)) => depth.to_u8().ok_or(format!("Wrong depth type. Expected type: u8. Actual value: {}", depth)),
+    Some(Token::Depth(depth)) => depth.to_u8().ok_or(AsciiError::WrongDepthType(depth.to_string())),
     None => Ok(0),
-    Some(token) => Err(format!("Wrong first token. Expected: depth. Actual: {:?}", token)),
+    Some(token) => Err(AsciiError::WrongFirstTokenDepthExpected(format!("{:?}", token))),
   }?;
   let mut depth_max = cur_depth;
   let mut moc: Vec<CellOrCellRange<T>> = Vec::with_capacity(tokens.len());
   for token in tokens {
     match token {
       Token::Depth(depth) => {
-        cur_depth = depth.to_u8().ok_or(format!("Wrong depth type. Expected type: u8. Actual value: {}", depth))?;
+        cur_depth = depth.to_u8().ok_or(AsciiError::WrongDepthType(depth.to_string()))?;
         depth_max = depth_max.max(cur_depth);
       },
       Token::Cell(icell) => moc.push(CellOrCellRange::Cell(Cell::new(cur_depth, icell))),
@@ -214,13 +264,77 @@ pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, Bo
     }
   }
   // Sort the list
+  //println!("MOC before sort {:?}", &moc);
   moc.sort_by(|a, b| a.cmp::<Q>(b));
+  /*println!("MOC after sort {:?}", &moc);
+  let v: Vec<Range<T>> = moc.iter().map(|e| MocRange::<T, Q>::from(e).0).collect();
+  println!("MOC ranges {:?}", &v);*/
+
   // Check non-overlaping property
-  // TODO: add check for non-overlaping ranges
+  // TODO: add check for non-overlaping ranges?
   // Return the result
   Ok(CellOrCellRangeMOC::new(depth_max, MocCellOrCellRanges::new(CellOrCellRanges(moc))))
 }
 
+/// We could have returned an iterator, but this ASCII serialization is not really made
+/// for streaming, or we should return an iterator over of Results.
+/// So far we prefer to parse the full file instead.
+/// For a streaming version, see the FITS deserialization.
+pub fn moc2d_from_ascii_ivoa<T, Q, U, R>(input: &str)
+  -> Result<CellOrCellRangeMOC2<T, Q, U, R>, AsciiError>
+  where
+    T: Idx,
+    Q: MocQty<T>,
+    U: Idx,
+    R: MocQty<U>,
+{
+  let mut depth_max_l = 0_u8;
+  let mut depth_max_r = 0_u8;
+  let mut elems: Vec<CellOrCellRangeMOC2Elem<T, Q, U, R>> = Vec::with_capacity(100);
+  for elem in input.trim().split(Q::PREFIX) {
+    if elem.is_empty() {
+      continue;
+    }
+    if let Some((l, r)) = elem.split_once(R::PREFIX) {
+      let l: CellOrCellRangeMOC<T, Q> = from_ascii_ivoa(l)?;
+      let r: CellOrCellRangeMOC<U, R> = from_ascii_ivoa(r)?;
+      depth_max_l = depth_max_l.max(l.depth_max());
+      depth_max_r = depth_max_r.max(r.depth_max());
+      elems.push(CellOrCellRangeMOC2Elem::new(l, r));
+    } else {
+      return Err(AsciiError::ElemNotFound(R::PREFIX.to_string(), elem.to_string()));
+    }
+  }
+  // TODO: check that the elements are sorted and non overalpping
+  Ok(CellOrCellRangeMOC2::new(depth_max_l, depth_max_r, elems))
+}
+
+pub fn moc2d_to_ascii_ivoa<T, Q, I, U, R, J, K, L, W>(
+  moc2_it: L,
+  fold: &Option<usize>,
+  use_range_len: bool,
+  mut writer: W
+) -> Result<(), AsciiError>
+  where
+    T: Idx,
+    Q: MocQty<T>,
+    I: CellOrCellRangeMOCIterator<T, Qty=Q>,
+    U: Idx,
+    R: MocQty<U>,
+    J: CellOrCellRangeMOCIterator<U, Qty=R>,
+    K: CellOrCellRangeMOC2ElemIt<T, Q, U, R, It1=I, It2=J>,
+    L: CellOrCellRangeMOC2Iterator<T, Q, I, U, R, J, K>,
+    W: Write
+{
+  for e in moc2_it {
+    writer.write_u8(Q::PREFIX as u8)?;
+    let (moc1_it, moc2_it) = e.cellcellrange_mocs_it();
+    to_ascii_ivoa(moc1_it, &fold, use_range_len, &mut writer)?;
+    writer.write_u8(R::PREFIX as u8)?;
+    to_ascii_ivoa(moc2_it, &fold, use_range_len, &mut writer)?;
+  }
+  Ok(())
+}
 
 
 /// This serialization is less compact than the IVOA ASCII serialization
@@ -269,7 +383,7 @@ pub fn to_ascii_stream<T, Q, I, W>(it: I, use_range_len: bool, mut writer: W)
 
 // TODO: add a beter error handling with quickerror!
 pub fn from_ascii_stream<T, Q, R>(reader: R)
-  -> Result<MOCFromAsciiStream<T, Q, R>, Box<dyn Error>>
+  -> Result<MOCFromAsciiStream<T, Q, R>, AsciiError>
   where
     T: Idx,
     Q: MocQty<T>,
@@ -279,15 +393,15 @@ pub fn from_ascii_stream<T, Q, R>(reader: R)
   if let Some(line) = lines.next().transpose()? {
     match line.trim().split_once('=').map(|(l, r)| (l.trim(), r.trim())) {
       Some(("qty", name)) if name == Q::NAME => (),
-      _ => return Err(format!("Error at first line. Expected: 'qty={}'. Actual: {}", Q::NAME, line).into()),
+      _ => return Err(AsciiError::QtyExpectedAtFirstLine(Q::NAME.to_string(), line)),
     }
   } else {
-    return Err(format!("Empty reader!").into());
+    return Err(AsciiError::EmptyReader);
   }
   if let Some(line) = lines.next().transpose()? {
     let depth = match line.trim().split_once('=').map(|(l, r)| (l.trim(), r.trim().parse::<u8>())) {
       Some(("depth", Ok(depth))) => Ok(depth),
-      _ => Err(format!("Error at first line. Expected: 'depth=DEPTH'. Actual: {}", line))
+      _ => Err(AsciiError::DepthExpectedAtSecondLine(line))
     }?;
     Ok(
       MOCFromAsciiStream {
@@ -298,7 +412,7 @@ pub fn from_ascii_stream<T, Q, R>(reader: R)
       }
     )
   } else {
-    Err(format!("No more line in the reader!").into())
+    Err(AsciiError::NoData)
   }
 }
 
@@ -370,10 +484,43 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> CellOrCellRangeMOCIterator<T> for MOCFrom
 #[cfg(test)]
 mod tests {
   use std::str;
-  use crate::deser::ascii::{from_ascii_stream, from_ascii_ivoa};
+  use crate::deser::ascii::{from_ascii_stream, from_ascii_ivoa, moc2d_from_ascii_ivoa, moc2d_to_ascii_ivoa};
   use crate::mocranges::MocRanges;
-  use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator};
-  use crate::mocqty::Hpx;
+  use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, HasMaxDepth};
+  use crate::mocqty::{Hpx, Time};
+  use nom::AsBytes;
+  use crate::moc2d::CellOrCellRangeMOC2IntoIterator;
+  use crate::mocell::Cell;
+
+  #[test]
+  fn test_from_ascii_ivoa() {
+    let smoc_ascii = "3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/";
+    let smoc = from_ascii_ivoa::<u64, Hpx::<u64>>(&smoc_ascii).unwrap();
+    let mut rit = smoc.into_cellcellrange_moc_iter().ranges();
+    assert_eq!(rit.depth_max(), 29);
+    assert_eq!(rit.next(), Some(493827156..493827160));
+    assert_eq!(rit.next(), Some(3724541952..3741319168));
+    assert_eq!(rit.next(), Some(5348024557502464..5910974510923776));
+    assert_eq!(rit.next(), Some(13510798882111488..21392098230009856));
+    assert_eq!(rit.next(), Some(24769797950537728..25895697857380352));
+    assert_eq!(rit.next(), Some(45035996273704960..49539595901075456));
+    assert_eq!(rit.next(), None);
+
+    let tmoc_ascii = "31/1 32/4 35/";
+    let tmoc = from_ascii_ivoa::<u64, Time::<u64>>(&tmoc_ascii).unwrap();
+    let mut cellit = tmoc.into_cellcellrange_moc_iter().ranges();
+    assert_eq!(cellit.depth_max(), 35);
+    assert_eq!(cellit.next(), Some(1073741824..2684354560));
+    assert_eq!(cellit.next(), None);
+
+    let tmoc_ascii = "31/1 32/4 35/";
+    let tmoc = from_ascii_ivoa::<u64, Time::<u64>>(&tmoc_ascii).unwrap();
+    let mut cellit = tmoc.into_cellcellrange_moc_iter().ranges().cells();
+    assert_eq!(cellit.depth_max(), 35);
+    assert_eq!(cellit.next(), Some(Cell::new(31, 1)));
+    assert_eq!(cellit.next(), Some(Cell::new(32, 4)));
+    assert_eq!(cellit.next(), None);
+  }
 
   #[test]
   fn test_fromto_ascii_ivoa() {
@@ -392,7 +539,7 @@ mod tests {
       .cellranges()
       .to_ascii_ivoa(None,false, &mut res_ascii_1)
       .unwrap();
-    // println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
+    println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
     let mut res_ascii_2 = Vec::new();
     from_ascii_ivoa::<u64, Hpx<u64>>(str::from_utf8(&res_ascii_1).unwrap())
       .unwrap()
@@ -483,5 +630,18 @@ mod tests {
       .to_ascii_stream(true, &mut res_ascii_2)
       .unwrap();
     assert_eq!(res_ascii_1, res_ascii_2);
+  }
+
+  #[test]
+  fn test_moc2d_fromto_ascii_ivoa() {
+    let input = "t61/1 3 5 s3/1-3 t61/50 52 s4/25";
+    let stmoc = moc2d_from_ascii_ivoa::<u64, Time<u64>, u64, Hpx<u64>>(input).unwrap();
+    let mut res_ascii_1 = Vec::new();
+    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &Some(20), false, &mut res_ascii_1);
+    println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
+
+    let mut res_ascii_1 = Vec::new();
+    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &None, true, &mut res_ascii_1);
+    println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
   }
 }

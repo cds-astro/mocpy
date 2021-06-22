@@ -1015,3 +1015,102 @@ class MOC(AbstractMOC):
         plt.grid(True, linestyle='--', linewidth=1, color='#555555')
 
         plt.show()
+
+    def save(self, path, format='fits'):
+        """
+        Writes the Spatial MOC to a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to save the MOC in.
+        format : str, optional
+            The format in which the MOC is saved.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        if format == 'fits':
+            mocpy.spatial_moc_to_fits_file(self.max_order, self._interval_set._intervals, path)
+        elif format == 'ascii':
+            mocpy.spatial_moc_to_ascii_file(self.max_order, self._interval_set._intervals, path)
+        elif format == 'json':
+            mocpy.spatial_moc_to_json_file(self.max_order, self._interval_set._intervals, path)
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def load(cls, path, format='fits'):
+        """
+        Load the Spatial MOC from a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to load the MOC from.
+        format : str, optional
+            The format from which the MOC is loaded.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        if format == 'fits':
+            intervals = mocpy.spatial_moc_from_fits_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'ascii':
+            intervals = mocpy.spatial_moc_from_ascii_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'json':
+            intervals = mocpy.spatial_moc_from_json_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    def to_string(self, format='ascii'):
+        """
+        Writes the Spatial MOC into a string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        if format == 'ascii':
+            return mocpy.spatial_moc_to_ascii_str(self.max_order, self._interval_set._intervals)
+        elif format == 'json':
+            return mocpy.spatial_moc_to_json_str(self.max_order, self._interval_set._intervals)
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def from_string(cls, value, format='ascii'):
+        """
+        Deserialize the Spatial MOC from the given string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        if format == 'ascii':
+            intervals = mocpy.spatial_moc_from_ascii_str(value)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'json':
+            intervals = mocpy.spatial_moc_from_json_str(value)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))

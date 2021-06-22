@@ -359,6 +359,52 @@ class STMOC(serializer.IO):
         return mocpy.coverage_2d_to_fits(self.__index)
 
     @classmethod
+    def deserialization_pre_v2(cls, hdulist):
+        """
+        Deserialization of an hdulist to a Time-Space coverage
+        """
+        # The binary HDU table contains all the data
+        header = hdulist[1].header
+
+        bin_HDU_table = hdulist[1]
+        # Some FITS file may not have a name column to access
+        # the data. So we rename it as the `PIXELS` columns.
+        if len(bin_HDU_table.columns) != 1:
+            raise AttributeError('The binary HDU table of {0} must contain only one'
+                'column where the data are stored.')
+
+        if bin_HDU_table.columns[0].name is None:
+            bin_HDU_table.columns[0].name = 'PIXELS'
+
+        key = bin_HDU_table.columns[0].name
+
+        # Retrieve the spatial and time order
+        # FITS header can be of two different format for expressing
+        # these orders:
+        # 1. TORDER key refers the max depth in the time dimension. MOCORDER then
+        #    refers the spatial max depth.
+        # 2. MOCORDER refers the max depth along the 1st dimension whereas
+        #    MOCORD_1 refers to the max depth along the 2nd dimension.
+        # DOES NOT SEEM TO BE USE
+        #if header.get('TORDER') is None:
+        #    # We are in the 2. case
+        #    first_dim_depth = header.get('MOCORDER')
+        #    second_dim_depth = header.get('MOCORD_1')
+        #else:
+        #    # We are in the 1. case
+        #    first_dim_depth = header.get('TORDER')
+        #    second_dim_depth = header.get('MOCORDER')
+
+        # No need to worry about the change in depth since
+        # (it seems that) it was not used at loading.
+        result = cls()
+        mocpy.coverage_2d_from_fits_pre_v2(
+            result.__index,
+            bin_HDU_table.data[key].astype(np.int64)
+        )
+        return result
+
+    @classmethod
     def deserialization(cls, hdulist):
         """
         Deserialization of an hdulist to a Time-Space coverage
@@ -385,26 +431,50 @@ class STMOC(serializer.IO):
         #    refers the spatial max depth.
         # 2. MOCORDER refers the max depth along the 1st dimension whereas
         #    MOCORD_1 refers to the max depth along the 2nd dimension.
-        if header.get('TORDER') is None:
-            # We are in the 2. case
-            first_dim_depth = header.get('MOCORDER')
-            second_dim_depth = header.get('MOCORD_1')
-        else:
-            # We are in the 1. case
-            first_dim_depth = header.get('TORDER')
-            second_dim_depth = header.get('MOCORDER')
+        # DOES NOT SEEM TO BE USE
+        #if header.get('TORDER') is None:
+        #    # We are in the 2. case
+        #    first_dim_depth = header.get('MOCORDER')
+        #    second_dim_depth = header.get('MOCORD_1')
+        #else:
+        #    # We are in the 1. case
+        #    first_dim_depth = header.get('TORDER')
+        #    second_dim_depth = header.get('MOCORDER')
 
         result = cls()
         mocpy.coverage_2d_from_fits(
             result.__index,
-            bin_HDU_table.data[key].astype(np.int64)
+            bin_HDU_table.data[key].astype(np.uint64)
         )
         return result
 
     @classmethod
+    def from_fits_pre_v2(cls, filename):
+        """
+        Loads a STMOC from a FITS file, using the pre-MOC2.0 standard
+        (time ranges coded with negative values, single time range associated to a SMOC).
+
+        Parameters
+        ----------
+        filename : str
+            The path to the FITS file.
+
+        Returns
+        -------
+        result : `~mocpy.moc.STMOC`
+            The resulting STMOC.
+        """
+        # Open the FITS file
+        with fits.open(filename) as hdulist:
+            stmoc = STMOC.deserialization_pre_v2(hdulist)
+
+        return stmoc
+
+    @classmethod
     def from_fits(cls, filename):
         """
-        Loads a STMOC from a FITS file.
+        Loads a STMOC from a FITS file,
+        using the astropy.io fits reader.
 
         Parameters
         ----------
@@ -421,3 +491,127 @@ class STMOC(serializer.IO):
             stmoc = STMOC.deserialization(hdulist)
 
         return stmoc
+
+    @classmethod
+    def from_fits_native(cls, filename):
+        """
+        Loads a STMOC from a FITS file,
+        without requiring a python fits reader.
+        (it may replace `from_fits`)
+
+        Parameters
+        ----------
+        filename : str
+            The path to the FITS file.
+
+        Returns
+        -------
+        result : `~mocpy.moc.STMOC`
+            The resulting STMOC.
+        """
+        stmoc = cls()
+        mocpy.coverage_2d_from_fits_file(stmoc.__index, filename)
+        return stmoc
+
+
+    def save(self, path, format='fits'):
+        """
+        Writes the ST-MOC to a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to save the MOC in.
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        if format == 'fits':
+            mocpy.coverage_2d_to_fits_file(path, self.__index)
+        elif format == 'ascii':
+            mocpy.coverage_2d_to_ascii_file(path, self.__index)
+        elif format == 'json':
+            mocpy.coverage_2d_to_json_file(path, self.__index)
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def load(cls, path, format='fits'):
+        """
+        Load the Spatial MOC from a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to load the MOC from.
+        format : str, optional
+            The format from which the MOC is loaded.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        stmoc = cls()
+        if format == 'fits':
+            mocpy.coverage_2d_from_fits_file(stmoc.__index, path)
+            return stmoc
+        elif format == 'ascii':
+            mocpy.coverage_2d_from_ascii_file(stmoc.__index, path)
+            return stmoc
+        elif format == 'json':
+            mocpy.coverage_2d_from_json_file(stmoc.__index, path)
+            return stmoc
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+
+    def to_string(self, format='ascii'):
+        """
+        Writes the ST-MOC into a string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        if format == 'ascii':
+            return mocpy.coverage_2d_to_ascii_str(self.__index)
+        elif format == 'json':
+            return mocpy.coverage_2d_to_json_str(self.__index)
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def from_string(cls, value, format='ascii'):
+        """
+        Deserialize the Spatial MOC from the given string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        stmoc = cls()
+        if format == 'ascii':
+            mocpy.coverage_2d_from_ascii_str(stmoc.__index, value)
+            return stmoc
+        elif format == 'json':
+            mocpy.coverage_2d_from_json_str(stmoc.__index, value)
+            return stmoc
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))

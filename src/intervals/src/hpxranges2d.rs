@@ -1,17 +1,27 @@
 
+use std::slice;
+use std::iter;
 use std::ops::Range;
-use std::convert::TryFrom;
+use std::convert::{From, TryFrom};
 
 use num::One;
 use rayon::prelude::*;
 
 use crate::utils;
+use crate::moc::{ZSorted, NonOverlapping, RangeMOC, RangeMocIter, RangeMOCIntoIterator, CellMOCIntoIterator, CellMOCIterator, CellOrCellRangeMOCIterator};
+use crate::moc2d::{
+    HasTwoMaxDepth, MOC2Properties,
+    RangeMOC2ElemIt, RangeMOC2Iterator,
+    range::RangeMOC2Elem
+};
 use crate::mocqty::{MocQty, Hpx, Time};
 use crate::ranges::{SNORanges, Idx, ranges2d::SNORanges2D, Ranges};
 use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
 // use healpix::nested::moc::HpxHash;
-
+use crate::deser::fits::{
+    RangeMocIterFromFits, RangeMoc2DIterFromFits
+};
 
 /// Declaration of the ST-MOC type
 pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
@@ -19,6 +29,18 @@ pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
 // Just to be able to define specific methods on this struct
 #[derive(Debug)]
 pub struct HpxRanges2D<TT: Idx, T: MocQty<TT>, ST: Idx>(pub Moc2DRanges<TT, T, ST, Hpx<ST>>);
+
+impl<TT: Idx> HpxRanges2D<TT, Time<TT>, TT> {
+    pub fn time_space_iter<'a>(&'a self, depth_max_t: u8, depth_max_s: u8) -> TimeSpaceRangesIter<'a, TT> {
+        // let (depth_max_t, depth_max_s) = self.compute_min_depth();
+        TimeSpaceRangesIter {
+            depth_max_t,
+            depth_max_s,
+            it_t: self.0.ranges2d.x.iter().peekable(),
+            it_s: self.0.ranges2d.y.iter().peekable(),
+        }
+    }
+}
 
 impl<TT, T, ST> HpxRanges2D<TT, T, ST>
 where
@@ -31,7 +53,7 @@ where
         let ranges = Moc2DRanges::new(vec![], vec![]);
         HpxRanges2D(ranges)
     }
-
+    
     /// Create a Quantity/Space 2D coverage
     ///
     /// # Arguments
@@ -397,6 +419,10 @@ where
 
 use ndarray::Array1;
 use crate::ranges::ranges2d::Ranges2D;
+use std::io::BufRead;
+use std::iter::Peekable;
+use crate::moc2d::cell::CellMoc2Iter;
+use crate::moc2d::cellcellrange::CellOrCellRangeMoc2Iter;
 
 impl<T: MocQty<u64>> From<&HpxRanges2D<u64, T, u64>> for Array1<i64> {
     /// Create a Array1<i64> from a NestedRanges2D<u64, u64>
@@ -538,6 +564,229 @@ impl<T:MocQty<u64>> TryFrom<Array1<i64>> for HpxRanges2D<u64, T, u64> {
         Ok(HpxRanges2D(ranges))
     }
 }
+
+
+
+impl<T: MocQty<u64>> TryFrom<Array1<u64>> for HpxRanges2D<u64, T, u64> {
+    type Error = &'static str;
+    /// Create a NestedRanges2D<u64, u64> from a Array1<u64>
+    ///
+    /// This is used when loading a STMOC from a FITS file
+    /// opened with astropy
+    ///
+    /// # Precondition
+    ///
+    /// The input Array1 stores the STMOC under the nested format.
+    /// Its memory layout contains each time range followed by the
+    /// list of space ranges referred to that time range.
+    /// Time ranges are negatives so that one can distinguish them
+    /// from space ranges.
+    ///
+    /// Coverages coming from FITS file should be consistent because they
+    /// are stored this way.
+    ///
+    /// # Errors
+    ///
+    /// * If the number of time ranges do not match the number of
+    ///   spatial coverages.
+    fn try_from(input: Array1<u64>) -> Result<Self, Self::Error> {
+        let ranges = if input.is_empty() {
+            // If the input array is empty
+            // then we return an empty coverage
+            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(vec![], vec![])
+        } else {
+            let mask = u64::MSB_MASK;
+            let mut input = input.into_raw_vec();
+            let input = utils::unflatten(&mut input);
+
+            let mut cur_t = Vec::<Range<u64>>::new();
+            let mut t: Vec::<Range<u64>> = Vec::with_capacity(input.len() >> 2);
+
+            let mut cur_s = Vec::<Range<u64>>::new();
+            let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(input.len());
+            for r in input.into_iter() {
+                if r.start & r.end & mask == mask {
+                    if !cur_s.is_empty(){
+                        // Push previous (tranges, srange) tuple
+                        for rt in cur_t.drain(..) {
+                            t.push(rt);
+                            s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
+                            cur_s.clear();
+                        }
+                        assert!(cur_t.is_empty());
+                        // cur_t.clear(); Not needed since we drain
+                    }
+                    // First dim range
+                    let t_start = r.start & mask;
+                    let t_end = r.end & mask;
+                    cur_t.push(t_start..t_end);
+                } else {
+                    // Second dim range
+                    let s_start = r.start as u64;
+                    let s_end = r.end as u64;
+                    cur_s.push(s_start..s_end);
+                }
+            }
+
+            // Push the last (tranges, srange) tuple
+            for rt in cur_t {
+                t.push(rt);
+                s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
+                cur_s.clear();
+            }
+
+            // Propagate invalid Coverage FITS errors.
+            if t.len() != s.len() {
+                return Err("Number of time ranges and
+                    spatial coverages do not match.");
+            }
+            // No need to make it consistent because it comes
+            // from python
+            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(t, s)
+        };
+
+        Ok(HpxRanges2D(ranges))
+    }
+}
+
+// The 3 following From contains code redumdancy. We probably should do something!
+
+impl<R: BufRead> From<RangeMoc2DIterFromFits<u64, R>> for HpxRanges2D<u64, Time<u64>, u64> {
+    
+    fn from(it: RangeMoc2DIterFromFits<u64, R>) -> Self {
+        let mut t = Vec::<Range<u64>>::new();
+        let mut s = Vec::<Ranges<u64>>::new();
+        for elem in it {
+            let (moc_t, moc_s) = elem.mocs();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_range_moc_iter() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let mut it = moc_t.into_range_moc_iter().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(moc_s.into_moc_ranges().into_ranges())
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<u64, Time<u64>, u64, Hpx<u64>>::new(t, s))
+    }
+}
+
+impl From<CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Time<u64>, u64> {
+
+    fn from(it: CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>) -> Self {
+        let (low, upp) = it.size_hint();
+        let ub = upp.unwrap_or(100);
+        let mut t: Vec::<Range<u64>> = Vec::with_capacity(ub);
+        let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(ub);
+        for elem in it {
+            let (moc_t, moc_s) = elem.mocs();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_cellcellrange_moc_iter().ranges().peekable() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let sranges = Ranges::new_unchecked(moc_s.into_cellcellrange_moc_iter().ranges().collect());
+            let mut it = moc_t.into_cellcellrange_moc_iter().ranges().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(sranges.clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(sranges)
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<u64, Time<u64>, u64, Hpx<u64>>::new(t, s))
+    }
+}
+
+impl From<CellMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Time<u64>, u64> {
+
+    fn from(it: CellMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>) -> Self {
+        let (low, upp) = it.size_hint();
+        let ub = upp.unwrap_or(100);
+        let mut t: Vec::<Range<u64>> = Vec::with_capacity(ub);
+        let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(ub);
+        for elem in it {
+            let (moc_t, moc_s) = elem.mocs();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_cell_moc_iter().ranges().peekable() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let sranges = Ranges::new_unchecked(moc_s.into_cell_moc_iter().ranges().collect());
+            let mut it = moc_t.into_cell_moc_iter().ranges().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(sranges.clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(sranges)
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<u64, Time<u64>, u64, Hpx<u64>>::new(t, s))
+    }
+}
+
+
+
+
+// Adaptor to write FITs
+pub struct TimeSpaceRangesIter<'a, T: Idx> {
+    depth_max_t: u8,
+    depth_max_s: u8,
+    it_t: Peekable<slice::Iter<'a, Range<T>>>,
+    it_s: Peekable<slice::Iter<'a, Ranges<T>>>
+}
+impl<'a, T: Idx> HasTwoMaxDepth for TimeSpaceRangesIter<'a, T> {
+    fn depth_max_1(&self) -> u8 {
+        self.depth_max_t
+    }
+    fn depth_max_2(&self) -> u8 {
+        self.depth_max_s
+    }
+}
+impl<'a, T: Idx> ZSorted for TimeSpaceRangesIter<'a, T> {}
+impl<'a, T: Idx> NonOverlapping for TimeSpaceRangesIter<'a, T> {}
+impl<'a, T: Idx> MOC2Properties for TimeSpaceRangesIter<'a, T> {}
+impl<'a, T: Idx> Iterator for TimeSpaceRangesIter<'a, T> {
+    type Item = RangeMOC2Elem<T, Time<T>, T, Hpx<T>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        if let (Some(t_range), Some(s_ranges)) = (self.it_t.next(), self.it_s.next()) {
+            let mut t = Vec::<Range<T>>::new();
+            t.push(t_range.clone());
+            while let Some(next_s_ranges) = self.it_s.peek() {
+                if (next_s_ranges == &s_ranges) {
+                    t.push(self.it_t.next().unwrap().clone());
+                    self.it_s.next().unwrap();
+                } else {
+                    break;
+                }
+            }
+            Some(RangeMOC2Elem::new(
+                RangeMOC::new(self.depth_max_t, Ranges::new_unchecked(t).into()),
+                RangeMOC::new(self.depth_max_s,s_ranges.clone().into())
+            ))
+        } else {
+            None
+        }
+    }
+}
+impl<'a, T: Idx> RangeMOC2Iterator<
+    T, Time<T>, RangeMocIter<T, Time<T>>,
+    T,  Hpx<T>, RangeMocIter<T, Hpx<T>>,
+    RangeMOC2Elem<T, Time<T>, T, Hpx<T>>
+> for TimeSpaceRangesIter<'a, T> {}
 
 /*
 #[cfg(test)]

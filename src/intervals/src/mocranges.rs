@@ -23,6 +23,16 @@ pub type TimeRanges<T> = MocRanges<T, Time<T>>;
 #[derive(Debug)]
 pub struct MocRanges<T: Idx, Q: MocQty<T>>(pub Ranges<T>, PhantomData<Q>);
 
+impl<T: Idx, Q: MocQty<T>> MocRanges<T, Q> {
+  pub fn ranges(&self) -> &Ranges<T> {
+    &self.0
+  }
+  
+  pub fn into_ranges(self) -> Ranges<T> {
+    self.0
+  }
+}
+
 impl<T: Idx, Q: MocQty<T>> From<Ranges<T>> for MocRanges<T, Q> {
   fn from(ranges: Ranges<T>) -> Self {
     MocRanges(ranges,  PhantomData)

@@ -6,7 +6,7 @@ use num::One;
 
 use crate::mocqty::{MocQty, Hpx, Time};
 use crate::ranges::Idx;
-use crate::mocell::{MocCell, Cell};
+use crate::mocell::{MocCell, Cell, CellRange, CellOrCellRange, MocCellOrCellRange};
 
 // Commodity type definitions
 pub type HpxRange<T> = MocRange<T, Hpx<T>>;
@@ -38,6 +38,7 @@ impl<T: Idx, Q: MocQty<T>> MocRange<T, Q> {
   /// We can deduce `shift_dd` and `range_len_min` from `Q::<T>` and `depth_max`, but we pass them
   /// to avoid recomputing them (even if it is fast)
   pub fn next_cell_with_knowledge(&mut self, depth_max: u8, shift_dd: usize, range_len_min: T, mask: T) -> Option<MocCell<T, Q>> {
+    // println!("{:?}", self.0);
     let len = self.0.end - self.0.start;
     if len < T::one() {
       None
@@ -95,6 +96,11 @@ impl<T: Idx, Q: MocQty<T>> From<Range<T>> for MocRange<T, Q> {
     MocRange(range, PhantomData)
   }
 }
+impl<T: Idx, Q: MocQty<T>> From<&Range<T>> for MocRange<T, Q> {
+  fn from(range: &Range<T>) -> Self {
+    MocRange(range.clone(), PhantomData)
+  }
+}
 
 impl<T: Idx, Q: MocQty<T>> From<(u8, T)> for MocRange<T, Q> {
   fn from((depth, ipix): (u8, T)) -> Self {
@@ -112,10 +118,68 @@ impl<T: Idx, Q: MocQty<T>> From<Cell<T>> for MocRange<T, Q> {
     Self::from((cell.depth, cell.idx))
   }
 }
+impl<T: Idx, Q: MocQty<T>> From<&Cell<T>> for MocRange<T, Q> {
+  fn from(cell: &Cell<T>) -> Self {
+    Self::from((cell.depth, cell.idx))
+  }
+}
 
 impl<T: Idx, Q: MocQty<T>> From<MocCell<T, Q>> for MocRange<T, Q> {
   fn from(cell: MocCell<T, Q>) -> Self {
     Self::from(cell.0)
+  }
+}
+impl<T: Idx, Q: MocQty<T>> From<&MocCell<T, Q>> for MocRange<T, Q> {
+  fn from(cell: &MocCell<T, Q>) -> Self {
+    Self::from(&cell.0)
+  }
+}
+
+impl<T: Idx, Q: MocQty<T>> From<CellRange<T>> for MocRange<T, Q> {
+  fn from(cellrange: CellRange<T>) -> Self {
+    let tdd = Q::shift_from_depth_max(cellrange.depth) as u32;
+    let range = Range {
+      start: cellrange.range.start.unsigned_shl(tdd),
+      end: cellrange.range.end.unsigned_shl(tdd),
+    };
+    Self::from(range)
+  }
+}
+impl<T: Idx, Q: MocQty<T>> From<&CellRange<T>> for MocRange<T, Q> {
+  fn from(cellrange: &CellRange<T>) -> Self {
+    let tdd = Q::shift_from_depth_max(cellrange.depth) as u32;
+    let range = Range {
+      start: cellrange.range.start.unsigned_shl(tdd),
+      end: cellrange.range.end.unsigned_shl(tdd),
+    };
+    Self::from(range)
+  }
+}
+
+
+impl<T: Idx, Q: MocQty<T>> From<CellOrCellRange<T>> for MocRange<T, Q> {
+  fn from(cellcellrange: CellOrCellRange<T>) -> Self {
+    match cellcellrange {
+      CellOrCellRange::Cell(cell) => Self::from(cell),
+      CellOrCellRange::CellRange(cellrange) => Self::from(cellrange),
+    }
+  }
+}
+impl<T: Idx, Q: MocQty<T>> From<&CellOrCellRange<T>> for MocRange<T, Q> {
+  fn from(cellcellrange: &CellOrCellRange<T>) -> Self {
+    match cellcellrange {
+      CellOrCellRange::Cell(cell) => Self::from(cell),
+      CellOrCellRange::CellRange(cellrange) => Self::from(cellrange),
+    }
+  }
+}
+
+impl<T: Idx, Q: MocQty<T>> From<MocCellOrCellRange<T, Q>> for MocRange<T, Q> {
+  fn from(moccellcellrange: MocCellOrCellRange<T, Q>) -> Self {
+    match moccellcellrange {
+      MocCellOrCellRange::MocCell(mocell) => Self::from(mocell.0),
+      MocCellOrCellRange::MocCellRange(mocellrange) => Self::from(mocellrange.0),
+    }
   }
 }
 

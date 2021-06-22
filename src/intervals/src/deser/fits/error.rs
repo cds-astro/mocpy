@@ -46,11 +46,13 @@ quick_error! {
       display("More data than the expected!")
     }
     PrematureEndOfData {
-      display("Less data than the expected!")
+      display("Less data than expected!")
+    }
+    UnexpectedWrittenSize {
+      display("Unexpected number of data written!")
     }
     UnexpectedDepth(depth: u8, depth_max: u8) {
       display("unexpected depth. Max expected: {}. Actual: {}", depth_max, depth)
     }
-
   }
 }

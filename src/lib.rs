@@ -20,13 +20,16 @@ use std::sync::Mutex;
 use ndarray::{Array, Array1, Array2, Axis, Ix2};
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
-use pyo3::types::{PyDict, PyList};
-use pyo3::{PyObject, ToPyObject};
+use pyo3::types::{PyDict, PyList, PyString};
+use pyo3::{PyObject, ToPyObject, exceptions};
 
 use intervals::ranges::{SNORanges, Ranges};
 use intervals::mocqty::MocQty;
 use intervals::mocranges::MocRanges;
 use intervals::hpxranges2d::TimeSpaceMoc;
+use std::path::Path;
+use intervals::moc::RangeMOC;
+use pyo3::ffi::PyMarshal_WriteObjectToString;
 
 pub mod coverage;
 pub mod spatial_coverage;
@@ -500,7 +503,134 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         result.into_pyarray(py).to_owned()
     }
 
-    /// Deserialize a Time-Space coverage from FITS
+    /// Serialize a Time-Space coverage into a FITS file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_fits_file")]
+    fn coverage_2d_to_fits_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_fits_file(depth_max_t, depth_max_s, coverage, Path::new(&path))
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into an ASCII file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_ascii_file")]
+    fn coverage_2d_to_ascii_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_ascii_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into an ASCII string
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_ascii_str")]
+    fn coverage_2d_to_ascii_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_ascii_str(depth_max_t, depth_max_s, coverage)).into()
+    }
+
+    /// Serialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_json_file")]
+    fn coverage_2d_to_json_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_json_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_json_str")]
+    fn coverage_2d_to_json_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_json_str(depth_max_t, depth_max_s, coverage)).into()
+    }
+
+    /*
+    /// Deserialize a Time-Space coverage from a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_from_json_file")]
+    fn coverage_2d_from_json_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_json_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Deserialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_from_json_str")]
+    fn coverage_2d_from_json_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_json_str(depth_max_t, depth_max_s, coverage)).into()
+    }*/
+
+
+
+
+    /// Deserialize a Time-Space coverage from FITS using the pre v2.0 MOC standard.
     ///
     /// # Context
     ///
@@ -524,8 +654,46 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// This method returns a `PyValueError` if the `Array1` is not
     /// defined as above.
+    #[pyfn(m, "coverage_2d_from_fits_pre_v2")]
+    fn coverage_2d_from_fits_pre_v2(index: usize, data: PyReadonlyArray1<i64>) -> PyResult<()> {
+        let data = data.as_array().to_owned();
+        let coverage_from_fits = time_space_coverage::from_fits_pre_v2(data)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_fits);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from FITS using the v2.0 MOC standard.
+    ///
+    /// # Context
+    ///
+    /// This is wrapped around the `from_fits` method
+    /// of MOCPy to load a Time-Space coverage from a
+    /// FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``data`` - A 1d array buffer containing the time and
+    ///   space axis ranges data.
+    ///
+    /// # Errors
+    ///
+    /// The `Array1` object stores the Time-Space coverage
+    /// under the nested format.
+    /// Its memory layout contains a list of time ranges followed by the
+    /// list of space ranges referred to that time ranges.
+    /// The most significant bit (MSB) of time ranges bounds is set to one so that one can
+    /// distinguish them from space ranges.
+    /// This is different from a negative value because we do not use the two's complement
+    /// representation, only a flag set on the MSB.
+    ///
+    /// This method returns a `PyValueError` if the `Array1` is not
+    /// defined as above.
     #[pyfn(m, "coverage_2d_from_fits")]
-    fn coverage_2d_from_fits(index: usize, data: PyReadonlyArray1<i64>) -> PyResult<()> {
+    fn coverage_2d_from_fits(index: usize, data: PyReadonlyArray1<u64>) -> PyResult<()> {
         let data = data.as_array().to_owned();
         let coverage_from_fits = time_space_coverage::from_fits(data)?;
 
@@ -535,6 +703,116 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         Ok(())
     }
+
+    /// Deserialize a Time-Space coverage from a FITS file (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the FITS file path
+    ///
+    /// # Warning
+    /// 
+    /// This function is not compatible with pre-v2.0 MOC standard.
+    /// 
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_fits_file")]
+    fn coverage_2d_from_fits_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_fits = time_space_coverage::from_fits_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_fits);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an ASCII file (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the ASCII file path
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_ascii_file")]
+    fn coverage_2d_from_ascii_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_ascii = time_space_coverage::from_ascii_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_ascii);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the JSON file path
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_json_file")]
+    fn coverage_2d_from_json_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_json = time_space_coverage::from_json_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_json);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an ASCII string (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``ascii`` - the ASCII string
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_ascii_str")]
+    fn coverage_2d_from_ascii_str(index: usize, ascii: String) -> PyResult<()> {
+        let coverage_from_ascii = time_space_coverage::from_ascii_str(ascii)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_ascii);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``json`` - the JSON string
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_json_str")]
+    fn coverage_2d_from_json_str(index: usize, json: String) -> PyResult<()> {
+        let coverage_from_json = time_space_coverage::from_json_str(json)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_json);
+
+        Ok(())
+    }
+
 
     /// Create a new empty Time-Space coverage
     ///
@@ -913,6 +1191,323 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = coverage::to_json(py, coverage)?;
         Ok(result.to_object(py))
     }
+
+
+    /// Serialize a spatial MOC into an FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_fits_file")]
+    fn spatial_moc_to_fits_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_fits_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a spatial MOC into an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_ascii_file")]
+    fn spatial_moc_to_ascii_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_ascii_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e))
+    }
+
+    /// Serialize a spatial MOC into a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "spatial_moc_to_ascii_str")]
+    fn spatial_moc_to_ascii_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        PyString::new(py,&spatial_coverage::to_ascii_str(depth, ranges)).into()
+    }
+
+    /// Serialize a spatial MOC into a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_json_file")]
+    fn spatial_moc_to_json_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_json_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e))
+    }
+
+    /// Serialize a spatial MOC into a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "spatial_moc_to_json_str")]
+    fn spatial_moc_to_json_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        PyString::new(py,&spatial_coverage::to_json_str(depth, ranges)).into()
+    }
+
+    /// Deserialize a spatial MOC from a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_fits_file")]
+    fn spatial_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_fits_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_ascii_file")]
+    fn spatial_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_ascii_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ascii`` - The json string
+    #[pyfn(m, "spatial_moc_from_ascii_str")]
+    fn spatial_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_ascii_str(ascii)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_json_file")]
+    fn spatial_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_json_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``json`` - The json string
+    #[pyfn(m, "spatial_moc_from_json_str")]
+    fn spatial_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_json_str(json)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+
+
+
+    /// Serialize a time MOC into a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_fits_file")]
+    fn time_moc_to_fits_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_fits_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a time MOC into an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_ascii_file")]
+    fn time_moc_to_ascii_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_ascii_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e))
+    }
+
+    /// Serialize a time MOC into a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "time_moc_to_ascii_str")]
+    fn time_moc_to_ascii_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        PyString::new(py,&temporal_coverage::to_ascii_str(depth, ranges)).into()
+    }
+
+    /// Serialize a time MOC into a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_json_file")]
+    fn time_moc_to_json_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_json_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e))
+    }
+
+    /// Serialize a time MOC into a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "time_moc_to_json_str")]
+    fn time_moc_to_json_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        PyString::new(py,&temporal_coverage::to_json_str(depth, ranges)).into()
+    }
+
+    /// Deserialize a time MOC from a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_fits_file")]
+    fn time_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_fits_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_ascii_file")]
+    fn time_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_ascii_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ascii`` - The json string
+    #[pyfn(m, "time_moc_from_ascii_str")]
+    fn time_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_ascii_str(ascii)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_json_file")]
+    fn time_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_json_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``json`` - The json string
+    #[pyfn(m, "time_moc_from_json_str")]
+    fn time_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_json_str(json)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
 
     /// Degrade a spatial coverage to a specific depth.
     ///

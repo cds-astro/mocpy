@@ -28,12 +28,14 @@ pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
     const N_BYTES: u8 = mem::size_of::<Self>() as u8;
     const N_BITS: u8 = Self::N_BYTES << 3;
     const TFORM: TForm1;
+    const MSB_MASK: Self; // mask use to switch on/select the most significant bit
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error>;
     fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error>;
 }
 
 impl Idx for u8 {
     const TFORM: TForm1 = TForm1::OneB;
+    const MSB_MASK: u8 = 1_u8 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u8()
     }
@@ -43,6 +45,7 @@ impl Idx for u8 {
 }
 impl Idx for u16 {
     const TFORM: TForm1 = TForm1::OneI;
+    const MSB_MASK: u16 = 1_u16 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u16::<B>()
     }
@@ -52,6 +55,7 @@ impl Idx for u16 {
 }
 impl Idx for u32 {
     const TFORM: TForm1 = TForm1::OneJ;
+    const MSB_MASK: u32 = 1_u32 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u32::<B>()
     }
@@ -61,6 +65,7 @@ impl Idx for u32 {
 }
 impl Idx for u64 {
     const TFORM: TForm1 = TForm1::OneK;
+    const MSB_MASK: u64 = 1_u64 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u64::<B>()
     }
@@ -70,6 +75,7 @@ impl Idx for u64 {
 }
 impl Idx for u128 {
     const TFORM: TForm1 = TForm1::TwoK;
+    const MSB_MASK: u128 = 1_u128 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_u128::<B>()
     }
@@ -79,6 +85,7 @@ impl Idx for u128 {
 }
 impl Idx for i16 {
     const TFORM: TForm1 = TForm1::OneI;
+    const MSB_MASK: i16 = 1_i16 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i16::<B>()
     }
@@ -88,6 +95,7 @@ impl Idx for i16 {
 }
 impl Idx for i32 {
     const TFORM: TForm1 = TForm1::OneJ;
+    const MSB_MASK: i32 = 1_i32 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i32::<B>()
     }
@@ -97,6 +105,7 @@ impl Idx for i32 {
 }
 impl Idx for i64 {
     const TFORM: TForm1 = TForm1::OneK;
+    const MSB_MASK: i64 = 1_i64 << (Self::N_BITS - 1) as u32;
     fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error> {
         reader.read_i64::<B>()
     }
@@ -180,7 +189,7 @@ pub trait SNORanges<'a, T: Idx>: Sized {
 pub struct Ranges<T: Idx>(pub Vec<Range<T>>);
 
 impl<T: Idx> Default for Ranges<T> {
-    fn default() -> Self {
+  fn default() -> Self {
         Ranges(Default::default())
     }
 }

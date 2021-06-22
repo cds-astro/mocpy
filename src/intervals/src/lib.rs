@@ -27,6 +27,8 @@ pub mod valuedcell;
 pub mod mocranges2d;
 pub mod hpxranges2d;
 
+pub mod moc2d;
+
 pub mod deser;
 
 use ndarray::Array2;
