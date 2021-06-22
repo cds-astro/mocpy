@@ -26,6 +26,26 @@ class TimeMOC(AbstractMOC):
     def __init__(self, interval_set=None):
         super(TimeMOC, self).__init__(interval_set)
 
+    def _times_to_microseconds(times):
+        """
+        Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping
+        the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
+        
+        Parameters
+        ----------
+        times : `astropy.time.Time`
+        Astropy observation times
+        
+        Returns
+        -------
+        times_microseconds : `np.array`
+        """
+    
+        times_jd = np.asarray(times.jd, dtype=np.uint64)*np.uint64(self.DAY_MICRO_SEC)
+        times_us = np.asarray((times-Time(times_jd, format='jd')).sec * 1e6, dtype=np.uint64)
+        
+        return times_jd+times_us
+    
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
         """
@@ -44,7 +64,7 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times = np.asarray(times.jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        times = self._times_to_microseconds(times)
         times = np.atleast_1d(times)
 
         times = times.reshape((times.shape[0], 1))
