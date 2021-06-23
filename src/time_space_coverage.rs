@@ -365,7 +365,7 @@ use ndarray::Array1;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
-use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa};
+use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa, STMocType};
 use std::error::Error;
 use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
 use intervals::deser::json::cellmoc2d_from_json_aladin;
@@ -463,11 +463,11 @@ pub fn from_fits_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
     // See https://github.com/PyO3/pyo3/blob/88d86a65aa78bf2d001753f994fe3f6db1d8d75e/src/err/impls.rs
     let file = File::open(&path).map_err(exceptions::PyValueError::new_err)?;
     let reader = BufReader::new(file);
-    let it = match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
-        MocIdxType::U64(MocQtyType::TimeHpx(it)) => it,
-        _ => return Err(exceptions::PyIOError::new_err("Only ST-MOC of u64 ranges supported!")),
-    };
-    Ok(TimeSpaceMoc::<u64, u64>::from(it))
+    match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
+        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::V2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from(it)),
+        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::PreV2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from(it)),
+        _ => Err(exceptions::PyIOError::new_err("Only ST-MOC of u64 ranges supported!")),
+    }
 }
 
 /// Deserialize a Time-Space coverage from a JSON string, using the MOC2.0 standard.

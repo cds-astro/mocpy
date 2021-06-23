@@ -6,6 +6,8 @@ import numpy as np
 
 def test_serialization():
     decals = STMOC.from_fits('resources/STMOC/STMoc-DECaLS-g.fits')
+    decals_bis = STMOC.load('resources/STMOC/STMoc-DECaLS-g.fits', format='fits')
+    assert(decals == decals_bis)
 
     # Serialize to FITS
     hdulist = decals.serialize(format="fits", pre_v2=True)

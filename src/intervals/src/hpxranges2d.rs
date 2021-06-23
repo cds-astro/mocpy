@@ -17,7 +17,6 @@ use crate::mocqty::{MocQty, Hpx, Time};
 use crate::ranges::{SNORanges, Idx, ranges2d::SNORanges2D, Ranges};
 use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
-use crate::deser::fits::RangeMoc2DIterFromFits;
 
 /// Declaration of the ST-MOC type
 pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
@@ -413,10 +412,9 @@ where
     }
 }
 
+use std::iter::Peekable;
 use ndarray::Array1;
 use crate::ranges::ranges2d::Ranges2D;
-use std::io::BufRead;
-use std::iter::Peekable;
 use crate::moc2d::cell::CellMoc2Iter;
 use crate::moc2d::cellcellrange::CellOrCellRangeMoc2Iter;
 
@@ -645,11 +643,15 @@ impl<T: MocQty<u64>> TryFrom<Array1<u64>> for HpxRanges2D<u64, T, u64> {
     }
 }
 
-// The 3 following From contains code redumdancy. We probably should do something!
+// The 3 following From contains code redundancy. We probably should do something!
 
-impl<R: BufRead> From<RangeMoc2DIterFromFits<u64, R>> for HpxRanges2D<u64, Time<u64>, u64> {
-    
-    fn from(it: RangeMoc2DIterFromFits<u64, R>) -> Self {
+impl<I: RangeMOC2Iterator<
+    u64, Time::<u64>, RangeMocIter<u64, Time::<u64>>,
+    u64, Hpx::<u64>, RangeMocIter<u64, Hpx::<u64>>,
+    RangeMOC2Elem<u64, Time::<u64>, u64, Hpx::<u64>>>
+> From<I> for HpxRanges2D<u64, Time<u64>, u64> {
+
+    fn from(it: I) -> Self {
         let mut t = Vec::<Range<u64>>::new();
         let mut s = Vec::<Ranges<u64>>::new();
         for elem in it {

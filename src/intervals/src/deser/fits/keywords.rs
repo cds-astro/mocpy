@@ -105,8 +105,9 @@ impl FitsCard for MocDim {
 
 #[derive(Debug)]
 pub enum Ordering {
-  Nuniq, // v1.2 v2.0
-  Range, //      v2.0
+  Nuniq,   // v1.2 v2.0
+  Range,   //      v2.0
+  Range29, //  pre v2.0
 }
 impl FitsCard for Ordering {
   const KEYWORD: &'static [u8; 8] = b"ORDERING";
@@ -115,6 +116,7 @@ impl FitsCard for Ordering {
     match get_str_val_no_quote(keyword_record)? {
       b"NUNIQ" => Ok(Ordering::Nuniq),
       b"RANGE" => Ok(Ordering::Range),
+      b"RANGE29" => Ok(Ordering::Range29),
       parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"NUNIQ", b"RANGE"])),
     }
   }
@@ -123,6 +125,7 @@ impl FitsCard for Ordering {
     String::from(match self {
       Ordering::Nuniq => "'NUNIQ'",
       Ordering::Range => "'RANGE'",
+      Ordering::Range29 => "'RANGE29'",
     })
   }
 }
@@ -149,6 +152,7 @@ impl FitsCard for CoordSys {
 #[derive(Debug)]
 pub enum TimeSys {
   TCB, // TCB
+  JD, // pre V2.0
 }
 impl FitsCard for TimeSys {
   const KEYWORD: &'static [u8; 8] = b"TIMESYS ";
@@ -156,12 +160,16 @@ impl FitsCard for TimeSys {
   fn specific_parse_value(keyword_record: &[u8]) -> Result<Self, FitsError> {
     match get_str_val_no_quote(keyword_record)? {
       b"TCB" => Ok(TimeSys::TCB),
-      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"TCB"])),
+      b"JD" => Ok(TimeSys::JD),
+      parsed_val => Err(Self::predefine_val_err(parsed_val, &[b"TCB", b"JD"])),
     }
   }
 
   fn to_fits_value(&self) -> String {
-    String::from("'TCB'")
+    match self {
+      TimeSys::TCB => String::from("'TCB'"),
+      TimeSys::JD => String::from("'JD'"),
+    }
   }
 }
 
@@ -426,6 +434,8 @@ impl MocKeywords  {
       b"MOCTOOL " => Some(MocTool::parse_value(keyword_record).map(MocKeywords::MOCTool)),
       b"MOCTYPE " => Some(MocType::parse_value(keyword_record).map(MocKeywords::MOCType)),
       b"MOCORD_S" => Some(MocOrdS::parse_value(keyword_record).map(MocKeywords::MOCOrdS)),
+      b"MOCORD_1" => Some(MocOrdS::parse_value(keyword_record).map(MocKeywords::MOCOrdS)), // To support pre v2 ST-MOC
+      b"TORDER  " => Some(MocOrdT::parse_value(keyword_record).map(MocKeywords::MOCOrdT)), // To support pre v2 ST-MOC
       b"MOCORD_T" => Some(MocOrdT::parse_value(keyword_record).map(MocKeywords::MOCOrdT)),
       b"MOCORDER" => Some(MocOrder::parse_value(keyword_record).map(MocKeywords::MOCOrder)),
       b"PIXTYPE " => Some(PixType::parse_value(keyword_record).map(MocKeywords::PixType)),
