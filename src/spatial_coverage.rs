@@ -164,7 +164,7 @@ pub fn complement(coverage: &HpxRanges<u64>) -> HpxRanges<u64> {
     coverage.complement()
 }
 
-use ndarray::{Array1, Array2, Axis, Zip};
+use ndarray::{Array1, Array2, Zip};
 /// Create a spatial coverage from a list of HEALPix cell indices.
 ///
 /// # Arguments
@@ -202,18 +202,6 @@ pub fn from_healpix_cells(mut pixels: Array1<u64>, depth: Array1<u8>) -> PyResul
             *pix <<= factor;
             *pix1 <<= factor;
         });
-
-    /*let shape = (pixels.shape()[0], 1);
-    let pixels = pixels.into_shape(shape).unwrap();
-    let pixels_1 = pixels_1.into_shape(shape).unwrap();
-
-    let ranges = concatenate![Axis(1), pixels, pixels_1].to_owned();
-
-    let ranges = coverage::create_hpx_ranges_from_py(ranges).make_consistent();
-
-    let result: Array2<u64> = ranges.into();
-    Ok(result)*/
-
     Ok(from_lower_and_upperd_bounds(pixels, pixels_1))
 }
 
@@ -243,9 +231,12 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
     let shape = (low.shape()[0], 1);
     let low = low.into_shape(shape).unwrap();
     let upp = upp.into_shape(shape).unwrap();
-    let ranges = concatenate![Axis(1), low, upp].to_owned();
-    let ranges = coverage::build_hpx_ranges_from_py(ranges);
-    ranges.into()
+    debug_assert_eq!(low.len(), upp.len());
+    let mut ranges: Vec<Range<u64>> = Vec::with_capacity(low.len());
+    for (start, end) in low.into_iter().zip(upp.into_iter()) {
+        ranges.push(start..end);
+    }
+    HpxRanges::<u64>::new_from(ranges).into()
 }
 
 

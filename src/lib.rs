@@ -1,6 +1,5 @@
 #[cfg(feature = "rayon")]
 extern crate intervals;
-#[macro_use(concatenate)]
 
 extern crate ndarray;
 extern crate healpix;
@@ -18,7 +17,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 
-use ndarray::{Array, Array1, Array2, Axis, Ix2};
+use ndarray::{Array, Array1, Array2, Ix2};
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList, PyString};
@@ -29,6 +28,8 @@ use intervals::mocqty::MocQty;
 use intervals::mocranges::MocRanges;
 use intervals::hpxranges2d::TimeSpaceMoc;
 use std::path::Path;
+use std::ops::Range;
+use intervals::uniqranges::HpxUniqRanges;
 
 pub mod coverage;
 pub mod spatial_coverage;
@@ -1665,21 +1666,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "to_nested")]
     fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
-
         let result: Array2<u64> = if ranges.is_empty() {
             Array::zeros((1, 0))
         } else {
             let shape = (ranges.shape()[0], 1);
-
             let start = ranges.into_shape(shape).unwrap();
-            let end = &start + &Array2::<u64>::ones(shape);
-
-            let ranges = concatenate![Axis(1), start, end];
-            // We assume the input ranges are already sorted, and we perform the "make_consistent"
-            // at the creation.
-            let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges);
-
-            let nested_coverage = spatial_coverage::to_nested(uniq_coverage);
+            let mut ranges: Vec<Range<u64>> = Vec::with_capacity(start.len());
+            for uniq in start {
+                ranges.push(uniq..uniq + 1)
+            }
+            ranges.sort_by(|a, b| a.start.cmp(&b.start));
+            let nested_coverage = spatial_coverage::to_nested(HpxUniqRanges::new_unchecked(ranges));
             nested_coverage.into()
         };
 

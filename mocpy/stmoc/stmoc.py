@@ -340,10 +340,26 @@ class STMOC(serializer.IO):
     def _fits_header_keywords(self):
         t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
         return {
+            'MOVERS': '2.0',
+            'MOCDIM': 'TIME.SPACE',
+            'ORDERING': 'RANGE',
+            # Max depth along the first dimension
+            'MOCORD_T': str(t_depth),
+            # Max depth along the second dimension
+            'MOCORD_S': str(s_depth),
+            'COORDSYS': 'C',
+            'TIMESYS': 'TCB',
+            'MOCTOOL': 'MOCPy'
+        }
+
+    @property
+    def _fits_header_keywords_pre_v2(self):
+        t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
+        return {
             'MOC': 'TIME.SPACE',
             'ORDERING': 'RANGE29',
             # Max depth along the first dimension
-            'MOCORDER': str(t_depth),
+            'MOCORDER': str(t_depth / 2),
             # Max depth along the second dimension
             'MOCORD_1': str(s_depth),
             'COORDSYS': 'C',
@@ -357,52 +373,6 @@ class STMOC(serializer.IO):
 
     def _uniq_format(self):
         return mocpy.coverage_2d_to_fits(self.__index)
-
-    @classmethod
-    def deserialization_pre_v2(cls, hdulist):
-        """
-        Deserialization of an hdulist to a Time-Space coverage
-        """
-        # The binary HDU table contains all the data
-        header = hdulist[1].header
-
-        bin_HDU_table = hdulist[1]
-        # Some FITS file may not have a name column to access
-        # the data. So we rename it as the `PIXELS` columns.
-        if len(bin_HDU_table.columns) != 1:
-            raise AttributeError('The binary HDU table of {0} must contain only one'
-                'column where the data are stored.')
-
-        if bin_HDU_table.columns[0].name is None:
-            bin_HDU_table.columns[0].name = 'PIXELS'
-
-        key = bin_HDU_table.columns[0].name
-
-        # Retrieve the spatial and time order
-        # FITS header can be of two different format for expressing
-        # these orders:
-        # 1. TORDER key refers the max depth in the time dimension. MOCORDER then
-        #    refers the spatial max depth.
-        # 2. MOCORDER refers the max depth along the 1st dimension whereas
-        #    MOCORD_1 refers to the max depth along the 2nd dimension.
-        # DOES NOT SEEM TO BE USE
-        #if header.get('TORDER') is None:
-        #    # We are in the 2. case
-        #    first_dim_depth = header.get('MOCORDER')
-        #    second_dim_depth = header.get('MOCORD_1')
-        #else:
-        #    # We are in the 1. case
-        #    first_dim_depth = header.get('TORDER')
-        #    second_dim_depth = header.get('MOCORDER')
-
-        # No need to worry about the change in depth since
-        # (it seems that) it was not used at loading.
-        result = cls()
-        mocpy.coverage_2d_from_fits_pre_v2(
-            result.__index,
-            bin_HDU_table.data[key].astype(np.int64)
-        )
-        return result
 
     @classmethod
     def deserialization(cls, hdulist):
@@ -441,40 +411,32 @@ class STMOC(serializer.IO):
         #    first_dim_depth = header.get('TORDER')
         #    second_dim_depth = header.get('MOCORDER')
 
+
         result = cls()
-        mocpy.coverage_2d_from_fits(
-            result.__index,
-            bin_HDU_table.data[key].astype(np.uint64)
-        )
+        ordering = bin_HDU_table.header['ORDERING']
+        if ordering == 'RANGE29':
+            mocpy.coverage_2d_from_fits_pre_v2(
+                result.__index,
+                bin_HDU_table.data[key].astype(np.int64)
+            )
+        else:
+            mocpy.coverage_2d_from_fits(
+                result.__index,
+                bin_HDU_table.data[key].astype(np.uint64)
+            )
         return result
-
-    @classmethod
-    def from_fits_pre_v2(cls, filename):
-        """
-        Loads a STMOC from a FITS file, using the pre-MOC2.0 standard
-        (time ranges coded with negative values, single time range associated to a SMOC).
-
-        Parameters
-        ----------
-        filename : str
-            The path to the FITS file.
-
-        Returns
-        -------
-        result : `~mocpy.moc.STMOC`
-            The resulting STMOC.
-        """
-        # Open the FITS file
-        with fits.open(filename) as hdulist:
-            stmoc = STMOC.deserialization_pre_v2(hdulist)
-
-        return stmoc
 
     @classmethod
     def from_fits(cls, filename):
         """
         Loads a STMOC from a FITS file,
         using the astropy.io fits reader.
+
+        WARNING
+        -------
+        This is deprecated and will be soon removed.
+        Use `load(cls, path, format='fits')` instead.
+
 
         Parameters
         ----------
@@ -491,28 +453,6 @@ class STMOC(serializer.IO):
             stmoc = STMOC.deserialization(hdulist)
 
         return stmoc
-
-    @classmethod
-    def from_fits_native(cls, filename):
-        """
-        Loads a STMOC from a FITS file,
-        without requiring a python fits reader.
-        (it may replace `from_fits`)
-
-        Parameters
-        ----------
-        filename : str
-            The path to the FITS file.
-
-        Returns
-        -------
-        result : `~mocpy.moc.STMOC`
-            The resulting STMOC.
-        """
-        stmoc = cls()
-        mocpy.coverage_2d_from_fits_file(stmoc.__index, filename)
-        return stmoc
-
 
     def save(self, path, format='fits'):
         """

@@ -2,13 +2,14 @@
 //! related to the creation and manipulation of
 //! temporal coverages.
 
-use ndarray::{Array, Array1, Array2, Axis};
+use ndarray::{Array1, Array2};
 
 use crate::coverage;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 use intervals::mocranges::TimeRanges;
 use intervals::deser::fits::error::FitsError;
+use std::ops::Range;
 
 /// Create a temporal coverage from a list of time ranges expressed in jd.
 ///
@@ -26,19 +27,15 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
             "min and max ranges have not the same shape",
         ))
     } else {
-        if min_times.is_empty() {
+        /*if min_times.is_empty() {
             return Ok(Array::zeros((1, 0)));
+        }*/
+        let mut ranges: Vec<Range<u64>> = Vec::with_capacity(min_times.len());
+        for (min, max) in min_times.into_iter().zip(max_times.into_iter()) {
+            ranges.push((min * 86400000000_f64) as u64..(max * 86400000000_f64) as u64);
         }
-        let shape = (min_times.shape()[0], 1);
-
-        let min_times = min_times.into_shape(shape).unwrap().mapv(|e| (e * 86400000000_f64) as u64);
-        let max_times = max_times.into_shape(shape).unwrap().mapv(|e| (e * 86400000000_f64) as u64);
-
-        let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
-        let ranges = coverage::build_time_ranges_from_py(ranges);
-
-        let result: Array2<u64> = ranges.into();
-        Ok(result)
+        let ranges = TimeRanges::new_from(ranges);
+        Ok(ranges.into())
     }
 }
 
@@ -58,19 +55,12 @@ pub fn from_time_ranges_in_microsec_since_jd_origin(min_times: Array1<u64>, max_
             "min and max ranges have not the same shape",
         ))
     } else {
-        if min_times.is_empty() {
-            return Ok(Array::zeros((1, 0)));
+        let mut ranges: Vec<Range<u64>> = Vec::with_capacity(min_times.len());
+        for (min, max) in min_times.into_iter().zip(max_times.into_iter()) {
+            ranges.push(min..max);
         }
-        let shape = (min_times.shape()[0], 1);
-
-        let min_times = min_times.into_shape(shape).unwrap();
-        let max_times = max_times.into_shape(shape).unwrap();
-
-        let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
-        let ranges = coverage::build_time_ranges_from_py(ranges);
-
-        let result: Array2<u64> = ranges.into();
-        Ok(result)
+        let ranges = TimeRanges::new_from(ranges);
+        Ok(ranges.into())
     }
 }
 

@@ -331,8 +331,8 @@ mod tests {
     // rangemoc2d_to_json_aladin(moc2.into_cell_moc2_iter(), &None, &mut sink);
     cellmoc2d_to_json_aladin(moc2.into_cell_moc2_iter(), &None, &mut sink);
     let json = String::from_utf8_lossy(&sink);
-    let cellmoc2 = cellmoc2d_from_json_aladin(&json).unwrap();
-    //cellmoc2.into_cell_moc2_iter().
-    // println!("{}\n", &json);
+    let cellmoc2 = cellmoc2d_from_json_aladin::<u64, Time<u64>, u64, Hpx<u64>>(&json);
+    // cellmoc2.into_cell_moc2_iter().
+    println!("{}\n", &json);
   }
 }

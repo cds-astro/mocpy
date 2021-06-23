@@ -451,28 +451,28 @@ def test_from_valued_healpix_cells_bayestar():
 
 #### TESTING new features ####
 def test_moc_save_load_deser():
-    smoc = mocpy.MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", 'ascii')
+    smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", 'ascii')
     smoc_ascii = smoc.to_string('ascii')
     smoc_ascii
     smoc_json = smoc.to_string('json')
     smoc_json
-    smoc_bis = mocpy.MOC.from_string(smoc_json, 'json')
+    smoc_bis = MOC.from_string(smoc_json, 'json')
     assert smoc == smoc_bis
 
-    smoc_bis = mocpy.MOC.load('resources/MOC2.0/smoc.ascii.txt', 'ascii')
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.ascii.txt', 'ascii')
     assert smoc == smoc_bis
 
-    smoc_bis = mocpy.MOC.load('resources/MOC2.0/SMOC.fits', 'fits')
+    smoc_bis = MOC.load('resources/MOC2.0/SMOC.fits', 'fits')
     assert smoc == smoc_bis
 
     smoc.save('resources/MOC2.0/smoc.py.test.fits', 'fits')
     smoc.save('resources/MOC2.0/smoc.py.test.json', 'json')
     smoc.save('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
-    smoc_bis = mocpy.MOC.load('resources/MOC2.0/smoc.py.test.fits', 'fits')
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.fits', 'fits')
     assert smoc == smoc_bis
-    smoc_bis = mocpy.MOC.load('resources/MOC2.0/smoc.py.test.json', 'json')
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.json', 'json')
     assert smoc == smoc_bis
-    smoc_bis = mocpy.MOC.load('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
     assert smoc == smoc_bis
 
 
