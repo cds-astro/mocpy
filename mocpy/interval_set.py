@@ -29,7 +29,7 @@ class IntervalSet:
     in the constructor. As there are no ways of modifying an IntervalSet object (e.g. add new HEALPix cells) then we are
     sure an IntervalSet is consistent when manipulating it for intersecting MOCs, doing their union etc...
     """
-    HPY_MAX_ORDER = np.uint8(29)
+    HPX_MAX_ORDER = np.uint8(29)
     TIME_MAX_ORDER = np.uint8(61)
 
     def __init__(self, intervals=None, make_consistent=True):

@@ -22,7 +22,6 @@ class AbstractMOC(serializer.IO):
     """
     Basic functions for manipulating MOCs.
     """
-    HPY_MAX_NORDER = np.uint8(29)
     LARK_PARSER_STR = None
 
     def __init__(self, interval_set=None):
