@@ -1,27 +1,32 @@
-use crate::bounded::Bounded;
-use num::{Integer, PrimInt};
 
-use crate::ranges::Ranges;
 use std::cmp;
 use std::ops::Range;
+use std::collections::HashSet;
 
 use rayon::prelude::*;
 
-#[derive(Debug)]
-pub struct Ranges2D<T, S>
-where
-    T: Integer + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Sync + Send + std::fmt::Debug,
-{
-    // First dimension
-    pub x: Vec<Range<T>>,
-    // Second dimension (usually the spatial one)
-    // Consecutive S values do not always refer to
-    // neighbours spatial cells. Therefore there is a few chance
-    // that time coverage will be the same for consecutive
-    // spatial cells. So the spatial cells will not be merged
-    // a lot.
-    pub y: Vec<Ranges<S>>,
+use crate::ranges::{Ranges, Idx, SNORanges};
+
+/// Generic operations on a set of Sorted and Non-Overlapping ranges.
+/// SNO = Sorted Non-Overlapping
+pub trait SNORanges2D<'a, T: Idx, S: Idx>: Sized {
+
+    // TODO: remove from here and put directly in a constructor
+    fn make_consistent(self) -> Self;
+
+    fn is_empty(&self) -> bool;
+
+    /// Checks whether a (time, position) tuple lies into the `NestedRanges2D<T, S>`
+    ///
+    /// # Arguments
+    ///
+    /// * ``time`` - The time at which the coordinate has been observed
+    /// * ``range`` - The spatial pixel of the nested range
+    fn contains(&self, time: T, range: &Range<S>) -> bool;
+
+    fn union(&self, other: &Self) -> Self;
+    fn intersection(&self, other: &Self) -> Self;
+    fn difference(&self, other: &Self) -> Self;
 }
 
 type Operation<T, S> = fn(
@@ -43,20 +48,30 @@ type Operation<T, S> = fn(
     usize,
 ) -> Option<Ranges<S>>;
 
+
+
+#[derive(Debug)]
+pub struct Ranges2D<T: Idx, S: Idx> {
+    // First dimension
+    pub x: Vec<Range<T>>,
+    // Second dimension (usually the spatial one)
+    // Consecutive S values do not always refer to
+    // neighbours spatial cells. Therefore there is a few chance
+    // that time coverage will be the same for consecutive
+    // spatial cells. So the spatial cells will not be merged
+    // a lot.
+    pub y: Vec<Ranges<S>>,
+}
+
+
 #[derive(Eq, PartialEq, Debug)]
-struct BoundRange<T>
-where
-    T: Integer + Sync + std::fmt::Debug,
-{
+struct BoundRange<T: Idx> {
     x: T,
     y_idx: usize,
     start: bool
 }
 
-impl<T> BoundRange<T>
-where
-    T: Integer + Sync + std::fmt::Debug,
-{
+impl<T: Idx> BoundRange<T> {
     fn new(x: T, y_idx: usize, start: bool) -> BoundRange<T> {
         BoundRange {
             x,
@@ -67,35 +82,24 @@ where
 }
 
 use std::cmp::Ordering;
-impl<T> Ord for BoundRange<T>
-where
-    T: Integer + Sync + std::fmt::Debug,
-{
+impl<T: Idx> Ord for BoundRange<T> {
     fn cmp(&self, other: &BoundRange<T>) -> Ordering {
         // Notice that the we flip the ordering on costs.
         // In case of a tie we compare positions - this step is necessary
         // to make implementations of `PartialEq` and `Ord` consistent.
         self.x.cmp(&other.x)
-            .then_with(|| self.start.cmp(&other.start))
+          .then_with(|| self.start.cmp(&other.start))
     }
 }
 
 // `PartialOrd` needs to be implemented as well.
-impl<T> PartialOrd for BoundRange<T>
-where
-    T: Integer + Sync + std::fmt::Debug,
-{
+impl<T: Idx> PartialOrd for BoundRange<T> {
     fn partial_cmp(&self, other: &BoundRange<T>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-use std::collections::HashSet;
-impl<T, S> Ranges2D<T, S>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
-{
+impl<T: Idx, S: Idx> Ranges2D<T, S> {
     /// Creates a 2D coverage
     ///
     /// # Arguments
@@ -124,7 +128,7 @@ where
         // from the second tuple.
         let mut prev_s = spatial_coverages.first().unwrap().clone();
         let mut prev_t = time_ranges.first().unwrap().clone();
-        // At this point: 
+        // At this point:
         // * There is at least 2 (time, space) tuples.
         // * Time ranges are not overlapping because (see the step 2. for more details)
         //   They can touch to each other.
@@ -168,70 +172,64 @@ where
         self.y = res_s;
     }
 
-    pub fn make_consistent(mut self) -> Self {
-        if !self.is_empty() {
-            let mut sorted_time_bound_ranges = self.x.par_iter()
-                .enumerate()
-                .map(|(idx, t)| {
-                    let start_b = BoundRange::new(t.start, idx, true);
-                    let end_b = BoundRange::new(t.end, idx, false);
-
-                    vec![start_b, end_b]
-                })
-                .flatten()
-                .collect::<Vec<_>>();
-
-            (&mut sorted_time_bound_ranges).par_sort_unstable_by(|l, r| {
-                l.cmp(&r)
-            });
-
-            let mut time_ranges = vec![];
-            let mut spatial_coverages = vec![];
-
-            let mut ranges_idx = HashSet::new();
-            ranges_idx.insert(0);
-            let mut prev_time_bound = sorted_time_bound_ranges
-                .first()
-                .unwrap()
-                .x;
-            for time_bound in sorted_time_bound_ranges.iter().skip(1) {
-                let cur_time_bound = time_bound.x;
-
-                if cur_time_bound > prev_time_bound && !ranges_idx.is_empty() {
-                    let spatial_coverage = ranges_idx.par_iter()
-                        .map(|coverage_idx| {
-                            let spatial_coverage = self.y[coverage_idx.clone()].clone();
-                            spatial_coverage
-                        })
-                        .reduce(
-                            || Ranges::<S>::new(vec![]),
-                            |s1, s2| {
-                                s1.union(&s2)
-                            }
-                        );
-
-                    time_ranges.push(prev_time_bound..cur_time_bound);
-                    spatial_coverages.push(spatial_coverage);
-                }
-
-                if time_bound.start {
-                    // A new time range begins, we add its S-MOC idx
-                    // to the set
-                    ranges_idx.insert(time_bound.y_idx);
-                } else {
-                    ranges_idx.remove(&time_bound.y_idx);
-                }
-
-                prev_time_bound = cur_time_bound;
-            }
-
-            // Time ranges are not overlapping anymore but can be next
-            // to each other.   
-            // One must check if they are equal and if so, merge them.
-            self.compress(time_ranges, spatial_coverages);
+    fn op_union(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.union(s2))
+        } else if !in_t1 && in_t2 {
+            let s2 = &other.y[j >> 1];
+            Some(s2.clone())
+        } else if in_t1 && !in_t2 {
+            let s1 = &self.y[i >> 1];
+            Some(s1.clone())
+        } else {
+            None
         }
+    }
 
-        self
+    fn op_intersection(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.intersection(s2))
+        } else {
+            None
+        }
+    }
+
+    fn op_difference(
+        &self,
+        other: &Self,
+        in_t1: bool,
+        in_t2: bool,
+        i: usize,
+        j: usize,
+    ) -> Option<Ranges<S>> {
+        if in_t1 && in_t2 {
+            let s1 = &self.y[i >> 1];
+            let s2 = &other.y[j >> 1];
+            Some(s1.difference(s2))
+        } else if in_t1 && !in_t2 {
+            let s1 = &self.y[i >> 1];
+            Some(s1.clone())
+        } else {
+            None
+        }
     }
 
     fn merge(&self, other: &Self, op: Operation<T, S>) -> Ranges2D<T, S> {
@@ -368,149 +366,95 @@ where
             y: s_ranges,
         }
     }
+}
 
-    fn op_union(
-        &self,
-        other: &Self,
-        in_t1: bool,
-        in_t2: bool,
-        i: usize,
-        j: usize,
-    ) -> Option<Ranges<S>> {
-        if in_t1 && in_t2 {
-            let s1 = &self.y[i >> 1];
-            let s2 = &other.y[j >> 1];
-            Some(s1.union(s2))
-        } else if !in_t1 && in_t2 {
-            let s2 = &other.y[j >> 1];
-            Some(s2.clone())
-        } else if in_t1 && !in_t2 {
-            let s1 = &self.y[i >> 1];
-            Some(s1.clone())
-        } else {
-            None
+impl<'a, T: Idx, S: Idx> SNORanges2D<'a, T, S> for Ranges2D<T, S> {
+
+    fn make_consistent(mut self) -> Self {
+        if !self.is_empty() {
+            let mut sorted_time_bound_ranges = self.x.par_iter()
+              .enumerate()
+              .map(|(idx, t)| {
+                  let start_b = BoundRange::new(t.start, idx, true);
+                  let end_b = BoundRange::new(t.end, idx, false);
+
+                  vec![start_b, end_b]
+              })
+              .flatten()
+              .collect::<Vec<_>>();
+
+            (&mut sorted_time_bound_ranges).par_sort_unstable_by(|l, r| {
+                l.cmp(&r)
+            });
+
+            let mut time_ranges = vec![];
+            let mut spatial_coverages = vec![];
+
+            let mut ranges_idx = HashSet::new();
+            ranges_idx.insert(0);
+            let mut prev_time_bound = sorted_time_bound_ranges
+              .first()
+              .unwrap()
+              .x;
+            for time_bound in sorted_time_bound_ranges.iter().skip(1) {
+                let cur_time_bound = time_bound.x;
+
+                if cur_time_bound > prev_time_bound && !ranges_idx.is_empty() {
+                    let spatial_coverage = ranges_idx.par_iter()
+                      .map(|coverage_idx| {
+                          let spatial_coverage = self.y[coverage_idx.clone()].clone();
+                          spatial_coverage
+                      })
+                      .reduce(
+                          || Ranges::<S>::default(),
+                          |s1, s2| {
+                              s1.union(&s2)
+                          }
+                      );
+
+                    time_ranges.push(prev_time_bound..cur_time_bound);
+                    spatial_coverages.push(spatial_coverage);
+                }
+
+                if time_bound.start {
+                    // A new time range begins, we add its S-MOC idx
+                    // to the set
+                    ranges_idx.insert(time_bound.y_idx);
+                } else {
+                    ranges_idx.remove(&time_bound.y_idx);
+                }
+
+                prev_time_bound = cur_time_bound;
+            }
+
+            // Time ranges are not overlapping anymore but can be next
+            // to each other.
+            // One must check if they are equal and if so, merge them.
+            self.compress(time_ranges, spatial_coverages);
         }
+
+        self
     }
 
-    pub fn union(&self, other: &Self) -> Self {
-        self.merge(other, Self::op_union)
-    }
-
-    fn op_intersection(
-        &self,
-        other: &Self,
-        in_t1: bool,
-        in_t2: bool,
-        i: usize,
-        j: usize,
-    ) -> Option<Ranges<S>> {
-        if in_t1 && in_t2 {
-            let s1 = &self.y[i >> 1];
-            let s2 = &other.y[j >> 1];
-            Some(s1.intersection(s2))
-        } else {
-            None
-        }
-    }
-
-    pub fn intersection(&self, other: &Self) -> Self {
-        self.merge(other, Self::op_intersection)
-    }
-
-    fn op_difference(
-        &self,
-        other: &Self,
-        in_t1: bool,
-        in_t2: bool,
-        i: usize,
-        j: usize,
-    ) -> Option<Ranges<S>> {
-        if in_t1 && in_t2 {
-            let s1 = &self.y[i >> 1];
-            let s2 = &other.y[j >> 1];
-            Some(s1.difference(s2))
-        } else if in_t1 && !in_t2 {
-            let s1 = &self.y[i >> 1];
-            Some(s1.clone())
-        } else {
-            None
-        }
-    }
-
-    pub fn difference(&self, other: &Self) -> Self {
-        self.merge(other, Self::op_difference)
-    }
-
-    pub fn is_empty(&self) -> bool {
+    fn is_empty(&self) -> bool {
         self.x.is_empty()
     }
 
-    /// Compute the depth of the coverage
-    ///
-    /// # Returns
-    ///
-    /// A tuple containing two values:
-    ///
-    /// * The maximum depth along the `T` axis
-    /// * The maximum depth along the `S` axis
-    ///
-    /// # Info
-    ///
-    /// If the `NestedRanges2D<T, S>` is empty, the depth returned
-    /// is set to (0, 0)
-    pub fn depth(&self) -> (i8, i8) {
-        let y = self.y
-            .par_iter()
-            // Compute the depths of the Ranges<T>
-            .map(|ranges| ranges.depth())
-            // Get the max of these depths
-            .max()
-            // If there are no ranges, the max depth
-            // along the second dimension is set to 0
-            .unwrap_or_else(|| 0);
-
-        let x = self.x
-            .par_iter()
-            // Compute de depths of the first dimensional ranges
-            .map(|range| {
-                let res = range.start | range.end;
-                let mut depth: i8 = <T>::MAXDEPTH - (res.trailing_zeros() >> 1) as i8;
-
-                if depth < 0 {
-                    depth = 0;
-                }
-                depth
-            })
-            // Get the max of these depths
-            .max()
-            // If there are no ranges, the max depth
-            // along the first dimension is set to 0
-            .unwrap_or_else(|| 0);
-
-        (x, y)
-    }
-
-    /// Checks whether a (time, position) tuple lies into the `NestedRanges2D<T, S>`
-    /// 
-    /// # Arguments
-    ///
-    /// * ``time`` - The time at which the coordinate has been observed
-    /// * ``range`` - The spatial pixel of the nested range
-    pub fn contains(&self, time: T, range: &Range<S>) -> bool {
+    fn contains(&self, time: T, range: &Range<S>) -> bool {
         // Check whether the time lies in the ranges of the `T` dimension
         let in_first_dim = self.x
-            .par_iter()
-            .enumerate()
-            .filter_map(|(idx, r)| {
-                let in_time_range = time >= r.start && time <= r.end;
-                if in_time_range {
-                    Some(idx)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        
+          .par_iter()
+          .enumerate()
+          .filter_map(|(idx, r)| {
+              let in_time_range = time >= r.start && time <= r.end;
+              if in_time_range {
+                  Some(idx)
+              } else {
+                  None
+              }
+          })
+          .collect::<Vec<_>>();
+
         if in_first_dim.len() > 1 {
             unreachable!();
         } else if in_first_dim.len() == 1 {
@@ -525,13 +469,23 @@ where
             false
         }
     }
+
+    fn union(&self, other: &Self) -> Self {
+        self.merge(other, Self::op_union)
+    }
+
+    fn intersection(&self, other: &Self) -> Self {
+        self.merge(other, Self::op_intersection)
+    }
+
+    fn difference(&self, other: &Self) -> Self {
+        self.merge(other, Self::op_difference)
+    }
 }
 
-impl<T, S> PartialEq for Ranges2D<T, S>
-where
-    T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-    S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
-{
+
+
+impl<T: Idx, S: Idx> PartialEq for Ranges2D<T, S> {
     fn eq(&self, other: &Self) -> bool {
         // It is fast to check if the two ranges
         // have the same number of ranges towards their
@@ -559,25 +513,18 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::bounded::Bounded;
-    use crate::ranges::ranges2d::Ranges2D;
-    use crate::ranges::Ranges;
-
-    use num::{Integer, PrimInt};
     use std::ops::Range;
+    use crate::ranges::{Ranges, Idx};
+    use crate::ranges::ranges2d::{Ranges2D, SNORanges2D};
 
-    fn creating_ranges<T, S>(
+    fn creating_ranges<T: Idx, S: Idx>(
         ranges_t: Vec<Range<T>>,
         ranges_s: Vec<Vec<Range<S>>>,
-    ) -> Ranges2D<T, S>
-    where
-        T: Integer + PrimInt + Bounded<T> + Send + Sync + std::fmt::Debug,
-        S: Integer + PrimInt + Bounded<S> + Send + Sync + std::fmt::Debug,
-    {
+    ) -> Ranges2D<T, S> {
         let mut vec_ranges_s = Vec::<Ranges<S>>::with_capacity(ranges_t.len());
 
         for range_s in ranges_s.into_iter() {
-            vec_ranges_s.push(Ranges::<S>::new(range_s).make_consistent());
+            vec_ranges_s.push(Ranges::<S>::new_from(range_s));
         }
 
         Ranges2D::new(ranges_t, vec_ranges_s).make_consistent()
@@ -587,19 +534,19 @@ mod tests {
     fn merge_overlapping_ranges() {
         let t = vec![0..15, 0..15, 15..30, 30..45, 15..30];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
-            Ranges::<u64>::new(vec![16..21]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
+          .make_consistent();
 
         let t_expect = vec![0..15, 15..45];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -612,16 +559,16 @@ mod tests {
     fn remove_different_length_time_ranges() {
         let t = vec![0..7, 0..30];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
-        
+          .make_consistent();
+
         let t_expect = vec![0..7, 7..30];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..21]),
-            Ranges::<u64>::new(vec![16..21])
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..21]),
+            Ranges::<u64>::new_unchecked(vec![16..21])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -634,17 +581,17 @@ mod tests {
     fn remove_different_length_time_ranges2() {
         let t = vec![0..30, 2..10];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
-        
+          .make_consistent();
+
         let t_expect = vec![0..2, 2..10, 10..30];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 5..21]),
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18])
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -657,17 +604,17 @@ mod tests {
     fn remove_different_length_time_ranges3() {
         let t = vec![0..5, 2..10];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
+          .make_consistent();
 
         let t_expect = vec![0..2, 2..5, 5..10];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 5..21]),
-            Ranges::<u64>::new(vec![16..21])
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..21]),
+            Ranges::<u64>::new_unchecked(vec![16..21])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -680,16 +627,16 @@ mod tests {
     fn remove_different_length_time_ranges4() {
         let t = vec![0..30, 10..30];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
+          .make_consistent();
 
         let t_expect = vec![0..10, 10..30];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 5..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..21]),
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -701,16 +648,16 @@ mod tests {
     fn remove_different_length_time_ranges5() {
         let t = vec![0..5, 5..20];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
+          .make_consistent();
 
         let t_expect = vec![0..5, 5..20];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![16..21])
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![16..21])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -720,20 +667,20 @@ mod tests {
     fn merge_overlapping_ranges_2() {
         let t = vec![0..15, 0..15, 15..30, 30..45, 15..30];
         let s = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4]),
-            Ranges::<u64>::new(vec![16..21]),
-            Ranges::<u64>::new(vec![16..21, 25..26]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4]),
+            Ranges::<u64>::new_unchecked(vec![16..21]),
+            Ranges::<u64>::new_unchecked(vec![16..21, 25..26]),
         ];
         let coverage = Ranges2D::<u64, u64>::new(t, s)
-            .make_consistent();
+          .make_consistent();
 
         let t_expect = vec![0..15, 15..30, 30..45];
         let s_expect = vec![
-            Ranges::<u64>::new(vec![0..4, 5..16, 17..18]),
-            Ranges::<u64>::new(vec![0..4, 16..21, 25..26]),
-            Ranges::<u64>::new(vec![16..21])
+            Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
+            Ranges::<u64>::new_unchecked(vec![0..4, 16..21, 25..26]),
+            Ranges::<u64>::new_unchecked(vec![16..21])
         ];
         let coverage_expect = Ranges2D::<u64, u64>::new(t_expect, s_expect);
         assert_eq!(coverage, coverage_expect);
@@ -757,7 +704,7 @@ mod tests {
         let c = a.union(&b);
 
         let res =
-            creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
+          creating_ranges::<u64, u64>(vec![0..10, 10..20], vec![vec![16..21], vec![16..22]]);
         assert_eq!(res, c);
     }
     #[test]
@@ -834,7 +781,7 @@ mod tests {
 
         let a_inter_b = a.intersection(&b);
         let expect_a_inter_b =
-            creating_ranges::<u64, u64>(vec![2..3, 6..7], vec![vec![0..3], vec![7..10]]);
+          creating_ranges::<u64, u64>(vec![2..3, 6..7], vec![vec![0..3], vec![7..10]]);
 
         assert_eq!(expect_a_inter_b, a_inter_b);
 

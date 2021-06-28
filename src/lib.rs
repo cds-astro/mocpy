@@ -1,6 +1,5 @@
 #[cfg(feature = "rayon")]
 extern crate intervals;
-#[macro_use(concatenate)]
 
 extern crate ndarray;
 extern crate healpix;
@@ -14,27 +13,34 @@ extern crate pyo3;
 #[macro_use]
 extern crate lazy_static;
 
-use ndarray::{Array, Array1, Array2, Axis};
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Mutex;
+
+use ndarray::{Array, Array1, Array2, Ix2};
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
-use pyo3::types::{PyDict, PyList};
-use pyo3::{PyObject, ToPyObject};
+use pyo3::types::{PyDict, PyList, PyString};
+use pyo3::{PyObject, ToPyObject, exceptions};
 
-use intervals::nestedranges2d::NestedRanges2D;
-
-use std::collections::HashMap;
-use std::sync::Mutex;
+use intervals::ranges::{SNORanges, Ranges};
+use intervals::mocqty::MocQty;
+use intervals::mocranges::MocRanges;
+use intervals::hpxranges2d::TimeSpaceMoc;
+use std::path::Path;
+use std::ops::Range;
+use intervals::uniqranges::HpxUniqRanges;
 
 pub mod coverage;
 pub mod spatial_coverage;
 pub mod temporal_coverage;
 pub mod time_space_coverage;
 
-type Coverage2DHashMap = HashMap<usize, NestedRanges2D<u64, u64>>;
+type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
 lazy_static! {
     static ref COVERAGES_2D: Mutex<Coverage2DHashMap> = Mutex::new(HashMap::new());
-    static ref NUM_COVERAGES_2D: Mutex<usize> = Mutex::new(0);
+    static ref NUM_COVERAGES_2D: AtomicUsize = AtomicUsize::new(0);
 }
 
 /// Insert a Time-Space coverage in the Hash Map
@@ -48,16 +54,12 @@ lazy_static! {
 ///
 /// * This will panic if the `COVERAGES_2D` or `NUM_COVERAGES_2D`
 ///   are already held by the current thread
-fn insert_new_coverage(coverage: NestedRanges2D<u64, u64>) -> usize {
+fn insert_new_coverage(coverage: TimeSpaceMoc<u64, u64>) -> usize {
     let mut coverages = COVERAGES_2D.lock().unwrap();
-    let mut num_coverages = NUM_COVERAGES_2D.lock().unwrap();
-
-    let index = *num_coverages;
+    let index = NUM_COVERAGES_2D.fetch_add(1, Ordering::SeqCst );
     if let Some(_v) = coverages.insert(index, coverage) {
         panic!("There is already a coverage at this index.");
     }
-    *num_coverages += 1;
-
     index
 }
 
@@ -93,7 +95,7 @@ fn remove_coverage(index: usize) {
 /// * If no Time-Space coverage has been found in the hash map
 /// for this specific `index`.
 /// * If `COVERAGES_2D` is already held by the current thread.
-fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
+fn update_coverage(index: usize, coverage: TimeSpaceMoc<u64, u64>) {
     let mut coverages = COVERAGES_2D.lock().unwrap();
     coverages
         .insert(index, coverage)
@@ -101,6 +103,87 @@ fn update_coverage(index: usize, coverage: NestedRanges2D<u64, u64>) {
         // because we suppose there should be a coverage
         // stored in the hash map at the `index` key.
         .expect("There is no coverage present");
+}
+
+fn coverage_op<O>(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>, op: O)
+                  -> Py<PyArray2<u64>>
+    where
+      O: Fn(Ranges<u64>, Ranges<u64>) -> Ranges<u64>
+{
+    let ranges_a = a.as_array().to_owned();
+    let ranges_b = b.as_array().to_owned();
+
+    let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
+    let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
+
+    let result = op(cov_a, cov_b);
+
+    let result: Array2<u64> = result.into();
+    result.to_owned().into_pyarray(py).to_owned()
+}
+
+fn coverage_complement<Q, F>(py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> Py<PyArray2<u64>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    let ranges = ranges.as_array().to_owned();
+
+    let coverage = to_moc_ranges(ranges);
+    let result = coverage.complement();
+
+    let result = if !result.is_empty() {
+        result.into()
+    } else {
+        // TODO: try without this condition
+        Array::zeros((1, 0))
+    };
+
+    result.into_pyarray(py).to_owned()
+}
+
+
+fn coverage_degrade<Q, F>(
+    py: Python,
+    ranges: PyReadonlyArray2<u64>,
+    depth: u8,
+    to_moc_ranges: F,
+) -> PyResult<Py<PyArray2<u64>>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    // let ranges = ranges.as_array().to_owned();
+    if ranges.len() == 0 {
+        Ok(Array::zeros((1, 0)).into_pyarray(py).to_owned())
+    } else {
+        let ranges = ranges.as_array().to_owned();
+        let mut ranges = to_moc_ranges(ranges);
+        coverage::degrade_ranges(&mut ranges, depth)?;
+        // The result is already consistent
+
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+}
+
+fn coverage_merge_intervals<Q, F>(
+    py: Python,
+    ranges: PyReadonlyArray2<u64>,
+    min_depth: i8,
+    to_moc_ranges: F,
+) -> PyResult<Py<PyArray2<u64>>>
+    where
+      Q: MocQty<u64>,
+      F: Fn(Array2<u64>) -> MocRanges<u64, Q>
+{
+    let ranges = ranges.as_array().to_owned();
+
+    let mut coverage = to_moc_ranges(ranges);
+    coverage = coverage::merge(coverage, min_depth)?;
+
+    let result: Array2<u64> = coverage.into();
+    Ok(result.into_pyarray(py).to_owned())
 }
 
 #[pymodule]
@@ -125,7 +208,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "from_lonlat")]
     fn from_lonlat(
         py: Python,
-        depth: i8,
+        depth: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
     ) -> PyResult<Py<PyArray2<u64>>> {
@@ -168,7 +251,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let uniq = uniq.as_array().to_owned();
         let values = values.as_array().to_owned();
 
-        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth as u32, uniq, values, cumul_from, cumul_to)?;
+        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
 
         let result: Array2<u64> = ranges.into();
         Ok(result.into_pyarray(py).to_owned())
@@ -199,10 +282,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_time_lonlat(
         index: usize,
         times: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
-        d2: i8,
+        d2: u8,
     ) -> PyResult<()> {
         let times = times.as_array()
             .to_owned()
@@ -251,10 +334,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         index: usize,
         times_min: PyReadonlyArray1<f64>,
         times_max: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         lon: PyReadonlyArray1<f64>,
         lat: PyReadonlyArray1<f64>,
-        d2: i8,
+        d2: u8,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
             .to_owned()
@@ -308,7 +391,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         index: usize,
         times_min: PyReadonlyArray1<f64>,
         times_max: PyReadonlyArray1<f64>,
-        d1: i8,
+        d1: u8,
         spatial_coverages: &PyList,
     ) -> PyResult<()> {
         let times_min = times_min.as_array()
@@ -331,7 +414,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn project_on_first_dim(py: Python, ranges: PyReadonlyArray2<u64>, index: usize) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
         let ranges = ranges.as_array().to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges);
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
         // Get the coverage and perform the projection
         let result = {
@@ -375,7 +458,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ) -> Py<PyArray2<u64>> {
         // Build the input ranges from a Array2
         let ranges = ranges.as_array().to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges);
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
 
         // Get the coverage and perform the projection
         let result = {
@@ -416,7 +499,134 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         result.into_pyarray(py).to_owned()
     }
 
-    /// Deserialize a Time-Space coverage from FITS
+    /// Serialize a Time-Space coverage into a FITS file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_fits_file")]
+    fn coverage_2d_to_fits_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_fits_file(depth_max_t, depth_max_s, coverage, Path::new(&path))
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into an ASCII file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_ascii_file")]
+    fn coverage_2d_to_ascii_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_ascii_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into an ASCII string
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_ascii_str")]
+    fn coverage_2d_to_ascii_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_ascii_str(depth_max_t, depth_max_s, coverage)).into()
+    }
+
+    /// Serialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_json_file")]
+    fn coverage_2d_to_json_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_json_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_to_json_str")]
+    fn coverage_2d_to_json_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_json_str(depth_max_t, depth_max_s, coverage)).into()
+    }
+
+    /*
+    /// Deserialize a Time-Space coverage from a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_from_json_file")]
+    fn coverage_2d_from_json_file(path: String, index: usize) -> PyResult<()> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        time_space_coverage::to_json_file(depth_max_t, depth_max_s, coverage, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Deserialize a Time-Space coverage into a JSON file
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage
+    ///   to serialize.
+    /// * ``path`` - the path of the output file
+    #[pyfn(m, "coverage_2d_from_json_str")]
+    fn coverage_2d_from_json_str(py: Python, index: usize) -> Py<PyString> {
+        // Get the coverage and flatten it
+        // to a Array1
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+        let(depth_max_t, depth_max_s) = coverage.compute_min_depth();
+        PyString::new(py, &time_space_coverage::to_json_str(depth_max_t, depth_max_s, coverage)).into()
+    }*/
+
+
+
+
+    /// Deserialize a Time-Space coverage from FITS using the pre v2.0 MOC standard.
     ///
     /// # Context
     ///
@@ -440,8 +650,46 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// This method returns a `PyValueError` if the `Array1` is not
     /// defined as above.
+    #[pyfn(m, "coverage_2d_from_fits_pre_v2")]
+    fn coverage_2d_from_fits_pre_v2(index: usize, data: PyReadonlyArray1<i64>) -> PyResult<()> {
+        let data = data.as_array().to_owned();
+        let coverage_from_fits = time_space_coverage::from_fits_pre_v2(data)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_fits);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from FITS using the v2.0 MOC standard.
+    ///
+    /// # Context
+    ///
+    /// This is wrapped around the `from_fits` method
+    /// of MOCPy to load a Time-Space coverage from a
+    /// FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``data`` - A 1d array buffer containing the time and
+    ///   space axis ranges data.
+    ///
+    /// # Errors
+    ///
+    /// The `Array1` object stores the Time-Space coverage
+    /// under the nested format.
+    /// Its memory layout contains a list of time ranges followed by the
+    /// list of space ranges referred to that time ranges.
+    /// The most significant bit (MSB) of time ranges bounds is set to one so that one can
+    /// distinguish them from space ranges.
+    /// This is different from a negative value because we do not use the two's complement
+    /// representation, only a flag set on the MSB.
+    ///
+    /// This method returns a `PyValueError` if the `Array1` is not
+    /// defined as above.
     #[pyfn(m, "coverage_2d_from_fits")]
-    fn coverage_2d_from_fits(index: usize, data: PyReadonlyArray1<i64>) -> PyResult<()> {
+    fn coverage_2d_from_fits(index: usize, data: PyReadonlyArray1<u64>) -> PyResult<()> {
         let data = data.as_array().to_owned();
         let coverage_from_fits = time_space_coverage::from_fits(data)?;
 
@@ -451,6 +699,116 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         Ok(())
     }
+
+    /// Deserialize a Time-Space coverage from a FITS file (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the FITS file path
+    ///
+    /// # Warning
+    /// 
+    /// This function is not compatible with pre-v2.0 MOC standard.
+    /// 
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_fits_file")]
+    fn coverage_2d_from_fits_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_fits = time_space_coverage::from_fits_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_fits);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an ASCII file (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the ASCII file path
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_ascii_file")]
+    fn coverage_2d_from_ascii_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_ascii = time_space_coverage::from_ascii_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_ascii);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``path`` - the JSON file path
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_json_file")]
+    fn coverage_2d_from_json_file(index: usize, path: String) -> PyResult<()> {
+        let coverage_from_json = time_space_coverage::from_json_file(Path::new(&path))?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_json);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an ASCII string (compatible with the MOC v2.0 standard).
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``ascii`` - the ASCII string
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_ascii_str")]
+    fn coverage_2d_from_ascii_str(index: usize, ascii: String) -> PyResult<()> {
+        let coverage_from_ascii = time_space_coverage::from_ascii_str(ascii)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_ascii);
+
+        Ok(())
+    }
+
+    /// Deserialize a Time-Space coverage from an JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - the index used to store the Time-Space coverage
+    /// * ``json`` - the JSON string
+    ///
+    /// # Errors
+    ///
+    /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+    #[pyfn(m, "coverage_2d_from_json_str")]
+    fn coverage_2d_from_json_str(index: usize, json: String) -> PyResult<()> {
+        let coverage_from_json = time_space_coverage::from_json_str(json)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage_from_json);
+
+        Ok(())
+    }
+
 
     /// Create a new empty Time-Space coverage
     ///
@@ -467,9 +825,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         // Insert a new coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        let result = insert_new_coverage(empty_coverage);
-
-        result
+        insert_new_coverage(empty_coverage)
     }
 
     /// Drop the content of a Time-Space coverage
@@ -492,7 +848,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// If the Time-Space coverage is empty, the returned
     /// depth is `(0, 0)`.
     #[pyfn(m, "coverage_2d_depth")]
-    fn coverage_2d_depth(_py: Python, index: usize) -> (i8, i8) {
+    fn coverage_2d_depth(_py: Python, index: usize) -> (u8, u8) {
         // Get the coverage and computes its depth
         // If the coverage is empty, the depth will be
         // (0, 0)
@@ -561,9 +917,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the union
-            let result = time_space_coverage::union(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::union(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
@@ -588,14 +942,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the intersection
-            let result = time_space_coverage::intersection(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::intersection(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
         // hash map and return its index key to python
-        update_coverage(index, result);
+        update_coverage(index, result)
     }
 
     /// Perform the difference between two Time-Space coverages.
@@ -615,9 +967,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let coverage_right = coverages.get(&id_right).unwrap();
 
             // Perform the difference
-            let result = time_space_coverage::difference(coverage_left, coverage_right);
-
-            result
+            time_space_coverage::difference(coverage_left, coverage_right)
         };
 
         // Update the coverage in the COVERAGES_2D
@@ -696,7 +1046,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
-    /// Perform the union between two spatial coverages
+
+
+
+    /// Perform the union between two generic coverages
     ///
     /// # Arguments
     ///
@@ -704,19 +1057,22 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_union")]
     fn coverage_union(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
+        let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
 
-        let result = spatial_coverage::union(&cov_a, &cov_b);
+        let result = cov_a.union(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.to_owned().into_pyarray(py).to_owned()
+        result.to_owned().into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.union(&cov_b))
     }
 
-    /// Perform the difference between two spatial coverages
+
+
+    /// Perform the difference between two generic coverages
     ///
     /// # Arguments
     ///
@@ -724,16 +1080,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``b`` - The spatial coverage being the right operand
     #[pyfn(m, "coverage_difference")]
     fn coverage_difference(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py(ranges_a);
+        let cov_b = coverage::create_ranges_from_py(ranges_b);
 
-        let result = spatial_coverage::difference(&cov_a, &cov_b);
+        let result = cov_a.difference(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.into_pyarray(py).to_owned()
+        result.into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.difference(&cov_b))
     }
 
     /// Perform the intersection between two spatial coverages
@@ -748,39 +1105,40 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         a: PyReadonlyArray2<u64>,
         b: PyReadonlyArray2<u64>,
     ) -> Py<PyArray2<u64>> {
-        let ranges_a = a.as_array().to_owned();
+        /*let ranges_a = a.as_array().to_owned();
         let ranges_b = b.as_array().to_owned();
 
-        let cov_a = coverage::create_nested_ranges_from_py(ranges_a);
-        let cov_b = coverage::create_nested_ranges_from_py(ranges_b);
+        let cov_a = coverage::create_ranges_from_py(ranges_a);
+        let cov_b = coverage::create_ranges_from_py(ranges_b);
 
-        let result = spatial_coverage::intersection(&cov_a, &cov_b);
+        let result = cov_a.intersection(&cov_b);
 
         let result: Array2<u64> = result.into();
-        result.into_pyarray(py).to_owned()
+        result.into_pyarray(py).to_owned()*/
+        coverage_op(py, a, b, |cov_a, cov_b| cov_a.intersection(&cov_b))
     }
 
-    /// Computes the complement of the coverage
+    /// Computes the complement of the given nested/ring coverage
     ///
     /// # Arguments
     ///
     /// * ``ranges`` - The input spatial coverage
-    #[pyfn(m, "coverage_complement")]
-    fn coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-        let ranges = ranges.as_array().to_owned();
-
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
-        let result = spatial_coverage::complement(&coverage);
-
-        let result = if !result.is_empty() {
-            result.into()
-        } else {
-            // TODO: try without this condition
-            Array::zeros((1, 0))
-        };
-
-        result.into_pyarray(py).to_owned()
+    #[pyfn(m, "hpx_coverage_complement")]
+    fn hpx_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
+        coverage_complement(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
     }
+
+    /// Computes the complement of the given time coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The input time coverage
+    #[pyfn(m, "time_coverage_complement")]
+    fn time_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
+        coverage_complement(py, ranges, coverage::create_time_ranges_from_py_uncheked)
+    }
+
+
 
     /// Deserialize a spatial coverage from a json python dictionary
     ///
@@ -816,11 +1174,328 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn coverage_to_json(py: Python, ranges: PyReadonlyArray2<u64>) -> PyResult<PyObject> {
         let ranges = ranges.as_array().to_owned();
 
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
         let result = coverage::to_json(py, coverage)?;
         Ok(result.to_object(py))
     }
+
+
+    /// Serialize a spatial MOC into an FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_fits_file")]
+    fn spatial_moc_to_fits_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_fits_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a spatial MOC into an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_ascii_file")]
+    fn spatial_moc_to_ascii_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_ascii_file(depth, ranges, path)
+          .map_err(exceptions::PyIOError::new_err)
+    }
+
+    /// Serialize a spatial MOC into a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "spatial_moc_to_ascii_str")]
+    fn spatial_moc_to_ascii_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        PyString::new(py,&spatial_coverage::to_ascii_str(depth, ranges)).into()
+    }
+
+    /// Serialize a spatial MOC into a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_to_json_file")]
+    fn spatial_moc_to_json_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        spatial_coverage::to_json_file(depth, ranges, path)
+          .map_err(exceptions::PyIOError::new_err)
+    }
+
+    /// Serialize a spatial MOC into a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "spatial_moc_to_json_str")]
+    fn spatial_moc_to_json_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        PyString::new(py,&spatial_coverage::to_json_str(depth, ranges)).into()
+    }
+
+    /// Deserialize a spatial MOC from a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_fits_file")]
+    fn spatial_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_fits_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_ascii_file")]
+    fn spatial_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_ascii_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ascii`` - The json string
+    #[pyfn(m, "spatial_moc_from_ascii_str")]
+    fn spatial_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_ascii_str(ascii)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "spatial_moc_from_json_file")]
+    fn spatial_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_json_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a spatial MOC from a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``json`` - The json string
+    #[pyfn(m, "spatial_moc_from_json_str")]
+    fn spatial_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = spatial_coverage::from_json_str(json)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+
+
+
+    /// Serialize a time MOC into a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_fits_file")]
+    fn time_moc_to_fits_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_fits_file(depth, ranges, path)
+          .map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+    }
+
+    /// Serialize a time MOC into an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_ascii_file")]
+    fn time_moc_to_ascii_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_ascii_file(depth, ranges, path)
+          .map_err(exceptions::PyIOError::new_err)
+    }
+
+    /// Serialize a time MOC into a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "time_moc_to_ascii_str")]
+    fn time_moc_to_ascii_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        PyString::new(py,&temporal_coverage::to_ascii_str(depth, ranges)).into()
+    }
+
+    /// Serialize a time MOC into a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_to_json_file")]
+    fn time_moc_to_json_file(
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+        path: String,
+    ) -> PyResult<()> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        temporal_coverage::to_json_file(depth, ranges, path)
+          .map_err(exceptions::PyIOError::new_err)
+    }
+
+    /// Serialize a time MOC into a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
+    ///               at the deepest level, in which case the computed depth will not be deep enough)
+    /// * ``ranges`` - The list of time ranges to serialize.
+    #[pyfn(m, "time_moc_to_json_str")]
+    fn time_moc_to_json_str(
+        py: Python,
+        depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> Py<PyString> {
+        let ranges = ranges.as_array().to_owned();
+        let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
+        PyString::new(py,&temporal_coverage::to_json_str(depth, ranges)).into()
+    }
+
+    /// Deserialize a time MOC from a FITS file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_fits_file")]
+    fn time_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_fits_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from an ASCII file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_ascii_file")]
+    fn time_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_ascii_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a ASCII string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ascii`` - The json string
+    #[pyfn(m, "time_moc_from_ascii_str")]
+    fn time_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_ascii_str(ascii)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a JSON file.
+    ///
+    /// # Arguments
+    ///
+    /// * ``path`` - The file path
+    #[pyfn(m, "time_moc_from_json_file")]
+    fn time_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_json_file(path)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Deserialize a time MOC from a JSON string.
+    ///
+    /// # Arguments
+    ///
+    /// * ``json`` - The json string
+    #[pyfn(m, "time_moc_from_json_str")]
+    fn time_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = temporal_coverage::from_json_str(json)?;
+        let result: Array2<u64> = ranges.into();
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
 
     /// Degrade a spatial coverage to a specific depth.
     ///
@@ -831,22 +1506,56 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Errors
     ///
-    /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-    #[pyfn(m, "coverage_degrade")]
-    fn coverage_degrade(
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_degrade")]
+    fn hpx_coverage_degrade(
         py: Python,
         ranges: PyReadonlyArray2<u64>,
-        depth: i8,
+        depth: u8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_degrade(py, ranges, depth, coverage::create_hpx_ranges_from_py_unchecked)
+    }
+
+    /// Degrade a time coverage to a specific depth.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The time coverage ranges to degrade.
+    /// * ``depth`` - The depth to degrade the time coverage to.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
+    #[pyfn(m, "time_coverage_degrade")]
+    fn time_coverage_degrade(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>,
+        depth: u8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_degrade(py, ranges, depth, coverage::create_time_ranges_from_py_uncheked)
+    }
+
+
+    /// Make a generic coverage consistent
+    ///
+    /// # Infos
+    ///
+    /// This is an internal method whose purpose is not to be called
+    /// by an user. It is called inside of the `mocpy.IntervalSet` class.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The coverage ranges to make consistent.
+    #[pyfn(m, "coverage_merge_gen_intervals")]
+    fn coverage_merge_gen_intervals(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>
     ) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = ranges.as_array().to_owned();
 
-        let mut ranges = coverage::create_nested_ranges_from_py(ranges);
-        coverage::degrade_nested_ranges(&mut ranges, depth)?;
+        let coverage = coverage::build_ranges_from_py(ranges);
 
-        // Merge the overlapping intervals after degradation
-        let ranges = ranges.make_consistent();
-
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = coverage.into();
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -868,22 +1577,42 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Errors
     ///
-    /// * ``min_depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-    #[pyfn(m, "coverage_merge_nested_intervals")]
-    fn coverage_merge_nested_intervals(
+    /// * ``min_depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "coverage_merge_hpx_intervals")]
+    fn coverage_merge_hpx_intervals(
         py: Python,
         ranges: PyReadonlyArray2<u64>,
         min_depth: i8,
     ) -> PyResult<Py<PyArray2<u64>>> {
-        let ranges = ranges.as_array().to_owned();
+        coverage_merge_intervals(py, ranges, min_depth, coverage::build_hpx_ranges_from_py)
+    }
 
-        // Convert the Array2<u64> to a NestedRanges<u64>
-        // and make it consistent
-        let mut coverage = coverage::create_nested_ranges_from_py(ranges);
-        coverage = coverage::merge(coverage, min_depth)?;
-
-        let result: Array2<u64> = coverage.into();
-        Ok(result.into_pyarray(py).to_owned())
+    /// Make a time coverage consistent
+    ///
+    /// # Infos
+    ///
+    /// This is an internal method whose purpose is not to be called
+    /// by an user. It is called inside of the `mocpy.IntervalSet` class.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The time coverage ranges to make consistent.
+    /// * ``min_depth`` - A minimum depth. This argument is optional.
+    ///   A min depth means that we do not want any cells to be
+    ///   of depth < to ``min_depth``. This argument is used for example for
+    ///   plotting a time coverage. All time cells of depth < 2 are splitted
+    ///   into cells of depth 2.
+    ///
+    /// # Errors
+    ///
+    /// * ``min_depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
+    #[pyfn(m, "coverage_merge_time_intervals")]
+    fn coverage_merge_time_intervals(
+        py: Python,
+        ranges: PyReadonlyArray2<u64>,
+        min_depth: i8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        coverage_merge_intervals(py, ranges, min_depth, coverage::build_time_ranges_from_py)
     }
 
     /// Compute the depth of a spatial coverage
@@ -891,12 +1620,28 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``ranges`` - The input coverage.
-    #[pyfn(m, "coverage_depth")]
-    fn coverage_depth(_py: Python, ranges: PyReadonlyArray2<u64>) -> i8 {
+    #[pyfn(m, "hpx_coverage_depth")]
+    fn hpx_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
+        coverage_depth(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
+    }
+
+    /// Compute the depth of a time coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``ranges`` - The input coverage.
+    #[pyfn(m, "time_coverage_depth")]
+    fn time_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
+        coverage_depth(py, ranges, coverage::create_time_ranges_from_py_uncheked)
+    }
+
+    fn coverage_depth<Q, F>(_py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> u8
+        where
+          Q: MocQty<u64>,
+          F: Fn(Array<u64, Ix2>) -> MocRanges<u64, Q>
+    {
         let ranges = ranges.as_array().to_owned();
-
-        let coverage = coverage::create_nested_ranges_from_py(ranges);
-
+        let coverage = to_moc_ranges(ranges);
         coverage::depth(&coverage)
     }
 
@@ -921,19 +1666,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "to_nested")]
     fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
-
         let result: Array2<u64> = if ranges.is_empty() {
             Array::zeros((1, 0))
         } else {
             let shape = (ranges.shape()[0], 1);
-
             let start = ranges.into_shape(shape).unwrap();
-            let end = &start + &Array2::<u64>::ones(shape);
-
-            let ranges = concatenate![Axis(1), start, end];
-            let uniq_coverage = coverage::create_uniq_ranges_from_py(ranges).make_consistent();
-
-            let nested_coverage = spatial_coverage::to_nested(uniq_coverage);
+            let mut ranges: Vec<Range<u64>> = Vec::with_capacity(start.len());
+            for uniq in start {
+                ranges.push(uniq..uniq + 1)
+            }
+            ranges.sort_by(|a, b| a.start.cmp(&b.start));
+            let nested_coverage = spatial_coverage::to_nested(HpxUniqRanges::new_unchecked(ranges));
             nested_coverage.into()
         };
 
@@ -952,9 +1695,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result: Array1<u64> = if ranges.is_empty() {
             Array::zeros((0,))
         } else {
-            let nested_coverage = coverage::create_nested_ranges_from_py(ranges);
+            let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
-            let uniq_coverage = nested_coverage.to_uniq();
+            let uniq_coverage = nested_coverage.to_hpx_uniq();
             uniq_coverage.into()
         };
 
@@ -968,6 +1711,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``min_times`` - The list of inf bounds of the time ranges expressed in **jd**
     /// * ``max_times`` - The list of sup bounds of the time ranges expressed in **jd**
     ///
+    /// # WARNING
+    /// * using `f64`, it is not precise to the microsecond,
+    ///   use `from_time_ranges_in_microsec_since_jd_origin` instead.
+    ///
+    ///
     /// # Errors
     ///
     /// * If the number of ``min_times`` and ``max_times`` do not match.
@@ -980,10 +1728,36 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let min_times = min_times.as_array().to_owned();
         let max_times = max_times.as_array().to_owned();
 
-        let coverage = temporal_coverage::from_time_ranges(min_times, max_times)?;
+        let coverage: Array2<u64> = temporal_coverage::from_time_ranges(min_times, max_times)?;
 
-        let result: Array2<u64> = coverage.into();
-        Ok(result.into_pyarray(py).to_owned())
+        Ok(coverage.into_pyarray(py).to_owned())
+    }
+
+    /// Create a temporal coverage from a list of time ranges expressed in microseconds since
+    /// jd origin.
+    ///
+    /// # Arguments
+    ///
+    /// * ``min_times`` - The list of inf bounds of the time ranges expressed in microseconds since
+    ///    jd origin.
+    /// * ``max_times`` - The list of sup bounds of the time ranges expressed in microseconds since
+    ///    jd origin.
+    ///
+    /// # Errors
+    ///
+    /// * If the number of ``min_times`` and ``max_times`` do not match.
+    #[pyfn(m, "from_time_ranges_in_microsec_since_jd_origin")]
+    fn from_time_ranges_in_microsec_since_jd_origin(
+        py: Python,
+        min_times: PyReadonlyArray1<u64>,
+        max_times: PyReadonlyArray1<u64>,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let min_times = min_times.as_array().to_owned();
+        let max_times = max_times.as_array().to_owned();
+
+        let coverage: Array2<u64> = temporal_coverage::from_time_ranges_in_microsec_since_jd_origin(min_times, max_times)?;
+
+        Ok(coverage.into_pyarray(py).to_owned())
     }
 
     /// Flatten HEALPix cells to a specific depth
@@ -993,10 +1767,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``data`` - The spatial coverage
     /// * ``depth`` - The depth to flatten the coverage to.
     #[pyfn(m, "flatten_pixels")]
-    fn flatten_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: i8) -> Py<PyArray1<u64>> {
+    fn flatten_hpx_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: u8) -> Py<PyArray1<u64>> {
         let data = data.as_array().to_owned();
 
-        let result = coverage::flatten_pixels(data, depth);
+        let result = coverage::flatten_hpx_pixels(data, depth);
 
         result.into_pyarray(py).to_owned()
     }
@@ -1022,7 +1796,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn from_healpix_cells(
         py: Python,
         pixels: PyReadonlyArray1<u64>,
-        depth: PyReadonlyArray1<i8>,
+        depth: PyReadonlyArray1<u8>,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let pixels = pixels.as_array().to_owned();
         let depth = depth.as_array().to_owned();
@@ -1032,5 +1806,32 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
-    Ok(())
+
+    /// Create a spatial coverage from an HEALPix map, i.e. from a list of HEALPix cell indices
+    /// at the same depth.
+    ///
+    /// # Arguments
+    ///
+    /// * ``pixels`` - A set of HEALPix cell indices
+    /// * ``depth`` - The depths of each HEALPix cell indices
+    ///
+    /// # Precondition
+    ///
+    /// * ``depth`` is a value in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
+    #[pyfn(m, "from_healpix_cells")]
+    fn from_healpix_map(
+        py: Python,
+        pixels: PyReadonlyArray1<u64>,
+        depth: PyReadonlyArray1<u8>,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let pixels = pixels.as_array().to_owned();
+        let depth = depth.as_array().to_owned();
+
+        let result = spatial_coverage::from_healpix_cells(pixels, depth)?;
+
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+   Ok(())
 }

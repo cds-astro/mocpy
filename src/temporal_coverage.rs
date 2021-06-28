@@ -2,11 +2,15 @@
 //! related to the creation and manipulation of
 //! temporal coverages.
 
-use ndarray::{Array, Array1, Array2, Axis};
+use ndarray::{Array1, Array2};
 
 use crate::coverage;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
+use intervals::mocranges::TimeRanges;
+use intervals::deser::fits::error::FitsError;
+use std::ops::Range;
+
 /// Create a temporal coverage from a list of time ranges expressed in jd.
 ///
 /// # Arguments
@@ -23,24 +27,71 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
             "min and max ranges have not the same shape",
         ))
     } else {
-        if min_times.is_empty() {
+        /*if min_times.is_empty() {
             return Ok(Array::zeros((1, 0)));
+        }*/
+        let mut ranges: Vec<Range<u64>> = Vec::with_capacity(min_times.len());
+        for (min, max) in min_times.into_iter().zip(max_times.into_iter()) {
+            ranges.push((min * 86400000000_f64) as u64..(max * 86400000000_f64) as u64);
         }
-        let shape = (min_times.shape()[0], 1);
-
-        let min_times = min_times.into_shape(shape).unwrap();
-        let max_times = max_times.into_shape(shape).unwrap();
-
-        let min_times = &min_times * &Array::from_elem(shape, 86400000000_f64);
-        let min_times = min_times.mapv(|e| e as u64);
-
-        let max_times = &max_times * &Array::from_elem(shape, 86400000000_f64);
-        let max_times = max_times.mapv(|e| e as u64);
-
-        let ranges = concatenate![Axis(1), min_times, max_times].to_owned();
-        let ranges = coverage::create_nested_ranges_from_py(ranges).make_consistent();
-
-        let result: Array2<u64> = ranges.into();
-        Ok(result)
+        let ranges = TimeRanges::new_from(ranges);
+        Ok(ranges.into())
     }
+}
+
+/// Create a temporal coverage from a list of time ranges expressed in microseconds since jd=0.
+///
+/// # Arguments
+///
+/// * ``min_times`` - The list of inf bounds (inclusive) of the time ranges expressed in **microseconds** since **jd=0**
+/// * ``max_times`` - The list of sup bounds (exclusive) of the time ranges expressed in **microseconds** since **jd=0**
+///
+/// # Errors
+///
+/// * If the number of ``min_times`` and ``max_times`` do not match.
+pub fn from_time_ranges_in_microsec_since_jd_origin(min_times: Array1<u64>, max_times: Array1<u64>) -> PyResult<Array2<u64>> {
+    if min_times.shape() != max_times.shape() {
+        Err(exceptions::PyValueError::new_err(
+            "min and max ranges have not the same shape",
+        ))
+    } else {
+        let mut ranges: Vec<Range<u64>> = Vec::with_capacity(min_times.len());
+        for (min, max) in min_times.into_iter().zip(max_times.into_iter()) {
+            ranges.push(min..max);
+        }
+        let ranges = TimeRanges::new_from(ranges);
+        Ok(ranges.into())
+    }
+}
+
+pub fn to_ascii_str(depth_max: u8, ranges: TimeRanges<u64>) -> String {
+    coverage::to_ascii_str(depth_max, ranges)
+}
+pub fn to_ascii_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_ascii_file(depth_max, ranges, path)
+}
+pub fn to_json_str(depth_max: u8, ranges: TimeRanges<u64>) -> String {
+    coverage::to_json_str(depth_max, ranges)
+}
+pub fn to_json_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> std::io::Result<()> {
+    coverage::to_json_file(depth_max, ranges, path)
+}
+pub fn to_fits_file(depth_max: u8, ranges: TimeRanges<u64>, path: String) -> Result<(), FitsError> {
+    coverage::to_fits_file(depth_max, ranges, path)
+}
+
+pub fn from_ascii_str(ascii: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_ascii_str(ascii).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_ascii_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_ascii_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_str(json: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_json_str(json).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_json_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_json_file(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
+}
+pub fn from_fits_file(path: String) -> PyResult<TimeRanges<u64>> {
+    coverage::from_fits_file_time(path).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))
 }

@@ -11,8 +11,24 @@ from astropy.io import fits
 
 import cdshealpix
 
+from ..interval_set import IntervalSet
 from ..moc import MOC, World2ScreenMPL
 
+
+
+def test_interval_min_depth():
+    big_cells = np.array([[0, 4**29]], dtype=np.uint64)
+    itv_result = MOC(IntervalSet(big_cells, make_consistent=False), min_depth=1)
+
+    small_cells = np.array([[0, 4**28], [4**28, 2*4**28], [2*4**28, 3*4**28], [3*4**28, 4**29]], dtype=np.uint64)
+    itv_small_cells = MOC(IntervalSet(small_cells, make_consistent=False), make_consistent=False)
+    assert itv_result == itv_small_cells
+
+def test_interval_set_complement():
+    assert MOC().complement() == MOC(IntervalSet(np.array([[0, 12*4**29]], dtype=np.uint64)))
+    assert MOC().complement().complement() == MOC()
+    assert MOC(IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))).complement() == \
+        MOC(IntervalSet(np.array([[0, 1], [2, 5], [8, 12*4**29]], dtype=np.uint64)))
 
 #### TESTING MOC creation ####
 def get_random_skycoords(size):
@@ -432,3 +448,31 @@ def test_from_valued_healpix_cells_bayestar():
 
     for b in cumul_to:
         MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)
+
+#### TESTING new features ####
+def test_moc_save_load_deser():
+    smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", 'ascii')
+    smoc_ascii = smoc.to_string('ascii')
+    smoc_ascii
+    smoc_json = smoc.to_string('json')
+    smoc_json
+    smoc_bis = MOC.from_string(smoc_json, 'json')
+    assert smoc == smoc_bis
+
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.ascii.txt', 'ascii')
+    assert smoc == smoc_bis
+
+    smoc_bis = MOC.load('resources/MOC2.0/SMOC.fits', 'fits')
+    assert smoc == smoc_bis
+
+    smoc.save('resources/MOC2.0/smoc.py.test.fits', 'fits')
+    smoc.save('resources/MOC2.0/smoc.py.test.json', 'json')
+    smoc.save('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.fits', 'fits')
+    assert smoc == smoc_bis
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.json', 'json')
+    assert smoc == smoc_bis
+    smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
+    assert smoc == smoc_bis
+
+

@@ -23,29 +23,102 @@ class TimeMOC(AbstractMOC):
     # default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format='sec', scale='tdb')
 
-    def __init__(self, interval_set=None):
+    # I introduced, but do not like, the double `make_consistent` (MOC + IntervalSet)
+    # but `coverage_merge_time_intervals` is no more genric
+    # and I can't remove `make_consistent` from `IntervalSet` without changing tests
+    def __init__(self, interval_set=None, make_consistent=True, min_depth=None):
+        """
+        TimeMoc constructor.
+
+        The merging step of the overlapping intervals is done here.
+
+        Parameters
+        ----------
+        intervals : `~numpy.ndarray`
+            a N x 2 numpy array representing the set of intervals.
+        make_consistent : bool, optional
+            True by default. Remove the overlapping intervals that makes
+            a valid MOC (i.e. can be plot, serialized, manipulated).
+        """
         super(TimeMOC, self).__init__(interval_set)
 
+        if make_consistent:
+            if min_depth is None:
+                min_depth = -1
+
+            min_depth = np.int8(min_depth)
+            self._merge_intervals(min_depth)
+
+    def _merge_intervals(self, min_depth):
+        if not self.empty():
+            self._interval_set._intervals = mocpy.coverage_merge_time_intervals(self._interval_set._intervals, min_depth)
+
+    @staticmethod
     def _times_to_microseconds(times):
         """
         Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping
         the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
-        
+
         Parameters
         ----------
         times : `astropy.time.Time`
         Astropy observation times
-        
+
         Returns
         -------
         times_microseconds : `np.array`
         """
-    
-        times_jd = np.asarray(times.jd, dtype=np.uint64)*np.uint64(self.DAY_MICRO_SEC)
-        times_us = np.asarray((times-Time(times_jd, format='jd')).sec * 1e6, dtype=np.uint64)
-        
-        return times_jd+times_us
-    
+        times_jd = np.asarray(times.jd, dtype=np.uint64)
+        times_us = np.asarray((times - Time(times_jd, format='jd', scale='tdb')).jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
+        return times_jd * np.uint64(TimeMOC.DAY_MICRO_SEC) + times_us
+
+    @property
+    def max_order(self):
+        """
+        Depth of the smallest Time cells found in the MOC instance.
+        """
+        depth = mocpy.time_coverage_depth(self._interval_set._intervals)
+        depth = np.uint8(depth)
+        return depth
+
+    def refine_to_order(self, min_depth):
+        intervals = mocpy.coverage_merge_time_intervals(self._interval_set._intervals, min_depth)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return TimeMOC(interval_set, make_consistent=False)
+
+    def complement(self):
+        """
+        Returns the complement of the TimeMOC instance.
+
+        Returns
+        -------
+        result : `~mocpy.moc.TimeMOC`
+            The resulting TimeMOC.
+        """
+        intervals = mocpy.time_coverage_complement(self._interval_set._intervals)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return TimeMOC(interval_set, make_consistent=False)
+
+    def degrade_to_order(self, new_order):
+        """
+        Degrades the MOC instance to a new, less precise, MOC.
+
+        The maximum depth (i.e. the depth of the smallest Time cells that can be found in the MOC) of the
+        degraded MOC is set to ``new_order``.
+
+        Parameters
+        ----------
+        new_order : int
+            Maximum depth of the output degraded MOC.
+
+        Returns
+        -------
+        moc : `~mocpy.tmoc.TimeMOC`
+            The degraded MOC.
+        """
+        intervals = mocpy.time_coverage_degrade(self._interval_set._intervals, new_order)
+        return TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
         """
@@ -64,7 +137,7 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times = self._times_to_microseconds(times)
+        times = TimeMOC._times_to_microseconds(times)
         times = np.atleast_1d(times)
 
         times = times.reshape((times.shape[0], 1))
@@ -72,7 +145,8 @@ class TimeMOC(AbstractMOC):
 
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
-        return TimeMOC(IntervalSet(intervals)).degrade_to_order(depth)
+        tmoc = TimeMOC(IntervalSet(intervals))
+        return tmoc.degrade_to_order(depth)
 
     @classmethod
     def from_time_ranges(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -97,6 +171,44 @@ class TimeMOC(AbstractMOC):
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
         
+        min_times = TimeMOC._times_to_microseconds(min_times)
+        min_times = np.atleast_1d(min_times)
+
+        max_times = TimeMOC._times_to_microseconds(max_times)
+        max_times = np.atleast_1d(max_times)
+
+        assert min_times.shape == max_times.shape
+
+        intervals = mocpy.from_time_ranges_in_microsec_since_jd_origin(min_times, max_times)
+
+        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        return tmoc.degrade_to_order(depth)
+
+
+    @classmethod
+    def from_time_ranges_approx(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
+        """
+        Create a TimeMOC from a range defined by two `astropy.time.Time`.
+        Uses the following approximation: simple take the JD time and multiply by the number of microseconds in a day.
+
+        Parameters
+        ----------
+        min_times : `astropy.time.Time`
+            astropy times defining the left part of the intervals
+        max_times : `astropy.time.Time`
+            astropy times defining the right part of the intervals
+        delta_t : `astropy.time.TimeDelta`, optional
+            the duration of one observation. It is set to 30 min by default. This data is used to compute the
+            more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+            is able to discriminate two observations separated by ``delta_t``).
+
+        Returns
+        -------
+        time_moc : `~mocpy.tmoc.TimeMOC`
+        """
+        # degrade the TimeMoc to the order computed from ``delta_t``
+        depth = TimeMOC.time_resolution_to_order(delta_t)
+
         min_times = np.asarray(min_times.jd)
         min_times = np.atleast_1d(min_times)
 
@@ -105,12 +217,9 @@ class TimeMOC(AbstractMOC):
 
         assert min_times.shape == max_times.shape
 
-        intervals = mocpy.from_time_ranges(
-            min_times.astype(np.float64),
-            max_times.astype(np.float64),
-        )
+        intervals = mocpy.from_time_ranges(min_times, max_times)
 
-        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False))
+        tmoc = TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
         return tmoc.degrade_to_order(depth)
 
     def add_neighbours(self):
@@ -122,7 +231,7 @@ class TimeMOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMOC`
             self extended by one degree of neighbors.
         """
-        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (IntervalSet.TIME_MAX_ORDER - self.max_order)
 
         intervals = self._interval_set._intervals
         # WARN: astype gives the ownership/writeable of the array to python
@@ -131,7 +240,7 @@ class TimeMOC(AbstractMOC):
         intervals = intervals.astype(np.uint64)
 
         intervals[:, 0] = np.maximum(intervals[:, 0] - time_delta, np.uint64(0))
-        intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 1] = np.minimum(intervals[:, 1] + time_delta, np.uint64((1 << 62) - 1))
 
         self._interval_set = IntervalSet(intervals)
         return self
@@ -145,7 +254,7 @@ class TimeMOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMOC`
             self shrinked by one degree of neighbors.
         """
-        time_delta = np.uint64(1) << (np.uint8(2)*(IntervalSet.HPY_MAX_ORDER - self.max_order))
+        time_delta = np.uint64(1) << (IntervalSet.TIME_MAX_ORDER - self.max_order)
 
         intervals = self._interval_set._intervals
         # WARN: astype gives the ownership/writeable of the array to python
@@ -153,7 +262,7 @@ class TimeMOC(AbstractMOC):
         # This will be removed as soon as this code is ported in rust
         intervals = intervals.astype(np.uint64)
 
-        intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 58) - 1))
+        intervals[:, 0] = np.minimum(intervals[:, 0] + time_delta, np.uint64((1 << 62) - 1))
         intervals[:, 1] = np.maximum(intervals[:, 1] - time_delta, np.uint64(0))
 
         good_intervals = intervals[:, 1] > intervals[:, 0]
@@ -427,7 +536,7 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        delta_t = TimeDelta(4**(29 - order) / 1e6, format='sec', scale='tdb')
+        delta_t = TimeDelta(2**(61 - order) / 1e6, format='sec', scale='tdb')
         return delta_t
 
     @staticmethod
@@ -447,7 +556,7 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        order = 29 - int(np.log2(delta_time.sec * 1e6) / 2)
+        order = 61 - int(np.log2(delta_time.sec * 1e6))
         return np.uint8(order)
 
     def plot(self, title='TimeMoc', view=(None, None), figsize=(9.5, 5), **kwargs):
@@ -536,3 +645,102 @@ class TimeMOC(AbstractMOC):
         cid = fig1.canvas.mpl_connect('motion_notify_event', on_mouse_motion)
 
         plt.show()
+
+    def save(self, path, format='fits'):
+        """
+        Writes the Time MOC to a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to save the MOC in.
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        if format == 'fits':
+            mocpy.time_moc_to_fits_file(self.max_order, self._interval_set._intervals, path)
+        elif format == 'ascii':
+            mocpy.time_moc_to_ascii_file(self.max_order, self._interval_set._intervals, path)
+        elif format == 'json':
+            mocpy.time_moc_to_json_file(self.max_order, self._interval_set._intervals, path)
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def load(cls, path, format='fits'):
+        """
+        Load the Time MOC from a file.
+
+        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to load the MOC from.
+        format : str, optional
+            The format from which the MOC is loaded.
+            Possible formats are "fits", "ascii" or "json".
+            By default, ``format`` is set to "fits".
+        """
+        if format == 'fits':
+            intervals = mocpy.time_moc_from_fits_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'ascii':
+            intervals = mocpy.time_moc_from_ascii_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'json':
+            intervals = mocpy.time_moc_from_json_file(path)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        else:
+            formats = ('fits', 'ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    def to_string(self, format='ascii'):
+        """
+        Writes the Time MOC into a string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        if format == 'ascii':
+            return mocpy.time_moc_to_ascii_str(self.max_order, self._interval_set._intervals)
+        elif format == 'json':
+            return mocpy.time_moc_to_json_str(self.max_order, self._interval_set._intervals)
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))
+
+    @classmethod
+    def from_string(cls, value, format='ascii'):
+        """
+        Deserialize the Time MOC from the given string.
+
+        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        Parameters
+        ----------
+        format : str, optional
+            The format in which the MOC will be serialized before being saved.
+            Possible formats are "ascii" or "json".
+            By default, ``format`` is set to "ascii".
+        """
+        if format == 'ascii':
+            intervals = mocpy.time_moc_from_ascii_str(value)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        elif format == 'json':
+            intervals = mocpy.time_moc_from_json_str(value)
+            return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        else:
+            formats = ('ascii', 'json')
+            raise ValueError('format should be one of %s' % (str(formats)))

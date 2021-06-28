@@ -29,9 +29,10 @@ class IntervalSet:
     in the constructor. As there are no ways of modifying an IntervalSet object (e.g. add new HEALPix cells) then we are
     sure an IntervalSet is consistent when manipulating it for intersecting MOCs, doing their union etc...
     """
-    HPY_MAX_ORDER = np.uint8(29)
+    HPX_MAX_ORDER = np.uint8(29)
+    TIME_MAX_ORDER = np.uint8(61)
 
-    def __init__(self, intervals=None, make_consistent=True, min_depth=None):
+    def __init__(self, intervals=None, make_consistent=True):
         """
         IntervalSet constructor.
 
@@ -42,8 +43,8 @@ class IntervalSet:
         intervals : `~numpy.ndarray`
             a N x 2 numpy array representing the set of intervals.
         make_consistent : bool, optional
-            True by default. Remove the overlapping intervals that makes
-            a valid MOC (i.e. can be plot, serialized, manipulated).
+                    True by default. Remove the overlapping intervals that makes
+                    a valid MOC (i.e. can be plot, serialized, manipulated).
         """
         intervals = np.array([[]], dtype=np.uint64) if intervals is None else intervals
         # TODO: remove the cast to np.uint64
@@ -54,20 +55,17 @@ class IntervalSet:
         self._intervals = intervals
 
         if make_consistent:
-            if min_depth is None:
-                min_depth = -1
+            self._merge_intervals()
 
-            min_depth = np.int8(min_depth)
-            self._merge_nested_intervals(min_depth)
 
     @classmethod
     def from_uniq(cls, pix):
         intervals = mocpy.to_nested(pix)
         return cls(intervals=intervals, make_consistent=False)
 
-    def _merge_nested_intervals(self, min_depth):
+    def _merge_intervals(self):
         if not self.empty():
-            self._intervals = mocpy.coverage_merge_nested_intervals(self._intervals, min_depth)
+            self._intervals = mocpy.coverage_merge_gen_intervals(self._intervals)
 
     def copy(self):
         """
@@ -125,9 +123,9 @@ class IntervalSet:
         intervals = mocpy.coverage_difference(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
-    def complement(self):
-        intervals = mocpy.coverage_complement(self._intervals)
-        return IntervalSet(intervals, make_consistent=False)
+    #def complement(self):
+    #    intervals = mocpy.coverage_complement(self._intervals)
+    #    return IntervalSet(intervals, make_consistent=False)*/
 
     @property
     def uniq(self):

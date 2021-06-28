@@ -6,11 +6,19 @@ import numpy as np
 
 def test_serialization():
     decals = STMOC.from_fits('resources/STMOC/STMoc-DECaLS-g.fits')
-    # Serialize to FITS
-    hdulist = decals.serialize(format="fits")
+    decals_bis = STMOC.load('resources/STMOC/STMoc-DECaLS-g.fits', format='fits')
+    assert(decals == decals_bis)
 
+    # Serialize to FITS
+    hdulist = decals.serialize(format="fits", pre_v2=True)
     # Deserialize from FITS
     decals_result = decals.deserialization(hdulist)
+    assert(decals == decals_result)
+
+    # Save to FITS
+    decals.save(path='resources/STMOC/STMoc-DECaLS-g.v2.fits', format='fits')
+    # Load from FITS
+    decals_result = STMOC.load(path='resources/STMOC/STMoc-DECaLS-g.v2.fits', format='fits')
 
     assert(decals == decals_result)
 
@@ -36,7 +44,7 @@ def test_is_empty():
 
 def test_max_depth():
     decals = STMOC.from_fits('resources/STMOC/STMoc-DECaLS-g.fits')
-    assert(decals.max_depth == (29, 9))
+    assert(decals.max_depth == (61, 9))
 
 
 def test_union_decals():
@@ -58,3 +66,30 @@ def test_difference_decals():
     
     result = decals.difference(decals)
     assert(result == STMOC())
+
+
+#### TESTING new features ####
+def test_stmoc_save_load_deser():
+    stmoc = STMOC.from_string("t61/1 3 5 s3/1-3 t61/50 52 s4/25", 'ascii');
+    stmoc_ascii = stmoc.to_string('ascii')
+    stmoc_ascii
+    stmoc_json = stmoc.to_string('json')
+    stmoc_json
+    stmoc_bis = STMOC.from_string(stmoc_json, 'json')
+    assert stmoc == stmoc_bis
+    
+    stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.ascii.txt', 'ascii')
+    assert stmoc == stmoc_bis
+    
+    stmoc_bis = STMOC.load('resources/MOC2.0/STMOC.fits', 'fits')
+    assert stmoc == stmoc_bis
+    
+    stmoc.save('resources/MOC2.0/stmoc.py.test.fits', 'fits')
+    stmoc.save('resources/MOC2.0/stmoc.py.test.json', 'json')
+    stmoc.save('resources/MOC2.0/stmoc.py.test.ascii', 'ascii')
+    stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.py.test.fits', 'fits')
+    assert stmoc == stmoc_bis
+    stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.py.test.json', 'json')
+    assert stmoc == stmoc_bis
+    stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.py.test.ascii', 'ascii')
+    assert stmoc == stmoc_bis

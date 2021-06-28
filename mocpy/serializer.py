@@ -1,7 +1,8 @@
 from astropy.io import fits
 
 class IO:
-    def _to_fits(self, uniq, optional_kw_dict=None):
+
+    def _to_fits(self, uniq, optional_kw_dict=None, pre_v2=False):
         """
         Serializes a MOC to the FITS format.
 
@@ -11,6 +12,7 @@ class IO:
             The array of HEALPix cells representing the MOC to serialize.
         optional_kw_dict : dict
             Optional keywords arguments added to the FITS header.
+        pre_v2 : used only for ST-MOC FITS serialization (to ensure backward compatibility)
 
         Returns
         -------
@@ -21,7 +23,10 @@ class IO:
             fits.ColDefs([
                 fits.Column(name=self._fits_column_name, format=self._fits_format, array=uniq)
             ]))
-        tbhdu.header.update(self._fits_header_keywords)
+        if pre_v2:
+            tbhdu.header.update(self._fits_header_keywords_pre_v2)
+        else:
+            tbhdu.header.update(self._fits_header_keywords)
 
         if optional_kw_dict:
             for key in optional_kw_dict:
@@ -30,7 +35,7 @@ class IO:
         thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
         return thdulist
 
-    def serialize(self, format='fits', optional_kw_dict=None):
+    def serialize(self, format='fits', optional_kw_dict=None, pre_v2=False):
         """
         Serializes the MOC into a specific format.
 
@@ -55,8 +60,7 @@ class IO:
         uniq = self._uniq_format()
 
         if format == 'fits':
-            result = self._to_fits(uniq=uniq,
-                                   optional_kw_dict=optional_kw_dict)
+            result = self._to_fits(uniq=uniq, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2)
         elif format == 'str':
             result = self._to_str(uniq=uniq)
         else:
@@ -67,7 +71,9 @@ class IO:
 
         return result
 
-    def write(self, path, format='fits', overwrite=False, optional_kw_dict=None):
+
+
+    def write(self, path, format='fits', overwrite=False, optional_kw_dict=None, pre_v2=False):
         """
         Writes the MOC to a file.
 
@@ -85,7 +91,7 @@ class IO:
         optional_kw_dict : optional
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
-        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict)
+        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2)
 
         if format == 'fits':
             serialization.writeto(path, overwrite=overwrite)

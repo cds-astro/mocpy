@@ -2,9 +2,16 @@ import pytest
 
 from astropy.time import Time
 from astropy.io import ascii
+from ..interval_set import IntervalSet
 from ..tmoc import TimeMOC
 
 import numpy as np
+
+def test_interval_set_complement():
+    assert TimeMOC().complement() == TimeMOC(IntervalSet(np.array([[0, 2*2**61]], dtype=np.uint64)))
+    assert TimeMOC().complement().complement() == TimeMOC()
+    assert TimeMOC(IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))).complement() == \
+        TimeMOC(IntervalSet(np.array([[0, 1], [2, 5], [8, 2*2**61]], dtype=np.uint64)))
 
 def test_empty_tmoc():
     times = Time([], format='jd', scale='tdb')
@@ -24,26 +31,26 @@ def test_empty_tmoc():
 
 def test_simple_tmoc():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
-    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 2 * 1e-6
-    assert tmoc.max_order == 29
+    assert tmoc.max_order == 61
 
     tmoc.write('tmoc.txt', format='json', overwrite=True)
 
 def test_single_time_tmoc():
     times = Time(2/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
-    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 1 * 1e-6
-    assert tmoc.max_order == 29
+    assert tmoc.max_order == 61
 
 
 def test_single_range_time_tmoc():
     min_times = Time(2/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
     max_times = Time(3/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
 
-    tmoc = TimeMOC.from_time_ranges(min_times, max_times, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_time_ranges(min_times, max_times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 1 * 1e-6
-    assert tmoc.max_order == 29
+    assert tmoc.max_order == 61
 
 
 def test_tmoc_from_time_ranges():
@@ -52,12 +59,14 @@ def test_tmoc_from_time_ranges():
     containing a list of time intervals
     """
     tmoc = TimeMOC.from_fits('resources/TMOC/HST_SDSSg/TMoc.fits')
+    print(tmoc)
 
     # Load HST_SDSSg from a CSV file
     data = ascii.read('resources/TMOC/HST_SDSSg/uniq-times.csv', format='csv')
-    tmoc2 = TimeMOC.from_time_ranges(Time(data['t_min'], format="mjd", scale="tdb"),
+    tmoc2 = TimeMOC.from_time_ranges_approx(Time(data['t_min'], format="mjd", scale="tdb"),
                                      Time(data['t_max'], format="mjd", scale="tdb"),
-                                     delta_t=TimeMOC.order_to_time_resolution(29))
+                                     delta_t=TimeMOC.order_to_time_resolution(61))
+    print(tmoc2)
 
     assert tmoc == tmoc2
 
@@ -74,16 +83,16 @@ def test_tmoc_from_single_time_range():
     """
     tmoc = TimeMOC.from_time_ranges(Time(0, format="mjd", scale="tdb"),
                                     Time(3, format="mjd", scale="tdb"),
-                                    delta_t=TimeMOC.order_to_time_resolution(29))
+                                    delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.jd == 3
 
 
 def test_add_neighbours():
     times = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
     times_expected = Time(np.array([1, 2, 3, 6, 7, 8])/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
-    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     
-    tmoc_expected = TimeMOC.from_times(times_expected, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc_expected = TimeMOC.from_times(times_expected, delta_t=TimeMOC.order_to_time_resolution(61))
     tmoc.add_neighbours()
 
     assert tmoc == tmoc_expected
@@ -92,8 +101,8 @@ def test_remove_neighbours():
     times = Time(np.array([1, 2, 3, 6, 7, 8])/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
     times_expected = Time([2/TimeMOC.DAY_MICRO_SEC, 7/TimeMOC.DAY_MICRO_SEC], format='jd', scale='tdb')
 
-    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(29))
-    tmoc_expected = TimeMOC.from_times(times_expected, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
+    tmoc_expected = TimeMOC.from_times(times_expected, delta_t=TimeMOC.order_to_time_resolution(61))
 
     tmoc.remove_neighbours()
 
@@ -112,7 +121,7 @@ def test_add_remove_back_and_forth():
 def test_contains():
     tmoc = TimeMOC.from_time_ranges(Time(np.array([0]), format="mjd", scale="tdb"),
                                     Time(np.array([1]), format="mjd", scale="tdb"),
-                                    delta_t=TimeMOC.order_to_time_resolution(29))
+                                    delta_t=TimeMOC.order_to_time_resolution(61))
 
     times_inside = Time(np.linspace(0, 1, num=100), format='mjd', scale='tdb')
     times_outside = Time(np.linspace(1.01, 2, num=100), format='mjd', scale='tdb')
@@ -175,3 +184,30 @@ def test_intersection(a, b, expect):
     res = a.intersection(b)
 
     assert res == expect
+
+
+#### TESTING new features ####
+def test_tmoc_save_load_deser():
+    tmoc = TimeMOC.from_string("31/1 32/4 35/")
+    tmoc_ascii = tmoc.to_string('ascii')
+    tmoc_ascii
+    tmoc_json = tmoc.to_string('json')
+    tmoc_json
+    tmoc_bis = TimeMOC.from_string(tmoc_json, 'json')
+    assert tmoc == tmoc_bis
+
+    tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.ascii.txt', 'ascii')
+    assert tmoc == tmoc_bis
+
+    tmoc_bis = TimeMOC.load('resources/MOC2.0/TMOC.fits', 'fits')
+    assert tmoc == tmoc_bis
+
+    tmoc.save('resources/MOC2.0/tmoc.py.test.fits', 'fits')
+    tmoc.save('resources/MOC2.0/tmoc.py.test.json', 'json')
+    tmoc.save('resources/MOC2.0/tmoc.py.test.ascii', 'ascii')
+    tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.py.test.fits', 'fits')
+    assert tmoc == tmoc_bis
+    tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.py.test.json', 'json')
+    assert tmoc == tmoc_bis
+    tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.py.test.ascii', 'ascii')
+    assert tmoc == tmoc_bis

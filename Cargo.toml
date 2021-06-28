@@ -1,6 +1,6 @@
 [package]
 name = "MOCPy"
-version = "0.8.5"
+version = "0.9.0"
 authors = [
   "Thomas Boch <thomas.boch@astro.unistra.fr>", 
   "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
@@ -42,19 +42,19 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-rand = "0.7.3"
 intervals = { path = "./src/intervals" }
-healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
-num = "0.2"
+healpix = { package = "cdshealpix", version = "0.5.4" }
+# healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
+num = "0.4"
 time = "*"
-rayon = "1.3.0"
+rayon = "1.5.1"
 lazy_static = "1.4.0"
 
 [dependencies.numpy]
-version = "0.13.0"
+version = "0.13.2"
 
 [dependencies.ndarray]
-version = "0.14.0"
+version = "0.15.3"
 default-features = false # do not include the default features, and optionally
                          # cherry-pick individual features
 features = ["rayon"]
@@ -62,6 +62,9 @@ features = ["rayon"]
 [dependencies.pyo3]
 version = "0.13.2"
 features = ["extension-module"]
+
+[dev-dependencies]
+rand = "0.8.3"
 
 [profile.release]
 opt-level = 3
