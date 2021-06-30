@@ -171,7 +171,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
             },
             Err(i) => {
                 i & 1 == 1 // index is odd => x.start inside the range
-                || x.end > result[i] // else (even index) => Check x.end > range.start
+                || (i < len && x.end > result[i]) // else (even index) => Check x.end > range.start
             },
         }
     }
