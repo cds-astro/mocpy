@@ -10,6 +10,7 @@ from ..interval_set import IntervalSet
 from ..abstract_moc import AbstractMOC
 
 from .. import mocpy
+from .. import utils
 
 __author__ = "Matthieu Baumann"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -53,24 +54,6 @@ class TimeMOC(AbstractMOC):
         if not self.empty():
             self._interval_set._intervals = mocpy.coverage_merge_time_intervals(self._interval_set._intervals, min_depth)
 
-    @staticmethod
-    def _times_to_microseconds(times):
-        """
-        Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping
-        the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
-
-        Parameters
-        ----------
-        times : `astropy.time.Time`
-        Astropy observation times
-
-        Returns
-        -------
-        times_microseconds : `np.array`
-        """
-        times_jd = np.asarray(times.jd, dtype=np.uint64)
-        times_us = np.asarray((times - Time(times_jd, format='jd', scale='tdb')).jd * TimeMOC.DAY_MICRO_SEC, dtype=np.uint64)
-        return times_jd * np.uint64(TimeMOC.DAY_MICRO_SEC) + times_us
 
     @property
     def max_order(self):
@@ -137,7 +120,7 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times = TimeMOC._times_to_microseconds(times)
+        times = utils.times_to_microseconds(times)
         times = np.atleast_1d(times)
 
         times = times.reshape((times.shape[0], 1))
@@ -171,10 +154,10 @@ class TimeMOC(AbstractMOC):
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
         
-        min_times = TimeMOC._times_to_microseconds(min_times)
+        min_times = utils.times_to_microseconds(min_times)
         min_times = np.atleast_1d(min_times)
 
-        max_times = TimeMOC._times_to_microseconds(max_times)
+        max_times = utils.times_to_microseconds(max_times)
         max_times = np.atleast_1d(max_times)
 
         assert min_times.shape == max_times.shape
@@ -451,7 +434,8 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        min_time = Time(self._interval_set.min / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
+        # min_time = Time(self._interval_set.min / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
+        min_time = utils.microseconds_to_times(self._interval_set.min)
         return min_time
 
     @property
@@ -466,7 +450,8 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        max_time = Time(self._interval_set.max / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
+        # max_time = Time(self._interval_set.max / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
+        max_time = utils.microseconds_to_times(self._interval_set.min)
         return max_time
 
     def contains(self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -503,8 +488,9 @@ class TimeMOC(AbstractMOC):
 
         rough_tmoc = self.degrade_to_order(new_max_order)
 
-        pix_arr = (times.jd * TimeMOC.DAY_MICRO_SEC)
-        pix_arr = pix_arr.astype(np.uint64)
+        #pix_arr = (times.jd * TimeMOC.DAY_MICRO_SEC)
+        #pix_arr = pix_arr.astype(np.uint64)
+        pix_arr = utils.times_to_microseconds(times)
 
         intervals = rough_tmoc._interval_set._intervals
         inf_arr = np.vstack([pix_arr[i] >= intervals[:, 0] for i in range(pix_arr.shape[0])])
@@ -611,8 +597,10 @@ class TimeMOC(AbstractMOC):
 
         y = np.zeros(size)
         for (s_time_us, e_time_us) in plotted_moc._interval_set._intervals:
-            s_index = int((s_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
-            e_index = int((e_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
+            #s_index = int((s_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
+            #e_index = int((e_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
+            s_index = int((utils.microseconds_to_times(s_time_us) - min_jd_time) / delta)
+            e_index = int((utils.microseconds_to_times(e_time_us) - min_jd_time) / delta)
             y[s_index:(e_index+1)] = 1.0
 
         # hack in case of full time mocs.

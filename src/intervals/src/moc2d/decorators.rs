@@ -1,14 +1,18 @@
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
+
+use std::marker::PhantomData;
+
+use crate::idx::Idx;
+use crate::qty::MocQty;
+use crate::moc::{
+  ZSorted, NonOverlapping, RangeMOCIterator, CellMOCIterator,
+  decorators::{CellMOCIteratorFromRanges, CellOrCellRangeMOCIteratorFromCells}
+};
 use crate::moc2d::{
   RangeMOC2ElemIt, CellMOC2ElemIt, RangeMOC2Iterator, HasTwoMaxDepth, MOC2Properties, 
   CellMOC2Iterator, CellMOC2IntoIterator, CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator, 
-  CellOrCellRangeMOC2IntoIterator};
-use crate::moc::{
-  CellMOCIteratorFromRanges, RangeMOCIterator, ZSorted, NonOverlapping, 
-  CellOrCellRangeMOCIteratorFromCells, CellMOCIterator
+  CellOrCellRangeMOC2IntoIterator
 };
-use std::marker::PhantomData;
+
 
 // Range 2 Cell decorator
 // - elem

@@ -2,12 +2,13 @@
 use std::slice;
 use std::vec::{IntoIter};
 
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
+use crate::idx::Idx;
+use crate::qty::MocQty;
 use crate::moc::{
   ZSorted, NonOverlapping,
-  RangeMOC, RangeMocIter, RangeRefMocIter, RangeMOCIntoIterator, RangeMOCIterator,
-  CellMOCIteratorFromRanges
+  RangeMOCIterator, RangeMOCIntoIterator,
+  range::{RangeMOC, RangeMocIter, RangeRefMocIter},
+  decorators::CellMOCIteratorFromRanges,
 };
 use crate::moc2d::{
   HasTwoMaxDepth, MOC2Properties, 

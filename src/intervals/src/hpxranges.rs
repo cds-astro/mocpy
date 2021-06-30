@@ -5,9 +5,10 @@ use std::ops::Range;
 
 use num::{CheckedAdd, One, Zero};
 
-use crate::mocqty::{MocQty, Hpx};
+use crate::idx::Idx;
+use crate::qty::{MocQty, Hpx};
 use crate::mocranges::HpxRanges;
-use crate::ranges::{Idx, SNORanges};
+use crate::ranges::SNORanges;
 
 
 pub struct HpxToUniqIter<T>

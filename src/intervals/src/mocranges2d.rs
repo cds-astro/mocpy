@@ -4,10 +4,11 @@ use std::marker::PhantomData;
 
 use rayon::prelude::*;
 
-use crate::mocqty::MocQty;
+use crate::idx::Idx;
+use crate::qty::MocQty;
 use crate::mocranges::MocRanges;
 use crate::ranges::ranges2d::{Ranges2D, SNORanges2D};
-use crate::ranges::{Idx, Ranges};
+use crate::ranges::Ranges;
 
 // Declaration of the ST-MOC type mage in hpxranges2d
 // pub type TimeSpaceMoc<T, S> = Moc2DRanges::<T, Time<T>, S, Hpx<S>>;
@@ -171,7 +172,7 @@ mod tests {
 
   use crate::ranges::{Idx, Ranges};
   use crate::ranges::ranges2d::{SNORanges2D};
-  use crate::mocqty::{Time, Hpx};
+  use crate::qty::{Time, Hpx};
   use crate::mocranges2d::Moc2DRanges;
   use crate::hpxranges2d::{TimeSpaceMoc, HpxRanges2D};
 

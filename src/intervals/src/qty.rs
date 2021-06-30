@@ -3,7 +3,8 @@ use num::One;
 use std::fmt::Debug;
 use std::ops::Range;
 use std::marker::PhantomData;
-use crate::ranges::Idx;
+
+use crate::idx::Idx;
 use crate::deser::fits::keywords::MocDim;
 
 /// Number of bits reserved to code the quantity type
@@ -62,7 +63,7 @@ const fn n_bits_to_code_from_0_to_n_exclusive(n: u8) -> u8 {
     (n_bits_in_u8 - index_max.leading_zeros()) as u8
 }
 
-/// A quantity with its exact integer representation. (Replace Bounded?)
+/// A quantity with its exact integer representation.
 pub trait MocQty<T>: MocableQty where T: Idx
 {
     const MAX_DEPTH: u8 = (T::N_BITS - (N_RESERVED_BITS + Self::N_D0_BITS)) / Self::DIM;
@@ -287,7 +288,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::mocqty::{MocableQty, MocQty, Time, Hpx};
+    use crate::qty::{MocableQty, MocQty, Time, Hpx};
 
     #[test]
     fn test_hpx_uniq() {

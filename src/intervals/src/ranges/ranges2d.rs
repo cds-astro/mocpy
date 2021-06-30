@@ -5,7 +5,8 @@ use std::collections::HashSet;
 
 use rayon::prelude::*;
 
-use crate::ranges::{Ranges, Idx, SNORanges};
+use crate::idx::Idx;
+use crate::ranges::{Ranges, SNORanges};
 
 /// Generic operations on a set of Sorted and Non-Overlapping ranges.
 /// SNO = Sorted Non-Overlapping

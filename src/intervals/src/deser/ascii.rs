@@ -15,13 +15,19 @@ use nom::error::{ParseError, VerboseError, FromExternalError, convert_error};
 use nom::character::complete::{digit1, multispace0};
 use nom::character::complete::char;
 
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
-use crate::moc::{CellOrCellRangeMOCIterator, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, CellOrCellRangeMOC};
+use crate::idx::Idx;
+use crate::qty::MocQty;
+use crate::moc::{
+  HasMaxDepth, ZSorted, NonOverlapping, MOCProperties,
+  CellOrCellRangeMOCIterator,
+  cellcellrange::CellOrCellRangeMOC
+};
 use crate::mocell::{CellOrCellRange, Cell, CellRange};
 use crate::mocells::{MocCellOrCellRanges, CellOrCellRanges};
-use crate::moc2d::cellcellrange::{CellOrCellRangeMOC2, CellOrCellRangeMOC2Elem};
-use crate::moc2d::{CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator};
+use crate::moc2d::{
+  CellOrCellRangeMOC2ElemIt, CellOrCellRangeMOC2Iterator,
+  cellcellrange::{CellOrCellRangeMOC2, CellOrCellRangeMOC2Elem}
+};
 
 quick_error! {
   #[derive(Debug)]
@@ -481,7 +487,7 @@ mod tests {
   use crate::deser::ascii::{from_ascii_stream, from_ascii_ivoa, moc2d_from_ascii_ivoa, moc2d_to_ascii_ivoa};
   use crate::mocranges::MocRanges;
   use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, HasMaxDepth};
-  use crate::mocqty::{Hpx, Time};
+  use crate::qty::{Hpx, Time};
   use nom::AsBytes;
   use crate::moc2d::CellOrCellRangeMOC2IntoIterator;
   use crate::mocell::Cell;

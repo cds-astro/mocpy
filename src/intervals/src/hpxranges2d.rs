@@ -6,15 +6,22 @@ use std::convert::{From, TryFrom};
 use num::One;
 use rayon::prelude::*;
 
+use crate::idx::Idx;
 use crate::utils;
-use crate::moc::{ZSorted, NonOverlapping, RangeMOC, RangeMocIter, RangeMOCIntoIterator, CellMOCIntoIterator, CellMOCIterator, CellOrCellRangeMOCIterator};
+use crate::moc::{
+    ZSorted, NonOverlapping,
+    RangeMOCIntoIterator,
+    CellMOCIterator, CellMOCIntoIterator,
+    CellOrCellRangeMOCIterator,
+    range::{RangeMOC, RangeMocIter}
+};
 use crate::moc2d::{
     HasTwoMaxDepth, MOC2Properties,
     RangeMOC2Iterator,
     range::RangeMOC2Elem
 };
-use crate::mocqty::{MocQty, Hpx, Time};
-use crate::ranges::{SNORanges, Idx, ranges2d::SNORanges2D, Ranges};
+use crate::qty::{MocQty, Hpx, Time};
+use crate::ranges::{SNORanges, ranges2d::SNORanges2D, Ranges};
 use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
 

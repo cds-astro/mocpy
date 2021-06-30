@@ -23,8 +23,8 @@ use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject, exceptions};
 
+use intervals::qty::MocQty;
 use intervals::ranges::{SNORanges, Ranges};
-use intervals::mocqty::MocQty;
 use intervals::mocranges::MocRanges;
 use intervals::hpxranges2d::TimeSpaceMoc;
 use std::path::Path;
@@ -262,7 +262,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Arguments
     ///
-    /// * ``times`` - The times at which the sky coordinates have be given.
+    /// * ``times`` - The times at which the sky coordinates have be given, in jd coded
+    ///   on doubles (=> not precise to the microsecond). 
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -271,15 +272,20 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Precondition
     ///
     /// * ``lon`` and ``lat`` must be expressed in radians.
-    /// * ``times`` must be expressed in jd.
+    /// * ``times`` must be expressed in jd, on doubles (=> not precise to the microsecond).
     ///
     /// # Errors
     ///
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
-    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    #[pyfn(m, "from_time_lonlat")]
-    fn from_time_lonlat(
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "from_time_lonlat_approx")]
+    fn from_time_lonlat_approx(
         index: usize,
         times: PyReadonlyArray1<f64>,
         d1: u8,
@@ -297,6 +303,55 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
+        let coverage = time_space_coverage::create_from_times_positions_approx(times, lon, lat, d1, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time, longitude, latitude) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times`` - The times at which the sky coordinates have be given, in microsecond since JD=0.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians
+    /// * ``lat`` - The latitudes in radians
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon`` and ``lat`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd, in microsecond since JD=0.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat`` and ``times`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    #[pyfn(m, "from_time_lonlat")]
+    fn from_time_lonlat(
+        index: usize,
+        times: PyReadonlyArray1<u64>,
+        d1: u8,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>,
+        d2: u8,
+    ) -> PyResult<()> {
+        let times = times.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let lon = lon.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let lat = lat.as_array()
+          .to_owned()
+          .into_raw_vec();
+
         let coverage = time_space_coverage::create_from_times_positions(times, lon, lat, d1, d2)?;
 
         // Update a coverage in the COVERAGES_2D
@@ -311,8 +366,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Arguments
     ///
-    /// * ``times_min`` - The begining time of observation.
-    /// * ``times_max`` - The ending time of observation.
+    /// * ``times_min`` - The begining time of observation, in jd coded
+    ///                   on doubles (=> not precise to the microsecond). 
+    /// * ``times_max`` - The ending time of observation, in jd coded
+    ///                   on doubles (=> not precise to the microsecond). 
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -326,11 +383,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
-    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    ///
-    #[pyfn(m, "from_time_ranges_lonlat")]
-    fn from_time_ranges_lonlat(
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "from_time_ranges_lonlat_approx")]
+    fn from_time_ranges_lonlat_approx(
         index: usize,
         times_min: PyReadonlyArray1<f64>,
         times_max: PyReadonlyArray1<f64>,
@@ -352,6 +413,61 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             .to_owned()
             .into_raw_vec();
 
+        let coverage = time_space_coverage::create_from_time_ranges_positions_approx(times_min, times_max, d1, lon, lat, d2)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation, in microsecond since JD=0.
+    /// * ``times_max`` - The ending time of observation, in microsecond since JD=0.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians
+    /// * ``lat`` - The latitudes in radians
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon`` and ``lat`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat`` and ``times`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_lonlat")]
+    fn from_time_ranges_lonlat(
+        index: usize,
+        times_min: PyReadonlyArray1<u64>,
+        times_max: PyReadonlyArray1<u64>,
+        d1: u8,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>,
+        d2: u8,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let times_max = times_max.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let lon = lon.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let lat = lat.as_array()
+          .to_owned()
+          .into_raw_vec();
+
         let coverage = time_space_coverage::create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)?;
 
         // Update a coverage in the COVERAGES_2D
@@ -366,8 +482,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Arguments
     ///
-    /// * ``times_min`` - The begining time of observation.
-    /// * ``times_max`` - The ending time of observation.
+    /// * ``times_min`` - The begining time of observation in jd coded
+    ///                   on doubles (=> not precise to the microsecond). 
+    /// * ``times_max`` - The ending time of observation, in jd coded
+    ///                   on doubles (=> not precise to the microsecond). 
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians.
     /// * ``lat`` - The latitudes in radians.
@@ -382,11 +500,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
-    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    ///
-    #[pyfn(m, "from_time_ranges_spatial_coverages")]
-    fn from_time_ranges_spatial_coverages(
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "from_time_ranges_spatial_coverages_approx")]
+    fn from_time_ranges_spatial_coverages_approx(
         py: Python,
         index: usize,
         times_min: PyReadonlyArray1<f64>,
@@ -400,6 +522,55 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let times_max = times_max.as_array()
             .to_owned()
             .into_raw_vec();
+
+        let coverage = time_space_coverage::from_time_ranges_spatial_coverages_approx(py, times_min, times_max, d1, spatial_coverages)?;
+
+        // Update a coverage in the COVERAGES_2D
+        // hash map and return its index key to python
+        update_coverage(index, coverage);
+
+        Ok(())
+    }
+
+    /// Create a 2D Time-Space coverage from a list of
+    /// (time_range, longitude, latitude, radius) tuples.
+    ///
+    /// # Arguments
+    ///
+    /// * ``times_min`` - The begining time of observation, in microsecond since JD=0.
+    /// * ``times_max`` - The ending time of observation, in microsecond since JD=0.
+    /// * ``d1`` - The depth along the Time axis.
+    /// * ``lon`` - The longitudes in radians.
+    /// * ``lat`` - The latitudes in radians.
+    /// * ``radius`` - Radius in radians.
+    /// * ``d2`` - The depth along the Space axis.
+    ///
+    /// # Precondition
+    ///
+    /// * ``lon``, ``lat`` and ``radius`` must be expressed in radians.
+    /// * ``times`` must be expressed in jd.
+    ///
+    /// # Errors
+    ///
+    /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
+    /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
+    /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
+    ///
+    #[pyfn(m, "from_time_ranges_spatial_coverages")]
+    fn from_time_ranges_spatial_coverages(
+        py: Python,
+        index: usize,
+        times_min: PyReadonlyArray1<u64>,
+        times_max: PyReadonlyArray1<u64>,
+        d1: u8,
+        spatial_coverages: &PyList,
+    ) -> PyResult<()> {
+        let times_min = times_min.as_array()
+          .to_owned()
+          .into_raw_vec();
+        let times_max = times_max.as_array()
+          .to_owned()
+          .into_raw_vec();
 
         let coverage = time_space_coverage::from_time_ranges_spatial_coverages(py, times_min, times_max, d1, spatial_coverages)?;
 
@@ -872,13 +1043,38 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If the coverage is empty.
-    #[pyfn(m, "coverage_2d_min_time")]
-    fn coverage_2d_min_time(_py: Python, index: usize) -> PyResult<f64> {
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "coverage_2d_min_time_approx")]
+    fn coverage_2d_min_time_approx(_py: Python, index: usize) -> PyResult<f64> {
         // Get the coverage
         let res = COVERAGES_2D.lock().unwrap();
         let coverage = res.get(&index).unwrap();
 
-        time_space_coverage::t_min(coverage)
+        time_space_coverage::t_min_jd(coverage)
+    }
+
+    /// Returns the minimum time value of the Time-Space
+    /// coverage, in microarcsec since jd=0.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage.
+    ///
+    /// # Errors
+    ///
+    /// * If the coverage is empty.
+    ///
+    #[pyfn(m, "coverage_2d_min_time")]
+    fn coverage_2d_min_time(_py: Python, index: usize) -> PyResult<u64> {
+        // Get the coverage
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+
+        time_space_coverage::t_min_mircosecond_since_jd_org(coverage)
     }
 
     /// Returns the maximum time value of the Time-Space
@@ -891,13 +1087,38 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If the coverage is empty.
-    #[pyfn(m, "coverage_2d_max_time")]
-    fn coverage_2d_max_time(_py: Python, index: usize) -> PyResult<f64> {
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "coverage_2d_max_time_approx")]
+    fn coverage_2d_max_time_approx(_py: Python, index: usize) -> PyResult<f64> {
         // Get the coverage
         let res = COVERAGES_2D.lock().unwrap();
         let coverage = res.get(&index).unwrap();
 
-        time_space_coverage::t_max(coverage)
+        time_space_coverage::t_max_jd(coverage)
+    }
+
+    /// Returns the maximum time value of the Time-Space
+    /// coverage, in microseconds since jd=0.
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage.
+    ///
+    /// # Errors
+    ///
+    /// * If the coverage is empty.
+    ///
+    #[pyfn(m, "coverage_2d_max_time")]
+    fn coverage_2d_max_time(_py: Python, index: usize) -> PyResult<u64> {
+        // Get the coverage
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
+
+        time_space_coverage::t_max_mircosecond_since_jd_org(coverage)
     }
 
     /// Perform the union between two Time-Space coverages.
@@ -1027,8 +1248,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If `lon`, `lat` and `times` do not have the same length
-    #[pyfn(m, "coverage_2d_contains")]
-    fn coverage_2d_contains(
+    /// 
+    /// # Remark 
+    /// 
+    /// Method kept temporarily to ensure backward compatibility.
+    /// 
+    #[pyfn(m, "coverage_2d_contains_approx")]
+    fn coverage_2d_contains_approx(
         py: Python,
         index: usize,
         times: PyReadonlyArray1<f64>,
@@ -1042,12 +1268,40 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let coverage = res.get(&index).unwrap();
 
         let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
-        time_space_coverage::contains(coverage, times, lon, lat, &mut result)?;
+        time_space_coverage::contains_approx(coverage, times, lon, lat, &mut result)?;
         Ok(result.into_pyarray(py).to_owned())
     }
 
+    /// Check if (time, position) tuples are contained into a Time-Space coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Time-Space coverage.
+    /// * ``times`` - Times at which the positions have been observed, in microsec since jd=0
+    /// * ``lon`` - The longitudes.
+    /// * ``lat`` - The latitudes.
+    ///
+    /// # Errors
+    ///
+    /// * If `lon`, `lat` and `times` do not have the same length
+    #[pyfn(m, "coverage_2d_contains")]
+    fn coverage_2d_contains(
+        py: Python,
+        index: usize,
+        times: PyReadonlyArray1<u64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
+        let times = times.as_array().to_owned();
+        let lon = lon.as_array().to_owned();
+        let lat = lat.as_array().to_owned();
 
+        let res = COVERAGES_2D.lock().unwrap();
+        let coverage = res.get(&index).unwrap();
 
+        let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
+        time_space_coverage::contains(coverage, times, lon, lat, &mut result)?;
+        Ok(result.into_pyarray(py).to_owned())
+    }
 
     /// Perform the union between two generic coverages
     ///

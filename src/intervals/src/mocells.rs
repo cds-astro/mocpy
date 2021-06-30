@@ -1,5 +1,5 @@
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
+use crate::idx::Idx;
+use crate::qty::MocQty;
 use crate::mocell::{Cell, CellOrCellRange};
 use std::marker::PhantomData;
 

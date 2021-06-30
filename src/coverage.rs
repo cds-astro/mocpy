@@ -14,7 +14,7 @@ use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject};
 
 use intervals::ranges::Ranges;
-use intervals::mocqty::{MocQty, Hpx, Time};
+use intervals::qty::{MocQty, Hpx, Time};
 use intervals::mocranges::{MocRanges, HpxRanges, TimeRanges};
 use intervals::uniqranges::HpxUniqRanges;
 
@@ -120,7 +120,12 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<HpxRanges<u64>> {
 }
 
 use std::collections::HashMap;
-use intervals::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, CellMOCIntoIterator};
+use intervals::moc::{
+    RangeMOCIterator, RangeMOCIntoIterator,
+    CellMOCIterator, CellMOCIntoIterator,
+    CellOrCellRangeMOCIterator,
+    range::{RangeMOC}
+};
 use std::fs::File;
 use std::io::{BufWriter, BufReader};
 use std::path::Path;

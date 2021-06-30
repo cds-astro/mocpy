@@ -2,16 +2,17 @@
 
 use std::ops::{Index, Range};
 use std::iter::FromIterator;
+use std::slice::Iter;
 use std::marker::PhantomData;
 
 use num::{One, Zero};
 use ndarray::Array2;
 
-use crate::ranges::{ranges_to_array2d, Ranges, SNORanges, Idx, MergeOverlappingRangesIter};
-use crate::mocqty::{Bounded, MocQty, Hpx, Time};
+use crate::idx::Idx;
+use crate::ranges::{ranges_to_array2d, Ranges, SNORanges, MergeOverlappingRangesIter};
+use crate::qty::{Bounded, MocQty, Hpx, Time};
 use crate::uniqranges::HpxUniqRanges;
 use crate::hpxranges::{HpxUniq2DepthIdxIter, HpxToUniqIter};
-use std::slice::Iter;
 
 
 // Commodity type definitions
@@ -239,7 +240,7 @@ impl<'a, T: Idx, Q: MocQty<T>> From<&'a Ranges<T>> for MocRangesRef<'a, T, Q> {
 #[cfg(test)]
 mod tests {
   use crate::mocranges::HpxRanges;
-  use crate::mocqty::{Hpx, MocQty};
+  use crate::qty::{Hpx, MocQty};
   use std::ops::Range;
 
   #[test]

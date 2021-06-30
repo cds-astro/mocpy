@@ -3,7 +3,7 @@ use std::ops::Range;
 
 use ndarray::Array2;
 
-use crate::ranges::Idx;
+use crate::idx::Idx;
 
 pub fn flatten<T>(input: &mut Vec<Range<T>>) -> Vec<T> {
     let mut owned_input = Vec::<Range<T>>::new();

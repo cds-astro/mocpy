@@ -4,8 +4,8 @@ use ndarray::Array1;
 use std::ops::Range;
 use std::cmp::Ordering::Equal;
 
-use crate::ranges::Idx;
-use crate::mocqty::Hpx;
+use crate::idx::Idx;
+use crate::qty::Hpx;
 use crate::mocrange::HpxRange;
 
 
@@ -251,7 +251,7 @@ mod tests {
     use std::u64;
     use ndarray::prelude::*;
 
-    use crate::mocqty::{MocQty, Hpx};
+    use crate::qty::{MocQty, Hpx};
     use crate::mocranges::HpxRanges;
     use crate::valuedcell::valued_cells_to_moc;
 

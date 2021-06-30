@@ -6,10 +6,14 @@ use std::convert::TryFrom;
 
 use rayon::prelude::*;
 
+use numpy::PyReadonlyArray2;
+
+use pyo3::types::PyList;
+use pyo3::{ToPyObject, Python};
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
-use intervals::mocqty::{MocQty, Hpx, Time};
+use intervals::qty::{MocQty, Hpx, Time};
 use intervals::hpxranges2d::TimeSpaceMoc;
 use intervals::mocranges::{HpxRanges, TimeRanges};
 use intervals::moc2d::{
@@ -40,8 +44,50 @@ use intervals::moc2d::{
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_times_positions(
+/// 
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+/// 
+pub fn create_from_times_positions_approx(
     times: Vec<f64>,
+    lon: Vec<f64>,
+    lat: Vec<f64>,
+    dt: u8,
+    ds: u8,
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    let times = times
+      .into_par_iter()
+      .map(|t| (t * 86400000000_f64).floor() as u64)
+      .collect::<Vec<_>>();
+    create_from_times_positions(times, lon, lat, dt, ds)
+}
+
+/// Create a time-spatial coverage (2D) from a list of sky coordinates
+/// and times.
+///
+/// # Arguments
+///
+/// * ``times`` - The times expressed in microsecond since jd=0.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn create_from_times_positions(
+    times: Vec<u64>,
     lon: Vec<f64>,
     lat: Vec<f64>,
     dt: u8,
@@ -69,15 +115,10 @@ pub fn create_from_times_positions(
 
         let layer = healpix::nested::get(ds as u8);
         ipix.par_iter_mut()
-            .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
-            .for_each(|(p, (l, b))| {
-                *p = layer.hash(l, b);
-            });
-
-        let times = times
-            .into_par_iter()
-            .map(|t| (t * 86400000000_f64).floor() as u64)
-            .collect::<Vec<_>>();
+          .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
+          .for_each(|(p, (l, b))| {
+              *p = layer.hash(l, b);
+          });
 
         Ok(TimeSpaceMoc::<u64, u64>::create_from_times_positions(
             times, ipix, dt, ds,
@@ -109,7 +150,11 @@ pub fn create_from_times_positions(
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn create_from_time_ranges_positions(
+/// 
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+pub fn create_from_time_ranges_positions_approx(
     times_start: Vec<f64>,
     times_end: Vec<f64>,
     dt: u8,
@@ -170,6 +215,86 @@ pub fn create_from_time_ranges_positions(
     }
 }
 
+/// Create a time-spatial coverage (2D) from a list of sky coordinates
+/// and ranges of times.
+///
+/// # Arguments
+///
+/// * ``times_start`` - The starting times expressed in microseconds since jd=0.
+/// * ``times_end`` - The ending times expressed in microseconds since jd=0.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn create_from_time_ranges_positions(
+    times_start: Vec<u64>,
+    times_end: Vec<u64>,
+    dt: u8,
+    lon: Vec<f64>,
+    lat: Vec<f64>,
+    ds: u8,
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    if ds > Hpx::<u64>::MAX_DEPTH {
+        Err(exceptions::PyValueError::new_err(format!(
+            "Space depth must be in [0, {0}]",
+            Hpx::<u64>::MAX_DEPTH
+        )))
+    } else if dt > Time::<u64>::MAX_DEPTH {
+        Err(exceptions::PyValueError::new_err(format!(
+            "Time depth must be in [0, {0}]",
+            Time::<u64>::MAX_DEPTH
+        )))
+    } else {
+        if times_start.len() != lon.len() ||
+          times_start.len() != lat.len() ||
+          times_start.len() != times_end.len() {
+            return Err(exceptions::PyValueError::new_err(
+                "Times, longitudes and latitudes do not have the same shapes.",
+            ));
+        }
+
+        let mut ipix = vec![0; lon.len()];
+
+        let layer = healpix::nested::get(ds as u8);
+        ipix.par_iter_mut()
+          .zip_eq(lon.into_par_iter().zip_eq(lat.into_par_iter()))
+          .for_each(|(p, (l, b))| {
+              *p = layer.hash(l, b);
+          });
+
+        let times = times_start.into_par_iter()
+          .zip_eq(times_end.into_par_iter())
+          .map(|(t1, t2)| t1..t2)
+          .collect::<Vec<_>>();
+
+        if times.len() != ipix.len() {
+            return Err(exceptions::PyValueError::new_err(
+                "Number of time ranges and sky coordinates do not match.",
+            ));
+        }
+
+        Ok(TimeSpaceMoc::<u64, u64>::create_from_time_ranges_positions(
+            times, ipix, dt, ds,
+        ))
+    }
+}
+
+
+
+
 /// Create a time-spatial coverage (2D) from a list of cones
 /// and time ranges.
 ///
@@ -195,11 +320,12 @@ pub fn create_from_time_ranges_positions(
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-use pyo3::types::PyList;
-use numpy::PyReadonlyArray2;
-use pyo3::{ToPyObject, Python};
-
-pub fn from_time_ranges_spatial_coverages(
+/// 
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+/// 
+pub fn from_time_ranges_spatial_coverages_approx(
     py: Python,
     times_start: Vec<f64>,
     times_end: Vec<f64>,
@@ -255,6 +381,79 @@ pub fn from_time_ranges_spatial_coverages(
     }
 }
 
+/// Create a time-spatial coverage (2D) from a list of cones
+/// and time ranges.
+///
+/// # Arguments
+///
+/// * ``times_start`` - The starting times expressed in microseconds since jd=0.
+/// * ``times_end`` - The ending times expressed in  microseconds since jd=0.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``radius`` - The radiuses of the cones.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn from_time_ranges_spatial_coverages(
+    py: Python,
+    times_start: Vec<u64>,
+    times_end: Vec<u64>,
+    dt: u8,
+    spatial_coverages: &PyList,
+) -> PyResult<TimeSpaceMoc<u64, u64>> {
+    if dt > Time::<u64>::MAX_DEPTH {
+        Err(exceptions::PyValueError::new_err(format!(
+            "Time depth must be in [0, {0}]",
+            Time::<u64>::MAX_DEPTH
+        )))
+    } else {
+        if times_start.len() != times_end.len() {
+            return Err(exceptions::PyValueError::new_err(
+                "Invalid times.",
+            ));
+        }
+
+        const ERR_CAST: &str = "Cannot cast spatial coverages to Array2<u64>";
+        let mut spatial_coverages_res: Vec<HpxRanges<u64>> = vec![];
+
+        for spatial_cov in spatial_coverages.into_iter() {
+            // Loop over the python list and cast its elements
+            // to numpy PyArray2<u64> types first, to ndarray Array2<u64> secondly
+            // and finally to HpxRanges<u64>
+            let spatial_cov = spatial_cov
+              .to_object(py)
+              .extract::<PyReadonlyArray2<u64>>(py)
+              .map_err(|_| exceptions::PyValueError::new_err(ERR_CAST))?
+              .as_array()
+              .to_owned()
+              .into();
+
+            spatial_coverages_res.push(spatial_cov);
+        }
+
+        let times = times_start.into_par_iter()
+          .zip_eq(times_end.into_par_iter())
+          .map(|(t1, t2)| t1..t2)
+          .collect::<Vec<_>>();
+
+        Ok(TimeSpaceMoc::<u64, u64>::create_from_time_ranges_spatial_coverage(
+            times, spatial_coverages_res, dt,
+        ))
+    }
+}
+
 use ndarray::Zip;
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
 /// and times.
@@ -279,7 +478,11 @@ use ndarray::Zip;
 /// # Errors
 ///
 /// If the number of longitudes, latitudes and times do not match.
-pub fn contains(
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+/// 
+pub fn contains_approx(
     coverage: &TimeSpaceMoc<u64, u64>,
     time: Array1<f64>,
     lon: Array1<f64>,
@@ -316,6 +519,66 @@ pub fn contains(
 
     Ok(())
 }
+
+/// Create a time-spatial coverage (2D) from a list of sky coordinates
+/// and times.
+///
+/// # Arguments
+///
+/// * ``times`` - The times expressed in microseconds since jd=0.
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``dt`` - The depth along the time (i.e. `T`) axis.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+/// * ``times`` are expressed in jd and are coming
+/// from `astropy.time.Time` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes, latitudes and times do not match.
+pub fn contains(
+    coverage: &TimeSpaceMoc<u64, u64>,
+    time: Array1<u64>,
+    lon: Array1<f64>,
+    lat: Array1<f64>,
+    result: &mut Array1<bool>,
+) -> PyResult<()> {
+    if time.len() != lon.len() || time.len() != lat.len() {
+        return Err(exceptions::PyValueError::new_err(
+            "Times, longitudes and latitudes do not have the same shapes.",
+        ));
+    }
+
+    // Retrieve the spatial depth of the Time-Space coverage
+    let (_, s_depth) = coverage.compute_min_depth();
+    let layer = healpix::nested::get(s_depth as u8);
+    let shift = (Hpx::<u64>::MAX_DEPTH - s_depth) << 1;
+    Zip::from(result)
+      .and(&time)
+      .and(&lon)
+      .and(&lat)
+      .par_for_each(|r, &t, &l, &b| {
+          // Compute the HEALPix cell range at the max depth
+          // along the spatial dimension
+          let pix = layer.hash(l, b);
+          let e1 = pix << shift;
+          let e2 = (pix + 1) << shift;
+          
+          // Check whether the (time in µs, HEALPix cell nested range)
+          // is contained into the Spatial-Time coverage
+          *r = coverage.contains(t, &(e1..e2));
+      });
+
+    Ok(())
+}
+
 
 /// Returns the union of the ranges along the `T` axis for which their
 /// `S` ranges is contained in ``y``
@@ -558,7 +821,12 @@ pub fn depth(coverage: &TimeSpaceMoc<u64, u64>) -> (u8, u8) {
 /// # Errors
 ///
 /// When the `TimeSpaceMoc<T, S>` is empty.
-pub fn t_min(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
+///
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+/// 
+pub fn t_min_jd(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
     let t_min = coverage.t_min().map_err(exceptions::PyValueError::new_err)?;
 
     Ok((t_min as f64) / 86400000000_f64)
@@ -569,10 +837,33 @@ pub fn t_min(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
 /// # Errors
 ///
 /// When the `TimeSpaceMoc<T, S>` is empty.
-pub fn t_max(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
+/// 
+/// # Remark 
+/// 
+/// Method kept temporarily to ensure backward compatibility.
+/// 
+pub fn t_max_jd(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<f64> {
     let t_max = coverage.t_max().map_err(exceptions::PyValueError::new_err)?;
 
     Ok((t_max as f64) / 86400000000_f64)
+}
+
+/// Returns the minimum value along the `T` dimension
+///
+/// # Errors
+///
+/// When the `TimeSpaceMoc<T, S>` is empty.
+pub fn t_min_mircosecond_since_jd_org(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<u64> {
+    coverage.t_min().map_err(exceptions::PyValueError::new_err)
+}
+
+/// Returns the maximum value along the `T` dimension
+///
+/// # Errors
+///
+/// When the `TimeSpaceMoc<T, S>` is empty.
+pub fn t_max_mircosecond_since_jd_org(coverage: &TimeSpaceMoc<u64, u64>) -> PyResult<u64> {
+    coverage.t_max().map_err(exceptions::PyValueError::new_err)
 }
 
 /// Performs the union between two `TimeSpaceMoc<T, S>`

@@ -4,8 +4,8 @@ use std::ops::Range;
 
 use num::One;
 
-use crate::mocqty::{MocQty, Hpx, Time};
-use crate::ranges::Idx;
+use crate::idx::Idx;
+use crate::qty::{MocQty, Hpx, Time};
 use crate::mocell::{MocCell, Cell, CellRange, CellOrCellRange, MocCellOrCellRange};
 
 // Commodity type definitions

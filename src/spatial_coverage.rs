@@ -10,7 +10,7 @@ use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
 use intervals::ranges::SNORanges;
-use intervals::mocqty::{MocQty, Hpx};
+use intervals::qty::{MocQty, Hpx};
 
 use super::coverage;
 

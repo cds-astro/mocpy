@@ -8,7 +8,8 @@ extern crate rayon;
 #[cfg(nightly)]
 extern crate test;
 
-pub mod mocqty;
+pub mod idx;
+pub mod qty;
 mod utils;
 
 pub mod ranges;
@@ -33,8 +34,9 @@ pub mod deser;
 
 use ndarray::Array2;
 
-use ranges::{Ranges, Idx};
-use mocqty::{MocQty};
+use idx::Idx;
+use ranges::Ranges;
+use qty::{MocQty};
 use uniqranges::HpxUniqRanges;
 use crate::mocranges::MocRanges;
 

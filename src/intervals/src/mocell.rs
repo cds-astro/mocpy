@@ -1,5 +1,5 @@
-use crate::ranges::Idx;
-use crate::mocqty::{MocQty, Hpx};
+use crate::idx::Idx;
+use crate::qty::{MocQty, Hpx};
 use std::marker::PhantomData;
 use std::ops::Range;
 use std::cmp::Ordering;

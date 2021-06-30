@@ -14,6 +14,7 @@ from astropy.time import Time
 
 import cdshealpix
 from .. import mocpy
+from .. import utils
 
 from .. import MOC, serializer
 from ..interval_set import IntervalSet
@@ -85,7 +86,8 @@ class STMOC(serializer.IO):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        times = times.jd.astype(np.float64)
+        # times = times.jd.astype(np.float64)
+        times = utils.times_to_microseconds(times)
         lon = lon.to_value('rad').astype(np.float64)
         lat = lat.to_value('rad').astype(np.float64)
 
@@ -127,8 +129,11 @@ class STMOC(serializer.IO):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        times_start = times_start.jd.astype(np.float64)
-        times_end = times_end.jd.astype(np.float64)
+        # times_start = times_start.jd.astype(np.float64)
+        # times_end = times_end.jd.astype(np.float64)
+
+        times_start = utils.times_to_microseconds(times_start)
+        times_end = utils.times_to_microseconds(times_end)
 
         lon = lon.to_value('rad').astype(np.float64)
         lat = lat.to_value('rad').astype(np.float64)
@@ -166,8 +171,10 @@ class STMOC(serializer.IO):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        times_start = times_start.jd.astype(np.float64)
-        times_end = times_end.jd.astype(np.float64)
+        # times_start = times_start.jd.astype(np.float64)
+        # times_end = times_end.jd.astype(np.float64)
+        times_start = utils.times_to_microseconds(times_start)
+        times_end = utils.times_to_microseconds(times_end)
 
         if times_start.shape != times_end.shape or times_start.shape[0] != len(spatial_coverages):
             raise ValueError("Time ranges and spatial coverages must have the same length")
@@ -200,7 +207,8 @@ class STMOC(serializer.IO):
         if times.ndim != 2 or times.shape[1] != 2:
             raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
 
-        times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
+        # times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
+        times = utils.times_to_microseconds(times)
         ranges = mocpy.project_on_second_dim(times, self.__index)
         return MOC(IntervalSet(ranges, make_consistent=False))
 
@@ -223,7 +231,8 @@ class STMOC(serializer.IO):
         """
         # Time ranges in µsec
         time_ranges = mocpy.project_on_first_dim(spatial_coverage._interval_set._intervals, self.__index)
-        return Time(time_ranges / 86400000000, format='jd', scale='tdb')
+        # return Time(time_ranges / 86400000000, format='jd', scale='tdb')
+        return utils.microseconds_to_times(time_ranges)
 
     def union(self, other):
         """
@@ -319,7 +328,8 @@ class STMOC(serializer.IO):
         array : `~np.ndarray`
             A mask boolean array
         """
-        times = times.jd.astype(np.float64)
+        # times = times.jd.astype(np.float64)
+        times = utils.times_to_microseconds(times)
         lon = lon.to_value('rad').astype(np.float64)
         lat = lat.to_value('rad').astype(np.float64)
 

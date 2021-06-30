@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]` 
 * Add `from_time_ranges_in_microsec_since_jd_origin` in `temporal_coverage.rs`
+* Time operations now precise to the microseconds, see:
+    + `utils.times_to_microseconds`
+    + `utils.microseconds_to_times`
 ### Internal Python changes
 * `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
-* 
 ### Internal changes
 * Add FITS serialization/deserialization on the Rust code.
 * Add ASCII and JSON serialization/deserialization on the Rust code.

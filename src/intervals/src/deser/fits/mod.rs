@@ -5,8 +5,8 @@ use std::io::{BufRead, Write, Cursor};
 
 use byteorder::BigEndian;
 
-use crate::ranges::Idx;
-use crate::mocqty::{MocQty, Hpx, Time, MocableQty};
+use crate::idx::Idx;
+use crate::qty::{MocQty, Hpx, Time, MocableQty};
 use crate::deser::fits::error::FitsError;
 use crate::deser::fits::common::{
   consume_primary_hdu, next_36_chunks_of_80_bytes, check_keyword_and_val,
@@ -17,7 +17,12 @@ use crate::deser::fits::keywords::{
   MocOrdS, MocOrdT, TimeSys, MocId, MocTool, CoordSys, TType1
 };
 use crate::mocell::Cell;
-use crate::moc::{CellMOC, HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator, CellMOCIterator, RangeMOC, RangeMocIter};
+use crate::moc::{
+  HasMaxDepth, ZSorted, NonOverlapping, MOCProperties,
+  RangeMOCIterator, CellMOCIterator,
+  cell::CellMOC,
+  range::{RangeMOC, RangeMocIter},
+};
 use crate::mocells::{MocCells, Cells};
 use crate::moc2d::{
   HasTwoMaxDepth, RangeMOC2ElemIt, 
@@ -1051,7 +1056,7 @@ mod tests {
   use std::path::PathBuf;
   use std::marker::PhantomData;
 
-  use crate::mocqty::{Hpx, Time};
+  use crate::qty::{Hpx, Time};
   use crate::deser::fits::{FitsError, MocIdxType, MocQtyType, MocType, from_fits_ivoa, hpx_cells_to_fits_ivoa, ranges_to_fits_ivoa_internal, ranges_to_fits_ivoa, rangemoc2d_to_fits_ivoa, STMocType};
   use crate::moc::{HasMaxDepth, CellMOC, CellMOCIntoIterator, RangeMOC, RangeMOCIntoIterator};
   use crate::mocells::{MocCells, Cells};

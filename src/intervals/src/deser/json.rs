@@ -8,9 +8,12 @@ use serde_json;
 use serde_json::Value;
 use serde_json::value::Value::Array;
 
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
-use crate::moc::{CellMOCIterator, CellMOC, HasMaxDepth};
+use crate::idx::Idx;
+use crate::qty::MocQty;
+use crate::moc::{
+  HasMaxDepth, CellMOCIterator,
+  cell::CellMOC
+};
 use crate::mocell::Cell;
 use crate::mocells::{MocCells, Cells};
 use crate::moc2d::{CellMOC2ElemIt, CellMOC2Iterator};
@@ -259,7 +262,7 @@ mod tests {
 
   use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellMOCIntoIterator};
   use crate::mocranges::{MocRanges, TimeRanges, HpxRanges};
-  use crate::mocqty::{Hpx, Time};
+  use crate::qty::{Hpx, Time};
   use crate::deser::json::{from_json_aladin, cellmoc2d_to_json_aladin, cellmoc2d_from_json_aladin};
   use crate::moc2d::{RangeMOC2IntoIterator, CellMOC2IntoIterator};
   use crate::moc2d::range::{RangeMOC2Elem, RangeMOC2};

@@ -4,7 +4,7 @@ use std::slice::Iter;
 use num::One;
 use ndarray::Array1;
 
-use crate::ranges::Idx;
+use crate::idx::Idx;
 use crate::mocranges::HpxRanges;
 use crate::hpxranges::UniqToHpxIter;
 

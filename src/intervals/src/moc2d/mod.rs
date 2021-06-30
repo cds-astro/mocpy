@@ -1,8 +1,8 @@
 
 use std::io::Write;
 
-use crate::ranges::Idx;
-use crate::mocqty::MocQty;
+use crate::idx::Idx;
+use crate::qty::MocQty;
 use crate::moc::{
   ZSorted, NonOverlapping, 
   CellOrCellRangeMOCIterator, CellMOCIterator, RangeMOCIterator

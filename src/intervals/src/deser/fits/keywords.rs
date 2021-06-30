@@ -2,11 +2,12 @@
 
 use std::str;
 use std::fmt;
+use std::marker::PhantomData;
+use std::slice::ChunksMut;
 
 use crate::deser::fits::common::{get_str_val_no_quote, get_keyword, parse_uint_val, write_keyword_record};
 use crate::deser::fits::error::FitsError;
-use std::marker::PhantomData;
-use std::slice::ChunksMut;
+
 
 pub trait FitsCard: Sized {
   const KEYWORD: &'static [u8; 8];
