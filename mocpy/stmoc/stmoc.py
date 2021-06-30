@@ -48,11 +48,13 @@ class STMOC(serializer.IO):
 
     @property
     def max_time(self):
-        return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
+        #return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
+        return utils.microseconds_to_times(mocpy.coverage_2d_max_time(self.__index))
 
     @property
     def min_time(self):
-        return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
+        #return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
+        return utils.microseconds_to_times(mocpy.coverage_2d_min_time(self.__index))
 
     def is_empty(self):
         """
