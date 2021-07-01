@@ -1,5 +1,5 @@
 
-use ndarray::Array1;
+// use ndarray::Array1;
 
 use std::ops::Range;
 use std::cmp::Ordering::Equal;
@@ -157,16 +157,20 @@ impl DivBy<u64> for f64 {
 /// * `values`: values associated to each uniq.
 /// * `cumul_from`: the cumulative value from which cells are put in the MOC
 /// * `cumul_to`: the cumulative value to which cells are put in the MOC
-pub fn valued_cells_to_moc<T, V>(
+pub fn valued_cells_to_moc<'a, T, V, I1, I2>(
     max_depth: u8,
-    uniq: Array1<T>,
-    values: Array1<V>,
+    uniq: I1,
+    values: I2,
     cumul_from: V,
     cumul_to: V
-    ) -> HpxRanges<T>
-where T: Idx,
-      V: Num + PartialOrd + DivBy<T, Output=V> + Copy + Send + Sync + std::fmt::Debug {
-    let mut valued_uniq_sorted: Vec<(T, V, V)> = uniq.iter().zip(values.iter())
+) -> HpxRanges<T>
+    where 
+      T: Idx,
+      V: 'static + Num + PartialOrd + DivBy<T, Output=V> + Copy + Send + Sync + std::fmt::Debug,
+      I1: Iterator<Item=&'a T>,
+      I2: Iterator<Item=&'a V>,
+{
+    let mut valued_uniq_sorted: Vec<(T, V, V)> = uniq.zip(values)
         .map(|(uniq, val)| {
             let (depth, _icell) = Hpx::<T>::from_uniq_hpx(*uniq);
             let n_sub_cells = T::one().unsigned_shl(((max_depth - depth) << 1) as u32);
@@ -249,7 +253,6 @@ where T: Idx,
 #[cfg(test)]
 mod tests {
     use std::u64;
-    use ndarray::prelude::*;
 
     use crate::qty::{MocQty, Hpx};
     use crate::mocranges::HpxRanges;
@@ -257,13 +260,13 @@ mod tests {
 
     #[test]
     fn test_single_uniq() {
-        let uniq = array![4];
-        let values = array![1_f64];
+        let uniq = vec![4];
+        let values = vec![1_f64];
 
         let max_depth = 2;
 
         // let nested_ranges = valued_cells_to_moc::<u64, f64>(max_depth, uniq, values, 0_f64, 0.25_f64);
-        let nested_ranges = valued_cells_to_moc(max_depth, uniq, values, 0_f64, 0.25_f64);
+        let nested_ranges = valued_cells_to_moc(max_depth, uniq.iter(), values.iter(), 0_f64, 0.25_f64);
 
         let tdd = ((Hpx::<u64>::MAX_DEPTH - max_depth) << 1) as u32;
         let expect_nested_ranges = HpxRanges::new_unchecked(
@@ -277,13 +280,13 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let uniq = array![];
-        let values = array![];
+        let uniq = vec![];
+        let values = vec![];
 
         let max_depth = 2;
 
         // let nested_ranges = valued_cells_to_moc::<u64, f64>(max_depth, uniq, values, 0_f64, 1_f64);
-        let nested_ranges = valued_cells_to_moc(max_depth, uniq, values, 0_f64, 1_f64);
+        let nested_ranges = valued_cells_to_moc(max_depth, uniq.iter(), values.iter(), 0_f64, 1_f64);
         let expect_nested_ranges = HpxRanges::default();
 
         assert_eq!(nested_ranges, expect_nested_ranges);
@@ -291,14 +294,14 @@ mod tests {
 
     #[test]
     fn test_full_space() {
-        let uniq = array![4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        let uniq = vec![4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
-        let values = array![0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0_f64, 0_f64];
+        let values = vec![0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0.1_f64, 0_f64, 0_f64];
 
         let max_depth = 2;
 
         // let nested_ranges = valued_cells_to_moc::<u64, f64>(max_depth, uniq, values, 0_f64, 1_f64);
-        let nested_ranges = valued_cells_to_moc(max_depth, uniq, values, 0_f64, 1_f64);
+        let nested_ranges = valued_cells_to_moc(max_depth, uniq.iter(), values.iter(), 0_f64, 1_f64);
         let expect_nested_ranges = HpxRanges::new_unchecked(
             vec![0..12 << (2*29)]
         );

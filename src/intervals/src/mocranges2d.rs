@@ -170,7 +170,8 @@ impl<TT, T, ST, S> PartialEq for Moc2DRanges<TT, T, ST, S>
 mod tests {
   use std::ops::Range;
 
-  use crate::ranges::{Idx, Ranges};
+  use crate::idx::Idx;
+  use crate::ranges::Ranges;
   use crate::ranges::ranges2d::{SNORanges2D};
   use crate::qty::{Time, Hpx};
   use crate::mocranges2d::Moc2DRanges;

@@ -111,7 +111,7 @@ pub fn from_valued_healpix_cells(
         )
     } else {
         // Uniq and values have the same size (can be empty)
-        let result = valued_cells_to_moc(max_depth, uniq, values, cumul_from, cumul_to);
+        let result = valued_cells_to_moc(max_depth, uniq.iter(), values.iter(), cumul_from, cumul_to);
         Ok(result)
     }
 }
@@ -236,13 +236,14 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
     for (start, end) in low.into_iter().zip(upp.into_iter()) {
         ranges.push(start..end);
     }
-    HpxRanges::<u64>::new_from(ranges).into()
+    mocranges_to_array2(HpxRanges::<u64>::new_from(ranges))
 }
 
 
 use intervals::uniqranges::HpxUniqRanges;
 use intervals::mocranges::HpxRanges;
 use intervals::deser::fits::error::FitsError;
+use crate::ndarray_fromto::mocranges_to_array2;
 
 /// Convert a spatial coverage from the **uniq** to the **nested** format.
 ///

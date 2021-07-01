@@ -1,7 +1,6 @@
 #![cfg_attr(nightly, feature(test))]
 
 extern crate healpix;
-extern crate ndarray;
 extern crate num;
 extern crate rayon;
 
@@ -10,7 +9,7 @@ extern crate test;
 
 pub mod idx;
 pub mod qty;
-mod utils;
+pub mod utils;
 
 pub mod ranges;
 
@@ -31,68 +30,6 @@ pub mod hpxranges2d;
 pub mod moc2d;
 
 pub mod deser;
-
-use ndarray::Array2;
-
-use idx::Idx;
-use ranges::Ranges;
-use qty::{MocQty};
-use uniqranges::HpxUniqRanges;
-use crate::mocranges::MocRanges;
-
-impl<T: Idx> From<Array2<T>> for Ranges<T> {
-    /// Convert a Array2 to a Ranges<T>
-    ///
-    /// This is useful for converting a set of ranges
-    /// coming from python into a Rust structure
-    ///
-    /// # Info
-    ///
-    /// This method is used whenever an operation must be
-    /// done to a MOC such as logical operations, degradation
-    /// max depth computation, etc...
-    fn from(input: Array2<T>) -> Ranges<T> {
-        let ranges = utils::array2_to_vec_ranges(input);
-        Ranges::<T>::new_unchecked(ranges)
-    }
-}
-
-
-impl<T, Q> From<Array2<T>> for MocRanges<T, Q>
-where
-    T: Idx,
-    Q: MocQty<T>
-{
-    /// Convert a Array2 to a MocRanges<T, Q>
-    ///
-    /// This is useful for converting a set of ranges
-    /// coming from python into a Rust structure
-    ///
-    /// # Info
-    ///
-    /// This method is used whenever an operation must be
-    /// done to a MOC such as logical operations, degradation
-    /// max depth computation, etc...
-    fn from(input: Array2<T>) -> MocRanges<T, Q> {
-        let ranges = utils::array2_to_vec_ranges(input);
-        MocRanges::<T, Q>::new_unchecked(ranges)
-    }
-}
-
-impl<T> From<Array2<T>> for HpxUniqRanges<T>
-where
-    T: Idx,
-{
-    /// Convert a Array2 to a UniqRanges<T>
-    ///
-    /// This is useful for converting a set of ranges
-    /// coming from python into a Rust structure
-    fn from(input: Array2<T>) -> HpxUniqRanges<T> {
-        let ranges = utils::array2_to_vec_ranges(input);
-        HpxUniqRanges::<T>::new_unchecked(ranges)
-    }
-}
-
 
 #[cfg(test)]
 mod tests {

@@ -486,9 +486,13 @@ mod tests {
   use std::str;
   use crate::deser::ascii::{from_ascii_stream, from_ascii_ivoa, moc2d_from_ascii_ivoa, moc2d_to_ascii_ivoa};
   use crate::mocranges::MocRanges;
-  use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellOrCellRangeMOCIterator, HasMaxDepth};
+  use crate::moc::{
+    HasMaxDepth,
+    RangeMOCIterator, RangeMOCIntoIterator,
+    CellMOCIterator, CellOrCellRangeMOCIterator, 
+    range::RangeMOC
+  };
   use crate::qty::{Hpx, Time};
-  use nom::AsBytes;
   use crate::moc2d::CellOrCellRangeMOC2IntoIterator;
   use crate::mocell::Cell;
 
@@ -637,11 +641,11 @@ mod tests {
     let input = "t61/1 3 5 s3/1-3 t61/50 52 s4/25";
     let stmoc = moc2d_from_ascii_ivoa::<u64, Time<u64>, u64, Hpx<u64>>(input).unwrap();
     let mut res_ascii_1 = Vec::new();
-    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &Some(20), false, &mut res_ascii_1);
+    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &Some(20), false, &mut res_ascii_1).unwrap();
     println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
 
     let mut res_ascii_1 = Vec::new();
-    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &None, true, &mut res_ascii_1);
+    moc2d_to_ascii_ivoa((&stmoc).into_cellcellrange_moc2_iter(), &None, true, &mut res_ascii_1).unwrap();
     println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
   }
 }

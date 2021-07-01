@@ -10,6 +10,7 @@ use pyo3::prelude::PyResult;
 use intervals::mocranges::TimeRanges;
 use intervals::deser::fits::error::FitsError;
 use std::ops::Range;
+use crate::ndarray_fromto::mocranges_to_array2;
 
 /// Create a temporal coverage from a list of time ranges expressed in jd.
 ///
@@ -35,7 +36,7 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
             ranges.push((min * 86400000000_f64) as u64..(max * 86400000000_f64) as u64);
         }
         let ranges = TimeRanges::new_from(ranges);
-        Ok(ranges.into())
+        Ok(mocranges_to_array2(ranges))
     }
 }
 
@@ -60,7 +61,7 @@ pub fn from_time_ranges_in_microsec_since_jd_origin(min_times: Array1<u64>, max_
             ranges.push(min..max);
         }
         let ranges = TimeRanges::new_from(ranges);
-        Ok(ranges.into())
+        Ok(mocranges_to_array2(ranges))
     }
 }
 

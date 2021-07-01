@@ -144,6 +144,8 @@ impl<T: Idx> NUniqMOC<T> {
 
 #[cfg(test)]
 mod tests {
+
+  use std::ops::Range;
   use std::cmp::Ordering;
 
   use crate::moc::{
@@ -176,7 +178,8 @@ mod tests {
 
   #[test]
   fn test_range2cells_2() {
-    let ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![2..8]);
+    let ranges: Vec<Range<u64>> = vec![2..8];
+    let ranges = MocRanges::<u64, Hpx<u64>>::new_unchecked(ranges);
     let rm = RangeMOC::new(29, ranges);
     let rit = (&rm).into_range_moc_iter();
     let v1: Vec<Cell<u64>> = rit.cells().collect();
@@ -225,7 +228,8 @@ mod tests {
 
   #[test]
   fn test_range2cellrange() {
-    let ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![2..8]);
+    let ranges: Vec<Range<u64>> = vec![2..8];
+    let ranges = MocRanges::<u64, Hpx<u64>>::new_unchecked(ranges);
     let rm = RangeMOC::new(29, ranges);
     let res: Vec<CellOrCellRange<u64>> = (&rm).into_range_moc_iter().cells().cellranges().collect();
     assert_eq!(res, vec![

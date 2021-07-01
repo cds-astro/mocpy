@@ -1054,11 +1054,16 @@ mod tests {
   use std::fs::File;
   use std::ops::Range;
   use std::path::PathBuf;
-  use std::marker::PhantomData;
 
   use crate::qty::{Hpx, Time};
-  use crate::deser::fits::{FitsError, MocIdxType, MocQtyType, MocType, from_fits_ivoa, hpx_cells_to_fits_ivoa, ranges_to_fits_ivoa_internal, ranges_to_fits_ivoa, rangemoc2d_to_fits_ivoa, STMocType};
-  use crate::moc::{HasMaxDepth, CellMOC, CellMOCIntoIterator, RangeMOC, RangeMOCIntoIterator};
+  use crate::deser::fits::{
+    FitsError, MocIdxType, MocQtyType, MocType, from_fits_ivoa, 
+    hpx_cells_to_fits_ivoa, ranges_to_fits_ivoa, rangemoc2d_to_fits_ivoa, STMocType
+  };
+  use crate::moc::{
+    HasMaxDepth, CellMOCIntoIterator, RangeMOCIntoIterator,
+    cell::CellMOC, range::RangeMOC
+  };
   use crate::mocells::{MocCells, Cells};
   use crate::mocell::Cell;
   use crate::mocranges::{MocRanges, TimeRanges, HpxRanges};
@@ -1069,7 +1074,7 @@ mod tests {
  
   #[test]
   fn test_err() {
-    let mut buff = [0_u8; 10];
+    let buff = [0_u8; 10];
     let reader = BufReader::new(&buff[..]);
     match from_fits_ivoa(reader) {
       Err(e) => assert!(matches!(e, FitsError::Io(..))),
@@ -1087,19 +1092,20 @@ mod tests {
       Ok(MocIdxType::U64(MocQtyType::Hpx(MocType::Cells(moc1)))) => {
         assert_eq!(moc1.depth_max(), 29);
         assert_eq!(moc1.len(), 10);
-        let moc2 = CellMOC::<u64, Hpx<u64>>::new(29, MocCells::new(Cells(
-          vec![
-            Cell::from_uniq_hpx(259_u64),
-            Cell::from_uniq_hpx(266_u64),
-            Cell::from_uniq_hpx(1040_u64),
-            Cell::from_uniq_hpx(1041_u64),
-            Cell::from_uniq_hpx(1042_u64),
-            Cell::from_uniq_hpx(1046_u64),
-            Cell::from_uniq_hpx(4115_u64),
-            Cell::from_uniq_hpx(4116_u64),
-            Cell::from_uniq_hpx(68719476958_u64),
-            Cell::from_uniq_hpx(288230376275168533_u64)
-          ])));
+        let mut vec_cells: Vec<Cell<u64>> = vec![
+          Cell::from_uniq_hpx(259_u64),
+          Cell::from_uniq_hpx(266_u64),
+          Cell::from_uniq_hpx(1040_u64),
+          Cell::from_uniq_hpx(1041_u64),
+          Cell::from_uniq_hpx(1042_u64),
+          Cell::from_uniq_hpx(1046_u64),
+          Cell::from_uniq_hpx(4115_u64),
+          Cell::from_uniq_hpx(4116_u64),
+          Cell::from_uniq_hpx(68719476958_u64),
+          Cell::from_uniq_hpx(288230376275168533_u64)
+        ];
+        vec_cells.sort_by(|a, b| a.cmp::<Hpx<u64>>(&b));
+        let moc2 = CellMOC::<u64, Hpx<u64>>::new(29, MocCells::new(Cells(vec_cells)));
         for (c1, c2) in moc1.into_cell_moc_iter().zip(moc2.into_cell_moc_iter()) {
           assert_eq!(c1, c2);
         }
@@ -1167,7 +1173,7 @@ mod tests {
     let path_buf1 = PathBuf::from("resources/MOC2.0/STMOC.fits");
     let path_buf2 = PathBuf::from("../resources/MOC2.0/STMOC.fits");
     let file = File::open(&path_buf1).or_else(|_| File::open(&path_buf2)).unwrap();
-    let mut reader = BufReader::new(file);
+    let reader = BufReader::new(file);
     let mut it = match from_fits_ivoa(reader).unwrap() {
       MocIdxType::U64(MocQtyType::TimeHpx(STMocType::V2(it))) => it,
       _ => unreachable!(),

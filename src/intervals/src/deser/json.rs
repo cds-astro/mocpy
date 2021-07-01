@@ -257,20 +257,21 @@ pub fn cellmoc2d_from_json_aladin<T, Q, U, R>(input: &str) -> Result<CellMOC2<T,
 
 #[cfg(test)]
 mod tests {
+  
   use std::fs;
   use std::path::PathBuf;
 
-  use crate::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator, CellMOCIterator, CellMOCIntoIterator};
+  use crate::moc::{
+    RangeMOCIterator, RangeMOCIntoIterator,
+    CellMOCIterator, CellMOCIntoIterator,
+    range::{RangeMOC}
+  };
   use crate::mocranges::{MocRanges, TimeRanges, HpxRanges};
   use crate::qty::{Hpx, Time};
   use crate::deser::json::{from_json_aladin, cellmoc2d_to_json_aladin, cellmoc2d_from_json_aladin};
-  use crate::moc2d::{RangeMOC2IntoIterator, CellMOC2IntoIterator};
+  use crate::moc2d::CellMOC2IntoIterator;
   use crate::moc2d::range::{RangeMOC2Elem, RangeMOC2};
-  use std::fs::File;
-  use std::io::Write;
-  use nom::AsBytes;
-
-
+  
   #[test]
   fn test_fromto_json() {
     let rm = RangeMOC::new(29,
@@ -337,9 +338,9 @@ mod tests {
     //  
     let mut sink = Vec::new();
     // rangemoc2d_to_json_aladin(moc2.into_cell_moc2_iter(), &None, &mut sink);
-    cellmoc2d_to_json_aladin(moc2.into_cell_moc2_iter(), &None, &mut sink);
+    cellmoc2d_to_json_aladin(moc2.into_cell_moc2_iter(), &None, &mut sink).unwrap();
     let json = String::from_utf8_lossy(&sink);
-    let cellmoc2 = cellmoc2d_from_json_aladin::<u64, Time<u64>, u64, Hpx<u64>>(&json);
+    let _cellmoc2 = cellmoc2d_from_json_aladin::<u64, Time<u64>, u64, Hpx<u64>>(&json);
     // cellmoc2.into_cell_moc2_iter().
     println!("{}\n", &json);
   }

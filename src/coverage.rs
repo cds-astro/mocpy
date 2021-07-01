@@ -134,6 +134,7 @@ use std::fs;
 use intervals::deser::ascii::from_ascii_ivoa;
 use std::error::Error;
 use intervals::deser::json::from_json_aladin;
+use crate::ndarray_fromto::{array2_to_ranges, array2_to_mocranges};
 
 /// Serializes a spatial coverage to a JSON format
 ///
@@ -239,7 +240,7 @@ pub fn sky_fraction(coverage: &Array2<u64>) -> f32 {
 /// Cast an `Array2<u64>` coming from MOCPy python code to
 /// a generic `Ranges<u64>` object.
 pub fn create_ranges_from_py_unchecked(data: Array2<u64>) -> Ranges<u64> {
-    data.into()
+   array2_to_ranges(data)
 }
 
 pub fn build_ranges_from_py(data: Array2<u64>) -> Ranges<u64> {
@@ -249,7 +250,7 @@ pub fn build_ranges_from_py(data: Array2<u64>) -> Ranges<u64> {
 /// Cast an `Array2<u64>` coming from MOCPy python code to
 /// a `HpxRanges<u64>` object.
 pub fn create_hpx_ranges_from_py_unchecked(data: Array2<u64>) -> HpxRanges<u64> {
-    data.into()
+    array2_to_mocranges(data)
 }
 
 pub fn build_hpx_ranges_from_py(data: Array2<u64>) -> HpxRanges<u64> {
@@ -259,7 +260,7 @@ pub fn build_hpx_ranges_from_py(data: Array2<u64>) -> HpxRanges<u64> {
 /// Cast an `Array2<u64>` coming from MOCPy python code to
 /// a `TimeRanges<u64>` object.
 pub fn create_time_ranges_from_py_uncheked(data: Array2<u64>) -> TimeRanges<u64> {
-    data.into()
+    array2_to_mocranges(data)
 }
 
 pub fn build_time_ranges_from_py(data: Array2<u64>) -> TimeRanges<u64> {

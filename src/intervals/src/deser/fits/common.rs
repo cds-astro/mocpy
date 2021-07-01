@@ -246,7 +246,7 @@ mod tests {
   #[test]
   fn test_write_primary_hdu() {
     let mut buf: Vec<u8> = Default::default();
-    write_primary_hdu(&mut buf);
+    write_primary_hdu(&mut buf).unwrap();
     assert_eq!(buf.len(), 2880);
   }
 }

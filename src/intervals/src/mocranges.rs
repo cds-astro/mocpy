@@ -6,10 +6,10 @@ use std::slice::Iter;
 use std::marker::PhantomData;
 
 use num::{One, Zero};
-use ndarray::Array2;
+// use ndarray::Array2;
 
 use crate::idx::Idx;
-use crate::ranges::{ranges_to_array2d, Ranges, SNORanges, MergeOverlappingRangesIter};
+use crate::ranges::{Ranges, SNORanges, MergeOverlappingRangesIter};
 use crate::qty::{Bounded, MocQty, Hpx, Time};
 use crate::uniqranges::HpxUniqRanges;
 use crate::hpxranges::{HpxUniq2DepthIdxIter, HpxToUniqIter};
@@ -212,6 +212,7 @@ impl<T, Q> FromIterator<Range<T>> for MocRanges<T, Q>
   }
 }
 
+/*
 impl<Q: MocQty<u64>> From<MocRanges<u64, Q>> for Array2<u64> {
   fn from(input: MocRanges<u64, Q>) -> Self {
     ranges_to_array2d(input.0)
@@ -222,6 +223,7 @@ impl<Q: MocQty<i64>> From<MocRanges<i64, Q>> for Array2<i64> {
     ranges_to_array2d(input.0)
   }
 }
+*/
 
 
 

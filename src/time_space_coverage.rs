@@ -2,9 +2,15 @@
 //! related to the creation and manipulation of
 //! Time-Space 2D coverages.
 
-use std::convert::TryFrom;
+use std::path::Path;
+use std::fs;
+use std::fs::{File};
+use std::io::{BufReader, BufWriter};
+use std::error::Error;
 
 use rayon::prelude::*;
+
+use ndarray::Array1;
 
 use numpy::PyReadonlyArray2;
 
@@ -13,12 +19,22 @@ use pyo3::{ToPyObject, Python};
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
+
+use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa, STMocType};
+use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
+use intervals::deser::json::cellmoc2d_from_json_aladin;
 use intervals::qty::{MocQty, Hpx, Time};
 use intervals::hpxranges2d::TimeSpaceMoc;
 use intervals::mocranges::{HpxRanges, TimeRanges};
 use intervals::moc2d::{
     CellMOC2Iterator, CellMOC2IntoIterator,
     CellOrCellRangeMOC2Iterator, CellOrCellRangeMOC2IntoIterator
+};
+
+use crate::ndarray_fromto::{
+    array2_to_mocranges, 
+    hpxranges2d_to_array1_i64, 
+    try_array1_i64_to_hpx_ranges2, try_array1_u64_to_hpx_ranges2
 };
 
 /// Create a time-spatial coverage (2D) from a list of sky coordinates
@@ -356,10 +372,9 @@ pub fn from_time_ranges_spatial_coverages_approx(
                 .extract::<PyReadonlyArray2<u64>>(py)
                 .map_err(|_| exceptions::PyValueError::new_err(ERR_CAST))?
                 .as_array()
-                .to_owned()
-                .into();
+                .to_owned();
 
-            spatial_coverages_res.push(spatial_cov);
+            spatial_coverages_res.push(array2_to_mocranges(spatial_cov));
         }
 
         let times = times_start.into_par_iter()
@@ -437,10 +452,9 @@ pub fn from_time_ranges_spatial_coverages(
               .extract::<PyReadonlyArray2<u64>>(py)
               .map_err(|_| exceptions::PyValueError::new_err(ERR_CAST))?
               .as_array()
-              .to_owned()
-              .into();
+              .to_owned();
 
-            spatial_coverages_res.push(spatial_cov);
+            spatial_coverages_res.push(array2_to_mocranges(spatial_cov));
         }
 
         let times = times_start.into_par_iter()
@@ -624,16 +638,6 @@ pub fn project_on_second_dim(
     TimeSpaceMoc::project_on_second_dim(x, coverage)
 }
 
-use ndarray::Array1;
-use std::path::Path;
-use std::fs::File;
-use std::io::{BufReader, BufWriter};
-use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa, STMocType};
-use std::error::Error;
-use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
-use intervals::deser::json::cellmoc2d_from_json_aladin;
-use std::fs;
-
 /// Create a Array1<i64> from a TimeSpaceMoc<u64, u64>
 ///
 /// This is used when storing a STMOC into a FITS file
@@ -649,7 +653,7 @@ use std::fs;
 /// Content example of an Array1 coming from a FITS file:
 /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
 pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
-    coverage.into()
+    hpxranges2d_to_array1_i64(coverage)
 }
 
 /// Deserialize a Time-Space coverage from FITS, using the pre-version 2.0 MOC standard.
@@ -677,7 +681,7 @@ pub fn to_fits(coverage: &TimeSpaceMoc<u64, u64>) -> Array1<i64> {
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
 pub fn from_fits_pre_v2(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
-    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(exceptions::PyValueError::new_err)
+    try_array1_i64_to_hpx_ranges2::<Time<u64>>(data).map_err(exceptions::PyValueError::new_err)
 }
 
 /// Deserialize a Time-Space coverage from FITS, using the MOC2.0 standard.
@@ -705,7 +709,7 @@ pub fn from_fits_pre_v2(data: Array1<i64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// This method returns a `PyValueError` if the `Array1` is not
 /// defined as above.
 pub fn from_fits(data: Array1<u64>) -> PyResult<TimeSpaceMoc<u64, u64>> {
-    TimeSpaceMoc::<u64, u64>::try_from(data).map_err(exceptions::PyValueError::new_err)
+    try_array1_u64_to_hpx_ranges2::<Time<u64>>(data).map_err(exceptions::PyValueError::new_err)
 }
 
 /// Deserialize a Time-Space coverage from a FITS file, using the MOC2.0 standard.

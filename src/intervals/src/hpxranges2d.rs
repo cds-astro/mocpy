@@ -1,13 +1,13 @@
 
 use std::slice;
+use std::iter::Peekable;
 use std::ops::Range;
-use std::convert::{From, TryFrom};
+use std::convert::From;
 
 use num::One;
 use rayon::prelude::*;
 
 use crate::idx::Idx;
-use crate::utils;
 use crate::moc::{
     ZSorted, NonOverlapping,
     RangeMOCIntoIterator,
@@ -22,8 +22,11 @@ use crate::moc2d::{
 };
 use crate::qty::{MocQty, Hpx, Time};
 use crate::ranges::{SNORanges, ranges2d::SNORanges2D, Ranges};
+use crate::ranges::ranges2d::Ranges2D;
 use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
+use crate::moc2d::cell::CellMoc2Iter;
+use crate::moc2d::cellcellrange::CellOrCellRangeMoc2Iter;
 
 /// Declaration of the ST-MOC type
 pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
@@ -419,56 +422,6 @@ where
     }
 }
 
-use std::iter::Peekable;
-use ndarray::Array1;
-use crate::ranges::ranges2d::Ranges2D;
-use crate::moc2d::cell::CellMoc2Iter;
-use crate::moc2d::cellcellrange::CellOrCellRangeMoc2Iter;
-
-impl<T: MocQty<u64>> From<&HpxRanges2D<u64, T, u64>> for Array1<i64> {
-    /// Create a Array1<i64> from a NestedRanges2D<u64, u64>
-    ///
-    /// This is used when storing a STMOC into a FITS file
-    ///
-    /// # Info
-    ///
-    /// The output Array1 stores the STMOC under the nested format.
-    /// Its memory layout contains each time range followed by the
-    /// list of space ranges referred to that time range.
-    /// Time ranges are negatives so that one can distinguish them
-    /// from space ranges.
-    ///
-    /// Content example of an Array1 coming from a FITS file:
-    /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
-    fn from(input: &HpxRanges2D<u64, T, u64>) -> Self {
-        let ranges = &input.0.ranges2d;
-
-        let first_dim_ranges = &ranges.x;
-        let second_dim_ranges = &ranges.y;
-
-        let mut result: Vec<i64> = Vec::<i64>::new();
-
-        // Iterate over the tuples (time range, spatial moc associated)
-        for (t, s) in first_dim_ranges.iter().zip(second_dim_ranges.iter()) {
-            // 1. Append the time range. The opposite is taken so that one can
-            //    recognize it is a first dimensional range
-            result.push(-(t.start as i64));
-            result.push(-(t.end as i64));
-
-            // 2. Append the spatial ranges describing the spatial coverage
-            //    associated to the above time range.
-            for second_dim_range in s.iter() {
-                result.push(second_dim_range.start as i64);
-                result.push(second_dim_range.end as i64);
-            }
-        }
-
-        // Get an Array1 from the Vec<i64> without copying any data
-        let result: Array1<i64> = result.into();
-        result.to_owned()
-    }
-}
-
 impl<TT, T, ST> PartialEq for HpxRanges2D<TT, T, ST>
 where
     TT: Idx,
@@ -485,170 +438,7 @@ where
     TT: Idx,
     T: MocQty<TT>,
     ST: Idx,
-{
-}
-
-impl<T:MocQty<u64>> TryFrom<Array1<i64>> for HpxRanges2D<u64, T, u64> {
-    type Error = &'static str;
-    /// Create a NestedRanges2D<u64, u64> from a Array1<i64>
-    ///
-    /// This is used when loading a STMOC from a FITS file
-    /// opened with astropy
-    ///
-    /// # Precondition
-    ///
-    /// The input Array1 stores the STMOC under the nested format.
-    /// Its memory layout contains each time range followed by the
-    /// list of space ranges referred to that time range.
-    /// Time ranges are negatives so that one can distinguish them
-    /// from space ranges.
-    ///
-    /// Content example of an Array1 coming from a FITS file:
-    /// int64[] = {-1, -3, 3, 5, 10, 12, 13, 18, -5, -6, 0, 1}
-    ///
-    /// Coverages coming from FITS file should be consistent because they
-    /// are stored this way.
-    ///
-    /// # Errors
-    ///
-    /// * If the number of time ranges do not match the number of
-    ///   spatial coverages.
-    fn try_from(input: Array1<i64>) -> Result<Self, Self::Error> {
-        let ranges = if input.is_empty() {
-            // If the input array is empty
-            // then we return an empty coverage
-            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(vec![], vec![])
-        } else {
-            let mut input = input.into_raw_vec();
-            let input = utils::unflatten(&mut input);
-
-            let mut t = Vec::<Range<u64>>::new();
-
-            let mut cur_s = Vec::<Range<u64>>::new();
-            let mut s = Vec::<Ranges<u64>>::new();
-            for r in input.into_iter() {
-                if r.start < 0 {
-                    // First dim range
-                    let t_start = (-r.start) as u64;
-                    let t_end = (-r.end) as u64;
-                    t.push(t_start..t_end);
-
-                    // Push the second dim MOC if there is ranges in it
-                    if !cur_s.is_empty() {
-                        // Warning: We suppose all the STMOCS read from FITS files
-                        // are already consistent when they have been saved!
-                        // That is why we do not check the consistency of the MOCs here!
-                        s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
-                        cur_s.clear();
-                    }
-                } else {
-                    // Second dim range
-                    let s_start = r.start as u64;
-                    let s_end = r.end as u64;
-                    cur_s.push(s_start..s_end);
-                }
-            }
-
-            // Push the last second dim coverage
-            s.push(Ranges::<u64>::new_unchecked(cur_s));
-
-            // Propagate invalid Coverage FITS errors.
-            if t.len() != s.len() {
-                return Err("Number of time ranges and
-                    spatial coverages do not match.");
-            }
-            // No need to make it consistent because it comes
-            // from python
-            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(t, s)
-        };
-
-        Ok(HpxRanges2D(ranges))
-    }
-}
-
-
-
-impl<T: MocQty<u64>> TryFrom<Array1<u64>> for HpxRanges2D<u64, T, u64> {
-    type Error = &'static str;
-    /// Create a NestedRanges2D<u64, u64> from a Array1<u64>
-    ///
-    /// This is used when loading a STMOC from a FITS file
-    /// opened with astropy
-    ///
-    /// # Precondition
-    ///
-    /// The input Array1 stores the STMOC under the nested format.
-    /// Its memory layout contains each time range followed by the
-    /// list of space ranges referred to that time range.
-    /// Time ranges are negatives so that one can distinguish them
-    /// from space ranges.
-    ///
-    /// Coverages coming from FITS file should be consistent because they
-    /// are stored this way.
-    ///
-    /// # Errors
-    ///
-    /// * If the number of time ranges do not match the number of
-    ///   spatial coverages.
-    fn try_from(input: Array1<u64>) -> Result<Self, Self::Error> {
-        let ranges = if input.is_empty() {
-            // If the input array is empty
-            // then we return an empty coverage
-            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(vec![], vec![])
-        } else {
-            let mask = u64::MSB_MASK;
-            let mut input = input.into_raw_vec();
-            let input = utils::unflatten(&mut input);
-
-            let mut cur_t = Vec::<Range<u64>>::new();
-            let mut t: Vec::<Range<u64>> = Vec::with_capacity(input.len() >> 2);
-
-            let mut cur_s = Vec::<Range<u64>>::new();
-            let mut s: Vec::<Ranges<u64>> = Vec::with_capacity(input.len());
-            for r in input.into_iter() {
-                if r.start & r.end & mask == mask {
-                    if !cur_s.is_empty(){
-                        // Push previous (tranges, srange) tuple
-                        for rt in cur_t.drain(..) {
-                            t.push(rt);
-                            s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
-                            cur_s.clear();
-                        }
-                        assert!(cur_t.is_empty());
-                        // cur_t.clear(); Not needed since we drain
-                    }
-                    // First dim range
-                    let t_start = r.start & mask;
-                    let t_end = r.end & mask;
-                    cur_t.push(t_start..t_end);
-                } else {
-                    // Second dim range
-                    let s_start = r.start as u64;
-                    let s_end = r.end as u64;
-                    cur_s.push(s_start..s_end);
-                }
-            }
-
-            // Push the last (tranges, srange) tuple
-            for rt in cur_t {
-                t.push(rt);
-                s.push(Ranges::<u64>::new_unchecked(cur_s.clone()));
-                cur_s.clear();
-            }
-
-            // Propagate invalid Coverage FITS errors.
-            if t.len() != s.len() {
-                return Err("Number of time ranges and
-                    spatial coverages do not match.");
-            }
-            // No need to make it consistent because it comes
-            // from python
-            Moc2DRanges::<u64, T, u64, Hpx<u64>>::new(t, s)
-        };
-
-        Ok(HpxRanges2D(ranges))
-    }
-}
+{ }
 
 // The 3 following From contains code redundancy. We probably should do something!
 
@@ -742,9 +532,6 @@ impl From<CellMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Ti
         HpxRanges2D(Moc2DRanges::<u64, Time<u64>, u64, Hpx<u64>>::new(t, s))
     }
 }
-
-
-
 
 // Adaptor to write FITs
 pub struct TimeSpaceRangesIter<'a, T: Idx> {

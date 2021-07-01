@@ -7,7 +7,7 @@ use std::ptr::slice_from_raw_parts;
 
 use rayon::prelude::*;
 use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
-use ndarray::{Array1, Array2};
+// use ndarray::{Array1, Array2};
 
 use crate::{
     idx::Idx, utils
@@ -323,6 +323,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
     }
 }
 
+/*
 impl From<Ranges<u64>> for Array2<u64> {
     fn from(input: Ranges<u64>) -> Self {
         ranges_to_array2d(input)
@@ -332,10 +333,10 @@ impl From<Ranges<i64>> for Array2<i64> {
     fn from(input: Ranges<i64>) -> Self {
         ranges_to_array2d(input)
     }
-}
+}*/
 
 
-pub fn ranges_to_array2d<T: Idx>(input: Ranges<T>) -> Array2<T> {
+/*pub fn ranges_to_array2d<T: Idx>(input: Ranges<T>) -> Array2<T> {
     if input.is_empty() {
         // Warning: Empty 2D numpy arrays coming from python
         // have the shape (1, 0).
@@ -354,7 +355,7 @@ pub fn ranges_to_array2d<T: Idx>(input: Ranges<T>) -> Array2<T> {
         // of HEALPix cell contained in the moc
         result.into_shape((len, 2)).unwrap().to_owned()
     }
-}
+}*/
 
 
 #[derive(Debug)]
@@ -460,18 +461,15 @@ where
 
 #[cfg(test)]
 mod tests {
-
-
+    
     use std::ops::Range;
     use std::mem::{align_of, size_of};
 
     use num::PrimInt;
     use rand::Rng;
-    use ndarray::Array2;
 
     use crate::qty::{MocQty, Hpx};
     use crate::ranges::{SNORanges, Ranges};
-    use crate::ranges::ranges_to_array2d;
 
     #[test]
     fn test_alignment() {
@@ -485,14 +483,6 @@ mod tests {
         assert_eq!(size_of::<u64>() << 1, size_of::<Range<u64>>());
         assert_eq!(size_of::<i32>() << 1, size_of::<Range<i32>>());
         assert_eq!(size_of::<i64>() << 1, size_of::<Range<i64>>());
-    }
-
-    #[test]
-    fn empty_ranges_to_array2d() {
-        let ranges = Ranges::<u64>::new_unchecked(vec![]);
-
-        let result = ranges_to_array2d(ranges);
-        assert_eq!(result, Array2::<u64>::zeros((1, 0)));
     }
 
     #[test]

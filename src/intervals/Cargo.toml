@@ -17,16 +17,8 @@ rayon = "1.5.1"
 nom = "6.1.2"
 quick-error = "2.0.1"
 healpix = { package = "cdshealpix", version = "0.5.4" }
-#healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 serde_json = "1.0"
 byteorder = "1.4.3"
-
-[dependencies.ndarray]
-version = "0.15.3"
-default-features = false # do not include the default features, and optionally
-                         # cherry-pick individual features
-features = ["rayon"]
-
 
 [dev-dependencies]
 rand = "0.8.3"

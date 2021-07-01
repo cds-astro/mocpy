@@ -31,10 +31,13 @@ use std::path::Path;
 use std::ops::Range;
 use intervals::uniqranges::HpxUniqRanges;
 
+pub mod ndarray_fromto;
 pub mod coverage;
 pub mod spatial_coverage;
 pub mod temporal_coverage;
 pub mod time_space_coverage;
+
+use crate::ndarray_fromto::{ranges_to_array2, mocranges_to_array2, uniq_ranges_to_array1};
 
 type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
@@ -118,7 +121,7 @@ fn coverage_op<O>(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>
 
     let result = op(cov_a, cov_b);
 
-    let result: Array2<u64> = result.into();
+    let result: Array2<u64> = ranges_to_array2(result);
     result.to_owned().into_pyarray(py).to_owned()
 }
 
@@ -133,7 +136,7 @@ fn coverage_complement<Q, F>(py: Python, ranges: PyReadonlyArray2<u64>, to_moc_r
     let result = coverage.complement();
 
     let result = if !result.is_empty() {
-        result.into()
+        mocranges_to_array2(result)
     } else {
         // TODO: try without this condition
         Array::zeros((1, 0))
@@ -162,7 +165,7 @@ fn coverage_degrade<Q, F>(
         coverage::degrade_ranges(&mut ranges, depth)?;
         // The result is already consistent
 
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 }
@@ -182,7 +185,7 @@ fn coverage_merge_intervals<Q, F>(
     let mut coverage = to_moc_ranges(ranges);
     coverage = coverage::merge(coverage, min_depth)?;
 
-    let result: Array2<u64> = coverage.into();
+    let result: Array2<u64> = mocranges_to_array2(coverage);
     Ok(result.into_pyarray(py).to_owned())
 }
 
@@ -217,7 +220,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let ranges = spatial_coverage::create_from_position(lon, lat, depth)?;
 
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
     
@@ -253,7 +256,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let ranges = spatial_coverage::from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
 
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -596,7 +599,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         // Convert the result back to an ndarray::Array2
-        let result: Array2<u64> = result.into();
+        let result: Array2<u64> = mocranges_to_array2(result);
         result.into_pyarray(py).to_owned()
     }
 
@@ -640,7 +643,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         };
 
         // Convert the result back to an ndarray::Array2
-        let result: Array2<u64> = result.into();
+        let result: Array2<u64> = mocranges_to_array2(result);
         result.into_pyarray(py).to_owned()
     }
 
@@ -1415,7 +1418,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn coverage_from_json(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
         let coverage = coverage::from_json(py, input)?;
 
-        let result: Array2<u64> = coverage.into();
+        let result: Array2<u64> = mocranges_to_array2(coverage);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1539,7 +1542,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "spatial_moc_from_fits_file")]
     fn spatial_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = spatial_coverage::from_fits_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1551,7 +1554,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "spatial_moc_from_ascii_file")]
     fn spatial_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = spatial_coverage::from_ascii_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1563,7 +1566,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "spatial_moc_from_ascii_str")]
     fn spatial_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = spatial_coverage::from_ascii_str(ascii)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1575,7 +1578,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "spatial_moc_from_json_file")]
     fn spatial_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = spatial_coverage::from_json_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1587,7 +1590,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "spatial_moc_from_json_str")]
     fn spatial_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = spatial_coverage::from_json_str(json)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1698,7 +1701,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "time_moc_from_fits_file")]
     fn time_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = temporal_coverage::from_fits_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1710,7 +1713,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "time_moc_from_ascii_file")]
     fn time_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = temporal_coverage::from_ascii_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1722,7 +1725,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "time_moc_from_ascii_str")]
     fn time_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = temporal_coverage::from_ascii_str(ascii)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1734,7 +1737,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "time_moc_from_json_file")]
     fn time_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = temporal_coverage::from_json_file(path)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1746,7 +1749,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "time_moc_from_json_str")]
     fn time_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
         let ranges = temporal_coverage::from_json_str(json)?;
-        let result: Array2<u64> = ranges.into();
+        let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1809,7 +1812,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let coverage = coverage::build_ranges_from_py(ranges);
 
-        let result: Array2<u64> = coverage.into();
+        let result: Array2<u64> = ranges_to_array2(coverage);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1931,7 +1934,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             }
             ranges.sort_by(|a, b| a.start.cmp(&b.start));
             let nested_coverage = spatial_coverage::to_nested(HpxUniqRanges::new_unchecked(ranges));
-            nested_coverage.into()
+            mocranges_to_array2(nested_coverage)
         };
 
         result.into_pyarray(py).to_owned()
@@ -1952,7 +1955,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
             let uniq_coverage = nested_coverage.to_hpx_uniq();
-            uniq_coverage.into()
+            uniq_ranges_to_array1(uniq_coverage)
         };
 
         result.into_pyarray(py).to_owned()
