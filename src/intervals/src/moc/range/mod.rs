@@ -36,6 +36,8 @@ impl<T: Idx, Q: MocQty<T>> RangeMOC<T, Q> {
     self.ranges
   }
 
+  // pub fn and(&self, RangeMocIntoIterator) !!
+
   // pub fn owned_and() -> RangeMOC<T, Q> { }
   // pub fn lazy_and() -> 
   

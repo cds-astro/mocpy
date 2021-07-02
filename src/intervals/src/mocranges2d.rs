@@ -192,7 +192,7 @@ mod tests {
 
   #[test]
   fn merge_overlapping_ranges() {
-    let t = vec![0..15, 0..15, 15..30, 30..45, 15..30];
+    let t: Vec<Range<u64>> = vec![0..15, 0..15, 15..30, 30..45, 15..30];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
@@ -216,7 +216,7 @@ mod tests {
   // xxxx-------
   #[test]
   fn remove_different_length_time_ranges() {
-    let t = vec![0..7, 0..30];
+    let t: Vec<Range<u64>> = vec![0..7, 0..30];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![16..21]),
@@ -237,7 +237,7 @@ mod tests {
   // ----xxxx---
   #[test]
   fn remove_different_length_time_ranges2() {
-    let t = vec![0..30, 2..10];
+    let t: Vec<Range<u64>> = vec![0..30, 2..10];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![16..21]),
@@ -259,7 +259,7 @@ mod tests {
   // ----xxxxxxx
   #[test]
   fn remove_different_length_time_ranges3() {
-    let t = vec![0..5, 2..10];
+    let t: Vec<Range<u64>> = vec![0..5, 2..10];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![16..21]),
@@ -281,7 +281,7 @@ mod tests {
   // ----xxxxxxx
   #[test]
   fn remove_different_length_time_ranges4() {
-    let t = vec![0..30, 10..30];
+    let t: Vec<Range<u64>> = vec![0..30, 10..30];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![16..21]),
@@ -301,7 +301,7 @@ mod tests {
   // ------xxxx
   #[test]
   fn remove_different_length_time_ranges5() {
-    let t = vec![0..5, 5..20];
+    let t: Vec<Range<u64>> = vec![0..5, 5..20];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![16..21]),
@@ -319,7 +319,7 @@ mod tests {
 
   #[test]
   fn merge_overlapping_ranges_2() {
-    let t = vec![0..15, 0..15, 15..30, 30..45, 15..30];
+    let t: Vec<Range<u64>> = vec![0..15, 0..15, 15..30, 30..45, 15..30];
     let s = vec![
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),
       Ranges::<u64>::new_unchecked(vec![0..4, 5..16, 17..18]),

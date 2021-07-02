@@ -999,14 +999,16 @@ impl<R: BufRead> MOC2Properties for RangeMoc2DPreV2IterFromFits<R> {}
 impl<R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<R> {
   type Item = RangeMOC2Elem<u64, Time<u64>, u64, Hpx<u64>>;
   fn next(&mut self) -> Option<Self::Item> {
+    use byteorder::ReadBytesExt;
+
     let mut tranges: Vec<Range<u64>> = Vec::with_capacity(1000);
     if let Some(trange) = self.prev_t.take() {
       tranges.push(trange);
     }
     let mut sranges: Vec<Range<u64>> = Vec::with_capacity(1000);
     while self.n_ranges > 0_u64 {
-      let from = i64::read::<_, BigEndian>(&mut self.reader);
-      let to = i64::read::<_, BigEndian>(&mut self.reader);
+      let from = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
+      let to = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
       if let (Ok(start), Ok(end)) = (from, to) {
         self.n_ranges -= 1;
         if start < 0 && end < 0 {
@@ -1021,8 +1023,8 @@ impl<R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<R> {
       }
     }
     while self.n_ranges > 0_u64 {
-      let from = i64::read::<_, BigEndian>(&mut self.reader);
-      let to = i64::read::<_, BigEndian>(&mut self.reader);
+      let from = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
+      let to = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
       if let (Ok(start), Ok(end)) = (from, to) {
         self.n_ranges -= 1;
         if start < 0 && end < 0 {

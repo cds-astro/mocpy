@@ -20,7 +20,6 @@ pub fn and<T, Q, I1, I2>(
   AndRangeIter::new(left_it, right_it)
 }
 
-
 /// Performs an `AND` operation between two iterators of ranges on-the-fly, while iterating.
 pub struct AndRangeIter<T, Q, I1, I2>
   where
@@ -131,7 +130,7 @@ impl<T, Q, I1, I2> Iterator for AndRangeIter<T, Q, I1, I2>
         },
       };
       if from < to {
-        return Some(Range { start: from, end: to });
+        return Some(from..to);
       }
     }
     None

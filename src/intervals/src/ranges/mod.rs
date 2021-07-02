@@ -14,6 +14,7 @@ use crate::{
 };
 use num::{Zero, Integer, PrimInt, One};
 use std::cmp;
+use std::cmp::Ordering;
 
 pub mod ranges2d;
 
@@ -54,9 +55,10 @@ pub trait SNORanges<'a, T: Idx>: Sized {
         self.merge(other, |a, b| a || b)
     }
 
-    fn intersection(&self, other: &Self) -> Self {
+    fn intersection(&self, other: &Self) -> Self;
+    /*fn intersection(&self, other: &Self) -> Self {
         self.merge(other, |a, b| a && b)
-    }
+    }*/
 
     fn difference(&self, other: &Self) -> Self {
         self.merge(other, |a, b| a && !b)
@@ -206,6 +208,66 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
             Ok(i) => i & 1 == 0 && x.end <= result[i | 1], // index must be even (lower bound of a range)
             Err(i) => i & 1 == 1 && x.end <= result[i], // index must be odd (inside a range)
         }
+    }
+
+    fn intersection(&self, other: &Self) -> Self {
+        let l = &self.0;
+        let len_l = l.len();
+        let r = &other.0;
+        let len_r = r.len();
+        // Quick rejection test
+        if len_l == 0 || len_r == 0
+          || l[0].start >= r[len_r - 1].end
+          || l[len_l - 1].end <= r[0].start
+        {
+            return Ranges(Default::default());
+        }
+        // Use binary search to find the starting element
+        let (i_l, i_r) = if l[0].start < r[0].start {
+            let i_l = match l.binary_search_by(|l_range| l_range.start.cmp(&r[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (i_l, 0)
+        } else if l[0].start > r[0].start {
+            let i_r = match r.binary_search_by(|r_range| r_range.start.cmp(&l[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (0, i_r)
+        } else {
+            (0, 0)
+        };
+        // Perform the iterator algo in the two sub-arrays :)
+        let mut left_it = l[i_l..].iter();
+        let mut right_it = r[i_r..].iter();
+        let mut left = left_it.next();
+        let mut right = right_it.next();
+        let mut res = Vec::with_capacity(((len_l - i_l) + (len_r - i_r)) as usize);
+        while let (Some(l), Some(r)) = (&left, &right) {
+            let from = l.start.max(r.start);
+            let l_to = l.end;
+            let r_to = r.end;
+            let to = match l_to.cmp(&r_to) {
+                Ordering::Less => {
+                    left = left_it.next();
+                    l_to
+                },
+                Ordering::Greater => {
+                    right = right_it.next();
+                    r_to
+                },
+                Ordering::Equal => {
+                    left = left_it.next();
+                    right = right_it.next();
+                    l_to
+                },
+            };
+            if from < to {
+                res.push(from..to);
+            }
+        }
+        Ranges(res)
     }
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self {

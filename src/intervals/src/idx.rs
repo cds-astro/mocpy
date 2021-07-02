@@ -24,6 +24,10 @@ pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
   const MSB_MASK: Self; // mask use to switch on/select the most significant bit
   fn read<R: Read, B: ByteOrder>(reader: &mut R) -> Result<Self, std::io::Error>;
   fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error>;
+  fn convert<T: Idx + From<Self>>(self) -> T {
+    let to: T = self.into();
+    to.unsigned_shl((T::N_BITS - Self::N_BITS) as u32)
+  }
 }
 
 impl Idx for u8 {
@@ -76,6 +80,8 @@ impl Idx for u128 {
     writer.write_u128::<B>(self)
   }
 }
+
+/*
 impl Idx for i16 {
   const TFORM: TForm1 = TForm1::OneI;
   const MSB_MASK: i16 = 1_i16 << (Self::N_BITS - 1) as u32;
@@ -105,8 +111,32 @@ impl Idx for i64 {
   fn write<W: Write, B: ByteOrder>(self, writer: &mut W) -> Result<(), std::io::Error> {
     writer.write_i64::<B>(self)
   }
-}
+}*/
 
 /*impl<T> Idx for T where T: 'static + Integer + PrimInt + ToPrimitive + AddAssign
                                    + FromStr + From<u8> + TryFrom<u64>
                                    + Send + Sync + Debug + Display + Copy {}*/
+
+
+
+/*
+pub struct IdxConvert<F: Idx, T: Idx + From<F>> {
+  n_bits: u32,
+  _from_type: PhantomData<F>,
+  _to_type: PhantomData<T>,
+}
+
+impl<F: Idx, T: Idx + From<F>> IdxConvert<F, T> {
+  pub fn new() -> Self {
+    IdxConvert {
+      n_bits: (T::N_BITS - F::N_BITS) as u32,
+      _from_type: PhantomData,
+      _to_type: PhantomData
+    }
+  }
+  pub fn convert(&self, from: F) -> T {
+    let to: T = from.into();
+    to.unsigned_shl(self.n_bits)
+  }
+}*/
+

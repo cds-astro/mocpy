@@ -69,6 +69,10 @@ impl<'a, T: Idx, Q: MocQty<T>> SNORanges<'a, T> for MocRanges<T, Q> {
     self.0.par_iter()
   }
 
+  fn intersection(&self, other: &Self) -> Self {
+    self.0.intersection(&other.0).into()
+  }
+
   fn intersects(&self, x: &Range<T>) -> bool {
     self.0.intersects(x)
   }
