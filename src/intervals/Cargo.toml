@@ -28,6 +28,10 @@ criterion = "0.3"
 name = "ranges2cells"
 harness = false
 
+[[bench]]
+name = "moc_and"
+harness = false
+
 [profile.release]
 opt-level = 3
 

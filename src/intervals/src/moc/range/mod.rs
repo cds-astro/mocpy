@@ -13,6 +13,8 @@ use crate::qty::{MocQty, Hpx};
 use crate::moc::{HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, RangeMOCIterator, RangeMOCIntoIterator};
 use crate::mocranges::MocRanges;
 
+pub mod op;
+
 /// A MOC made of (ordered and non-overlaping) ranges.
 #[derive(Debug, Clone)]
 pub struct RangeMOC<T: Idx, Q: MocQty<T>> {
@@ -34,6 +36,10 @@ impl<T: Idx, Q: MocQty<T>> RangeMOC<T, Q> {
     self.ranges
   }
 
+  // pub fn owned_and() -> RangeMOC<T, Q> { }
+  // pub fn lazy_and() -> 
+  
+  
   /*pub fn into_range_moc_iter(self) -> LazyRangeMOCIter<T, Q, IntoIter<Range<T>>> {
     LazyRangeMOCIter::new(self.depth_max, self.ranges.0.0.into_iter())
   }*/
@@ -126,6 +132,7 @@ impl RangeMOC<u16, Hpx<u16>> {
 pub struct RangeMocIter<T: Idx, Q: MocQty<T>> {
   depth_max: u8,
   iter: IntoIter<Range<T>>,
+  last: Option<Range<T>>,
   _qty: PhantomData<Q>,
 }
 impl<T: Idx, Q: MocQty<T>> HasMaxDepth for RangeMocIter<T, Q> {
@@ -148,15 +155,26 @@ impl<T: Idx, Q: MocQty<T>> Iterator for RangeMocIter<T, Q> {
 }
 impl<T: Idx, Q: MocQty<T>> RangeMOCIterator<T> for RangeMocIter<T, Q> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Range<T>> {
+    self.last.as_ref()
+  }
 }
 impl<T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for RangeMOC<T, Q> {
   type Qty = Q;
   type IntoRangeMOCIter = RangeMocIter<T, Self::Qty>;
 
   fn into_range_moc_iter(self) -> Self::IntoRangeMOCIter {
+    let l = self.ranges.0.0.len();
+    let last: Option<Range<T>> = if l > 0 {
+      Some(self.ranges.0.0[l - 1].clone())
+    } else {
+      None
+    };
     RangeMocIter {
       depth_max: self.depth_max,
       iter: self.ranges.0.0.into_iter(),
+      last,
       _qty: PhantomData
     }
   }
@@ -166,6 +184,7 @@ impl<T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for RangeMOC<T, Q> {
 pub struct RangeRefMocIter<'a, T: Idx, Q: MocQty<T>> {
   depth_max: u8,
   iter: slice::Iter<'a, Range<T>>,
+  last: Option<Range<T>>,
   _qty: PhantomData<Q>,
 }
 impl<'a, T: Idx, Q: MocQty<T>> HasMaxDepth for RangeRefMocIter<'a, T, Q> {
@@ -188,15 +207,26 @@ impl<'a, T: Idx, Q: MocQty<T>> Iterator for RangeRefMocIter<'a, T, Q> {
 }
 impl<'a, T: Idx, Q: MocQty<T>> RangeMOCIterator<T> for RangeRefMocIter<'a, T, Q> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Range<T>> {
+    self.last.as_ref()
+  }
 }
 impl<'a, T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for &'a RangeMOC<T, Q> {
   type Qty = Q;
   type IntoRangeMOCIter = RangeRefMocIter<'a, T, Self::Qty>;
 
   fn into_range_moc_iter(self) -> Self::IntoRangeMOCIter {
+    let l = self.ranges.0.0.len();
+    let last: Option<Range<T>> = if l > 0 {
+      Some(self.ranges.0.0[l - 1].clone())
+    } else {
+      None
+    };
     RangeRefMocIter {
       depth_max: self.depth_max,
       iter: self.ranges.iter(),
+      last,
       _qty: PhantomData
     }
   }

@@ -7,6 +7,7 @@ use crate::deser;
 use crate::idx::Idx;
 use crate::qty::MocQty;
 use crate::mocell::{Cell, CellOrCellRange};
+use crate::mocrange::MocRange;
 use crate::moc::decorators::{
   RangeMOCIteratorFromCells,
   RangeMOCIteratorFromCellOrCellRanges,
@@ -58,11 +59,20 @@ Iterator<Item=Some(enum(Left(Ragne), Right(Range), Common(Range)))>.. ?*/
 /// Iterator over MOC cells
 pub trait CellMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Cell<T>> {
   type Qty: MocQty<T>;
+
+  /// If available, returns the upper cellthe iterator will return, without consuming
+  /// the iterator.
+  /// This information is available e.g. for an Iterator from a Vector, but may not be available
+  /// for an Iterator coming from a stream.
+  /// If available, this information can be used for fast rejection tests.
+  fn peek_last(&self) -> Option<&Cell<T>>;
+  
   fn cellranges(self) -> CellOrCellRangeMOCIteratorFromCells<T, Self::Qty, Self> {
     CellOrCellRangeMOCIteratorFromCells::new(self)
   }
   fn ranges(self) -> RangeMOCIteratorFromCells<T, Self::Qty, Self> {
-    RangeMOCIteratorFromCells::new(self)
+    let last: Option<Range<T>> =  self.peek_last().map(|cell| MocRange::<T, Self::Qty>::from(cell).0);
+    RangeMOCIteratorFromCells::new(self, last)
   }
   fn to_json_aladin<W: Write>(self, fold: Option<usize>, writer: W) -> std::io::Result<()> {
     deser::json::to_json_aladin(self, &fold, "", writer)
@@ -80,6 +90,13 @@ pub trait CellMOCIntoIterator<T: Idx>: Sized {
 pub trait CellOrCellRangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=CellOrCellRange<T>> {
   type Qty: MocQty<T>;
 
+  /// If available, returns the upper cell or cell range the iterator will return,
+  /// without consuming the iterator.
+  /// This information is available e.g. for an Iterator from a Vector, but may not be available
+  /// for an Iterator coming from a stream.
+  /// If available, this information can be used for fast rejection tests.
+  fn peek_last(&self) -> Option<&CellOrCellRange<T>>;
+  
   /// # WARNING
   /// - `use_offset=true` is not compatible with the current IVOA standard!
   fn to_ascii_ivoa<W: Write>(self, fold: Option<usize>, use_offset: bool, writer: W) -> std::io::Result<()> {
@@ -92,7 +109,8 @@ pub trait CellOrCellRangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<I
   }
 
   fn ranges(self) -> RangeMOCIteratorFromCellOrCellRanges<T, Self::Qty, Self> {
-    RangeMOCIteratorFromCellOrCellRanges::new(self)
+    let last: Option<Range<T>> =  self.peek_last().map(|ccr| MocRange::<T, Self::Qty>::from(ccr).0);
+    RangeMOCIteratorFromCellOrCellRanges::new(self, last)
   }
 }
 pub trait CellOrCellRangeMOCIntoIterator<T: Idx>: Sized {
@@ -116,6 +134,12 @@ pub trait CellOrCellRangeMOCIntoIterator<T: Idx>: Sized {
 pub trait RangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Range<T>> {
   type Qty: MocQty<T>;
 
+  /// If available, returns the of the last range of the Iterator, without consuming the iterator.
+  /// This information is available e.g. for an Iterator from a Vector, but may not be available
+  /// for an Iterator coming from a stream.
+  /// If available, this information can be used for fast rejection tests.
+  fn peek_last(&self) -> Option<&Range<T>>;
+  
   fn cells(self) -> CellMOCIteratorFromRanges<T, Self::Qty, Self> {
     CellMOCIteratorFromRanges::new(self)
   }

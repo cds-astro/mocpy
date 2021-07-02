@@ -38,7 +38,7 @@ pub mod common;
 pub mod error;
 pub mod keywords;
 
-
+#[derive(Debug)]
 pub enum MocIdxType<R: BufRead> {
   U8(MocQtyType<u8, R>),
   U16(MocQtyType<u16, R>),
@@ -47,12 +47,14 @@ pub enum MocIdxType<R: BufRead> {
   U128(MocQtyType<u128, R>),
 }
 
+#[derive(Debug)]
 pub enum MocQtyType<T: Idx, R: BufRead> {
   Hpx(MocType<T, Hpx<T>, R>),
   Time(MocType<T, Time<T>, R>),
   TimeHpx(STMocType<T, R>),
 }
 
+#[derive(Debug)]
 pub enum MocType<T: Idx, Q: MocQty<T>, R: BufRead> {
   Ranges(RangeMocIterFromFits<T, Q, R>),
   Cells(CellMOC<T, Q>),
@@ -61,6 +63,7 @@ pub enum MocType<T: Idx, Q: MocQty<T>, R: BufRead> {
   // RMixed(),
 }
 
+#[derive(Debug)]
 pub enum STMocType<T: Idx, R: BufRead> {
   V2(RangeMoc2DIterFromFits<T, R>),
   PreV2(RangeMoc2DPreV2IterFromFits<R>)
@@ -780,7 +783,7 @@ fn from_fits_range<T, Q, R>(reader: R, depth_max: u8, n_ranges: u64)
 }
 
 
-
+#[derive(Debug)]
 pub struct RangeMocIterFromFits<T: Idx, Q: MocQty<T>, R: BufRead> {
   depth_max: u8,
   reader: R,
@@ -831,6 +834,10 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> Iterator for RangeMocIterFromFits<T, Q, R
 }
 impl<T: Idx, Q: MocQty<T>, R: BufRead> RangeMOCIterator<T> for RangeMocIterFromFits<T, Q, R> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Range<T>> {
+    None
+  }
 }
 
 // st-moc read iterator
@@ -844,6 +851,7 @@ fn from_fits_range2d<T, R>(reader: R, depth_max_time: u8, depth_max_hpx: u8, n_r
   Ok(RangeMoc2DIterFromFits::new(depth_max_time, depth_max_hpx, reader, n_ranges))
 }
 
+#[derive(Debug)]
 pub struct RangeMoc2DIterFromFits<T: Idx, R: BufRead> {
   depth_max_time: u8,
   depth_max_hpx: u8,
@@ -952,6 +960,7 @@ fn from_fits_range2d_29<R>(reader: R, depth_max_time: u8, depth_max_hpx: u8, n_r
   Ok(RangeMoc2DPreV2IterFromFits::new(depth_max_time, depth_max_hpx, reader, n_ranges))
 }
 
+#[derive(Debug)]
 pub struct RangeMoc2DPreV2IterFromFits<R: BufRead> {
   depth_max_time: u8,
   depth_max_hpx: u8,

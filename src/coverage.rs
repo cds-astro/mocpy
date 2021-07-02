@@ -15,9 +15,9 @@ use pyo3::{PyObject, ToPyObject};
 
 use intervals::ranges::Ranges;
 use intervals::qty::{MocQty, Hpx, Time};
+use intervals::moc::CellOrCellRangeMOCIntoIterator;
 use intervals::mocranges::{MocRanges, HpxRanges, TimeRanges};
 use intervals::uniqranges::HpxUniqRanges;
-
 use intervals::deser::fits::error::FitsError;
 
 /// Degrade a coverage.

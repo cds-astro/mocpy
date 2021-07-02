@@ -14,6 +14,7 @@ use crate::mocells::MocCells;
 
 /// A MOC made of (ordered and non-overlaping) cells.
 /// This is used as the result of a MOC JSON deserialization of a MOC.
+#[derive(Debug)]
 pub struct CellMOC<T: Idx, Q: MocQty<T>> {
   depth_max: u8,
   cells: MocCells<T, Q>
@@ -38,6 +39,7 @@ impl<T: Idx, Q: MocQty<T>> MOCProperties for CellMOC<T, Q> { }
 /// Iterator taking the ownership of the `CellMOC` it iterates over.
 pub struct CellMocIter<T: Idx, Q: MocQty<T>> {
   depth_max: u8,
+  last: Option<Cell<T>>,
   iter: IntoIter<Cell<T>>,
   _qty: PhantomData<Q>,
 }
@@ -57,14 +59,25 @@ impl<T: Idx, Q: MocQty<T>> Iterator for CellMocIter<T, Q> {
 }
 impl<T: Idx, Q: MocQty<T>> CellMOCIterator<T> for CellMocIter<T, Q> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Cell<T>> {
+    self.last.as_ref()
+  }
 }
 impl<T: Idx, Q: MocQty<T>> CellMOCIntoIterator<T> for CellMOC<T, Q> {
   type Qty = Q;
   type IntoCellMOCIter = CellMocIter<T, Self::Qty>;
 
   fn into_cell_moc_iter(self) -> Self::IntoCellMOCIter {
+    let l = self.cells.0.0.len();
+    let last: Option<Cell<T>> = if l > 0 {
+      Some(self.cells.0.0[l - 1].clone())
+    } else {
+      None
+    };
     CellMocIter {
       depth_max: self.depth_max,
+      last,
       iter: self.cells.0.0.into_iter(),
       _qty: PhantomData
     }
@@ -74,6 +87,7 @@ impl<T: Idx, Q: MocQty<T>> CellMOCIntoIterator<T> for CellMOC<T, Q> {
 /// Iterator borrowing the `CellMOC` it iterates over.
 pub struct CellRefMocIter<'a, T: Idx, Q: MocQty<T>> {
   depth_max: u8,
+  last: Option<Cell<T>>,
   iter: slice::Iter<'a, Cell<T>>,
   _qty: PhantomData<Q>,
 }
@@ -93,14 +107,25 @@ impl<'a, T: Idx, Q: MocQty<T>> Iterator for CellRefMocIter<'a, T, Q> {
 }
 impl<'a, T: Idx, Q: MocQty<T>> CellMOCIterator<T> for CellRefMocIter<'a, T, Q> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Cell<T>> {
+    self.last.as_ref()
+  }
 }
 impl<'a, T: Idx, Q: MocQty<T>> CellMOCIntoIterator<T> for &'a CellMOC<T, Q> {
   type Qty = Q;
   type IntoCellMOCIter = CellRefMocIter<'a, T, Self::Qty>;
 
   fn into_cell_moc_iter(self) -> Self::IntoCellMOCIter {
+    let l = self.cells.0.0.len();
+    let last: Option<Cell<T>> = if l > 0 {
+      Some(self.cells.0.0[l - 1].clone())
+    } else {
+      None
+    };
     CellRefMocIter {
       depth_max: self.depth_max,
+      last,
       iter: self.cells.0.0.iter(),
       _qty: PhantomData
     }

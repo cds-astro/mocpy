@@ -19,6 +19,7 @@ pub struct CellMOCIteratorFromRanges<T, Q, R>
     R: RangeMOCIterator<T, Qty=Q>
 {
   it: R,
+  last: Option<Cell<T>>,
   curr: Option<MocRange<T, Q>>,
   shift_dd: usize,
   range_len_min: T,
@@ -33,6 +34,11 @@ impl<T, Q, R> CellMOCIteratorFromRanges<T, Q, R>
 {
 
   pub fn new(mut it: R) -> CellMOCIteratorFromRanges<T, Q, R> {
+    let last = it.peek_last().and_then(|r| {
+      let moc_range: MocRange<T, Q> = r.into();
+      // TODO: Make a method retrieving directly the last elem instead of iterating
+      moc_range.last().map(|mc| mc.into())
+    });
     let curr = it.next().map(|range| range.into());
     let shift_dd = Q::shift_from_depth_max (it.depth_max()) as usize;
     let range_len_min = T::one() << shift_dd;
@@ -40,6 +46,7 @@ impl<T, Q, R> CellMOCIteratorFromRanges<T, Q, R>
     mask = mask.unsigned_shl(shift_dd as u32);
     CellMOCIteratorFromRanges {
       it,
+      last,
       curr,
       shift_dd,
       range_len_min,
@@ -58,6 +65,10 @@ impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> NonOverlapping for Cel
 impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> MOCProperties for CellMOCIteratorFromRanges<T, Q, R> { }
 impl<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>> CellMOCIterator<T> for CellMOCIteratorFromRanges<T, Q, R> {
   type Qty = Q;
+  
+  fn peek_last(&self) -> Option<&Cell<T>> {
+    self.last.as_ref()
+  } 
 }
 impl<T, Q, R> Iterator for CellMOCIteratorFromRanges<T, Q, R>
   where
@@ -90,6 +101,7 @@ pub struct RangeMOCIteratorFromCells<T, Q, R>
     Q: MocQty<T>,
     R: CellMOCIterator<T, Qty=Q>
 {
+  last: Option<Range<T>>,
   it: R,
   curr: Option<Range<T>>,
 }
@@ -99,9 +111,10 @@ impl<T, Q, R> RangeMOCIteratorFromCells<T, Q, R>
     Q: MocQty<T>,
     R: CellMOCIterator<T, Qty=Q>
 {
-  pub fn new(mut it: R) -> RangeMOCIteratorFromCells<T, Q, R> {
+  pub fn new(mut it: R, last: Option<Range<T>>) -> RangeMOCIteratorFromCells<T, Q, R> {
     let curr: Option<Range<T>> = it.next().map(|e| MocRange::<T, Q>::from(e).0);
     RangeMOCIteratorFromCells {
+      last,
       it,
       curr,
     }
@@ -154,6 +167,10 @@ impl<T, Q, R> Iterator for RangeMOCIteratorFromCells<T, Q, R>
 }
 impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> RangeMOCIterator<T> for RangeMOCIteratorFromCells<T, Q, R> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Range<T>> {
+    self.last.as_ref()
+  }
 }
 
 
@@ -164,6 +181,7 @@ pub struct RangeMOCIteratorFromCellOrCellRanges<T, Q, R>
     Q: MocQty<T>,
     R: CellOrCellRangeMOCIterator<T, Qty=Q>
 {
+  last: Option<Range<T>>,
   it: R,
   curr: Option<Range<T>>,
 }
@@ -173,9 +191,10 @@ impl<T, Q, R> RangeMOCIteratorFromCellOrCellRanges<T, Q, R>
     Q: MocQty<T>,
     R: CellOrCellRangeMOCIterator<T, Qty=Q>
 {
-  pub fn new(mut it: R) -> RangeMOCIteratorFromCellOrCellRanges<T, Q, R> {
+  pub fn new(mut it: R, last: Option<Range<T>>) -> RangeMOCIteratorFromCellOrCellRanges<T, Q, R> {
     let curr: Option<Range<T>> = it.next().map(|e| MocRange::<T, Q>::from(e).0);
     RangeMOCIteratorFromCellOrCellRanges {
+      last,
       it,
       curr,
     }
@@ -228,6 +247,10 @@ impl<T, Q, R> Iterator for RangeMOCIteratorFromCellOrCellRanges<T, Q, R>
 }
 impl<T: Idx, Q: MocQty<T>, R: CellOrCellRangeMOCIterator<T, Qty=Q>> RangeMOCIterator<T> for RangeMOCIteratorFromCellOrCellRanges<T, Q, R> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&Range<T>> {
+    self.last.as_ref()
+  }
 }
 
 
@@ -239,6 +262,7 @@ pub struct CellOrCellRangeMOCIteratorFromCells<T, Q, R>
     R: CellMOCIterator<T, Qty=Q>
 {
   it: R,
+  last: Option<CellOrCellRange<T>>,
   curr: Option<Cell<T>>,
 }
 
@@ -249,9 +273,15 @@ impl<T, Q, R> CellOrCellRangeMOCIteratorFromCells<T, Q, R>
     R: CellMOCIterator<T, Qty=Q>
 {
   pub fn new(mut it: R) -> CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
+    let last = it.peek_last().and_then(|r| {
+      let moc_range: MocRange<T, Q> = r.into();
+      // TODO: Make a method retrieving directly the last elem instead of iterating
+      moc_range.last().map(|mc| CellOrCellRange::Cell(mc.into()))
+    });
     let curr = it.next();
     CellOrCellRangeMOCIteratorFromCells {
       it,
+      last,
       curr,
     }
   }
@@ -301,4 +331,8 @@ impl<T, Q, R> Iterator for CellOrCellRangeMOCIteratorFromCells<T, Q, R>
 }
 impl<T: Idx, Q: MocQty<T>, R: CellMOCIterator<T, Qty=Q>> CellOrCellRangeMOCIterator<T> for CellOrCellRangeMOCIteratorFromCells<T, Q, R> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&CellOrCellRange<T>> {
+    self.last.as_ref()
+  }
 }

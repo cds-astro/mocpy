@@ -478,6 +478,10 @@ impl<T: Idx, Q: MocQty<T>, R: BufRead> Iterator for MOCFromAsciiStream<T, Q, R> 
 }
 impl<T: Idx, Q: MocQty<T>, R: BufRead> CellOrCellRangeMOCIterator<T> for MOCFromAsciiStream<T, Q, R> {
   type Qty = Q;
+
+  fn peek_last(&self) -> Option<&CellOrCellRange<T>> {
+    None
+  }
 }
 
 
@@ -489,7 +493,8 @@ mod tests {
   use crate::moc::{
     HasMaxDepth,
     RangeMOCIterator, RangeMOCIntoIterator,
-    CellMOCIterator, CellOrCellRangeMOCIterator, 
+    CellMOCIterator, CellOrCellRangeMOCIterator,
+    CellOrCellRangeMOCIntoIterator,
     range::RangeMOC
   };
   use crate::qty::{Hpx, Time};

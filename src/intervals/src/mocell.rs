@@ -46,7 +46,7 @@ pub enum MocCellOrCellRange<T: Idx, Q: MocQty<T>> {
 /// A MOC cell, i.e. an index at a given depth.
 /// Without attached quantities, we do not know the shift from one depth to another, and
 /// so we cannot define a absolute order.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Cell<T: Idx> {
   pub depth: u8,
   pub idx: T,
@@ -84,10 +84,15 @@ impl<T: Idx, Q: MocQty<T>> From<MocCell<T, Q>> for Cell<T> {
     cell.0
   }
 }
+impl<T: Idx, Q: MocQty<T>> From<&MocCell<T, Q>> for Cell<T> {
+  fn from(cell: &MocCell<T, Q>) -> Self {
+    cell.0
+  }
+}
 
 /// The order we define corresponds to the order of the lower bound of the cell at the deepest depth.
 #[repr(transparent)] // To be able to transmute Vec<Cell<T>> into Vec<MocCell<T, _>>
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct MocCell<T: Idx, Q: MocQty<T>>(pub Cell<T>, PhantomData<Q>);
 
 impl<T: Idx, Q: MocQty<T>> Ord for MocCell<T, Q> {

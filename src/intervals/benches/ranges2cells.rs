@@ -1,30 +1,33 @@
 
-use criterion::{Criterion, black_box, criterion_group, criterion_main, BenchmarkId};
-
-use intervals::moc::{RangeMOC, RangeMOCIntoIterator, RangeMOCIterator};
-use intervals::mocranges::MocRanges;
-use intervals::mocqty::{Hpx, MocQty};
-use intervals::mocell::Cell;
-use intervals::hpxranges::{HpxToUniqIter, HpxUniq2DepthIdxIter};
-use intervals::ranges::Idx;
 use std::cmp::Ordering;
 
+use criterion::{Criterion, criterion_group, criterion_main};
+
+use intervals::idx::Idx;
+use intervals::qty::{Hpx, MocQty};
+use intervals::moc::{
+  RangeMOCIterator, RangeMOCIntoIterator,
+  range::RangeMOC
+};
+use intervals::mocranges::MocRanges;
+use intervals::mocell::Cell;
+use intervals::hpxranges::HpxUniq2DepthIdxIter;
 
 fn create_ranges() -> RangeMOC<u64, Hpx<u64>> {
-  RangeMOC {
-    depth_max: 29,
-    ranges: MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![
+  RangeMOC::new(
+    29,
+    MocRanges::<u64, Hpx<u64>>::new_unchecked(vec![
       0..5,
       6..59,
       78..6953,
       12458..55587,
       55787..65587
     ])
-  }
+  )
 }
 
 fn test_old_version<T: Idx>(ranges_moc: RangeMOC<T, Hpx<T>>) -> Vec<(i8, T)> {
-  HpxUniq2DepthIdxIter::new(ranges_moc.ranges).collect()
+  HpxUniq2DepthIdxIter::new(ranges_moc.into_moc_ranges()).collect()
 }
 
 fn test_new_version<T: Idx, Q: MocQty<T>>(ranges_moc: RangeMOC<T, Q>) -> Vec<Cell<T>> {

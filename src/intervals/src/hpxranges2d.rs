@@ -12,7 +12,7 @@ use crate::moc::{
     ZSorted, NonOverlapping,
     RangeMOCIntoIterator,
     CellMOCIterator, CellMOCIntoIterator,
-    CellOrCellRangeMOCIterator,
+    CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator,
     range::{RangeMOC, RangeMocIter}
 };
 use crate::moc2d::{
@@ -27,7 +27,6 @@ use crate::mocranges::{HpxRanges, MocRanges};
 use crate::mocranges2d::Moc2DRanges;
 use crate::moc2d::cell::CellMoc2Iter;
 use crate::moc2d::cellcellrange::CellOrCellRangeMoc2Iter;
-
 /// Declaration of the ST-MOC type
 pub type TimeSpaceMoc<T, S> = HpxRanges2D::<T, Time<T>, S>;
 
