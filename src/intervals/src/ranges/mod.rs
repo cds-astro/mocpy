@@ -1,5 +1,6 @@
 //! Very generic ranges operations
 
+use std::mem;
 use std::ops::{Range, Index};
 use std::slice::Iter;
 use std::collections::VecDeque;
@@ -14,10 +15,8 @@ use crate::{
 };
 use num::{Zero, Integer, PrimInt, One};
 use std::cmp;
-use std::cmp::Ordering;
 
 pub mod ranges2d;
-
 
 /// Generic operations on a set of Sorted and Non-Overlapping ranges.
 /// SNO = Sorted Non-Overlapping
@@ -51,9 +50,10 @@ pub trait SNORanges<'a, T: Idx>: Sized {
 
     fn merge(&self, other: &Self, op: impl Fn(bool, bool) -> bool) -> Self;
 
-    fn union(&self, other: &Self) -> Self {
+    fn union(&self, other: &Self) -> Self;
+    /*fn union(&self, other: &Self) -> Self {
         self.merge(other, |a, b| a || b)
-    }
+    }*/
 
     fn intersection(&self, other: &Self) -> Self;
     /*fn intersection(&self, other: &Self) -> Self {
@@ -210,6 +210,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
         }
     }
 
+    /* 270 us
     fn intersection(&self, other: &Self) -> Self {
         let l = &self.0;
         let len_l = l.len();
@@ -267,6 +268,225 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
                 res.push(from..to);
             }
         }
+        Ranges(res)
+    }*/
+
+    /*// 180 us
+    fn intersection(&self, other: &Self) -> Self {
+        // utils.flatten()/unfallten()
+        let l = &self.0;
+        let r = &other.0;
+        // Quick rejection test
+        if l.len() == 0 || r.len() == 0
+          || l[0].start >= r[r.len() - 1].end
+          || l[l.len() - 1].end <= r[0].start
+        {
+            return Ranges(Default::default());
+        }
+        // Use binary search to find the starting indices
+        let (mut il, mut ir) = if l[0].start < r[0].start {
+            let il = match l.binary_search_by(|l_range| l_range.start.cmp(&r[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (il, 0)
+        } else if l[0].start > r[0].start {
+            let ir = match r.binary_search_by(|r_range| r_range.start.cmp(&l[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (0, ir)
+        } else {
+            (0, 0)
+        };
+        let mut res = Vec::with_capacity(l.len() + r.len());
+        while il < l.len() && ir < r.len() {
+            while il < l.len() && l[il].end <= r[ir].start { // |--l--| |--r--|
+                il += 1;
+            }
+            while ir < r.len() && r[ir].end <= l[il].start { // |--r--| |--l--|
+                ir += 1;
+            }
+            if il == l.len() || ir == r.len() {
+                break;
+            } else if l[il].end <= r[ir].start {
+                continue;
+            }
+            let from = l[il].start.max(r[ir].start);
+            if l[il].end < r[ir].end {
+                res.push(from..l[il].end);
+                il += 1;
+            } else if l[il].end > r[ir].end {
+                res.push(from..r[ir].end);
+                ir += 1;
+            } else {
+                res.push(from..l[il].end);
+                il += 1;
+                ir += 1;
+            }
+        }
+        Ranges(res)
+    }*/
+
+    
+    fn union(&self, other: &Self) -> Self {
+        let l = &self.0;
+        let r = &other.0;
+        // Deal with cases in which one of the two ranges (or both) is empty
+        if l.len() == 0 {
+            return Ranges(r.clone());
+        } else if r.len() == 0 {
+            return Ranges(l.clone());
+        }
+        // Init result
+        let mut res = Vec::with_capacity(l.len() + r.len());
+        // Use binary search to find the starting indices (and starts with a simple array copy)
+        let (il, ir) = if l[0].end < r[0].start {
+            let il = match l.binary_search_by(|l_range| l_range.end.cmp(&r[0].start)) {
+                Ok(i) => i,
+                Err(i) => i,
+            };
+            res.extend_from_slice(&l[..il]);
+            (il, 0)
+        } else if l[0].start > r[0].end {
+            let ir = match r.binary_search_by(|r_range| r_range.end.cmp(&l[0].start)) {
+                Ok(i) => i,
+                Err(i) => i,
+            };
+            res.extend_from_slice(&r[..ir]);
+            (0, ir)
+        } else {
+            (0, 0)
+        };
+        // Now regular work
+        let mut left_it = l[il..].iter();
+        let mut right_it = r[ir..].iter();
+        let mut left = left_it.next().cloned();
+        let mut right = right_it.next().cloned();
+
+        fn consume_while_end_lower_than<'a, T, I>(it: &mut I, to: T) -> Option<&'a Range<T>>
+            where
+                T: Idx,
+                I: Iterator<Item=&'a Range<T>>,
+        {
+            let mut curr = it.next();
+            while let Some(c) = &curr {
+                if c.end > to {
+                    break;
+                } else {
+                    curr = it.next();
+                }
+            }
+            curr
+        }
+
+        loop {
+            match (&mut left, &mut right) {
+                (Some(ref mut l), Some(ref mut r)) =>
+                    if l.end < r.start {        // L--L R--R
+                        res.push(mem::replace(&mut left, left_it.next().cloned()).unwrap());
+                    } else if r.end < l.start { // R--R L--L
+                        res.push(mem::replace(&mut right, right_it.next().cloned()).unwrap());
+                    } else if l.end <= r.end {    //    R--L--L--R
+                        if l.start < r.start {    // or L--R--L--R
+                            r.start = l.start;
+                        }
+                        left = consume_while_end_lower_than(&mut left_it, r.end).cloned();
+                    } else {                      //    L--R--R--L
+                        if r.start < l.start {    // or R--L--R--L
+                            l.start = r.start;
+                        }
+                        right = consume_while_end_lower_than(&mut right_it, l.end).cloned();
+                    },
+                (Some(ref l), None) => {
+                    res.push(l.clone());
+                    for l in left_it {
+                        res.push(l.clone());
+                    }
+                    break;
+                },
+                (None, Some(ref r)) => {
+                    res.push(r.clone());
+                    for r in right_it {
+                        res.push(r.clone());
+                    }
+                    break;
+                },
+                (None, None) => break,
+            };
+        }
+        res.shrink_to_fit();
+        Ranges(res)
+    }
+
+    fn intersection(&self, other: &Self) -> Self {
+        // utils.flatten()/unfallten()
+        let l = &self.0;
+        let r = &other.0;
+        // Quick rejection test
+        if l.len() == 0 || r.len() == 0
+          || l[0].start >= r[r.len() - 1].end
+          || l[l.len() - 1].end <= r[0].start
+        {
+            return Ranges(Default::default());
+        }
+        // Use binary search to find the starting indices
+        let (il, ir) = if l[0].start < r[0].start {
+            let il = match l.binary_search_by(|l_range| l_range.start.cmp(&r[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (il, 0)
+        } else if l[0].start > r[0].start {
+            let ir = match r.binary_search_by(|r_range| r_range.start.cmp(&l[0].start)) {
+                Ok(i) => i,
+                Err(i) => i - 1,
+            };
+            (0, ir)
+        } else {
+            (0, 0)
+        };
+        // Now simple sequential algo
+        let mut res = Vec::with_capacity(l.len() + r.len() - (il + ir));
+        let mut left_it = l[il..].iter();
+        let mut right_it = r[ir..].iter();
+        let mut left = left_it.next();
+        let mut right = right_it.next();
+        while let (Some(el), Some(er)) = (&left, &right) {
+           if el.end <= er.start { // |--l--| |--r--|
+               left = left_it.next();
+               while let Some(el) = &left {
+                   if el.end <= er.start {
+                       left = left_it.next();
+                   } else {
+                       break;
+                   }
+               }
+           } else if er.end <= el.start { // |--r--| |--l--|
+               right = right_it.next();
+               while let Some(er) = &right {
+                   if er.end <= el.start {
+                       right = right_it.next();
+                   } else {
+                       break;
+                   }
+               }
+           } else {
+               let from = el.start.max(er.start);
+               if el.end < er.end {
+                   res.push(from..el.end);
+                   left = left_it.next();
+               } else if el.end > er.end {
+                   res.push(from..er.end);
+                   right = right_it.next();
+               } else {
+                   res.push(from..el.end);
+                   left = left_it.next();
+                   right = right_it.next();
+               }
+           }
+        }
+        res.shrink_to_fit();
         Ranges(res)
     }
 
@@ -350,6 +570,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
                 result.push(c);
             }
         }
+        result.shrink_to_fit();
         Ranges(utils::unflatten(&mut result))
     }
 

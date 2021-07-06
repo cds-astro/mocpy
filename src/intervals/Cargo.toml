@@ -32,5 +32,11 @@ harness = false
 name = "moc_and"
 harness = false
 
+[[bench]]
+name = "moc_or"
+harness = false
+
 # See default profiles: https://doc.rust-lang.org/cargo/reference/profiles.html
 # But bench can be run with the cpu-native option: RUSTFLAGS='-C target-cpu=native' cargo bench
+[profile.bench]
+opt-level = 3

@@ -61,13 +61,13 @@ fn bench_and(c: &mut Criterion) {
   // https://bheisler.github.io/criterion.rs/book/user_guide/comparing_functions.html
   let mut group = c.benchmark_group("and");
   let (sdss, other) = load_mocs();
-  group.bench_function("Ranges",
+  group.bench_function("Ranges INTERSECTION",
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
-  group.bench_function("Ranges Iter",
+  group.bench_function("Ranges Iter AND",
                        |b| b.iter(|| test_and_ranges_it(sdss.clone(), other.clone())));
-  group.bench_function("Ranges 2",
+  group.bench_function("Ranges 2 INTERSECTION",
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
-  group.bench_function("Ranges Iter 2",
+  group.bench_function("Ranges Iter 2 AND",
                        |b| b.iter(|| test_and_ranges_it(sdss.clone(), other.clone())));
 }
 

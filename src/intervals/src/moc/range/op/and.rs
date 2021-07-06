@@ -1,6 +1,5 @@
 
 use std::ops::Range;
-use std::cmp::Ordering;
 
 use crate::idx::Idx;
 use crate::qty::MocQty;
@@ -111,7 +110,7 @@ impl<T, Q, I1, I2> Iterator for AndRangeIter<T, Q, I1, I2>
 
   fn next(&mut self) -> Option<Self::Item> {
     while let (Some(l), Some(r)) = (&self.left, &self.right) {
-      let from = l.start.max(r.start);
+      /*let from = l.start.max(r.start);
       let l_to = l.end;
       let r_to = r.end;
       let to = match l_to.cmp(&r_to) {
@@ -131,6 +130,41 @@ impl<T, Q, I1, I2> Iterator for AndRangeIter<T, Q, I1, I2>
       };
       if from < to {
         return Some(from..to);
+      }*/
+      if l.end <= r.start { // |--l--| |--r--|
+        self.left = self.left_it.next();
+        while let Some(l) = &self.left {
+          if l.end <= r.start {
+            self.left = self.left_it.next();
+          } else {
+            break;
+          }
+        }
+      } else if r.end <= l.start { // |--r--| |--l--|
+        self.right = self.right_it.next();
+        while let Some(r) = &self.right {
+          if r.end <= l.start {
+            self.right = self.right_it.next();
+          } else {
+            break;
+          }
+        }
+      } else {
+        let from = l.start.max(r.start);
+        if l.end < r.end {
+          let range = from..l.end;
+          self.left = self.left_it.next();
+          return Some(range);
+        } else if l.end > r.end {
+          let range = from..r.end;
+          self.right = self.right_it.next();
+          return Some(range);
+        } else {
+          let range = from..l.end;
+          self.left = self.left_it.next();
+          self.right = self.right_it.next();
+          return Some(range);
+        }
       }
     }
     None
@@ -231,6 +265,7 @@ mod tests {
     let (sdss, other) = load_mocs();
     let and_1 = and_ranges(sdss.clone(), other.clone());
     let and_2 = and_ranges_it(sdss.clone(), other.clone());
+    println!("and size: {}", and_1.moc_ranges().0.0.len());
     assert_eq!(and_1.moc_ranges().0.0.len(), and_2.moc_ranges().0.0.len());
   }
 }

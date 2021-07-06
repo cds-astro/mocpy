@@ -134,7 +134,8 @@ pub trait CellOrCellRangeMOCIntoIterator<T: Idx>: Sized {
 pub trait RangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Range<T>> {
   type Qty: MocQty<T>;
 
-  /// If available, returns the of the last range of the Iterator, without consuming the iterator.
+  /// If available, returns the last range of the Iterator (or at least a range having the last
+  /// range upper bound), without consuming the iterator.
   /// This information is available e.g. for an Iterator from a Vector, but may not be available
   /// for an Iterator coming from a stream.
   /// If available, this information can be used for fast rejection tests.
