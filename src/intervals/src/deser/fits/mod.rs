@@ -736,13 +736,17 @@ fn load_st_moc_range29<R: BufRead>(
 /// The file is sorted first by depth and then by cell number.
 fn from_fits_nuniq<T, R>(
   mut reader: R,
-  depth_max: u8,
+  mut depth_max: u8,
   n_elems: usize
 ) -> Result<CellMOC<T, Hpx<T>>, FitsError>
   where
     T: Idx,
     R: BufRead
 {
+  if depth_max > Hpx::<T>::MAX_DEPTH {
+    eprintln!("WARNING: Wrong depth_max {}. Reset to {}", depth_max, Hpx::<T>::MAX_DEPTH);
+    depth_max = Hpx::<T>::MAX_DEPTH;
+  }
   let mut v: Vec<Cell<T>> = Vec::with_capacity(n_elems);
   for _ in 0..n_elems {
     v.push(Cell::from_uniq_hpx(T::read::<_, BigEndian>(&mut reader)?));

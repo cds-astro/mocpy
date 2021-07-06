@@ -12,7 +12,7 @@ use intervals::deser::fits::{
     MocIdxType, MocQtyType, MocType
 };
 use intervals::moc::{HasMaxDepth, RangeMOCIntoIterator, CellMOCIntoIterator, CellMOCIterator};
-use intervals::moc::range::op::or::or;
+use intervals::moc::range::op::minus::minus;
 use intervals::ranges::SNORanges;
 
 fn load_moc(filename: &str) -> RangeMOC<u32, Hpx<u32>> {
@@ -42,7 +42,7 @@ fn load_mocs() -> (RangeMOC<u32, Hpx<u32>>, RangeMOC<u32, Hpx<u32>>) {
     (sdss, other)
 }
 
-fn test_or_ranges(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
+fn test_minus_ranges(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
     let depth = u8::max(moc_l.depth_max(), moc_r.depth_max());
     let ranges_l = moc_l.into_moc_ranges();
     let ranges_r = moc_r.into_moc_ranges();
@@ -51,34 +51,34 @@ fn test_or_ranges(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>
 
 // we could also perform the operation without having first collected the iteartor we obtain from
 // the FITS file
-fn test_or_ranges_it(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
-    let or = or(moc_l.into_range_moc_iter(), moc_r.into_range_moc_iter());
-    RangeMOC::new(or.depth_max(), or.collect())
+fn test_minus_ranges_it(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
+    let minus = minus(moc_l.into_range_moc_iter(), moc_r.into_range_moc_iter());
+    RangeMOC::new(minus.depth_max(), minus.collect())
 }
 
-fn test_or_ranges_it_ref(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
-    let or = or((&moc_l).into_range_moc_iter(), (&moc_r).into_range_moc_iter());
-    RangeMOC::new(or.depth_max(), or.collect())
+fn test_minus_ranges_it_ref(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
+    let minus = minus((&moc_l).into_range_moc_iter(), (&moc_r).into_range_moc_iter());
+    RangeMOC::new(minus.depth_max(), minus.collect())
 }
 
-
-fn bench_or(c: &mut Criterion) {
+fn bench_minus(c: &mut Criterion) {
     // https://bheisler.github.io/criterion.rs/book/user_guide/comparing_functions.html
-    let mut group = c.benchmark_group("or");
+    let mut group = c.benchmark_group("minus");
     let (sdss, other) = load_mocs();
-    group.bench_function("Ranges UNION",
-                         |b| b.iter(|| test_or_ranges(sdss.clone(), other.clone())));
-    group.bench_function("Ranges Iter OR",
-                         |b| b.iter(|| test_or_ranges_it(sdss.clone(), other.clone())));
-    group.bench_function("Ranges Ref Iter OR",
-                         |b| b.iter(|| test_or_ranges_it_ref(sdss.clone(), other.clone())));
-    group.bench_function("Ranges 2 UNION",
-                         |b| b.iter(|| test_or_ranges(sdss.clone(), other.clone())));
-    group.bench_function("Ranges Iter 2 OR",
-                         |b| b.iter(|| test_or_ranges_it(sdss.clone(), other.clone())));
-    group.bench_function("Ranges Ref Iter 2 OR",
-                         |b| b.iter(|| test_or_ranges_it_ref(sdss.clone(), other.clone())));
+    group.bench_function("Ranges MINUS",
+                         |b| b.iter(|| test_minus_ranges(sdss.clone(), other.clone())));
+    group.bench_function("Ranges Iter MINUS",
+                         |b| b.iter(|| test_minus_ranges_it(sdss.clone(), other.clone())));
+    group.bench_function("Ranges Ref Iter MINUS",
+                         |b| b.iter(|| test_minus_ranges_it_ref(sdss.clone(), other.clone())));
+    group.bench_function("Ranges 2 MINUS",
+                         |b| b.iter(|| test_minus_ranges(sdss.clone(), other.clone())));
+    group.bench_function("Ranges Iter 2 MINUS",
+                         |b| b.iter(|| test_minus_ranges_it(sdss.clone(), other.clone())));
+    group.bench_function("Ranges Ref Iter 2 MINUS",
+                         |b| b.iter(|| test_minus_ranges_it_ref(sdss.clone(), other.clone())));
+
 }
 
-criterion_group!(benches, bench_or);
+criterion_group!(benches, bench_minus);
 criterion_main!(benches);

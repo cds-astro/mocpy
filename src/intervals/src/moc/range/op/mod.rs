@@ -3,5 +3,10 @@
 pub mod check;
 pub mod convert;
 
-pub mod and;
-pub mod or;
+// pub mod not;
+// pub mod degrade;
+
+pub mod and;   // <=> intersection
+pub mod or;    // <=> union
+pub mod minus; // <=> mocpy difference = Aladin Soustracction
+pub mod xor;   // <=> Aladin Difference

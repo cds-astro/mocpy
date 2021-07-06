@@ -36,6 +36,13 @@ harness = false
 name = "moc_or"
 harness = false
 
+[[bench]]
+name = "moc_minus"
+harness = false
+
+# Run a specific bench:
+#  RUSTFLAGS='-C target-cpu=native' cargo bench --bench moc_minus
+
 # See default profiles: https://doc.rust-lang.org/cargo/reference/profiles.html
 # But bench can be run with the cpu-native option: RUSTFLAGS='-C target-cpu=native' cargo bench
 [profile.bench]

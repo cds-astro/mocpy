@@ -56,6 +56,10 @@ fn test_and_ranges_it(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u
   RangeMOC::new(and.depth_max(), and.collect())
 }
 
+fn test_and_ranges_it_ref(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, Hpx<u32>>) -> RangeMOC<u32, Hpx<u32>> {
+  let and = and((&moc_l).into_range_moc_iter(), (&moc_r).into_range_moc_iter());
+  RangeMOC::new(and.depth_max(), and.collect())
+}
 
 fn bench_and(c: &mut Criterion) {
   // https://bheisler.github.io/criterion.rs/book/user_guide/comparing_functions.html
@@ -65,10 +69,15 @@ fn bench_and(c: &mut Criterion) {
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
   group.bench_function("Ranges Iter AND",
                        |b| b.iter(|| test_and_ranges_it(sdss.clone(), other.clone())));
+  group.bench_function("Ranges Ref Iter AND",
+                       |b| b.iter(|| test_and_ranges_it_ref(sdss.clone(), other.clone())));
   group.bench_function("Ranges 2 INTERSECTION",
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
   group.bench_function("Ranges Iter 2 AND",
                        |b| b.iter(|| test_and_ranges_it(sdss.clone(), other.clone())));
+  group.bench_function("Ranges Ref Iter 2 AND",
+                       |b| b.iter(|| test_and_ranges_it_ref(sdss.clone(), other.clone())));
+
 }
 
 criterion_group!(benches, bench_and);
