@@ -9,10 +9,17 @@ use rayon::prelude::*;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
-use intervals::ranges::SNORanges;
-use intervals::qty::{MocQty, Hpx};
+use moc::qty::{MocQty, Hpx};
+use moc::elem::valuedcell::valued_cells_to_moc;
+use moc::elemset::range::{
+    HpxRanges,
+    uniq::HpxUniqRanges
+};
+use moc::ranges::SNORanges;
+use moc::deser::fits::error::FitsError;
 
 use super::coverage;
+use super::ndarray_fromto::mocranges_to_array2;
 
 /// Create a spatial coverage from a list of sky coordinates
 ///
@@ -72,7 +79,6 @@ pub fn create_from_position(
     Ok(result)
 }
 
-use intervals::valuedcell::valued_cells_to_moc;
 /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
 ///
 /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
@@ -240,18 +246,13 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
 }
 
 
-use intervals::uniqranges::HpxUniqRanges;
-use intervals::mocranges::HpxRanges;
-use intervals::deser::fits::error::FitsError;
-use crate::ndarray_fromto::mocranges_to_array2;
-
 /// Convert a spatial coverage from the **uniq** to the **nested** format.
 ///
 /// # Arguments
 ///
 /// * ``coverage`` - The spatial coverage defined in the **uniq** format.
 pub fn to_nested(coverage: HpxUniqRanges<u64>) -> HpxRanges<u64> {
-    coverage.to_hpx()
+    coverage.into_hpx()
 }
 
 /// Convert a spatial coverage from the **nested** to the **uniq** format.
@@ -260,7 +261,7 @@ pub fn to_nested(coverage: HpxUniqRanges<u64>) -> HpxRanges<u64> {
 ///
 /// * ``coverage`` - The spatial coverage defined in the **nested** format.
 pub fn to_uniq(coverage: HpxRanges<u64>) -> HpxUniqRanges<u64> {
-    coverage.to_hpx_uniq()
+    coverage.into_hpx_uniq()
 }
 
 pub fn to_ascii_str(depth_max: u8, ranges: HpxRanges<u64>) -> String {

@@ -4,7 +4,13 @@
 //! These are not specific to a particular dimension
 //!
 
+use std::fs;
+use std::fs::File;
+use std::io::{BufWriter, BufReader};
+use std::path::Path;
+use std::error::Error;
 use std::ops::Range;
+use std::collections::HashMap;
 
 use ndarray::{Array, Array1, Array2, Axis};
 
@@ -13,12 +19,28 @@ use pyo3::prelude::{Python, PyResult};
 use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject};
 
-use intervals::ranges::Ranges;
-use intervals::qty::{MocQty, Hpx, Time};
-use intervals::moc::CellOrCellRangeMOCIntoIterator;
-use intervals::mocranges::{MocRanges, HpxRanges, TimeRanges};
-use intervals::uniqranges::HpxUniqRanges;
-use intervals::deser::fits::error::FitsError;
+use moc::qty::{MocQty, Hpx, Time};
+use moc::elemset::range::{
+    MocRanges, HpxRanges, TimeRanges,
+    uniq::HpxUniqRanges
+};
+use moc::moc::{
+    RangeMOCIterator, RangeMOCIntoIterator,
+    CellMOCIterator, CellMOCIntoIterator,
+    CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator,
+    range::{RangeMOC}
+};
+use moc::ranges::Ranges;
+use moc::deser::fits::{
+    ranges_to_fits_ivoa, from_fits_ivoa,
+    MocIdxType, MocQtyType, MocType,
+    error::FitsError
+};
+use moc::deser::ascii::from_ascii_ivoa;
+use moc::deser::json::from_json_aladin;
+
+use crate::ndarray_fromto::{array2_to_ranges, array2_to_mocranges};
+
 
 /// Degrade a coverage.
 ///
@@ -119,22 +141,6 @@ pub fn from_json(py: Python, input: &PyDict) -> PyResult<HpxRanges<u64>> {
     Ok(result)
 }
 
-use std::collections::HashMap;
-use intervals::moc::{
-    RangeMOCIterator, RangeMOCIntoIterator,
-    CellMOCIterator, CellMOCIntoIterator,
-    CellOrCellRangeMOCIterator,
-    range::{RangeMOC}
-};
-use std::fs::File;
-use std::io::{BufWriter, BufReader};
-use std::path::Path;
-use intervals::deser::fits::{ranges_to_fits_ivoa, from_fits_ivoa, MocIdxType, MocQtyType, MocType};
-use std::fs;
-use intervals::deser::ascii::from_ascii_ivoa;
-use std::error::Error;
-use intervals::deser::json::from_json_aladin;
-use crate::ndarray_fromto::{array2_to_ranges, array2_to_mocranges};
 
 /// Serializes a spatial coverage to a JSON format
 ///

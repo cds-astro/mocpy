@@ -12,15 +12,16 @@ use num::One;
 
 use ndarray::{Array1, Array2};
 
-use intervals::utils;
-use intervals::idx::Idx;
-use intervals::ranges::{Ranges, SNORanges};
-use intervals::mocranges::MocRanges;
-use intervals::qty::{MocQty, Hpx};
-use intervals::uniqranges::HpxUniqRanges;
-use intervals::hpxranges2d::HpxRanges2D;
-use intervals::mocranges2d::Moc2DRanges;
-
+use moc::utils;
+use moc::idx::Idx;
+use moc::qty::{MocQty, Hpx};
+use moc::ranges::{Ranges, SNORanges};
+use moc::elemset::range::{
+  MocRanges,
+  uniq::HpxUniqRanges
+};
+use moc::hpxranges2d::HpxRanges2D;
+use moc::mocranges2d::Moc2DRanges;
 
 pub fn uniq_ranges_to_array1<T: Idx>(input: HpxUniqRanges<T>) -> Array1<T> {
   // let ranges = input.ranges;
@@ -371,7 +372,7 @@ pub fn try_array1_u64_to_hpx_ranges2<T:MocQty<u64>>(input: Array1<u64>) -> Resul
 #[cfg(test)]
 mod tests {
   use ndarray::Array2;
-  use intervals::ranges::Ranges;
+  use moc::ranges::Ranges;
   use crate::ndarray_fromto::{ranges_to_array2, array2_to_vec_ranges};
 
   #[test]

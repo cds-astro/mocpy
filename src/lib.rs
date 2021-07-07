@@ -13,23 +13,26 @@ extern crate pyo3;
 #[macro_use]
 extern crate lazy_static;
 
+use std::ops::Range;
+use std::sync::Mutex;
+use std::path::Path;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
 
 use ndarray::{Array, Array1, Array2, Ix2};
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject, exceptions};
 
-use intervals::qty::MocQty;
-use intervals::ranges::{SNORanges, Ranges};
-use intervals::mocranges::MocRanges;
-use intervals::hpxranges2d::TimeSpaceMoc;
-use std::path::Path;
-use std::ops::Range;
-use intervals::uniqranges::HpxUniqRanges;
+use moc::qty::MocQty;
+use moc::ranges::{SNORanges, Ranges};
+use moc::elemset::range::{
+    MocRanges,
+    uniq::HpxUniqRanges
+};
+use moc::hpxranges2d::TimeSpaceMoc;
 
 pub mod ndarray_fromto;
 pub mod coverage;
@@ -223,7 +226,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
     }
-    
+
     /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
     ///
     /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
@@ -266,7 +269,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``times`` - The times at which the sky coordinates have be given, in jd coded
-    ///   on doubles (=> not precise to the microsecond). 
+    ///   on doubles (=> not precise to the microsecond).
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -282,11 +285,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "from_time_lonlat_approx")]
     fn from_time_lonlat_approx(
         index: usize,
@@ -370,9 +373,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``times_min`` - The begining time of observation, in jd coded
-    ///                   on doubles (=> not precise to the microsecond). 
+    ///                   on doubles (=> not precise to the microsecond).
     /// * ``times_max`` - The ending time of observation, in jd coded
-    ///                   on doubles (=> not precise to the microsecond). 
+    ///                   on doubles (=> not precise to the microsecond).
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians
     /// * ``lat`` - The latitudes in radians
@@ -388,11 +391,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon``, ``lat`` and ``times`` do not have the same length.
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "from_time_ranges_lonlat_approx")]
     fn from_time_ranges_lonlat_approx(
         index: usize,
@@ -486,9 +489,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``times_min`` - The begining time of observation in jd coded
-    ///                   on doubles (=> not precise to the microsecond). 
+    ///                   on doubles (=> not precise to the microsecond).
     /// * ``times_max`` - The ending time of observation, in jd coded
-    ///                   on doubles (=> not precise to the microsecond). 
+    ///                   on doubles (=> not precise to the microsecond).
     /// * ``d1`` - The depth along the Time axis.
     /// * ``lon`` - The longitudes in radians.
     /// * ``lat`` - The latitudes in radians.
@@ -505,11 +508,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``lon``, ``lat``, ``times_min``, ``times_max`` and ``radius`` do not have the same length.
     /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
     /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "from_time_ranges_spatial_coverages_approx")]
     fn from_time_ranges_spatial_coverages_approx(
         py: Python,
@@ -882,9 +885,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``path`` - the FITS file path
     ///
     /// # Warning
-    /// 
+    ///
     /// This function is not compatible with pre-v2.0 MOC standard.
-    /// 
+    ///
     /// # Errors
     ///
     /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
@@ -1046,11 +1049,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If the coverage is empty.
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "coverage_2d_min_time_approx")]
     fn coverage_2d_min_time_approx(_py: Python, index: usize) -> PyResult<f64> {
         // Get the coverage
@@ -1090,11 +1093,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If the coverage is empty.
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "coverage_2d_max_time_approx")]
     fn coverage_2d_max_time_approx(_py: Python, index: usize) -> PyResult<f64> {
         // Get the coverage
@@ -1251,11 +1254,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Errors
     ///
     /// * If `lon`, `lat` and `times` do not have the same length
-    /// 
-    /// # Remark 
-    /// 
+    ///
+    /// # Remark
+    ///
     /// Method kept temporarily to ensure backward compatibility.
-    /// 
+    ///
     #[pyfn(m, "coverage_2d_contains_approx")]
     fn coverage_2d_contains_approx(
         py: Python,
@@ -1954,7 +1957,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         } else {
             let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
-            let uniq_coverage = nested_coverage.to_hpx_uniq();
+            let uniq_coverage = nested_coverage.into_hpx_uniq();
             uniq_ranges_to_array1(uniq_coverage)
         };
 

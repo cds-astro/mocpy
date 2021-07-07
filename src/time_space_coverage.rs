@@ -20,13 +20,13 @@ use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
 
-use intervals::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa, STMocType};
-use intervals::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
-use intervals::deser::json::cellmoc2d_from_json_aladin;
-use intervals::qty::{MocQty, Hpx, Time};
-use intervals::hpxranges2d::TimeSpaceMoc;
-use intervals::mocranges::{HpxRanges, TimeRanges};
-use intervals::moc2d::{
+use moc::deser::fits::{from_fits_ivoa, MocIdxType, MocQtyType, ranges2d_to_fits_ivoa, STMocType};
+use moc::deser::ascii::{AsciiError, moc2d_from_ascii_ivoa};
+use moc::deser::json::cellmoc2d_from_json_aladin;
+use moc::qty::{MocQty, Hpx, Time};
+use moc::hpxranges2d::TimeSpaceMoc;
+use moc::elemset::range::{HpxRanges, TimeRanges};
+use moc::moc2d::{
     CellMOC2Iterator, CellMOC2IntoIterator,
     CellOrCellRangeMOC2Iterator, CellOrCellRangeMOC2IntoIterator
 };
@@ -800,7 +800,7 @@ pub fn from_ascii_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
 /// `mocpy.STMOC` class
 pub fn new() -> TimeSpaceMoc<u64, u64> {
     // Create new empty coverage
-    TimeSpaceMoc::new()
+    Default::default()
 }
 
 /// Compute the depth of the coverage

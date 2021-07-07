@@ -2,14 +2,17 @@
 //! related to the creation and manipulation of
 //! temporal coverages.
 
+use std::ops::Range;
+
 use ndarray::{Array1, Array2};
 
-use crate::coverage;
 use pyo3::exceptions;
 use pyo3::prelude::PyResult;
-use intervals::mocranges::TimeRanges;
-use intervals::deser::fits::error::FitsError;
-use std::ops::Range;
+
+use moc::elemset::range::TimeRanges;
+use moc::deser::fits::error::FitsError;
+
+use crate::coverage;
 use crate::ndarray_fromto::mocranges_to_array2;
 
 /// Create a temporal coverage from a list of time ranges expressed in jd.

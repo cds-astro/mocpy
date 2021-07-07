@@ -2,8 +2,8 @@
 name = "MOCPy"
 version = "0.9.0"
 authors = [
+  "Matthieu Baumann <baumannmatthieu0@gmail.com>", 
   "Thomas Boch <thomas.boch@astro.unistra.fr>", 
-  "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
   "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>"
 ]
 edition = "2018"
@@ -42,7 +42,7 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-intervals = { path = "./src/intervals" }
+moc = { path = "./src/moc" }
 healpix = { package = "cdshealpix", version = "0.5.4" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 num = "0.4"

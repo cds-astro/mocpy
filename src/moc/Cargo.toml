@@ -1,0 +1,52 @@
+[package]
+name = "moc"
+version = "0.4.0"
+authors = [
+  "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>",
+  "Matthieu Baumann <baumannmatthieu0@gmail.com >"
+]
+edition = "2018"
+
+[lib]
+name = "moc"
+path = "src/lib.rs"
+test = true
+doctest = true
+bench = true
+
+[dependencies]
+num = "0.4"
+rayon = "1.5.1"
+nom = "6.1.2"
+quick-error = "2.0.1"
+healpix = { package = "cdshealpix", version = "0.5.4" }
+serde_json = "1.0"
+byteorder = "1.4.3"
+
+[dev-dependencies]
+rand = "0.8.3"
+criterion = "0.3"
+
+[[bench]]
+name = "ranges2cells"
+harness = false
+
+[[bench]]
+name = "moc_and"
+harness = false
+
+[[bench]]
+name = "moc_or"
+harness = false
+
+[[bench]]
+name = "moc_minus"
+harness = false
+
+# Run a specific bench:
+#  RUSTFLAGS='-C target-cpu=native' cargo bench --bench moc_minus
+
+# See default profiles: https://doc.rust-lang.org/cargo/reference/profiles.html
+# But bench can be run with the cpu-native option: RUSTFLAGS='-C target-cpu=native' cargo bench
+[profile.bench]
+opt-level = 3
