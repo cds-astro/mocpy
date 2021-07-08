@@ -16,12 +16,15 @@ bench = true
 
 [dependencies]
 num = "0.4"
-rayon = "1.5.1"
 nom = "6.1.2"
 quick-error = "2.0.1"
 healpix = { package = "cdshealpix", version = "0.5.4" }
 serde_json = "1.0"
 byteorder = "1.4.3"
+rayon = "1.5.1"
+# see wasm-bindgen-rayon
+# or use #[cfg(not(target_arch = "wasm32"))]
+# where rayon is used
 
 [dev-dependencies]
 rand = "0.8.3"

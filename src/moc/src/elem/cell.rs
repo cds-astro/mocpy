@@ -34,6 +34,7 @@ impl<T: Idx> Cell<T> {
     pub fn uniq_hpx(&self) -> T {
         Hpx::<T>::uniq_hpx(self.depth, self.idx)
     }
+
     pub fn from_uniq<Q: MocQty<T>>(uniq: T) -> Self {
         let (depth, idx) = Q::from_uniq_gen(uniq);
         Self { depth, idx }

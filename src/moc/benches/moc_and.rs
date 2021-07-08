@@ -5,13 +5,20 @@ use std::path::PathBuf;
 
 use criterion::{Criterion, criterion_group, criterion_main};
 
+use healpix::nested::bmoc::BMOC;
+
 use moc::qty::Hpx;
 use moc::moc::range::RangeMOC;
 use moc::deser::fits::{
   from_fits_ivoa,
   MocIdxType, MocQtyType, MocType
 };
-use moc::moc::{HasMaxDepth, RangeMOCIntoIterator, CellMOCIntoIterator, CellMOCIterator};
+use moc::moc::{
+  HasMaxDepth,
+  IntoBMOC,
+  RangeMOCIterator, RangeMOCIntoIterator,
+  CellMOCIterator, CellMOCIntoIterator
+};
 use moc::moc::range::op::and::and;
 use moc::ranges::SNORanges;
 
@@ -61,16 +68,27 @@ fn test_and_ranges_it_ref(moc_l: RangeMOC<u32, Hpx<u32>>, moc_r: RangeMOC<u32, H
   RangeMOC::new(and.depth_max(), and.collect())
 }
 
+fn test_and_bmoc(moc_l: BMOC, moc_r: BMOC) -> BMOC {
+  moc_l.and(&moc_r)
+}
+
 fn bench_and(c: &mut Criterion) {
   // https://bheisler.github.io/criterion.rs/book/user_guide/comparing_functions.html
   let mut group = c.benchmark_group("and");
   let (sdss, other) = load_mocs();
+  // let sdss_bmoc = (&sdss).into_moc_ranges().cells().into_bmoc();
+  // let other_bmoc = (&other).into_moc_ranges().cells().into_bmoc();
   group.bench_function("Ranges INTERSECTION",
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
   group.bench_function("Ranges Iter AND",
                        |b| b.iter(|| test_and_ranges_it(sdss.clone(), other.clone())));
   group.bench_function("Ranges Ref Iter AND",
                        |b| b.iter(|| test_and_ranges_it_ref(sdss.clone(), other.clone())));
+  group.bench_function("BMOC AND",
+                       |b| b.iter(|| test_and_bmoc(
+                         (&sdss).into_range_moc_iter().cells().into_bmoc(),
+                         (&other).into_range_moc_iter().cells().into_bmoc()
+                       )));
   /*group.bench_function("Ranges 2 INTERSECTION",
                        |b| b.iter(|| test_and_ranges(sdss.clone(), other.clone())));
   group.bench_function("Ranges Iter 2 AND",

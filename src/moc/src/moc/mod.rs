@@ -25,6 +25,7 @@ use crate::moc::range::op::{
   xor::{xor, XorRangeIter},
   minus::{minus, MinusRangeIter},
 };
+use healpix::nested::bmoc::{BMOC, BMOCBuilderUnsafe};
 
 pub mod range;
 pub mod cell;
@@ -89,7 +90,23 @@ pub trait CellMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Cell<T>
   fn to_json_aladin<W: Write>(self, fold: Option<usize>, writer: W) -> std::io::Result<()> {
     deser::json::to_json_aladin(self, &fold, "", writer)
   }
+
 }
+
+pub trait IntoBMOC<T: Idx + Into<u64>>: CellMOCIterator<T> {
+  fn into_bmoc(self) -> BMOC {
+    let (_, upper_bound) = self.size_hint();
+    let mut builder = BMOCBuilderUnsafe::new(self.depth_max(), upper_bound.unwrap_or(1000));
+    for Cell{depth, idx} in self {
+      builder.push(depth, idx.into(), true);
+    }
+    builder.to_bmoc()
+  }
+}
+impl<T: Idx + Into<u64>, U: CellMOCIterator<T>> IntoBMOC<T> for U {}
+
+
+
 /// Transform an object into an iterator over MOC cells.
 pub trait CellMOCIntoIterator<T: Idx>: Sized {
   type Qty: MocQty<T>;

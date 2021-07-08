@@ -47,12 +47,23 @@ pub trait MocableQty: PartialEq + Eq + Send + Sync {
     /// For FITS serialization (TODO: find a better approach)
     const HAS_TIMESYS: bool;
 
+    /// `v * Self::DIM`, generic so that for:
+    /// * `DIM=1` this is a no operation,
+    /// * `DIM=2` we can use `v  << 1`
+    fn mult_by_dim<T: Idx>(v: T) -> T;
+    /// `v / Self::DIM`, generic so that for:
+    /// * `DIM=1` this is a no operation,
+    /// * `DIM=2` we can use `v  >> 1`
+    fn div_by_dim<T: Idx>(v: T) -> T;
+
     // dim 1: delta_depth
     // dim 2: delta_depth << 1
     // dim 3:
+    #[inline(always)]
     fn shift(delta_depth: u8) -> u8 {
-        Self::DIM * delta_depth
+        Self::mult_by_dim(delta_depth)
     }
+
 }
 
 /// Returns the number of bits needed to code `n` values, with indices
@@ -89,7 +100,7 @@ pub trait MocQty<T>: MocableQty where T: Idx
         Self::delta_depth_max_from_n_bits_unchecked(n_bits).min(Self::MAX_DEPTH)
     }
 
-    /// Same as `delta_depth_max_from_n_bits` without cecking that the result is smaller than
+    /// Same as `delta_depth_max_from_n_bits` without checking that the result is smaller than
     /// depth_max.
     fn delta_depth_max_from_n_bits_unchecked(n_bits: u8) -> u8 {
         n_bits >> (Self::DIM - 1)
@@ -117,7 +128,7 @@ pub trait MocQty<T>: MocableQty where T: Idx
 
     #[inline(always)]
     fn compute_min_depth(x: T) -> u8 {
-        let dd = (x.trailing_zeros() as u8 / Self::DIM).min(Self::MAX_DEPTH);
+        let dd = Self::div_by_dim(x.trailing_zeros() as u8).min(Self::MAX_DEPTH);
         Self::MAX_DEPTH - dd
     }
 
@@ -126,19 +137,23 @@ pub trait MocQty<T>: MocableQty where T: Idx
     fn from_uniq_gen(uniq: T) -> (u8, T) { // pix_depth
         // T::N_BITS - uniq.leading_zeros() = number of bits to code sentinel + D + dims
         // - 1 (sentinel) - N_D0_BITS = number of bits to code dim
-        let depth = (T::N_BITS - uniq.leading_zeros() as u8 - 1 - Self::N_D0_BITS) / Self::DIM;
+        let depth = Self::div_by_dim(T::N_BITS - uniq.leading_zeros() as u8 - 1 - Self::N_D0_BITS);
         let idx = uniq & !Self::sentinel_bit(depth);
         (depth as u8, idx)
     }
+
     /// To generic uniq notation (using a sentinel bit)
     #[inline(always)]
     fn to_uniq_gen(depth: u8, idx: T) -> T {
         Self::sentinel_bit(depth) | idx
     }
+
     #[inline(always)]
     fn sentinel_bit(depth: u8) -> T {
         T::one().unsigned_shl(Self::N_D0_BITS as u32).unsigned_shl(Self::shift(depth) as u32)
     }
+
+    #[inline(always)]
     /// Range from the genric uniq notation (using a sentinel bit)
     fn uniq_gen_to_range(uniq: T) -> Range<T> { // uniq_to_range
         let (depth, pix) = Self::from_uniq_gen(uniq);
@@ -149,6 +164,28 @@ pub trait MocQty<T>: MocableQty where T: Idx
             start: pix.unsigned_shl(tdd),
             end: (pix + One::one()).unsigned_shl(tdd),
         }
+    }
+
+    /// `zuniq` is similar to the `uniq` notation (i.e. it encodes both the `depth` and
+    /// the `cell index` at this depth), but the natural ordering of the type `T` preserves the
+    /// global ordering of the cells, independently of the cells depth.
+    /// It is similar to the [cdshealpix](https://github.com/cds-astro/cds-healpix-rust/)
+    /// [BMOC](https://github.com/cds-astro/cds-healpix-rust/blob/master/src/nested/bmoc.rs)
+    /// notation (without the extra bit coding a boolean)
+    /// and to [multi-order-map](https://lscsoft.docs.ligo.org/ligo.skymap/moc/index.html),
+    /// but also coding the depth.
+    fn to_zuniq(depth: u8, idx: T) -> T {
+        let zuniq = (idx << 1) | T::one();
+        zuniq.unsigned_shl(Self::shift_from_depth_max(depth) as u32)
+    }
+
+
+    fn from_zuniq(zuniq: T) -> (u8, T) {
+        let n_trailing_zero = zuniq.trailing_zeros() as u8;
+        let delta_depth = Self::div_by_dim(n_trailing_zero);
+        let depth = Self::MAX_DEPTH - delta_depth;
+        let idx = zuniq >> (n_trailing_zero + 1) as usize;
+        (depth, idx)
     }
 
 /*
@@ -176,11 +213,20 @@ impl<T: Idx> MocableQty for Hpx<T> {
     const MOC_DIM: MocDim = MocDim::Space;
     const HAS_COOSYS: bool = true;
     const HAS_TIMESYS: bool = false;
+    #[inline(always)]
+    fn mult_by_dim<U: Idx>(v: U) -> U {
+        v << 1
+    }
+    #[inline(always)]
+    fn div_by_dim<U: Idx>(v: U) -> U {
+        v >> 1
+    }
 }
 
 impl<T> MocQty<T> for Hpx<T> where T: Idx { }
 
 impl<T: Idx> Hpx<T> {
+
     /// From HEALPix specific uniq notation
     #[inline(always)]
     pub fn from_uniq_hpx(uniq: T) -> (u8, T) { // pix_depth
@@ -188,16 +234,20 @@ impl<T: Idx> Hpx<T> {
         let idx = uniq - Self::four_shl_twice_depth(depth);
         (depth as u8, idx)
     }
+
     /// To HEALPix specific uniq notation
     #[inline(always)]
     pub fn uniq_hpx(depth: u8, idx: T) -> T {
         idx + Self::four_shl_twice_depth(depth as u32)
     }
+
     #[inline(always)]
     pub fn four_shl_twice_depth(depth: u32) -> T {
         T::one().unsigned_shl(2).unsigned_shl(depth << 1)
     }
+
     /// Range from the HEALPix specific uniq notation
+    #[inline(always)]
     pub fn uniq_hpx_to_range(uniq: T) -> Range<T> { // uniq_to_range
         let (depth, pix) = Self::from_uniq_hpx(uniq);
         let tdd = ((Self::MAX_DEPTH - depth) << 1) as u32;
@@ -223,67 +273,16 @@ impl<T: Idx> MocableQty for Time<T> {
     const MOC_DIM: MocDim = MocDim::Time;
     const HAS_COOSYS: bool = false;
     const HAS_TIMESYS: bool = true;
+    #[inline(always)]
+    fn mult_by_dim<U: Idx>(v: U) -> U {
+        v
+    }
+    #[inline(always)]
+    fn div_by_dim<U: Idx>(v: U) -> U {
+        v
+    }
 }
 impl<T> MocQty<T> for Time<T> where T: Idx { }
-
-
-
-/*pub trait Bounded<T, Q>
-where
-    T: MocIdx,
-    Q: MocQty<T>,
-{
-    #[inline(always)]
-    fn get_msb(x: T) -> u32 {
-        num_bits::<T>() as u32 - x.leading_zeros() - 1
-    }
-
-    #[inline(always)]
-    fn get_lsb(x: T) -> u32 {
-        x.trailing_zeros() as u32
-    }
-
-    #[inline(always)]
-    fn hpx_cell_depth(u: T) -> (u8, T) { // pix_depth
-        let msb = Self::get_msb(u) & TO_EVEN_MASK;
-
-        let depth = (msb >> 1) - 1;
-        let pix = u - T::one().unsigned_shl(msb);
-
-        (depth as u8, pix)
-    }
-
-    #[inline(always)]
-    fn get_hpx_depth(x: T) -> u32 {
-        let msb = Self::get_msb(x) & TO_EVEN_MASK;
-        let depth = (msb >> 1) - 1;
-
-        depth
-    }
-
-    fn to_uniq_hpx(depth: u8, pix: T) -> T {
-        let t = T::one().unsigned_shl(2).unsigned_shl((depth as u32) << 1);
-        t + pix
-    }
-
-    /// Use a sentinel bit on the lowest MSB not used to code the cell.
-    fn to_uniq_time(depth: u8, cell_index: T) -> T {
-        let msb: T = T::one().unsigned_shl((depth as u32) + 1);
-        msb | cell_index
-    }
-
-    #[inline(always)]
-    fn uniq_to_range_hpx(u: T) -> Range<T> { // uniq_to_range
-        let (depth, pix) = Self::hpx_cell_depth(u);
-        let tdd = ((Self::HPX_MAXDEPTH - depth) << 1) as u32;
-        // The length of a range computed from a pix
-        // at Self::HPX_MAXDEPTH equals to 1
-        Range {
-            start: pix.unsigned_shl(tdd),
-            end: (pix + One::one()).unsigned_shl(tdd),
-        }
-    }
-}*/
 
 
 #[cfg(test)]

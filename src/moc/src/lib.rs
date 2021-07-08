@@ -1,11 +1,3 @@
-#![cfg_attr(nightly, feature(test))]
-
-extern crate healpix;
-extern crate num;
-extern crate rayon;
-
-#[cfg(nightly)]
-extern crate test;
 
 pub mod idx;
 pub mod qty;

@@ -6,7 +6,6 @@ use std::io::{Read, Write};
 use std::str::FromStr;
 use std::fmt::{Debug, Display};
 use std::ops::AddAssign;
-use std::convert::TryFrom;
 
 use num::{Integer, PrimInt, ToPrimitive};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -15,8 +14,7 @@ use crate::deser::fits::keywords::TForm1;
 
 // 'static mean that Idx does not contains any reference
 pub trait Idx: 'static + Integer + PrimInt + ToPrimitive + AddAssign
-+ FromStr + From<u8> + TryFrom<u64>
-+ Send + Sync + Debug + Display + Copy {
++ FromStr + From<u8>  + Send + Sync + Debug + Display + Copy {
   const N_BYTES: u8 = mem::size_of::<Self>() as u8;
   const N_BITS: u8 = Self::N_BYTES << 3;
   /// Associated TFORM for the FITS serializion

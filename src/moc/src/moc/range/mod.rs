@@ -5,7 +5,11 @@ use std::vec::{IntoIter};
 use std::marker::PhantomData;
 
 use healpix::nested::{
-  cone_coverage_approx_custom
+  cone_coverage_approx_custom,
+  elliptical_cone_coverage_custom,
+  polygon_coverage,
+  zone_coverage,
+  bmoc::BMOC,
 };
 
 use crate::idx::Idx;
@@ -15,6 +19,8 @@ use crate::moc::{
   HasMaxDepth, ZSorted, NonOverlapping, MOCProperties,
   RangeMOCIterator, RangeMOCIntoIterator
 };
+use std::convert::{TryInto, TryFrom};
+use std::num::TryFromIntError;
 
 pub mod op;
 
@@ -68,25 +74,41 @@ impl<T: Idx, Q: MocQty<T>> HasMaxDepth for RangeMOC<T, Q> {
 impl<T: Idx, Q: MocQty<T>> ZSorted for RangeMOC<T, Q> { }
 impl<T: Idx, Q: MocQty<T>> NonOverlapping for RangeMOC<T, Q> { }
 
+impl From<BMOC> for RangeMOC<u64, Hpx<u64>> {
+  fn from(bmoc: BMOC) -> Self {
+    let ranges = bmoc.to_ranges();
+    // TODO: add a debug_assert! checking that the result is sorted!
+    RangeMOC::new(bmoc.get_depth_max(), MocRanges::new_unchecked(ranges.to_vec()))
+  }
+}
+
+
+fn from<T: Idx + TryFrom<u64,Error=TryFromIntError>>(range_moc: RangeMOC<u64, Hpx<u64>>) -> RangeMOC<T, Hpx<T>> {
+  let depth_max= range_moc.depth_max;
+  let ranges = range_moc.ranges.0;
+  let shift = u64::N_BITS - T::N_BITS;
+  let ranges: Vec<Range<T>> = ranges.0.into_iter()
+      .map(|Range { start, end}| (start >> shift).try_into().unwrap()..(end >> shift).try_into().unwrap())
+      .collect();
+  RangeMOC::new(depth_max, MocRanges::new_unchecked(ranges))
+}
+
+impl From<RangeMOC<u64, Hpx<u64>>> for RangeMOC<u32, Hpx<u32>> {
+  fn from(range_moc: RangeMOC<u64, Hpx<u64>>) -> Self {
+    assert!(range_moc.depth_max < 14);
+    from(range_moc)
+  }
+}
+
+impl From<RangeMOC<u64, Hpx<u64>>> for RangeMOC<u16, Hpx<u16>> {
+  fn from(range_moc: RangeMOC<u64, Hpx<u64>>) -> Self {
+    assert!(range_moc.depth_max < 6);
+    from(range_moc)
+  }
+}
 
 impl RangeMOC<u64, Hpx<u64>> {
-  /// # Input
-  /// - `cone_lon` the longitude of the center of the cone, in radians
-  /// - `cone_lat` the latitude of the center of the cone, in radians
-  /// - `cone_radius` the radius of the cone, in radians
-  /// - `depth`: the MOC depth
-  /// - `delta_depth` the difference between the MOC depth and the depth at which the computations
-  ///   are made (should remain quite small).
-  ///
-  pub fn cone(lon: f64, lat: f64, radius: f64, depth: u8, delta_depth: u8) -> Self {
-    let ranges = cone_coverage_approx_custom(depth, delta_depth, lon, lat, radius)
-      .to_ranges();
-    // TODO: add a debug_assert! checking that the result is sorted!
-    RangeMOC::new(depth, MocRanges::new_unchecked(ranges.to_vec()))
-  }
-}
 
-impl RangeMOC<u32, Hpx<u32>> {
   /// # Input
   /// - `cone_lon` the longitude of the center of the cone, in radians
   /// - `cone_lat` the latitude of the center of the cone, in radians
@@ -96,42 +118,84 @@ impl RangeMOC<u32, Hpx<u32>> {
   ///   are made (should remain quite small).
   ///
   /// # Panics
-  /// - if the input `depth` is larger than 13.
-  pub fn cone(lon: f64, lat: f64, radius: f64, depth: u8, delta_depth: u8) -> Self {
-    assert!(depth < 14);
-    // TODO: add a debug_assert! checking that the result is sorted!
-    let ranges = cone_coverage_approx_custom(depth, delta_depth, lon, lat, radius)
-      .to_ranges();
-    let ranges: Vec<Range<u32>> = ranges.into_vec().into_iter()
-      .map(|Range { start, end}| Range { start: (start >> 32) as u32, end: (end >> 32) as u32 })
-      .collect();
-    RangeMOC::new(depth, MocRanges::new_unchecked(ranges))
+  /// If this layer depth + `delta_depth` > the max depth (i.e. 29)
+  pub fn from_cone(lon: f64, lat: f64, radius: f64, depth: u8, delta_depth: u8) -> Self {
+    Self::from(cone_coverage_approx_custom(depth, delta_depth, lon, lat, radius))
   }
-}
 
-impl RangeMOC<u16, Hpx<u16>> {
   /// # Input
-  /// - `cone_lon` the longitude of the center of the cone, in radians
-  /// - `cone_lat` the latitude of the center of the cone, in radians
-  /// - `cone_radius` the radius of the cone, in radians
+  /// - `lon` the longitude of the center of the elliptical cone, in radians
+  /// - `lat` the latitude of the center of the elliptical cone, in radians
+  /// - `a` the semi-major axis of the elliptical cone, in radians
+  /// - `b` the semi-minor axis of the elliptical cone, in radians
+  /// - `pa` the position angle (i.e. the angle between the north and the semi-major axis, east-of-north), in radians
   /// - `depth`: the MOC depth
   /// - `delta_depth` the difference between the MOC depth and the depth at which the computations
   ///   are made (should remain quite small).
   ///
   /// # Panics
-  /// - if the input `depth` is larger than 5.
-  pub fn cone(lon: f64, lat: f64, radius: f64, depth: u8, delta_depth: u8) -> Self {
-    assert!(depth < 6);
-    let ranges = cone_coverage_approx_custom(depth, delta_depth, lon, lat, radius)
-      .to_ranges();
-    // TODO: add a debug_assert! checking that the result is sorted!
-    let ranges: Vec<Range<u16>> = ranges.into_vec().into_iter()
-      .map(|Range { start, end}| Range { start: (start >> 48) as u16, end: (end >> 48) as u16} )
-      .collect();
-    RangeMOC::new(depth, MocRanges::new_unchecked(ranges))
+  /// - if the semi-major axis is > PI/2
+  /// - if this layer depth + `delta_depth` > the max depth (i.e. 29)
+  pub fn from_elliptical_cone(lon: f64, lat: f64, a: f64, b: f64, pa: f64, depth: u8, delta_depth: u8) -> Self {
+    Self::from(elliptical_cone_coverage_custom(depth, delta_depth, lon, lat, a, b, pa))
   }
-}
 
+  /// # Input
+  /// - `vertices` the list of vertices (in a slice) coordinates, in radians
+  ///              `[(lon, lat), (lon, lat), ..., (lon, lat)]`
+  /// - `depth`: the MOC depth
+  pub fn from_polygon(vertices: &[(f64, f64)], depth: u8) -> Self {
+    Self::from(polygon_coverage(depth, vertices, true))
+  }
+
+  /// # Input
+  /// - `lon_min` the longitude of the bottom left corner
+  /// - `lat_min` the latitude of the bottom left corner
+  /// - `lon_max` the longitude of the upper left corner
+  /// - `lat_max` the latitude of the upper left corner
+  /// - `depth`: the MOC depth
+  ///
+  /// # Remark
+  /// - If `lon_min > lon_max` then we consider that the zone crosses the primary meridian.
+  /// - The north pole is included only if `lon_min == 0 && lat_max == pi/2`
+  ///
+  /// # Panics
+  /// * if `lon_min` or `lon_max` not in `[0, 2\pi[`
+  /// * if `lat_min` or `lat_max` not in `[-\pi/2, \pi/2[`
+  /// * `lat_min >= lat_max`.
+  pub fn from_zone(lon_min: f64, lat_min: f64, lon_max: f64, lat_max: f64, depth: u8) -> Self {
+    Self::from(zone_coverage(depth, lon_min, lat_min, lon_max, lat_max))
+  }
+
+  /*
+  expand
+  c.f. healpix: moc/mod.rs L455
+  pub fn expand(self) -> OrMocIter<u64, MOCIteratorFromRanges<u64,LazyRangeMoc>, MergeMoc> {
+    let mut ext: Vec<u64> = Vec::with_capacity(10 * self.ranges.len()); // constant to be adjusted
+    for HpxCell { depth, hash } in MOCIteratorFromRanges::new(self.range_moc_iter()) {
+      append_external_edge(depth, hash, self.depth_max - depth, &mut ext);
+    }
+    ext.sort_unstable(); // parallelize with rayon? It is the slowest part!!
+    ext.dedup();
+    let depth = self.depth_max;
+    MOCIteratorFromRanges::new(self.into_range_moc_iter())
+        .or(MergeIter::new(FlatLazyMOCIter::new(depth, ext.into_iter())
+        )
+        )
+  }
+  */
+
+  /*
+  pub fn from_cells => CellMOC -> Ranges
+  pub fn from_coos  => CellMOC -> Ranges
+  */
+
+  /* Perform UNIONS
+  pub fn from_fixed_radius_cones
+  pub fn from_multi_cones
+  pub fn from_multi_elliptical_cones*/
+
+}
 
 
 /// Iterator taking the ownership of the `RangeMOC` it iterates over.
