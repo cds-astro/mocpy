@@ -88,8 +88,10 @@ pub trait SNORanges<'a, T: Idx>: Sized {
 }
 
 /// Generic Range operations
+/// We use a `Boxed array` instead of `Vec` because we use possibly a lot of them in
+/// 2D-MOCs, so in may because not negligible to spare the capacity info.
 #[derive(Clone, Debug)]
-pub struct Ranges<T: Idx>(pub Vec<Range<T>>);
+pub struct Ranges<T: Idx>(pub Box<[Range<T>]>);
 
 impl<T: Idx> Default for Ranges<T> {
   fn default() -> Self {
@@ -102,13 +104,16 @@ impl<T: Idx> Ranges<T> {
     /// Assumes (without checking!) that the input vector of range is already sorted and do not
     /// contains overlapping (or consecutive) ranges
     pub fn new_unchecked(data: Vec<Range<T>>) -> Self {
-        Ranges(data)
+        Ranges(data.into_boxed_slice())
     }
 
     /// Assumes (without checking!) that the input vector of range is already sorted **BUT**
     /// may contains overlapping (or consecutive) ranges.
     pub fn new_from_sorted(data: Vec<Range<T>>) -> Self {
-        Ranges(MergeOverlappingRangesIter::new(data.iter(), None).collect::<Vec<_>>())
+        Self::new_unchecked(
+            MergeOverlappingRangesIter::new(data.iter(), None)
+                .collect::<Vec<_>>()
+        )
     }
 
     /// Internally sorts the input vector and ensures there is no overlapping (or consecutive) ranges.
@@ -417,7 +422,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
             };
         }
         res.shrink_to_fit();
-        Ranges(res)
+        Ranges::new_unchecked(res)
     }
 
     fn intersection(&self, other: &Self) -> Self {
@@ -494,7 +499,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
            }
         }
         res.shrink_to_fit();
-        Ranges(res)
+        Ranges::new_unchecked(res)
     }
 
     #[allow(clippy::many_single_char_names)]
@@ -579,7 +584,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
             }
         }
         result.shrink_to_fit();
-        Ranges(utils::unflatten(&mut result))
+        Ranges::new_unchecked(utils::unflatten(&mut result))
     }
 
     fn complement_with_upper_bound(&self, upper_bound_exclusive: T) -> Self {
@@ -610,7 +615,7 @@ impl<'a, T: Idx> SNORanges<'a, T> for Ranges<T> {
                 result.push(last..upper_bound_exclusive);
             }
         }
-        Ranges(result)
+        Ranges::new_unchecked(result)
     }
 }
 

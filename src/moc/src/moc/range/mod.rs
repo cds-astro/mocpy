@@ -87,7 +87,7 @@ fn from<T: Idx + TryFrom<u64,Error=TryFromIntError>>(range_moc: RangeMOC<u64, Hp
   let depth_max= range_moc.depth_max;
   let ranges = range_moc.ranges.0;
   let shift = u64::N_BITS - T::N_BITS;
-  let ranges: Vec<Range<T>> = ranges.0.into_iter()
+  let ranges: Vec<Range<T>> = ranges.0.iter()
       .map(|Range { start, end}| (start >> shift).try_into().unwrap()..(end >> shift).try_into().unwrap())
       .collect();
   RangeMOC::new(depth_max, MocRanges::new_unchecked(ranges))
@@ -243,7 +243,7 @@ impl<T: Idx, Q: MocQty<T>> RangeMOCIntoIterator<T> for RangeMOC<T, Q> {
     };
     RangeMocIter {
       depth_max: self.depth_max,
-      iter: self.ranges.0.0.into_iter(),
+      iter: self.ranges.0.0.into_vec().into_iter(),
       last,
       _qty: PhantomData
     }

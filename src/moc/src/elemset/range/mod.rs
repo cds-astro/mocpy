@@ -131,7 +131,10 @@ impl<T: Idx, Q: MocQty<T>> MocRanges<T, Q> {
     /// This requires min_depth to be defined between `[0, <T>::MAXDEPTH]`
     //pub fn divide(mut self, min_depth: i8) -> Self {
     pub fn divide(mut self, min_depth: u8) -> Self {
-        self.0.0 = MergeOverlappingRangesIter::new(self.iter(), Some(Q::shift_from_depth_max(min_depth) as u32)).collect::<Vec<_>>();
+        self.0 = Ranges::new_unchecked(
+            MergeOverlappingRangesIter::new(self.iter(), Some(Q::shift_from_depth_max(min_depth) as u32))
+                .collect::<Vec<_>>()
+        );
         self
     }
 
@@ -170,7 +173,10 @@ impl<T: Idx, Q: MocQty<T>> MocRanges<T, Q> {
         }
 
         // TODO: change the algo: one can merge while degrading!
-        self.0.0 = MergeOverlappingRangesIter::new(result.iter(), None).collect::<Vec<_>>();
+        self.0 = Ranges::new_unchecked(
+            MergeOverlappingRangesIter::new(result.iter(), None)
+                .collect::<Vec<_>>()
+        );
     }
 
     pub fn compute_min_depth(&self) -> u8 {
@@ -219,7 +225,7 @@ impl<T, Q> FromIterator<Range<T>> for MocRanges<T, Q>
         Q: MocQty<T>{
     fn from_iter<I: IntoIterator<Item = Range<T>>>(iter: I) -> Self {
         MocRanges(
-            Ranges(iter.into_iter().collect::<Vec<Range<T>>>()),
+            Ranges::new_unchecked(iter.into_iter().collect::<Vec<Range<T>>>()),
             PhantomData
         )
     }
@@ -270,7 +276,7 @@ mod tests {
             3 * (1 << 56)..(1 << 58),
         ];
 
-        assert_eq!(ranges.0.0, expected_ranges);
+        assert_eq!(ranges.0.0, expected_ranges.into_boxed_slice());
     }
 
     #[test]
@@ -351,6 +357,4 @@ mod tests {
         r5.degrade(5);
         assert_eq!(r5.compute_min_depth(), 2);
     }
-
-
 }
