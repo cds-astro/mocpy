@@ -277,7 +277,7 @@ pub fn from_ascii_ivoa<T, Q>(input: &str) -> Result<CellOrCellRangeMOC<T, Q>, As
   // Check non-overlaping property
   // TODO: add check for non-overlaping ranges?
   // Return the result
-  Ok(CellOrCellRangeMOC::new(depth_max, MocCellOrCellRanges::new(CellOrCellRanges(moc))))
+  Ok(CellOrCellRangeMOC::new(depth_max, MocCellOrCellRanges::new(CellOrCellRanges::new(moc))))
 }
 
 /// We could have returned an iterator, but this ASCII serialization is not really made

@@ -84,7 +84,7 @@ impl<T: Idx, Q: MocQty<T>> CellOrCellRangeMOCIntoIterator<T> for CellOrCellRange
     CellOrCellRangeMocIter {
       depth_max: self.depth_max,
       last,
-      iter: self.ranges.0.0.into_iter(),
+      iter: self.ranges.0.0.into_vec().into_iter(),
       _qty: PhantomData
     }
   }

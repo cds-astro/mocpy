@@ -749,7 +749,7 @@ fn from_fits_nuniq<T, R>(
     v.push(Cell::from_uniq_hpx(T::read::<_, BigEndian>(&mut reader)?));
   }
   v.sort_by(|a, b| a.flat_cmp::<Hpx::<T>>(b));
-  Ok(CellMOC::new(depth_max, MocCells::<T, Hpx::<T>>::new(Cells(v))))
+  Ok(CellMOC::new(depth_max, MocCells::<T, Hpx::<T>>::new(Cells::new(v))))
 }
 
 /// Generic numbering using a sentinel bit.
@@ -770,7 +770,7 @@ fn from_fits_guniq<T, Q, R>(mut reader: R, depth_max: u8, n_elems: usize)
   }
   // Check is_sorted (a function already exists in nighlty rust)
   // v.sort_by(|a, b| a.cmp::<Q>(b));
-  Ok(CellMOC::new(depth_max, MocCells::<T, Q>::new(Cells(v))))
+  Ok(CellMOC::new(depth_max, MocCells::<T, Q>::new(Cells::new(v))))
 }
 
 fn from_fits_range<T, Q, R>(reader: R, depth_max: u8, n_ranges: u64)

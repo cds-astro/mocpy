@@ -24,7 +24,7 @@ impl<T: Idx, Q: MocQty<T>> CellMOC<T, Q> {
     Self { depth_max, cells }
   }
   pub fn len(&self) -> usize {
-    self.cells.cells().cells().len()
+    self.cells.cells().len()
   }
   pub fn is_empty(&self) -> bool { self.len() == 0 }
 
@@ -80,7 +80,7 @@ impl<T: Idx, Q: MocQty<T>> CellMOCIntoIterator<T> for CellMOC<T, Q> {
     CellMocIter {
       depth_max: self.depth_max,
       last,
-      iter: self.cells.0.0.into_iter(),
+      iter: self.cells.0.0.into_vec().into_iter(),
       _qty: PhantomData
     }
   }
