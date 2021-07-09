@@ -1,4 +1,6 @@
 
+use rayon::ThreadPoolBuildError;
+
 pub mod idx;
 pub mod qty;
 pub mod elem;
@@ -18,6 +20,13 @@ pub mod utils;
 // from_cone
 // from_...
 
+/// Init the number of threads for parallel tasks.
+/// Must be called only once!
+/// If not called, the default number of threads is the nmber of physical core.
+/// See [rayon doc](https://docs.rs/rayon/1.5.1/rayon/struct.ThreadPoolBuilder.html)
+pub fn init_par(num_threads: usize) -> Result<(), ThreadPoolBuildError> {
+  rayon::ThreadPoolBuilder::new().num_threads(num_threads).build_global()
+}
 
 #[cfg(test)]
 mod tests {

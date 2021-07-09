@@ -60,7 +60,7 @@ pub fn ranges_to_array2<T: Idx>(input: Ranges<T>) -> Array2<T> {
     // By consistency, we also return a (1, 0) Array2 to python
     Array2::zeros((1, 0))
   } else {
-    let mut ranges = input.0;
+    let mut ranges = input.0.to_vec();
     // Cast Vec<Range<u64>> to Vec<u64>
     let len = ranges.len();
     let data = utils::flatten(&mut ranges);

@@ -31,6 +31,7 @@ pub mod range;
 pub mod cell;
 pub mod cellcellrange;
 pub mod decorators;
+pub mod builder;
 
 /// Returns the maximum depth of an item the implementor contains.
 pub trait HasMaxDepth {

@@ -250,7 +250,7 @@ pub fn create_ranges_from_py_unchecked(data: Array2<u64>) -> Ranges<u64> {
 }
 
 pub fn build_ranges_from_py(data: Array2<u64>) -> Ranges<u64> {
-    Ranges::new_from(create_ranges_from_py_unchecked(data).0)
+    Ranges::new_from(create_ranges_from_py_unchecked(data).0.to_vec())
 }
 
 /// Cast an `Array2<u64>` coming from MOCPy python code to
@@ -260,7 +260,7 @@ pub fn create_hpx_ranges_from_py_unchecked(data: Array2<u64>) -> HpxRanges<u64> 
 }
 
 pub fn build_hpx_ranges_from_py(data: Array2<u64>) -> HpxRanges<u64> {
-    HpxRanges::new_from(create_ranges_from_py_unchecked(data).0)
+    HpxRanges::new_from(create_ranges_from_py_unchecked(data).0.to_vec())
 }
 
 /// Cast an `Array2<u64>` coming from MOCPy python code to
@@ -270,14 +270,14 @@ pub fn create_time_ranges_from_py_uncheked(data: Array2<u64>) -> TimeRanges<u64>
 }
 
 pub fn build_time_ranges_from_py(data: Array2<u64>) -> TimeRanges<u64> {
-    TimeRanges::new_from(create_ranges_from_py_unchecked(data).0)
+    TimeRanges::new_from(create_ranges_from_py_unchecked(data).0.to_vec())
 }
 
 
 /// Cast an `Array2<u64>` coming from MOCPy python code to
 /// an `HpxUniqRanges<u64>` object.
 pub fn create_uniq_ranges_from_py(data: Array2<u64>) -> HpxUniqRanges<u64> {
-    HpxUniqRanges::new_from_sorted(create_ranges_from_py_unchecked(data).0)
+    HpxUniqRanges::new_from_sorted(create_ranges_from_py_unchecked(data).0.to_vec())
 }
 
 

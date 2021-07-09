@@ -1,26 +1,34 @@
 
 use std::slice;
 use std::ops::Range;
-use std::vec::{IntoIter};
+use std::vec::IntoIter;
 use std::marker::PhantomData;
+use std::convert::{TryInto, TryFrom};
+use std::num::TryFromIntError;
 
 use healpix::nested::{
   cone_coverage_approx_custom,
   elliptical_cone_coverage_custom,
   polygon_coverage,
   zone_coverage,
+  append_external_edge,
   bmoc::BMOC,
 };
 
 use crate::idx::Idx;
 use crate::qty::{MocQty, Hpx};
+use crate::elem::cell::Cell;
 use crate::elemset::range::MocRanges;
 use crate::moc::{
   HasMaxDepth, ZSorted, NonOverlapping, MOCProperties,
   RangeMOCIterator, RangeMOCIntoIterator
 };
-use std::convert::{TryInto, TryFrom};
-use std::num::TryFromIntError;
+use crate::ranges::SNORanges;
+use crate::moc::builder::fixed_depth::{FixedDepthMocBuilder, OwnedOrderedFixedDepthCellsToRanges};
+use crate::moc::range::op::or::{or, OrRangeIter};
+use crate::moc::range::op::minus::minus;
+use crate::moc::range::op::and::and;
+use crate::moc::range::op::xor::xor;
 
 pub mod op;
 
@@ -46,7 +54,72 @@ impl<T: Idx, Q: MocQty<T>> RangeMOC<T, Q> {
     self.ranges
   }
 
-  // pub fn and(&self, RangeMocIntoIterator) !!
+  /// <=> from HEALPix map, i.e. from a list of HEALPic cell indices at the same depth
+  pub fn from_fixed_depth_cells<I: Iterator<Item=T>>(
+    depth: u8,
+    cells_it: I,
+    buf_capacity: Option<usize>
+  ) -> Self {
+    let mut builder = FixedDepthMocBuilder::new(depth, buf_capacity);
+    for cell in cells_it {
+      builder.push(cell)
+    }
+    builder.into_moc()
+  }
+
+  pub fn append_fixed_depth_cells<I: Iterator<Item=T>>(
+    self,
+    depth: u8,
+    cells_it: I,
+    buf_capacity: Option<usize>
+  ) -> Self {
+    assert_eq!(depth, self.depth_max);
+    let mut builder = FixedDepthMocBuilder::from(buf_capacity, self);
+    for cell in cells_it {
+      builder.push(cell)
+    }
+    builder.into_moc()
+  }
+
+  pub fn and(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    let depth_max = self.depth_max.max(rhs.depth_max);
+    let ranges = self.ranges.intersection(&rhs.ranges);
+    RangeMOC::new(depth_max, ranges)
+  }
+  pub fn intersection(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    self.and(rhs)
+  }
+
+  pub fn or(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    let depth_max = self.depth_max.max(rhs.depth_max);
+    let ranges = self.ranges.union(&rhs.ranges);
+    RangeMOC::new(depth_max, ranges)
+  }
+  pub fn union(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    self.or(rhs)
+  }
+
+  pub fn not(&self) -> RangeMOC<T, Q> {
+    self.complement()
+  }
+  pub fn complement(&self) -> RangeMOC<T, Q> {
+    RangeMOC::new(self.depth_max, self.ranges.complement())
+  }
+
+  pub fn xor(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    let depth_max = self.depth_max.max(rhs.depth_max);
+    let ranges = xor((&self).into_range_moc_iter(), (&rhs).into_range_moc_iter()).collect();
+    RangeMOC::new(depth_max, ranges)
+  }
+
+  pub fn minus(&self, rhs: &RangeMOC<T, Q>) -> RangeMOC<T, Q> {
+    let depth_max = self.depth_max.max(rhs.depth_max);
+    let ranges = minus((&self).into_range_moc_iter(), (&rhs).into_range_moc_iter()).collect();
+    RangeMOC::new(depth_max, ranges)
+  }
+
+  // CONTAINS: union that stops at first elem found
+  // OVERLAP (=!CONTAINS on the COMPLEMENT ;) )
 
   // pub fn owned_and() -> RangeMOC<T, Q> { }
   // pub fn lazy_and() -> 
@@ -109,6 +182,18 @@ impl From<RangeMOC<u64, Hpx<u64>>> for RangeMOC<u16, Hpx<u16>> {
 
 impl RangeMOC<u64, Hpx<u64>> {
 
+
+  /// # Panics
+  ///   If a `lat` is **not in** `[-pi/2, pi/2]`, this method panics.
+  pub fn from_coos<I: Iterator<Item=(f64, f64)>>(depth: u8, coo_it: I, buf_capacity: Option<usize>) -> Self {
+    let layer = healpix::nested::get(depth);
+    Self::from_fixed_depth_cells(
+      depth,
+      coo_it.map(move |(lon_rad, lat_rad)| layer.hash(lon_rad, lat_rad)),
+      buf_capacity
+    )
+  }
+
   /// # Input
   /// - `cone_lon` the longitude of the center of the cone, in radians
   /// - `cone_lat` the latitude of the center of the cone, in radians
@@ -167,28 +252,42 @@ impl RangeMOC<u64, Hpx<u64>> {
     Self::from(zone_coverage(depth, lon_min, lat_min, lon_max, lat_max))
   }
 
-  /*
-  expand
-  c.f. healpix: moc/mod.rs L455
-  pub fn expand(self) -> OrMocIter<u64, MOCIteratorFromRanges<u64,LazyRangeMoc>, MergeMoc> {
-    let mut ext: Vec<u64> = Vec::with_capacity(10 * self.ranges.len()); // constant to be adjusted
-    for HpxCell { depth, hash } in MOCIteratorFromRanges::new(self.range_moc_iter()) {
-      append_external_edge(depth, hash, self.depth_max - depth, &mut ext);
+  /// Add the MOC external border of depth `self.depth_max`.
+  pub fn expanded(&self) -> Self {
+    Self::new(self.depth_max, self.expanded_iter().collect())
+  }
+
+  pub fn expanded_iter(&self) -> OrRangeIter<u64, Hpx<u64>,
+    RangeRefMocIter<'_, u64, Hpx<u64>>, OwnedOrderedFixedDepthCellsToRanges<u64, Hpx<u64>>> {
+    let mut ext: Vec<u64> = Vec::with_capacity(10 * self.ranges.ranges().0.len()); // constant to be adjusted
+    for Cell { depth, idx } in (&self).into_range_moc_iter().cells() {
+      append_external_edge(depth, idx, self.depth_max - depth, &mut ext);
     }
     ext.sort_unstable(); // parallelize with rayon? It is the slowest part!!
-    ext.dedup();
-    let depth = self.depth_max;
-    MOCIteratorFromRanges::new(self.into_range_moc_iter())
-        .or(MergeIter::new(FlatLazyMOCIter::new(depth, ext.into_iter())
-        )
-        )
+    let ext_range_iter = OwnedOrderedFixedDepthCellsToRanges::new(self.depth_max, ext.into_iter());
+    or((&self).into_range_moc_iter(), ext_range_iter)
   }
-  */
 
-  /*
-  pub fn from_cells => CellMOC -> Ranges
-  pub fn from_coos  => CellMOC -> Ranges
-  */
+  /// Returns this MOC external border
+  pub fn external_border(&self) -> Self {
+   Self::new(self.depth_max, minus(
+        self.expanded_iter(),
+        (&self).into_range_moc_iter()
+      ).collect()
+    )
+  }
+
+  /// Returns this MOC internal border
+  pub fn internal_border(&self) -> Self {
+    let not = self.not();
+    Self::new(
+      self.depth_max,
+      and(not.expanded_iter(), (&self).into_range_moc_iter()).collect()
+    )
+  }
+
+
+  // BORDER = NOT(SELF)+EXPAND && SELF
 
   /* Perform UNIONS
   pub fn from_fixed_radius_cones
