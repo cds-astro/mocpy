@@ -18,7 +18,8 @@ bench = true
 num = "0.4"
 nom = "6.1.2"
 quick-error = "2.0.1"
-healpix = { package = "cdshealpix", version = "0.5.4" }
+healpix = { package = "cdshealpix", version = "0.5.5" }
+# healpix = { package = "cdshealpix", path = "../rust-healpix" }
 serde_json = "1.0"
 byteorder = "1.4.3"
 rayon = "1.5.1"
