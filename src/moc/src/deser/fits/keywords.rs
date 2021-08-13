@@ -7,6 +7,7 @@ use std::slice::ChunksMut;
 
 use crate::deser::fits::common::{get_str_val_no_quote, get_keyword, parse_uint_val, write_keyword_record};
 use crate::deser::fits::error::FitsError;
+use std::str::FromStr;
 
 
 pub trait FitsCard: Sized {
@@ -198,7 +199,13 @@ impl FitsCard for MocType {
     })
   }
 }
+impl FromStr for MocType {
+  type Err = FitsError;
 
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    MocType::specific_parse_value(s.as_bytes())
+  }
+}
 #[derive(Debug)]
 pub enum PixType {
   Healpix,

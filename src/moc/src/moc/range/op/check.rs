@@ -105,6 +105,7 @@ impl<T, Q, I> RangeMOCIterator<T> for CheckedIterator<T, Q, I>
     I: RangeMOCIterator<T, Qty=Q>,
 {
   type Qty = Q;
+
   fn peek_last(&self) -> Option<&Range<T>> {
     self.it.peek_last()
   }

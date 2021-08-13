@@ -10,11 +10,12 @@ use crate::moc::{
 
 use crate::deser::ascii::{AsciiError, moc2d_to_ascii_ivoa};
 use crate::deser::json::cellmoc2d_to_json_aladin;
+use crate::moc2d::range::{RangeMOC2, RangeMOC2Elem};
 
 pub mod cell;
 pub mod range;
 pub mod cellcellrange;
-pub mod decorators;
+pub mod adapters;
 
 /// Returns the maximum depth of an item the implementor contains.
 pub trait HasTwoMaxDepth {
@@ -112,7 +113,18 @@ pub trait RangeMOC2Iterator<
   + MOC2Properties
   + Iterator<Item=K>
 {
-  /*fn to_fits<W: Write>(
+  fn into_range_moc2(self) -> RangeMOC2<T, Q, U, R> {
+    let depth_max_l = self.depth_max_1();
+    let depth_max_r = self.depth_max_2();
+    let elems: Vec<RangeMOC2Elem<T, Q, U, R>> = self.map(|e| {
+        let (it_l, it_r) = e.range_mocs_it();
+        RangeMOC2Elem::new(it_l.into_range_moc(), it_r.into_range_moc())
+      })
+      .collect();
+    RangeMOC2::new(depth_max_l, depth_max_r, elems)
+  }
+  /*
+  fn to_fits_ivoa<W: Write>(
     self,
     moc_id: Option<String>,
     moc_type: Option<MocType>,

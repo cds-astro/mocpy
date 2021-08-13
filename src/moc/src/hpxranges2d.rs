@@ -8,18 +8,8 @@ use num::One;
 use rayon::prelude::*;
 
 use crate::idx::Idx;
-use crate::moc::{
-    ZSorted, NonOverlapping,
-    RangeMOCIntoIterator,
-    CellMOCIterator, CellMOCIntoIterator,
-    CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator,
-    range::{RangeMOC, RangeMocIter}
-};
-use crate::moc2d::{
-    HasTwoMaxDepth, MOC2Properties,
-    RangeMOC2Iterator,
-    range::RangeMOC2Elem
-};
+use crate::moc::{ZSorted, NonOverlapping, RangeMOCIntoIterator, CellMOCIterator, CellMOCIntoIterator, CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator, range::{RangeMOC, RangeMocIter}, RangeMOCIterator};
+use crate::moc2d::{HasTwoMaxDepth, MOC2Properties, RangeMOC2Iterator, range::RangeMOC2Elem, RangeMOC2ElemIt};
 use crate::qty::{MocQty, Hpx, Time};
 use crate::ranges::{SNORanges, ranges2d::SNORanges2D, Ranges};
 use crate::ranges::ranges2d::Ranges2D;
@@ -44,7 +34,75 @@ impl<TT: Idx> HpxRanges2D<TT, Time<TT>, TT> {
             it_s: self.0.ranges2d.y.iter().peekable(),
         }
     }
+    
+   
+    pub fn from_ranges_it<I>(it: I) -> Self
+        where I: RangeMOC2Iterator<
+                TT, Time::<TT>, RangeMocIter<TT, Time::<TT>>,
+                TT, Hpx::<TT>, RangeMocIter<TT, Hpx::<TT>>,
+                RangeMOC2Elem<TT, Time::<TT>, TT, Hpx::<TT>>
+            >
+    {
+        let mut t = Vec::<Range<TT>>::new();
+        let mut s = Vec::<Ranges<TT>>::new();
+        for elem in it {
+            let (moc_t, moc_s) = elem.mocs();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_range_moc_iter() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let mut it = moc_t.into_range_moc_iter().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(moc_s.into_moc_ranges().into_ranges())
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<TT, Time<TT>, TT, Hpx<TT>>::new(t, s))
+    }
+
+    pub fn from_ranges_it_gen<I, J, K, L>(it: L) -> Self
+        where
+          I: RangeMOCIterator<TT, Qty=Time::<TT>>,
+          J: RangeMOCIterator<TT, Qty=Hpx::<TT>>,
+          K: RangeMOC2ElemIt<TT, Time::<TT>, TT, Hpx::<TT>, It1=I, It2=J>,
+          L: RangeMOC2Iterator<
+              TT, Time::<TT>, I,
+              TT, Hpx::<TT>, J,
+              K
+          >
+    {
+        let mut t = Vec::<Range<TT>>::new();
+        let mut s = Vec::<Ranges<TT>>::new();
+        for elem in it {
+            let (moc_t_it, moc_s_it) = elem.range_mocs_it();
+            let moc_t = moc_t_it.into_range_moc();
+            let moc_s = moc_s_it.into_range_moc();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_range_moc_iter() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let mut it = moc_t.into_range_moc_iter().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(moc_s.into_moc_ranges().into_ranges())
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<TT, Time<TT>, TT, Hpx<TT>>::new(t, s))
+    }
 }
+
 
 impl<TT, T, ST> Default for HpxRanges2D<TT, T, ST>
     where
@@ -335,6 +393,46 @@ where
         MocRanges::<TT, T>::new_from_sorted(t_ranges)
     }
 
+    /*/// Returns the union of the ranges along the `T` axis for which their
+    /// `S` ranges intersect ``y``
+    ///
+    /// # Arguments
+    ///
+    /// * ``y``- The set of ranges along the `S` axis.
+    /// * ``coverage`` - The input coverage.
+    ///
+    /// # Algorithm
+    ///
+    /// This method checks for all the `S` axis ranges of ``coverage`` that
+    /// lie into the range set ``y``.
+    ///
+    /// It then performs the union of the `T` axis ranges corresponding to the
+    /// matching ranges along the `S` axis.
+    pub fn project_on_first_dim_v2(
+        y: &HpxRanges<ST>,
+        coverage: &HpxRanges2D<TT, T, ST>,
+    ) -> MocRanges<TT, T> {
+        let coverage = &coverage.0.ranges2d;
+        let t_ranges = coverage.x.par_iter()
+          .zip_eq(coverage.y.par_iter())
+          // Filter the time ranges to keep only those
+          // that lie into ``x``
+          .filter_map(|(t, s)| {
+              for r in s.iter() {
+                  if !y.contains(r) {
+                      return None;
+                  }
+              }
+              // The matching 1st dim ranges matching
+              // are cloned. We do not want
+              // to consume the Range2D
+              Some(t.clone())
+          })
+          .collect::<Vec<_>>();
+        // TODO: debug_assert: check is sorted!!
+        MocRanges::<TT, T>::new_from_sorted(t_ranges)
+    }*/
+
     /// Compute the depth of the coverage
     ///
     /// # Returns
@@ -448,7 +546,7 @@ where
 
 // The 3 following From contains code redundancy. We probably should do something!
 
-impl<I: RangeMOC2Iterator<
+/*impl<I: RangeMOC2Iterator<
     u64, Time::<u64>, RangeMocIter<u64, Time::<u64>>,
     u64, Hpx::<u64>, RangeMocIter<u64, Hpx::<u64>>,
     RangeMOC2Elem<u64, Time::<u64>, u64, Hpx::<u64>>>
@@ -477,7 +575,38 @@ impl<I: RangeMOC2Iterator<
         }
         HpxRanges2D(Moc2DRanges::<u64, Time<u64>, u64, Hpx<u64>>::new(t, s))
     }
-}
+}*/
+/*
+impl<T: Idx, I: RangeMOC2Iterator<
+    T, Time::<T>, RangeMocIter<T, Time::<T>>,
+    T, Hpx::<T>, RangeMocIter<T, Hpx::<T>>,
+    RangeMOC2Elem<T, Time::<T>, T, Hpx::<T>>>
+> From<I> for HpxRanges2D<T, Time<T>, T> {
+
+    fn from(it: I) -> Self {
+        let mut t = Vec::<Range<T>>::new();
+        let mut s = Vec::<Ranges<T>>::new();
+        for elem in it {
+            let (moc_t, moc_s) = elem.mocs();
+            /* Simpler but we want to avoid the copy of the s_moc for the last t_range
+            for range_t in moc_t.into_range_moc_iter() {
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }*/
+            let mut it = moc_t.into_range_moc_iter().peekable();
+            while it.peek().is_some() {
+                let range_t = it.next().unwrap();
+                t.push(range_t);
+                s.push(moc_s.moc_ranges().ranges().clone())
+            }
+            if let Some(range_t) = it.next() {
+                t.push(range_t);
+                s.push(moc_s.into_moc_ranges().into_ranges())
+            }
+        }
+        HpxRanges2D(Moc2DRanges::<T, Time<T>, T, Hpx<T>>::new(t, s))
+    }
+}*/
 
 impl From<CellOrCellRangeMoc2Iter<u64, Time<u64>, u64, Hpx::<u64>>> for HpxRanges2D<u64, Time<u64>, u64> {
 

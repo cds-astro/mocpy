@@ -2,9 +2,10 @@
 
 pub mod check;
 pub mod convert;
+pub mod merge;
 
-// pub mod not;
-// pub mod degrade;
+pub mod not;   // <=> complement
+pub mod degrade;
 
 pub mod and;   // <=> intersection
 pub mod or;    // <=> union

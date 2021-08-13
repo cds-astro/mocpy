@@ -22,16 +22,18 @@ use crate::elemset::{
   range::MocRanges
 };
 use crate::moc::{
-  HasMaxDepth, ZSorted, NonOverlapping, MOCProperties,
-  RangeMOCIterator, CellMOCIterator,
-  cell::CellMOC,
+  HasMaxDepth, ZSorted, NonOverlapping, MOCProperties, 
+  RangeMOCIterator, CellMOCIterator, CellMOCIntoIterator,
+  cell::{CellMOC, CellMocIter}, 
   range::{RangeMOC, RangeMocIter},
+  adapters::RangeMOCIteratorFromCells
 };
 use crate::moc2d::{
   HasTwoMaxDepth, RangeMOC2ElemIt, 
-  RangeMOC2Iterator, RangeMOC2IntoIterator, MOC2Properties
+  RangeMOC2Iterator, RangeMOC2IntoIterator, MOC2Properties,
+  range::{RangeMOC2, RangeMOC2Elem}
 };
-use crate::moc2d::range::{RangeMOC2, RangeMOC2Elem};
+use crate::moc::range::op::convert::ConvertIterator;
 
 // FITS standard
 // https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf
@@ -40,13 +42,90 @@ pub mod common;
 pub mod error;
 pub mod keywords;
 
+/*
+fn print_info(moc: MocIdxType<BufReader<File>>) -> Result<(), Box<dyn Error>> {
+  match moc {
+    MocIdxType::U8(moc) => print_info_qty("u8", moc),
+    MocIdxType::U16(moc) => print_info_qty("u16", moc),
+    MocIdxType::U32(moc) => print_info_qty("u32", moc),
+    MocIdxType::U64(moc) => print_info_qty("u64", moc),
+    MocIdxType::U128(moc) => print_info_qty("u128", moc),
+  }
+}
+
+fn print_info_qty<T: Idx>(idx_type: &str, moc: MocQtyType<T, BufReader<File>>) -> Result<(), Box<dyn Error>> {
+  match moc {
+    MocQtyType::Hpx(moc) => print_info_type(idx_type, "SPACE", moc),
+    MocQtyType::Time(moc) => print_info_type(idx_type, "TIME", moc),
+    MocQtyType::TimeHpx(moc) => todo!(), //print_info_type(idx_type, "TIME-SPACE", moc),
+  }
+}
+
+fn print_info_type<T: Idx, Q: MocQty<T>>(idx_type: &str, qty_type: &str, moc: MocType<T, Q, BufReader<File>>) -> Result<(), Box<dyn Error>> {
+  match moc {
+    MocType::Ranges(moc) => print_moc_info(idx_type, qty_type, moc),
+    MocType::Cells(moc) =>  print_moc_info(idx_type, qty_type, moc.into_cell_moc_iter().ranges()),
+  }
+}
+
+fn print_moc_info<T: Idx, Q: MocQty<T>, R: RangeMOCIterator<T, Qty=Q>>(idx_type: &str, qty_type: &str, moc: R) -> Result<(), Box<dyn Error>>
+*/
+
+
+
+
+/*
+pub struct IdxConvert<F: Idx, T: Idx + From<F>>(PhantomData<F>, PhantomData<T>);
+
+impl<F: Idx, T: Idx + From<F>> IdxConvert<F, T> {
+  
+  pub fn new() -> Self {
+    IdxConvert(PhantomData, PhantomData)
+  }
+  
+  pub fn convert_rangemoc<Q, S, R>(
+    &self, 
+    input: RangeMocIterFromFits<F, Q, R>
+  ) -> ConvertIterator<F, Q, RangeMocIterFromFits<F, Q, R>, T, S> 
+    where
+      Q: MocQty<F>, 
+      R: BufRead,
+      S: MocQty<T>
+  {
+    input.convert()
+  }
+
+  pub fn convert_cellmoc<Q, S>(
+    &self, 
+    input: CellMOC<F, Q>
+  ) -> ConvertIterator<F, Q, RangeMOCIteratorFromCells<F, Q, CellMocIter<F, Q>>, T, S>
+    where
+      Q: MocQty<F>,
+      S: MocQty<T>
+  {
+    input.into_cell_moc_iter().ranges().convert()
+  }
+}*/
+
+
 #[derive(Debug)]
 pub enum MocIdxType<R: BufRead> {
-  U8(MocQtyType<u8, R>),
+  //U8(MocQtyType<u8, R>),
   U16(MocQtyType<u16, R>),
   U32(MocQtyType<u32, R>),
   U64(MocQtyType<u64, R>),
-  U128(MocQtyType<u128, R>),
+  // U128(MocQtyType<u128, R>),
+}
+impl<R: BufRead> MocIdxType<R> {
+  pub fn to_fits_ivoa<W: Write>(self, write: W) -> Result<(), FitsError> {
+    match self {
+      //MocIdxType::U8(moc_qty_type) => moc_qty_type.to_fits_ivoa(write),
+      MocIdxType::U16(moc_qty_type) => moc_qty_type.to_fits_ivoa(write),
+      MocIdxType::U32(moc_qty_type) => moc_qty_type.to_fits_ivoa(write),
+      MocIdxType::U64(moc_qty_type) => moc_qty_type.to_fits_ivoa(write),
+      // MocIdxType::U128(moc_qty_type) => moc_qty_type.to_fits_ivoa(write),
+    }
+  }
 }
 
 #[derive(Debug)]
@@ -55,6 +134,16 @@ pub enum MocQtyType<T: Idx, R: BufRead> {
   Time(MocType<T, Time<T>, R>),
   TimeHpx(STMocType<T, R>),
 }
+impl<T: Idx, R: BufRead> MocQtyType<T, R> {
+  pub fn to_fits_ivoa<W: Write>(self, write: W) -> Result<(), FitsError> {
+    match self {
+      MocQtyType::Hpx(moc_type) => moc_type.to_fits_ivoa(write),
+      MocQtyType::Time(moc_type) => moc_type.to_fits_ivoa(write),
+      MocQtyType::TimeHpx(moc_type) => moc_type.to_fits_ivoa(write),
+    }
+  }
+}
+
 
 #[derive(Debug)]
 pub enum MocType<T: Idx, Q: MocQty<T>, R: BufRead> {
@@ -64,11 +153,33 @@ pub enum MocType<T: Idx, Q: MocQty<T>, R: BufRead> {
   // RUniq(),
   // RMixed(),
 }
+impl<T: Idx, Q: MocQty<T>, R: BufRead> MocType<T, Q, R> {
+  pub fn to_fits_ivoa<W: Write>(self, write: W) -> Result<(), FitsError> {
+    match self {
+      MocType::Ranges(ranges) => ranges_to_fits_ivoa(ranges, None, None, write),
+      MocType::Cells(cells) => ranges_to_fits_ivoa(cells.into_cell_moc_iter().ranges(), None, None, write),
+    }
+  }
+  pub fn collect(self) -> RangeMOC<T, Q> {
+    match self {
+      MocType::Ranges(ranges) => ranges.into_range_moc(),
+      MocType::Cells(cells) => cells.into_cell_moc_iter().ranges().into_range_moc(),
+    }
+  }
+}
 
 #[derive(Debug)]
 pub enum STMocType<T: Idx, R: BufRead> {
   V2(RangeMoc2DIterFromFits<T, R>),
-  PreV2(RangeMoc2DPreV2IterFromFits<R>)
+  PreV2(RangeMoc2DPreV2IterFromFits<T, R>)
+}
+impl<T: Idx, R: BufRead> STMocType<T, R> {
+  pub fn to_fits_ivoa<W: Write>(self, write: W) -> Result<(), FitsError> {
+    match self {
+      STMocType::V2(ranges2) => ranges2d_to_fits_ivoa(ranges2, None, None, write),
+      STMocType::PreV2(ranges2) => ranges2d_to_fits_ivoa(ranges2, None, None, write),
+    }
+  }
 }
 
 
@@ -653,14 +764,14 @@ fn load_t_moc_range<R: BufRead>(
       Ok(MocIdxType::U64(MocQtyType::Time(MocType::Ranges(
         from_fits_range::<u64, Time::<u64>, R>(reader, depth_max, n_ranges)?
       )))),
-    (Some(MocKeywords::TForm1(TForm1::OneB)), u8::N_BYTES) =>
+    /*(Some(MocKeywords::TForm1(TForm1::OneB)), u8::N_BYTES) =>
       Ok(MocIdxType::U8(MocQtyType::Time(MocType::Ranges(
         from_fits_range::<u8, Time::<u8>, R>(reader, depth_max, n_ranges)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::TwoK)), u128::N_BYTES) =>
       Ok(MocIdxType::U128(MocQtyType::Time(MocType::Ranges(
         from_fits_range::<u128, Time::<u128>, R>(reader, depth_max, n_ranges)?
-      )))),
+      )))),*/
     (Some(MocKeywords::TForm1(tform)), nb) =>
       Err(FitsError::UncompatibleKeywordContent(format!("NAXIS1  = {}", nb), tform.to_string())),
     (None, _) => Err(FitsError::MissingKeyword(TForm1::keyword_string())),
@@ -691,14 +802,14 @@ fn load_st_moc_range<R: BufRead>(
       Ok(MocIdxType::U64(MocQtyType::TimeHpx(STMocType::V2(
         from_fits_range2d::<u64, _>(reader, depth_max_time, depth_max_hpx, n_ranges)?
       )))),
-    (Some(MocKeywords::TForm1(TForm1::OneB)), u8::N_BYTES) =>
+    /*(Some(MocKeywords::TForm1(TForm1::OneB)), u8::N_BYTES) =>
       Ok(MocIdxType::U8(MocQtyType::TimeHpx(STMocType::V2(
         from_fits_range2d::<u8, _>(reader, depth_max_time, depth_max_hpx, n_ranges)?
       )))),
     (Some(MocKeywords::TForm1(TForm1::TwoK)), u128::N_BYTES) =>
       Ok(MocIdxType::U128(MocQtyType::TimeHpx(STMocType::V2(
         from_fits_range2d::<u128, _>(reader, depth_max_time, depth_max_hpx, n_ranges)?
-      )))),
+      )))),*/
     (Some(MocKeywords::TForm1(tform)), nb) =>
       Err(FitsError::UncompatibleKeywordContent(format!("NAXIS1  = {}", nb), tform.to_string())),
     (None, _) => Err(FitsError::MissingKeyword(TForm1::keyword_string())),
@@ -954,7 +1065,7 @@ for RangeMoc2DIterFromFits<T, R> { }
 // st-moc pre_v2 read iterator
 
 fn from_fits_range2d_29<R>(reader: R, depth_max_time: u8, depth_max_hpx: u8, n_ranges: u64)
-                           -> Result<RangeMoc2DPreV2IterFromFits<R>, FitsError>
+                           -> Result<RangeMoc2DPreV2IterFromFits<u64, R>, FitsError>
   where
     R: BufRead
 {
@@ -962,21 +1073,21 @@ fn from_fits_range2d_29<R>(reader: R, depth_max_time: u8, depth_max_hpx: u8, n_r
 }
 
 #[derive(Debug)]
-pub struct RangeMoc2DPreV2IterFromFits<R: BufRead> {
+pub struct RangeMoc2DPreV2IterFromFits<T: Idx, R: BufRead> {
   depth_max_time: u8,
   depth_max_hpx: u8,
   reader: R,
   n_ranges: u64,
-  prev_t: Option<Range<u64>>,
+  prev_t: Option<Range<T>>,
 }
 
-impl<R: BufRead> RangeMoc2DPreV2IterFromFits<R> {
+impl<T: Idx, R: BufRead> RangeMoc2DPreV2IterFromFits<T, R> {
   fn new(
     depth_max_time: u8,
     depth_max_hpx: u8,
     reader: R,
     n_ranges: u64
-  ) -> RangeMoc2DPreV2IterFromFits<R> {
+  ) -> RangeMoc2DPreV2IterFromFits<T, R> {
     RangeMoc2DPreV2IterFromFits {
       depth_max_time,
       depth_max_hpx,
@@ -986,7 +1097,7 @@ impl<R: BufRead> RangeMoc2DPreV2IterFromFits<R> {
     }
   }
 }
-impl<R: BufRead> HasTwoMaxDepth for RangeMoc2DPreV2IterFromFits<R> {
+impl<T: Idx, R: BufRead> HasTwoMaxDepth for RangeMoc2DPreV2IterFromFits<T, R> {
   fn depth_max_1(&self) -> u8 {
     self.depth_max_time
   }
@@ -994,28 +1105,28 @@ impl<R: BufRead> HasTwoMaxDepth for RangeMoc2DPreV2IterFromFits<R> {
     self.depth_max_hpx
   }
 }
-impl<R: BufRead> ZSorted for RangeMoc2DPreV2IterFromFits<R> {}
-impl<R: BufRead> NonOverlapping for RangeMoc2DPreV2IterFromFits<R> {}
-impl<R: BufRead> MOC2Properties for RangeMoc2DPreV2IterFromFits<R> {}
-impl<R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<R> {
-  type Item = RangeMOC2Elem<u64, Time<u64>, u64, Hpx<u64>>;
+impl<T: Idx, R: BufRead> ZSorted for RangeMoc2DPreV2IterFromFits<T, R> {}
+impl<T: Idx, R: BufRead> NonOverlapping for RangeMoc2DPreV2IterFromFits<T, R> {}
+impl<T: Idx, R: BufRead> MOC2Properties for RangeMoc2DPreV2IterFromFits<T, R> {}
+impl<T: Idx, R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<T, R> {
+  type Item = RangeMOC2Elem<T, Time<T>, T, Hpx<T>>;
   fn next(&mut self) -> Option<Self::Item> {
     use byteorder::ReadBytesExt;
 
-    let mut tranges: Vec<Range<u64>> = Vec::with_capacity(1000);
+    let mut tranges: Vec<Range<T>> = Vec::with_capacity(1000);
     if let Some(trange) = self.prev_t.take() {
       tranges.push(trange);
     }
-    let mut sranges: Vec<Range<u64>> = Vec::with_capacity(1000);
+    let mut sranges: Vec<Range<T>> = Vec::with_capacity(1000);
     while self.n_ranges > 0_u64 {
       let from = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
       let to = self.reader.read_i64::<BigEndian>(); // i64::read::<_, BigEndian>(&mut self.reader);
       if let (Ok(start), Ok(end)) = (from, to) {
         self.n_ranges -= 1;
         if start < 0 && end < 0 {
-          tranges.push(Range { start: -start as u64, end: -end as u64})
+          tranges.push(Range { start: T::from_u64_idx(-start as u64), end: T::from_u64_idx(-end as u64)})
         } else {
-          sranges.push(Range{start: start as u64, end: end as u64});
+          sranges.push(Range{start: T::from_u64_idx(start as u64), end: T::from_u64_idx(end as u64)});
           break;
         }
       } else {
@@ -1029,10 +1140,10 @@ impl<R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<R> {
       if let (Ok(start), Ok(end)) = (from, to) {
         self.n_ranges -= 1;
         if start < 0 && end < 0 {
-          self.prev_t = Some(Range { start: -start as u64, end: -end as u64});
+          self.prev_t = Some(Range { start: T::from_u64_idx(-start as u64), end: T::from_u64_idx(-end as u64)});
           break;
         } else {
-          sranges.push(Range{start: start as u64, end: end as u64});
+          sranges.push(Range{start: T::from_u64_idx(start as u64), end: T::from_u64_idx(end as u64)});
         }
       } else {
         // Early stop due to read error. Better to return a Result!
@@ -1051,12 +1162,12 @@ impl<R: BufRead> Iterator for RangeMoc2DPreV2IterFromFits<R> {
   // No size int because should be the number of RangeMOC2Elem instead of the
   // total number of ranges...
 }
-impl<R: BufRead> RangeMOC2Iterator<
-  u64, Time::<u64>, RangeMocIter<u64, Time::<u64>>,
-  u64, Hpx::<u64>, RangeMocIter<u64, Hpx::<u64>>,
-  RangeMOC2Elem<u64, Time::<u64>, u64, Hpx::<u64>>
+impl<T: Idx, R: BufRead> RangeMOC2Iterator<
+  T, Time::<T>, RangeMocIter<T, Time::<T>>,
+  T, Hpx::<T>, RangeMocIter<T, Hpx::<T>>,
+  RangeMOC2Elem<T, Time::<T>, T, Hpx::<T>>
 >
-for RangeMoc2DPreV2IterFromFits<R> { }
+for RangeMoc2DPreV2IterFromFits<T, R> { }
 
 
 #[cfg(test)]
@@ -1119,7 +1230,7 @@ mod tests {
           Cell::from_uniq_hpx(288230376275168533_u64)
         ];
         vec_cells.sort_by(|a, b| a.flat_cmp::<Hpx<u64>>(&b));
-        let moc2 = CellMOC::<u64, Hpx<u64>>::new(29, MocCells::new(Cells(vec_cells)));
+        let moc2 = CellMOC::<u64, Hpx<u64>>::new(29, MocCells::new(Cells(vec_cells.into_boxed_slice())));
         for (c1, c2) in moc1.into_cell_moc_iter().zip(moc2.into_cell_moc_iter()) {
           assert_eq!(c1, c2);
         }
@@ -1173,7 +1284,7 @@ mod tests {
         Cell::from_uniq_hpx(4116_u64),
         Cell::from_uniq_hpx(68719476958_u64),
         Cell::from_uniq_hpx(288230376275168533_u64)
-      ])));
+      ].into_boxed_slice())));
     let path_buf1 = PathBuf::from("resources/MOC2.0/SMOC_test.fits");
     let path_buf2 = PathBuf::from("../resources/MOC2.0/SMOC_test.fits");
     let file = File::create(&path_buf1).or_else(|_| File::create(&path_buf2)).unwrap();

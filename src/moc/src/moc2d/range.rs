@@ -8,7 +8,7 @@ use crate::moc::{
   ZSorted, NonOverlapping,
   RangeMOCIterator, RangeMOCIntoIterator,
   range::{RangeMOC, RangeMocIter, RangeRefMocIter},
-  decorators::CellMOCIteratorFromRanges,
+  adapters::CellMOCIteratorFromRanges,
 };
 use crate::moc2d::{
   HasTwoMaxDepth, MOC2Properties, 
@@ -152,10 +152,6 @@ impl<T, Q, U, R> MOC2Properties for RangeMOC2<T, Q, U, R>
     Q: MocQty<T>,
     U: Idx,
     R: MocQty<U> {}
-
-
-
-
 
 /// Iterator taking the ownership of a MOC2 made of Range elements
 pub struct RangeMoc2Iter<T, Q, U, R>
@@ -306,10 +302,6 @@ CellMOC2IntoIterator<
     }
   }
 }*/
-
-
-
-
 
 /// Iterator borrowing a MOC2 made of Range elements
 pub struct RangeRefMoc2Iter<'a, T, Q, U, R>

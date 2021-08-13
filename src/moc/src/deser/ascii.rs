@@ -551,7 +551,7 @@ mod tests {
     (&rm).into_range_moc_iter()
       .cells()
       .cellranges()
-      .to_ascii_ivoa(None,false, &mut res_ascii_1)
+      .to_ascii_ivoa(None, false, &mut res_ascii_1)
       .unwrap();
     println!("{}\n", str::from_utf8(&res_ascii_1).unwrap());
     let mut res_ascii_2 = Vec::new();

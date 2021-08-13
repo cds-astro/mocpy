@@ -65,11 +65,21 @@ pub struct CellOrCellRangeMOC2<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>> {
   depth_max_r: u8, // not in vmoc. Really useful?
   elems: Vec<CellOrCellRangeMOC2Elem<T, Q, U, R>>,
 }
-impl<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>>  CellOrCellRangeMOC2<T, Q, U, R> {
+impl<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>> CellOrCellRangeMOC2<T, Q, U, R> {
   pub fn new(depth_max_l: u8, depth_max_r: u8, elems: Vec<CellOrCellRangeMOC2Elem<T, Q, U, R>>) -> Self {
     Self { depth_max_l, depth_max_r, elems }
   }
 }
+impl<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>> HasTwoMaxDepth for CellOrCellRangeMOC2<T, Q, U, R> {
+  fn depth_max_1(&self) -> u8 {
+    self.depth_max_l
+  }
+  fn depth_max_2(&self) -> u8 {
+    self.depth_max_r
+  }
+}
+
+
 
 /// Iterator taking the ownership of a MOC2 made of CellOrCellRange elements
 pub struct CellOrCellRangeMoc2Iter<T, Q, U, R>

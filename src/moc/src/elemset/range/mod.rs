@@ -147,7 +147,7 @@ impl<T: Idx, Q: MocQty<T>> MocRanges<T, Q> {
     }
 
     // Because of degrade, this is not a simple range but contains the notion of order/level/depth.
-    pub fn degrade(&mut self, depth: u8) {
+    pub fn degraded(&self, depth: u8) -> Self {
         let shift = Q::shift_from_depth_max(depth) as u32;
 
         let mut offset: T = One::one();
@@ -173,10 +173,14 @@ impl<T: Idx, Q: MocQty<T>> MocRanges<T, Q> {
         }
 
         // TODO: change the algo: one can merge while degrading!
-        self.0 = Ranges::new_unchecked(
+        Ranges::new_unchecked(
             MergeOverlappingRangesIter::new(result.iter(), None)
-                .collect::<Vec<_>>()
-        );
+              .collect::<Vec<_>>()
+        ).into()
+    }
+    
+    pub fn degrade(&mut self, depth: u8) {
+        self.0 = self.degraded(depth).0
     }
 
     pub fn compute_min_depth(&self) -> u8 {

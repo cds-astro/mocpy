@@ -154,7 +154,7 @@ pub fn cellmoc2d_to_json_aladin<T, Q, I, U, R, J, K, L, W>(
 /// Read a JSON following the Aladin JSON format.
 pub fn from_json_aladin<T, Q>(input: &str) -> Result<CellMOC<T, Q>, Box<dyn Error>>
   where
-    T: Idx + From<u64>,
+    T: Idx, // + From<u64>,
     Q: MocQty<T>,
 {
   // If streamming is needed, see:
@@ -166,7 +166,7 @@ pub fn from_json_aladin<T, Q>(input: &str) -> Result<CellMOC<T, Q>, Box<dyn Erro
 
 fn from_json_aladin_internal<T, Q>(value: &Value) -> Result<CellMOC<T, Q>, Box<dyn Error>>
   where
-    T: Idx + From<u64>,
+    T: Idx,
     Q: MocQty<T>,
 {
   match value {
@@ -186,7 +186,7 @@ fn from_json_aladin_internal<T, Q>(value: &Value) -> Result<CellMOC<T, Q>, Box<d
         if let Some(Array(vec)) = map.get(&depth.to_string()) {
           for v in vec.iter()
             .filter_map(|v| match v {
-              Value::Number(idx) => idx.as_u64().and_then(|v| v.into()/*T::try_from(v).ok()*/),
+              Value::Number(idx) => idx.as_u64().and_then(|v| T::from_u64(v).into() /*v.into()*/ /*T::try_from(v).ok()*/),
               _ => None,
             }) {
             cells.push(Cell::new(depth, v.into()));
@@ -207,9 +207,9 @@ fn from_json_aladin_internal<T, Q>(value: &Value) -> Result<CellMOC<T, Q>, Box<d
 /// Read a JSON following the Aladin JSON format.
 pub fn cellmoc2d_from_json_aladin<T, Q, U, R>(input: &str) -> Result<CellMOC2<T, Q, U, R>, Box<dyn Error>>
   where
-    T: Idx + From<u64>,
+    T: Idx, // + From<u64>,
     Q: MocQty<T>,
-    U: Idx + From<u64>,
+    U: Idx, // + From<u64>,
     R: MocQty<U>,
 {
   // If streamming is needed, see:

@@ -731,8 +731,8 @@ pub fn from_fits_file(path: &Path) -> PyResult<TimeSpaceMoc<u64, u64>> {
     let file = File::open(&path).map_err(exceptions::PyValueError::new_err)?;
     let reader = BufReader::new(file);
     match from_fits_ivoa(reader).map_err(|err| exceptions::PyIOError::new_err(err.to_string()))? {
-        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::V2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from(it)),
-        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::PreV2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from(it)),
+        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::V2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from_ranges_it(it)),
+        MocIdxType::U64(MocQtyType::TimeHpx(STMocType::PreV2(it))) => Ok(TimeSpaceMoc::<u64, u64>::from_ranges_it(it)),
         _ => Err(exceptions::PyIOError::new_err("Only ST-MOC of u64 ranges supported!")),
     }
 }

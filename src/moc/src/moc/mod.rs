@@ -5,33 +5,39 @@ use std::ops::Range;
 
 use crate::deser;
 use crate::idx::Idx;
-use crate::qty::MocQty;
+use crate::qty::{MocQty, Bounded};
 use crate::elem::{
   cell::Cell,
   cellcellrange::CellOrCellRange,
   range::MocRange,
 };
-use crate::moc::decorators::{
+use crate::moc::adapters::{
   RangeMOCIteratorFromCells,
   RangeMOCIteratorFromCellOrCellRanges,
   CellMOCIteratorFromRanges,
   CellOrCellRangeMOCIteratorFromCells
 };
+use crate::moc::range::RangeMOC;
 use crate::moc::range::op::{
   check::{check, CheckedIterator},
   convert::{convert, ConvertIterator},
+  degrade::{degrade, DegradeRangeIter},
+  not::{not, NotRangeIter},
   and::{and, AndRangeIter},
   or::{or, OrRangeIter},
   xor::{xor, XorRangeIter},
   minus::{minus, MinusRangeIter},
 };
 use healpix::nested::bmoc::{BMOC, BMOCBuilderUnsafe};
+use crate::deser::fits::{keywords, ranges_to_fits_ivoa};
+use crate::deser::fits::error::FitsError;
 
 pub mod range;
 pub mod cell;
 pub mod cellcellrange;
-pub mod decorators;
+pub mod adapters;
 pub mod builder;
+
 
 /// Returns the maximum depth of an item the implementor contains.
 pub trait HasMaxDepth {
@@ -183,6 +189,39 @@ pub trait RangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Range<
     for _ in self.into_checked() { }
   }
 
+  fn to_fits_ivoa<W: Write>(
+    self, 
+    moc_id: Option<String>, 
+    moc_type: Option<keywords::MocType>, 
+    writer: W
+  ) -> Result<(), FitsError> {
+    ranges_to_fits_ivoa(self, moc_id, moc_type, writer) 
+  }
+  
+  fn into_range_moc(self) -> RangeMOC<T, Self::Qty> {
+    RangeMOC::new(self.depth_max(), self.collect())
+  }
+
+  fn range_sum(self) -> T {
+    let mut sum = T::zero();
+    for Range { start, end } in self {
+      sum += end - start;
+    }
+    sum
+  }
+
+  fn coverage_percentage(self) -> f64 {
+    let rsum = self.range_sum();
+    let tot = Self::Qty::upper_bound_exclusive();
+    if T::N_BITS > 52 { // 52 = n mantissa bits in a f64
+      // Divide by the same power of 2, dropping the LSBs
+      let shift = (T::N_BITS - 52) as u32;
+      rsum.unsigned_shr(shift);
+      tot.unsigned_shr(shift);
+    }
+    rsum.cast_to_f64() / tot.cast_to_f64()
+  }
+
   // I have not yet found a way to ensure that the quantity is the same, with only the a different
   // type T --> U
   fn convert<U, R>(self) -> ConvertIterator<T, Self::Qty, Self, U, R>
@@ -195,6 +234,14 @@ pub trait RangeMOCIterator<T: Idx>: Sized + MOCProperties + Iterator<Item=Range<
 
   fn cells(self) -> CellMOCIteratorFromRanges<T, Self::Qty, Self> {
     CellMOCIteratorFromRanges::new(self)
+  }
+
+  fn degrade(self, new_depth: u8) -> DegradeRangeIter<T, Self::Qty, Self> {
+    degrade(self, new_depth)
+  }
+
+  fn not(self) -> NotRangeIter<T, Self::Qty, Self> {
+    not(self)
   }
 
   fn and<I>(self, other: I) -> AndRangeIter<T, Self::Qty, Self, I>

@@ -74,6 +74,15 @@ impl<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>>  CellMOC2<T, Q, U, R> {
   }
 }
 
+impl<T: Idx, Q: MocQty<T>, U: Idx, R: MocQty<U>> HasTwoMaxDepth for CellMOC2<T, Q, U, R> {
+  fn depth_max_1(&self) -> u8 {
+    self.depth_max_l
+  }
+  fn depth_max_2(&self) -> u8 {
+    self.depth_max_r
+  }
+}
+
 /// Iterator taking the ownership of a MOC2 made of Cell elements
 pub struct CellMoc2Iter<T, Q, U, R>
   where
