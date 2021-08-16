@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Internal Python changes
 * `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
 ### Internal changes
+* Remove the `moc` crate from MOCPy and publish it as a standalone [here](https://github.com/cds-astro/cds-moc-rust)
 * Add FITS serialization/deserialization on the Rust code.
 * Add ASCII and JSON serialization/deserialization on the Rust code.
 * Move `rand` from dependencies to dev-dependenciies

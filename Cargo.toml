@@ -42,8 +42,9 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-moc = { path = "./src/moc" }
-healpix = { package = "cdshealpix", version = "0.5.4" }
+moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main' }
+# moc = { path = "./src/moc" }
+healpix = { package = "cdshealpix", version = "0.5.5" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 num = "0.4"
 time = "*"
