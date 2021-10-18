@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add several options to `moc.from_valued_healpix_cells` 
 * Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring 
   the MOC2.0 compatibility).
+* Improve performance and some operations (like intersection)
+* Improve `to_uniq` performances (x5 according to a bench in pure Rust)
 ### Internal Python changes
 * `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
 ### Internal changes

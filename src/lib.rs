@@ -40,7 +40,7 @@ pub mod spatial_coverage;
 pub mod temporal_coverage;
 pub mod time_space_coverage;
 
-use crate::ndarray_fromto::{ranges_to_array2, mocranges_to_array2, uniq_ranges_to_array1};
+use crate::ndarray_fromto::{ranges_to_array2, mocranges_to_array2}; // uniq_ranges_to_array1
 
 type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
@@ -2027,6 +2027,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
     #[pyfn(m, "to_uniq")]
     fn to_uniq(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray1<u64>> {
+        use moc::moc::range::RangeMOC;
+        use moc::moc::{RangeMOCIterator, RangeMOCIntoIterator};
+        
         let ranges = ranges.as_array().to_owned();
 
         let result: Array1<u64> = if ranges.is_empty() {
@@ -2034,8 +2037,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         } else {
             let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
-            let uniq_coverage = nested_coverage.into_hpx_uniq();
-            uniq_ranges_to_array1(uniq_coverage)
+            // let uniq_coverage = nested_coverage.into_hpx_uniq();
+            // uniq_ranges_to_array1(uniq_coverage)
+            
+            let mut v: Vec<u64> = RangeMOC::new(29, nested_coverage).into_range_moc_iter()
+              .cells()
+              .map(|cell| cell.uniq_hpx())
+              .collect();
+            v.sort_unstable();
+            v.into()
         };
 
         result.into_pyarray(py).to_owned()
