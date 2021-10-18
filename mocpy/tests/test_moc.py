@@ -308,7 +308,9 @@ def mocs():
 
 
 def test_add_neighbours(mocs):
+    print(mocs['moc1'])
     mocs['moc1'].add_neighbours()
+    print(mocs['moc1'])
     assert mocs['moc1'] == mocs['moc1_increased']
 
     mocs['moc2'].add_neighbours()

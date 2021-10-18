@@ -10,12 +10,13 @@ use pyo3::exceptions;
 use pyo3::prelude::PyResult;
 
 use moc::qty::{MocQty, Hpx};
-use moc::elem::valuedcell::valued_cells_to_moc;
+use moc::elem::valuedcell::{valued_cells_to_moc, valued_cells_to_moc_with_opt};
 use moc::elemset::range::{
     HpxRanges,
     uniq::HpxUniqRanges
 };
 use moc::ranges::SNORanges;
+use moc::moc::range::RangeMOC;
 use moc::deser::fits::error::FitsError;
 
 use super::coverage;
@@ -122,6 +123,75 @@ pub fn from_valued_healpix_cells(
     }
 }
 
+/// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
+///
+/// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
+///
+/// # Arguments
+///
+/// * ``uniq`` - Uniq HEALPix indices
+/// * ``values`` - Array containing the values associated for each cells.
+/// Must be of the same size of ``uniq`` and must sum to one.
+/// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
+/// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
+/// * ``max_depth`` - the largest depth of the output MOC, which must be larger or equals to the largest
+///   depth in the `uniq` values
+/// * `asc`: cumulative value computed from lower to highest densities instead of from highest to lowest
+/// * `strict`: (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+/// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+/// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
+/// 
+/// # Precondition
+///
+/// * ``uniq`` and ``values`` must be of the same size
+pub fn from_valued_healpix_cells_with_opt(
+    max_depth: u8,
+    uniq: Array1<u64>,
+    values: Array1<f64>,
+    cumul_from: f64,
+    cumul_to: f64,
+    asc: bool,
+    strict: bool,
+    no_split: bool,
+    reverse_decent: bool,
+) -> PyResult<HpxRanges<u64>> {
+    use std::f64::consts::PI;
+    if uniq.len() != values.len() {
+        Err(
+            exceptions::PyValueError::new_err(
+                "`uniq` and values do not have the same size."
+            )
+        )
+    } else if cumul_from >= cumul_to {
+        Err(
+            exceptions::PyValueError::new_err(
+                "`cumul_from` has to be < to `cumul_to`."
+            )
+        )
+    } else {
+        // Uniq and values have the same size (can be empty)
+        let area_per_cell = (PI / 3.0) / (1_u64 << (max_depth << 1) as u32) as f64;  // = 4pi / (12*4^depth)
+        let uniq_val_dens: Vec<(u64, f64, f64)> = uniq.iter().zip(values.iter())
+          .map(|(uniq, val)| {
+              let (cdepth, _) = Hpx::<u64>::from_uniq_hpx(*uniq);
+              let n_sub_cells = (1_u64 << (((max_depth - cdepth) << 1) as u32)) as f64;
+              (*uniq, *val, val / (n_sub_cells * area_per_cell))
+          }).collect();
+        
+        let result = valued_cells_to_moc_with_opt(
+            max_depth,
+            uniq_val_dens,
+            cumul_from,
+            cumul_to,
+            asc,
+            strict,
+            no_split,
+            reverse_decent,
+        );
+        Ok(result)
+    }
+}
+
 /// Performs the union between two spatial coverages
 ///
 /// # Arguments
@@ -168,6 +238,30 @@ pub fn difference(
 /// * `coverage` - The input spatial coverage
 pub fn complement(coverage: &HpxRanges<u64>) -> HpxRanges<u64> {
     coverage.complement()
+}
+
+
+/// Extend the given MOC adding an edge of cells at max order.
+///
+/// # Arguments
+/// 
+/// * `depth_max` - MOC depth
+/// * `coverage` - The input spatial coverage
+pub fn expand(depth_max: u8, coverage: HpxRanges<u64>) -> HpxRanges<u64> {
+    let moc = RangeMOC::<u64, Hpx<u64>>::new(depth_max, coverage);
+    let moc_out = moc.expanded();
+    moc_out.into_moc_ranges()
+}
+
+/// Contract the given MOC adding an edge of cells at max order.
+///
+/// # Arguments
+/// 
+/// * `depth_max` - MOC depth
+/// * `coverage` - The input spatial coverage
+pub fn contract(depth_max: u8, coverage: HpxRanges<u64>) -> HpxRanges<u64> {
+    let moc = RangeMOC::<u64, Hpx<u64>>::new(depth_max, coverage);
+    moc.contracted().into_moc_ranges()
 }
 
 use ndarray::{Array1, Array2, Zip};

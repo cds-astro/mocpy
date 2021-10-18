@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Time operations now precise to the microseconds, see:
     + `utils.times_to_microseconds`
     + `utils.microseconds_to_times`
+* Add several options to `moc.from_valued_healpix_cells` 
+* Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring 
+  the MOC2.0 compatibility).
 ### Internal Python changes
 * `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
 ### Internal changes
 * Remove the `moc` crate from MOCPy and publish it as a standalone [here](https://github.com/cds-astro/cds-moc-rust)
+* Methods `add_neighbours` and `remove_neighbour` now fully implemented in Rust (with improved performances)
 * Add FITS serialization/deserialization on the Rust code.
 * Add ASCII and JSON serialization/deserialization on the Rust code.
 * Move `rand` from dependencies to dev-dependenciies

@@ -25,11 +25,11 @@ from .. import mocpy
 from .boundaries import Boundaries
 from .plot import fill, border
 
-__author__ = "Thomas Boch, Matthieu Baumann"
+__author__ = "Thomas Boch, Matthieu Baumann, F.-X. Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
+__email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
 
 class MOC(AbstractMOC):
     """
@@ -189,29 +189,10 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self extended by one degree of neighbours.
         """
-        max_depth = self.max_order
-
-        # Get the pixels array of the MOC at the its max order.
-        ipix = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
-        # Get the HEALPix array containing the neighbors of ``ipix``.
-        # This array "extends" ``ipix`` by one degree of neighbors.
-        ipix_extended = cdshealpix.neighbours(ipix, max_depth)
-        ipix_extended = ipix_extended[ipix_extended >= 0]
-        ipix_extended = ipix_extended.astype(np.uint64)
-
-        # Compute the difference between ``extend_ipix`` and ``ipix`` to get only the neighboring pixels
-        # located at the border of the MOC.
-        ipix_neighbors = np.setdiff1d(ipix_extended, ipix)
-
-        depth_neighbors = np.full(shape=ipix_neighbors.shape, fill_value=max_depth, dtype=np.uint8)
-        #intervals_neighbors = mocpy.from_healpix_cells(ipix_neighbors, depth_neighbors)
-        moc_neighbors = MOC.from_healpix_cells(ipix_neighbors, depth_neighbors)
-        
-        # This array of HEALPix neighbors are added to the MOC to get an ``extended`` MOC
-        #self._interval_set._intervals = mocpy.coverage_union(self._interval_set._intervals, moc_neighbors._interval_set._intervals)
-        final = self.union(moc_neighbors)
-        self._interval_set = final._interval_set
+        intervals = mocpy.hpx_coverage_expand(self.max_order, self._interval_set._intervals)
+        self._interval_set = IntervalSet(intervals, make_consistent=False)
         return self
+
 
     def remove_neighbours(self):
         """
@@ -224,29 +205,11 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             self minus its HEALPix cells located at its border.
         """
-        max_depth = self.max_order
-        # Get the HEALPix cells of the MOC at its max depth
-        ipix = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
-        # Get the HEALPix array containing the neighbors of ``ipix``.
-        # This array "extends" ``ipix`` by one degree of neighbors.
-        ipix_extended = cdshealpix.neighbours(ipix, max_depth)
-        ipix_extended = ipix_extended[ipix_extended >= 0]
-        ipix_extended = ipix_extended.astype(np.uint64)
-        # Get only the max depth HEALPix cells lying at the border of the MOC
-        ipix_neighbors = np.setxor1d(ipix_extended, ipix)
-
-        # Remove these pixels from ``ipix``
-        ipix_around_border = cdshealpix.neighbours(ipix_neighbors, max_depth)
-        ipix_around_border = ipix_around_border[ipix_around_border >= 0]
-        ipix_around_border = ipix_around_border.astype(np.uint64)
-
-        final_ipix = np.setdiff1d(ipix, ipix_around_border)
-        final_depth = np.full(shape=final_ipix.shape, fill_value=max_depth, dtype=np.uint8)
-
-        # Build the reduced MOC, i.e. MOC without its pixels which were located at its border.
-        final = MOC.from_healpix_cells(final_ipix, final_depth)
-        self._interval_set = final._interval_set
+        intervals = mocpy.hpx_coverage_contract(self.max_order, self._interval_set._intervals);
+        self._interval_set = IntervalSet(intervals, make_consistent=False)
         return self
+        
+
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
@@ -591,7 +554,10 @@ class MOC(AbstractMOC):
         return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     @classmethod
-    def from_valued_healpix_cells(cls, uniq, values, max_depth=None, cumul_from=0.0, cumul_to=1.0):
+    def from_valued_healpix_cells(cls, 
+        uniq, values, max_depth=None, 
+        cumul_from=0.0, cumul_to=1.0, 
+        asc=False, strict=True, no_split=True, reverse_decent=False):
         """
         Creates a MOC from a list of uniq associated with values.
 
@@ -600,6 +566,11 @@ class MOC(AbstractMOC):
         ``cumul_from`` and ``cumul_to``.
         Cells being on the fence are recursively splitted and added
         until the depth of the cells is equal to ``max_norder``.
+
+        For compatibility with Aladin, use ``no_split=False`` and ``reverse_decent=True``
+        
+        Remark: using ``no_split=False``, the way the cells overlapping with the low and high thresholds are split
+        is somewhat arbitrary.
 
         Parameters
         ----------
@@ -614,6 +585,14 @@ class MOC(AbstractMOC):
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
             Cumulative value to which cells will be added to the MOC
+        asc: boolean
+            the cumulative value is computed from lower to highest densities instead of from highest to lowest
+        strict: boolean
+            (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+        no_split: boolean
+            cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+        reverse_decent: boolean
+            perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
 
         Returns
         -------
@@ -634,7 +613,11 @@ class MOC(AbstractMOC):
             uniq.astype(np.uint64),
             values.astype(np.float64),
             np.float64(cumul_from),
-            np.float64(cumul_to)
+            np.float64(cumul_to),
+            asc, 
+            strict, 
+            no_split, 
+            reverse_decent
         )
         moc = cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 

@@ -240,7 +240,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
     /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
     ///   depth in the `uniq` values
-    ///
+    /// * `asc`: cumulative value computed from lower to highest densities instead of from highest to lowest
+    /// * `strict`: (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+    /// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+    /// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
+    /// 
     /// # Precondition
     ///
     /// * ``uniq`` and ``values`` must be of the same size
@@ -253,11 +257,25 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         values: PyReadonlyArray1<f64>,
         cumul_from: f64,
         cumul_to: f64,
+        asc: bool,
+        strict: bool,
+        no_split: bool,
+        reverse_decent: bool,
     ) -> PyResult<Py<PyArray2<u64>>> {
         let uniq = uniq.as_array().to_owned();
         let values = values.as_array().to_owned();
-
-        let ranges = spatial_coverage::from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
+        
+        let ranges = spatial_coverage::from_valued_healpix_cells_with_opt(
+            max_depth,
+            uniq,
+            values,
+            cumul_from,
+            cumul_to,
+            asc,
+            strict,
+            no_split,
+            reverse_decent,
+        )?; //from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
 
         let result: Array2<u64> = mocranges_to_array2(ranges);
         Ok(result.into_pyarray(py).to_owned())
@@ -1776,6 +1794,65 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         coverage_degrade(py, ranges, depth, coverage::create_hpx_ranges_from_py_unchecked)
     }
 
+    /// Expand the spatial coverage adding an external edge of max_depth pixels.
+    ///
+    /// # Arguments
+    ///
+    /// * ``max_depth`` - The MOC depth.
+    /// * ``ranges`` - The spatial coverage ranges of max depth to be expanded.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_expand")]
+    fn hpx_coverage_expand(
+        py: Python,
+        max_depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = ranges.as_array().to_owned();
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        let result = spatial_coverage::expand(max_depth, coverage);
+
+        let result = if !result.is_empty() {
+            mocranges_to_array2(result)
+        } else {
+            // TODO: try without this condition
+            Array::zeros((1, 0))
+        };
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
+    /// Contract the spatial coverage removing an internal edge of max_depth pixels.
+    ///
+    /// # Arguments
+    ///
+    /// * ``max_depth`` - The MOC depth.
+    /// * ``ranges`` - The spatial coverage ranges of max depth to be contracted.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_contract")]
+    fn hpx_coverage_contract(
+        py: Python,
+        max_depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let ranges = ranges.as_array().to_owned();
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        let result = spatial_coverage::contract(max_depth, coverage);
+
+        let result = if !result.is_empty() {
+            mocranges_to_array2(result)
+        } else {
+            // TODO: try without this condition
+            Array::zeros((1, 0))
+        };
+        Ok(result.into_pyarray(py).to_owned())
+    }
+    
+    
     /// Degrade a time coverage to a specific depth.
     ///
     /// # Arguments
