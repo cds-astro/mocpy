@@ -19,6 +19,8 @@ by querying a STMOC with a TMOC.
 Please check the mocpy's `documentation <https://cds-astro.github.io/mocpy/>`__
 for more details about installing MOCPy and using it.
 
+For more information about the MOCPy Rust core, see the `moc crate <https://crates.io/crates/moc>`__. 
+
 .. figure:: ./resources/readme.png
    :scale: 50 %
    :align: center
