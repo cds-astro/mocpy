@@ -1,8 +1,71 @@
-mocpy.MOC
+﻿mocpy.MOC
 =========
 
 .. currentmodule:: mocpy
 
 .. autoclass:: MOC
-    :members:
-    :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MOC.__init__
+      ~MOC.add_neighbours
+      ~MOC.border
+      ~MOC.complement
+      ~MOC.contains
+      ~MOC.degrade_to_order
+      ~MOC.difference
+      ~MOC.empty
+      ~MOC.fill
+      ~MOC.from_cone
+      ~MOC.from_elliptical_cone
+      ~MOC.from_fits
+      ~MOC.from_fits_image
+      ~MOC.from_fits_images
+      ~MOC.from_healpix_cells
+      ~MOC.from_ivorn
+      ~MOC.from_json
+      ~MOC.from_lonlat
+      ~MOC.from_polygon
+      ~MOC.from_polygon_skycoord
+      ~MOC.from_skycoords
+      ~MOC.from_str
+      ~MOC.from_string
+      ~MOC.from_url
+      ~MOC.from_valued_healpix_cells
+      ~MOC.from_vizier_table
+      ~MOC.get_boundaries
+      ~MOC.intersection
+      ~MOC.load
+      ~MOC.order_to_spatial_resolution
+      ~MOC.plot
+      ~MOC.query_simbad
+      ~MOC.query_vizier_table
+      ~MOC.refine_to_order
+      ~MOC.remove_neighbours
+      ~MOC.save
+      ~MOC.serialize
+      ~MOC.spatial_resolution_to_order
+      ~MOC.to_string
+      ~MOC.union
+      ~MOC.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MOC.LARK_PARSER_STR
+      ~MOC.MOC_SERVER_ROOT_URL
+      ~MOC.max_order
+      ~MOC.sky_fraction
+   
+   

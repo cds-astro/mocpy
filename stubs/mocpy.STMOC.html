@@ -4,12 +4,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.STMOC &#8212; mocpy 0.8.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bootstrap-astropy.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>mocpy.STMOC &#8212; mocpy 0.9.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -57,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.8.5 documentation</a>
+	<a href="../index.html">mocpy 0.9.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -72,11 +73,11 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="mocpy-stmoc">
+  <section id="mocpy-stmoc">
 <h1>mocpy.STMOC<a class="headerlink" href="#mocpy-stmoc" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="mocpy.STMOC">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mocpy.</span></code><code class="sig-name descname"><span class="pre">STMOC</span></code><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mocpy.STMOC">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">STMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_consistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time-Spatial Coverage class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -94,371 +95,154 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.contains" title="mocpy.STMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(times, lon, lat[, inside])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(times, lon, lat[, inside])</p></td>
 <td><p>Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.deserialization" title="mocpy.STMOC.deserialization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialization</span></code></a>(hdulist)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialization</span></code>(hdulist)</p></td>
 <td><p>Deserialization of an hdulist to a Time-Space coverage</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.difference" title="mocpy.STMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(other)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code>(other)</p></td>
 <td><p>Difference of two Space-Time coverages.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_fits" title="mocpy.STMOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
-<td><p>Loads a STMOC from a FITS file.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code>(filename)</p></td>
+<td><p>Loads a STMOC from a FITS file, using the astropy.io fits reader.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_spatial_coverages" title="mocpy.STMOC.from_spatial_coverages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code></a>(times_start, …[, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code>(times_start, ...[, ...])</p></td>
 <td><p>Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_time_ranges_positions" title="mocpy.STMOC.from_time_ranges_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_positions</span></code></a>(times_start, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>(value[, format])</p></td>
+<td><p>Deserialize the Spatial MOC from the given string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_positions</span></code>(times_start, ...)</p></td>
 <td><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_times_positions" title="mocpy.STMOC.from_times_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times_positions</span></code></a>(times, time_depth, lon, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times_positions</span></code>(times, time_depth, lon, ...)</p></td>
 <td><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.intersection" title="mocpy.STMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(other)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code>(other)</p></td>
 <td><p>Intersection of two Space-Time coverages.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.is_empty" title="mocpy.STMOC.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code>()</p></td>
 <td><p>Check whether the Space-Time coverage is empty</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_space" title="mocpy.STMOC.query_by_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></a>(spatial_coverage)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path[, format])</p></td>
+<td><p>Load the Spatial MOC from a file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code>(spatial_coverage)</p></td>
 <td><p>Query the ST-MOC by space coverage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_time" title="mocpy.STMOC.query_by_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code></a>(times)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code>(times)</p></td>
 <td><p>Query the ST-MOC by time ranges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.serialize" title="mocpy.STMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code>(path[, format])</p></td>
+<td><p>Writes the ST-MOC to a file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code>([format, optional_kw_dict, pre_v2])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.union" title="mocpy.STMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(other)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code>([format])</p></td>
+<td><p>Writes the ST-MOC into a string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code>(other)</p></td>
 <td><p>Union of two Space-Time coverages.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.write" title="mocpy.STMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, …])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code>(path[, format, overwrite, ...])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt id="mocpy.STMOC.contains">
-<code class="sig-name descname"><span class="pre">contains</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.contains" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
-</dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. The returned mask array has true values for (time, position)
-lying inside the Space-Time coverage.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>array</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></span></dt><dd><p>A mask boolean array</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><dl>
-<dt><strong>ValueError</strong><span class="classifier">If <code class="xref py py-obj docutils literal notranslate"><span class="pre">times</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">lon</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">lat</span></code> do not have the same length.</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="mocpy.STMOC.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_consistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.__init__" title="mocpy.STMOC.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([make_consistent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(times, lon, lat[, inside])</p></td>
+<td><p>Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialization</span></code>(hdulist)</p></td>
+<td><p>Deserialization of an hdulist to a Time-Space coverage</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code>(other)</p></td>
+<td><p>Difference of two Space-Time coverages.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code>(filename)</p></td>
+<td><p>Loads a STMOC from a FITS file, using the astropy.io fits reader.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code>(times_start, ...[, ...])</p></td>
+<td><p>Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>(value[, format])</p></td>
+<td><p>Deserialize the Spatial MOC from the given string.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_positions</span></code>(times_start, ...)</p></td>
+<td><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times_positions</span></code>(times, time_depth, lon, ...)</p></td>
+<td><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code>(other)</p></td>
+<td><p>Intersection of two Space-Time coverages.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code>()</p></td>
+<td><p>Check whether the Space-Time coverage is empty</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path[, format])</p></td>
+<td><p>Load the Spatial MOC from a file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code>(spatial_coverage)</p></td>
+<td><p>Query the ST-MOC by space coverage.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code>(times)</p></td>
+<td><p>Query the ST-MOC by time ranges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code>(path[, format])</p></td>
+<td><p>Writes the ST-MOC to a file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code>([format, optional_kw_dict, pre_v2])</p></td>
+<td><p>Serializes the MOC into a specific format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code>([format])</p></td>
+<td><p>Writes the ST-MOC into a string.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code>(other)</p></td>
+<td><p>Union of two Space-Time coverages.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code>(path[, format, overwrite, ...])</p></td>
+<td><p>Writes the MOC to a file.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_depth</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mocpy.STMOC.deserialization">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">deserialization</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdulist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.deserialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.deserialization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deserialization of an hdulist to a Time-Space coverage</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.difference">
-<code class="sig-name descname"><span class="pre">difference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.difference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Difference of two Space-Time coverages.</p>
-<p>The difference is first performed along the Time axis of the
-coverage. The difference of space axis coverages is done on time
-ranges that overlap.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>other</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The Space-Time coverage to perform the difference with.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>A new Space-Time coverage being the difference of <code class="xref py py-obj docutils literal notranslate"><span class="pre">self</span></code>
-with <code class="xref py py-obj docutils literal notranslate"><span class="pre">other</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.from_fits">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_fits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_fits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a STMOC from a FITS file.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></span></dt><dd><p>The resulting STMOC.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.from_spatial_coverages">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_spatial_coverages</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_coverages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_spatial_coverages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_spatial_coverages" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
-</dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
-</dd>
-<dt><strong>spatial_coverages</strong><span class="classifier">list</span></dt><dd><p>List of <a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a> spatial coverage objects.</p>
-</dd>
-<dt><strong>time_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Time depth. By default, the time resolution chosen is 1µs.</p>
-</dd>
-<dt><strong>spatial_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Spatial depth. By default, the space resolution chosen is 393.2μas.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></span></dt><dd><p>The resulting Spatial-Time Coverage map.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.from_time_ranges_positions">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_time_ranges_positions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_time_ranges_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_time_ranges_positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p>
-<ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
-</ul>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
-</dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
-</dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>time_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Time depth. By default, the time resolution chosen is 1µs.</p>
-</dd>
-<dt><strong>spatial_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Spatial depth. By default, the space resolution chosen is 393.2μas.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></span></dt><dd><p>The resulting Spatial-Time Coverage map.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.from_times_positions">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_times_positions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_times_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_times_positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a 2D Coverage from a set of times and positions associated to each time.</p>
-<ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
-</ul>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
-</dd>
-<dt><strong>time_depth</strong><span class="classifier">int</span></dt><dd><p>Time depth.</p>
-</dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
-</dd>
-<dt><strong>spatial_depth</strong><span class="classifier">int</span></dt><dd><p>Spatial depth.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></span></dt><dd><p>The resulting Spatial-Time Coverage map.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.intersection">
-<code class="sig-name descname"><span class="pre">intersection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.intersection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Intersection of two Space-Time coverages.</p>
-<p>The intersection is first performed along the Time axis of the
-coverage. The intersection of space axis coverages is done on time
-ranges that overlap.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>other</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The Space-Time coverage to perform the intersection with.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>A new Space-Time coverage being the intersection of <code class="xref py py-obj docutils literal notranslate"><span class="pre">self</span></code>
-with <code class="xref py py-obj docutils literal notranslate"><span class="pre">other</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.is_empty">
-<code class="sig-name descname"><span class="pre">is_empty</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.is_empty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check whether the Space-Time coverage is empty</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.query_by_space">
-<code class="sig-name descname"><span class="pre">query_by_space</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spatial_coverage</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_space" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query the ST-MOC by space coverage.</p>
-<p>This will perform the union of all the time ranges whose associated
-spatial coverages lie in <code class="docutils literal notranslate"><span class="pre">moc</span></code>.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>spatial_coverage</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a></span></dt><dd><p>The spatial coverage.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></span></dt><dd><p>The time ranges observing in the <code class="docutils literal notranslate"><span class="pre">spatial_coverage</span></code></p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.query_by_time">
-<code class="sig-name descname"><span class="pre">query_by_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query the ST-MOC by time ranges.</p>
-<p>This will perform the union of all the spatial coverages lying in a set of time ranges.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Time ranges. Must be a Nx2 shaped astropy time array.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The spatial coverage being observed within the input time ranges</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.serialize">
-<code class="sig-name descname"><span class="pre">serialize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.serialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serializes the MOC into a specific format.</p>
-<p>Possible formats are FITS, JSON and STRING</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>format</strong><span class="classifier">str</span></dt><dd><p>‘fits’ by default. The other possible choice is ‘json’ or ‘str’.</p>
-</dd>
-<dt><strong>optional_kw_dict</strong><span class="classifier">dict</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.union">
-<code class="sig-name descname"><span class="pre">union</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.union" title="Permalink to this definition">¶</a></dt>
-<dd><p>Union of two Space-Time coverages.</p>
-<p>The union is first performed along the Time axis of the
-coverage. The union of space axis coverages is done on time
-ranges that overlap.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>other</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The Space-Time coverage to perform the union with.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>A new Space-Time coverage being the union of <code class="xref py py-obj docutils literal notranslate"><span class="pre">self</span></code>
-with <code class="xref py py-obj docutils literal notranslate"><span class="pre">other</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mocpy.STMOC.write">
-<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the MOC to a file.</p>
-<p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the file to save the MOC in.</p>
-</dd>
-<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved. Possible formats are “fits” or “json”.
-By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
-</dd>
-<dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword. Default to False.</p>
-</dd>
-<dt><strong>optional_kw_dict</strong><span class="classifier">optional</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
+</section>
 
 
             <div class="clearer"></div>

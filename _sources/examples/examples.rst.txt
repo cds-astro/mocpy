@@ -87,7 +87,7 @@ Temporal coverages
 
 A class :py:class:`TimeMOC` describes temporal coverages. 
 
-Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/tmoc.ipynb>`__ for how to use it.
+Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/master/notebooks/tmoc.ipynb>`__ for how to use it.
 
 Space & Time coverages
 ----------------------
@@ -103,4 +103,4 @@ Space-Time coverages allows you to:
 
 As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.
 
-Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/ranges2D/notebooks/Space%20%26%20Time%20coverages.ipynb>`__ for how to compute and query Space-Time coverages.
+Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/master/notebooks/Space%20%26%20Time%20coverages.ipynb>`__ for how to compute and query Space-Time coverages.

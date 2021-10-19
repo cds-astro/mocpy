@@ -1,8 +1,60 @@
-mocpy.TimeMOC
+﻿mocpy.TimeMOC
 =============
 
 .. currentmodule:: mocpy
 
 .. autoclass:: TimeMOC
-    :members:
-    :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TimeMOC.__init__
+      ~TimeMOC.add_neighbours
+      ~TimeMOC.complement
+      ~TimeMOC.contains
+      ~TimeMOC.degrade_to_order
+      ~TimeMOC.difference
+      ~TimeMOC.empty
+      ~TimeMOC.from_fits
+      ~TimeMOC.from_json
+      ~TimeMOC.from_str
+      ~TimeMOC.from_string
+      ~TimeMOC.from_time_ranges
+      ~TimeMOC.from_time_ranges_approx
+      ~TimeMOC.from_times
+      ~TimeMOC.intersection
+      ~TimeMOC.load
+      ~TimeMOC.order_to_time_resolution
+      ~TimeMOC.plot
+      ~TimeMOC.refine_to_order
+      ~TimeMOC.remove_neighbours
+      ~TimeMOC.save
+      ~TimeMOC.serialize
+      ~TimeMOC.time_resolution_to_order
+      ~TimeMOC.to_string
+      ~TimeMOC.union
+      ~TimeMOC.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TimeMOC.DAY_MICRO_SEC
+      ~TimeMOC.DEFAULT_OBSERVATION_TIME
+      ~TimeMOC.LARK_PARSER_STR
+      ~TimeMOC.consistency
+      ~TimeMOC.max_order
+      ~TimeMOC.max_time
+      ~TimeMOC.min_time
+      ~TimeMOC.total_duration
+   
+   
