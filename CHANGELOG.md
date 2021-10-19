@@ -14,14 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     + `utils.microseconds_to_times`
 * Add several options to `moc.from_valued_healpix_cells` 
 * Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring 
-  the MOC2.0 compatibility).
-* Improve performance and some operations (like intersection)
+  MOC2.0 compatibility).
+* Improve performance and some operations (like intersection and union)
 * Improve `to_uniq` performances (x5 according to a bench in pure Rust)
+* Improve `add_neighbours` and `remove_neighbours` performances (now in pure Rust)
 ### Internal Python changes
-* `complement()`: remove from AbstractMoc / IntervalSet and add in Moc and TimeMoc (because complement depends on the qty)
+* `complement()`: remove from AbstractMoc / IntervalSet, and add it in Moc and TimeMoc (because complement now depends on the qty)
 ### Internal changes
 * Remove the `moc` crate from MOCPy and publish it as a standalone [here](https://github.com/cds-astro/cds-moc-rust)
-* Methods `add_neighbours` and `remove_neighbour` now fully implemented in Rust (with improved performances)
+  (with a lot of added stuff)
 * Add FITS serialization/deserialization on the Rust code.
 * Add ASCII and JSON serialization/deserialization on the Rust code.
 * Move `rand` from dependencies to dev-dependenciies
@@ -31,9 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add `MocRange(s)` since we introduced `MocQty` for depth dependent operations, and introduce both: `HpxRange(s)` and `TimeRange(s)`
 * Add `MocRanges2D` for depth dependent operations
 * Rename `NestedXX` in `HpxXX` to possibly support Ring indices (the code should be the same as far as the NSIDE is a power of 2)
-* TBD? Introduce `uniq` notation based on a sentinel bit (more generic than the HEALPix uniq numbergin, but requires an extra bit)
-* TBD? Introduce the multi-order map numbering
-
+* ...
 
 ## [0.8.5]
 ### Changed

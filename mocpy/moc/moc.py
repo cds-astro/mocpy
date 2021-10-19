@@ -943,7 +943,7 @@ class MOC(AbstractMOC):
         warnings.simplefilter('default')
         warnings.warn('This method is deprecated and is no longer tested.'
                       'Please refer to this documentation page for plotting MOCs using'
-                      'matplotlib: https://mocpy.readthedocs.io/en/latest/examples/examples.html#loading-and-plotting-the-moc-of-sdss', DeprecationWarning)
+                      'matplotlib: https://cds-astro.github.io/mocpy/xamples/examples.html#loading-and-plotting-the-moc-of-sdss', DeprecationWarning)
 
         frame = ICRS() if frame is None else frame
 
