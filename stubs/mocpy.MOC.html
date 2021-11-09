@@ -112,7 +112,7 @@ python dictionnary (see <code class="xref py py-obj docutils literal notranslate
 </ul>
 <ol class="arabic simple" start="4">
 <li><p>Get the sky coordinates defining the border(s) of <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects (see <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>).</p></li>
-<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
+<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -181,7 +181,7 @@ python dictionnary (see <code class="xref py py-obj docutils literal notranslate
 <td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_lonlat</span></code>(lon, lat, max_norder)</p></td>
-<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
+<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_polygon</span></code>(lon, lat[, max_depth])</p></td>
 <td><p>Creates a MOC from a polygon</p></td>
@@ -190,7 +190,7 @@ python dictionnary (see <code class="xref py py-obj docutils literal notranslate
 <td><p>Creates a MOC from a polygon.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_skycoords</span></code>(skycoords, max_norder)</p></td>
-<td><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
+<td><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code>(value)</p></td>
 <td><p>Create a MOC from a str.</p></td>
@@ -331,7 +331,7 @@ a valid MOC (i.e. can be plot, serialized, manipulated).</p>
 <td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_lonlat</span></code>(lon, lat, max_norder)</p></td>
-<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
+<td><p>Creates a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_polygon</span></code>(lon, lat[, max_depth])</p></td>
 <td><p>Creates a MOC from a polygon</p></td>
@@ -340,7 +340,7 @@ a valid MOC (i.e. can be plot, serialized, manipulated).</p>
 <td><p>Creates a MOC from a polygon.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_skycoords</span></code>(skycoords, max_norder)</p></td>
-<td><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
+<td><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code>(value)</p></td>
 <td><p>Create a MOC from a str.</p></td>
