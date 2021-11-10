@@ -28,8 +28,9 @@ use moc::moc::{
     RangeMOCIterator, RangeMOCIntoIterator,
     CellMOCIterator, CellMOCIntoIterator,
     CellOrCellRangeMOCIterator, CellOrCellRangeMOCIntoIterator,
-    range::{RangeMOC}
+    range::{RangeMOC, op::convert::convert_to_u64}
 };
+
 use moc::ranges::Ranges;
 use moc::deser::fits::{
     ranges_to_fits_ivoa, from_fits_ivoa,
@@ -335,7 +336,11 @@ pub fn to_fits_file<Q: MocQty<u64>>(depth_max: u8, ranges: MocRanges<u64, Q>, pa
 pub fn from_fits_file_spatial(path: String) -> Result<MocRanges<u64, Hpx::<u64>>, Box<dyn Error>> {
   let file = File::open(&path).map_err(Box::new)?;
   let reader = BufReader::new(file);
-    let ranges: Vec<Range<u64>> = match from_fits_ivoa(reader).map_err(Box::new)? {
+  let ranges: Vec<Range<u64>> = match from_fits_ivoa(reader).map_err(Box::new)? {
+    MocIdxType::U16(MocQtyType::Hpx(MocType::Cells(moc))) => convert_to_u64::<_, Hpx<_>, _, Hpx<u64>>(moc.into_cell_moc_iter().ranges()).collect(),
+    MocIdxType::U16(MocQtyType::Hpx(MocType::Ranges(moc))) => convert_to_u64::<_, Hpx<_>, _, Hpx<u64>>(moc).collect(),
+    MocIdxType::U32(MocQtyType::Hpx(MocType::Cells(moc))) => convert_to_u64::<_, Hpx<_>, _, Hpx<u64>>(moc.into_cell_moc_iter().ranges()).collect(),
+    MocIdxType::U32(MocQtyType::Hpx(MocType::Ranges(moc))) => convert_to_u64::<_, Hpx<_>, _, Hpx<u64>>(moc).collect(),
     MocIdxType::U64(MocQtyType::Hpx(MocType::Cells(moc))) => moc.into_cell_moc_iter().ranges().collect(),
     MocIdxType::U64(MocQtyType::Hpx(MocType::Ranges(moc))) => moc.collect(),
     _ => return Err(String::from("FITS file  content not compatible with a space moc of u64").into())
@@ -347,6 +352,10 @@ pub fn from_fits_file_time(path: String) -> Result<MocRanges<u64, Time::<u64>>, 
     let file = File::open(&path).map_err(Box::new)?;
     let reader = BufReader::new(file);
     let ranges: Vec<Range<u64>> = match from_fits_ivoa(reader).map_err(Box::new)? {
+        MocIdxType::U16(MocQtyType::Time(MocType::Cells(moc))) => convert_to_u64::<_, Time<_>, _, Time<u64>>(moc.into_cell_moc_iter().ranges()).collect(),
+        MocIdxType::U16(MocQtyType::Time(MocType::Ranges(moc))) => convert_to_u64::<_, Time<_>, _, Time<u64>>(moc).collect(),
+        MocIdxType::U32(MocQtyType::Time(MocType::Cells(moc))) => convert_to_u64::<_, Time<_>, _, Time<u64>>(moc.into_cell_moc_iter().ranges()).collect(),
+        MocIdxType::U32(MocQtyType::Time(MocType::Ranges(moc))) => convert_to_u64::<_, Time<_>, _, Time<u64>>(moc).collect(),
         MocIdxType::U64(MocQtyType::Time(MocType::Cells(moc))) => moc.into_cell_moc_iter().ranges().collect(),
         MocIdxType::U64(MocQtyType::Time(MocType::Ranges(moc))) => moc.collect(),
         _ => return Err(String::from("FITS file content not compatible with a time moc of u64").into())
