@@ -54,6 +54,32 @@ jobs:
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
          done 
 
+  build-aarch64-wheels:
+    runs-on: ubuntu-latest
+    env:
+      img: quay.io/pypa/manylinux2014_aarch64
+      MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
+      MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+    steps:
+     - name: Checkout
+       uses: actions/checkout@v2
+     - name: Set up QEMU
+       id: qemu
+       uses: docker/setup-qemu-action@v1
+     - name: Install dependencies
+       run: |
+            docker run --rm \
+            -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
+            -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
+            -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            ${{ env.img }} \
+            bash -exc 'curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+            source $HOME/.cargo/env && \
+            for PYBIN in /opt/python/cp3[678910]*/bin; do
+              "${PYBIN}/pip" install maturin
+              "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
+            done'
+
   # Deploy for Windows and MoxOS 64 bits.
   # If Windows 32 bits neede, check e.g. https://github.com/marketplace/actions/setup-msys2
   build-macos-and-windows-wheels:      
