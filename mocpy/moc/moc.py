@@ -42,7 +42,7 @@ class MOC(AbstractMOC):
     
     1. Define `~mocpy.moc.MOC` objects:
 
-    - From a FITS file that stores HEALPix cells (see `from_fits`).
+    - From a FITS file that stores HEALPix cells (see `load(path, 'fits')`).
     - Directly from a list of HEALPix cells expressed either as a numpy structural array (see `from_healpix_cells`) or a simple
       python dictionnary (see `from_json`).
     - From a list of sky coordinates (see `from_skycoords`, `from_lonlat`).
@@ -55,6 +55,7 @@ class MOC(AbstractMOC):
     - The `union`
     - The `difference`
     - The `complement`
+
 
     3. Plot the `~mocpy.moc.MOC` objects:
 
@@ -122,6 +123,37 @@ class MOC(AbstractMOC):
         intervals = mocpy.hpx_coverage_complement(self._interval_set._intervals)
         interval_set = IntervalSet(intervals, make_consistent=False)
         return MOC(interval_set, make_consistent=False)
+
+    def extended(self):
+        """
+        Returns the MOC extended by the external border made of cells at the MOC maximum depth.
+        The only difference with respect to `add_neighbours` is that `extended` returns a new MOC
+        instead of modifying the existing one.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            The extended MOC
+        """
+        intervals = mocpy.hpx_coverage_expand(self.max_order, self._interval_set._intervals)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return MOC(interval_set, make_consistent=False)
+
+    def contracted(self):
+        """
+        Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
+        The only difference with respect to `remove_neighbours` is that `contracted` returns a new MOC
+        instead of modifying the existing one.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            The extended MOC
+        """
+        intervals = mocpy.hpx_coverage_contract(self.max_order, self._interval_set._intervals)
+        interval_set = IntervalSet(intervals, make_consistent=False)
+        return MOC(interval_set, make_consistent=False)
+
 
     def degrade_to_order(self, new_order):
         """
@@ -235,7 +267,7 @@ class MOC(AbstractMOC):
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
         >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-        >>> moc = MOC.from_fits(filename)
+        >>> moc = MOC.load(filename, 'fits')
         >>> # Plot the MOC using matplotlib
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
@@ -282,7 +314,7 @@ class MOC(AbstractMOC):
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
         >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-        >>> moc = MOC.from_fits(filename)
+        >>> moc = MOC.load(filename, 'fits')
         >>> # Plot the MOC using matplotlib
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
@@ -333,7 +365,6 @@ class MOC(AbstractMOC):
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
         import warnings
-        warnings.simplefilter('default')
         warnings.warn('This method is not stable. A future more stable algorithm will be implemented!', DeprecationWarning)
         return Boundaries.get(self, order)
 
@@ -510,7 +541,7 @@ class MOC(AbstractMOC):
             The resulting MOC.
         """
         path = download_file(url, show_progress=False, timeout=60)
-        return cls.from_fits(path)
+        return cls.load(path, 'fits')
 
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
@@ -940,7 +971,6 @@ class MOC(AbstractMOC):
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
         import warnings
-        warnings.simplefilter('default')
         warnings.warn('This method is deprecated and is no longer tested.'
                       'Please refer to this documentation page for plotting MOCs using'
                       'matplotlib: https://cds-astro.github.io/mocpy/xamples/examples.html#loading-and-plotting-the-moc-of-sdss', DeprecationWarning)
@@ -999,7 +1029,7 @@ class MOC(AbstractMOC):
 
         plt.show()
 
-    def save(self, path, format='fits'):
+    def save(self, path, format='fits', overwrite=False):
         """
         Writes the Spatial MOC to a file.
 
@@ -1013,7 +1043,17 @@ class MOC(AbstractMOC):
             The format in which the MOC is saved.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+        overwrite : bool, optional
+            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
+            Default to False.
         """
+        import os
+        file_exists = os.path.isfile(path)
+        
+        if file_exists and not overwrite:
+            raise OSError('File {} already exists! Set ``overwrite`` to '
+                          'True if you want to replace it.'.format(path))
+        
         if format == 'fits':
             mocpy.spatial_moc_to_fits_file(self.max_order, self._interval_set._intervals, path)
         elif format == 'ascii':
@@ -1080,6 +1120,8 @@ class MOC(AbstractMOC):
         Deserialize the Spatial MOC from the given string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+        
+        WARNING: the serialization must be strict, i.e. **must not** contain overlapping elements
 
         Parameters
         ----------

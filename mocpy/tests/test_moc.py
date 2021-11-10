@@ -140,7 +140,7 @@ def test_moc_serialize_and_from_json(moc_from_json):
 
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10 42-46 54\n\r8 6/4500 8/45'),
+    '5/8-10 42-46 54\n\r 6/4500 8/45'),
     (MOC.from_json({}), '0/'),
     (MOC.from_json({'29': [101]}), '29/101'),
     (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
@@ -148,7 +148,8 @@ def test_moc_serialize_and_from_json(moc_from_json):
     (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r \n 8/8-10\n 11/'),
 ])
 def test_from_str(expected, moc_str):
-    assert MOC.from_str(moc_str) == expected
+    # assert MOC.from_str(moc_str) == expected
+    assert MOC.from_string(moc_str, 'ascii') == expected
 
 
 def test_moc_full_skyfraction():
@@ -197,15 +198,15 @@ def test_serialize_to_str(moc, expected):
     ('moc', True, 'fits', False),
     ('moc', False, 'fits', True),
     ('moc', True, 'json', False),
-    ('moc', True, 'str', False),
-    ('moc', False, 'str', True),
+    ('moc', True, 'ascii', False),
+    ('moc', False, 'ascii', True),
 ])
 def test_write(moc_from_json, filename, overwrite, format, os_error):
     if os_error:
         with pytest.raises(OSError):
-            moc_from_json.write(filename, format=format, overwrite=overwrite)
+            moc_from_json.save(filename, format=format, overwrite=overwrite)
     else:
-        moc_from_json.write(filename, format=format, overwrite=overwrite)
+        moc_from_json.save(filename, format=format, overwrite=overwrite)
 
 
 #### TESTING MOC plot functions ####
@@ -467,9 +468,9 @@ def test_moc_save_load_deser():
     smoc_bis = MOC.load('resources/MOC2.0/SMOC.fits', 'fits')
     assert smoc == smoc_bis
 
-    smoc.save('resources/MOC2.0/smoc.py.test.fits', 'fits')
-    smoc.save('resources/MOC2.0/smoc.py.test.json', 'json')
-    smoc.save('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
+    smoc.save('resources/MOC2.0/smoc.py.test.fits', format='fits', overwrite=True)
+    smoc.save('resources/MOC2.0/smoc.py.test.json', format='json', overwrite=True)
+    smoc.save('resources/MOC2.0/smoc.py.test.ascii', format='ascii', overwrite=True)
     smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.fits', 'fits')
     assert smoc == smoc_bis
     smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.json', 'json')

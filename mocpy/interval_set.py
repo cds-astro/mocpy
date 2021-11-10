@@ -46,7 +46,10 @@ class IntervalSet:
                     True by default. Remove the overlapping intervals that makes
                     a valid MOC (i.e. can be plot, serialized, manipulated).
         """
-        intervals = np.array([[]], dtype=np.uint64) if intervals is None else intervals
+        intervals = np.zeros((0, 2), dtype=np.uint64) if intervals is None else intervals
+
+        assert intervals.shape[1] == 2
+        
         # TODO: remove the cast to np.uint64
         # This code is executed as long as the Intervals objects
         # are not created from the rust code! (e.g. for the TimeMOCs)
@@ -57,6 +60,7 @@ class IntervalSet:
         if make_consistent:
             self._merge_intervals()
 
+        assert self._intervals.shape[1] == 2
 
     @classmethod
     def from_uniq(cls, pix):
@@ -130,7 +134,7 @@ class IntervalSet:
     @property
     def uniq(self):
         if self.empty():
-            return self._intervals
+           return np.array([], dtype=np.uint64)
         return mocpy.to_uniq(self._intervals)
 
     @property

@@ -99,6 +99,7 @@ class TimeMOC(AbstractMOC):
         moc : `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
+        assert self._interval_set._intervals.shape[1] == 2
         intervals = mocpy.time_coverage_degrade(self._interval_set._intervals, new_order)
         return TimeMOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
@@ -125,6 +126,7 @@ class TimeMOC(AbstractMOC):
 
         times = times.reshape((times.shape[0], 1))
         intervals = np.hstack((times, times + np.uint64(1)))
+        assert intervals.shape[1] == 2
 
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
@@ -566,7 +568,6 @@ class TimeMOC(AbstractMOC):
 
         if self._interval_set.empty():
             import warnings
-            warnings.simplefilter('default')
             warnings.warn('This time moc is empty', UserWarning)
             return
 
@@ -599,8 +600,8 @@ class TimeMOC(AbstractMOC):
         for (s_time_us, e_time_us) in plotted_moc._interval_set._intervals:
             #s_index = int((s_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
             #e_index = int((e_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
-            s_index = int((utils.microseconds_to_times(s_time_us) - min_jd_time) / delta)
-            e_index = int((utils.microseconds_to_times(e_time_us) - min_jd_time) / delta)
+            s_index = int((utils.microseconds_to_times(s_time_us).jd - min_jd_time) / delta)
+            e_index = int((utils.microseconds_to_times(e_time_us).jd - min_jd_time) / delta)
             y[s_index:(e_index+1)] = 1.0
 
         # hack in case of full time mocs.
@@ -634,7 +635,7 @@ class TimeMOC(AbstractMOC):
 
         plt.show()
 
-    def save(self, path, format='fits'):
+    def save(self, path, format='fits', overwrite=False):
         """
         Writes the Time MOC to a file.
 
@@ -648,7 +649,17 @@ class TimeMOC(AbstractMOC):
             The format in which the MOC will be serialized before being saved.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+        overwrite : bool, optional
+            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword.
+            Default to False.
         """
+        import os
+        file_exists = os.path.isfile(path)
+        
+        if file_exists and not overwrite:
+            raise OSError('File {} already exists! Set ``overwrite`` to '
+                          'True if you want to replace it.'.format(path))        
+        
         if format == 'fits':
             mocpy.time_moc_to_fits_file(self.max_order, self._interval_set._intervals, path)
         elif format == 'ascii':
@@ -715,6 +726,8 @@ class TimeMOC(AbstractMOC):
         Deserialize the Time MOC from the given string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+
+        WARNING: the serialization must be strict, i.e. **must not** contain overlapping elements
 
         Parameters
         ----------

@@ -31,9 +31,6 @@ pub fn from_time_ranges(min_times: Array1<f64>, max_times: Array1<f64>) -> PyRes
             "min and max ranges have not the same shape",
         ))
     } else {
-        /*if min_times.is_empty() {
-            return Ok(Array::zeros((1, 0)));
-        }*/
         let mut ranges: Vec<Range<u64>> = Vec::with_capacity(min_times.len());
         for (min, max) in min_times.into_iter().zip(max_times.into_iter()) {
             ranges.push((min * 86400000000_f64) as u64..(max * 86400000000_f64) as u64);

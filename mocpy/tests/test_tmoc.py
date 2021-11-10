@@ -35,7 +35,9 @@ def test_simple_tmoc():
     assert tmoc.total_duration.sec == 2 * 1e-6
     assert tmoc.max_order == 61
 
-    tmoc.write('tmoc.txt', format='json', overwrite=True)
+    #tmoc.write('tmoc.txt', format='json', overwrite=True)
+    tmoc.save('tmoc.txt', format='json', overwrite=True)
+
 
 def test_single_time_tmoc():
     times = Time(2/TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
@@ -59,6 +61,7 @@ def test_tmoc_from_time_ranges():
     containing a list of time intervals
     """
     tmoc = TimeMOC.from_fits('resources/TMOC/HST_SDSSg/TMoc.fits')
+    # tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
     print(tmoc)
 
     # Load HST_SDSSg from a CSV file
@@ -202,9 +205,9 @@ def test_tmoc_save_load_deser():
     tmoc_bis = TimeMOC.load('resources/MOC2.0/TMOC.fits', 'fits')
     assert tmoc == tmoc_bis
 
-    tmoc.save('resources/MOC2.0/tmoc.py.test.fits', 'fits')
-    tmoc.save('resources/MOC2.0/tmoc.py.test.json', 'json')
-    tmoc.save('resources/MOC2.0/tmoc.py.test.ascii', 'ascii')
+    tmoc.save('resources/MOC2.0/tmoc.py.test.fits', format='fits', overwrite=True)
+    tmoc.save('resources/MOC2.0/tmoc.py.test.json', format='json', overwrite=True)
+    tmoc.save('resources/MOC2.0/tmoc.py.test.ascii', format='ascii', overwrite=True)
     tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.py.test.fits', 'fits')
     assert tmoc == tmoc_bis
     tmoc_bis = TimeMOC.load('resources/MOC2.0/tmoc.py.test.json', 'json')

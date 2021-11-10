@@ -138,12 +138,7 @@ fn coverage_complement<Q, F>(py: Python, ranges: PyReadonlyArray2<u64>, to_moc_r
     let coverage = to_moc_ranges(ranges);
     let result = coverage.complement();
 
-    let result = if !result.is_empty() {
-        mocranges_to_array2(result)
-    } else {
-        // TODO: try without this condition
-        Array::zeros((1, 0))
-    };
+    let result = mocranges_to_array2(result);
 
     result.into_pyarray(py).to_owned()
 }
@@ -159,18 +154,12 @@ fn coverage_degrade<Q, F>(
       Q: MocQty<u64>,
       F: Fn(Array2<u64>) -> MocRanges<u64, Q>
 {
-    // let ranges = ranges.as_array().to_owned();
-    if ranges.len() == 0 {
-        Ok(Array::zeros((1, 0)).into_pyarray(py).to_owned())
-    } else {
-        let ranges = ranges.as_array().to_owned();
-        let mut ranges = to_moc_ranges(ranges);
-        coverage::degrade_ranges(&mut ranges, depth)?;
-        // The result is already consistent
-
-        let result: Array2<u64> = mocranges_to_array2(ranges);
-        Ok(result.into_pyarray(py).to_owned())
-    }
+    let ranges = ranges.as_array().to_owned();
+    let mut ranges = to_moc_ranges(ranges);
+    coverage::degrade_ranges(&mut ranges, depth)?;
+    // The result is already consistent
+    let result: Array2<u64> = mocranges_to_array2(ranges);
+    Ok(result.into_pyarray(py).to_owned())
 }
 
 fn coverage_merge_intervals<Q, F>(
@@ -184,10 +173,8 @@ fn coverage_merge_intervals<Q, F>(
       F: Fn(Array2<u64>) -> MocRanges<u64, Q>
 {
     let ranges = ranges.as_array().to_owned();
-
     let mut coverage = to_moc_ranges(ranges);
     coverage = coverage::merge(coverage, min_depth)?;
-
     let result: Array2<u64> = mocranges_to_array2(coverage);
     Ok(result.into_pyarray(py).to_owned())
 }
@@ -1813,13 +1800,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         let result = spatial_coverage::expand(max_depth, coverage);
-
-        let result = if !result.is_empty() {
-            mocranges_to_array2(result)
-        } else {
-            // TODO: try without this condition
-            Array::zeros((1, 0))
-        };
+        let result = mocranges_to_array2(result);
         Ok(result.into_pyarray(py).to_owned())
     }
 
@@ -1842,13 +1823,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let ranges = ranges.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         let result = spatial_coverage::contract(max_depth, coverage);
-
-        let result = if !result.is_empty() {
-            mocranges_to_array2(result)
-        } else {
-            // TODO: try without this condition
-            Array::zeros((1, 0))
-        };
+        let result = mocranges_to_array2(result);
         Ok(result.into_pyarray(py).to_owned())
     }
     
@@ -2004,7 +1979,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
         let ranges = ranges.as_array().to_owned();
         let result: Array2<u64> = if ranges.is_empty() {
-            Array::zeros((1, 0))
+            Array::zeros((0, 2))
         } else {
             let shape = (ranges.shape()[0], 1);
             let start = ranges.into_shape(shape).unwrap();

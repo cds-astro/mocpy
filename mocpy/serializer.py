@@ -91,6 +91,8 @@ class IO:
         optional_kw_dict : optional
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
+        import warnings
+        warnings.warn('This method is deprecated. Use MOC.save(path, "fits") instead!', DeprecationWarning)
         serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2)
 
         if format == 'fits':

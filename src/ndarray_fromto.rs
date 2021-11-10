@@ -54,24 +54,17 @@ impl From<HpxUniqRanges<i64>> for Array1<i64> {
 
 
 pub fn ranges_to_array2<T: Idx>(input: Ranges<T>) -> Array2<T> {
-  if input.is_empty() {
-    // Warning: Empty 2D numpy arrays coming from python
-    // have the shape (1, 0).
-    // By consistency, we also return a (1, 0) Array2 to python
-    Array2::zeros((1, 0))
-  } else {
-    let mut ranges = input.0.to_vec();
-    // Cast Vec<Range<u64>> to Vec<u64>
-    let len = ranges.len();
-    let data = utils::flatten(&mut ranges);
+  let mut ranges = input.0.to_vec();
+  // Cast Vec<Range<u64>> to Vec<u64>
+  let len = ranges.len();
+  let data = utils::flatten(&mut ranges);
 
-    // Get a Array1 from the Vec<u64> without copying any data
-    let result: Array1<T> = data.into();
+  // Get a Array1 from the Vec<u64> without copying any data
+  let result: Array1<T> = data.into();
 
-    // Reshape the result to get a Array2 of shape (N x 2) where N is the number
-    // of HEALPix cell contained in the moc
-    result.into_shape((len, 2)).unwrap().to_owned()
-  }
+  // Reshape the result to get a Array2 of shape (N x 2) where N is the number
+  // of HEALPix cell contained in the moc
+  result.into_shape((len, 2)).unwrap().to_owned()
 }
 
 pub fn mocranges_to_array2<T: Idx, Q: MocQty<T>>(input: MocRanges<T, Q>) -> Array2<T> {
@@ -106,29 +99,18 @@ impl From<Ranges<i64>> for Array2<i64> {
 
 pub fn array2_to_vec_ranges<T: Idx>(mut input: Array2<T>) -> Vec<Range<T>> {
   let shape = input.shape();
-  // Warning: empty Array2 objects coming from MOCPy
-  // do have a shape equal to (1, 0).
-  let len = if shape == [1, 0] {
-    // It is empty
-    0
-  } else if shape[1] == 2 {
-    shape[0]
-  } else {
+  if shape[1] != 2 {
     // Unrecognized shape of a Array2 coming
     // from MOCPy python code
-    let msg = format!(
-      "Unrecognized Array2 shape coming from \
-             MOCPy python code {:?}",
-      shape
-    );
+    let msg = format!("Unrecognized Array2 shape coming from  MOCPy python code {:?}", shape);
     unreachable!(msg);
   };
-  let cap = len;
+  let len = shape[0];
   let ptr = input.as_mut_ptr() as *mut Range<T>;
 
   mem::forget(input);
 
-  unsafe { Vec::from_raw_parts(ptr, len, cap) }
+  unsafe { Vec::from_raw_parts(ptr, len, len) }
 }
 
 /// Convert a Array2 to a Ranges<T>
@@ -277,8 +259,7 @@ pub fn try_array1_i64_to_hpx_ranges2<T:MocQty<u64>>(input: Array1<i64>) -> Resul
 
     // Propagate invalid Coverage FITS errors.
     if t.len() != s.len() {
-      return Err("Number of time ranges and
-                    spatial coverages do not match.");
+      return Err("Number of time ranges and spatial coverages do not match.");
     }
     // No need to make it consistent because it comes
     // from python
@@ -357,8 +338,7 @@ pub fn try_array1_u64_to_hpx_ranges2<T:MocQty<u64>>(input: Array1<u64>) -> Resul
 
     // Propagate invalid Coverage FITS errors.
     if t.len() != s.len() {
-      return Err("Number of time ranges and
-                    spatial coverages do not match.");
+      return Err("Number of time ranges and spatial coverages do not match.");
     }
     // No need to make it consistent because it comes
     // from python
@@ -377,7 +357,7 @@ mod tests {
 
   #[test]
   fn test_empty_array2_to_vec_ranges() {
-    let empty_array = Array2::<u64>::zeros((1, 0));
+    let empty_array = Array2::<u64>::zeros((0, 2));
 
     let result = array2_to_vec_ranges(empty_array);
 
@@ -389,6 +369,6 @@ mod tests {
     let ranges = Ranges::<u64>::new_unchecked(vec![]);
 
     let result = ranges_to_array2(ranges);
-    assert_eq!(result, Array2::<u64>::zeros((1, 0)));
+    assert_eq!(result, Array2::<u64>::zeros((0, 2)));
   }
 }

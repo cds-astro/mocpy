@@ -16,7 +16,7 @@ def test_serialization():
     assert(decals == decals_result)
 
     # Save to FITS
-    decals.save(path='resources/STMOC/STMoc-DECaLS-g.v2.fits', format='fits')
+    decals.save(path='resources/STMOC/STMoc-DECaLS-g.v2.fits', format='fits', overwrite=True)
     # Load from FITS
     decals_result = STMOC.load(path='resources/STMOC/STMoc-DECaLS-g.v2.fits', format='fits')
 
@@ -84,9 +84,9 @@ def test_stmoc_save_load_deser():
     stmoc_bis = STMOC.load('resources/MOC2.0/STMOC.fits', 'fits')
     assert stmoc == stmoc_bis
     
-    stmoc.save('resources/MOC2.0/stmoc.py.test.fits', 'fits')
-    stmoc.save('resources/MOC2.0/stmoc.py.test.json', 'json')
-    stmoc.save('resources/MOC2.0/stmoc.py.test.ascii', 'ascii')
+    stmoc.save('resources/MOC2.0/stmoc.py.test.fits', format='fits', overwrite=True)
+    stmoc.save('resources/MOC2.0/stmoc.py.test.json', format='json', overwrite=True)
+    stmoc.save('resources/MOC2.0/stmoc.py.test.ascii', format='ascii', overwrite=True)
     stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.py.test.fits', 'fits')
     assert stmoc == stmoc_bis
     stmoc_bis = STMOC.load('resources/MOC2.0/stmoc.py.test.json', 'json')

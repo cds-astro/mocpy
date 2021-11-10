@@ -466,7 +466,7 @@ class STMOC(serializer.IO):
 
         return stmoc
 
-    def save(self, path, format='fits'):
+    def save(self, path, format='fits', overwrite=False):
         """
         Writes the ST-MOC to a file.
 
@@ -480,7 +480,17 @@ class STMOC(serializer.IO):
             The format in which the MOC will be serialized before being saved.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+       overwrite : bool, optional
+            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
+            Default to False.    
         """
+        import os
+        file_exists = os.path.isfile(path)
+        
+        if file_exists and not overwrite:
+            raise OSError('File {} already exists! Set ``overwrite`` to '
+                          'True if you want to replace it.'.format(path))         
+        
         if format == 'fits':
             mocpy.coverage_2d_to_fits_file(path, self.__index)
         elif format == 'ascii':

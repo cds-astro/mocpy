@@ -194,7 +194,14 @@ class AbstractMOC(serializer.IO):
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
+            
+        Warning
+        -------
+        Not compatible with the last version of the MOC 2.0 standard.
+            
         """
+        import warnings
+        warnings.warn('This method is deprecated. Use MOC.load(path, "fits") instead!', DeprecationWarning)
         table = Table.read(filename)
         first_column_index = table.colnames[0]
         intervals = mocpy.to_nested(table[first_column_index].astype(np.uint64))
@@ -223,6 +230,10 @@ class AbstractMOC(serializer.IO):
         >>> from mocpy import MOC
         >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
         """
+        import warnings
+        warnings.warn('This method is deprecated. Use MOC.load(path, "ascii") instead!', DeprecationWarning)
+        
+        
         # Import lark parser when from_str is called
         # at least one time
         from lark import Lark, Transformer

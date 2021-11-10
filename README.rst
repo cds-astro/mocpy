@@ -28,7 +28,7 @@ For more information about the MOCPy Rust core, see the `moc crate <https://crat
 
    *Rendered with MOCpy!*
 
-.. |PyPI version| image:: https://badge.fury.io/py/MOCPy.svg
+.. |PyPI version| image:: https://badge.fury.io/py/mocpy.svg
     :target: https://badge.fury.io/py/MOCPy
 
 .. |Build/Test status| image:: https://github.com/cds-astro/mocpy/actions/workflows/test.yml/badge.svg
