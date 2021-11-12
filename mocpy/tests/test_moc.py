@@ -87,11 +87,12 @@ def test_from_healpix_cells():
 
 def test_moc_from_fits():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
+    moc = MOC.load(fits_path, 'fits')
 
 
 def test_moc_consistent_with_aladin():
-    truth = MOC.from_fits('resources/CDS-I-125A-catalog_MOC.fits')
+    # truth = MOC.from_fits('resources/CDS-I-125A-catalog_MOC.fits')
+    truth = MOC.load('resources/CDS-I-125A-catalog_MOC.fits', 'fits')
     table = parse_single_table("resources/I_125A_catalog.vot").to_table()
 
     moc = MOC.from_lonlat(
@@ -224,7 +225,7 @@ def test_write(moc_from_json, filename, overwrite, format, os_error):
 #### TESTING MOC plot functions ####
 def test_mpl_fill():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
+    moc = MOC.load(fits_path, 'fits')
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
@@ -240,7 +241,7 @@ def test_mpl_fill():
 
 def test_mpl_border():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
+    moc = MOC.load(fits_path, 'fits')
 
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
@@ -281,7 +282,7 @@ def test_moc_contains():
 
 def test_degrade_to_order():
     hst_fits_path = 'resources/hst.fits'
-    hst_moc = MOC.from_fits(hst_fits_path)
+    hst_moc = MOC.load(hst_fits_path, 'fits')
 
     max_depth = hst_moc.max_order
 
@@ -293,7 +294,7 @@ def test_degrade_to_order():
 '''
 def test_boundaries():
     fits_path = 'resources/P-GALEXGR6-AIS-FUV.fits'
-    moc = MOC.from_fits(fits_path)
+    moc = MOC.load(fits_path, 'fits')
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
 '''
@@ -376,7 +377,7 @@ def test_moc_difference(mocs_op):
     })
 
 def test_moc_complement_consistency():
-    moc = MOC.from_fits('resources/P-GALEXGR6-AIS-FUV.fits')
+    moc = MOC.load('resources/P-GALEXGR6-AIS-FUV.fits', 'fits')
     assert moc.complement().complement() == moc
 
 

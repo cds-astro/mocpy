@@ -61,6 +61,7 @@ def test_tmoc_from_time_ranges():
     containing a list of time intervals
     """
     tmoc = TimeMOC.from_fits('resources/TMOC/HST_SDSSg/TMoc.fits')
+    # Old T-MOC so we have to load it with the Old method.
     # tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
     print(tmoc)
 

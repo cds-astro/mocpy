@@ -284,7 +284,7 @@ class TimeMOC(AbstractMOC):
         result = self_degradation, another_moc_degradation
         return result
 
-    def intersection(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+    def intersection_with_timeresolution(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
         """
         Intersection between self and moc. ``delta_t`` gives the possibility to the user
         to set a time resolution for performing the tmoc intersection
@@ -310,7 +310,7 @@ class TimeMOC(AbstractMOC):
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
         return super(TimeMOC, self_degraded).intersection(moc_degraded)
 
-    def union(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+    def union_with_timeresolution(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
         """
         Union between self and moc. ``delta_t`` gives the possibility to the user
         to set a time resolution for performing the tmoc union
@@ -336,7 +336,7 @@ class TimeMOC(AbstractMOC):
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
         return super(TimeMOC, self_degraded).union(moc_degraded)
 
-    def difference(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+    def difference_with_timeresolution(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
         """
         Difference between self and moc. ``delta_t`` gives the possibility to the user
         to set a time resolution for performing the tmoc diff

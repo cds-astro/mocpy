@@ -12,7 +12,6 @@ from astropy.coordinates import SkyCoord
 from astropy import wcs
 from astropy.time import Time
 
-import cdshealpix
 from .. import mocpy
 from .. import utils
 
