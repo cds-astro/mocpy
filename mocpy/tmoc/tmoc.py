@@ -12,11 +12,11 @@ from ..abstract_moc import AbstractMOC
 from .. import mocpy
 from .. import utils
 
-__author__ = "Matthieu Baumann"
+__author__ = "Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "matthieu.baumann@astro.unistra.fr"
+__email__ = "baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
 
 class TimeMOC(AbstractMOC):
     """Multi-order time coverage class. Experimental"""
@@ -452,8 +452,7 @@ class TimeMOC(AbstractMOC):
 
         """
 
-        # max_time = Time(self._interval_set.max / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
-        max_time = utils.microseconds_to_times(self._interval_set.min)
+        max_time = utils.microseconds_to_times(self._interval_set.max)
         return max_time
 
     def contains(self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME):
@@ -571,7 +570,7 @@ class TimeMOC(AbstractMOC):
             warnings.warn('This time moc is empty', UserWarning)
             return
 
-        plot_order = 15
+        plot_order = 30
         if self.max_order > plot_order:
             plotted_moc = self.degrade_to_order(plot_order)
         else:
@@ -580,6 +579,7 @@ class TimeMOC(AbstractMOC):
         min_jd = plotted_moc.min_time.jd if not view[0] else view[0].jd
         max_jd = plotted_moc.max_time.jd if not view[1] else view[1].jd
 
+        
         if max_jd < min_jd:
             raise ValueError("Invalid selection: max_jd = {0} must be > to min_jd = {1}".format(max_jd, min_jd))
 
@@ -598,8 +598,6 @@ class TimeMOC(AbstractMOC):
 
         y = np.zeros(size)
         for (s_time_us, e_time_us) in plotted_moc._interval_set._intervals:
-            #s_index = int((s_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
-            #e_index = int((e_time_us / TimeMOC.DAY_MICRO_SEC - min_jd_time) / delta)
             s_index = int((utils.microseconds_to_times(s_time_us).jd - min_jd_time) / delta)
             e_index = int((utils.microseconds_to_times(e_time_us).jd - min_jd_time) / delta)
             y[s_index:(e_index+1)] = 1.0
