@@ -11,18 +11,20 @@ from . import utils, serializer
 
 from . import mocpy
 
-__author__ = "Thomas Boch, Matthieu Baumann"
+__author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
+__email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
 
 
 class AbstractMOC(serializer.IO):
     """
     Basic functions for manipulating MOCs.
     """
-    LARK_PARSER_STR = None
+    
+    
+    __LARK_PARSER_STR = None
 
     def __init__(self, interval_set=None):
         interval = IntervalSet() if interval_set is None else interval_set
@@ -274,8 +276,8 @@ class AbstractMOC(serializer.IO):
 
         # Initialize the parser when from_str is called
         # for the first time
-        if AbstractMOC.LARK_PARSER_STR is None:
-            AbstractMOC.LARK_PARSER_STR = Lark(r"""
+        if AbstractMOC.__LARK_PARSER_STR is None:
+            AbstractMOC.__LARK_PARSER_STR = Lark(r"""
                 value: depthpix (sep+ depthpix)*
                 depthpix : INT "/" sep* pixs
                 pixs : pix (sep+ pix)*
@@ -287,7 +289,7 @@ class AbstractMOC(serializer.IO):
                 """, start='value')
 
         try:
-            tree = AbstractMOC.LARK_PARSER_STR.parse(value)
+            tree = AbstractMOC.__LARK_PARSER_STR.parse(value)
         except Exception as err:
             raise ParsingException("Could not parse {0}. \n Check the grammar \
                 section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf \

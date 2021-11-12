@@ -4,7 +4,7 @@
 
 # Mandatory packages for MOCPy to work 
 astropy
-cdshealpix
+cdshealpix>=0.6.1
 matplotlib
 networkx>=2.5
 lark-parser
