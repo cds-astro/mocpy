@@ -1,5 +1,5 @@
-mocpy.STMOC
-=============
+﻿mocpy.STMOC
+===========
 
 .. currentmodule:: mocpy
 

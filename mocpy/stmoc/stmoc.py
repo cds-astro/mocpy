@@ -19,11 +19,11 @@ from .. import utils
 from .. import MOC, serializer
 from ..interval_set import IntervalSet
 
-__author__ = "Thomas Boch, Matthieu Baumann"
+__author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr"
+__email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
 
 
 class STMOC(serializer.IO):
@@ -480,9 +480,9 @@ class STMOC(serializer.IO):
             The format in which the MOC will be serialized before being saved.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
-       overwrite : bool, optional
+        overwrite : bool, optional
             If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
-            Default to False.    
+            Default to False.
         """
         import os
         file_exists = os.path.isfile(path)
@@ -500,7 +500,7 @@ class STMOC(serializer.IO):
         else:
             formats = ('fits', 'ascii', 'json')
             raise ValueError('format should be one of %s' % (str(formats)))
-
+            
     @classmethod
     def load(cls, path, format='fits'):
         """

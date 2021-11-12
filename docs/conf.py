@@ -21,8 +21,8 @@ import mocpy
 # -- Project information -----------------------------------------------------
 
 project = 'mocpy'
-copyright = '2018, Thomas Boch, Matthieu Baumann'
-author = 'Thomas Boch, Matthieu Baumann'
+copyright = '2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau'
+author = 'Thomas Boch, Matthieu Baumann, François-Xavier Pineau'
 
 # The short X.Y version
 version = mocpy.__version__
@@ -56,6 +56,7 @@ bibtex_bibfiles = ['references.bib']
 
 default_role = 'py:obj'
 numpydoc_class_members_toctree = False
+autosummary_generate = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -153,7 +154,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'mocpy.tex', 'mocpy Documentation',
-     'Thomas Boch, Matthieu Baumann', 'manual'),
+     'Thomas Boch, Matthieu Baumann, François-Xavier Pineau', 'manual'),
 ]
 
 

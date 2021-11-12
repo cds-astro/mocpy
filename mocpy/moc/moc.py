@@ -25,7 +25,7 @@ from .. import mocpy
 from .boundaries import Boundaries
 from .plot import fill, border
 
-__author__ = "Thomas Boch, Matthieu Baumann, F.-X. Pineau"
+__author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
