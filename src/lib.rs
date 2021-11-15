@@ -26,12 +26,14 @@ use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList, PyString};
 use pyo3::{PyObject, ToPyObject, exceptions};
 
-use moc::qty::MocQty;
-use moc::ranges::{SNORanges, Ranges};
+use moc::qty::{MocQty, Hpx};
 use moc::elemset::range::{
     MocRanges,
     uniq::HpxUniqRanges
 };
+use moc::moc::{CellMOCIterator, CellMOCIntoIterator};
+use moc::moc::range::RangeMOC;
+use moc::ranges::{SNORanges, Ranges};
 use moc::hpxranges2d::TimeSpaceMoc;
 
 pub mod ndarray_fromto;
@@ -40,7 +42,7 @@ pub mod spatial_coverage;
 pub mod temporal_coverage;
 pub mod time_space_coverage;
 
-use crate::ndarray_fromto::{ranges_to_array2, mocranges_to_array2}; // uniq_ranges_to_array1
+use crate::ndarray_fromto::{ranges_to_array2, mocranges_to_array2, vec_range_to_array2}; // uniq_ranges_to_array1
 
 type Coverage2DHashMap = HashMap<usize, TimeSpaceMoc<u64, u64>>;
 
@@ -1402,9 +1404,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn time_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
         coverage_complement(py, ranges, coverage::create_time_ranges_from_py_uncheked)
     }
-
-
-
+    
     /// Deserialize a spatial coverage from a json python dictionary
     ///
     /// JSON python dictionary stores (key, value) pair where:
@@ -1542,6 +1542,75 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         PyString::new(py,&spatial_coverage::to_json_str(depth, ranges)).into()
     }
 
+    /// Create a 1D spatial coverage from the deserialization of a FITS file containing a multi-order map.
+    ///
+    /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
+    ///
+    /// # Arguments
+    ///
+    /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
+    /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
+    /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
+    ///   depth in the `uniq` values
+    /// * `asc`: cumulative value computed from lower to highest densities instead of from highest to lowest
+    /// * `strict`: (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+    /// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+    /// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
+    ///
+    /// # Info
+    /// 
+    /// We expect the FITS file to be a BINTABLE containing a multi-order map.
+    /// In this non-flexible approach, we expect the BINTABLE extension to contains:
+    /// 
+    /// ```bash
+    /// XTENSION= 'BINTABLE'           / binary table extension                         
+    /// BITPIX  =                    8 / array data type                                
+    /// NAXIS   =                    2 / number of array dimensions 
+    /// AXIS1  =                    ?? / length of dimension 1                          
+    /// NAXIS2  =                   ?? / length of dimension 2                          
+    /// PCOUNT  =                    0 / number of group parameters                     
+    /// GCOUNT  =                    1 / number of groups                               
+    /// TFIELDS =                   xx / number of table fields
+    /// TTYPE1  = 'UNIQ    '                                                            
+    /// TFORM1  = 'K       '                                                            
+    /// TTYPE2  = 'PROBDENSITY'                                                         
+    /// TFORM2  = 'D       '                                                            
+    /// TUNIT2  = 'sr-1    ' 
+    /// ...
+    /// MOC     =                    T                                                  
+    /// PIXTYPE = 'HEALPIX '           / HEALPIX pixelisation                           
+    /// ORDERING= 'NUNIQ   '           / Pixel ordering scheme: RING, NESTED, or NUNIQ  
+    /// COORDSYS= 'C       '           / Ecliptic, Galactic or Celestial (equatorial)   
+    /// MOCORDER=                   xx / MOC resolution (best order) 
+    /// ...
+    /// END
+    /// ```
+    #[pyfn(m, "spatial_moc_from_multiordermap_fits_file")]
+    fn spatial_moc_from_multiordermap_fits_file(
+        py: Python, 
+        path: String,
+        cumul_from: f64,
+        cumul_to: f64,
+        asc: bool,
+        strict: bool,
+        no_split: bool,
+        reverse_decent: bool
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        use std::fs::File;
+        use std::io::BufReader;
+        use moc::deser::fits;
+        
+        let file = File::open(&path)?;
+        let reader = BufReader::new(file);
+        let ranges = fits::multiordermap::from_fits_multiordermap(
+            reader,
+            cumul_from, cumul_to,
+            asc, strict, no_split, reverse_decent
+        ).map_err(|e| exceptions::PyIOError::new_err(e.to_string()))?;
+        let result: Array2<u64> = mocranges_to_array2(ranges.into_moc_ranges());
+        Ok(result.into_pyarray(py).to_owned())
+    }
+    
     /// Deserialize a spatial MOC from a FITS file.
     ///
     /// # Arguments
@@ -1826,6 +1895,57 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = mocranges_to_array2(result);
         Ok(result.into_pyarray(py).to_owned())
     }
+
+    /// Count the number of disjoint MOC this MOC contains.
+    ///
+    /// # Arguments
+    ///
+    /// * ``max_depth`` - The MOC depth.
+    /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_split_count")]
+    fn hpx_coverage_split_count(
+        max_depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> u32 {
+        let ranges = ranges.as_array().to_owned();
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
+        moc.split_into_joint_mocs().len() as u32
+    }
+
+    /// Split the input MOC into disjoint MOCs.
+    ///
+    /// # Arguments
+    ///
+    /// * ``max_depth`` - The MOC depth.
+    /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
+    ///
+    /// # Errors
+    ///
+    /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
+    #[pyfn(m, "hpx_coverage_split")]
+    fn hpx_coverage_split(
+        py: Python,
+        max_depth: u8,
+        ranges: PyReadonlyArray2<u64>,
+    ) -> PyResult<Py<PyList>> {
+        let ranges = ranges.as_array().to_owned();
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+        let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
+        let mocs: Vec<Py<PyArray2<u64>>> = moc.split_into_joint_mocs()
+          .drain(..)
+          .map(|cell_moc| 
+            vec_range_to_array2(
+                cell_moc.into_cell_moc_iter().ranges().collect()
+            ).into_pyarray(py).to_owned().into()
+          ).collect();
+        PyList::new(py, mocs).extract()
+    }
+    
     
     
     /// Degrade a time coverage to a specific depth.

@@ -54,7 +54,10 @@ impl From<HpxUniqRanges<i64>> for Array1<i64> {
 
 
 pub fn ranges_to_array2<T: Idx>(input: Ranges<T>) -> Array2<T> {
-  let mut ranges = input.0.to_vec();
+  vec_range_to_array2(input.0.to_vec())
+}
+
+pub fn vec_range_to_array2<T: Idx>(mut ranges: Vec<Range<T>>) -> Array2<T> {
   // Cast Vec<Range<u64>> to Vec<u64>
   let len = ranges.len();
   let data = utils::flatten(&mut ranges);

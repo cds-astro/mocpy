@@ -154,6 +154,24 @@ class MOC(AbstractMOC):
         interval_set = IntervalSet(intervals, make_consistent=False)
         return MOC(interval_set, make_consistent=False)
 
+    def split_count(self):
+       """
+       Returns the number of disjoint MOCs the given MOC contains.
+       """
+       return mocpy.hpx_coverage_split_count(self.max_order, self._interval_set._intervals)
+
+    def split(self):
+        """
+        Returns the disjoint MOCs this MOC contains.format
+       
+        WARNING
+        -------
+        Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
+        
+        """
+        list_of_intervals = mocpy.hpx_coverage_split(self.max_order, self._interval_set._intervals)
+        mocs = map(lambda intervals: MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False), list_of_intervals)
+        return mocs
 
     def degrade_to_order(self, new_order):
         """
@@ -209,6 +227,8 @@ class MOC(AbstractMOC):
         pix = cdshealpix.lonlat_to_healpix(ra, dec, max_depth)
 
         return m[pix]
+
+    ## TODO: implement: def contains_including_surrounding(self, ra, dec, distance)
 
     def add_neighbours(self):
         """
@@ -582,6 +602,58 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         intervals = mocpy.from_lonlat(max_norder, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
+        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+
+    @classmethod
+    def from_multiordermap_fits_file(cls, path,
+        cumul_from=0.0, cumul_to=1.0, 
+        asc=False, strict=True, no_split=True, reverse_decent=False):
+        """
+        Creates a MOC from a mutli-order map FITS file.
+
+        HEALPix cells are first sorted by their values.
+        The MOC contains the cells from which the cumulative value is between
+        ``cumul_from`` and ``cumul_to``.
+        Cells being on the fence are recursively splitted and added
+        until the depth of the cells is equal to ``max_norder``.
+
+        For compatibility with Aladin, use ``no_split=False`` and ``reverse_decent=True``
+        
+        Remark: using ``no_split=False``, the way the cells overlapping with the low and high thresholds are split
+        is somewhat arbitrary.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to save the MOC in.
+        cumul_from : float
+            Cumulative value from which cells will be added to the MOC
+        cumul_to : float
+            Cumulative value to which cells will be added to the MOC
+        asc: boolean
+            the cumulative value is computed from lower to highest densities instead of from highest to lowest
+        strict: boolean
+            (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+        no_split: boolean
+            cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+        reverse_decent: boolean
+            perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        intervals = mocpy.spatial_moc_from_multiordermap_fits_file(
+            path,
+            np.float64(cumul_from),
+            np.float64(cumul_to),
+            asc, 
+            strict, 
+            no_split, 
+            reverse_decent
+        )
+
         return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
     @classmethod

@@ -91,7 +91,6 @@ def test_moc_from_fits():
 
 
 def test_moc_consistent_with_aladin():
-    # truth = MOC.from_fits('resources/CDS-I-125A-catalog_MOC.fits')
     truth = MOC.load('resources/CDS-I-125A-catalog_MOC.fits', 'fits')
     table = parse_single_table("resources/I_125A_catalog.vot").to_table()
 
@@ -161,7 +160,6 @@ def test_from_str(expected, moc_str):
     (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r \n 8/8-10\n 11/'),
 ])
 def test_from_string(expected, moc_str):
-    # assert MOC.from_str(moc_str) == expected
     assert MOC.from_string(moc_str, 'ascii') == expected
 
 
@@ -464,6 +462,17 @@ def test_from_valued_healpix_cells_bayestar():
 
     for b in cumul_to:
         MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)
+
+def test_from_valued_healpix_cells_bayestar_and_split():
+   fits_mom_filename = './resources/bayestar.multiorder.fits'
+   moc = MOC.from_multiordermap_fits_file(fits_mom_filename, cumul_from=0.0, cumul_to=0.9)
+   count = moc.split_count()
+   assert count == 2
+   mocs = list(moc.split())
+   assert len(mocs)== 2
+   for moc in mocs:
+     assert moc.max_order == 8
+
 
 #### TESTING new features ####
 def test_moc_save_load_deser():
