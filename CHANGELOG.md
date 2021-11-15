@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.10.0]
+### Changed
+* Rename `TimeMOC` logical operations taing a deltaT constraint adding the sufix `_with_timeresolution`
+* WARNING logical `TimeMOC` logical operations are now at the deepest depth (no time resolution parameter)
+
+### Added
+* Deprecate `from_fits`, ...  methods
+* Ddd `MOC.spli_count`, `MOC.split`, `MOC.from_multiordermap_fits_file`
+* Add support for u16 and u32 fits MOC and TMOC in 'load'
+
+### Bug correction
+* Replace empty moc shape (1, 0) by (0, 2)
+* Fix `tmoc.max_time`
+* Fix doc (due to an evolution of sphinx)
+
 ## [0.9.0]
 ### Changed
 * Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]` 
