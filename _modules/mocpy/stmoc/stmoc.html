@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.9.0 documentation</title>
+    <title>mocpy.stmoc.stmoc &#8212; mocpy 0.10.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-astropy.css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.9.0 documentation</a>
+	<a href="../../../index.html">mocpy 0.10.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -74,18 +74,17 @@
 <span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">wcs</span>
 <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
-<span class="kn">import</span> <span class="nn">cdshealpix</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mocpy</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">utils</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">serializer</span>
 <span class="kn">from</span> <span class="nn">..interval_set</span> <span class="kn">import</span> <span class="n">IntervalSet</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Thomas Boch, Matthieu Baumann&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Thomas Boch, Matthieu Baumann, François-Xavier Pineau&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
 
 <span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;BSD 3-Clause License&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;thomas.boch@astro.unistra.fr, matthieu.baumann@astro.unistra.fr&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr&quot;</span>
 
 
 <div class="viewcode-block" id="STMOC"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC">[docs]</a><span class="k">class</span> <span class="nc">STMOC</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">IO</span><span class="p">):</span>
@@ -94,9 +93,9 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="STMOC.__init__"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">create_2d_coverage</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_column_name</span> <span class="o">=</span> <span class="s1">&#39;PIXELS&#39;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fits_column_name</span> <span class="o">=</span> <span class="s1">&#39;PIXELS&#39;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">drop_2d_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
@@ -118,13 +117,13 @@
         <span class="c1">#return Time(mocpy.coverage_2d_min_time(self.__index), format=&#39;jd&#39;, scale=&#39;tdb&#39;)</span>
         <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.is_empty"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the Space-Time coverage is empty</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span></div>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.from_times_positions"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_times_positions">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_times_positions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a 2D Coverage from a set of times and positions associated to each time.</span>
@@ -163,9 +162,9 @@
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.from_time_ranges_positions"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_time_ranges_positions">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_time_ranges_positions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a 2D Coverage from a set of times and positions associated to each time.</span>
@@ -210,9 +209,9 @@
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_ranges_lonlat</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.from_spatial_coverages"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_spatial_coverages">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_spatial_coverages</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">spatial_coverages</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">29</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.</span>
@@ -250,9 +249,9 @@
         <span class="n">spatial_coverages</span> <span class="o">=</span> <span class="p">[</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span> <span class="k">for</span> <span class="n">spatial_coverage</span> <span class="ow">in</span> <span class="n">spatial_coverages</span><span class="p">]</span>
 
         <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_ranges_spatial_coverages</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">times_start</span><span class="p">,</span> <span class="n">times_end</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">spatial_coverages</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="k">def</span> <span class="nf">query_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.query_by_time"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.query_by_time">[docs]</a>    <span class="k">def</span> <span class="nf">query_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Query the ST-MOC by time ranges.</span>
 
@@ -274,9 +273,9 @@
         <span class="c1"># times = np.asarray(times.jd * 86400000000, dtype=np.uint64)</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">times_to_microseconds</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="n">ranges</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_second_dim</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">query_by_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_coverage</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.query_by_space"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.query_by_space">[docs]</a>    <span class="k">def</span> <span class="nf">query_by_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_coverage</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Query the ST-MOC by space coverage.</span>
 
@@ -296,9 +295,9 @@
         <span class="c1"># Time ranges in µsec</span>
         <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">spatial_coverage</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="c1"># return Time(time_ranges / 86400000000, format=&#39;jd&#39;, scale=&#39;tdb&#39;)</span>
-        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">time_ranges</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">time_ranges</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.union"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Union of two Space-Time coverages.</span>
 
@@ -319,9 +318,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_union</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.intersection"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.intersection">[docs]</a>    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intersection of two Space-Time coverages.</span>
 
@@ -342,9 +341,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_intersection</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.difference"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.difference">[docs]</a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Difference of two Space-Time coverages.</span>
 
@@ -365,9 +364,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">STMOC</span><span class="p">()</span>
         <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_difference</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.contains"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</span>
 
@@ -408,7 +407,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="o">~</span><span class="n">result</span>
 
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_fits_header_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -448,7 +447,7 @@
     <span class="k">def</span> <span class="nf">_uniq_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_to_fits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.deserialization"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.deserialization">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">deserialization</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdulist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deserialization of an hdulist to a Time-Space coverage</span>
@@ -498,9 +497,9 @@
                 <span class="n">result</span><span class="o">.</span><span class="n">__index</span><span class="p">,</span>
                 <span class="n">bin_HDU_table</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.from_fits"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_fits">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_fits</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads a STMOC from a FITS file,</span>
@@ -526,9 +525,9 @@
         <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdulist</span><span class="p">:</span>
             <span class="n">stmoc</span> <span class="o">=</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">deserialization</span><span class="p">(</span><span class="n">hdulist</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">stmoc</span>
+        <span class="k">return</span> <span class="n">stmoc</span></div>
 
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.save"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes the ST-MOC to a file.</span>
 
@@ -542,7 +541,17 @@
 <span class="sd">            The format in which the MOC will be serialized before being saved.</span>
 <span class="sd">            Possible formats are &quot;fits&quot;, &quot;ascii&quot; or &quot;json&quot;.</span>
 <span class="sd">            By default, ``format`` is set to &quot;fits&quot;.</span>
+<span class="sd">        overwrite : bool, optional</span>
+<span class="sd">            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. </span>
+<span class="sd">            Default to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="n">file_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">file_exists</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s1">&#39;File </span><span class="si">{}</span><span class="s1"> already exists! Set ``overwrite`` to &#39;</span>
+                          <span class="s1">&#39;True if you want to replace it.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>         
+        
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;fits&#39;</span><span class="p">:</span>
             <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_to_fits_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;ascii&#39;</span><span class="p">:</span>
@@ -551,9 +560,9 @@
             <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_to_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span> <span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span>
-
-    <span class="nd">@classmethod</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
+            
+<div class="viewcode-block" id="STMOC.load"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the Spatial MOC from a file.</span>
@@ -581,10 +590,10 @@
             <span class="k">return</span> <span class="n">stmoc</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span> <span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
 
-    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="STMOC.to_string"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.to_string">[docs]</a>    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes the ST-MOC into a string.</span>
 
@@ -603,9 +612,9 @@
             <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_to_json_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="STMOC.from_string"><a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_string">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deserialize the Spatial MOC from the given string.</span>
@@ -628,7 +637,7 @@
             <span class="k">return</span> <span class="n">stmoc</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;format should be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div></div>
 </pre></div>
 
             <div class="clearer"></div>
@@ -652,7 +661,7 @@
   <p class="pull-right"> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
   </p>
 </footer>
   </body>

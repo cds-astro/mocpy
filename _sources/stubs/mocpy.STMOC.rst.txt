@@ -4,45 +4,5 @@
 .. currentmodule:: mocpy
 
 .. autoclass:: STMOC
-
-   
-   .. automethod:: __init__
-
-   
-   .. rubric:: Methods
-
-   .. autosummary::
-   
-      ~STMOC.__init__
-      ~STMOC.contains
-      ~STMOC.deserialization
-      ~STMOC.difference
-      ~STMOC.from_fits
-      ~STMOC.from_spatial_coverages
-      ~STMOC.from_string
-      ~STMOC.from_time_ranges_positions
-      ~STMOC.from_times_positions
-      ~STMOC.intersection
-      ~STMOC.is_empty
-      ~STMOC.load
-      ~STMOC.query_by_space
-      ~STMOC.query_by_time
-      ~STMOC.save
-      ~STMOC.serialize
-      ~STMOC.to_string
-      ~STMOC.union
-      ~STMOC.write
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~STMOC.max_depth
-      ~STMOC.max_time
-      ~STMOC.min_time
-   
-   
+    :members:
+    :inherited-members:

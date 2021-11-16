@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>mocpy.TimeMOC &#8212; mocpy 0.9.0 documentation</title>
+    <title>mocpy.TimeMOC &#8212; mocpy 0.10.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.9.0 documentation</a>
+	<a href="../index.html">mocpy 0.10.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -77,21 +77,20 @@
 <h1>mocpy.TimeMOC<a class="headerlink" href="#mocpy-timemoc" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mocpy.TimeMOC">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">TimeMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_consistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">TimeMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_consistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-order time coverage class. Experimental</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>LARK_PARSER_STR</strong></dt><dd></dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">consistency</span></code></dt><dd><p>Get a percentage of fill between the min and max time the moc is defined.</p>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.consistency" title="mocpy.TimeMOC.consistency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">consistency</span></code></a></dt><dd><p>Get a percentage of fill between the min and max time the moc is defined.</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></dt><dd><p>Depth of the smallest Time cells found in the MOC instance.</p>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.max_order" title="mocpy.TimeMOC.max_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></a></dt><dd><p>Depth of the smallest Time cells found in the MOC instance.</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></dt><dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation</p>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.max_time" title="mocpy.TimeMOC.max_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></a></dt><dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></dt><dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation</p>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.min_time" title="mocpy.TimeMOC.min_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></a></dt><dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_duration</span></code></dt><dd><p>Get the total duration covered by the temporal moc</p>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.total_duration" title="mocpy.TimeMOC.total_duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_duration</span></code></a></dt><dd><p>Get the total duration covered by the temporal moc</p>
 </dd>
 </dl>
 </dd>
@@ -103,221 +102,736 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.add_neighbours" title="mocpy.TimeMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>()</p></td>
 <td><p>Add all the pixels at max order in the neighbourhood of the moc</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.complement" title="mocpy.TimeMOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>()</p></td>
 <td><p>Returns the complement of the TimeMOC instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(times[, keep_inside, delta_t])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.contains" title="mocpy.TimeMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(times[, keep_inside, delta_t])</p></td>
 <td><p>Get a mask array (e.g.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code>(new_order)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.degrade_to_order" title="mocpy.TimeMOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(new_order)</p></td>
 <td><p>Degrades the MOC instance to a new, less precise, MOC.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code>(another_moc[, delta_t])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.difference" title="mocpy.TimeMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(another_moc, *args)</p></td>
+<td><p>Difference between the MOC instance and other MOCs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.difference_with_timeresolution" title="mocpy.TimeMOC.difference_with_timeresolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference_with_timeresolution</span></code></a>(another_moc)</p></td>
 <td><p>Difference between self and moc.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.empty" title="mocpy.TimeMOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>()</p></td>
 <td><p>Checks whether the MOC is empty.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code>(filename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_fits" title="mocpy.TimeMOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(filename)</p></td>
 <td><p>Loads a MOC from a FITS file.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json</span></code>(json_moc)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_json" title="mocpy.TimeMOC.from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json</span></code></a>(json_moc)</p></td>
 <td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_str" title="mocpy.TimeMOC.from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code></a>(value)</p></td>
 <td><p>Create a MOC from a str.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>(value[, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_string" title="mocpy.TimeMOC.from_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code></a>(value[, format])</p></td>
 <td><p>Deserialize the Time MOC from the given string.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges</span></code>(min_times, max_times[, delta_t])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_time_ranges" title="mocpy.TimeMOC.from_time_ranges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges</span></code></a>(min_times, max_times[, delta_t])</p></td>
 <td><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_approx</span></code>(min_times, max_times)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_time_ranges_approx" title="mocpy.TimeMOC.from_time_ranges_approx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_approx</span></code></a>(min_times, max_times)</p></td>
 <td><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times</span></code>(times[, delta_t])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.from_times" title="mocpy.TimeMOC.from_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times</span></code></a>(times[, delta_t])</p></td>
 <td><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code>(another_moc[, delta_t])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.intersection" title="mocpy.TimeMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc, *args)</p></td>
+<td><p>Intersection between the MOC instance and other MOCs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.intersection_with_timeresolution" title="mocpy.TimeMOC.intersection_with_timeresolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection_with_timeresolution</span></code></a>(another_moc)</p></td>
 <td><p>Intersection between self and moc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path[, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.load" title="mocpy.TimeMOC.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path[, format])</p></td>
 <td><p>Load the Time MOC from a file.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_time_resolution</span></code>(order)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.order_to_time_resolution" title="mocpy.TimeMOC.order_to_time_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_time_resolution</span></code></a>(order)</p></td>
 <td><p>Convert an TimeMoc order to its equivalent time</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>([title, view, figsize])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.plot" title="mocpy.TimeMOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([title, view, figsize])</p></td>
 <td><p>Plot the TimeMoc in a time window.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_to_order</span></code>(min_depth)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.refine_to_order" title="mocpy.TimeMOC.refine_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_to_order</span></code></a>(min_depth)</p></td>
 <td><p>Internal method</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.remove_neighbours" title="mocpy.TimeMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
 <td><p>Remove all the pixels at max order located at the bound of the moc</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code>(path[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.save" title="mocpy.TimeMOC.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path[, format, overwrite])</p></td>
 <td><p>Writes the Time MOC to a file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code>([format, optional_kw_dict, pre_v2])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.serialize" title="mocpy.TimeMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict, pre_v2])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_resolution_to_order</span></code>(delta_time)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.time_resolution_to_order" title="mocpy.TimeMOC.time_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_resolution_to_order</span></code></a>(delta_time)</p></td>
 <td><p>Convert a time resolution to a TimeMoc order.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code>([format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.to_string" title="mocpy.TimeMOC.to_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code></a>([format])</p></td>
 <td><p>Writes the Time MOC into a string.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code>(another_moc[, delta_t])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.union" title="mocpy.TimeMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc, *args)</p></td>
+<td><p>Union between the MOC instance and other MOCs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.union_with_timeresolution" title="mocpy.TimeMOC.union_with_timeresolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union_with_timeresolution</span></code></a>(another_moc[, delta_t])</p></td>
 <td><p>Union between self and moc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code>(path[, format, overwrite, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.TimeMOC.write" title="mocpy.TimeMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, ...])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="mocpy.TimeMOC.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_consistent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>TimeMoc constructor.</p>
-<p>The merging step of the overlapping intervals is done here.</p>
+<dt class="sig sig-object py" id="mocpy.TimeMOC.add_neighbours">
+<span class="sig-name descname"><span class="pre">add_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.add_neighbours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add all the pixels at max order in the neighbourhood of the moc</p>
 <dl class="field-list">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl>
-<dt><strong>intervals</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></span></dt><dd><p>a N x 2 numpy array representing the set of intervals.</p>
-</dd>
-<dt><strong>make_consistent</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. Remove the overlapping intervals that makes
-a valid MOC (i.e. can be plot, serialized, manipulated).</p>
+<dt><strong>tmoc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>self extended by one degree of neighbors.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.TimeMOC.__init__" title="mocpy.TimeMOC.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([interval_set, make_consistent, ...])</p></td>
-<td><p>TimeMoc constructor.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code>()</p></td>
-<td><p>Add all the pixels at max order in the neighbourhood of the moc</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code>()</p></td>
-<td><p>Returns the complement of the TimeMOC instance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(times[, keep_inside, delta_t])</p></td>
-<td><p>Get a mask array (e.g.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code>(new_order)</p></td>
-<td><p>Degrades the MOC instance to a new, less precise, MOC.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code>(another_moc[, delta_t])</p></td>
-<td><p>Difference between self and moc.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code>()</p></td>
-<td><p>Checks whether the MOC is empty.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code>(filename)</p></td>
-<td><p>Loads a MOC from a FITS file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json</span></code>(json_moc)</p></td>
-<td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code>(value)</p></td>
-<td><p>Create a MOC from a str.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>(value[, format])</p></td>
-<td><p>Deserialize the Time MOC from the given string.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges</span></code>(min_times, max_times[, delta_t])</p></td>
-<td><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_approx</span></code>(min_times, max_times)</p></td>
-<td><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times</span></code>(times[, delta_t])</p></td>
-<td><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code>(another_moc[, delta_t])</p></td>
-<td><p>Intersection between self and moc.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path[, format])</p></td>
-<td><p>Load the Time MOC from a file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_time_resolution</span></code>(order)</p></td>
-<td><p>Convert an TimeMoc order to its equivalent time</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>([title, view, figsize])</p></td>
-<td><p>Plot the TimeMoc in a time window.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_to_order</span></code>(min_depth)</p></td>
-<td><p>Internal method</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code>()</p></td>
-<td><p>Remove all the pixels at max order located at the bound of the moc</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code>(path[, format])</p></td>
-<td><p>Writes the Time MOC to a file.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code>([format, optional_kw_dict, pre_v2])</p></td>
-<td><p>Serializes the MOC into a specific format.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_resolution_to_order</span></code>(delta_time)</p></td>
-<td><p>Convert a time resolution to a TimeMoc order.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code>([format])</p></td>
-<td><p>Writes the Time MOC into a string.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code>(another_moc[, delta_t])</p></td>
-<td><p>Union between self and moc.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code>(path[, format, overwrite, ...])</p></td>
-<td><p>Writes the MOC to a file.</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DAY_MICRO_SEC</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_OBSERVATION_TIME</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LARK_PARSER_STR</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">consistency</span></code></p></td>
-<td><p>Get a percentage of fill between the min and max time the moc is defined.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></p></td>
-<td><p>Depth of the smallest Time cells found in the MOC instance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></p></td>
-<td><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></p></td>
-<td><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_duration</span></code></p></td>
-<td><p>Get the total duration covered by the temporal moc</p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.complement">
+<span class="sig-name descname"><span class="pre">complement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.complement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.complement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the complement of the TimeMOC instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting TimeMOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.consistency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">consistency</span></span><a class="headerlink" href="#mocpy.TimeMOC.consistency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a percentage of fill between the min and max time the moc is defined.</p>
+<p>A value near 0 shows a sparse temporal moc (i.e. the moc does not cover a lot
+of time and covers very distant times. A value near 1 means that the moc covers
+a lot of time without big pauses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">float</span></dt><dd><p>fill percentage (between 0 and 1.)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_inside=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the
+TMOC instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
+</dd>
+<dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
+If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>array</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">darray</span></code></span></dt><dd><p>A mask boolean array</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.degrade_to_order">
+<span class="sig-name descname"><span class="pre">degrade_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.degrade_to_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Degrades the MOC instance to a new, less precise, MOC.</p>
+<p>The maximum depth (i.e. the depth of the smallest Time cells that can be found in the MOC) of the
+degraded MOC is set to <code class="docutils literal notranslate"><span class="pre">new_order</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>new_order</strong><span class="classifier">int</span></dt><dd><p>Maximum depth of the output degraded MOC.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The degraded MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.difference">
+<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.difference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Difference between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used that will be substracted to self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.difference_with_timeresolution">
+<span class="sig-name descname"><span class="pre">difference_with_timeresolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.difference_with_timeresolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.difference_with_timeresolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Difference between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
+to set a time resolution for performing the tmoc diff</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMoc to substract from self</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMoc</span></code></span></dt><dd><p>MOC object whose interval set corresponds to : self - <code class="docutils literal notranslate"><span class="pre">moc</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.empty">
+<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the MOC is empty.</p>
+<p>A MOC is empty when its list of HEALPix cell ranges is empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>result: bool</dt><dd><p>True if the MOC instance is empty.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_fits">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.from_fits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a MOC from a FITS file.</p>
+<p>The specified FITS file must store the MOC
+(i.e. the list of HEALPix cells it contains)
+in a binary HDU table.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_moc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>json_moc</strong><span class="classifier">dict(str</span></dt><dd><p>A dictionary of HEALPix cell arrays indexed by their depth.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>the MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_str">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.from_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a MOC from a str.</p>
+<p>This grammar is expressed is the <a class="reference external" href="http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf">MOC IVOA</a>
+specification at section 2.3.2.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>value</strong><span class="classifier">str</span></dt><dd><p>The MOC as a string following the grammar rules.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_string">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize the Time MOC from the given string.</p>
+<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<p>WARNING: the serialization must be strict, i.e. <strong>must not</strong> contain overlapping elements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved.
+Possible formats are “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “ascii”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+</dd>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>time_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges_approx">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges_approx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges_approx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.
+Uses the following approximation: simple take the JD time and multiply by the number of microseconds in a day.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+</dd>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>time_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.from_times">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Astropy observation times</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>The duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMOC order to represent the observations (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>time_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.intersection">
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersection between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the intersection with self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the intersection with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.intersection_with_timeresolution">
+<span class="sig-name descname"><span class="pre">intersection_with_timeresolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.intersection_with_timeresolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.intersection_with_timeresolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersection between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
+to set a time resolution for performing the tmoc intersection</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMOC used for performing the intersection with self</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>MOC object whose interval set corresponds to : self &amp; <code class="docutils literal notranslate"><span class="pre">moc</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the Time MOC from a file.</p>
+<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the file to load the MOC from.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format from which the MOC is loaded.
+Possible formats are “fits”, “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.max_order">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_order</span></span><a class="headerlink" href="#mocpy.TimeMOC.max_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depth of the smallest Time cells found in the MOC instance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.max_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.max_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></span></dt><dd><p>time of the last observation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.min_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.min_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>time of the first observation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.order_to_time_resolution">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">order_to_time_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.order_to_time_resolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.order_to_time_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an TimeMoc order to its equivalent time</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>order</strong><span class="classifier">int</span></dt><dd><p>order to convert</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time equivalent to <code class="docutils literal notranslate"><span class="pre">order</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TimeMoc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(9.5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the TimeMoc in a time window.</p>
+<p>This method uses interactive matplotlib. The user can move its mouse through the plot to see the
+time (at the mouse position).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Set to ‘TimeMoc’ by default.</p>
+</dd>
+<dt><strong>view</strong><span class="classifier">(<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>), optional</span></dt><dd><p>Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
+all the observation time window is rendered).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.refine_to_order">
+<span class="sig-name descname"><span class="pre">refine_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.refine_to_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.refine_to_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal method</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.remove_neighbours">
+<span class="sig-name descname"><span class="pre">remove_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.remove_neighbours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the pixels at max order located at the bound of the moc</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>tmoc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>self shrinked by one degree of neighbors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the Time MOC to a file.</p>
+<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the file to save the MOC in.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved.
+Possible formats are “fits”, “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+<dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword.
+Default to False.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes the MOC into a specific format.</p>
+<p>Possible formats are FITS, JSON and STRING</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>format</strong><span class="classifier">str</span></dt><dd><p>‘fits’ by default. The other possible choice is ‘json’ or ‘str’.</p>
+</dd>
+<dt><strong>optional_kw_dict</strong><span class="classifier">dict</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.time_resolution_to_order">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_resolution_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.time_resolution_to_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.time_resolution_to_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a time resolution to a TimeMoc order.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>delta_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time to convert</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>order</strong><span class="classifier">int</span></dt><dd><p>The less precise order which is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_time</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.to_string">
+<span class="sig-name descname"><span class="pre">to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.to_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the Time MOC into a string.</p>
+<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved.
+Possible formats are “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “ascii”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.total_duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_duration</span></span><a class="headerlink" href="#mocpy.TimeMOC.total_duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the total duration covered by the temporal moc</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>duration</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>total duration of all the observation times of the tmoc
+total duration of all the observation times of the tmoc</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.union">
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.union" title="Permalink to this definition">¶</a></dt>
+<dd><p>Union between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the union with self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the union with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.union_with_timeresolution">
+<span class="sig-name descname"><span class="pre">union_with_timeresolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.union_with_timeresolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.union_with_timeresolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Union between self and moc. <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> gives the possibility to the user
+to set a time resolution for performing the tmoc union</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMoc to bind to self</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
+is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMoc</span></code></span></dt><dd><p>MOC object whose interval set corresponds to : self | <code class="docutils literal notranslate"><span class="pre">moc</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the MOC to a file.</p>
+<p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the file to save the MOC in.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved. Possible formats are “fits” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+<dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword. Default to False.</p>
+</dd>
+<dt><strong>optional_kw_dict</strong><span class="classifier">optional</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -362,7 +876,7 @@ a valid MOC (i.e. can be plot, serialized, manipulated).</p>
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
   </p>
 </footer>
   </body>

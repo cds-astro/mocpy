@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>mocpy.World2ScreenMPL &#8212; mocpy 0.9.0 documentation</title>
+    <title>mocpy.World2ScreenMPL &#8212; mocpy 0.10.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.9.0 documentation</a>
+	<a href="../index.html">mocpy 0.10.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -77,7 +77,7 @@
 <h1>mocpy.World2ScreenMPL<a class="headerlink" href="#mocpy-world2screenmpl" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mocpy.World2ScreenMPL">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">World2ScreenMPL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">fig</span></em>, <em class="sig-param"><span class="pre">fov</span></em>, <em class="sig-param"><span class="pre">center=&lt;SkyCoord</span> <span class="pre">(ICRS):</span> <span class="pre">(ra</span></em>, <em class="sig-param"><span class="pre">dec)</span> <span class="pre">in</span> <span class="pre">deg</span>&#160;&#160;&#160;&#160; <span class="pre">(0.</span></em>, <em class="sig-param"><span class="pre">0.)&gt;</span></em>, <em class="sig-param"><span class="pre">coordsys='icrs'</span></em>, <em class="sig-param"><span class="pre">projection='AIT'</span></em>, <em class="sig-param"><span class="pre">rotation=&lt;Angle</span> <span class="pre">0.</span> <span class="pre">rad&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/plot/wcs.html#World2ScreenMPL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.World2ScreenMPL" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">World2ScreenMPL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center=&lt;SkyCoord</span> <span class="pre">(ICRS):</span> <span class="pre">(ra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec)</span> <span class="pre">in</span> <span class="pre">deg</span>&#160;&#160;&#160;&#160; <span class="pre">(0.</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">0.)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordsys='icrs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection='AIT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation=&lt;Angle</span> <span class="pre">0.</span> <span class="pre">rad&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/plot/wcs.html#World2ScreenMPL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.World2ScreenMPL" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a World2ScreenMPL for vizualizing a MOC in a matplotlib axis.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -130,23 +130,6 @@ the projections currently supported in astropy. Default to Aitoff.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="py method">
-<dt class="sig sig-object py" id="mocpy.World2ScreenMPL.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">fig</span></em>, <em class="sig-param"><span class="pre">fov</span></em>, <em class="sig-param"><span class="pre">center=&lt;SkyCoord</span> <span class="pre">(ICRS):</span> <span class="pre">(ra</span></em>, <em class="sig-param"><span class="pre">dec)</span> <span class="pre">in</span> <span class="pre">deg</span>&#160;&#160;&#160;&#160; <span class="pre">(0.</span></em>, <em class="sig-param"><span class="pre">0.)&gt;</span></em>, <em class="sig-param"><span class="pre">coordsys='icrs'</span></em>, <em class="sig-param"><span class="pre">projection='AIT'</span></em>, <em class="sig-param"><span class="pre">rotation=&lt;Angle</span> <span class="pre">0.</span> <span class="pre">rad&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/plot/wcs.html#World2ScreenMPL.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.World2ScreenMPL.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.World2ScreenMPL.__init__" title="mocpy.World2ScreenMPL.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(fig, fov[, center, coordsys, ...])</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </section>
@@ -191,7 +174,7 @@ the projections currently supported in astropy. Default to Aitoff.</p>
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2018, Thomas Boch, Matthieu Baumann.<br/>
+    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
   </p>
 </footer>
   </body>
