@@ -7,12 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.0]
 ### Changed
-* Rename `TimeMOC` logical operations taing a deltaT constraint adding the sufix `_with_timeresolution`
+* Rename `TimeMOC` logical operations taking a deltaT constraint adding the sufix `_with_timeresolution`
 * WARNING logical `TimeMOC` logical operations are now at the deepest depth (no time resolution parameter)
 
 ### Added
 * Deprecate `from_fits`, ...  methods
-* Ddd `MOC.spli_count`, `MOC.split`, `MOC.from_multiordermap_fits_file`
+* Add `MOC.spli_count`, `MOC.split`, `MOC.from_multiordermap_fits_file`
 * Add support for u16 and u32 fits MOC and TMOC in 'load'
 
 ### Bug correction
