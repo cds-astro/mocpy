@@ -17,12 +17,8 @@ def compute_healpix_vertices(depth, ipix, wcs):
 
     depth = int(depth)
 
-    step = 1
-    if depth < 3:
-        step = 2
-
     ipix_lon, ipix_lat = cdshealpix.vertices(ipix, depth)
-        
+
     ipix_lon = ipix_lon[:, [2, 3, 0, 1]]
     ipix_lat = ipix_lat[:, [2, 3, 0, 1]]
     ipix_boundaries = SkyCoord(ipix_lon, ipix_lat, frame=ICRS())
@@ -34,17 +30,6 @@ def compute_healpix_vertices(depth, ipix, wcs):
     c3 = np.vstack((xp[:, 2], yp[:, 2])).T
     c4 = np.vstack((xp[:, 3], yp[:, 3])).T
 
-    # if depth < 3:
-    #     c5 = np.vstack((xp[:, 4], yp[:, 4])).T
-    #     c6 = np.vstack((xp[:, 5], yp[:, 5])).T
-    #     c7 = np.vstack((xp[:, 6], yp[:, 6])).T
-    #     c8 = np.vstack((xp[:, 7], yp[:, 7])).T
-
-    #     cells = np.hstack((c1, c2, c3, c4, c5, c6, c7, c8, np.zeros((c1.shape[0], 2))))
-
-    #     path_vertices = cells.reshape((9*c1.shape[0], 2))
-    #     single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
-    # else:
     cells = np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
 
     path_vertices = cells.reshape((5*c1.shape[0], 2))
@@ -82,7 +67,6 @@ def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
 
     # Add the patches to the mpl axis
     ax.add_patch(patches_mpl)
-
     axis_viewport.set(ax, wcs)
 
 def fill(moc, ax, wcs, **kw_mpl_pathpatch):
