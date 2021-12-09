@@ -150,7 +150,7 @@ class STMOC(serializer.IO):
         return result
 
     @classmethod
-    def from_spatial_coverages(cls, times_start, times_end, spatial_coverages, time_depth=29):
+    def from_spatial_coverages(cls, times_start, times_end, spatial_coverages, time_depth=61):
         """
         Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.
 
