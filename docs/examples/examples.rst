@@ -42,6 +42,12 @@ This example:
 .. plot:: examples/logical_operations.py
     :include-source:
 
+Using the generic WCS astropy class
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. plot:: examples/astropy_wcs.py
+    :include-source:
+
 Create a MOC from a concave polygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

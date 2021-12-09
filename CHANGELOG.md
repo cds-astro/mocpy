@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1]
+### Changed
+* Extend the `moc.fill` and `moc.border` to directly accept an astropy wcs object. This solves the issue https://github.com/cds-astro/mocpy/issues/69
+* Addresses the plotting artefacts when plotting big HEALPix cells. Cells of depth < 3 are subdivided to the depth 3 before being plotted
 
 ## [0.10.0]
 ### Changed
