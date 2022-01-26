@@ -4,10 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.1]
+## [0.11.0]
+### Added
+* Option `include_indirect_neighbours` to `split` and `split_count`
+
 ### Changed
 * Extend the `moc.fill` and `moc.border` to directly accept an astropy wcs object. This solves the issue https://github.com/cds-astro/mocpy/issues/69
 * Addresses the plotting artefacts when plotting big HEALPix cells. Cells of depth < 3 are subdivided to the depth 3 before being plotted
+* Set the default `time_order` from 29 to 61, i.e. to `max_order` in `stmoc.from_spatial_coverages` (29 was the `max_order` in the previous MOC V2.0 version).
+
+## Improvement
+* More robust FITS UNIQ deserialization (ignoring 0 values)
+
 
 ## [0.10.0]
 ### Changed
