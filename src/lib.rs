@@ -1901,6 +1901,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``max_depth`` - The MOC depth.
+    /// * ``include_indirect_neighbours`` -
+    ///     if `false`, only consider  cells having a common edge as been part of a same MOC
+    ///     if `true`, also consider cells having a common vertex as been part of the same MOC
     /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
     ///
     /// # Errors
@@ -1909,12 +1912,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "hpx_coverage_split_count")]
     fn hpx_coverage_split_count(
         max_depth: u8,
+        include_indirect_neighbours: bool,
         ranges: PyReadonlyArray2<u64>,
     ) -> u32 {
         let ranges = ranges.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
-        moc.split_into_joint_mocs().len() as u32
+        moc.split_into_joint_mocs(include_indirect_neighbours).len() as u32
     }
 
     /// Split the input MOC into disjoint MOCs.
@@ -1922,6 +1926,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     /// # Arguments
     ///
     /// * ``max_depth`` - The MOC depth.
+    /// * ``include_indirect_neighbours`` -
+    ///     if `false`, only consider  cells having a common edge as been part of a same MOC
+    ///     if `true`, also consider cells having a common vertex as been part of the same MOC
     /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
     ///
     /// # Errors
@@ -1931,12 +1938,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn hpx_coverage_split(
         py: Python,
         max_depth: u8,
+        include_indirect_neighbours: bool,
         ranges: PyReadonlyArray2<u64>,
     ) -> PyResult<Py<PyList>> {
         let ranges = ranges.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
         let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
-        let mocs: Vec<Py<PyArray2<u64>>> = moc.split_into_joint_mocs()
+        let mocs: Vec<Py<PyArray2<u64>>> = moc.split_into_joint_mocs(include_indirect_neighbours)
           .drain(..)
           .map(|cell_moc| 
             vec_range_to_array2(

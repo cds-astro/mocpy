@@ -154,22 +154,34 @@ class MOC(AbstractMOC):
         interval_set = IntervalSet(intervals, make_consistent=False)
         return MOC(interval_set, make_consistent=False)
 
-    def split_count(self):
+    def split_count(self, include_indirect_neighbours=False):
        """
        Returns the number of disjoint MOCs the given MOC contains.
-       """
-       return mocpy.hpx_coverage_split_count(self.max_order, self._interval_set._intervals)
 
-    def split(self):
+       Parameter
+       ---------
+       include_indirect_neighbours : bool
+           if `false`, only consider  cells having a common edge as been part of a same MOC
+           if `true`, also consider cells having a common vertex as been part of the same MOC
+       """
+       return mocpy.hpx_coverage_split_count(self.max_order, include_indirect_neighbours, self._interval_set._intervals)
+
+    def split(self, include_indirect_neighbours=False):
         """
         Returns the disjoint MOCs this MOC contains.format
-       
+
+        Parameter
+        ---------
+        include_indirect_neighbours : bool
+            if `false`, only consider  cells having a common edge as been part of a same MOC
+            if `true`, also consider cells having a common vertex as been part of the same MOC
+
         WARNING
         -------
         Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
         
         """
-        list_of_intervals = mocpy.hpx_coverage_split(self.max_order, self._interval_set._intervals)
+        list_of_intervals = mocpy.hpx_coverage_split(self.max_order, include_indirect_neighbours, self._interval_set._intervals)
         mocs = map(lambda intervals: MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False), list_of_intervals)
         return mocs
 
