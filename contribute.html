@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Contribute &#8212; mocpy 0.10.0 documentation</title>
+    <title>Contribute &#8212; mocpy 0.10.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
     
@@ -52,7 +52,7 @@
 	
       </li>
       <li>
-	<a href="index.html">mocpy 0.10.0 documentation</a>
+	<a href="index.html">mocpy 0.10.1 documentation</a>
 	 &#187;
       </li>
       
@@ -124,6 +124,16 @@ along with a new empty pip package manager.</p>
 <p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pip</span> <span class="pre">list</span></code> will tell you that there is no package installed and <code class="xref py py-obj docutils literal notranslate"><span class="pre">python</span></code>
 opens a session with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy-env</span></code> interpreter.</p>
 <ul>
+<li><p>You will need to install <a class="reference external" href="https://github.com/PyO3/maturin">maturin</a>, a tool that builds and publishes crates and rust binaries as python packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">maturin</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run maturin:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">maturin</span> <span class="n">develop</span> <span class="o">--</span><span class="n">release</span>
+</pre></div>
+</div>
+</li>
 <li><p>You can now install all the necessary pip packages
 for developping and testing MOCpy:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="o">&lt;</span><span class="n">path_to_mocpy_repo</span><span class="o">&gt;/</span><span class="n">requirements</span><span class="o">/</span><span class="n">contributing</span><span class="o">.</span><span class="n">txt</span>
@@ -190,9 +200,11 @@ for developping and testing MOCpy:</p>
 </ul>
 
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="stubs/mocpy.World2ScreenMPL.html"
-                        title="previous chapter">mocpy.World2ScreenMPL</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stubs/mocpy.World2ScreenMPL.html"
+                          title="previous chapter">mocpy.World2ScreenMPL</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Examples &#8212; mocpy 0.10.0 documentation</title>
+    <title>Examples &#8212; mocpy 0.10.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.10.0 documentation</a>
+	<a href="../index.html">mocpy 0.10.1 documentation</a>
 	 &#187;
       </li>
       
@@ -174,6 +174,67 @@
 <p>(<a class="reference external" href="../examples/logical_operations.py">Source code</a>, <a class="reference external" href="../examples/logical_operations.png">png</a>, <a class="reference external" href="../examples/logical_operations.hires.png">hires.png</a>, <a class="reference external" href="../examples/logical_operations.pdf">pdf</a>)</p>
 <figure class="align-default">
 <img alt="../_images/logical_operations.png" src="../_images/logical_operations.png" />
+</figure>
+</section>
+<section id="using-the-generic-wcs-astropy-class">
+<h3>Using the generic WCS astropy class<a class="headerlink" href="#using-the-generic-wcs-astropy-class" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">healpy</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+
+<span class="c1"># Generate an abritrary WCS object</span>
+<span class="n">wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span><span class="n">naxis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">ctype</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RA---AIT&quot;</span><span class="p">,</span> <span class="s2">&quot;DEC--AIT&quot;</span><span class="p">]</span> 
+<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crval</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.675</span><span class="p">,</span> <span class="mf">0.675</span><span class="p">])</span>
+<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crpix</span> <span class="o">=</span> <span class="p">[</span><span class="mf">240.5</span><span class="p">,</span> <span class="mf">120.5</span><span class="p">]</span>
+
+<span class="c1"># Get HEALPix cell centers</span>
+<span class="n">nside</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span>
+    <span class="n">nside</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">nside</span><span class="p">)),</span>
+    <span class="n">nest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">lonlat</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># MPL figure with WCS projection</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span>
+    <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span>
+<span class="p">)</span>
+
+<span class="c1"># Plot the HEALPix centers (just to test)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">get_transform</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="c1"># Define a MOC union</span>
+<span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
+    <span class="n">lon</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">lat</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+<span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
+    <span class="n">lon</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">lat</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">moc1</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
+
+<span class="c1"># Plot the MOC in the current figure</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href="../examples/astropy_wcs.py">Source code</a>, <a class="reference external" href="../examples/astropy_wcs.png">png</a>, <a class="reference external" href="../examples/astropy_wcs.hires.png">hires.png</a>, <a class="reference external" href="../examples/astropy_wcs.pdf">pdf</a>)</p>
+<figure class="align-default">
+<img alt="../_images/astropy_wcs.png" src="../_images/astropy_wcs.png" />
 </figure>
 </section>
 <section id="create-a-moc-from-a-concave-polygon">
@@ -450,6 +511,7 @@ See its description formalized by the IVOA <a class="reference external" href="h
 <li><a class="reference internal" href="#spatial-coverages">Spatial coverages</a><ul>
 <li><a class="reference internal" href="#loading-and-plotting-the-moc-of-sdss">Loading and plotting the MOC of SDSS</a></li>
 <li><a class="reference internal" href="#intersection-between-galex-and-sdss">Intersection between GALEX and SDSS</a></li>
+<li><a class="reference internal" href="#using-the-generic-wcs-astropy-class">Using the generic WCS astropy class</a></li>
 <li><a class="reference internal" href="#create-a-moc-from-a-concave-polygon">Create a MOC from a concave polygon</a></li>
 <li><a class="reference internal" href="#get-the-border-s-of-a-moc">Get the border(s) of a MOC</a></li>
 <li><a class="reference internal" href="#gravitational-waves-mocs">Gravitational Waves MOCs</a></li>
@@ -463,12 +525,16 @@ See its description formalized by the IVOA <a class="reference external" href="h
 </ul>
 
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../install.html"
-                        title="previous chapter">Install</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../api.html"
-                        title="next chapter">API</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../install.html"
+                          title="previous chapter">Install</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../api.html"
+                          title="next chapter">API</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>mocpy.MOC &#8212; mocpy 0.10.0 documentation</title>
+    <title>mocpy.MOC &#8212; mocpy 0.10.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.10.0 documentation</a>
+	<a href="../index.html">mocpy 0.10.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -197,73 +197,76 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_polygon_skycoord" title="mocpy.MOC.from_polygon_skycoord"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_polygon_skycoord</span></code></a>(skycoord[, max_depth])</p></td>
 <td><p>Creates a MOC from a polygon.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_skycoords" title="mocpy.MOC.from_skycoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_skycoords</span></code></a>(skycoords, max_norder)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_ring" title="mocpy.MOC.from_ring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_ring</span></code></a>(lon, lat, internal_radius, ...[, ...])</p></td>
+<td><p>Creates a MOC from a ring.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_skycoords" title="mocpy.MOC.from_skycoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_skycoords</span></code></a>(skycoords, max_norder)</p></td>
 <td><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_str" title="mocpy.MOC.from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code></a>(value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_str" title="mocpy.MOC.from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code></a>(value)</p></td>
 <td><p>Create a MOC from a str.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_string" title="mocpy.MOC.from_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code></a>(value[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_string" title="mocpy.MOC.from_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code></a>(value[, format])</p></td>
 <td><p>Deserialize the Spatial MOC from the given string.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_url" title="mocpy.MOC.from_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_url</span></code></a>(url)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_url" title="mocpy.MOC.from_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_url</span></code></a>(url)</p></td>
 <td><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> object from a given url.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_valued_healpix_cells" title="mocpy.MOC.from_valued_healpix_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_valued_healpix_cells</span></code></a>(uniq, values[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_valued_healpix_cells" title="mocpy.MOC.from_valued_healpix_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_valued_healpix_cells</span></code></a>(uniq, values[, ...])</p></td>
 <td><p>Creates a MOC from a list of uniq associated with values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_vizier_table" title="mocpy.MOC.from_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_vizier_table</span></code></a>(table_id[, nside])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_vizier_table" title="mocpy.MOC.from_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_vizier_table</span></code></a>(table_id[, nside])</p></td>
 <td><p>Creates a <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> object from a VizieR table.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>([order])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>([order])</p></td>
 <td><p>Returns the sky coordinates defining the border(s) of the MOC.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.intersection" title="mocpy.MOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc, *args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.intersection" title="mocpy.MOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc, *args)</p></td>
 <td><p>Intersection between the MOC instance and other MOCs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.load" title="mocpy.MOC.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.load" title="mocpy.MOC.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path[, format])</p></td>
 <td><p>Load the Spatial MOC from a file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.order_to_spatial_resolution" title="mocpy.MOC.order_to_spatial_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_spatial_resolution</span></code></a>(order)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.order_to_spatial_resolution" title="mocpy.MOC.order_to_spatial_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_spatial_resolution</span></code></a>(order)</p></td>
 <td><p>Convert a depth to its equivalent spatial resolution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.plot" title="mocpy.MOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([title, frame])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.plot" title="mocpy.MOC.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([title, frame])</p></td>
 <td><p>Plot the MOC object using a mollweide projection.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.query_simbad" title="mocpy.MOC.query_simbad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_simbad</span></code></a>([max_rows])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.query_simbad" title="mocpy.MOC.query_simbad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_simbad</span></code></a>([max_rows])</p></td>
 <td><p>Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.query_vizier_table" title="mocpy.MOC.query_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_vizier_table</span></code></a>(table_id[, max_rows])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.query_vizier_table" title="mocpy.MOC.query_vizier_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_vizier_table</span></code></a>(table_id[, max_rows])</p></td>
 <td><p>Query a VizieR table for sources in the coverage of the MOC instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.refine_to_order" title="mocpy.MOC.refine_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_to_order</span></code></a>(min_depth)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.refine_to_order" title="mocpy.MOC.refine_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_to_order</span></code></a>(min_depth)</p></td>
 <td><p>Internal method</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.remove_neighbours" title="mocpy.MOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.remove_neighbours" title="mocpy.MOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
 <td><p>Removes from the MOC instance the HEALPix cells located at its border.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.save" title="mocpy.MOC.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path[, format, overwrite])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.save" title="mocpy.MOC.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path[, format, overwrite])</p></td>
 <td><p>Writes the Spatial MOC to a file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.serialize" title="mocpy.MOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict, pre_v2])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.serialize" title="mocpy.MOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict, pre_v2])</p></td>
 <td><p>Serializes the MOC into a specific format.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.spatial_resolution_to_order" title="mocpy.MOC.spatial_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spatial_resolution_to_order</span></code></a>(spatial_resolution)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.spatial_resolution_to_order" title="mocpy.MOC.spatial_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spatial_resolution_to_order</span></code></a>(spatial_resolution)</p></td>
 <td><p>Convert a spatial resolution to a MOC order.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.split" title="mocpy.MOC.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.split" title="mocpy.MOC.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>([include_indirect_neighbours])</p></td>
 <td><p>Returns the disjoint MOCs this MOC contains.format</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.split_count" title="mocpy.MOC.split_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_count</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.split_count" title="mocpy.MOC.split_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_count</span></code></a>([include_indirect_neighbours])</p></td>
 <td><p>Returns the number of disjoint MOCs the given MOC contains.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.to_string" title="mocpy.MOC.to_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code></a>([format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.to_string" title="mocpy.MOC.to_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code></a>([format])</p></td>
 <td><p>Writes the Spatial MOC into a string.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.union" title="mocpy.MOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc, *args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.union" title="mocpy.MOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc, *args)</p></td>
 <td><p>Union between the MOC instance and other MOCs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.write" title="mocpy.MOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.write" title="mocpy.MOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, ...])</p></td>
 <td><p>Writes the MOC to a file.</p></td>
 </tr>
 </tbody>
@@ -288,16 +291,16 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <span class="sig-name descname"><span class="pre">border</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wcs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw_mpl_pathpatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.border"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.border" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws the MOC border(s) on a matplotlib axis.</p>
 <p>This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
-You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a> 
+You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a> 
 (see the <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch">list of valid keywords</a>).</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
 <dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
-<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a></p>
+<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a></p>
 </dd>
 </dl>
 </dd>
@@ -464,16 +467,16 @@ instead of modifying the existing one.</p>
 <span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wcs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw_mpl_pathpatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.fill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.fill" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws the MOC on a matplotlib axis.</p>
 <p>This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
-You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
+You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
 (see the <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch">list of valid keywords</a>).</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
 <dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
-<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.4.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>.</p>
+<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -869,6 +872,54 @@ concave polygon but not a self-intersecting one.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.from_ring">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_ring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_ring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_ring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a MOC from a ring.</p>
+<p>The cone is centered around the (<code class="xref py py-obj docutils literal notranslate"><span class="pre">lon</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">lat</span></code>) position with an internal radius expressed by
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">internal_radius</span></code> and an external radius expressed by <code class="xref py py-obj docutils literal notranslate"><span class="pre">external_radius</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the ring.</p>
+</dd>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the ring.</p>
+</dd>
+<dt><strong>internal_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The internal radius angle of the ring.</p>
+</dd>
+<dt><strong>external_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The external radius angle of the ring.</p>
+</dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
+</dd>
+<dt><strong>delta_depth</strong><span class="classifier">int, optional</span></dt><dd><p>To control the approximation, you can choose to perform the computations at a deeper
+depth using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth_delta</span></code> parameter.
+The depth at which the computations will be made will therefore be equal to
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_depth</span></code> + <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth_delta</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The resulting MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">Longitude</span><span class="p">,</span> <span class="n">Latitude</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_ring</span><span class="p">(</span>
+<span class="gp">... </span> <span class="n">lon</span><span class="o">=</span><span class="n">Longitude</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">lat</span><span class="o">=</span><span class="n">Latitude</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">internal_radius</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">external_radius</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_skycoords">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_skycoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skycoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_norder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_skycoords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_skycoords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p>
@@ -1251,13 +1302,13 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.split">
-<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.split" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_indirect_neighbours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.split" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the disjoint MOCs this MOC contains.format</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.split_count">
-<span class="sig-name descname"><span class="pre">split_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.split_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.split_count" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_indirect_neighbours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.split_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.split_count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of disjoint MOCs the given MOC contains.</p>
 </dd></dl>
 
@@ -1338,12 +1389,16 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </ul>
 
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../api.html"
-                        title="previous chapter">API</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="mocpy.TimeMOC.html"
-                        title="next chapter">mocpy.TimeMOC</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../api.html"
+                          title="previous chapter">API</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="mocpy.TimeMOC.html"
+                          title="next chapter">mocpy.TimeMOC</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.10.0 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.10.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-astropy.css" />
     
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.10.0 documentation</a>
+	<a href="../../../index.html">mocpy 0.10.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -216,22 +216,34 @@
         <span class="n">interval_set</span> <span class="o">=</span> <span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">interval_set</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.split_count"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split_count">[docs]</a>    <span class="k">def</span> <span class="nf">split_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.split_count"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split_count">[docs]</a>    <span class="k">def</span> <span class="nf">split_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Returns the number of disjoint MOCs the given MOC contains.</span>
-<span class="sd">       &quot;&quot;&quot;</span>
-       <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">hpx_coverage_split_count</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.split"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="sd">       Parameter</span>
+<span class="sd">       ---------</span>
+<span class="sd">       include_indirect_neighbours : bool</span>
+<span class="sd">           if `false`, only consider  cells having a common edge as been part of a same MOC</span>
+<span class="sd">           if `true`, also consider cells having a common vertex as been part of the same MOC</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+       <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">hpx_coverage_split_count</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MOC.split"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the disjoint MOCs this MOC contains.format</span>
-<span class="sd">       </span>
+
+<span class="sd">        Parameter</span>
+<span class="sd">        ---------</span>
+<span class="sd">        include_indirect_neighbours : bool</span>
+<span class="sd">            if `false`, only consider  cells having a common edge as been part of a same MOC</span>
+<span class="sd">            if `true`, also consider cells having a common vertex as been part of the same MOC</span>
+
 <span class="sd">        WARNING</span>
 <span class="sd">        -------</span>
 <span class="sd">        Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">list_of_intervals</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">hpx_coverage_split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">)</span>
+        <span class="n">list_of_intervals</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">hpx_coverage_split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_set</span><span class="o">.</span><span class="n">_intervals</span><span class="p">)</span>
         <span class="n">mocs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">intervals</span><span class="p">:</span> <span class="n">MOC</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">list_of_intervals</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">mocs</span></div>
 
@@ -891,6 +903,62 @@
         <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">Latitude</span><span class="p">)</span>  <span class="k">else</span> <span class="n">Latitude</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
         <span class="n">pix</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">fully_covered_flags</span> <span class="o">=</span> <span class="n">cdshealpix</span><span class="o">.</span><span class="n">cone_search</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span><span class="n">pix</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">fully_covered_flags</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MOC.from_ring"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ring">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_ring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">internal_radius</span><span class="p">,</span> <span class="n">external_radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a MOC from a ring.</span>
+
+<span class="sd">        The cone is centered around the (`lon`, `lat`) position with an internal radius expressed by</span>
+<span class="sd">        `internal_radius` and an external radius expressed by `external_radius`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`</span>
+<span class="sd">            The longitude of the center of the ring.</span>
+<span class="sd">        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`</span>
+<span class="sd">            The latitude of the center of the ring.</span>
+<span class="sd">        internal_radius : `astropy.coordinates.Angle`</span>
+<span class="sd">            The internal radius angle of the ring.</span>
+<span class="sd">        external_radius : `astropy.coordinates.Angle`</span>
+<span class="sd">            The external radius angle of the ring.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        delta_depth : int, optional</span>
+<span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
+<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
+<span class="sd">            `max_depth` + `depth_delta`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC`</span>
+<span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, Longitude, Latitude</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_ring(</span>
+<span class="sd">        ...  lon=Longitude(0 * u.deg),</span>
+<span class="sd">        ...  lat=Latitude(0 * u.deg),</span>
+<span class="sd">        ...  internal_radius=Angle(5, u.deg),</span>
+<span class="sd">        ...  external_radius=Angle(10, u.deg),</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">Longitude</span><span class="p">)</span> <span class="k">else</span> <span class="n">Longitude</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">Latitude</span><span class="p">)</span>  <span class="k">else</span> <span class="n">Latitude</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_ring</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">lon</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">internal_radius</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">external_radius</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">IntervalSet</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">make_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MOC.from_polygon_skycoord"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon_skycoord">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_polygon_skycoord</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoord</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
