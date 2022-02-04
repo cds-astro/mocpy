@@ -2283,5 +2283,47 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
+    /// Create a spatial coverage from a given ring.
+    ///
+    /// # Arguments
+    ///
+    /// * ``ra_deg`` - longitude of the center of the ring, in degrees
+    /// * ``dec_deg`` - latitude of the center of the ring, in degrees
+    /// * ``r_int_deg`` - Internal radius of the ring, in degrees
+    /// * ``r_ext_deg`` - External radius of the ring, in degrees
+    /// * ``depth`` - The depths of the expected MOC
+    /// * ``delta_depth`` - parameter controlling the approximation (typical value: 2)
+    ///
+    /// # Errors
+    ///
+    /// If one of the following conditions is not met:
+    ///
+    /// * ``depth`` contains values in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+    /// * ``r_int_deg`` contains values in the range `[0, 180]`
+    /// * ``r_ext_deg`` contains values in the range `[0, 180]`
+    /// * ``r_ext_deg > r_int_deg``
+    ///
+    #[pyfn(m, "from_ring")]
+    fn from_ring(
+        py: Python,
+        lon_deg: f64,
+        lat_deg: f64,
+        r_int_deg: f64,
+        r_ext_deg: f64,
+        depth: u8,
+        delta_depth: u8,
+    ) -> PyResult<Py<PyArray2<u64>>> {
+        let moc_ranges = RangeMOC::from_ring(
+            lon_deg.to_radians(),
+            lat_deg.to_radians(),
+            r_int_deg.to_radians(),
+            r_ext_deg.to_radians(),
+            depth,
+            delta_depth
+        ).into_moc_ranges();
+        let result = mocranges_to_array2(moc_ranges);
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
    Ok(())
 }

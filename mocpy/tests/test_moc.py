@@ -288,6 +288,15 @@ def test_degrade_to_order():
         hst_moc = hst_moc.degrade_to_order(order)
         assert(hst_moc.sky_fraction <= 1.0)
 
+
+def test_from_ring():
+     moc = MOC.from_ring(
+         lon=0 * u.deg,
+         lat=0 * u.deg,
+         internal_radius=Angle(5, u.deg),
+         external_radius=Angle(10, u.deg),
+         max_depth=10)
+
 # TODO: IMPROVE THE ALGO
 '''
 def test_boundaries():
