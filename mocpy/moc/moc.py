@@ -843,6 +843,62 @@ class MOC(AbstractMOC):
         return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
 
     @classmethod
+    def from_ring(cls, lon, lat, internal_radius, external_radius, max_depth, delta_depth=2):
+        """
+        Creates a MOC from a ring.
+
+        The cone is centered around the (`lon`, `lat`) position with an internal radius expressed by
+        `internal_radius` and an external radius expressed by `external_radius`.
+
+        Parameters
+        ----------
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
+            The longitude of the center of the ring.
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
+            The latitude of the center of the ring.
+        internal_radius : `astropy.coordinates.Angle`
+            The internal radius angle of the ring.
+        external_radius : `astropy.coordinates.Angle`
+            The external radius angle of the ring.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
+        >>> moc = MOC.from_ring(
+        ...  lon=Longitude(0 * u.deg),
+        ...  lat=Latitude(0 * u.deg),
+        ...  internal_radius=Angle(5, u.deg),
+        ...  external_radius=Angle(10, u.deg),
+        ...  max_depth=10
+        ... )
+        """
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
+        lat = lat if isinstance(lat, Latitude)  else Latitude(lat)
+        intervals = mocpy.from_ring(
+            np.float64(lon.degree),
+            np.float64(lat.degree),
+            np.float64(internal_radius.degree),
+            np.float64(external_radius.degree),
+            np.uint8(max_depth),
+            np.uint8(delta_depth)
+        )
+        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+
+    @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
         """
         Creates a MOC from a polygon.
