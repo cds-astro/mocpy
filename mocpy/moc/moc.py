@@ -636,7 +636,7 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        path : str
+        path : str or pathlib.Path
             The path to the file to save the MOC in.
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
@@ -657,7 +657,7 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         intervals = mocpy.spatial_moc_from_multiordermap_fits_file(
-            path,
+            str(path),
             np.float64(cumul_from),
             np.float64(cumul_to),
             asc, 
@@ -1177,7 +1177,7 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        path : str
+        path : str or pathlib.Path
             The path to the file to save the MOC in.
         format : str, optional
             The format in which the MOC is saved.
@@ -1187,6 +1187,7 @@ class MOC(AbstractMOC):
             If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
             Default to False.
         """
+        path = str(path)
         import os
         file_exists = os.path.isfile(path)
         
@@ -1213,13 +1214,14 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        path : str
+        path : str or pathlib.Path
             The path to the file to load the MOC from.
         format : str, optional
             The format from which the MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
         """
+        path = str(path)
         if format == 'fits':
             intervals = mocpy.spatial_moc_from_fits_file(path)
             return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
