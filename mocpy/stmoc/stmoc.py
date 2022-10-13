@@ -473,7 +473,7 @@ class STMOC(serializer.IO):
 
         Parameters
         ----------
-        path : str
+        path : str or pathlib.Path
             The path to the file to save the MOC in.
         format : str, optional
             The format in which the MOC will be serialized before being saved.
@@ -483,6 +483,7 @@ class STMOC(serializer.IO):
             If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
             Default to False.
         """
+        path = str(path)
         import os
         file_exists = os.path.isfile(path)
         
@@ -509,13 +510,14 @@ class STMOC(serializer.IO):
 
         Parameters
         ----------
-        path : str
+        path : str or pathlib.Path
             The path to the file to load the MOC from.
         format : str, optional
             The format from which the MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
         """
+        path = str(path)
         stmoc = cls()
         if format == 'fits':
             mocpy.coverage_2d_from_fits_file(stmoc.__index, path)
