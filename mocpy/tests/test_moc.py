@@ -254,8 +254,10 @@ def test_mpl_border():
 
 
 #### TESTING MOC features ####
-def test_moc_contains():
-    order = 4
+@pytest.mark.parametrize("order", [
+    4, 5, 6, 15, 20, 28
+])
+def test_moc_contains(order):
     size = 20
     healpix_arr = np.random.randint(0, 12*4**order, size)
     all_healpix_arr = np.arange(12*4**order)
