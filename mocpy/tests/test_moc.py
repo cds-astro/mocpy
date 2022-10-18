@@ -254,27 +254,28 @@ def test_mpl_border():
 
 
 #### TESTING MOC features ####
-def test_moc_contains():
-    order = 4
+@pytest.mark.parametrize("order", [
+    4, 5, 6, 15, 20, 28
+])
+def test_moc_contains(order):
+    # defines 20 random healpix cells of the required order
     size = 20
-    healpix_arr = np.random.randint(0, 12*4**order, size)
-    all_healpix_arr = np.arange(12*4**order)
-    healpix_outside_arr = np.setdiff1d(all_healpix_arr, healpix_arr)
-
+    healpix_arr = np.random.randint(0, 12*4**order, size, dtype='uint64')
+    # defines a moc containing the 20 points
     moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
-
+    # the complementary should not contain them
+    moc_complement = moc.complement()
+    # coordinates of the 20 random points
     lon, lat = cdshealpix.healpix_to_lonlat(healpix_arr, order)
-    lon_out, lat_out = cdshealpix.healpix_to_lonlat(healpix_outside_arr, order)
-
+    # tests 
     should_be_inside_arr = moc.contains(ra=lon, dec=lat)
     assert should_be_inside_arr.all()
-    should_be_outside_arr = moc.contains(ra=lon_out, dec=lat_out)
+    should_be_outside_arr = moc_complement.contains(ra=lon, dec=lat)
     assert not should_be_outside_arr.any()
-
     # test keep_inside field
     should_be_outside_arr = moc.contains(ra=lon, dec=lat, keep_inside=False)
     assert not should_be_outside_arr.any()
-    should_be_inside_arr = moc.contains(ra=lon_out, dec=lat_out, keep_inside=False)
+    should_be_inside_arr = moc_complement.contains(ra=lon, dec=lat, keep_inside=False)
     assert should_be_inside_arr.all()
 
 

@@ -339,6 +339,54 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
     mocranges_to_array2(HpxRanges::<u64>::new_from(ranges))
 }
 
+/// Creates a spatial coverage from a list of sky coordinates.
+///
+/// # Arguments
+///
+/// * ``lon`` - The longitudes of the sky coordinates.
+/// * ``lat`` - The latitudes of the sky coordinates.
+/// * ``ds`` - The depth at which HEALPix cell indices
+///   will be computed.
+///
+/// # Precondition
+///
+/// * ``lon`` and ``lat`` are expressed in radians.
+/// They are valid because they come from
+/// `astropy.units.Quantity` objects.
+///
+/// # Errors
+///
+/// If the number of longitudes and latitudes do not match.
+pub fn contains(
+    coverage: &HpxRanges<u64>,
+    lon: Array1<f64>,
+    lat: Array1<f64>,
+    result: &mut Array1<bool>,
+) -> PyResult<()> {
+    if lon.len() != lat.len() {
+        return Err(exceptions::PyValueError::new_err(
+            "Longitudes and latitudes should have the same length.",
+        ));
+    }
+
+    // Retrieve the spatial depth of the Space coverage
+    let layer = healpix::nested::get(Hpx::<u64>::MAX_DEPTH);
+    Zip::from(result)
+      .and(&lon)
+      .and(&lat)
+      .par_for_each(|r, &l, &b| {
+          // Compute the HEALPix cell range at the max depth
+          // along the spatial dimension
+          let pix = layer.hash(l, b);
+          
+          // Check whether the (time in µs, HEALPix cell nested range)
+          // is contained into the Time coverage
+          *r = coverage.contains_val(&pix);
+      });
+
+    Ok(())
+}
+
 
 /// Convert a spatial coverage from the **uniq** to the **nested** format.
 ///
