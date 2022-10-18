@@ -1430,6 +1430,34 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
+    /// Checks if ra dec coordinates are contained into a Space coverage
+    ///
+    /// # Arguments
+    ///
+    /// * ``index`` - The index of the Space coverage.
+    /// * ``lon`` - The longitudes.
+    /// * ``lat`` - The latitudes.
+    ///
+    /// # Errors
+    ///
+    /// * If `lon` and `lat` do not have the same length
+    #[pyfn(m, "space_coverage_contains")]
+    fn space_coverage_contains(
+        py: Python,
+        intervals: PyReadonlyArray2<u64>,
+        lon: PyReadonlyArray1<f64>,
+        lat: PyReadonlyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
+        let lon = lon.as_array().to_owned();
+        let lat = lat.as_array().to_owned();
+
+        let ranges = intervals.as_array().to_owned();
+        let coverage = coverage::create_ranges_from_py_unchecked(ranges).into();
+
+        let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
+        spatial_coverage::contains(&coverage, lon, lat, &mut result)?;
+        Ok(result.into_pyarray(py).to_owned())
+    }
+
     /// Serialize a spatial coverage to a JSON format
     ///
     /// # Arguments
@@ -1444,7 +1472,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let result = coverage::to_json(py, coverage)?;
         Ok(result.to_object(py))
     }
-
 
     /// Serialize a spatial MOC into an FITS file.
     ///
