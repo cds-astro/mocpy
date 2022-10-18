@@ -224,21 +224,11 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-        max_depth = self.max_order
-        m = np.zeros(3 << (2*(max_depth + 1)), dtype=bool)
-
-        pix_id = mocpy.flatten_pixels(self._interval_set._intervals, max_depth)
-        m[pix_id] = True
-
-        if not keep_inside:
-            m = np.logical_not(m)
-
-        ra  = ra  if isinstance(ra, Longitude) else Longitude(ra)
-        dec = dec if isinstance(dec, Latitude) else Latitude(dec)
-
-        pix = cdshealpix.lonlat_to_healpix(ra, dec, max_depth)
-
-        return m[pix]
+        mask = mocpy.space_coverage_contains(self._interval_set._intervals, ra, dec)
+        if keep_inside: 
+            return mask
+        else:
+            return ~mask
 
     ## TODO: implement: def contains_including_surrounding(self, ra, dec, distance)
 
