@@ -370,9 +370,7 @@ pub fn contains(
     }
 
     // Retrieve the spatial depth of the Space coverage
-    let s_depth = coverage.compute_min_depth();
-    let layer = healpix::nested::get(s_depth as u8);
-    let shift = (Hpx::<u64>::MAX_DEPTH - s_depth) << 1;
+    let layer = healpix::nested::get(Hpx::<u64>::MAX_DEPTH);
     Zip::from(result)
       .and(&lon)
       .and(&lat)
@@ -380,12 +378,10 @@ pub fn contains(
           // Compute the HEALPix cell range at the max depth
           // along the spatial dimension
           let pix = layer.hash(l, b);
-          let e1 = pix << shift;
-          let e2 = (pix + 1) << shift;
           
           // Check whether the (time in µs, HEALPix cell nested range)
           // is contained into the Time coverage
-          *r = coverage.contains(&(e1..e2));
+          *r = coverage.contains_val(&pix);
       });
 
     Ok(())
