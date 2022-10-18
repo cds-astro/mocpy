@@ -52,14 +52,6 @@ along with a new empty pip package manager.
 `pip list` will tell you that there is no package installed and `python`
 opens a session with the `mocpy-env` interpreter.
 
-- You will need to install `maturin <https://github.com/PyO3/maturin>`__, a tool that builds and publishes crates and rust binaries as python packages::
-
-    pip install maturin
-
-- Run maturin::
-
-    maturin develop --release
-
 - You can now install all the necessary pip packages
   for developping and testing MOCpy::
 
@@ -69,9 +61,22 @@ opens a session with the `mocpy-env` interpreter.
 
     deactivate
 
-
-Running the tests
+Now build package
 -----------------
+
+- You will need to install `maturin <https://github.com/PyO3/maturin>`__, a tool that builds and publishes crates and rust binaries as python packages::
+
+    pip install maturin
+
+- Run maturin::
+
+    maturin develop --release
+   
+This step will inform you of any issue in the rust part.
+
+
+Running the python tests
+------------------------
 
 Once your environment is set up and activated you can run the tests
 
