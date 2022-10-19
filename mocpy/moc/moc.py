@@ -205,6 +205,9 @@ class MOC(AbstractMOC):
         intervals = mocpy.hpx_coverage_degrade(self._interval_set._intervals, new_order)
         return MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
+
+        
+
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
         Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
@@ -223,6 +226,33 @@ class MOC(AbstractMOC):
             A mask boolean array
         """
         return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside=keep_inside)
+
+    def contains(self, lon, lat, keep_inside=True):
+        """
+        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
+
+        Parameters
+        ----------
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
+            Right ascension array
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
+            Declination array
+        keep_inside : bool, optional
+            True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
+            is false, contains will return the mask of the coordinates lying outside the MOC.
+
+        Returns
+        -------
+        array : `~np.ndarray`
+            A mask boolean array
+        """
+
+
+        import warnings
+        warnings.warn('This method is deprecated and has been replaced by contains_lonlat', DeprecationWarning)
+
+        return self.contains_lonlat(lon, lat, keep_inside=keep_inside)
+
 
     def contains_lonlat(self, lon, lat, keep_inside=True):
         """
