@@ -205,15 +205,34 @@ class MOC(AbstractMOC):
         intervals = mocpy.hpx_coverage_degrade(self._interval_set._intervals, new_order)
         return MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
-    def contains(self, ra, dec, keep_inside=True):
+    def contains_skycoords(self, skycoords, keep_inside=True):
         """
         Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
 
         Parameters
         ----------
-        ra : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
+        skycoords : `astropy.coordinates.SkyCoord`
+            The sky coordinates that will be tested.
+        keep_inside : bool, optional
+            True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
+            is false, contains will return the mask of the coordinates lying outside the MOC.
+
+        Returns
+        -------
+        array : `~np.ndarray`
+            A mask boolean array
+        """
+        return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside)
+
+    def contains_lonlat(self, lon, lat, keep_inside=True):
+        """
+        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
+
+        Parameters
+        ----------
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
             Right ascension array
-        dec : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             Declination array
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
@@ -224,13 +243,14 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-        mask = mocpy.space_coverage_contains(self._interval_set._intervals, ra, dec)
+
+        mask = mocpy.space_coverage_contains(self._interval_set._intervals, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         if keep_inside: 
             return mask
         else:
             return ~mask
 
-    ## TODO: implement: def contains_including_surrounding(self, ra, dec, distance)
+    ## TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
 
     def add_neighbours(self):
         """
