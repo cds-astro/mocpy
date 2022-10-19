@@ -205,9 +205,6 @@ class MOC(AbstractMOC):
         intervals = mocpy.hpx_coverage_degrade(self._interval_set._intervals, new_order)
         return MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
 
-
-        
-
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
         Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
@@ -246,8 +243,6 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-
-
         import warnings
         warnings.warn('This method is deprecated and has been replaced by contains_lonlat', DeprecationWarning)
 
@@ -297,7 +292,6 @@ class MOC(AbstractMOC):
         self._interval_set = IntervalSet(intervals, make_consistent=False)
         return self
 
-
     def remove_neighbours(self):
         """
         Removes from the MOC instance the HEALPix cells located at its border.
@@ -313,8 +307,6 @@ class MOC(AbstractMOC):
         self._interval_set = IntervalSet(intervals, make_consistent=False)
         return self
         
-
-
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
         Draws the MOC on a matplotlib axis.
