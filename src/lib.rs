@@ -1430,7 +1430,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(result.into_pyarray(py).to_owned())
     }
 
-    /// Checks if ra dec coordinates are contained into a Space coverage
+    /// Checks if lon lat coordinates are contained into a Space coverage
     ///
     /// # Arguments
     ///
@@ -1451,7 +1451,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         let lat = lat.as_array().to_owned();
 
         let ranges = intervals.as_array().to_owned();
-        let coverage = coverage::create_ranges_from_py_unchecked(ranges).into();
+        let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
         let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
         spatial_coverage::contains(&coverage, lon, lat, &mut result)?;
@@ -2314,8 +2314,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     ///
     /// # Arguments
     ///
-    /// * ``ra_deg`` - longitude of the center of the ring, in degrees
-    /// * ``dec_deg`` - latitude of the center of the ring, in degrees
+    /// * ``lon_deg`` - longitude of the center of the ring, in degrees
+    /// * ``lat_deg`` - latitude of the center of the ring, in degrees
     /// * ``r_int_deg`` - Internal radius of the ring, in degrees
     /// * ``r_ext_deg`` - External radius of the ring, in degrees
     /// * ``depth`` - The depths of the expected MOC

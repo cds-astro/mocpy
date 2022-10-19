@@ -105,8 +105,7 @@ pub fn array2_to_vec_ranges<T: Idx>(mut input: Array2<T>) -> Vec<Range<T>> {
   if shape[1] != 2 {
     // Unrecognized shape of a Array2 coming
     // from MOCPy python code
-    let msg = format!("Unrecognized Array2 shape coming from  MOCPy python code {:?}", shape);
-    unreachable!(msg);
+    unreachable!("Unrecognized Array2 shape coming from  MOCPy python code {:?}", shape);
   };
   let len = shape[0];
   let ptr = input.as_mut_ptr() as *mut Range<T>;

@@ -268,14 +268,14 @@ def test_moc_contains(order):
     # coordinates of the 20 random points
     lon, lat = cdshealpix.healpix_to_lonlat(healpix_arr, order)
     # tests 
-    should_be_inside_arr = moc.contains(ra=lon, dec=lat)
+    should_be_inside_arr = moc.contains_lonlat(lon=lon, lat=lat)
     assert should_be_inside_arr.all()
-    should_be_outside_arr = moc_complement.contains(ra=lon, dec=lat)
+    should_be_outside_arr = moc_complement.contains_lonlat(lon=lon, lat=lat)
     assert not should_be_outside_arr.any()
     # test keep_inside field
-    should_be_outside_arr = moc.contains(ra=lon, dec=lat, keep_inside=False)
+    should_be_outside_arr = moc.contains_lonlat(lon=lon, lat=lat, keep_inside=False)
     assert not should_be_outside_arr.any()
-    should_be_inside_arr = moc_complement.contains(ra=lon, dec=lat, keep_inside=False)
+    should_be_inside_arr = moc_complement.contains_lonlat(lon=lon, lat=lat, keep_inside=False)
     assert should_be_inside_arr.all()
 
 
