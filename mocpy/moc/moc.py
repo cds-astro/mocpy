@@ -222,7 +222,7 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
         """
-        return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside)
+        return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside=keep_inside)
 
     def contains_lonlat(self, lon, lat, keep_inside=True):
         """
