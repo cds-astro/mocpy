@@ -221,19 +221,27 @@ class MOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        See also
+        --------
+        `contains_lonlat`
         """
         return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside=keep_inside)
 
     def contains(self, lon, lat, keep_inside=True):
-        """
-        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
+        """Tests wether a MOC contains (or not) the given points. Returns a boolean mask array.
+
+        .. deprecated:: 0.11.1
+          `contains` is replaced by
+          `contains_lonlat` for naming consistency. 
+          Please consider switching.
 
         Parameters
         ----------
         lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
-            Right ascension array
+            Right ascension array in deg
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
-            Declination array
+            Declination array in deg
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
             is false, contains will return the mask of the coordinates lying outside the MOC.
@@ -242,6 +250,10 @@ class MOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        See Also
+        --------
+        `contains_skycoords`
         """
         import warnings
         warnings.warn('This method is deprecated and has been replaced by contains_lonlat', DeprecationWarning)
@@ -250,15 +262,14 @@ class MOC(AbstractMOC):
 
 
     def contains_lonlat(self, lon, lat, keep_inside=True):
-        """
-        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
+        """Tests wether a MOC contains (or not) the given points. Returns a boolean mask array.
 
         Parameters
         ----------
         lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
-            Right ascension array
+            Right ascension array in deg
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
-            Declination array
+            Declination array in deg
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
             is false, contains will return the mask of the coordinates lying outside the MOC.
@@ -267,6 +278,10 @@ class MOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        See also
+        --------
+        `contains_skycoord`
         """
 
         mask = mocpy.space_coverage_contains(self._interval_set._intervals, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
