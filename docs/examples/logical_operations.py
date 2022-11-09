@@ -5,8 +5,8 @@ import astropy.units as u
 sdss = MOC.from_fits('./../../resources/P-SDSS9-r.fits')
 galex = MOC.from_fits('./../../resources/P-GALEXGR6-AIS-FUV.fits')
 # Compute their intersection
-inter = sdss.intersection(galex)
-union = sdss.union(galex)
+inter = sdss & galex
+union = sdss + galex
 # Plot the MOC using matplotlib
 import matplotlib.pyplot as plt
 fig = plt.figure(111, figsize=(10, 10))
