@@ -371,10 +371,19 @@ def test_moc_union(mocs_op):
     assert mocs_op['first'].union(mocs_op['second']) == MOC.from_json({
         '0': [0, 1, 2, 3, 4, 5, 7]
     })
+    assert mocs_op['first'] + mocs_op['second'] == MOC.from_json({
+        '0': [0, 1, 2, 3, 4, 5, 7]
+    })
+    assert mocs_op['first'] | mocs_op['second'] == MOC.from_json({
+        '0': [0, 1, 2, 3, 4, 5, 7]
+    })
 
 
 def test_moc_intersection(mocs_op):
     assert mocs_op['first'].intersection(mocs_op['second']) == MOC.from_json({
+        '0': [0, 3, 4]
+    })
+    assert mocs_op['first'] & mocs_op['second'] == MOC.from_json({
         '0': [0, 3, 4]
     })
 
@@ -383,6 +392,10 @@ def test_moc_difference(mocs_op):
     assert mocs_op['first'].difference(mocs_op['second']) == MOC.from_json({
         '0': [2, 5]
     })
+    assert mocs_op['first'] - mocs_op['second'] == MOC.from_json({
+        '0': [2, 5]
+    })
+
 
 def test_moc_complement_consistency():
     moc = MOC.load('resources/P-GALEXGR6-AIS-FUV.fits', 'fits')
@@ -399,6 +412,7 @@ def test_from_fits_old():
 ])
 def test_moc_complement(input, expected):
     assert input.complement() == expected
+    assert ~input == expected
 
 
 def test_spatial_res_to_order():

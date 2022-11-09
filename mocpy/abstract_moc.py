@@ -54,6 +54,91 @@ class AbstractMOC(serializer.IO):
 
         return self._interval_set == another_moc._interval_set
 
+    def __add__(self, moc):
+        """
+        Operator + definition
+
+        Computes the union of self with another MOC
+
+        Parameters
+        ----------
+        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            Another MOC to compute the union with.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The union of self and moc.
+        """
+        return self.union(moc)
+
+    def __or__(self, moc):
+        """
+        Operator | definition
+
+        Computes the union of self with another MOC
+
+        Parameters
+        ----------
+        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            Another MOC to compute the union with.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The union of self and moc.
+        """
+        return self.union(moc)
+
+    def __sub__(self, moc):
+        """
+        Operator - definition
+
+        Computes the difference of self with another MOC
+
+        Parameters
+        ----------
+        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            Another MOC to compute the difference with.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The difference of self with moc.
+        """
+        return self.difference(moc)
+
+    def __and__(self, moc):
+        """
+        Operator & definition
+
+        Computes the intersection of self with another MOC
+
+        Parameters
+        ----------
+        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            Another MOC to compute the intersection with.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The intersection of self and moc.
+        """
+        return self.intersection(moc)
+
+    def __invert__(self):
+        """
+        Unary operator ~ definition
+
+        Computes the complement of self
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The complement MOC of self.
+        """
+        return self.complement()
+
     def empty(self):
         """
         Checks whether the MOC is empty.
