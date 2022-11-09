@@ -68,7 +68,7 @@ Now build package
 
     pip install maturin
 
-- Run maturin::
+- Move to your root's mocpy location and run maturin::
 
     maturin develop --release
    
