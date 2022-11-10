@@ -222,9 +222,9 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
 
-        See also
+        See Also
         --------
-        `contains_lonlat`
+        contains_lonlat
         """
         return self.contains_lonlat(lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside=keep_inside)
 
@@ -253,7 +253,7 @@ class MOC(AbstractMOC):
 
         See Also
         --------
-        `contains_skycoords`
+        contains_skycoords
         """
         import warnings
         warnings.warn('This method is deprecated and has been replaced by contains_lonlat', DeprecationWarning)
@@ -279,9 +279,9 @@ class MOC(AbstractMOC):
         array : `~np.ndarray`
             A mask boolean array
 
-        See also
+        See Also
         --------
-        `contains_skycoord`
+        contains_skycoords
         """
 
         mask = mocpy.space_coverage_contains(self._interval_set._intervals, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
