@@ -22,6 +22,8 @@ jobs:
           # Create and activate a new virtualenv
           virtualenv mocpy-env
           source mocpy-env/bin/activate
+          # Install pytest and nbmake
+          pip install nbmake pytest-xdist
           # Install maturin
           pip install maturin
           # Build and install mocpy
