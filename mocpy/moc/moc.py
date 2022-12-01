@@ -283,7 +283,8 @@ class MOC(AbstractMOC):
         --------
         contains_skycoords
         """
-
+        if lon.shape != lat.shape :
+            raise ValueError("lon and lat mush have the same shape")
         mask = mocpy.space_coverage_contains(self._interval_set._intervals, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         if keep_inside: 
             return mask
