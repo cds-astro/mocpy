@@ -21,7 +21,7 @@ use moc::deser::fits::error::FitsError;
 
 use super::coverage;
 use super::ndarray_fromto::mocranges_to_array2;
-use ndarray::ArrayD;
+use ndarray::{ArrayD, ArrayViewD};
 
 /// Create a spatial coverage from a list of sky coordinates
 ///
@@ -360,8 +360,8 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
 /// If the number of longitudes and latitudes do not match.
 pub fn contains(
     coverage: &HpxRanges<u64>,
-    lon: ArrayD<f64>,
-    lat: ArrayD<f64>,
+    lon: ArrayViewD<f64>,
+    lat: ArrayViewD<f64>,
     result: &mut ArrayD<bool>,
 ) -> PyResult<()> {
     // Retrieve the spatial depth of the Space coverage
