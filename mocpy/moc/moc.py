@@ -158,8 +158,8 @@ class MOC(AbstractMOC):
        """
        Returns the number of disjoint MOCs the given MOC contains.
 
-       Parameter
-       ---------
+       Parameters
+       ----------
        include_indirect_neighbours : bool
            if `false`, only consider  cells having a common edge as been part of a same MOC
            if `true`, also consider cells having a common vertex as been part of the same MOC
@@ -170,17 +170,20 @@ class MOC(AbstractMOC):
         """
         Returns the disjoint MOCs this MOC contains.format
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         include_indirect_neighbours : bool
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
 
-        WARNING
-        -------
-        Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
+        Raises
+        ------
+        DeprecationWarning
+            Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
         
         """
+        import warnings
+        DeprecationWarning("Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high")
         list_of_intervals = mocpy.hpx_coverage_split(self.max_order, include_indirect_neighbours, self._interval_set._intervals)
         mocs = map(lambda intervals: MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False), list_of_intervals)
         return mocs
@@ -282,6 +285,20 @@ class MOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> from astropy.coordinates import Angle
+        >>> import astropy.units as u
+        >>> # create lists of coordinates
+        >>> lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)
+        >>> lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)
+        >>> # create a polygonal moc from these
+        >>> moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+        >>> moc.contains_lonlat(lon=lon, lat=lat) # returns all true 
+        [[ True  True  True][ True  True  True]]
 
         See Also
         --------
