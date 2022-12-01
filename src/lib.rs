@@ -1447,8 +1447,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         intervals: PyReadonlyArray2<u64>,
         lon: PyReadonlyArrayDyn<f64>,
         lat: PyReadonlyArrayDyn<f64>) -> PyResult<Py<PyArrayDyn<bool>>> {
-        let lon = lon.as_array().to_owned();
-        let lat = lat.as_array().to_owned();
+        let lon = lon.as_array();
+        let lat = lat.as_array();
 
         let ranges = intervals.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
