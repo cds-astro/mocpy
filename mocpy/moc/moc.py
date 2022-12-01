@@ -273,6 +273,10 @@ class MOC(AbstractMOC):
         keep_inside : bool, optional
             True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
             is false, contains will return the mask of the coordinates lying outside the MOC.
+        
+        Raises
+        ------
+        ValueError : If `lon` and `lat` have mismatched shapes.
 
         Returns
         -------
@@ -284,7 +288,7 @@ class MOC(AbstractMOC):
         contains_skycoords
         """
         if lon.shape != lat.shape :
-            raise ValueError("lon and lat mush have the same shape")
+            raise ValueError(f"mismatch between lon and lat of shapes {lon.shape} and {lat.shape}")
         mask = mocpy.space_coverage_contains(self._interval_set._intervals, lon.to_value(u.rad).astype(np.float64), lat.to_value(u.rad).astype(np.float64))
         if keep_inside: 
             return mask
