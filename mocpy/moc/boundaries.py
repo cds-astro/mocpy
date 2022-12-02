@@ -1,4 +1,5 @@
 import numpy as np
+
 # A python module handling graph manipulations
 import networkx as nx
 
@@ -13,7 +14,8 @@ import astropy.units as u
 
 from .. import mocpy
 
-class Boundaries():
+
+class Boundaries:
     @staticmethod
     def get(moc, order):
         boundaries_l = []
@@ -22,7 +24,9 @@ class Boundaries():
         max_order, ipixels = Boundaries._compute_HEALPix_indices(moc, order)
 
         # Split the global MOC graph into all its non connected subgraphs.
-        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(max_order, ipixels)
+        graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(
+            max_order, ipixels
+        )
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
         return boundaries_l
@@ -39,10 +43,10 @@ class Boundaries():
 
         # Take the complement if the MOC covers more than half of the sky => the perimeter(MOC) = perimeter(complement(MOC))
         # but we process less hpx cells
-        num_ipixels = 3 << (2*(max_order + 1))
+        num_ipixels = 3 << (2 * (max_order + 1))
         sky_fraction = ipixels.shape[0] / float(num_ipixels)
 
-        #if sky_fraction > 0.5:
+        # if sky_fraction > 0.5:
         #    ipixels_all = np.arange(num_ipixels)
         #    ipixels = np.setdiff1d(ipixels_all, ipixels, assume_unique=True)
 
@@ -67,13 +71,13 @@ class Boundaries():
                 # top right one. When computing the MST (minimal spanning tree) from a graph, we need our graphs to have
                 # only nodes of degrees 1 or 2 (i.e. to be lines).
                 if G.degree[l1] >= 2:
-                    l1 += '_'
+                    l1 += "_"
             except:
                 pass
 
             try:
                 if G.degree[l2] >= 2:
-                    l2 += '_'
+                    l2 += "_"
             except:
                 pass
             # Set the skycoord instance as an attribute of the nodes
@@ -84,7 +88,7 @@ class Boundaries():
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
         ipixels = ipixels.astype(np.int)
-        hp = HEALPix(nside=(1 << depth), order='nested', frame=ICRS())
+        hp = HEALPix(nside=(1 << depth), order="nested", frame=ICRS())
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
         ipixels = ipixels.astype(np.uint64)
 
@@ -97,20 +101,22 @@ class Boundaries():
         isin_border = isin[:, border]
 
         # Phase 2: Build the graph from the positions of the ipixels boundaries
-        #import cdshealpix as healpix
-        #ipix_lon, ipix_lat = healpix.vertices(ipixels_border, depth)
-        #ipix_lon[:, [1, 3]] = ipix_lon[:, [3, 1]]
-        #ipix_lat[:, [1, 3]] = ipix_lat[:, [3, 1]]
+        # import cdshealpix as healpix
+        # ipix_lon, ipix_lat = healpix.vertices(ipixels_border, depth)
+        # ipix_lon[:, [1, 3]] = ipix_lon[:, [3, 1]]
+        # ipix_lat[:, [1, 3]] = ipix_lat[:, [3, 1]]
         ipix_lon, ipix_lat = hp.boundaries_lonlat(ipixels_border, step=1)
 
         ipix_lon_deg = ipix_lon.to_value(u.deg)
         ipix_lat_deg = ipix_lat.to_value(u.deg)
 
-        ipix_lon_repr = \
-         np.around(np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3).tolist()
-        ipix_lat_repr = \
-         np.around(np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3).tolist()
-        
+        ipix_lon_repr = np.around(
+            np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3
+        ).tolist()
+        ipix_lat_repr = np.around(
+            np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3
+        ).tolist()
+
         west_border = ~isin_border[0, :]
         south_border = ~isin_border[1, :]
         east_border = ~isin_border[2, :]
@@ -132,15 +138,15 @@ class Boundaries():
             p2_lat = lat_deg[2]
             p3_lat = lat_deg[3]
 
-            off = 4*i
-            off2 = 4*(i + 1)
+            off = 4 * i
+            off2 = 4 * (i + 1)
             repr_lon = ipix_lon_repr[off:off2]
             repr_lat = ipix_lat_repr[off:off2]
 
-            s0 = str(repr_lon[0]) + ' ' + str(repr_lat[0])
-            s1 = str(repr_lon[1]) + ' ' + str(repr_lat[1])
-            s2 = str(repr_lon[2]) + ' ' + str(repr_lat[2])
-            s3 = str(repr_lon[3]) + ' ' + str(repr_lat[3])
+            s0 = str(repr_lon[0]) + " " + str(repr_lat[0])
+            s1 = str(repr_lon[1]) + " " + str(repr_lat[1])
+            s2 = str(repr_lon[2]) + " " + str(repr_lat[2])
+            s3 = str(repr_lon[3]) + " " + str(repr_lat[3])
 
             # WEST border
             if west_border[i]:
@@ -182,8 +188,8 @@ class Boundaries():
                     break
 
             # Get the unordered lon and lat
-            ra = np.asarray(list(nx.get_node_attributes(v, 'ra').values()))
-            dec = np.asarray(list(nx.get_node_attributes(v, 'dec').values()))
+            ra = np.asarray(list(nx.get_node_attributes(v, "ra").values()))
+            dec = np.asarray(list(nx.get_node_attributes(v, "dec").values()))
             coords = np.vstack((ra, dec)).T
             # Get the ordering from the MST
             ordering = np.asarray(list(nx.dfs_preorder_nodes(mst, src)))

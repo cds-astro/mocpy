@@ -6,13 +6,14 @@ from astropy.wcs.utils import pixel_to_skycoord
 
 import warnings
 
+
 def build_plotting_moc(moc, wcs):
     # Get the WCS cdelt giving the deg.px^(-1) resolution.
     cdelt = wcs.wcs.cdelt
     # Convert in rad.px^(-1)
-    cdelt = np.abs((2*np.pi/360)*cdelt[0])
-    # Get the minimum depth such as the resolution of a cell is contained in 1px. 
-    depth_res = int(np.floor(np.log2(np.sqrt(np.pi/3)/cdelt)))
+    cdelt = np.abs((2 * np.pi / 360) * cdelt[0])
+    # Get the minimum depth such as the resolution of a cell is contained in 1px.
+    depth_res = int(np.floor(np.log2(np.sqrt(np.pi / 3) / cdelt)))
     depth_res = max(depth_res, 0)
     # Degrade the moc to that depth for plotting purposes. It is not necessary to plot pixels
     # that we will not see because they are contained in 1px.
@@ -23,8 +24,8 @@ def build_plotting_moc(moc, wcs):
     moc_plot = moc_plot.refine_to_order(min_depth=3)
 
     # Get the MOC delimiting the FOV polygon
-    width_px = int(wcs.wcs.crpix[0]*2.) # Supposing the wcs is centered in the axis
-    heigth_px = int(wcs.wcs.crpix[1]*2.)
+    width_px = int(wcs.wcs.crpix[0] * 2.0)  # Supposing the wcs is centered in the axis
+    heigth_px = int(wcs.wcs.crpix[1] * 2.0)
 
     # Compute the sky coordinate path delimiting the viewport.
     # It consists of a closed polygon of (4 - 1)*4 = 12 vertices
@@ -57,6 +58,7 @@ def build_plotting_moc(moc, wcs):
 
     # Import MOC here to avoid circular imports
     from ..moc import MOC
+
     # Create a rough MOC (depth=3 is sufficient) from the viewport
     moc_viewport = MOC.from_polygon_skycoord(viewport, max_depth=3)
 
@@ -64,4 +66,3 @@ def build_plotting_moc(moc, wcs):
     # a lot the time to draw the MOC along with its borders.
     moc_plot = moc_plot.intersection(moc_viewport)
     return moc_plot
-

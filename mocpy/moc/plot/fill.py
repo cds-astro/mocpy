@@ -11,6 +11,7 @@ from .utils import build_plotting_moc
 from . import culling_backfacing_cells
 from . import axis_viewport
 
+
 def compute_healpix_vertices(depth, ipix, wcs):
     path_vertices = np.array([])
     codes = np.array([])
@@ -32,25 +33,29 @@ def compute_healpix_vertices(depth, ipix, wcs):
 
     cells = np.hstack((c1, c2, c3, c4, np.zeros((c1.shape[0], 2))))
 
-    path_vertices = cells.reshape((5*c1.shape[0], 2))
-    single_code = np.array([Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+    path_vertices = cells.reshape((5 * c1.shape[0], 2))
+    single_code = np.array(
+        [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY]
+    )
 
     codes = np.tile(single_code, c1.shape[0])
 
     return path_vertices, codes
 
+
 def compute_the_patches(moc, wcs):
     depth_ipix_d = moc.serialize(format="json")
-    depth_ipix_clean_d = culling_backfacing_cells.from_moc(depth_ipix_d=depth_ipix_d, wcs=wcs)
+    depth_ipix_clean_d = culling_backfacing_cells.from_moc(
+        depth_ipix_d=depth_ipix_d, wcs=wcs
+    )
 
     patches = []
     for depth, ipix in depth_ipix_clean_d.items():
-        patch = compute_healpix_vertices(depth=depth,
-                    ipix=ipix,
-                    wcs=wcs)
+        patch = compute_healpix_vertices(depth=depth, ipix=ipix, wcs=wcs)
         patches.append(patch)
 
     return patches
+
 
 def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
     first_patch = patches[0]
@@ -69,6 +74,7 @@ def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
     ax.add_patch(patches_mpl)
     axis_viewport.set(ax, wcs)
 
+
 def fill(moc, ax, wcs, **kw_mpl_pathpatch):
     # Simplify the MOC for plotting purposes:
     # 1. Degrade the MOC if the FOV is enough big so that we cannot see the smallest HEALPix cells.
@@ -81,4 +87,3 @@ def fill(moc, ax, wcs, **kw_mpl_pathpatch):
     if not moc_to_plot.empty():
         patches = compute_the_patches(moc=moc_to_plot, wcs=wcs)
         add_patches_to_mpl_axe(patches=patches, ax=ax, wcs=wcs, **kw_mpl_pathpatch)
-

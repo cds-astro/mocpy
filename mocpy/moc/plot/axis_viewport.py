@@ -1,5 +1,6 @@
 from matplotlib.pyplot import figure, axis
 
+
 def set(ax, wcs):
     # get the plot dimension the same way as in World2ScreenMPL constructor
     # This allows to pass an astropy wcs instead of a World2ScreenMPL when plotting
@@ -11,6 +12,6 @@ def set(ax, wcs):
     x_max = width_px - 1
     y_min = 0
     y_max = height_px - 1
-    
+
     ax.set_xlim([x_min, x_max])
     ax.set_ylim([y_min, y_max])
