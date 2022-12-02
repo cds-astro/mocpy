@@ -33,7 +33,7 @@ class STMOC(serializer.IO):
 
     def __init__(self, make_consistent=True):
         self.__index = mocpy.create_2d_coverage()
-        self._fits_column_name = 'PIXELS'
+        self._fits_column_name = "PIXELS"
 
     def __del__(self):
         mocpy.drop_2d_coverage(self.__index)
@@ -47,12 +47,12 @@ class STMOC(serializer.IO):
 
     @property
     def max_time(self):
-        #return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
+        # return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
         return utils.microseconds_to_times(mocpy.coverage_2d_max_time(self.__index))
 
     @property
     def min_time(self):
-        #return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
+        # return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
         return utils.microseconds_to_times(mocpy.coverage_2d_min_time(self.__index))
 
     def is_empty(self):
@@ -89,8 +89,8 @@ class STMOC(serializer.IO):
         """
         # times = times.jd.astype(np.float64)
         times = utils.times_to_microseconds(times)
-        lon = lon.to_value('rad').astype(np.float64)
-        lat = lat.to_value('rad').astype(np.float64)
+        lon = lon.to_value("rad").astype(np.float64)
+        lat = lat.to_value("rad").astype(np.float64)
 
         if times.shape != lon.shape or lon.shape != lat.shape:
             raise ValueError("Times and positions must have the same length.")
@@ -99,11 +99,15 @@ class STMOC(serializer.IO):
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        mocpy.from_time_lonlat(result.__index, times, time_depth, lon, lat, spatial_depth)
+        mocpy.from_time_lonlat(
+            result.__index, times, time_depth, lon, lat, spatial_depth
+        )
         return result
 
     @classmethod
-    def from_time_ranges_positions(cls, times_start, times_end, lon, lat, time_depth=29, spatial_depth=29):
+    def from_time_ranges_positions(
+        cls, times_start, times_end, lon, lat, time_depth=29, spatial_depth=29
+    ):
         """
         Creates a 2D Coverage from a set of times and positions associated to each time.
 
@@ -136,21 +140,29 @@ class STMOC(serializer.IO):
         times_start = utils.times_to_microseconds(times_start)
         times_end = utils.times_to_microseconds(times_end)
 
-        lon = lon.to_value('rad').astype(np.float64)
-        lat = lat.to_value('rad').astype(np.float64)
+        lon = lon.to_value("rad").astype(np.float64)
+        lat = lat.to_value("rad").astype(np.float64)
 
-        if times_start.shape != lon.shape or lon.shape != lat.shape or times_start.shape != times_end.shape:
+        if (
+            times_start.shape != lon.shape
+            or lon.shape != lat.shape
+            or times_start.shape != times_end.shape
+        ):
             raise ValueError("Times and positions must have the same length.")
 
         if times_start.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
         result = cls()
-        mocpy.from_time_ranges_lonlat(result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth)
+        mocpy.from_time_ranges_lonlat(
+            result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth
+        )
         return result
 
     @classmethod
-    def from_spatial_coverages(cls, times_start, times_end, spatial_coverages, time_depth=61):
+    def from_spatial_coverages(
+        cls, times_start, times_end, spatial_coverages, time_depth=61
+    ):
         """
         Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.
 
@@ -177,16 +189,25 @@ class STMOC(serializer.IO):
         times_start = utils.times_to_microseconds(times_start)
         times_end = utils.times_to_microseconds(times_end)
 
-        if times_start.shape != times_end.shape or times_start.shape[0] != len(spatial_coverages):
-            raise ValueError("Time ranges and spatial coverages must have the same length")
+        if times_start.shape != times_end.shape or times_start.shape[0] != len(
+            spatial_coverages
+        ):
+            raise ValueError(
+                "Time ranges and spatial coverages must have the same length"
+            )
 
         if times_start.ndim != 1:
             raise ValueError("Times and spatial coverages must be 1D arrays")
 
         result = cls()
-        spatial_coverages = [spatial_coverage._interval_set._intervals for spatial_coverage in spatial_coverages]
+        spatial_coverages = [
+            spatial_coverage._interval_set._intervals
+            for spatial_coverage in spatial_coverages
+        ]
 
-        mocpy.from_time_ranges_spatial_coverages(result.__index, times_start, times_end, time_depth, spatial_coverages)
+        mocpy.from_time_ranges_spatial_coverages(
+            result.__index, times_start, times_end, time_depth, spatial_coverages
+        )
         return result
 
     def query_by_time(self, times):
@@ -206,7 +227,9 @@ class STMOC(serializer.IO):
             The spatial coverage being observed within the input time ranges
         """
         if times.ndim != 2 or times.shape[1] != 2:
-            raise ValueError("Times ranges must be provided. The shape of times must be (_, 2)")
+            raise ValueError(
+                "Times ranges must be provided. The shape of times must be (_, 2)"
+            )
 
         # times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
         times = utils.times_to_microseconds(times)
@@ -231,7 +254,9 @@ class STMOC(serializer.IO):
             The time ranges observing in the ``spatial_coverage``
         """
         # Time ranges in µsec
-        time_ranges = mocpy.project_on_first_dim(spatial_coverage._interval_set._intervals, self.__index)
+        time_ranges = mocpy.project_on_first_dim(
+            spatial_coverage._interval_set._intervals, self.__index
+        )
         # return Time(time_ranges / 86400000000, format='jd', scale='tdb')
         return utils.microseconds_to_times(time_ranges)
 
@@ -331,8 +356,8 @@ class STMOC(serializer.IO):
         """
         # times = times.jd.astype(np.float64)
         times = utils.times_to_microseconds(times)
-        lon = lon.to_value('rad').astype(np.float64)
-        lat = lat.to_value('rad').astype(np.float64)
+        lon = lon.to_value("rad").astype(np.float64)
+        lat = lat.to_value("rad").astype(np.float64)
 
         if times.shape != lon.shape or lon.shape != lat.shape:
             raise ValueError("Times and positions must have the same length.")
@@ -351,36 +376,36 @@ class STMOC(serializer.IO):
     def _fits_header_keywords(self):
         t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
         return {
-            'MOVERS': '2.0',
-            'MOCDIM': 'TIME.SPACE',
-            'ORDERING': 'RANGE',
+            "MOVERS": "2.0",
+            "MOCDIM": "TIME.SPACE",
+            "ORDERING": "RANGE",
             # Max depth along the first dimension
-            'MOCORD_T': str(t_depth),
+            "MOCORD_T": str(t_depth),
             # Max depth along the second dimension
-            'MOCORD_S': str(s_depth),
-            'COORDSYS': 'C',
-            'TIMESYS': 'TCB',
-            'MOCTOOL': 'MOCPy'
+            "MOCORD_S": str(s_depth),
+            "COORDSYS": "C",
+            "TIMESYS": "TCB",
+            "MOCTOOL": "MOCPy",
         }
 
     @property
     def _fits_header_keywords_pre_v2(self):
         t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
         return {
-            'MOC': 'TIME.SPACE',
-            'ORDERING': 'RANGE29',
+            "MOC": "TIME.SPACE",
+            "ORDERING": "RANGE29",
             # Max depth along the first dimension
-            'MOCORDER': str(t_depth / 2),
+            "MOCORDER": str(t_depth / 2),
             # Max depth along the second dimension
-            'MOCORD_1': str(s_depth),
-            'COORDSYS': 'C',
-            'TIMESYS': 'JD',
-            'MOCTOOL': 'MOCPy'
+            "MOCORD_1": str(s_depth),
+            "COORDSYS": "C",
+            "TIMESYS": "JD",
+            "MOCTOOL": "MOCPy",
         }
 
     @property
     def _fits_format(self):
-        return '1K'
+        return "1K"
 
     def _uniq_format(self):
         return mocpy.coverage_2d_to_fits(self.__index)
@@ -397,11 +422,13 @@ class STMOC(serializer.IO):
         # Some FITS file may not have a name column to access
         # the data. So we rename it as the `PIXELS` columns.
         if len(bin_HDU_table.columns) != 1:
-            raise AttributeError('The binary HDU table of {0} must contain only one'
-                'column where the data are stored.')
+            raise AttributeError(
+                "The binary HDU table of {0} must contain only one"
+                "column where the data are stored."
+            )
 
         if bin_HDU_table.columns[0].name is None:
-            bin_HDU_table.columns[0].name = 'PIXELS'
+            bin_HDU_table.columns[0].name = "PIXELS"
 
         key = bin_HDU_table.columns[0].name
 
@@ -413,27 +440,24 @@ class STMOC(serializer.IO):
         # 2. MOCORDER refers the max depth along the 1st dimension whereas
         #    MOCORD_1 refers to the max depth along the 2nd dimension.
         # DOES NOT SEEM TO BE USE
-        #if header.get('TORDER') is None:
+        # if header.get('TORDER') is None:
         #    # We are in the 2. case
         #    first_dim_depth = header.get('MOCORDER')
         #    second_dim_depth = header.get('MOCORD_1')
-        #else:
+        # else:
         #    # We are in the 1. case
         #    first_dim_depth = header.get('TORDER')
         #    second_dim_depth = header.get('MOCORDER')
 
-
         result = cls()
-        ordering = bin_HDU_table.header['ORDERING']
-        if ordering == 'RANGE29':
+        ordering = bin_HDU_table.header["ORDERING"]
+        if ordering == "RANGE29":
             mocpy.coverage_2d_from_fits_pre_v2(
-                result.__index,
-                bin_HDU_table.data[key].astype(np.int64)
+                result.__index, bin_HDU_table.data[key].astype(np.int64)
             )
         else:
             mocpy.coverage_2d_from_fits(
-                result.__index,
-                bin_HDU_table.data[key].astype(np.uint64)
+                result.__index, bin_HDU_table.data[key].astype(np.uint64)
             )
         return result
 
@@ -465,7 +489,7 @@ class STMOC(serializer.IO):
 
         return stmoc
 
-    def save(self, path, format='fits', overwrite=False):
+    def save(self, path, format="fits", overwrite=False):
         """
         Writes the ST-MOC to a file.
 
@@ -480,29 +504,32 @@ class STMOC(serializer.IO):
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
         overwrite : bool, optional
-            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. 
+            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword.
             Default to False.
         """
         path = str(path)
         import os
+
         file_exists = os.path.isfile(path)
-        
+
         if file_exists and not overwrite:
-            raise OSError('File {} already exists! Set ``overwrite`` to '
-                          'True if you want to replace it.'.format(path))         
-        
-        if format == 'fits':
+            raise OSError(
+                "File {} already exists! Set ``overwrite`` to "
+                "True if you want to replace it.".format(path)
+            )
+
+        if format == "fits":
             mocpy.coverage_2d_to_fits_file(path, self.__index)
-        elif format == 'ascii':
+        elif format == "ascii":
             mocpy.coverage_2d_to_ascii_file(path, self.__index)
-        elif format == 'json':
+        elif format == "json":
             mocpy.coverage_2d_to_json_file(path, self.__index)
         else:
-            formats = ('fits', 'ascii', 'json')
-            raise ValueError('format should be one of %s' % (str(formats)))
-            
+            formats = ("fits", "ascii", "json")
+            raise ValueError("format should be one of %s" % (str(formats)))
+
     @classmethod
-    def load(cls, path, format='fits'):
+    def load(cls, path, format="fits"):
         """
         Load the Spatial MOC from a file.
 
@@ -519,21 +546,20 @@ class STMOC(serializer.IO):
         """
         path = str(path)
         stmoc = cls()
-        if format == 'fits':
+        if format == "fits":
             mocpy.coverage_2d_from_fits_file(stmoc.__index, path)
             return stmoc
-        elif format == 'ascii':
+        elif format == "ascii":
             mocpy.coverage_2d_from_ascii_file(stmoc.__index, path)
             return stmoc
-        elif format == 'json':
+        elif format == "json":
             mocpy.coverage_2d_from_json_file(stmoc.__index, path)
             return stmoc
         else:
-            formats = ('fits', 'ascii', 'json')
-            raise ValueError('format should be one of %s' % (str(formats)))
+            formats = ("fits", "ascii", "json")
+            raise ValueError("format should be one of %s" % (str(formats)))
 
-
-    def to_string(self, format='ascii'):
+    def to_string(self, format="ascii"):
         """
         Writes the ST-MOC into a string.
 
@@ -546,16 +572,16 @@ class STMOC(serializer.IO):
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
         """
-        if format == 'ascii':
+        if format == "ascii":
             return mocpy.coverage_2d_to_ascii_str(self.__index)
-        elif format == 'json':
+        elif format == "json":
             return mocpy.coverage_2d_to_json_str(self.__index)
         else:
-            formats = ('ascii', 'json')
-            raise ValueError('format should be one of %s' % (str(formats)))
+            formats = ("ascii", "json")
+            raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
-    def from_string(cls, value, format='ascii'):
+    def from_string(cls, value, format="ascii"):
         """
         Deserialize the Spatial MOC from the given string.
 
@@ -569,12 +595,12 @@ class STMOC(serializer.IO):
             By default, ``format`` is set to "ascii".
         """
         stmoc = cls()
-        if format == 'ascii':
+        if format == "ascii":
             mocpy.coverage_2d_from_ascii_str(stmoc.__index, value)
             return stmoc
-        elif format == 'json':
+        elif format == "json":
             mocpy.coverage_2d_from_json_str(stmoc.__index, value)
             return stmoc
         else:
-            formats = ('ascii', 'json')
-            raise ValueError('format should be one of %s' % (str(formats)))
+            formats = ("ascii", "json")
+            raise ValueError("format should be one of %s" % (str(formats)))

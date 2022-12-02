@@ -7,6 +7,7 @@ import astropy.units as u
 
 from matplotlib.pyplot import figure
 
+
 class World2ScreenMPL:
     """
     Create a World2ScreenMPL for vizualizing a MOC in a matplotlib axis.
@@ -44,7 +45,7 @@ class World2ScreenMPL:
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure(111, figsize=(15, 15))
     >>> # Define a World2ScreenMPL as a context
-    >>> with World2ScreenMPL(fig, 
+    >>> with World2ScreenMPL(fig,
     ...         fov=200 * u.deg,
     ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
     ...         coordsys="icrs",
@@ -58,29 +59,32 @@ class World2ScreenMPL:
     >>> plt.ylabel('dec')
     >>> plt.grid(color="black", linestyle="dotted")
     """
-    def __init__(self,
-                 fig,
-                 fov,
-                 center=coordinates.SkyCoord(0, 0, unit="deg", frame="icrs"),
-                 coordsys="icrs",
-                 projection="AIT",
-                 rotation=coordinates.Angle(0, u.radian)):
+
+    def __init__(
+        self,
+        fig,
+        fov,
+        center=coordinates.SkyCoord(0, 0, unit="deg", frame="icrs"),
+        coordsys="icrs",
+        projection="AIT",
+        rotation=coordinates.Angle(0, u.radian),
+    ):
         self.w = wcs.WCS(naxis=2)
-        
+
         width_px, height_px = fig.get_size_inches() * float(fig.dpi)
 
-        cdelt_x = fov.to_value("deg")/float(width_px)
-        cdelt_y = fov.to_value("deg")/float(height_px)
+        cdelt_x = fov.to_value("deg") / float(width_px)
+        cdelt_y = fov.to_value("deg") / float(height_px)
 
-        self.w.wcs.crpix = [width_px/2.0, height_px/2.0]
+        self.w.wcs.crpix = [width_px / 2.0, height_px / 2.0]
         self.w.wcs.cdelt = [-cdelt_x, cdelt_x]
 
-        if coordsys == 'icrs':
+        if coordsys == "icrs":
             self.w.wcs.crval = [center.icrs.ra.deg, center.icrs.dec.deg]
-            self.w.wcs.ctype = ['RA---' + projection, 'DEC--' + projection]
-        elif coordsys == 'galactic':
+            self.w.wcs.ctype = ["RA---" + projection, "DEC--" + projection]
+        elif coordsys == "galactic":
             self.w.wcs.crval = [center.galactic.l.deg, center.galactic.b.deg]
-            self.w.wcs.ctype = ['GLON-' + projection, 'GLAT-' + projection]
+            self.w.wcs.ctype = ["GLON-" + projection, "GLAT-" + projection]
 
         theta = rotation.radian
         self.w.wcs.pc = [
@@ -93,4 +97,3 @@ class World2ScreenMPL:
 
     def __exit__(self, exception_type, exception_value, traceback):
         pass
-

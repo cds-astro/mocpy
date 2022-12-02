@@ -1,7 +1,7 @@
 from astropy.io import fits
 
-class IO:
 
+class IO:
     def _to_fits(self, uniq, optional_kw_dict=None, pre_v2=False):
         """
         Serializes a MOC to the FITS format.
@@ -20,9 +20,16 @@ class IO:
             The list of HDU tables.
         """
         tbhdu = fits.BinTableHDU.from_columns(
-            fits.ColDefs([
-                fits.Column(name=self._fits_column_name, format=self._fits_format, array=uniq)
-            ]))
+            fits.ColDefs(
+                [
+                    fits.Column(
+                        name=self._fits_column_name,
+                        format=self._fits_format,
+                        array=uniq,
+                    )
+                ]
+            )
+        )
         if pre_v2:
             tbhdu.header.update(self._fits_header_keywords_pre_v2)
         else:
@@ -35,7 +42,7 @@ class IO:
         thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
         return thdulist
 
-    def serialize(self, format='fits', optional_kw_dict=None, pre_v2=False):
+    def serialize(self, format="fits", optional_kw_dict=None, pre_v2=False):
         """
         Serializes the MOC into a specific format.
 
@@ -53,15 +60,17 @@ class IO:
         result : `astropy.io.fits.HDUList` or JSON dictionary
             The result of the serialization.
         """
-        formats = ('fits', 'json', 'str')
+        formats = ("fits", "json", "str")
         if format not in formats:
-            raise ValueError('format should be one of %s' % (str(formats)))
+            raise ValueError("format should be one of %s" % (str(formats)))
 
         uniq = self._uniq_format()
 
-        if format == 'fits':
-            result = self._to_fits(uniq=uniq, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2)
-        elif format == 'str':
+        if format == "fits":
+            result = self._to_fits(
+                uniq=uniq, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2
+            )
+        elif format == "str":
             result = self._to_str(uniq=uniq)
         else:
             # json format serialization
@@ -71,9 +80,9 @@ class IO:
 
         return result
 
-
-
-    def write(self, path, format='fits', overwrite=False, optional_kw_dict=None, pre_v2=False):
+    def write(
+        self, path, format="fits", overwrite=False, optional_kw_dict=None, pre_v2=False
+    ):
         """
         Writes the MOC to a file.
 
@@ -92,25 +101,33 @@ class IO:
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
         """
         import warnings
-        warnings.warn('This method is deprecated. Use MOC.save(path, "fits") instead!', DeprecationWarning)
-        serialization = self.serialize(format=format, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2)
 
-        if format == 'fits':
+        warnings.warn(
+            'This method is deprecated. Use MOC.save(path, "fits") instead!',
+            DeprecationWarning,
+        )
+        serialization = self.serialize(
+            format=format, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2
+        )
+
+        if format == "fits":
             serialization.writeto(path, overwrite=overwrite)
         else:
             import os
+
             file_exists = os.path.isfile(path)
 
             if file_exists and not overwrite:
-                raise OSError('File {} already exists! Set ``overwrite`` to '
-                            'True if you want to replace it.'.format(path))
+                raise OSError(
+                    "File {} already exists! Set ``overwrite`` to "
+                    "True if you want to replace it.".format(path)
+                )
 
-            if format == 'json':
+            if format == "json":
                 import json
-                with open(path, 'w') as f_out:
-                    f_out.write(
-                        json.dumps(serialization, sort_keys=True, indent=2)
-                    )
-            elif format == 'str':
-                with open(path, 'w') as f_out:
+
+                with open(path, "w") as f_out:
+                    f_out.write(json.dumps(serialization, sort_keys=True, indent=2))
+            elif format == "str":
+                with open(path, "w") as f_out:
                     f_out.write(serialization)

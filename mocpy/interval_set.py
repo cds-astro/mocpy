@@ -29,6 +29,7 @@ class IntervalSet:
     in the constructor. As there are no ways of modifying an IntervalSet object (e.g. add new HEALPix cells) then we are
     sure an IntervalSet is consistent when manipulating it for intersecting MOCs, doing their union etc...
     """
+
     HPX_MAX_ORDER = np.uint8(29)
     TIME_MAX_ORDER = np.uint8(61)
 
@@ -46,10 +47,12 @@ class IntervalSet:
                     True by default. Remove the overlapping intervals that makes
                     a valid MOC (i.e. can be plot, serialized, manipulated).
         """
-        intervals = np.zeros((0, 2), dtype=np.uint64) if intervals is None else intervals
+        intervals = (
+            np.zeros((0, 2), dtype=np.uint64) if intervals is None else intervals
+        )
 
         assert intervals.shape[1] == 2
-        
+
         # TODO: remove the cast to np.uint64
         # This code is executed as long as the Intervals objects
         # are not created from the rust code! (e.g. for the TimeMOCs)
@@ -127,14 +130,14 @@ class IntervalSet:
         intervals = mocpy.coverage_difference(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
-    #def complement(self):
+    # def complement(self):
     #    intervals = mocpy.coverage_complement(self._intervals)
     #    return IntervalSet(intervals, make_consistent=False)*/
 
     @property
     def uniq(self):
         if self.empty():
-           return np.array([], dtype=np.uint64)
+            return np.array([], dtype=np.uint64)
         return mocpy.to_uniq(self._intervals)
 
     @property

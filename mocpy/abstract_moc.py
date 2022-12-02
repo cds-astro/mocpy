@@ -22,14 +22,13 @@ class AbstractMOC(serializer.IO):
     """
     Basic functions for manipulating MOCs.
     """
-    
-    
+
     __LARK_PARSER_STR = None
 
     def __init__(self, interval_set=None):
         interval = IntervalSet() if interval_set is None else interval_set
         self._interval_set = interval
-        self._fits_column_name = 'UNIQ'
+        self._fits_column_name = "UNIQ"
 
     def __repr__(self):
         return self._interval_set.__repr__()
@@ -50,7 +49,9 @@ class AbstractMOC(serializer.IO):
             for consistency before comparing them).
         """
         if not isinstance(another_moc, AbstractMOC):
-            raise TypeError('Cannot compare an AbstractMOC with a {0}'.format(type(another_moc)))
+            raise TypeError(
+                "Cannot compare an AbstractMOC with a {0}".format(type(another_moc))
+            )
 
         return self._interval_set == another_moc._interval_set
 
@@ -157,11 +158,10 @@ class AbstractMOC(serializer.IO):
         """
         Depth of the smallest cells found in the MOC instance.
         """
-        #depth = mocpy.coverage_depth(self._interval_set._intervals)
-        #depth = np.uint8(depth)
-        #return depth
+        # depth = mocpy.coverage_depth(self._interval_set._intervals)
+        # depth = np.uint8(depth)
+        # return depth
         raise NotImplementedError("Method max_order not implemented")
-
 
     def intersection(self, another_moc, *args):
         """
@@ -281,15 +281,19 @@ class AbstractMOC(serializer.IO):
         -------
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
-            
+
         Raises
         ------
         DeprecationWarning
             Not compatible with the last version of the MOC 2.0 standard.
-            
+
         """
         import warnings
-        warnings.warn('This method is deprecated. Use MOC.load(path, "fits") instead!', DeprecationWarning)
+
+        warnings.warn(
+            'This method is deprecated. Use MOC.load(path, "fits") instead!',
+            DeprecationWarning,
+        )
         table = Table.read(filename)
         first_column_index = table.colnames[0]
         intervals = mocpy.to_nested(table[first_column_index].astype(np.uint64))
@@ -299,7 +303,7 @@ class AbstractMOC(serializer.IO):
     def from_str(cls, value):
         """
         Create a MOC from a str.
-        
+
         This grammar is expressed is the `MOC IVOA <http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf>`__
         specification at section 2.3.2.
 
@@ -307,24 +311,28 @@ class AbstractMOC(serializer.IO):
         ----------
         value : str
             The MOC as a string following the grammar rules.
-        
+
         Returns
         -------
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC
-        
+
         Examples
         --------
         >>> from mocpy import MOC
         >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
         """
         import warnings
-        warnings.warn('This method is deprecated. Use MOC.load(path, "ascii") instead!', DeprecationWarning)
-        
-        
+
+        warnings.warn(
+            'This method is deprecated. Use MOC.load(path, "ascii") instead!',
+            DeprecationWarning,
+        )
+
         # Import lark parser when from_str is called
         # at least one time
         from lark import Lark, Transformer
+
         class ParsingException(Exception):
             pass
 
@@ -332,7 +340,7 @@ class AbstractMOC(serializer.IO):
             def value(self, items):
                 res = {}
                 for item in items:
-                    if item is not None: # Do not take into account the "sep" branches
+                    if item is not None:  # Do not take into account the "sep" branches
                         res.update(item)
                 return res
 
@@ -351,19 +359,22 @@ class AbstractMOC(serializer.IO):
             def range_pix(self, range_pix):
                 lower_bound = int(range_pix[0])
                 upper_bound = int(range_pix[1])
-                return np.arange(start=lower_bound, stop=upper_bound + 1, dtype=int).tolist()
+                return np.arange(
+                    start=lower_bound, stop=upper_bound + 1, dtype=int
+                ).tolist()
 
             def pixs(self, items):
                 ipixs = []
                 for pix in items:
-                    if pix is not None: # Do not take into account the "sep" branches
+                    if pix is not None:  # Do not take into account the "sep" branches
                         ipixs.extend(pix)
                 return ipixs
 
         # Initialize the parser when from_str is called
         # for the first time
         if AbstractMOC.__LARK_PARSER_STR is None:
-            AbstractMOC.__LARK_PARSER_STR = Lark(r"""
+            AbstractMOC.__LARK_PARSER_STR = Lark(
+                r"""
                 value: depthpix (sep+ depthpix)*
                 depthpix : INT "/" sep* pixs
                 pixs : pix (sep+ pix)*
@@ -372,14 +383,20 @@ class AbstractMOC(serializer.IO):
                 sep : " " | "\n" | "\r"
 
                 %import common.INT
-                """, start='value')
+                """,
+                start="value",
+            )
 
         try:
             tree = AbstractMOC.__LARK_PARSER_STR.parse(value)
         except Exception as err:
-            raise ParsingException("Could not parse {0}. \n Check the grammar \
+            raise ParsingException(
+                "Could not parse {0}. \n Check the grammar \
                 section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf \
-                to see the correct syntax for writing a MOC from a str".format(value))
+                to see the correct syntax for writing a MOC from a str".format(
+                    value
+                )
+            )
 
         moc_json = TreeToJson().transform(tree)
         return cls.from_json(moc_json)
@@ -416,7 +433,7 @@ class AbstractMOC(serializer.IO):
                 result_json[str(d)] = ipix_depth.tolist()
 
         return result_json
-        #return mocpy.coverage_to_json(intervals)
+        # return mocpy.coverage_to_json(intervals)
 
     @staticmethod
     def _to_str(uniq):
@@ -425,7 +442,7 @@ class AbstractMOC(serializer.IO):
 
         HEALPix cells are separated by a comma. The HEALPix cell at order 0 and number 10 is encoded
         by the string: "0/10", the first digit representing the depth and the second the HEALPix cell number
-        for this depth. HEALPix cells next to each other within a specific depth can be expressed as a range and 
+        for this depth. HEALPix cells next to each other within a specific depth can be expressed as a range and
         therefore written like that: "12/10-150". This encodes the list of HEALPix cells from 10 to 150 at the
         depth 12.
 
@@ -439,16 +456,17 @@ class AbstractMOC(serializer.IO):
         result : str
             The serialized MOC.
         """
-        def write_cells(serial, a, b, sep=''):
+
+        def write_cells(serial, a, b, sep=""):
             if a == b:
-                serial += '{0}{1}'.format(a, sep)
+                serial += "{0}{1}".format(a, sep)
             else:
-                serial += '{0}-{1}{2}'.format(a, b, sep)
+                serial += "{0}-{1}{2}".format(a, b, sep)
             return serial
 
-        res = ''
+        res = ""
 
-        if uniq.size == 0: 
+        if uniq.size == 0:
             return res
 
         depth, ipixels = utils.uniq2orderipix(uniq)
@@ -460,7 +478,7 @@ class AbstractMOC(serializer.IO):
 
             if pix_index.size > 0:
                 # Serialize the depth followed by a slash
-                res += '{0}/'.format(d)
+                res += "{0}/".format(d)
 
                 # Retrieve the pixel(s) for this depth
                 ipix_depth = ipixels[pix_index]
@@ -481,7 +499,7 @@ class AbstractMOC(serializer.IO):
                         # If the current pixel does not follow the previous one
                         # then we can end a range and serializes it
                         if ipix > last_range + np.uint64(1):
-                            res = write_cells(res, beg_range, last_range, sep=' ')
+                            res = write_cells(res, beg_range, last_range, sep=" ")
                             # The current pixel is the beginning of a new range
                             beg_range = ipix
 
@@ -491,7 +509,7 @@ class AbstractMOC(serializer.IO):
                     res = write_cells(res, beg_range, last_range)
 
                 # Add a ' ' separator before writing serializing the pixels of the next depth
-                res += ' '
+                res += " "
 
         # Remove the last ' ' character
         res = res[:-1]
@@ -503,7 +521,7 @@ class AbstractMOC(serializer.IO):
         Degrades the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest cells that can be found in the MOC) of the
-        degraded MOC is set to ``new_order``. 
+        degraded MOC is set to ``new_order``.
 
         Parameters
         ----------
@@ -515,16 +533,15 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The degraded MOC.
         """
-        #intervals = mocpy.coverage_degrade(self._interval_set._intervals, new_order)
-        #return self.__class__(IntervalSet(intervals, make_consistent=False))
+        # intervals = mocpy.coverage_degrade(self._interval_set._intervals, new_order)
+        # return self.__class__(IntervalSet(intervals, make_consistent=False))
         raise NotImplementedError("Method degrade_to_order not implemented")
 
     def refine_to_order(self, min_depth):
         """
         Internal method
         """
-        #intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
-        #interval_set = IntervalSet(intervals, make_consistent=False)
-        #return self.__class__(interval_set)
+        # intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
+        # interval_set = IntervalSet(intervals, make_consistent=False)
+        # return self.__class__(interval_set)
         raise NotImplementedError("Method refine_to_order not implemented")
-

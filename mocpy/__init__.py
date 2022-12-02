@@ -16,9 +16,9 @@ from .interval_set import IntervalSet
 from .version import __version__
 
 __all__ = [
-    'MOC',
-    'TimeMOC',
-    'STMOC',
-    'World2ScreenMPL',
-    'IntervalSet',
+    "MOC",
+    "TimeMOC",
+    "STMOC",
+    "World2ScreenMPL",
+    "IntervalSet",
 ]
