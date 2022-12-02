@@ -282,9 +282,10 @@ class AbstractMOC(serializer.IO):
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
             
-        Warning
-        -------
-        Not compatible with the last version of the MOC 2.0 standard.
+        Raises
+        ------
+        DeprecationWarning
+            Not compatible with the last version of the MOC 2.0 standard.
             
         """
         import warnings

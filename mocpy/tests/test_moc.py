@@ -15,22 +15,29 @@ from ..interval_set import IntervalSet
 from ..moc import MOC, World2ScreenMPL
 
 
-
 def test_interval_min_depth():
     big_cells = np.array([[0, 4**29]], dtype=np.uint64)
-    itv_result = MOC(IntervalSet(big_cells, make_consistent=False), min_depth=1)
+    itv_result = MOC(IntervalSet(
+        big_cells, make_consistent=False), min_depth=1)
 
-    small_cells = np.array([[0, 4**28], [4**28, 2*4**28], [2*4**28, 3*4**28], [3*4**28, 4**29]], dtype=np.uint64)
-    itv_small_cells = MOC(IntervalSet(small_cells, make_consistent=False), make_consistent=False)
+    small_cells = np.array([[0, 4**28], [4**28, 2*4**28],
+                           [2*4**28, 3*4**28], [3*4**28, 4**29]], dtype=np.uint64)
+    itv_small_cells = MOC(IntervalSet(
+        small_cells, make_consistent=False), make_consistent=False)
     assert itv_result == itv_small_cells
 
+
 def test_interval_set_complement():
-    assert MOC().complement() == MOC(IntervalSet(np.array([[0, 12*4**29]], dtype=np.uint64)))
+    assert MOC().complement() == MOC(IntervalSet(
+        np.array([[0, 12*4**29]], dtype=np.uint64)))
     assert MOC().complement().complement() == MOC()
     assert MOC(IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))).complement() == \
-        MOC(IntervalSet(np.array([[0, 1], [2, 5], [8, 12*4**29]], dtype=np.uint64)))
+        MOC(IntervalSet(
+            np.array([[0, 1], [2, 5], [8, 12*4**29]], dtype=np.uint64)))
 
 #### TESTING MOC creation ####
+
+
 def get_random_skycoords(size):
     return SkyCoord(ra=np.random.uniform(0, 360, size),
                     dec=np.random.uniform(-90, 90, size),
@@ -40,6 +47,7 @@ def get_random_skycoords(size):
 skycoords1 = get_random_skycoords(size=1000)
 skycoords2 = get_random_skycoords(size=2000)
 skycoords3 = get_random_skycoords(size=50000)
+
 
 @pytest.fixture()
 def skycoords_gen_f():
@@ -118,7 +126,8 @@ def moc_from_fits_image():
     image_path = 'resources/image_with_mask.fits.gz'
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
+        moc = MOC.from_fits_image(
+            hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
 
     return moc
 
@@ -140,24 +149,27 @@ def test_moc_serialize_and_from_json(moc_from_json):
 
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10 42-46 54\n\r 8 6/4500 8/45'),
+     '5/8-10 42-46 54\n\r 8 6/4500 8/45'),
     (MOC.from_json({}), '0/'),
     (MOC.from_json({'29': [101]}), '29/101'),
     (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
     (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2 9'),
-    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r \n 8/8-10\n 11/'),
+    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}),
+     '0/2\r \n 8/8-10\n 11/'),
 ])
 def test_from_str(expected, moc_str):
     assert MOC.from_str(moc_str) == expected
 
+
 @pytest.mark.parametrize("expected, moc_str", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10 42-46 54\n\r 6/4500 8/45'),
+     '5/8-10 42-46 54\n\r 6/4500 8/45'),
     (MOC.from_json({}), '0/'),
     (MOC.from_json({'29': [101]}), '29/101'),
     (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
     (MOC.from_json({'0': [2, 9], '1': [9]}), '0/2 9'),
-    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}), '0/2\r \n 8/8-10\n 11/'),
+    (MOC.from_json({'0': [2], '8': [8, 9, 10], '11': []}),
+     '0/2\r \n 8/8-10\n 11/'),
 ])
 def test_from_string(expected, moc_str):
     assert MOC.from_string(moc_str, 'ascii') == expected
@@ -195,7 +207,7 @@ def test_moc_serialize_to_json(moc_from_fits_image):
 
 @pytest.mark.parametrize("moc, expected", [
     (MOC.from_json({'5': [8, 9, 10, 42, 43, 44, 45, 54, 46], '6':[4500], '7':[], '8':[45]}),
-    '5/8-10 42-46 54 6/4500 8/45'),
+     '5/8-10 42-46 54 6/4500 8/45'),
     (MOC.from_json({}), ''),
     (MOC.from_json({'29': [101]}), '29/101'),
     (MOC.from_json({'0': [1, 0, 9]}), '0/0-1 9'),
@@ -228,11 +240,11 @@ def test_mpl_fill():
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
     with World2ScreenMPL(fig,
-         fov=50 * u.deg,
-         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-         coordsys="icrs",
-         rotation=Angle(0, u.degree),
-         projection="AIT") as wcs:
+                         fov=50 * u.deg,
+                         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+                         coordsys="icrs",
+                         rotation=Angle(0, u.degree),
+                         projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         moc.fill(ax=ax, wcs=wcs, alpha=0.5, color='r')
 
@@ -244,11 +256,11 @@ def test_mpl_border():
     import matplotlib.pyplot as plt
     fig = plt.figure(111, figsize=(10, 10))
     with World2ScreenMPL(fig,
-         fov=50 * u.deg,
-         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-         coordsys="icrs",
-         rotation=Angle(0, u.degree),
-         projection="AIT") as wcs:
+                         fov=50 * u.deg,
+                         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+                         coordsys="icrs",
+                         rotation=Angle(0, u.degree),
+                         projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         moc.border(ax=ax, wcs=wcs, color='g')
 
@@ -267,16 +279,34 @@ def test_moc_contains(order):
     moc_complement = moc.complement()
     # coordinates of the 20 random points
     lon, lat = cdshealpix.healpix_to_lonlat(healpix_arr, order)
-    # tests 
+    # tests
     should_be_inside_arr = moc.contains_lonlat(lon=lon, lat=lat)
     assert should_be_inside_arr.all()
     should_be_outside_arr = moc_complement.contains_lonlat(lon=lon, lat=lat)
     assert not should_be_outside_arr.any()
     # test keep_inside field
-    should_be_outside_arr = moc.contains_lonlat(lon=lon, lat=lat, keep_inside=False)
+    should_be_outside_arr = moc.contains_lonlat(
+        lon=lon, lat=lat, keep_inside=False)
     assert not should_be_outside_arr.any()
-    should_be_inside_arr = moc_complement.contains_lonlat(lon=lon, lat=lat, keep_inside=False)
+    should_be_inside_arr = moc_complement.contains_lonlat(
+        lon=lon, lat=lat, keep_inside=False)
     assert should_be_inside_arr.all()
+
+# test 2d-arrays as lon lat input
+def test_moc_contains_2d_parameters():
+    # test that funny arrays are accepted
+    lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)
+    lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)
+    moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+    should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
+    assert should_be_inside.all()
+    # test mismatched
+    with pytest.raises(ValueError):
+        lat_mismatched = Angle(np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]),
+                           unit=u.deg)
+        moc.contains(lon=lon, lat=lat_mismatched)
+    
+    
 
 
 def test_degrade_to_order():
@@ -287,16 +317,17 @@ def test_degrade_to_order():
 
     for order in reversed(range(0, max_depth)):
         hst_moc = hst_moc.degrade_to_order(order)
-        assert(hst_moc.sky_fraction <= 1.0)
+        assert (hst_moc.sky_fraction <= 1.0)
 
 
 def test_from_ring():
-     moc = MOC.from_ring(
-         lon=0 * u.deg,
-         lat=0 * u.deg,
-         internal_radius=Angle(5, u.deg),
-         external_radius=Angle(10, u.deg),
-         max_depth=10)
+    moc = MOC.from_ring(
+        lon=0 * u.deg,
+        lat=0 * u.deg,
+        internal_radius=Angle(5, u.deg),
+        external_radius=Angle(10, u.deg),
+        max_depth=10)
+
 
 # TODO: IMPROVE THE ALGO
 '''
@@ -306,6 +337,8 @@ def test_boundaries():
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
 '''
+
+
 def test_from_elliptical_cone():
     moc = MOC.from_elliptical_cone(
         lon=0 * u.deg,
@@ -408,7 +441,8 @@ def test_from_fits_old():
 
 
 @pytest.mark.parametrize("input, expected", [
-    (MOC.from_json({'0': [1, 3]}), MOC.from_json({'0': [0, 2, 4, 5, 6, 7, 8, 9, 10, 11]}))
+    (MOC.from_json({'0': [1, 3]}), MOC.from_json(
+        {'0': [0, 2, 4, 5, 6, 7, 8, 9, 10, 11]}))
 ])
 def test_moc_complement(input, expected):
     assert input.complement() == expected
@@ -444,7 +478,8 @@ def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
     values = np.array([1.0])
 
     with pytest.raises(ValueError):
-        MOC.from_valued_healpix_cells(uniq, values, cumul_from=0.8, cumul_to=-5.0)
+        MOC.from_valued_healpix_cells(
+            uniq, values, cumul_from=0.8, cumul_to=-5.0)
 
 
 @pytest.mark.parametrize("cumul_from, cumul_to", [
@@ -458,7 +493,8 @@ def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
     uniq = np.array([500])
     values = np.array([-1.0])
 
-    MOC.from_valued_healpix_cells(uniq, values, cumul_from=cumul_from, cumul_to=cumul_to)
+    MOC.from_valued_healpix_cells(
+        uniq, values, cumul_from=cumul_from, cumul_to=cumul_to)
 
 
 def test_from_valued_healpix_cells_bayestar():
@@ -478,29 +514,34 @@ def test_from_valued_healpix_cells_bayestar():
     import astropy.units as u
 
     level, ipix = ah.uniq_to_level_ipix(uniq)
-    area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
+    area = ah.nside_to_pixel_area(
+        ah.level_to_nside(level)).to_value(u.steradian)
 
     prob = probdensity * area
 
     cumul_to = np.linspace(0.01, 2.0, num=10)
 
     for b in cumul_to:
-        MOC.from_valued_healpix_cells(uniq, prob, 12, cumul_from=0.0, cumul_to=b)
+        MOC.from_valued_healpix_cells(
+            uniq, prob, 12, cumul_from=0.0, cumul_to=b)
+
 
 def test_from_valued_healpix_cells_bayestar_and_split():
-   fits_mom_filename = './resources/bayestar.multiorder.fits'
-   moc = MOC.from_multiordermap_fits_file(fits_mom_filename, cumul_from=0.0, cumul_to=0.9)
-   count = moc.split_count()
-   assert count == 2
-   mocs = list(moc.split())
-   assert len(mocs)== 2
-   for moc in mocs:
-     assert moc.max_order == 8
+    fits_mom_filename = './resources/bayestar.multiorder.fits'
+    moc = MOC.from_multiordermap_fits_file(
+        fits_mom_filename, cumul_from=0.0, cumul_to=0.9)
+    count = moc.split_count()
+    assert count == 2
+    mocs = list(moc.split())
+    assert len(mocs) == 2
+    for moc in mocs:
+        assert moc.max_order == 8
 
 
 #### TESTING new features ####
 def test_moc_save_load_deser():
-    smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", 'ascii')
+    smoc = MOC.from_string(
+        "3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", 'ascii')
     smoc_ascii = smoc.to_string('ascii')
     smoc_ascii
     smoc_json = smoc.to_string('json')
@@ -514,14 +555,15 @@ def test_moc_save_load_deser():
     smoc_bis = MOC.load('resources/MOC2.0/SMOC.fits', 'fits')
     assert smoc == smoc_bis
 
-    smoc.save('resources/MOC2.0/smoc.py.test.fits', format='fits', overwrite=True)
-    smoc.save('resources/MOC2.0/smoc.py.test.json', format='json', overwrite=True)
-    smoc.save('resources/MOC2.0/smoc.py.test.ascii', format='ascii', overwrite=True)
+    smoc.save('resources/MOC2.0/smoc.py.test.fits',
+              format='fits', overwrite=True)
+    smoc.save('resources/MOC2.0/smoc.py.test.json',
+              format='json', overwrite=True)
+    smoc.save('resources/MOC2.0/smoc.py.test.ascii',
+              format='ascii', overwrite=True)
     smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.fits', 'fits')
     assert smoc == smoc_bis
     smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.json', 'json')
     assert smoc == smoc_bis
     smoc_bis = MOC.load('resources/MOC2.0/smoc.py.test.ascii', 'ascii')
     assert smoc == smoc_bis
-
-

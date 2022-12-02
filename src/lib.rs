@@ -19,8 +19,8 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use ndarray::{Array, Array1, Array2, Ix2};
-use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use ndarray::{Array, Array1, Array2, ArrayD, Ix2};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::prelude::{pymodule, Py, PyModule, PyResult, Python};
 use pyo3::types::{PyDict, PyList, PyString};
@@ -1445,15 +1445,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     fn space_coverage_contains(
         py: Python,
         intervals: PyReadonlyArray2<u64>,
-        lon: PyReadonlyArray1<f64>,
-        lat: PyReadonlyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
-        let lon = lon.as_array().to_owned();
-        let lat = lat.as_array().to_owned();
+        lon: PyReadonlyArrayDyn<f64>,
+        lat: PyReadonlyArrayDyn<f64>) -> PyResult<Py<PyArrayDyn<bool>>> {
+        let lon = lon.as_array();
+        let lat = lat.as_array();
 
         let ranges = intervals.as_array().to_owned();
         let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
 
-        let mut result: Array1<bool> = Array::from_elem((lon.shape()[0],), false);
+        let mut result: ArrayD<bool> = ArrayD::from_elem(lon.shape(), false);
         spatial_coverage::contains(&coverage, lon, lat, &mut result)?;
         Ok(result.into_pyarray(py).to_owned())
     }

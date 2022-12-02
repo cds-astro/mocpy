@@ -21,6 +21,7 @@ use moc::deser::fits::error::FitsError;
 
 use super::coverage;
 use super::ndarray_fromto::mocranges_to_array2;
+use ndarray::{ArrayD, ArrayViewD};
 
 /// Create a spatial coverage from a list of sky coordinates
 ///
@@ -359,16 +360,10 @@ fn from_lower_and_upperd_bounds(low: Array1<u64>, upp: Array1<u64>) -> Array2<u6
 /// If the number of longitudes and latitudes do not match.
 pub fn contains(
     coverage: &HpxRanges<u64>,
-    lon: Array1<f64>,
-    lat: Array1<f64>,
-    result: &mut Array1<bool>,
+    lon: ArrayViewD<f64>,
+    lat: ArrayViewD<f64>,
+    result: &mut ArrayD<bool>,
 ) -> PyResult<()> {
-    if lon.len() != lat.len() {
-        return Err(exceptions::PyValueError::new_err(
-            "Longitudes and latitudes should have the same length.",
-        ));
-    }
-
     // Retrieve the spatial depth of the Space coverage
     let layer = healpix::nested::get(Hpx::<u64>::MAX_DEPTH);
     Zip::from(result)
