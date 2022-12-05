@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from astropy.io import fits
 from astropy.table import Table
 
 from .interval_set import IntervalSet
@@ -19,9 +18,7 @@ __email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-
 
 
 class AbstractMOC(serializer.IO):
-    """
-    Basic functions for manipulating MOCs.
-    """
+    """Basic functions for manipulating MOCs."""
 
     __LARK_PARSER_STR = None
 
@@ -35,7 +32,7 @@ class AbstractMOC(serializer.IO):
 
     def __eq__(self, another_moc):
         """
-        Test equality between thr MOC instance and ``another_moc``
+        Test equality between thr MOC instance and ``another_moc``.
 
         Parameters
         ----------
@@ -57,7 +54,7 @@ class AbstractMOC(serializer.IO):
 
     def __add__(self, moc):
         """
-        Operator + definition
+        Operator + definition.
 
         Computes the union of self with another MOC
 
@@ -75,7 +72,7 @@ class AbstractMOC(serializer.IO):
 
     def __or__(self, moc):
         """
-        Operator | definition
+        Operator | definition.
 
         Computes the union of self with another MOC
 
@@ -93,7 +90,7 @@ class AbstractMOC(serializer.IO):
 
     def __sub__(self, moc):
         """
-        Operator - definition
+        Operator - definition.
 
         Computes the difference of self with another MOC
 
@@ -111,7 +108,7 @@ class AbstractMOC(serializer.IO):
 
     def __and__(self, moc):
         """
-        Operator & definition
+        Operator & definition.
 
         Computes the intersection of self with another MOC
 
@@ -129,7 +126,7 @@ class AbstractMOC(serializer.IO):
 
     def __invert__(self):
         """
-        Unary operator ~ definition
+        Unary operator ~ definition.
 
         Computes the complement of self
 
@@ -155,9 +152,7 @@ class AbstractMOC(serializer.IO):
 
     @property
     def max_order(self):
-        """
-        Depth of the smallest cells found in the MOC instance.
-        """
+        """Depth of the smallest cells found in the MOC instance."""
         # depth = mocpy.coverage_depth(self._interval_set._intervals)
         # depth = np.uint8(depth)
         # return depth
@@ -389,7 +384,7 @@ class AbstractMOC(serializer.IO):
 
         try:
             tree = AbstractMOC.__LARK_PARSER_STR.parse(value)
-        except Exception as err:
+        except Exception:
             raise ParsingException(
                 "Could not parse {0}. \n Check the grammar \
                 section 2.3.2 of http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf \
@@ -538,9 +533,7 @@ class AbstractMOC(serializer.IO):
         raise NotImplementedError("Method degrade_to_order not implemented")
 
     def refine_to_order(self, min_depth):
-        """
-        Internal method
-        """
+        """Internal method."""
         # intervals = mocpy.coverage_merge_nested_intervals(self._interval_set._intervals, min_depth)
         # interval_set = IntervalSet(intervals, make_consistent=False)
         # return self.__class__(interval_set)
