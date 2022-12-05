@@ -103,14 +103,24 @@ class MOC(AbstractMOC):
 
     @property
     def max_order(self):
-        """
-        Depth of the smallest HEALPix cells found in the MOC instance.
-        """
+        """Depth of the smallest HEALPix cells found in the MOC instance."""
         depth = mocpy.hpx_coverage_depth(self._interval_set._intervals)
         depth = np.uint8(depth)
         return depth
 
     def refine_to_order(self, min_depth):
+        """Return a MOC with min depth.
+
+        Parameters
+        ----------
+        min_depth : int
+            desired depth for the new MOC
+
+        Returns
+        -------
+        `mocpy.MOC`
+            a new MOC with depth=min_depth
+        """
         intervals = mocpy.coverage_merge_hpx_intervals(
             self._interval_set._intervals, min_depth
         )
@@ -133,6 +143,7 @@ class MOC(AbstractMOC):
     def extended(self):
         """
         Returns the MOC extended by the external border made of cells at the MOC maximum depth.
+
         The only difference with respect to `add_neighbours` is that `extended` returns a new MOC
         instead of modifying the existing one.
 
@@ -150,6 +161,7 @@ class MOC(AbstractMOC):
     def contracted(self):
         """
         Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
+
         The only difference with respect to `remove_neighbours` is that `contracted` returns a new MOC
         instead of modifying the existing one.
 
@@ -166,7 +178,7 @@ class MOC(AbstractMOC):
 
     def split_count(self, include_indirect_neighbours=False):
         """
-        Returns the number of disjoint MOCs the given MOC contains.
+        Return the number of disjoint MOCs the given MOC contains.
 
         Parameters
         ----------
@@ -180,7 +192,7 @@ class MOC(AbstractMOC):
 
     def split(self, include_indirect_neighbours=False):
         """
-        Returns the disjoint MOCs this MOC contains.format
+        Return the disjoint MOCs this MOC contains.format.
 
         Parameters
         ----------
@@ -196,9 +208,11 @@ class MOC(AbstractMOC):
         """
         import warnings
 
-        DeprecationWarning(
-            "Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high"
+        warnings.warn(
+            "Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high",
+            UserWarning,
         )
+
         list_of_intervals = mocpy.hpx_coverage_split(
             self.max_order, include_indirect_neighbours, self._interval_set._intervals
         )
@@ -256,7 +270,7 @@ class MOC(AbstractMOC):
         )
 
     def contains(self, lon, lat, keep_inside=True):
-        """Tests wether a MOC contains (or not) the given points. Returns a boolean mask array.
+        """Test wether a MOC contains --or not-- the given points. Returns a boolean mask array.
 
         .. deprecated:: 0.11.1
           `contains` is replaced by
@@ -345,7 +359,7 @@ class MOC(AbstractMOC):
         else:
             return ~mask
 
-    ## TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
+    # TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
 
     def add_neighbours(self):
         """
@@ -383,7 +397,7 @@ class MOC(AbstractMOC):
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Draws the MOC on a matplotlib axis.
+        Draw the MOC on a matplotlib axis.
 
         This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
         You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`
@@ -430,7 +444,7 @@ class MOC(AbstractMOC):
 
     def border(self, ax, wcs, **kw_mpl_pathpatch):
         """
-        Draws the MOC border(s) on a matplotlib axis.
+        Draw the MOC border.s on a matplotlib axis.
 
         This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
         You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`
@@ -532,9 +546,6 @@ class MOC(AbstractMOC):
         """
         # Only take the first HDU
         header = hdu.header
-
-        height = header["NAXIS2"]
-        width = header["NAXIS1"]
 
         # Compute a WCS from the header of the image
         w = wcs.WCS(header)
@@ -876,7 +887,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
         """
-        Creates a MOC from an elliptical cone
+        Create a MOC from an elliptical cone.
 
         The ellipse is centered around the (`lon`, `lat`) position. `a` (resp. `b`) corresponds
         to the semi-major axis magnitude (resp. semi-minor axis magnitude). `pa` is expressed as a
@@ -1062,7 +1073,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_polygon(cls, lon, lat, max_depth=10):
         """
-        Creates a MOC from a polygon
+        Create a MOC from a polygon.
 
         The polygon is given as lon and lat `astropy.units.Quantity` that define the
         vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.
@@ -1185,33 +1196,28 @@ class MOC(AbstractMOC):
 
     @property
     def sky_fraction(self):
-        """
-        Sky fraction covered by the MOC
-        """
+        """Sky fraction covered by the MOC."""
         sky_fraction = mocpy.coverage_sky_fraction(self._interval_set._intervals)
         return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region
     # See https://github.com/astropy/astroquery/pull/1466
     def query_simbad(self, max_rows=10000):
-        """
-        Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.
-        """
+        """Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance."""
         return self._query("SIMBAD", max_rows)
 
     # TODO : move this in astroquery.Vizier.query_region
     # See https://github.com/astropy/astroquery/pull/1466
     def query_vizier_table(self, table_id, max_rows=10000):
-        """
-        Query a VizieR table for sources in the coverage of the MOC instance.
-        """
+        """Query a VizieR table for sources in the coverage of the MOC instance."""
         return self._query(table_id, max_rows)
 
     # TODO : move this in astroquery
     def _query(moc, resource_id, max_rows=100000):
         """
-        Internal method to query Simbad or a VizieR table
-        for sources in the coverage of the MOC instance
+        Internal method to query Simbad or a VizieR table.
+
+        Find sources in the coverage of the MOC instance.
         """
         from astropy.io.votable import parse_single_table
         import requests
