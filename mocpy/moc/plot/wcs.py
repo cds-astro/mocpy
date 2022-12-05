@@ -5,8 +5,6 @@ from astropy import wcs
 
 import astropy.units as u
 
-from matplotlib.pyplot import figure
-
 
 class World2ScreenMPL:
     """
@@ -74,7 +72,6 @@ class World2ScreenMPL:
         width_px, height_px = fig.get_size_inches() * float(fig.dpi)
 
         cdelt_x = fov.to_value("deg") / float(width_px)
-        cdelt_y = fov.to_value("deg") / float(height_px)
 
         self.w.wcs.crpix = [width_px / 2.0, height_px / 2.0]
         self.w.wcs.cdelt = [-cdelt_x, cdelt_x]
