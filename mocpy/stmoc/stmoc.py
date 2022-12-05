@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-import numpy as np
 
+import numpy as np
 from astropy.io import fits
 
-from .. import mocpy
-from .. import utils
-
-from .. import MOC, serializer
+from .. import MOC, mocpy, serializer, utils
 from ..interval_set import IntervalSet
 
 __author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
@@ -457,11 +454,11 @@ class STMOC(serializer.IO):
         """
         Load a STMOC from a FITS file, using the astropy.io fits reader.
 
-        WARNING
-        -------
-        This is deprecated and will be soon removed.
-        Use `load(cls, path, format='fits')` instead.
-
+        Raises
+        ------
+        DeprecationWarning
+            This is deprecated and will be soon removed.
+            Use `load(cls, path, format='fits')` instead.
 
         Parameters
         ----------
@@ -473,6 +470,12 @@ class STMOC(serializer.IO):
         result : `~mocpy.moc.STMOC`
             The resulting STMOC.
         """
+        import warnings
+
+        warnings.warn(
+            "This is deprecated and will be soon removed. Use `load(cls, path, format='fits')` instead.",
+            DeprecationWarning,
+        )
         # Open the FITS file
         with fits.open(filename) as hdulist:
             stmoc = STMOC.deserialization(hdulist)
