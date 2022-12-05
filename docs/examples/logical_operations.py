@@ -1,6 +1,8 @@
-from mocpy import MOC, World2ScreenMPL
-from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
+import matplotlib.pyplot as plt
+from astropy.coordinates import Angle, SkyCoord
+
+from mocpy import MOC, World2ScreenMPL
 
 # Load Galex and SDSS
 sdss = MOC.from_fits("./../../resources/P-SDSS9-r.fits")
@@ -9,8 +11,6 @@ galex = MOC.from_fits("./../../resources/P-GALEXGR6-AIS-FUV.fits")
 inter = sdss & galex
 union = sdss + galex
 # Plot the MOC using matplotlib
-import matplotlib.pyplot as plt
-
 fig = plt.figure(111, figsize=(10, 10))
 # Define a astropy WCS easily
 with World2ScreenMPL(
