@@ -26,11 +26,17 @@ def test_empty_tmoc():
     assert tmoc.empty()
     assert tmoc.total_duration == 0
 
-    with pytest.raises(ValueError):
-        min_time = tmoc.min_time
+    with pytest.raises(
+        ValueError,
+        match="zero-size array to reduction operation minimum which has no identity",
+    ):
+        tmoc.min_time
 
-    with pytest.raises(ValueError):
-        max_time = tmoc.max_time
+    with pytest.raises(
+        ValueError,
+        match="zero-size array to reduction operation maximum which has no identity",
+    ):  # pytest styles : should add the match parameter
+        tmoc.max_time
 
     tmoc_ranges = TimeMOC.from_time_ranges(times, times)
     assert tmoc_ranges.empty()
@@ -68,9 +74,10 @@ def test_single_range_time_tmoc():
 
 
 def test_tmoc_from_time_ranges():
-    """
-    Assert a correct tmoc loaded from a fits file is equal to the tmoc built from a CSV file
-    containing a list of time intervals
+    """Test tmocs built from time ranges.
+
+    Assert a correct tmoc loaded from a fits file is equal to the
+    tmoc built from a CSV file containing a list of time intervals.
     """
     tmoc = TimeMOC.from_fits("resources/TMOC/HST_SDSSg/TMoc.fits")
     # Old T-MOC so we have to load it with the Old method.
@@ -89,15 +96,16 @@ def test_tmoc_from_time_ranges():
     assert tmoc == tmoc2
 
     with pytest.raises(AssertionError):
-        tmoc_ranges = TimeMOC.from_time_ranges(
+        TimeMOC.from_time_ranges(
             Time([], format="jd", scale="tdb"), Time([3], format="jd", scale="tdb")
         )
 
 
 def test_tmoc_from_single_time_range():
-    """
-    Assert a correct tmoc loaded from a fits file is equal to the tmoc built from a CSV file
-    containing a list of time intervals
+    """Test tmoc build from a single time range.
+
+    Assert a correct tmoc loaded from a fits file is equal to the
+    tmoc built from a CSV file containing a list of time intervals.
     """
     tmoc = TimeMOC.from_time_ranges(
         Time(0, format="mjd", scale="tdb"),
@@ -251,8 +259,14 @@ def test_intersection(a, b, expect):
     assert res == expect
 
 
-#### TESTING new features ####
+# ------- TESTING new features -------#
 def test_tmoc_save_load_deser():
+    """Test of IO features.
+
+    1. Serializations
+    2. Load
+    3. Save
+    """
     tmoc = TimeMOC.from_string("31/1 32/4 35/")
     tmoc_ascii = tmoc.to_string("ascii")
     tmoc_ascii

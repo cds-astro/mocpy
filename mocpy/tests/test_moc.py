@@ -1,10 +1,9 @@
 import pytest
 import copy
-import sys
 
 import numpy as np
 
-from astropy.coordinates import SkyCoord, ICRS, Angle
+from astropy.coordinates import SkyCoord, Angle
 from astropy.io.votable import parse_single_table
 import astropy.units as u
 from astropy.io import fits
@@ -46,7 +45,7 @@ def test_interval_set_complement():
     )
 
 
-#### TESTING MOC creation ####
+# --- TESTING MOC creation ---#
 
 
 def get_random_skycoords(size):
@@ -88,13 +87,13 @@ def lonlat_gen_f():
 @pytest.mark.parametrize("size", [1000, 10000, 50000])
 def test_moc_from_skycoords(skycoords_gen_f, size):
     skycoords = skycoords_gen_f(size)
-    moc = MOC.from_skycoords(skycoords, max_norder=7)
+    MOC.from_skycoords(skycoords, max_norder=7)
 
 
 @pytest.mark.parametrize("size", [1000, 10000, 50000])
 def test_moc_from_lonlat(lonlat_gen_f, size):
     lon, lat = lonlat_gen_f(size)
-    moc = MOC.from_lonlat(lon=lon, lat=lat, max_norder=6)
+    MOC.from_lonlat(lon=lon, lat=lat, max_norder=6)
 
 
 def test_from_healpix_cells():
@@ -102,12 +101,12 @@ def test_from_healpix_cells():
     depth = np.array([3, 3, 3])
     fully_covered = np.array([True, True, True])
 
-    moc = MOC.from_healpix_cells(ipix, depth, fully_covered)
+    MOC.from_healpix_cells(ipix, depth, fully_covered)
 
 
 def test_moc_from_fits():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
-    moc = MOC.load(fits_path, "fits")
+    MOC.load(fits_path, "fits")
 
 
 def test_moc_consistent_with_aladin():
@@ -124,7 +123,7 @@ def test_moc_consistent_with_aladin():
 def test_moc_from_fits_images():
     image_path = "resources/image_with_mask.fits.gz"
 
-    moc = MOC.from_fits_images([image_path], max_norder=15)
+    MOC.from_fits_images([image_path], max_norder=15)
 
 
 def test_from_fits_images_2():
@@ -221,7 +220,7 @@ def test_sky_fraction_on_empty_coverage():
     assert moc.sky_fraction == 0
 
 
-#### TESTING MOC serialization ####
+# --- TESTING MOC serialization ---#
 def test_moc_serialize_to_fits(moc_from_fits_image):
     hdulist = moc_from_fits_image.serialize(format="fits")
     assert isinstance(hdulist, fits.hdu.hdulist.HDUList)
@@ -268,13 +267,13 @@ def test_serialize_to_str(moc, expected):
 )
 def test_write(moc_from_json, filename, overwrite, format, os_error):
     if os_error:
-        with pytest.raises(OSError):
+        with pytest.raises(OSError):  # TODO add the match parameter of the exception
             moc_from_json.save(filename, format=format, overwrite=overwrite)
     else:
         moc_from_json.save(filename, format=format, overwrite=overwrite)
 
 
-#### TESTING MOC plot functions ####
+# --- TESTING MOC plot functions ---#
 def test_mpl_fill():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
     moc = MOC.load(fits_path, "fits")
@@ -313,7 +312,7 @@ def test_mpl_border():
         moc.border(ax=ax, wcs=wcs, color="g")
 
 
-#### TESTING MOC features ####
+# --- TESTING MOC features ---#
 @pytest.mark.parametrize("order", [4, 5, 6, 15, 20, 28])
 def test_moc_contains(order):
     # defines 20 random healpix cells of the required order
@@ -341,18 +340,16 @@ def test_moc_contains(order):
 
 # test 2d-arrays as lon lat input
 def test_moc_contains_2d_parameters():
-    # test that funny arrays are accepted
+    """Test that not only 1d arrays are accepted."""
     lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)
     lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)
+    lat2 = Angle(np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]), unit=u.deg)
     moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
     should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
     assert should_be_inside.all()
     # test mismatched
-    with pytest.raises(ValueError):
-        lat_mismatched = Angle(
-            np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]), unit=u.deg
-        )
-        moc.contains(lon=lon, lat=lat_mismatched)
+    with pytest.raises(ValueError, match=r".*mismatch.*"):
+        moc.contains_lonlat(lon=lon, lat=lat2)
 
 
 def test_degrade_to_order():
@@ -367,7 +364,7 @@ def test_degrade_to_order():
 
 
 def test_from_ring():
-    moc = MOC.from_ring(
+    MOC.from_ring(
         lon=0 * u.deg,
         lat=0 * u.deg,
         internal_radius=Angle(5, u.deg),
@@ -387,7 +384,7 @@ def test_boundaries():
 
 
 def test_from_elliptical_cone():
-    moc = MOC.from_elliptical_cone(
+    MOC.from_elliptical_cone(
         lon=0 * u.deg,
         lat=0 * u.deg,
         a=Angle(10, u.deg),
@@ -438,7 +435,7 @@ def test_neighbours(mocs):
     assert moc2 == mocs["moc2"]
 
 
-#### TESTING MOC operations ####
+# --- TESTING MOC operations ---#
 @pytest.fixture()
 def mocs_op():
     moc1 = MOC.from_json({"0": [0, 2, 3, 4, 5]})
@@ -516,7 +513,9 @@ def test_from_valued_healpix_cells_different_sizes():
     uniq = np.array([500])
     values = np.array([])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="`uniq` and values do not have the same size."
+    ):
         MOC.from_valued_healpix_cells(uniq, values)
 
 
@@ -524,7 +523,7 @@ def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
     uniq = np.array([500])
     values = np.array([1.0])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="`cumul_from` has to be < to `cumul_to`."):
         MOC.from_valued_healpix_cells(uniq, values, cumul_from=0.8, cumul_to=-5.0)
 
 
@@ -558,7 +557,7 @@ def test_from_valued_healpix_cells_bayestar():
     import astropy_healpix as ah
     import astropy.units as u
 
-    level, ipix = ah.uniq_to_level_ipix(uniq)
+    level, _ = ah.uniq_to_level_ipix(uniq)
     area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
 
     prob = probdensity * area
@@ -582,7 +581,7 @@ def test_from_valued_healpix_cells_bayestar_and_split():
         assert moc.max_order == 8
 
 
-#### TESTING new features ####
+# --- TESTING new features ---#
 def test_moc_save_load_deser():
     smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", "ascii")
     smoc_ascii = smoc.to_string("ascii")
