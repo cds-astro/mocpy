@@ -202,7 +202,7 @@ class MOC(AbstractMOC):
 
         Raises
         ------
-        DeprecationWarning
+        UserWarning
             Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
 
         """
