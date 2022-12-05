@@ -1,9 +1,6 @@
-from ..moc import MOC, World2ScreenMPL
+from ..moc import MOC
 
 from astropy import units as u
-from astropy.coordinates import SkyCoord
-
-import numpy as np
 
 
 def test_create_from_polygon():
@@ -172,7 +169,6 @@ def test_create_from_polygon():
 def test_polygon2_issue_44():
     from astropy import units as u
     from mocpy import MOC
-    import numpy as np
 
     ra = [174.75937396073138, 185.24062603926856, 184.63292896369916, 175.3670710363009]
     dec = [

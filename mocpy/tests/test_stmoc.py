@@ -1,8 +1,6 @@
-import pytest
-
 from ..stmoc import STMOC
-
-import numpy as np
+from astropy.time import Time
+import astropy.units as u
 
 
 def test_serialization():
@@ -26,10 +24,6 @@ def test_serialization():
     )
 
     assert decals == decals_result
-
-
-from astropy.time import Time
-import astropy.units as u
 
 
 def test_from_times_lonlat():
@@ -77,7 +71,7 @@ def test_difference_decals():
     assert result == STMOC()
 
 
-#### TESTING new features ####
+# --- TESTING new features ---#
 def test_stmoc_save_load_deser():
     stmoc = STMOC.from_string("t61/1 3 5 s3/1-3 t61/50 52 s4/25", "ascii")
     stmoc_ascii = stmoc.to_string("ascii")
