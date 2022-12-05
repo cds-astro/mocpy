@@ -1,3 +1,14 @@
+"""Implement conversions.
+
+Misc variables:
+    DAY_MICRO_SEC
+
+Functions:
+    uniq2orderipix
+    times_to_microseconds
+    microseconds_to_times
+"""
+
 import numpy as np
 from astropy.time import Time
 
@@ -6,8 +17,15 @@ DAY_MICRO_SEC = 86400000000.0
 
 def uniq2orderipix(uniq):
     """
-    convert a HEALPix pixel coded as a NUNIQ number
-    to a (norder, ipix) tuple
+    Convert a HEALPix pixel coded as a NUNIQ number to a (norder, ipix) tuple.
+
+    Parameters
+    ----------
+    uniq : int
+
+    Returns
+    -------
+    (order, ipix): int, int
     """
     order = (np.log2(uniq // np.uint8(4))) // np.uint8(2)
     order = order.astype(np.uint8)
@@ -18,8 +36,7 @@ def uniq2orderipix(uniq):
 
 def times_to_microseconds(times):
     """
-    Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping
-    the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
+    Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
 
     Parameters
     ----------
