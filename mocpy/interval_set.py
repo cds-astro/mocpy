@@ -35,7 +35,7 @@ class IntervalSet:
 
     def __init__(self, intervals=None, make_consistent=True):
         """
-        IntervalSet constructor.
+        Construct IntervalSet.
 
         The merging step of the overlapping intervals is done here.
 
@@ -67,6 +67,7 @@ class IntervalSet:
 
     @classmethod
     def from_uniq(cls, pix):
+        """Create an interval from a pix."""
         intervals = mocpy.to_nested(pix)
         return cls(intervals=intervals, make_consistent=False)
 
@@ -90,7 +91,7 @@ class IntervalSet:
 
     def __eq__(self, another_is):
         """
-        Equality operator override
+        Equality operator override.
 
         Parameters
         ----------
@@ -106,27 +107,63 @@ class IntervalSet:
 
     @property
     def min(self):
+        """Return the minimum interval."""
         return self._intervals.min()
 
     @property
     def max(self):
+        """Return the maximum interval."""
         return self._intervals.max()
 
     def empty(self):
-        """
-        Return True if the set is empty False otherwise
-        """
+        """Return True if the set is empty False otherwise."""
         return self._intervals.size == 0
 
     def union(self, other):
+        """Return the union with an other TMOC.
+
+        Parameters
+        ----------
+        other : `mocpy.tmoc`
+            the other tmoc to do the union with
+
+        Returns
+        -------
+        `mocpy.tmoc`
+            the result of the union
+        """
         intervals = mocpy.coverage_union(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def intersection(self, other):
+        """Return the intersection with an other TMOC.
+
+        Parameters
+        ----------
+        other : `mocpy.tmoc`
+            the TMOC to intersect with
+
+        Returns
+        -------
+        `mocpy.tmoc`
+            the result of the intersection of the two TMOCs
+        """
         intervals = mocpy.coverage_intersection(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
     def difference(self, other):
+        """Return the difference with an other TMOC.
+
+        Parameters
+        ----------
+        other : `mocpy.tmoc`
+            the TMOC to substract
+
+        Returns
+        -------
+        `mocpy.tmoc`
+            the result of the substraction of the two TMOCs
+        """
         intervals = mocpy.coverage_difference(self._intervals, other._intervals)
         return IntervalSet(intervals, make_consistent=False)
 
@@ -136,10 +173,12 @@ class IntervalSet:
 
     @property
     def uniq(self):
+        """Return a `np.array` of intervals."""
         if self.empty():
             return np.array([], dtype=np.uint64)
         return mocpy.to_uniq(self._intervals)
 
     @property
     def nested(self):
+        """Return the intervals."""
         return self._intervals
