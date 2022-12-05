@@ -1,10 +1,10 @@
-import pytest
 import numpy as np
 from astropy.time import Time
 from .. import utils
 
 
 def test_time_to_microsec_1():
+    """Test of the time conversion from `astropy.time` with format isot to microseconds."""
     # t = Time([['1998-01-01', '1999-01-01']], format="iso", scale="tdb")
 
     t = Time("1999-01-01T00:00:00.123456789", format="isot", scale="tdb")
@@ -17,6 +17,7 @@ def test_time_to_microsec_1():
 
 
 def test_time_to_microsec_2():
+    """Test of the time conversion from `astropy.time` with format iso to microseconds."""
     t = Time([["1998-01-01", "1999-01-01"]], format="iso", scale="tdb")
     us1 = utils.times_to_microseconds(t)
     us2 = np.asarray(t.jd * 86400000000, dtype=np.uint64)
