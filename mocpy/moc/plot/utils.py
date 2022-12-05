@@ -1,6 +1,4 @@
 import numpy as np
-import astropy.units as u
-from astropy.coordinates import SkyCoord
 
 from astropy.wcs.utils import pixel_to_skycoord
 
@@ -8,6 +6,7 @@ import warnings
 
 
 def build_plotting_moc(moc, wcs):
+    """Plot a moc."""
     # Get the WCS cdelt giving the deg.px^(-1) resolution.
     cdelt = wcs.wcs.cdelt
     # Convert in rad.px^(-1)
@@ -52,9 +51,6 @@ def build_plotting_moc(moc, wcs):
 
     if np.isnan(ra_deg).any() or np.isnan(dec_deg).any():
         return moc_plot
-
-    center_x_px, center_y_px = wcs.wcs.crpix[0], wcs.wcs.crpix[1]
-    inside = pixel_to_skycoord(center_x_px, center_y_px, wcs)
 
     # Import MOC here to avoid circular imports
     from ..moc import MOC
