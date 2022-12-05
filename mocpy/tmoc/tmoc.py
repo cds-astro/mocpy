@@ -20,7 +20,7 @@ __email__ = "baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr
 
 
 class TimeMOC(AbstractMOC):
-    """Multi-order time coverage class. Experimental"""
+    """Multi-order time coverage class. Experimental."""
 
     DAY_MICRO_SEC = 86400000000.0
     # default observation time : 30 min
@@ -30,8 +30,7 @@ class TimeMOC(AbstractMOC):
     # but `coverage_merge_time_intervals` is no more genric
     # and I can't remove `make_consistent` from `IntervalSet` without changing tests
     def __init__(self, interval_set=None, make_consistent=True, min_depth=None):
-        """
-        TimeMoc constructor.
+        """Construct TimeMoc.
 
         The merging step of the overlapping intervals is done here.
 
@@ -60,14 +59,20 @@ class TimeMOC(AbstractMOC):
 
     @property
     def max_order(self):
-        """
-        Depth of the smallest Time cells found in the MOC instance.
-        """
+        """Depth of the smallest Time cells found in the MOC instance."""
         depth = mocpy.time_coverage_depth(self._interval_set._intervals)
         depth = np.uint8(depth)
         return depth
 
     def refine_to_order(self, min_depth):
+        """Upgrade the MOC instance to a new, more precise, MOC.
+
+        Args:
+            min_depth (int): desired minimal depth
+
+        Returns:
+            TimeMOC: a new timemoc with the desired minimal HEALPix cell resolution
+        """
         intervals = mocpy.coverage_merge_time_intervals(
             self._interval_set._intervals, min_depth
         )
@@ -76,7 +81,7 @@ class TimeMOC(AbstractMOC):
 
     def complement(self):
         """
-        Returns the complement of the TimeMOC instance.
+        Return the complement of the TimeMOC instance.
 
         Returns
         -------
@@ -115,7 +120,7 @@ class TimeMOC(AbstractMOC):
     @classmethod
     def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
         """
-        Create a TimeMOC from a `astropy.time.Time`
+        Create a TimeMOC from a `astropy.time.Time`.
 
         Parameters
         ----------
@@ -145,7 +150,7 @@ class TimeMOC(AbstractMOC):
     @classmethod
     def from_time_ranges(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
         """
-        Create a TimeMOC from a range defined by two `astropy.time.Time`
+        Create a TimeMOC from a range defined by two `astropy.time.Time`.
 
         Parameters
         ----------
@@ -188,6 +193,7 @@ class TimeMOC(AbstractMOC):
     ):
         """
         Create a TimeMOC from a range defined by two `astropy.time.Time`.
+
         Uses the following approximation: simple take the JD time and multiply by the number of microseconds in a day.
 
         Parameters
@@ -225,7 +231,7 @@ class TimeMOC(AbstractMOC):
 
     def add_neighbours(self):
         """
-        Add all the pixels at max order in the neighbourhood of the moc
+        Add all the pixels at max order in the neighbourhood of the moc.
 
         Returns
         -------
@@ -250,7 +256,7 @@ class TimeMOC(AbstractMOC):
 
     def remove_neighbours(self):
         """
-        Remove all the pixels at max order located at the bound of the moc
+        Remove all the pixels at max order located at the bound of the moc.
 
         Returns
         -------
@@ -277,7 +283,7 @@ class TimeMOC(AbstractMOC):
 
     def _process_degradation(self, another_moc, order_op):
         """
-        Degrade (down-sampling) self and ``another_moc`` to ``order_op`` order
+        Degrade (down-sampling) self and ``another_moc`` to ``order_op`` order.
 
         Parameters
         ----------
@@ -311,7 +317,9 @@ class TimeMOC(AbstractMOC):
         self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME
     ):
         """
-        Intersection between self and moc. ``delta_t`` gives the possibility to the user
+        Intersection between self and moc.
+
+        ``delta_t`` gives the possibility to the user
         to set a time resolution for performing the tmoc intersection
 
         Parameters
@@ -329,7 +337,6 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self & ``moc``
 
         """
-
         order_op = TimeMOC.time_resolution_to_order(delta_t)
 
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
@@ -337,7 +344,9 @@ class TimeMOC(AbstractMOC):
 
     def union_with_timeresolution(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
         """
-        Union between self and moc. ``delta_t`` gives the possibility to the user
+        Union between self and moc.
+
+        ``delta_t`` gives the possibility to the user
         to set a time resolution for performing the tmoc union
 
         Parameters
@@ -355,7 +364,6 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self | ``moc``
 
         """
-
         order_op = TimeMOC.time_resolution_to_order(delta_t)
 
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
@@ -365,8 +373,10 @@ class TimeMOC(AbstractMOC):
         self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME
     ):
         """
-        Difference between self and moc. ``delta_t`` gives the possibility to the user
-        to set a time resolution for performing the tmoc diff
+        Difference between self and moc.
+
+        ``delta_t`` gives the possibility to the user to set a time resolution for
+        performing the tmoc diff.
 
         Parameters
         ----------
@@ -383,7 +393,6 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self - ``moc``
 
         """
-
         order_op = TimeMOC.time_resolution_to_order(delta_t)
 
         self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
@@ -411,7 +420,7 @@ class TimeMOC(AbstractMOC):
     @property
     def total_duration(self):
         """
-        Get the total duration covered by the temporal moc
+        Get the total duration covered by the temporal moc.
 
         Returns
         -------
@@ -420,7 +429,6 @@ class TimeMOC(AbstractMOC):
             total duration of all the observation times of the tmoc
 
         """
-
         if self._interval_set.empty():
             return 0
 
@@ -447,14 +455,13 @@ class TimeMOC(AbstractMOC):
             fill percentage (between 0 and 1.)
 
         """
-
         result = self.total_duration.jd / (self.max_time - self.min_time).jd
         return result
 
     @property
     def min_time(self):
         """
-        Get the `~astropy.time.Time` time of the tmoc first observation
+        Get the `~astropy.time.Time` time of the tmoc first observation.
 
         Returns
         -------
@@ -462,7 +469,6 @@ class TimeMOC(AbstractMOC):
             time of the first observation
 
         """
-
         # min_time = Time(self._interval_set.min / TimeMOC.DAY_MICRO_SEC, format='jd', scale='tdb')
         min_time = utils.microseconds_to_times(self._interval_set.min)
         return min_time
@@ -470,7 +476,7 @@ class TimeMOC(AbstractMOC):
     @property
     def max_time(self):
         """
-        Get the `~astropy.time.Time` time of the tmoc last observation
+        Get the `~astropy.time.Time` time of the tmoc last observation.
 
         Returns
         -------
@@ -478,14 +484,12 @@ class TimeMOC(AbstractMOC):
             time of the last observation
 
         """
-
         max_time = utils.microseconds_to_times(self._interval_set.max)
         return max_time
 
     def contains(self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME):
         """
-        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the
-        TMOC instance.
+        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the TMOC instance.
 
         Parameters
         ----------
@@ -543,7 +547,7 @@ class TimeMOC(AbstractMOC):
     @staticmethod
     def order_to_time_resolution(order):
         """
-        Convert an TimeMoc order to its equivalent time
+        Convert an TimeMoc order to its equivalent time.
 
         Parameters
         ----------
@@ -556,7 +560,6 @@ class TimeMOC(AbstractMOC):
             time equivalent to ``order``
 
         """
-
         delta_t = TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tdb")
         return delta_t
 
@@ -576,7 +579,6 @@ class TimeMOC(AbstractMOC):
             The less precise order which is able to discriminate two observations separated by ``delta_time``.
 
         """
-
         order = 61 - int(np.log2(delta_time.sec * 1e6))
         return np.uint8(order)
 
@@ -673,13 +675,13 @@ class TimeMOC(AbstractMOC):
             text.set_rotation(70)
             text.set_text(tx)
 
-        cid = fig1.canvas.mpl_connect("motion_notify_event", on_mouse_motion)
+        fig1.canvas.mpl_connect("motion_notify_event", on_mouse_motion)
 
         plt.show()
 
     def save(self, path, format="fits", overwrite=False):
         """
-        Writes the Time MOC to a file.
+        Write the Time MOC to a file.
 
         Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
 
@@ -760,7 +762,7 @@ class TimeMOC(AbstractMOC):
 
     def to_string(self, format="ascii"):
         """
-        Writes the Time MOC into a string.
+        Write the Time MOC into a string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
 
