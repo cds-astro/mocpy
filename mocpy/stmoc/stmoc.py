@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from urllib.parse import urlencode
-from io import BytesIO
 
-from astropy.utils.data import download_file
-from astropy import units as u
 from astropy.io import fits
-from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord
-from astropy import wcs
-from astropy.time import Time
 
 from .. import mocpy
 from .. import utils
@@ -26,45 +18,48 @@ __email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-
 
 
 class STMOC(serializer.IO):
-    """
-    Time-Spatial Coverage class.
-
-    """
+    """Time-Spatial Coverage class."""
 
     def __init__(self, make_consistent=True):
+        """Is a Time-Spatial Coverage (STMOC).
+
+        Args:
+            make_consistent (bool, optional): Unaccessed parameter. Defaults to True.
+        """
         self.__index = mocpy.create_2d_coverage()
         self._fits_column_name = "PIXELS"
 
     def __del__(self):
+        """Erase STMOC."""
         mocpy.drop_2d_coverage(self.__index)
 
     def __eq__(self, other):
+        """Assert equality between MOCs."""
         return mocpy.coverage_2d_equality_check(self.__index, other.__index)
 
     @property
     def max_depth(self):
+        """Return max depth of MOC."""
         return mocpy.coverage_2d_depth(self.__index)
 
     @property
     def max_time(self):
-        # return Time(mocpy.coverage_2d_max_time(self.__index), format='jd', scale='tdb')
+        """Return STMOC max time."""
         return utils.microseconds_to_times(mocpy.coverage_2d_max_time(self.__index))
 
     @property
     def min_time(self):
-        # return Time(mocpy.coverage_2d_min_time(self.__index), format='jd', scale='tdb')
+        """Return STMOC min time."""
         return utils.microseconds_to_times(mocpy.coverage_2d_min_time(self.__index))
 
     def is_empty(self):
-        """
-        Check whether the Space-Time coverage is empty
-        """
+        """Check whether the Space-Time coverage is empty."""
         return mocpy.coverage_2d_is_empty(self.__index)
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
         """
-        Creates a 2D Coverage from a set of times and positions associated to each time.
+        Create a 2D Coverage from a set of times and positions associated to each time.
 
         - Its first dimension refers to `astropy.time.Time` times.
         - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
@@ -109,7 +104,7 @@ class STMOC(serializer.IO):
         cls, times_start, times_end, lon, lat, time_depth=29, spatial_depth=29
     ):
         """
-        Creates a 2D Coverage from a set of times and positions associated to each time.
+        Create a 2D Coverage from a set of times and positions associated to each time.
 
         - Its first dimension refers to `astropy.time.Time` times.
         - Its second dimension refers to lon, lat `astropy.units.Quantity` positions.
@@ -164,7 +159,7 @@ class STMOC(serializer.IO):
         cls, times_start, times_end, spatial_coverages, time_depth=61
     ):
         """
-        Creates a 2D Coverage from a set of time ranges and spatial coverages associated to them.
+        Create a 2D Coverage from a set of time ranges and spatial coverages associated to them.
 
         Parameters
         ----------
@@ -331,7 +326,7 @@ class STMOC(serializer.IO):
 
     def contains(self, times, lon, lat, inside=True):
         """
-        Returns a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.
+        Return a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.
 
         Parameters
         ----------
@@ -412,12 +407,8 @@ class STMOC(serializer.IO):
 
     @classmethod
     def deserialization(cls, hdulist):
-        """
-        Deserialization of an hdulist to a Time-Space coverage
-        """
+        """Deserialization of an hdulist to a Time-Space coverage."""
         # The binary HDU table contains all the data
-        header = hdulist[1].header
-
         bin_HDU_table = hdulist[1]
         # Some FITS file may not have a name column to access
         # the data. So we rename it as the `PIXELS` columns.
@@ -464,8 +455,7 @@ class STMOC(serializer.IO):
     @classmethod
     def from_fits(cls, filename):
         """
-        Loads a STMOC from a FITS file,
-        using the astropy.io fits reader.
+        Load a STMOC from a FITS file, using the astropy.io fits reader.
 
         WARNING
         -------
@@ -490,8 +480,7 @@ class STMOC(serializer.IO):
         return stmoc
 
     def save(self, path, format="fits", overwrite=False):
-        """
-        Writes the ST-MOC to a file.
+        """Write the ST-MOC to a file.
 
         Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
 
@@ -560,8 +549,7 @@ class STMOC(serializer.IO):
             raise ValueError("format should be one of %s" % (str(formats)))
 
     def to_string(self, format="ascii"):
-        """
-        Writes the ST-MOC into a string.
+        """Write the ST-MOC into a string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
 
