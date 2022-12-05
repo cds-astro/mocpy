@@ -1,13 +1,13 @@
-from mocpy import MOC, World2ScreenMPL
-from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
+import matplotlib.pyplot as plt
+from astropy.coordinates import Angle, SkyCoord
+
+from mocpy import MOC, World2ScreenMPL
 
 # Load a MOC
 filename = "./../../resources/P-SDSS9-r.fits"
 moc = MOC.from_fits(filename)
 # Plot the MOC using matplotlib
-import matplotlib.pyplot as plt
-
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
 with World2ScreenMPL(

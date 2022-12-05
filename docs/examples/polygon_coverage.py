@@ -1,8 +1,9 @@
-from mocpy import MOC, World2ScreenMPL
-from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
-
+import matplotlib.pyplot as plt
 import numpy as np
+from astropy.coordinates import Angle, SkyCoord
+
+from mocpy import MOC, World2ScreenMPL
 
 # The set of points delimiting the polygon in deg
 vertices = np.array(
@@ -34,9 +35,8 @@ skycoord = SkyCoord(vertices, unit="deg", frame="icrs")
 inside = SkyCoord(ra=10, dec=5, unit="deg", frame="icrs")
 moc = MOC.from_polygon_skycoord(skycoord, max_depth=9)
 moc.write("polygon_moc.fits", format="fits", overwrite=True)
-# Plot the MOC using matplotlib
-import matplotlib.pyplot as plt
 
+# Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(10, 10))
 # Define a astropy WCS easily
 with World2ScreenMPL(

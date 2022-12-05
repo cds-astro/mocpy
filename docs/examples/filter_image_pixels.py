@@ -1,9 +1,11 @@
-from astropy.io import fits
-from astropy.wcs import WCS as WCS
-from mocpy import MOC
-from astropy.visualization import simple_norm
 import astropy.units as u
+import matplotlib.pyplot as plt
 import numpy as np
+from astropy.io import fits
+from astropy.visualization import simple_norm
+from astropy.wcs import WCS as WCS
+
+from mocpy import MOC
 
 # load 2MASS cutout covering the galactic plane
 hdu = fits.open(
@@ -34,8 +36,6 @@ img_test = img.copy()
 img_test[~mask_in_moc] = 0
 
 # Plot the filtered pixels image
-import matplotlib.pyplot as plt
-
 fig = plt.figure(111, figsize=(15, 10))
 ax = fig.add_subplot(1, 1, 1, projection=twomass_wcs)
 
