@@ -1,3 +1,5 @@
+"""An example for plotting the union of two MOCs with the astropy.wcs module."""
+
 import matplotlib.pyplot as plt
 from astropy.wcs import WCS
 import numpy as np
