@@ -28,11 +28,6 @@ repos:
           #remove the above exceptions when feeling like writing
           # D401 : first line should be in imperative mood
           args: ['--ignore=W503,E501,E203,D100,D101,D104,D105,D107,D401']
-    - repo: https://github.com/pycqa/isort
-      rev: 5.10.1
-      hooks:
-        - id: isort
-          name: isort (python)
     - repo: https://github.com/nbQA-dev/nbQA
       rev: 1.5.3
       hooks:
