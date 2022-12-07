@@ -1,30 +1,35 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from urllib.parse import urlencode
-from io import BytesIO
 
-from astropy.utils.data import download_file
-from astropy import units as u
-from astropy.io import fits
-from astropy.coordinates import ICRS, Galactic, BaseCoordinateFrame
-from astropy.coordinates import SkyCoord, Angle, Longitude, Latitude
-from astropy import wcs
+from io import BytesIO
+from urllib.parse import urlencode
 
 import cdshealpix
+import numpy as np
+from astropy import units as u
+from astropy import wcs
+from astropy.coordinates import (
+    ICRS,
+    Angle,
+    BaseCoordinateFrame,
+    Galactic,
+    Latitude,
+    Longitude,
+    SkyCoord,
+)
+from astropy.io import fits
+from astropy.utils.data import download_file
 
 try:
     from astropy_healpix import HEALPix
 except ImportError:
     pass
 
+from .. import mocpy
 from ..abstract_moc import AbstractMOC
 from ..interval_set import IntervalSet
-
-from .. import mocpy
-
 from .boundaries import Boundaries
-from .plot import fill, border
+from .plot import border, fill
 
 __author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -339,7 +344,8 @@ class MOC(AbstractMOC):
         >>> # create a polygonal moc from these
         >>> moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
         >>> moc.contains_lonlat(lon=lon, lat=lat) # returns all true
-        [[ True  True  True][ True  True  True]]
+        array([[ True,  True,  True],
+               [ True,  True,  True]])
 
         See Also
         --------
@@ -1219,8 +1225,8 @@ class MOC(AbstractMOC):
 
         Find sources in the coverage of the MOC instance.
         """
-        from astropy.io.votable import parse_single_table
         import requests
+        from astropy.io.votable import parse_single_table
 
         moc_file = BytesIO()
         moc_fits = moc.serialize(format="fits")
@@ -1271,8 +1277,8 @@ class MOC(AbstractMOC):
 
         frame = ICRS() if frame is None else frame
 
-        from matplotlib.colors import LinearSegmentedColormap
         import matplotlib.pyplot as plt
+        from matplotlib.colors import LinearSegmentedColormap
 
         plot_order = 8
         if self.max_order > plot_order:
