@@ -20,3 +20,10 @@ astropy-sphinx-theme
 
 # Pytest extension package enabling test coverage
 pytest-cov
+
+# For pre-commits
+pre-commit=="2.20.0" # to set hooks
+black=="22.10.0" # python formater
+flake8=="6.0.0" # python linter
+isort=="5.10.1" # to sort python imports
+nbqa=="1.5.3" # to run black and flake8 in notebooks too
