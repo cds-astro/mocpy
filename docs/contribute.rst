@@ -21,7 +21,7 @@ Using conda
 
 - Set up the conda environment and activate it::
 
-    conda env create -q python=3.7 -f <path_to_mocpy>/requirements/environment.yml -n mocpy-env
+    conda env create -q python=3.8 -f <path_to_mocpy>/requirements/environment.yml -n mocpy-env
     source activate mocpy-env
 
 - Once you are done with your developments you can
@@ -60,6 +60,15 @@ opens a session with the `mocpy-env` interpreter.
 - Once you are done with your developments you can deactivate the virtual env::
 
     deactivate
+
+Pre-commits setup
+-----------------
+
+- You'll need to install the pre-commits in your `.git/hooks` to check your code locally::
+
+    pre-commit install
+   
+It will run linting and formating tests at each of your commits.
 
 Now build package
 -----------------
