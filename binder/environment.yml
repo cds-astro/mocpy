@@ -6,6 +6,7 @@ channels:
 
 dependencies:
 - maturin
+- cdshealpix
 - astropy
 - astroquery
 - astropy-healpix # Optional dependency for boundaries notebook
