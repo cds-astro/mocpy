@@ -8,6 +8,7 @@ dependencies:
 - maturin
 - cdshealpix
 - astropy
+- regions
 - astroquery
 - astropy-healpix # Optional dependency for boundaries notebook
 - requests
