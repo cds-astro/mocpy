@@ -10,6 +10,7 @@ dependencies:
 - astropy
 - regions
 - astroquery
+- ipyaladin
 - astropy-healpix # Optional dependency for boundaries notebook
 - requests
 - matplotlib # Used in fill and border
