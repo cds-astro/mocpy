@@ -41,7 +41,7 @@ pub mod coverage;
 pub mod spatial_coverage;
 pub mod temporal_coverage;
 
-use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2}; // uniq_ranges_to_array1
+use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2};
 
 
 fn coverage_op<O>(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>, op: O)

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0]
+#### Removed
+* Deserialisation of ST-MOCs from FITs HDU (reading/writting FITS file fully supported
+  on the Rust side)
+* Remove support of pre_v2 ST-MOC fits file writing (reading still ok)
+
 ## [0.11.0]
 ### Added
 * Add `MOC.from_ring`
