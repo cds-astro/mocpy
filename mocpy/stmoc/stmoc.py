@@ -6,11 +6,11 @@ import numpy as np
 from .. import MOC, mocpy, serializer, utils
 from ..interval_set import IntervalSet
 
-__author__ = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
+__author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unisrta.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 class STMOC(serializer.IO):
