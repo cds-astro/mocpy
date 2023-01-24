@@ -850,74 +850,65 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  /// Perform the union between two Time-Space coverages.
+  /// Perform the union between two coverages of same type.
   ///
   /// # Arguments
   ///
-  /// * ``id_left`` - The index of the Time-Space coverage being
-  ///   in the left of the operation.
-  /// * ``id_right`` - The index of the Time-Space coverage being
-  ///   in the right of the operation.
-  #[pyfn(m, "coverage_2d_union")]
-  fn coverage_2d_union(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
+  /// * ``id_left`` - index of the coverage being in the left of the operation.
+  /// * ``id_right`` - index of the coverage being in the right of the operation.
+  #[pyfn(m, "union")]
+  fn union(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .or(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
 
-  /// Perform the intersection between two Time-Space coverages.
+  /// Perform the intersection between two coverages of same type.
   ///
   /// # Arguments
   ///
-  /// * ``id_left`` - The index of the Time-Space coverage being
-  ///   in the left of the operation.
-  /// * ``id_right`` - The index of the Time-Space coverage being
-  ///   in the right of the operation.
-  #[pyfn(m, "coverage_2d_intersection")]
-  fn coverage_2d_intersection(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
+  /// * ``id_left`` - index of the coverage being in the left of the operation.
+  /// * ``id_right`` - index of the coverage being in the right of the operation.
+  #[pyfn(m, "intersection")]
+  fn intersection(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .and(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
 
-  /// Perform the difference between two Time-Space coverages.
+  /// Perform the difference between two coverages of same type.
   ///
   /// # Arguments
   ///
-  /// * ``id_left`` - The index of the Time-Space coverage being
-  ///   in the left of the operation.
-  /// * ``id_right`` - The index of the Time-Space coverage being
-  ///   in the right of the operation.
-  #[pyfn(m, "coverage_2d_difference")]
-  fn coverage_2d_difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
+  /// * ``id_left`` - index of the coverage being in the left of the operation.
+  /// * ``id_right`` - index of the coverage being in the right of the operation.
+  #[pyfn(m, "difference")]
+  fn difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .xor(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
 
-  /// Check the equality between two Time-Space coverages
+  /// Check the equality between two coverages
   ///
   /// # Arguments
   ///
-  /// * ``id_left`` - The index of the Time-Space coverage being
-  ///   in the left of the operation.
-  /// * ``id_right`` - The index of the Time-Space coverage being
-  ///   in the right of the operation.
-  #[pyfn(m, "coverage_2d_equality_check")]
-  fn coverage_2d_equality_check(_py: Python, id_left: usize, id_right: usize) -> PyResult<bool> {
+  /// * ``id_left`` - index of the coverage being in the left of the operation.
+  /// * ``id_right`` - index of the coverage being in the right of the operation.
+  #[pyfn(m, "check_eq")]
+  fn check_eq(_py: Python, id_left: usize, id_right: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .eq(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
 
-  /// Checks whether a Time-Space coverage is empty.
+  /// Checks whether a coverage is empty.
   ///
   /// # Arguments
   ///
-  /// * ``index`` - The index of the Time-Space coverage to check
-  ///   the emptiness.
-  #[pyfn(m, "coverage_2d_is_empty")]
-  fn coverage_2d_is_empty(_py: Python, index: usize) -> PyResult<bool> {
+  /// * ``index`` - The index of the coverage to check the emptiness.
+  #[pyfn(m, "is_empty")]
+  fn is_empty(_py: Python, index: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .is_empty(index)
       .map_err(PyIOError::new_err)

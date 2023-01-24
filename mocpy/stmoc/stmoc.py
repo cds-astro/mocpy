@@ -29,7 +29,6 @@ class STMOC(serializer.IO):
             create_key == STMOC.__create_key
         ), "ST-MOC instantiation is only allowed by class methods"
         self.__index = store_index
-        self._fits_column_name = "PIXELS"
 
     def __del__(self):
         """Erase STMOC."""
@@ -37,7 +36,7 @@ class STMOC(serializer.IO):
 
     def __eq__(self, other):
         """Assert equality between MOCs."""
-        return mocpy.coverage_2d_equality_check(self.__index, other.__index)
+        return mocpy.check_eq(self.__index, other.__index)
 
     @property
     def max_depth(self):
@@ -56,7 +55,7 @@ class STMOC(serializer.IO):
 
     def is_empty(self):
         """Check whether the Space-Time coverage is empty."""
-        return mocpy.coverage_2d_is_empty(self.__index)
+        return mocpy.is_empty(self.__index)
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -276,7 +275,7 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the union of `self`
             with `other`.
         """
-        index = mocpy.coverage_2d_union(self.__index, other.__index)
+        index = mocpy.union(self.__index, other.__index)
         return STMOC(STMOC.__create_key, index)
 
     def intersection(self, other):
@@ -298,7 +297,7 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the intersection of `self`
             with `other`.
         """
-        index = mocpy.coverage_2d_intersection(self.__index, other.__index)
+        index = mocpy.intersection(self.__index, other.__index)
         return STMOC(STMOC.__create_key, index)
 
     def difference(self, other):
@@ -320,7 +319,7 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the difference of `self`
             with `other`.
         """
-        index = mocpy.coverage_2d_difference(self.__index, other.__index)
+        index = mocpy.difference(self.__index, other.__index)
         return STMOC(STMOC.__create_key, index)
 
     def contains(self, times, lon, lat, inside=True):
