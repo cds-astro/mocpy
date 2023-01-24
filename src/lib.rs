@@ -40,7 +40,6 @@ pub mod ndarray_fromto;
 pub mod coverage;
 pub mod spatial_coverage;
 pub mod temporal_coverage;
-pub mod time_space_coverage;
 
 use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2}; // uniq_ranges_to_array1
 
