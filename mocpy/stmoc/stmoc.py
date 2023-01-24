@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
-from astropy.io import fits
 
 from .. import MOC, mocpy, serializer, utils
 from ..interval_set import IntervalSet
@@ -17,13 +16,19 @@ __email__ = "thomas.boch@astro.unistra.fr, baumannmatthieu0@gmail.com, francois-
 class STMOC(serializer.IO):
     """Time-Spatial Coverage class."""
 
-    def __init__(self, make_consistent=True):
+    __create_key = object()
+
+    def __init__(self, create_key, store_index):
         """Is a Time-Spatial Coverage (STMOC).
 
         Args:
-            make_consistent (bool, optional): Unaccessed parameter. Defaults to True.
+            create_key: Object ensure __init__ is called by class-methods only
+            store_index: index of the ST-MOC in the rust-side storage
         """
-        self.__index = mocpy.create_2d_coverage()
+        assert (
+            create_key == STMOC.__create_key
+        ), "ST-MOC instantiation is only allowed by class methods"
+        self.__index = store_index
         self._fits_column_name = "PIXELS"
 
     def __del__(self):
@@ -79,7 +84,6 @@ class STMOC(serializer.IO):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        # times = times.jd.astype(np.float64)
         times = utils.times_to_microseconds(times)
         lon = lon.to_value("rad").astype(np.float64)
         lat = lat.to_value("rad").astype(np.float64)
@@ -90,15 +94,14 @@ class STMOC(serializer.IO):
         if times.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = cls()
-        mocpy.from_time_lonlat(
-            result.__index, times, time_depth, lon, lat, spatial_depth
-        )
+        index = mocpy.from_time_lonlat(times, time_depth, lon, lat, spatial_depth)
+        result = cls(cls.__create_key, index)
+
         return result
 
     @classmethod
     def from_time_ranges_positions(
-        cls, times_start, times_end, lon, lat, time_depth=29, spatial_depth=29
+        cls, times_start, times_end, lon, lat, time_depth=61, spatial_depth=29
     ):
         """
         Create a 2D Coverage from a set of times and positions associated to each time.
@@ -145,10 +148,11 @@ class STMOC(serializer.IO):
         if times_start.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = cls()
-        mocpy.from_time_ranges_lonlat(
-            result.__index, times_start, times_end, time_depth, lon, lat, spatial_depth
+        index = mocpy.from_time_ranges_lonlat(
+            times_start, times_end, time_depth, lon, lat, spatial_depth
         )
+        result = cls(cls.__create_key, index)
+
         return result
 
     @classmethod
@@ -191,15 +195,16 @@ class STMOC(serializer.IO):
         if times_start.ndim != 1:
             raise ValueError("Times and spatial coverages must be 1D arrays")
 
-        result = cls()
         spatial_coverages = [
             spatial_coverage._interval_set._intervals
             for spatial_coverage in spatial_coverages
         ]
 
-        mocpy.from_time_ranges_spatial_coverages(
-            result.__index, times_start, times_end, time_depth, spatial_coverages
+        index = mocpy.from_time_ranges_spatial_coverages(
+            times_start, times_end, time_depth, spatial_coverages
         )
+        result = cls(cls.__create_key, index)
+
         return result
 
     def query_by_time(self, times):
@@ -271,9 +276,8 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the union of `self`
             with `other`.
         """
-        result = STMOC()
-        mocpy.coverage_2d_union(result.__index, self.__index, other.__index)
-        return result
+        index = mocpy.coverage_2d_union(self.__index, other.__index)
+        return STMOC(STMOC.__create_key, index)
 
     def intersection(self, other):
         """
@@ -294,9 +298,8 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the intersection of `self`
             with `other`.
         """
-        result = STMOC()
-        mocpy.coverage_2d_intersection(result.__index, self.__index, other.__index)
-        return result
+        index = mocpy.coverage_2d_intersection(self.__index, other.__index)
+        return STMOC(STMOC.__create_key, index)
 
     def difference(self, other):
         """
@@ -317,9 +320,8 @@ class STMOC(serializer.IO):
             A new Space-Time coverage being the difference of `self`
             with `other`.
         """
-        result = STMOC()
-        mocpy.coverage_2d_difference(result.__index, self.__index, other.__index)
-        return result
+        index = mocpy.coverage_2d_difference(self.__index, other.__index)
+        return STMOC(STMOC.__create_key, index)
 
     def contains(self, times, lon, lat, inside=True):
         """
@@ -364,91 +366,6 @@ class STMOC(serializer.IO):
 
         return result
 
-    @property
-    def _fits_header_keywords(self):
-        t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
-        return {
-            "MOVERS": "2.0",
-            "MOCDIM": "TIME.SPACE",
-            "ORDERING": "RANGE",
-            # Max depth along the first dimension
-            "MOCORD_T": str(t_depth),
-            # Max depth along the second dimension
-            "MOCORD_S": str(s_depth),
-            "COORDSYS": "C",
-            "TIMESYS": "TCB",
-            "MOCTOOL": "MOCPy",
-        }
-
-    @property
-    def _fits_header_keywords_pre_v2(self):
-        t_depth, s_depth = mocpy.coverage_2d_depth(self.__index)
-        return {
-            "MOC": "TIME.SPACE",
-            "ORDERING": "RANGE29",
-            # Max depth along the first dimension
-            "MOCORDER": str(t_depth / 2),
-            # Max depth along the second dimension
-            "MOCORD_1": str(s_depth),
-            "COORDSYS": "C",
-            "TIMESYS": "JD",
-            "MOCTOOL": "MOCPy",
-        }
-
-    @property
-    def _fits_format(self):
-        return "1K"
-
-    def _uniq_format(self):
-        return mocpy.coverage_2d_to_fits(self.__index)
-
-    @classmethod
-    def deserialization(cls, hdulist):
-        """Deserialization of an hdulist to a Time-Space coverage."""
-        # The binary HDU table contains all the data
-        bin_HDU_table = hdulist[1]
-        # Some FITS file may not have a name column to access
-        # the data. So we rename it as the `PIXELS` columns.
-        if len(bin_HDU_table.columns) != 1:
-            raise AttributeError(
-                "The binary HDU table of {0} must contain only one"
-                "column where the data are stored."
-            )
-
-        if bin_HDU_table.columns[0].name is None:
-            bin_HDU_table.columns[0].name = "PIXELS"
-
-        key = bin_HDU_table.columns[0].name
-
-        # Retrieve the spatial and time order
-        # FITS header can be of two different format for expressing
-        # these orders:
-        # 1. TORDER key refers the max depth in the time dimension. MOCORDER then
-        #    refers the spatial max depth.
-        # 2. MOCORDER refers the max depth along the 1st dimension whereas
-        #    MOCORD_1 refers to the max depth along the 2nd dimension.
-        # DOES NOT SEEM TO BE USE
-        # if header.get('TORDER') is None:
-        #    # We are in the 2. case
-        #    first_dim_depth = header.get('MOCORDER')
-        #    second_dim_depth = header.get('MOCORD_1')
-        # else:
-        #    # We are in the 1. case
-        #    first_dim_depth = header.get('TORDER')
-        #    second_dim_depth = header.get('MOCORDER')
-
-        result = cls()
-        ordering = bin_HDU_table.header["ORDERING"]
-        if ordering == "RANGE29":
-            mocpy.coverage_2d_from_fits_pre_v2(
-                result.__index, bin_HDU_table.data[key].astype(np.int64)
-            )
-        else:
-            mocpy.coverage_2d_from_fits(
-                result.__index, bin_HDU_table.data[key].astype(np.uint64)
-            )
-        return result
-
     @classmethod
     def from_fits(cls, filename):
         """
@@ -470,17 +387,7 @@ class STMOC(serializer.IO):
         result : `~mocpy.moc.STMOC`
             The resulting STMOC.
         """
-        import warnings
-
-        warnings.warn(
-            "This is deprecated and will be soon removed. Use `load(cls, path, format='fits')` instead.",
-            DeprecationWarning,
-        )
-        # Open the FITS file
-        with fits.open(filename) as hdulist:
-            stmoc = STMOC.deserialization(hdulist)
-
-        return stmoc
+        return cls.load(filename, "fits")
 
     def save(self, path, format="fits", overwrite=False):
         """Write the ST-MOC to a file.
@@ -537,15 +444,17 @@ class STMOC(serializer.IO):
             By default, ``format`` is set to "fits".
         """
         path = str(path)
-        stmoc = cls()
         if format == "fits":
-            mocpy.coverage_2d_from_fits_file(stmoc.__index, path)
+            index = mocpy.coverage_2d_from_fits_file(path)
+            stmoc = cls(cls.__create_key, index)
             return stmoc
         elif format == "ascii":
-            mocpy.coverage_2d_from_ascii_file(stmoc.__index, path)
+            index = mocpy.coverage_2d_from_ascii_file(path)
+            stmoc = cls(cls.__create_key, index)
             return stmoc
         elif format == "json":
-            mocpy.coverage_2d_from_json_file(stmoc.__index, path)
+            index = mocpy.coverage_2d_from_json_file(path)
+            stmoc = cls(cls.__create_key, index)
             return stmoc
         else:
             formats = ("fits", "ascii", "json")
@@ -585,13 +494,12 @@ class STMOC(serializer.IO):
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
         """
-        stmoc = cls()
         if format == "ascii":
-            mocpy.coverage_2d_from_ascii_str(stmoc.__index, value)
-            return stmoc
+            index = mocpy.coverage_2d_from_ascii_str(value)
+            return cls(cls.__create_key, index)
         elif format == "json":
-            mocpy.coverage_2d_from_json_str(stmoc.__index, value)
-            return stmoc
+            index = mocpy.coverage_2d_from_json_str(value)
+            return cls(cls.__create_key, index)
         else:
             formats = ("ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))

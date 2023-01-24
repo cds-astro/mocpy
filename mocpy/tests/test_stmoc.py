@@ -8,12 +8,6 @@ def test_serialization():
     decals_bis = STMOC.load("resources/STMOC/STMoc-DECaLS-g.fits", format="fits")
     assert decals == decals_bis
 
-    # Serialize to FITS
-    hdulist = decals.serialize(format="fits", pre_v2=True)
-    # Deserialize from FITS
-    decals_result = decals.deserialization(hdulist)
-    assert decals == decals_result
-
     # Save to FITS
     decals.save(
         path="resources/STMOC/STMoc-DECaLS-g.v2.fits", format="fits", overwrite=True
@@ -38,14 +32,9 @@ def test_from_times_lonlat():
     assert not stmoc.is_empty()
 
 
-def test_is_empty():
-    empty_stmoc = STMOC()
-    assert empty_stmoc.is_empty()
-
-
 def test_max_depth():
     decals = STMOC.from_fits("resources/STMOC/STMoc-DECaLS-g.fits")
-    assert decals.max_depth == (61, 9)
+    assert decals.max_depth == (28, 9)
 
 
 def test_union_decals():
@@ -68,12 +57,12 @@ def test_difference_decals():
     decals = STMOC.from_fits("resources/STMOC/STMoc-DECaLS-g.fits")
 
     result = decals.difference(decals)
-    assert result == STMOC()
+    assert result.is_empty()
 
 
 # --- TESTING new features ---#
 def test_stmoc_save_load_deser():
-    stmoc = STMOC.from_string("t61/1 3 5 s3/1-3 t61/50 52 s4/25", "ascii")
+    stmoc = STMOC.from_string("t61/1 3 5 s3/1-3 4/ t61/50 52 s4/25", "ascii")
     stmoc_ascii = stmoc.to_string("ascii")
     stmoc_ascii
     stmoc_json = stmoc.to_string("json")
