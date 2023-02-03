@@ -9,11 +9,13 @@ from mocpy import MOC, World2ScreenMPL
 
 fits_image_filename = "./../../resources/bayestar.multiorder.fits"
 
+max_order = None
 with fits.open(fits_image_filename) as hdul:
     hdul.info()
     hdul[1].columns
 
     data = hdul[1].data
+    max_order = hdul[1].header["MOCORDER"]
 
 uniq = data["UNIQ"]
 probdensity = data["PROBDENSITY"]
@@ -27,7 +29,7 @@ prob = probdensity * area
 
 cumul_to = np.linspace(0.5, 0.9, 5)[::-1]
 colors = ["blue", "green", "yellow", "orange", "red"]
-mocs = [MOC.from_valued_healpix_cells(uniq, prob, cumul_to=c) for c in cumul_to]
+mocs = [MOC.from_valued_healpix_cells(uniq, prob, max_order, cumul_to=c) for c in cumul_to]
 
 
 # Plot the MOC using matplotlib
