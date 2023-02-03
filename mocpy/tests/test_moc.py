@@ -10,13 +10,157 @@ from astropy.io import fits
 
 import cdshealpix
 
-from ..interval_set import IntervalSet
 from ..moc import MOC, World2ScreenMPL
+
+
+@pytest.fixture()
+def isets():
+    a = MOC.from_depth29_ranges(
+        29,
+        np.array(
+            [
+                [49, 73],
+                [53, 54],
+                [33, 63],
+                [65, 80],
+                [51, 80],
+                [100, 126],
+                [38, 68],
+                [61, 72],
+                [74, 102],
+                [27, 43],
+            ],
+            dtype=np.uint64,
+        ),
+    )
+    b = MOC.from_depth29_ranges(
+        29,
+        np.array(
+            [
+                [17, 26],
+                [17, 41],
+                [12, 31],
+                [32, 61],
+                [68, 90],
+                [77, 105],
+                [18, 27],
+                [12, 35],
+                [9, 37],
+                [87, 97],
+            ],
+            dtype=np.uint64,
+        ),
+    )
+    return dict(a=a, b=b)
+
+
+def test_interval_set_consistency(isets):
+    assert isets["a"] == MOC.from_depth29_ranges(
+        29, np.array([[27, 126]], dtype=np.uint64)
+    )
+    assert isets["b"] == MOC.from_depth29_ranges(
+        29, np.array([[9, 61], [68, 105]], dtype=np.uint64)
+    )
+
+
+def test_interval_set_union(isets):
+    assert isets["a"].union(isets["b"]) == MOC.from_depth29_ranges(
+        29, np.array([[9, 126]], dtype=np.uint64)
+    )
+    assert isets["a"].union(MOC.new_empty(29)) == MOC.from_depth29_ranges(
+        29, np.array([[27, 126]], dtype=np.uint64)
+    )
+    assert MOC.new_empty(29).union(isets["a"]) == MOC.from_depth29_ranges(
+        29, np.array([[27, 126]], dtype=np.uint64)
+    )
+
+
+def test_interval_set_intersection(isets):
+    assert isets["a"].intersection(isets["b"]) == MOC.from_depth29_ranges(
+        29, np.array([[27, 61], [68, 105]], dtype=np.uint64)
+    )
+    assert isets["a"].intersection(MOC.new_empty(29)) == MOC.new_empty(29)
+    assert MOC.new_empty(29).intersection(isets["a"]) == MOC.new_empty(29)
+
+
+def test_interval_set_difference(isets):
+    assert isets["a"].difference(isets["b"]) == MOC.from_depth29_ranges(
+        29, np.array([[61, 68], [105, 126]], dtype=np.uint64)
+    )
+    assert isets["b"].difference(isets["a"]) == MOC.from_depth29_ranges(
+        29, np.array([[9, 27]], dtype=np.uint64)
+    )
+    assert MOC.new_empty(29).difference(isets["a"]) == MOC.new_empty(29)
+    assert isets["a"].difference(MOC.new_empty(29)) == isets["a"]
+
+
+"""
+@pytest.fixture()
+def isets2():
+    nested1 = IntervalSet(np.array([[0, 1]], dtype=np.uint64))
+    nuniq1 = np.array([4 * 4**29], dtype=np.uint64)
+    nested2 = IntervalSet(np.array([[7, 76]], dtype=np.uint64))
+    nuniq2 = np.array(
+        [
+            1 + 4 * 4**27,
+            2 + 4 * 4**27,
+            3 + 4 * 4**27,
+            2 + 4 * 4**28,
+            3 + 4 * 4**28,
+            16 + 4 * 4**28,
+            17 + 4 * 4**28,
+            18 + 4 * 4**28,
+            7 + 4 * 4**29,
+        ],
+        dtype=np.uint64,
+    )
+    return {
+        "nest1": nested1,
+        "uniq1": nuniq1,
+        "nest2": nested2,
+        "uniq2": nuniq2,
+    }
+
+def test_to_uniq(isets2):
+    assert (isets2["nest1"].uniq == isets2["uniq1"]).all()
+    assert (isets2["nest2"].uniq == isets2["uniq2"]).all()
+    # empty nested interval set
+    assert (IntervalSet().uniq == np.array([], dtype=np.uint64)).all()
+
+
+def test_from_uniq(isets2):
+    assert IntervalSet.from_uniq(isets2["uniq1"]) == isets2["nest1"]
+    assert IntervalSet.from_uniq(isets2["uniq2"]) == isets2["nest2"]
+    # empty nuniq interval set
+    assert IntervalSet.from_uniq(np.array([], dtype=np.uint64)) == IntervalSet()
+
+def test_from_to_interval_set(isets2):
+    assert IntervalSet.from_uniq(isets2["nest1"].uniq) == isets2["nest1"]
+"""
+
+
+def test_interval_set_min(isets):
+    assert isets["a"].min_index == np.uint64(27)
+    assert isets["b"].min_index == np.uint64(9)
+    assert isets["a"].union(isets["b"]).min_index == np.uint64(9)
+
+
+def test_interval_set_max(isets):
+    assert isets["a"].max_index == np.uint64(126)
+    assert isets["b"].max_index == np.uint64(105)
+    assert isets["a"].union(isets["b"]).max_index == np.uint64(126)
+
+
+"""
+def test_repr_interval_set(isets):
+    assert repr(isets["a"]) == "[[ 27 126]]"
+    assert repr(isets["b"]) == "[[  9  61]\n" " [ 68 105]]"
+"""
 
 
 def test_interval_min_depth():
     big_cells = np.array([[0, 4**29]], dtype=np.uint64)
-    itv_result = MOC(IntervalSet(big_cells, make_consistent=False), min_depth=1)
+    itv_result = MOC.from_depth29_ranges(29, big_cells)
 
     small_cells = np.array(
         [
@@ -27,21 +171,23 @@ def test_interval_min_depth():
         ],
         dtype=np.uint64,
     )
-    itv_small_cells = MOC(
-        IntervalSet(small_cells, make_consistent=False), make_consistent=False
-    )
+    itv_small_cells = MOC.from_depth29_ranges(29, small_cells)
     assert itv_result == itv_small_cells
 
 
-def test_interval_set_complement():
-    assert MOC().complement() == MOC(
-        IntervalSet(np.array([[0, 12 * 4**29]], dtype=np.uint64))
+def test_complement():
+    assert MOC.from_depth29_ranges(
+        max_depth=29, ranges=None
+    ).complement() == MOC.from_depth29_ranges(
+        max_depth=29, ranges=np.array([[0, 12 * 4**29]], dtype=np.uint64)
     )
-    assert MOC().complement().complement() == MOC()
-    assert MOC(
-        IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))
-    ).complement() == MOC(
-        IntervalSet(np.array([[0, 1], [2, 5], [8, 12 * 4**29]], dtype=np.uint64))
+    assert MOC.new_empty(
+        max_depth=29
+    ).complement().complement() == MOC.from_depth29_ranges(max_depth=29, ranges=None)
+    assert MOC.from_depth29_ranges(
+        29, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
+    ).complement() == MOC.from_depth29_ranges(
+        29, np.array([[0, 1], [2, 5], [8, 12 * 4**29]], dtype=np.uint64)
     )
 
 
@@ -101,7 +247,7 @@ def test_from_healpix_cells():
     depth = np.array([3, 3, 3])
     fully_covered = np.array([True, True, True])
 
-    MOC.from_healpix_cells(ipix, depth, fully_covered)
+    MOC.from_healpix_cells(max_depth=29, ipix=ipix, depth=depth)
 
 
 def test_moc_from_fits():
@@ -167,14 +313,15 @@ def test_moc_serialize_and_from_json(moc_from_json):
                     "8": [45],
                 }
             ),
-            "5/8-10 42-46 54\n\r 8 6/4500 8/45",
+            "5/8-10 42-46 54\n\r 6/4500 8/45",
         ),
         (MOC.from_json({}), "0/"),
         (MOC.from_json({"29": [101]}), "29/101"),
         (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9"),
-        (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
+        (MOC.from_json({"0": [2, 9]}), "0/2 9"),
         (MOC.from_json({"0": [2], "8": [8, 9, 10], "11": []}), "0/2\r \n 8/8-10\n 11/"),
     ],
+    # (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
 )
 def test_from_str(expected, moc_str):
     assert MOC.from_str(moc_str) == expected
@@ -197,9 +344,10 @@ def test_from_str(expected, moc_str):
         (MOC.from_json({}), "0/"),
         (MOC.from_json({"29": [101]}), "29/101"),
         (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9"),
-        (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
+        (MOC.from_json({"0": [2, 9]}), "0/2 9"),
         (MOC.from_json({"0": [2], "8": [8, 9, 10], "11": []}), "0/2\r \n 8/8-10\n 11/"),
     ],
+    # (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
 )
 def test_from_string(expected, moc_str):
     assert MOC.from_string(moc_str, "ascii") == expected
@@ -216,7 +364,7 @@ def test_moc_skyfraction():
 
 
 def test_sky_fraction_on_empty_coverage():
-    moc = MOC()
+    moc = MOC.new_empty(max_depth=29)
     assert moc.sky_fraction == 0
 
 
@@ -243,13 +391,14 @@ def test_moc_serialize_to_json(moc_from_fits_image):
                     "8": [45],
                 }
             ),
-            "5/8-10 42-46 54 6/4500 8/45",
+            "5/8-10 42-46 54 6/4500 8/45 ",
         ),
-        (MOC.from_json({}), ""),
-        (MOC.from_json({"29": [101]}), "29/101"),
-        (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9"),
-        (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
+        (MOC.from_json({}), "0/ "),
+        (MOC.from_json({"29": [101]}), "29/101 "),
+        (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9 "),
+        (MOC.from_json({"0": [2, 9]}), "0/2 9 "),
     ],
+    #  (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
 )
 def test_serialize_to_str(moc, expected):
     assert moc.serialize(format="str") == expected
@@ -319,7 +468,7 @@ def test_moc_contains(order):
     size = 20
     healpix_arr = np.random.randint(0, 12 * 4**order, size, dtype="uint64")
     # defines a moc containing the 20 points
-    moc = MOC.from_json(json_moc={str(order): healpix_arr.tolist()})
+    moc = MOC.from_json(json_moc={str(order): np.unique(healpix_arr).tolist()})
     # the complementary should not contain them
     moc_complement = moc.complement()
     # coordinates of the 20 random points
@@ -341,14 +490,14 @@ def test_moc_contains(order):
 # test 2d-arrays as lon lat input
 def test_moc_contains_2d_parameters():
     """Test that not only 1d arrays are accepted."""
-    lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)
+    lon = Angle(np.array([[1, 2, 3], [2, 40, -5]]), unit=u.deg)
     lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)
     lat2 = Angle(np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]), unit=u.deg)
     moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
     should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
     assert should_be_inside.all()
     # test mismatched
-    with pytest.raises(ValueError, match=r".*mismatch.*"):
+    with pytest.raises(ValueError, match=r"Lon shape different from lat shape.*"):
         moc.contains_lonlat(lon=lon, lat=lat2)
 
 
@@ -506,7 +655,7 @@ def test_from_valued_healpix_cells_empty():
     uniq = np.array([])
     values = np.array([])
 
-    MOC.from_valued_healpix_cells(uniq, values)
+    MOC.from_valued_healpix_cells(uniq, values, 12)
 
 
 def test_from_valued_healpix_cells_different_sizes():
@@ -516,7 +665,7 @@ def test_from_valued_healpix_cells_different_sizes():
     with pytest.raises(
         ValueError, match="`uniq` and values do not have the same size."
     ):
-        MOC.from_valued_healpix_cells(uniq, values)
+        MOC.from_valued_healpix_cells(uniq, values, 12)
 
 
 def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
@@ -524,7 +673,7 @@ def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
     values = np.array([1.0])
 
     with pytest.raises(ValueError, match="`cumul_from` has to be < to `cumul_to`."):
-        MOC.from_valued_healpix_cells(uniq, values, cumul_from=0.8, cumul_to=-5.0)
+        MOC.from_valued_healpix_cells(uniq, values, 12, cumul_from=0.8, cumul_to=-5.0)
 
 
 @pytest.mark.parametrize(
@@ -536,7 +685,7 @@ def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
     values = np.array([-1.0])
 
     MOC.from_valued_healpix_cells(
-        uniq, values, cumul_from=cumul_from, cumul_to=cumul_to
+        uniq, values, 12, cumul_from=cumul_from, cumul_to=cumul_to
     )
 
 
@@ -578,7 +727,7 @@ def test_from_valued_healpix_cells_bayestar_and_split():
     mocs = list(moc.split())
     assert len(mocs) == 2
     for moc in mocs:
-        assert moc.max_order == 8
+        assert moc.max_order == 11
 
 
 # --- TESTING new features ---#

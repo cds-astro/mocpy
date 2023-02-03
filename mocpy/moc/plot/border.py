@@ -21,9 +21,7 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         return
 
     max_order = moc_to_plot.max_order
-    ipixels_open = mocpy.flatten_pixels(
-        moc_to_plot._interval_set._intervals, moc_to_plot.max_order
-    )
+    ipixels_open = moc_to_plot.flatten()
 
     # Take the complement if the MOC covers more than half of the sky
     num_ipixels = 3 << (2 * (max_order + 1))

@@ -3,8 +3,9 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 
-from .. import MOC, mocpy, serializer, utils
-from ..interval_set import IntervalSet
+from .. import MOC, TimeMOC, mocpy, utils
+from ..abstract_moc import AbstractMOC
+
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -13,49 +14,55 @@ __license__ = "BSD 3-Clause License"
 __email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unisrta.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
-class STMOC(serializer.IO):
+class STMOC(AbstractMOC):
     """Time-Spatial Coverage class."""
 
     __create_key = object()
 
     def __init__(self, create_key, store_index):
-        """Is a Time-Spatial Coverage (STMOC).
+        """Is a Time-Spatial Coverage (ST-MOC).
 
         Args:
-            create_key: Object ensure __init__ is called by class-methods only
+            create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the ST-MOC in the rust-side storage
         """
+        super(STMOC, self).__init__(
+            AbstractMOC._create_key, STMOC.__create_key, store_index
+        )
         assert (
             create_key == STMOC.__create_key
-        ), "ST-MOC instantiation is only allowed by class methods"
-        self.__index = store_index
+        ), "ST-MOC instantiation is only allowed by class or super-class methods"
 
     def __del__(self):
         """Erase STMOC."""
-        mocpy.drop_2d_coverage(self.__index)
+        super(STMOC, self).__del__()
 
     def __eq__(self, other):
         """Assert equality between MOCs."""
-        return mocpy.check_eq(self.__index, other.__index)
+        return super(STMOC, self).__eq__(other)
 
     @property
     def max_depth(self):
         """Return max depth of MOC."""
-        return mocpy.coverage_2d_depth(self.__index)
+        return mocpy.coverage_2d_depth(self._store_index)
 
     @property
     def max_time(self):
         """Return STMOC max time."""
-        return utils.microseconds_to_times(mocpy.coverage_2d_max_time(self.__index))
+        return utils.microseconds_to_times(
+            mocpy.coverage_2d_max_time(self._store_index)
+        )
 
     @property
     def min_time(self):
         """Return STMOC min time."""
-        return utils.microseconds_to_times(mocpy.coverage_2d_min_time(self.__index))
+        return utils.microseconds_to_times(
+            mocpy.coverage_2d_min_time(self._store_index)
+        )
 
     def is_empty(self):
         """Check whether the Space-Time coverage is empty."""
-        return mocpy.is_empty(self.__index)
+        return mocpy.is_empty(self._store_index)
 
     @classmethod
     def from_times_positions(cls, times, time_depth, lon, lat, spatial_depth):
@@ -206,15 +213,15 @@ class STMOC(serializer.IO):
 
         return result
 
-    def query_by_time(self, times):
+    def query_by_time(self, tmoc):
         """
-        Query the ST-MOC by time ranges.
+        Query the ST-MOC by time T-MOC.
 
         This will perform the union of all the spatial coverages lying in a set of time ranges.
 
         Parameters
         ----------
-        times : `astropy.time.Time`
+        tmoc : ~mocpy.tmoc.TimeMOC``
             Time ranges. Must be a Nx2 shaped astropy time array.
 
         Returns
@@ -222,17 +229,19 @@ class STMOC(serializer.IO):
         result : `~mocpy.moc.MOC`
             The spatial coverage being observed within the input time ranges
         """
-        if times.ndim != 2 or times.shape[1] != 2:
-            raise ValueError(
-                "Times ranges must be provided. The shape of times must be (_, 2)"
-            )
+        # if times.ndim != 2 or times.shape[1] != 2:
+        #    raise ValueError(
+        #        "Times ranges must be provided. The shape of times must be (_, 2)"
+        #    )
 
         # times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
-        times = utils.times_to_microseconds(times)
-        ranges = mocpy.project_on_second_dim(times, self.__index)
-        return MOC(IntervalSet(ranges, make_consistent=False))
+        # times = utils.times_to_microseconds(times)
+        # ranges = mocpy.project_on_second_dim(times, self._store_index)
+        # return MOC(IntervalSet(ranges, make_consistent=False))
+        # store_index = from_stmoc_time_fold(cls, tmoc, stmoc):
+        return MOC.from_stmoc_time_fold(tmoc, self)
 
-    def query_by_space(self, spatial_coverage):
+    def query_by_space(self, smoc):
         """
         Query the ST-MOC by space coverage.
 
@@ -241,86 +250,21 @@ class STMOC(serializer.IO):
 
         Parameters
         ----------
-        spatial_coverage : `mocpy.MOC`
+        smoc : `~mocpy.moc.MOC`
             The spatial coverage.
 
         Returns
         -------
-        result : `~astropy.time.Time`
+        result : `~mocpy.tmoc.TimeMOC`
             The time ranges observing in the ``spatial_coverage``
         """
         # Time ranges in µsec
-        time_ranges = mocpy.project_on_first_dim(
-            spatial_coverage._interval_set._intervals, self.__index
-        )
+        # time_ranges = mocpy.project_on_first_dim(
+        #    spatial_coverage._interval_set._intervals, self._store_index
+        # )
         # return Time(time_ranges / 86400000000, format='jd', scale='tdb')
-        return utils.microseconds_to_times(time_ranges)
-
-    def union(self, other):
-        """
-        Union of two Space-Time coverages.
-
-        The union is first performed along the Time axis of the
-        coverage. The union of space axis coverages is done on time
-        ranges that overlap.
-
-        Parameters
-        ----------
-        other : `mocpy.STMOC`
-            The Space-Time coverage to perform the union with.
-
-        Returns
-        -------
-        result : `mocpy.STMOC`
-            A new Space-Time coverage being the union of `self`
-            with `other`.
-        """
-        index = mocpy.union(self.__index, other.__index)
-        return STMOC(STMOC.__create_key, index)
-
-    def intersection(self, other):
-        """
-        Intersection of two Space-Time coverages.
-
-        The intersection is first performed along the Time axis of the
-        coverage. The intersection of space axis coverages is done on time
-        ranges that overlap.
-
-        Parameters
-        ----------
-        other : `mocpy.STMOC`
-            The Space-Time coverage to perform the intersection with.
-
-        Returns
-        -------
-        result : `mocpy.STMOC`
-            A new Space-Time coverage being the intersection of `self`
-            with `other`.
-        """
-        index = mocpy.intersection(self.__index, other.__index)
-        return STMOC(STMOC.__create_key, index)
-
-    def difference(self, other):
-        """
-        Difference of two Space-Time coverages.
-
-        The difference is first performed along the Time axis of the
-        coverage. The difference of space axis coverages is done on time
-        ranges that overlap.
-
-        Parameters
-        ----------
-        other : `mocpy.STMOC`
-            The Space-Time coverage to perform the difference with.
-
-        Returns
-        -------
-        result : `mocpy.STMOC`
-            A new Space-Time coverage being the difference of `self`
-            with `other`.
-        """
-        index = mocpy.difference(self.__index, other.__index)
-        return STMOC(STMOC.__create_key, index)
+        # return utils.microseconds_to_times(time_ranges)
+        return TimeMOC.from_stmoc_space_fold(smoc, self)
 
     def contains(self, times, lon, lat, inside=True):
         """
@@ -358,7 +302,7 @@ class STMOC(serializer.IO):
         if times.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = mocpy.coverage_2d_contains(self.__index, times, lon, lat)
+        result = mocpy.coverage_2d_contains(self._store_index, times, lon, lat)
 
         if not inside:
             result = ~result
@@ -388,44 +332,6 @@ class STMOC(serializer.IO):
         """
         return cls.load(filename, "fits")
 
-    def save(self, path, format="fits", overwrite=False):
-        """Write the ST-MOC to a file.
-
-        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
-
-        Parameters
-        ----------
-        path : str or pathlib.Path
-            The path to the file to save the MOC in.
-        format : str, optional
-            The format in which the MOC will be serialized before being saved.
-            Possible formats are "fits", "ascii" or "json".
-            By default, ``format`` is set to "fits".
-        overwrite : bool, optional
-            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword.
-            Default to False.
-        """
-        path = str(path)
-        import os
-
-        file_exists = os.path.isfile(path)
-
-        if file_exists and not overwrite:
-            raise OSError(
-                "File {} already exists! Set ``overwrite`` to "
-                "True if you want to replace it.".format(path)
-            )
-
-        if format == "fits":
-            mocpy.coverage_2d_to_fits_file(path, self.__index)
-        elif format == "ascii":
-            mocpy.coverage_2d_to_ascii_file(path, self.__index)
-        elif format == "json":
-            mocpy.coverage_2d_to_json_file(path, self.__index)
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
-
     @classmethod
     def load(cls, path, format="fits"):
         """
@@ -445,38 +351,15 @@ class STMOC(serializer.IO):
         path = str(path)
         if format == "fits":
             index = mocpy.coverage_2d_from_fits_file(path)
-            stmoc = cls(cls.__create_key, index)
-            return stmoc
+            return cls(cls.__create_key, index)
         elif format == "ascii":
             index = mocpy.coverage_2d_from_ascii_file(path)
-            stmoc = cls(cls.__create_key, index)
-            return stmoc
+            return cls(cls.__create_key, index)
         elif format == "json":
             index = mocpy.coverage_2d_from_json_file(path)
-            stmoc = cls(cls.__create_key, index)
-            return stmoc
+            return cls(cls.__create_key, index)
         else:
             formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
-
-    def to_string(self, format="ascii"):
-        """Write the ST-MOC into a string.
-
-        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
-
-        Parameters
-        ----------
-        format : str, optional
-            The format in which the MOC will be serialized before being saved.
-            Possible formats are "ascii" or "json".
-            By default, ``format`` is set to "ascii".
-        """
-        if format == "ascii":
-            return mocpy.coverage_2d_to_ascii_str(self.__index)
-        elif format == "json":
-            return mocpy.coverage_2d_to_json_str(self.__index)
-        else:
-            formats = ("ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod

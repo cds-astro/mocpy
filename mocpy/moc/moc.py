@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 from io import BytesIO
 from urllib.parse import urlencode
 
-import cdshealpix
 import numpy as np
 from astropy import units as u
 from astropy import wcs
@@ -27,7 +26,6 @@ except ImportError:
 
 from .. import mocpy
 from ..abstract_moc import AbstractMOC
-from ..interval_set import IntervalSet
 from .boundaries import Boundaries
 from .plot import border, fill
 
@@ -74,112 +72,27 @@ class MOC(AbstractMOC):
     5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
     """
 
-    # I introduced, but do not like, the double `make_consistent` (MOC + IntervalSet)
-    # but `coverage_merge_time_intervals` is no more genric
-    # and I can't remove `make_consistent` from `IntervalSet` without changing tests
-    def __init__(self, interval_set=None, make_consistent=True, min_depth=None):
+    __create_key = object()
+
+    def __init__(self, create_key, store_index):
+        """Is a Spatial Coverage (S-MOC).
+
+        Args:
+            create_key: Object ensure __init__ is called by super-class/class-methods only
+            store_index: index of the S-MOC in the rust-side storage
         """
-        Moc constructor.
-
-        The merging step of the overlapping intervals is done here.
-
-        Parameters
-        ----------
-        intervals : `~numpy.ndarray`
-            a N x 2 numpy array representing the set of intervals.
-        make_consistent : bool, optional
-            True by default. Remove the overlapping intervals that makes
-            a valid MOC (i.e. can be plot, serialized, manipulated).
-        """
-        super(MOC, self).__init__(interval_set)
-
-        if make_consistent:
-            if min_depth is None:
-                min_depth = -1
-
-            min_depth = np.int8(min_depth)
-            self._merge_intervals(min_depth)
-
-    def _merge_intervals(self, min_depth):
-        if not self.empty():
-            self._interval_set._intervals = mocpy.coverage_merge_hpx_intervals(
-                self._interval_set._intervals, min_depth
-            )
+        assert (
+            create_key == MOC.__create_key
+        ), "S-MOC instantiation is only allowed by class or super-class methods"
+        super(MOC, self).__init__(
+            AbstractMOC._create_key, MOC.__create_key, store_index
+        )
 
     @property
     def max_order(self):
-        """Depth of the smallest HEALPix cells found in the MOC instance."""
-        depth = mocpy.hpx_coverage_depth(self._interval_set._intervals)
-        depth = np.uint8(depth)
-        return depth
-
-    def refine_to_order(self, min_depth):
-        """Return a MOC with min depth.
-
-        Parameters
-        ----------
-        min_depth : int
-            desired depth for the new MOC
-
-        Returns
-        -------
-        `mocpy.MOC`
-            a new MOC with depth=min_depth
-        """
-        intervals = mocpy.coverage_merge_hpx_intervals(
-            self._interval_set._intervals, min_depth
-        )
-        interval_set = IntervalSet(intervals, make_consistent=False)
-        return MOC(interval_set, make_consistent=False)
-
-    def complement(self):
-        """
-        Returns the complement of the MOC instance.
-
-        Returns
-        -------
-        result : `~mocpy.moc.MOC`
-            The resulting MOC.
-        """
-        intervals = mocpy.hpx_coverage_complement(self._interval_set._intervals)
-        interval_set = IntervalSet(intervals, make_consistent=False)
-        return MOC(interval_set, make_consistent=False)
-
-    def extended(self):
-        """
-        Returns the MOC extended by the external border made of cells at the MOC maximum depth.
-
-        The only difference with respect to `add_neighbours` is that `extended` returns a new MOC
-        instead of modifying the existing one.
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            The extended MOC
-        """
-        intervals = mocpy.hpx_coverage_expand(
-            self.max_order, self._interval_set._intervals
-        )
-        interval_set = IntervalSet(intervals, make_consistent=False)
-        return MOC(interval_set, make_consistent=False)
-
-    def contracted(self):
-        """
-        Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
-
-        The only difference with respect to `remove_neighbours` is that `contracted` returns a new MOC
-        instead of modifying the existing one.
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            The extended MOC
-        """
-        intervals = mocpy.hpx_coverage_contract(
-            self.max_order, self._interval_set._intervals
-        )
-        interval_set = IntervalSet(intervals, make_consistent=False)
-        return MOC(interval_set, make_consistent=False)
+        """Depth/order of the S-MOC."""
+        depth = mocpy.get_smoc_depth(self._store_index)
+        return np.uint8(depth)
 
     def split_count(self, include_indirect_neighbours=False):
         """
@@ -191,9 +104,7 @@ class MOC(AbstractMOC):
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
         """
-        return mocpy.hpx_coverage_split_count(
-            self.max_order, include_indirect_neighbours, self._interval_set._intervals
-        )
+        return mocpy.split_count(self._store_index, include_indirect_neighbours)
 
     def split(self, include_indirect_neighbours=False):
         """
@@ -218,14 +129,10 @@ class MOC(AbstractMOC):
             UserWarning,
         )
 
-        list_of_intervals = mocpy.hpx_coverage_split(
-            self.max_order, include_indirect_neighbours, self._interval_set._intervals
-        )
+        indices = mocpy.split(self._store_index, include_indirect_neighbours)
         mocs = map(
-            lambda intervals: MOC(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            ),
-            list_of_intervals,
+            lambda index: MOC(MOC.__create_key, index),
+            indices,
         )
         return mocs
 
@@ -246,8 +153,8 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The degraded MOC.
         """
-        intervals = mocpy.hpx_coverage_degrade(self._interval_set._intervals, new_order)
-        return MOC(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        index = mocpy.degrade(self._store_index, new_order)
+        return MOC(MOC.__create_key, index)
 
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
@@ -351,14 +258,12 @@ class MOC(AbstractMOC):
         --------
         contains_skycoords
         """
-        if lon.shape != lat.shape:
-            raise ValueError(
-                f"mismatch between lon and lat of shapes {lon.shape} and {lat.shape}"
-            )
-        mask = mocpy.space_coverage_contains(
-            self._interval_set._intervals,
-            lon.to_value(u.rad).astype(np.float64),
-            lat.to_value(u.rad).astype(np.float64),
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
+        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
+        mask = mocpy.filter_pos(
+            self._store_index,
+            lon.to_value(u.deg).astype(np.float64),
+            lat.to_value(u.deg).astype(np.float64),
         )
         if keep_inside:
             return mask
@@ -366,40 +271,6 @@ class MOC(AbstractMOC):
             return ~mask
 
     # TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
-
-    def add_neighbours(self):
-        """
-        Extends the MOC instance so that it includes the HEALPix cells touching its border.
-
-        The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            self extended by one degree of neighbours.
-        """
-        intervals = mocpy.hpx_coverage_expand(
-            self.max_order, self._interval_set._intervals
-        )
-        self._interval_set = IntervalSet(intervals, make_consistent=False)
-        return self
-
-    def remove_neighbours(self):
-        """
-        Removes from the MOC instance the HEALPix cells located at its border.
-
-        The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.
-
-        Returns
-        -------
-        moc : `~mocpy.moc.MOC`
-            self minus its HEALPix cells located at its border.
-        """
-        intervals = mocpy.hpx_coverage_contract(
-            self.max_order, self._interval_set._intervals
-        )
-        self._interval_set = IntervalSet(intervals, make_consistent=False)
-        return self
 
     def fill(self, ax, wcs, **kw_mpl_pathpatch):
         """
@@ -618,7 +489,7 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = MOC()
+        moc = MOC.new_empty(max_norder)
         for filename in path_l:
             with fits.open(filename) as hdul:
                 current_moc = MOC.from_fits_image(hdu=hdul[0], max_norder=max_norder)
@@ -739,12 +610,14 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        intervals = mocpy.from_lonlat(
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
+        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
+        index = mocpy.from_lonlat(
             max_norder,
-            lon.to_value(u.rad).astype(np.float64),
-            lat.to_value(u.rad).astype(np.float64),
+            lon.to_value(u.deg).astype(np.float64),
+            lat.to_value(u.deg).astype(np.float64),
         )
-        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_multiordermap_fits_file(
@@ -793,7 +666,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        intervals = mocpy.spatial_moc_from_multiordermap_fits_file(
+        index = mocpy.spatial_moc_from_multiordermap_fits_file(
             str(path),
             np.float64(cumul_from),
             np.float64(cumul_to),
@@ -802,15 +675,15 @@ class MOC(AbstractMOC):
             no_split,
             reverse_decent,
         )
-
-        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_valued_healpix_cells(
         cls,
         uniq,
         values,
-        max_depth=None,
+        max_depth,
+        values_are_densities=False,
         cumul_from=0.0,
         cumul_to=1.0,
         asc=False,
@@ -837,10 +710,10 @@ class MOC(AbstractMOC):
         uniq : `numpy.ndarray`
             HEALPix cell indices written in uniq. dtype must be np.uint64
         values : `numpy.ndarray`
-            Probabilities associated with each ``uniq`` cells. dtype must be np.float64
-        max_depth : int, optional
-            The max depth of the MOC. If a depth is given, degrade the MOC to this depth before returning it to the user.
-            Otherwise choose as ``max_depth`` the depth corresponding to the smallest HEALPix cell found in ``uniq``.
+            Value associated with each ``uniq`` cells. dtype must be np.float64
+        max_depth : int,
+            The max depth of the MOC, must be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
+        values_are_densities: tell whether the values depends on the cell area or not
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
@@ -859,21 +732,13 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        max_depth_tile = 0
-        if uniq.size > 0:
-            # Get the depth of the smallest uniq
-            # Bigger uniq corresponds to big depth HEALPix cells.
-            max_depth_tile = int(np.log2(uniq.max() >> 2)) >> 1
-            assert (
-                max_depth_tile >= 0 and max_depth_tile <= 29
-            ), "Invalid uniq numbers. Too big uniq or negative uniq numbers might the cause."
-
         # Create the MOC at the max_depth equals to the smallest cell
         # found in the uniq array
-        intervals = mocpy.from_valued_hpx_cells(
-            np.uint8(max_depth_tile),
+        index = mocpy.from_valued_hpx_cells(
+            np.uint8(max_depth),
             uniq.astype(np.uint64),
             values.astype(np.float64),
+            values_are_densities,
             np.float64(cumul_from),
             np.float64(cumul_to),
             asc,
@@ -881,14 +746,7 @@ class MOC(AbstractMOC):
             no_split,
             reverse_decent,
         )
-        moc = cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
-
-        # Degrade the MOC to the depth requested by the user
-        if max_depth is not None:
-            assert max_depth >= 0 and max_depth <= 29, "Max depth must be in [0, 29]"
-            moc = moc.degrade_to_order(max_depth)
-
-        return moc
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
@@ -940,10 +798,16 @@ class MOC(AbstractMOC):
         """
         lon = lon if isinstance(lon, Longitude) else Longitude(lon)
         lat = lat if isinstance(lat, Latitude) else Latitude(lat)
-        pix, depth, fully_covered_flags = cdshealpix.elliptical_cone_search(
-            lon, lat, a, b, pa, max_depth, delta_depth, flat=False
+        index = mocpy.from_elliptical_cone(
+            np.float64(lon.degree),
+            np.float64(lat.degree),
+            np.float64(a.degree),
+            np.float64(b.degree),
+            np.float64(pa.degree),
+            np.uint8(max_depth),
+            np.uint8(delta_depth),
         )
-        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
@@ -988,10 +852,14 @@ class MOC(AbstractMOC):
         """
         lon = lon if isinstance(lon, Longitude) else Longitude(lon)
         lat = lat if isinstance(lat, Latitude) else Latitude(lat)
-        pix, depth, fully_covered_flags = cdshealpix.cone_search(
-            lon, lat, radius, max_depth, delta_depth, flat=False
+        index = mocpy.from_cone(
+            np.float64(lon.degree),
+            np.float64(lat.degree),
+            np.float64(radius.degree),
+            np.uint8(max_depth),
+            np.uint8(delta_depth),
         )
-        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_ring(
@@ -1041,7 +909,7 @@ class MOC(AbstractMOC):
         """
         lon = lon if isinstance(lon, Longitude) else Longitude(lon)
         lat = lat if isinstance(lat, Latitude) else Latitude(lat)
-        intervals = mocpy.from_ring(
+        index = mocpy.from_ring(
             np.float64(lon.degree),
             np.float64(lat.degree),
             np.float64(internal_radius.degree),
@@ -1049,7 +917,7 @@ class MOC(AbstractMOC):
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
-        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
@@ -1072,12 +940,12 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        return MOC.from_polygon(
-            lon=skycoord.icrs.ra, lat=skycoord.icrs.dec, max_depth=max_depth
+        return cls.from_polygon(
+            lon=skycoord.icrs.ra, lat=skycoord.icrs.dec, max_depth=np.uint8(max_depth)
         )
 
     @classmethod
-    def from_polygon(cls, lon, lat, max_depth=10):
+    def from_polygon(cls, lon, lat, complement=False, max_depth=10):
         """
         Create a MOC from a polygon.
 
@@ -1092,6 +960,7 @@ class MOC(AbstractMOC):
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitudes defining the polygon. Can describe convex and concave
             polygons but not self-intersecting ones.
+        complement : return the complement of the polygon. Set to False by default.
         max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
 
@@ -1102,25 +971,46 @@ class MOC(AbstractMOC):
         """
         lon = lon if isinstance(lon, Longitude) else Longitude(lon)
         lat = lat if isinstance(lat, Latitude) else Latitude(lat)
-        pix, depth, fully_covered_flags = cdshealpix.polygon_search(lon, lat, max_depth)
-        return MOC.from_healpix_cells(pix, depth, fully_covered_flags)
+        print(np.float64(lon.degree))
+        index = mocpy.from_polygon(
+            np.float64(lon.degree),
+            np.float64(lat.degree),
+            complement,
+            np.uint8(max_depth),
+        )
+        return cls(cls.__create_key, index)
 
     @classmethod
-    def from_healpix_cells(cls, ipix, depth, fully_covered=None):
+    def new_empty(cls, max_depth):
         """
-        Creates a MOC from a set of HEALPix cells at a given depth.
+        Creates a new empty MOC of given depth.
 
         Parameters
         ----------
+        max_depth : int, The resolution of the MOC
+
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            The MOC
+        """
+        index = mocpy.new_empty_smoc(np.uint8(max_depth))
+        return cls(cls.__create_key, index)
+
+    @classmethod
+    def from_healpix_cells(cls, max_depth, ipix, depth):
+        """
+        Creates a MOC from a set of HEALPix cells at various depths.
+
+        Parameters
+        ----------
+        max_depth : int, The resolution of the MOC
         ipix : `numpy.ndarray`
             HEALPix cell indices in the NESTED notation. dtype must be np.uint64
         depth : `numpy.ndarray`
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
             dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.
-        fully_covered : `numpy.ndarray`, optional
-            HEALPix cells coverage flags. This flag informs whether a cell is
-            fully covered by a cone (resp. polygon, elliptical cone) or not.
-            Must be of the same size of `ipix`.
 
         Raises
         ------
@@ -1132,16 +1022,50 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The MOC
         """
-        if ipix.shape != depth.shape:
-            raise IndexError("pixels and depth arrays must have the same shape")
-
-        if fully_covered is not None and fully_covered.shape != ipix.shape:
-            raise IndexError("fully covered and depth arrays must have the same shape")
-
-        intervals = mocpy.from_healpix_cells(
-            ipix.astype(np.uint64), depth.astype(np.uint8)
+        index = mocpy.from_healpix_cells(
+            np.uint8(max_depth), depth.astype(np.uint8), ipix.astype(np.uint64)
         )
-        return cls(IntervalSet(intervals, make_consistent=False), make_consistent=False)
+        return cls(cls.__create_key, index)
+
+    @classmethod
+    def from_depth29_ranges(cls, max_depth, ranges):
+        """
+        Creates a MOC from a set of HEALPix ranges at order 29.
+
+        Parameters
+        ----------
+        max_depth : int, The resolution of the MOC
+        ranges: `~numpy.ndarray`
+                 a N x 2 numpy array representing the set of depth 29 ranges.
+
+        Returns
+        -------
+        moc : `~mocpy.moc.MOC`
+            The MOC
+        """
+        # import pdb; pdb.set_trace()
+        ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
+
+        assert ranges.shape[1] == 2
+
+        if ranges.dtype is not np.uint64:
+            ranges = ranges.astype(np.uint64)
+
+        index = mocpy.from_hpx_ranges(np.uint8(max_depth), ranges)
+        return cls(cls.__create_key, index)
+
+    @classmethod
+    def from_stmoc_time_fold(cls, tmoc, stmoc):
+        """
+        Build a new S-MOC from the fold operation of the given ST-MOC by the given T-MOC.
+
+        Parameters
+        ----------
+        tmoc : `~mocpy.tmoc.TimeMoc`
+        stmoc : `~mocpy.stmoc.STMoc`
+        """
+        store_index = mocpy.project_on_second_dim(tmoc, stmoc)
+        return cls(cls.__create_key, store_index)
 
     @staticmethod
     def order_to_spatial_resolution(order):
@@ -1203,7 +1127,7 @@ class MOC(AbstractMOC):
     @property
     def sky_fraction(self):
         """Sky fraction covered by the MOC."""
-        sky_fraction = mocpy.coverage_sky_fraction(self._interval_set._intervals)
+        sky_fraction = mocpy.coverage_fraction(self._store_index)
         return sky_fraction
 
     # TODO : move this in astroquery.Simbad.query_region
@@ -1303,9 +1227,7 @@ class MOC(AbstractMOC):
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
 
         m = np.zeros(12 * 4 ** (plotted_moc.max_order))
-        pix_id = mocpy.flatten_pixels(
-            plotted_moc._interval_set._intervals, plotted_moc.max_order
-        )
+        pix_id = plotted_moc.flatten()
 
         # change the HEALPix cells if the frame of the MOC is not the same as the one associated with the plot method.
         if isinstance(frame, Galactic):
@@ -1348,51 +1270,6 @@ class MOC(AbstractMOC):
 
         plt.show()
 
-    def save(self, path, format="fits", overwrite=False):
-        """
-        Writes the Spatial MOC to a file.
-
-        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
-
-        Parameters
-        ----------
-        path : str or pathlib.Path
-            The path to the file to save the MOC in.
-        format : str, optional
-            The format in which the MOC is saved.
-            Possible formats are "fits", "ascii" or "json".
-            By default, ``format`` is set to "fits".
-        overwrite : bool, optional
-            If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword.
-            Default to False.
-        """
-        path = str(path)
-        import os
-
-        file_exists = os.path.isfile(path)
-
-        if file_exists and not overwrite:
-            raise OSError(
-                "File {} already exists! Set ``overwrite`` to "
-                "True if you want to replace it.".format(path)
-            )
-
-        if format == "fits":
-            mocpy.spatial_moc_to_fits_file(
-                self.max_order, self._interval_set._intervals, path
-            )
-        elif format == "ascii":
-            mocpy.spatial_moc_to_ascii_file(
-                self.max_order, self._interval_set._intervals, path
-            )
-        elif format == "json":
-            mocpy.spatial_moc_to_json_file(
-                self.max_order, self._interval_set._intervals, path
-            )
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
-
     @classmethod
     def load(cls, path, format="fits"):
         """
@@ -1411,47 +1288,16 @@ class MOC(AbstractMOC):
         """
         path = str(path)
         if format == "fits":
-            intervals = mocpy.spatial_moc_from_fits_file(path)
-            return cls(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            )
+            index = mocpy.spatial_moc_from_fits_file(path)
+            return cls(cls.__create_key, index)
         elif format == "ascii":
-            intervals = mocpy.spatial_moc_from_ascii_file(path)
-            return cls(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            )
+            index = mocpy.spatial_moc_from_ascii_file(path)
+            return cls(cls.__create_key, index)
         elif format == "json":
-            intervals = mocpy.spatial_moc_from_json_file(path)
-            return cls(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            )
+            index = mocpy.spatial_moc_from_json_file(path)
+            return cls(cls.__create_key, index)
         else:
             formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
-
-    def to_string(self, format="ascii"):
-        """
-        Writes the Spatial MOC into a string.
-
-        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
-
-        Parameters
-        ----------
-        format : str, optional
-            The format in which the MOC will be serialized before being saved.
-            Possible formats are "ascii" or "json".
-            By default, ``format`` is set to "ascii".
-        """
-        if format == "ascii":
-            return mocpy.spatial_moc_to_ascii_str(
-                self.max_order, self._interval_set._intervals
-            )
-        elif format == "json":
-            return mocpy.spatial_moc_to_json_str(
-                self.max_order, self._interval_set._intervals
-            )
-        else:
-            formats = ("ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
@@ -1471,15 +1317,25 @@ class MOC(AbstractMOC):
             By default, ``format`` is set to "ascii".
         """
         if format == "ascii":
-            intervals = mocpy.spatial_moc_from_ascii_str(value)
-            return cls(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            )
+            index = mocpy.spatial_moc_from_ascii_str(value)
+            return cls(cls.__create_key, index)
         elif format == "json":
-            intervals = mocpy.spatial_moc_from_json_str(value)
-            return cls(
-                IntervalSet(intervals, make_consistent=False), make_consistent=False
-            )
+            index = mocpy.spatial_moc_from_json_str(value)
+            return cls(cls.__create_key, index)
         else:
             formats = ("ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))
+
+    # FROM INTERVAL SET
+
+    # @property
+    # def uniq(self):
+    #    """Return a `np.array` of intervals."""
+    #    if self.empty():
+    #        return np.array([], dtype=np.uint64)
+    #    return mocpy.to_uniq(self._intervals)
+
+    # @property
+    # def nested(self):
+    #    """Return the intervals."""
+    #    return self._intervals

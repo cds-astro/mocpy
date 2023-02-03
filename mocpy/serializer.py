@@ -1,47 +1,8 @@
 from astropy.io import fits
+from . import mocpy
 
 
 class IO:
-    def _to_fits(self, uniq, optional_kw_dict=None, pre_v2=False):
-        """
-        Serializes a MOC to the FITS format.
-
-        Parameters
-        ----------
-        uniq : `numpy.ndarray`
-            The array of HEALPix cells representing the MOC to serialize.
-        optional_kw_dict : dict
-            Optional keywords arguments added to the FITS header.
-        pre_v2 : used only for ST-MOC FITS serialization (to ensure backward compatibility)
-
-        Returns
-        -------
-        thdulist : `astropy.io.fits.HDUList`
-            The list of HDU tables.
-        """
-        tbhdu = fits.BinTableHDU.from_columns(
-            fits.ColDefs(
-                [
-                    fits.Column(
-                        name=self._fits_column_name,
-                        format=self._fits_format,
-                        array=uniq,
-                    )
-                ]
-            )
-        )
-        if pre_v2:
-            tbhdu.header.update(self._fits_header_keywords_pre_v2)
-        else:
-            tbhdu.header.update(self._fits_header_keywords)
-
-        if optional_kw_dict:
-            for key in optional_kw_dict:
-                tbhdu.header[key] = optional_kw_dict[key]
-
-        thdulist = fits.HDUList([fits.PrimaryHDU(), tbhdu])
-        return thdulist
-
     def serialize(self, format="fits", optional_kw_dict=None, pre_v2=False):
         """
         Serializes the MOC into a specific format.
@@ -64,19 +25,25 @@ class IO:
         if format not in formats:
             raise ValueError("format should be one of %s" % (str(formats)))
 
-        uniq = self._uniq_format()
-
         if format == "fits":
-            result = self._to_fits(
-                uniq=uniq, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2
-            )
+            import io
+
+            in_mem_fits = io.BytesIO(mocpy.to_fits_raw(self._store_index, pre_v2))
+            with fits.open(in_mem_fits) as hdulist:
+                hdu = hdulist[1]
+                if optional_kw_dict:
+                    for key in optional_kw_dict:
+                        hdu.header[key] = optional_kw_dict[key]
+
+                return hdulist
+
         elif format == "str":
-            result = self._to_str(uniq=uniq)
+            result = self.to_string(format="ascii", fold=0)
         else:
-            # json format serialization
-            result = self._to_json(uniq)
-            # WARN: use the rust to_json
-            # result = self._to_json(self._interval_set.nested)
+            import json
+
+            json_str = self.to_string(format="json")
+            result = json.loads(json_str)
 
         return result
 

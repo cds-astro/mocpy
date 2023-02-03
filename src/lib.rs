@@ -13,7 +13,7 @@ extern crate pyo3;
 use std::ops::Range;
 
 use ndarray::{Array, Array1, Array2, ArrayD, Ix2};
-use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
+use numpy::{IntoPyArray, PyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::{
   PyObject, ToPyObject, 
@@ -33,67 +33,18 @@ use moc::{
     range::RangeMOC,
   },
   ranges::{SNORanges, Ranges},
-  storage::u64idx::U64MocStore,
+  storage::u64idx::{
+    U64MocStore,
+    common::MocQType
+  },
 };
 
 pub mod ndarray_fromto;
 pub mod coverage;
 pub mod spatial_coverage;
-pub mod temporal_coverage;
 
 use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2};
 
-
-fn coverage_op<O>(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>, op: O)
-                  -> Py<PyArray2<u64>>
-  where
-    O: Fn(Ranges<u64>, Ranges<u64>) -> Ranges<u64>
-{
-  let ranges_a = a.as_array().to_owned();
-  let ranges_b = b.as_array().to_owned();
-
-  let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
-  let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
-
-  let result = op(cov_a, cov_b);
-
-  let result: Array2<u64> = ranges_to_array2(result);
-  result.to_owned().into_pyarray(py).to_owned()
-}
-
-fn coverage_complement<Q, F>(py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> Py<PyArray2<u64>>
-  where
-    Q: MocQty<u64>,
-    F: Fn(Array2<u64>) -> MocRanges<u64, Q>
-{
-  let ranges = ranges.as_array().to_owned();
-
-  let coverage = to_moc_ranges(ranges);
-  let result = coverage.complement();
-
-  let result = mocranges_to_array2(result);
-
-  result.into_pyarray(py).to_owned()
-}
-
-
-fn coverage_degrade<Q, F>(
-  py: Python,
-  ranges: PyReadonlyArray2<u64>,
-  depth: u8,
-  to_moc_ranges: F,
-) -> PyResult<Py<PyArray2<u64>>>
-  where
-    Q: MocQty<u64>,
-    F: Fn(Array2<u64>) -> MocRanges<u64, Q>
-{
-  let ranges = ranges.as_array().to_owned();
-  let mut ranges = to_moc_ranges(ranges);
-  coverage::degrade_ranges(&mut ranges, depth)?;
-  // The result is already consistent
-  let result: Array2<u64> = mocranges_to_array2(ranges);
-  Ok(result.into_pyarray(py).to_owned())
-}
 
 fn coverage_merge_intervals<Q, F>(
   py: Python,
@@ -127,6 +78,70 @@ fn get_spatial_coverages(py: Python, spatial_coverages: &PyList) -> PyResult<Vec
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
+  /// Make a new spatial coverage from ranges (at max order) and a depth
+  ///
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - The depth of the coverage between `[0, <u64>::MAXDEPTH] = [0, 29]`
+  /// * ``ranges`` - The coverage ranges.
+  #[pyfn(m)]
+  fn from_hpx_ranges(
+    _py: Python,
+    depth: u8,
+    ranges: PyReadonlyArray2<u64>,
+  ) -> PyResult<usize> {
+    let it = ranges.as_array().into_iter().cloned();
+    struct RangeIt<T: Iterator<Item=u64>> {
+      it: T
+    }
+    impl<T: Iterator<Item=u64>> Iterator for RangeIt<T> {
+      type Item = Range<u64>;
+      fn next(&mut self) -> Option<Self::Item> {
+        if let (Some(start), Some(end)) = (self.it.next(), self.it.next()) {
+          Some(start..end)
+        } else {
+          None
+        }
+      }
+    }
+    U64MocStore::get_global_store()
+      .from_hpx_ranges(depth, RangeIt { it }, None)
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Create a temporal coverage from a list of time ranges expressed in microseconds since
+  /// jd origin.
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - depth of the MOC
+  /// * ``ranges``: PyReadonlyArray2<u64>,
+  #[pyfn(m)]
+  fn from_time_ranges_array2(
+    depth: u8,
+    ranges: PyReadonlyArray2<u64>,
+  ) -> PyResult<usize> {
+    let it = ranges.as_array().into_iter().cloned();
+    struct RangeIt<T: Iterator<Item=u64>> {
+      it: T
+    }
+    impl<T: Iterator<Item=u64>> Iterator for RangeIt<T> {
+      type Item = Range<u64>;
+      fn next(&mut self) -> Option<Self::Item> {
+        if let (Some(start), Some(end)) = (self.it.next(), self.it.next()) {
+          Some(start..end)
+        } else {
+          None
+        }
+      }
+    }
+    U64MocStore::get_global_store()
+      .from_microsec_ranges_since_jd0(depth, RangeIt { it })
+      .map_err(PyValueError::new_err)
+  }
+  
+  
   /// Create a 1D spatial coverage from a list of
   /// longitudes and latitudes
   ///
@@ -144,74 +159,152 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``lon`` and ``lat`` do not have the same length
   /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-  #[pyfn(m, "from_lonlat")]
+  #[pyfn(m)]
   fn from_lonlat(
-    py: Python,
     depth: u8,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
-
-    let ranges = spatial_coverage::create_from_position(lon, lat, depth)?;
-
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+    lon_deg: PyReadonlyArrayDyn<f64>,
+    lat_deg: PyReadonlyArrayDyn<f64>,
+  ) -> PyResult<usize> {
+    let lon = lon_deg.as_array().into_iter().cloned();
+    let lat = lat_deg.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .from_coo(depth, lon.zip(lat))
+      .map_err(PyValueError::new_err)
   }
 
+  #[pyfn(m)]
+  fn from_cone(
+    lon_deg: f64,
+    lat_deg: f64,
+    radius_deg: f64,
+    depth: u8,
+    delta_depth: u8
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_cone(lon_deg, lat_deg, radius_deg, depth, delta_depth)
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Create a spatial coverage from a given ring.
+  ///
+  /// # Arguments
+  ///
+  /// * ``lon_deg`` - longitude of the center of the ring, in degrees
+  /// * ``lat_deg`` - latitude of the center of the ring, in degrees
+  /// * ``r_int_deg`` - Internal radius of the ring, in degrees
+  /// * ``r_ext_deg`` - External radius of the ring, in degrees
+  /// * ``depth`` - The depths of the expected MOC
+  /// * ``delta_depth`` - parameter controlling the approximation (typical value: 2)
+  ///
+  /// # Errors
+  ///
+  /// If one of the following conditions is not met:
+  ///
+  /// * ``depth`` contains values in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+  /// * ``r_int_deg`` contains values in the range `[0, 180]`
+  /// * ``r_ext_deg`` contains values in the range `[0, 180]`
+  /// * ``r_ext_deg > r_int_deg``
+  ///
+  #[pyfn(m)]
+  fn from_ring(
+    lon_deg: f64,
+    lat_deg: f64,
+    r_int_deg: f64,
+    r_ext_deg: f64,
+    depth: u8,
+    delta_depth: u8,
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_ring(
+        lon_deg,
+        lat_deg,
+        r_int_deg,
+        r_ext_deg,
+        depth,
+        delta_depth,
+      )
+      .map_err(PyValueError::new_err)
+  }
+  
+  #[pyfn(m)]
+  pub fn from_elliptical_cone(
+    lon_deg: f64,
+    lat_deg: f64,
+    a_deg: f64,
+    b_deg: f64,
+    pa_deg: f64,
+    depth: u8,
+    delta_depth: u8,
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_elliptical_cone(lon_deg, lat_deg, a_deg, b_deg, pa_deg, depth, delta_depth)
+      .map_err(PyValueError::new_err)
+  }
+
+  #[pyfn(m)]
+  pub fn from_polygon(
+    lon_deg: PyReadonlyArrayDyn<f64>,
+    lat_deg: PyReadonlyArrayDyn<f64>,
+    complement: bool,
+    depth: u8,
+  ) -> PyResult<usize> {
+    let lon = lon_deg.as_array().into_iter().cloned();
+    let lat = lat_deg.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .from_polygon(lon.zip(lat), complement, depth)
+      .map_err(PyValueError::new_err)
+  }
+  
   /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
   ///
   /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
   ///
   /// # Arguments
   ///
+  /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
+  ///                    depth in the `uniq` values
   /// * ``uniq`` - Uniq HEALPix indices
-  /// * ``values`` - Array containing the values associated for each cells.
-  /// Must be of the same size of ``uniq`` and must sum to one.
+  /// * ``values`` - Array containing the values associated to each cell.
+  /// * ``values_are_densities`` - sum of all values equals 1, the values are densities (doe not depend on cell size)
   /// * ``cumul_from`` - The cumulative value from which cells are put in the coverage
   /// * ``cumul_to`` - The cumulative value to which cells are put in the coverage
-  /// * ``max_depth`` -  the largest depth of the output MOC, which must be larger or equals to the largest
-  ///   depth in the `uniq` values
   /// * `asc`: cumulative value computed from lower to highest densities instead of from highest to lowest
   /// * `strict`: (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
   /// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
   /// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
-  ///
-  /// # Precondition
-  ///
-  /// * ``uniq`` and ``values`` must be of the same size
-  /// * ``values`` must sum to one
-  #[pyfn(m, "from_valued_hpx_cells")]
+  /// 
+  #[pyfn(m)]
   fn from_valued_hpx_cells(
-    py: Python,
     max_depth: u8,
-    uniq: PyReadonlyArray1<u64>,
-    values: PyReadonlyArray1<f64>,
+    uniq: PyReadonlyArrayDyn<u64>,
+    values: PyReadonlyArrayDyn<f64>,
+    values_are_densities: bool,
     cumul_from: f64,
     cumul_to: f64,
     asc: bool,
     strict: bool,
     no_split: bool,
     reverse_decent: bool,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let uniq = uniq.as_array().to_owned();
-    let values = values.as_array().to_owned();
-
-    let ranges = spatial_coverage::from_valued_healpix_cells_with_opt(
-      max_depth,
-      uniq,
-      values,
-      cumul_from,
-      cumul_to,
-      asc,
-      strict,
-      no_split,
-      reverse_decent,
-    )?; //from_valued_healpix_cells(max_depth, uniq, values, cumul_from, cumul_to)?;
-
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  ) -> PyResult<usize> {
+    let uniq = uniq.as_array();
+    let values = values.as_array();
+    if uniq.len() != values.len() {
+      return Err(PyValueError::new_err("`uniq` and values do not have the same size."));
+    }
+    let uniq_vals = uniq.into_iter().cloned().zip(values.into_iter().cloned());
+    U64MocStore::get_global_store()
+      .from_valued_cells(
+        max_depth,
+        values_are_densities,
+        cumul_from,
+        cumul_to,
+        asc,
+        !strict,
+        !no_split,
+        reverse_decent,
+        uniq_vals,
+      )
+      .map_err(PyValueError::new_err)
   }
 
   /// Create a 2D Time-Space coverage from a list of
@@ -241,12 +334,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "from_time_lonlat_approx")]
+  #[pyfn(m)]
   fn from_time_lonlat_approx(
-    times: PyReadonlyArray1<f64>,
+    times: PyReadonlyArrayDyn<f64>,
     d1: u8,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
     let times = times.as_array().to_owned().into_raw_vec();
@@ -279,12 +372,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``lon``, ``lat`` and ``times`` do not have the same length.
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-  #[pyfn(m, "from_time_lonlat")]
+  #[pyfn(m)]
   fn from_time_lonlat(
-    times: PyReadonlyArray1<u64>,
+    times: PyReadonlyArrayDyn<u64>,
     d1: u8,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
     let times = times.as_array().to_owned().into_raw_vec();
@@ -325,13 +418,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "from_time_ranges_lonlat_approx")]
+  #[pyfn(m)]
   fn from_time_ranges_lonlat_approx(
-    times_min: PyReadonlyArray1<f64>,
-    times_max: PyReadonlyArray1<f64>,
+    times_min: PyReadonlyArrayDyn<f64>,
+    times_max: PyReadonlyArrayDyn<f64>,
     d1: u8,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
     let times_min = times_min.as_array().to_owned().into_raw_vec();
@@ -367,13 +460,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
   ///
-  #[pyfn(m, "from_time_ranges_lonlat")]
+  #[pyfn(m)]
   fn from_time_ranges_lonlat(
-    times_min: PyReadonlyArray1<u64>,
-    times_max: PyReadonlyArray1<u64>,
+    times_min: PyReadonlyArrayDyn<u64>,
+    times_max: PyReadonlyArrayDyn<u64>,
     d1: u8,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
     let times_min = times_min.as_array().to_owned().into_raw_vec();
@@ -416,11 +509,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "from_time_ranges_spatial_coverages_approx")]
+  #[pyfn(m)]
   fn from_time_ranges_spatial_coverages_approx(
     py: Python,
-    times_min: PyReadonlyArray1<f64>,
-    times_max: PyReadonlyArray1<f64>,
+    times_min: PyReadonlyArrayDyn<f64>,
+    times_max: PyReadonlyArrayDyn<f64>,
     d1: u8,
     spatial_coverages: &PyList,
     d2: u8,
@@ -459,11 +552,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
   ///
-  #[pyfn(m, "from_time_ranges_spatial_coverages")]
+  #[pyfn(m)]
   fn from_time_ranges_spatial_coverages(
     py: Python,
-    times_min: PyReadonlyArray1<u64>,
-    times_max: PyReadonlyArray1<u64>,
+    times_min: PyReadonlyArrayDyn<u64>,
+    times_max: PyReadonlyArrayDyn<u64>,
     d1: u8,
     spatial_coverages: &PyList,
     d2: u8,
@@ -479,32 +572,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   }
 
 
-
-
-  #[pyfn(m, "project_on_first_dim")]
-  fn project_on_first_dim(py: Python, ranges: PyReadonlyArray2<u64>, stmoc_index: usize) 
-    -> PyResult<Py<PyArray2<u64>>> {
-    // Build the input ranges from a Array2
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges); // HpxRanges<u64>
-
-    let store = U64MocStore::get_global_store();
-    
-    // Not needed before, this is temporary, we plan to used MOCs in the store...
-    let depth = ranges.compute_min_depth();
-    let smoc = RangeMOC::new(depth, ranges);
-    store.insert_smoc(smoc)
-      .and_then(|smoc_index| {
-        let res_tmoc_index = store.space_fold(smoc_index, stmoc_index);
-        store.drop(smoc_index)
-          .and_then(move |()| res_tmoc_index)
-      })
-      .and_then(|tmoc_index| store.drop_tmoc(tmoc_index))
-      .map(|tmoc| {
-        let result: Array2<u64> = mocranges_to_array2(tmoc.into_moc_ranges());
-        result.into_pyarray(py).to_owned()
-      })
-      .map_err(PyIOError::new_err)
+  #[pyfn(m)]
+  fn project_on_first_dim(smoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .space_fold(smoc_index, stmoc_index)
+      .map_err(PyValueError::new_err)
   }
 
   /// Project the Time-Space coverage into its second dimension
@@ -528,124 +600,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///   superior to their sup bound.
   ///
   /// This **should** not panic as this code is wrapped around MOCPy
-  #[pyfn(m, "project_on_second_dim")]
-  fn project_on_second_dim(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
-    stmoc_index: usize,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    // Build the input ranges from a Array2
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-
-    let store = U64MocStore::get_global_store();
-
-    // Not needed before, this is temporary, we plan to used MOCs in the store...
-    let depth = ranges.compute_min_depth();
-    let tmoc = RangeMOC::new(depth, ranges);
-    store.insert_tmoc(tmoc)
-      .and_then(|tmoc_index| {
-        let res_smoc_index = store.time_fold(tmoc_index, stmoc_index);
-        store.drop(tmoc_index)
-          .and_then(move |()| res_smoc_index)
-      })
-      .and_then(|smoc_index| store.drop_smoc(smoc_index))
-      .map(|smoc| {
-        let result: Array2<u64> = mocranges_to_array2(smoc.into_moc_ranges());
-        result.into_pyarray(py).to_owned()
-      })
-      .map_err(PyIOError::new_err)
+  #[pyfn(m)]
+  fn project_on_second_dim(tmoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .time_fold(tmoc_index, stmoc_index)
+      .map_err(PyValueError::new_err)
   }
   
-  /// Serialize a Time-Space coverage into FITS blob.
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_fits_file")]
-  fn coverage_2d_to_fits_raw(py: Python, index: usize) -> PyResult<Py<PyArray1<u8>>> {
-    U64MocStore::get_global_store()
-      .to_fits_buff(index, None)
-      .map(move |b| PyArray1::from_vec(py, b.into_vec()).to_owned())
-      .map_err(PyIOError::new_err)
-  }
-  
-  /// Serialize a Time-Space coverage into a FITS file
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_fits_file")]
-  fn coverage_2d_to_fits_file(path: String, index: usize) -> PyResult<()> {
-    U64MocStore::get_global_store()
-      .to_fits_file(index, path, None)
-      .map_err(PyIOError::new_err)
-  }
 
-  /// Serialize a Time-Space coverage into an ASCII file
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_ascii_file")]
-  fn coverage_2d_to_ascii_file(path: String, index: usize) -> PyResult<()> {
-    U64MocStore::get_global_store()
-      .to_ascii_file(index, path, Some(80))
-      .map_err(PyIOError::new_err)
-  }
-
-  /// Serialize a Time-Space coverage into an ASCII string
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_ascii_str")]
-  fn coverage_2d_to_ascii_str(py: Python, index: usize) -> PyResult<Py<PyString>> {
-    U64MocStore::get_global_store()
-      .to_ascii_str(index, Some(80))
-      .map(move |s| PyString::new(py, &s).into())
-      .map_err(PyIOError::new_err)
-  }
-
-  /// Serialize a Time-Space coverage into a JSON file
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_json_file")]
-  fn coverage_2d_to_json_file(path: String, index: usize) -> PyResult<()> {
-    U64MocStore::get_global_store()
-      .to_json_file(index, path, Some(80))
-      .map_err(PyIOError::new_err)
-  }
-
-
-
-  /// Serialize a Time-Space coverage into a JSON file
-  ///
-  /// # Arguments
-  ///
-  /// * ``index`` - The index of the Time-Space coverage
-  ///   to serialize.
-  /// * ``path`` - the path of the output file
-  #[pyfn(m, "coverage_2d_to_json_str")]
-  fn coverage_2d_to_json_str(py: Python, index: usize) -> PyResult<Py<PyString>> {
-    U64MocStore::get_global_store()
-      .to_json_str(index, Some(80))
-      .map(move |s| PyString::new(py, &s).into())
-      .map_err(PyIOError::new_err)
-  }
-  
 
   /// Deserialize a Time-Space coverage from a FITS file (compatible with the MOC v2.0 standard).
   ///
@@ -661,7 +623,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
-  #[pyfn(m, "coverage_2d_from_fits_file")]
+  #[pyfn(m)]
   fn coverage_2d_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_file(path)
@@ -678,7 +640,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
-  #[pyfn(m, "coverage_2d_from_ascii_file")]
+  #[pyfn(m)]
   fn coverage_2d_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii_file(path)
@@ -695,7 +657,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
-  #[pyfn(m, "coverage_2d_from_json_file")]
+  #[pyfn(m)]
   fn coverage_2d_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json_file(path)
@@ -712,7 +674,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
-  #[pyfn(m, "coverage_2d_from_ascii_str")]
+  #[pyfn(m)]
   fn coverage_2d_from_ascii_str(_py: Python, ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii(&ascii)
@@ -729,7 +691,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
-  #[pyfn(m, "coverage_2d_from_json_str")]
+  #[pyfn(m)]
   fn coverage_2d_from_json_str(_py: Python, json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json(&json)
@@ -737,13 +699,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   }
 
 
-  /// Drop the content of a Time-Space coverage
+  /// Drop the MOC at the given index.
   ///
-  /// This method is automatically called by the
-  /// Python garbage collector.
-  #[pyfn(m, "drop_2d_coverage")]
-  fn drop_2d_coverage(_py: Python, index: usize) -> PyResult<()> {
-    U64MocStore::get_global_store().drop(index)
+  /// This method is automatically called by the Python garbage collector.
+  #[pyfn(m)]
+  fn drop(_py: Python, index: usize) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .drop(index)
       .map_err(PyIOError::new_err)
   }
 
@@ -757,7 +719,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// If the Time-Space coverage is empty, the returned
   /// depth is `(0, 0)`.
-  #[pyfn(m, "coverage_2d_depth")]
+  #[pyfn(m)]
   fn coverage_2d_depth(_py: Python, index: usize) -> PyResult<(u8, u8)> {
     U64MocStore::get_global_store()
       .get_stmoc_depths(index)
@@ -779,10 +741,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "coverage_2d_min_time_approx")]
+  #[pyfn(m)]
   fn coverage_2d_min_time_approx(_py: Python, index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
-      .get_stmoc_tmin(index)
+      .get_1st_axis_min(index)
       .and_then(|opt| opt.ok_or_else(|| String::from("Empty ST-MOC")))
       .map(|t_min_microsec_since_jd0| (t_min_microsec_since_jd0 as f64) / 86400000000_f64)
       .map_err(PyValueError::new_err)
@@ -799,10 +761,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * If the coverage is empty.
   ///
-  #[pyfn(m, "coverage_2d_min_time")]
+  #[pyfn(m)]
   fn coverage_2d_min_time(_py: Python, index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
-      .get_stmoc_tmin(index)
+      .get_1st_axis_min(index)
       .and_then(|opt| opt.ok_or_else(|| String::from("Empty ST-MOC")))
       .map_err(PyValueError::new_err)
   }
@@ -822,10 +784,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "coverage_2d_max_time_approx")]
+  #[pyfn(m)]
   fn coverage_2d_max_time_approx(_py: Python, index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
-      .get_stmoc_tmax(index)
+      .get_1st_axis_max(index)
       .and_then(|opt| opt.ok_or_else(|| String::from("Empty ST-MOC")))
       .map(|t_min_microsec_since_jd0| (t_min_microsec_since_jd0 as f64) / 86400000000_f64)
       .map_err(PyValueError::new_err)
@@ -842,12 +804,25 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * If the coverage is empty.
   ///
-  #[pyfn(m, "coverage_2d_max_time")]
+  #[pyfn(m)]
   fn coverage_2d_max_time(_py: Python, index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
-      .get_stmoc_tmax(index)
+      .get_1st_axis_max(index)
       .and_then(|opt| opt.ok_or_else(|| String::from("Empty ST-MOC")))
       .map_err(PyValueError::new_err)
+  }
+
+
+  /// Computes the complement of the given coverage
+  ///
+  /// # Arguments
+  ///
+  /// * ``id`` - index of the coverage
+  #[pyfn(m)]
+  fn complement(_py: Python, id: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .not(id)
+      .map_err(PyIOError::new_err)
   }
 
   /// Perform the union between two coverages of same type.
@@ -856,10 +831,23 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m, "union")]
+  #[pyfn(m)]
   fn union(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .or(id_left, id_right)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Perform the union between multiple coverages of same type.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ids`` - indices of the coverages.
+  #[pyfn(m)]
+  fn multi_union(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
+    let indices = ids.as_slice()?;
+    U64MocStore::get_global_store()
+      .multi_union(indices)
       .map_err(PyIOError::new_err)
   }
 
@@ -869,10 +857,23 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m, "intersection")]
+  #[pyfn(m)]
   fn intersection(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .and(id_left, id_right)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Perform the intersection between multiple coverages of same type.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ids`` - indices of the coverages.
+  #[pyfn(m)]
+  fn multi_intersection(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
+    let indices = ids.as_slice()?;
+    U64MocStore::get_global_store()
+      .multi_intersection(indices)
       .map_err(PyIOError::new_err)
   }
 
@@ -882,20 +883,46 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m, "difference")]
-  fn difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
+  #[pyfn(m)]
+  fn symmetric_difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .xor(id_left, id_right)
+      .symmetric_difference(id_left, id_right)
+      .map_err(PyIOError::new_err)
+  }
+  
+  /// Perform the difference between multiple coverages of same type.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ids`` - indices of the coverages.
+  #[pyfn(m)]
+  fn multi_symmetric_difference(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
+    let indices = ids.as_slice()?;
+    U64MocStore::get_global_store()
+      .multi_symmetric_difference(indices)
       .map_err(PyIOError::new_err)
   }
 
+  /// Perform the difference between two coverages of same type.
+  ///
+  /// # Arguments
+  ///
+  /// * ``id_left`` - index of the coverage being in the left of the operation.
+  /// * ``id_right`` - index of the coverage being in the right of the operation.
+  #[pyfn(m)]
+  fn difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .difference(id_left, id_right)
+      .map_err(PyIOError::new_err)
+  }
+  
   /// Check the equality between two coverages
   ///
   /// # Arguments
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m, "check_eq")]
+  #[pyfn(m)]
   fn check_eq(_py: Python, id_left: usize, id_right: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .eq(id_left, id_right)
@@ -907,7 +934,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - The index of the coverage to check the emptiness.
-  #[pyfn(m, "is_empty")]
+  #[pyfn(m)]
   fn is_empty(_py: Python, index: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .is_empty(index)
@@ -931,21 +958,35 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m, "coverage_2d_contains_approx")]
+  #[pyfn(m)]
   fn coverage_2d_contains_approx(
     py: Python,
     index: usize,
-    times: PyReadonlyArray1<f64>,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>) -> PyResult<Py<PyArray1<bool>>> {
-    let it_time = times.iter()?.cloned();
-    let it_lon = lon.iter()?.cloned();
-    let it_lat = lat.iter()?.cloned();
+    times: PyReadonlyArrayDyn<f64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>
+  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    let time_shape = times.shape().to_vec();
+    let lon_shape = lon.shape();
+    let lat_shape = lat.shape();
+    if time_shape != lat_shape {
+      return Err(PyValueError::new_err(format!("Time shape different from lon shape: {:?} != {:?}", time_shape, lon_shape)));
+    }
+    if lon_shape != lat_shape {
+      return Err(PyValueError::new_err(format!("Lon shape different from lat shape: {:?} != {:?}", lon_shape, lat_shape)));
+    }
+    let it_time = times.as_array().into_iter().cloned();
+    let it_lon = lon.as_array().into_iter().cloned();
+    let it_lat = lat.as_array().into_iter().cloned();
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
-      .filter_timepos_approx(index, it, |b| b)
-      .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned())
+      .filter_timepos_approx(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
       .map_err(PyIOError::new_err)
+      .and_then(|vec_bool| Array::from_shape_vec(time_shape, vec_bool)
+        .map(|a| a.into_pyarray(py).to_owned())
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+      )
+      // .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned()) TOTO!!
   }
 
   /// Check if (time, position) tuples are contained into a Time-Space coverage
@@ -960,111 +1001,22 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// * If `lon`, `lat` and `times` do not have the same length
-  #[pyfn(m, "coverage_2d_contains")]
+  #[pyfn(m)]
   fn coverage_2d_contains(
     py: Python,
     index: usize,
-    times: PyReadonlyArray1<u64>,
-    lon: PyReadonlyArray1<f64>,
-    lat: PyReadonlyArray1<f64>
+    times: PyReadonlyArrayDyn<u64>,
+    lon: PyReadonlyArrayDyn<f64>,
+    lat: PyReadonlyArrayDyn<f64>
   ) -> PyResult<Py<PyArray1<bool>>> {
-    let it_time = times.iter()?.cloned();
-    let it_lon = lon.iter()?.cloned();
-    let it_lat = lat.iter()?.cloned();
+    let it_time = times.as_array().into_iter().cloned();
+    let it_lon = lon.as_array().into_iter().cloned();
+    let it_lat = lat.as_array().into_iter().cloned();
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
-      .filter_timepos(index, it, |b| b)
+      .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
       .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned())
       .map_err(PyIOError::new_err)
-  }
-
-  /// Perform the union between two generic coverages
-  ///
-  /// # Arguments
-  ///
-  /// * ``a`` - The spatial coverage being the left operand
-  /// * ``b`` - The spatial coverage being the right operand
-  #[pyfn(m, "coverage_union")]
-  fn coverage_union(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-    /*let ranges_a = a.as_array().to_owned();
-    let ranges_b = b.as_array().to_owned();
-
-    let cov_a = coverage::create_ranges_from_py_unchecked(ranges_a);
-    let cov_b = coverage::create_ranges_from_py_unchecked(ranges_b);
-
-    let result = cov_a.union(&cov_b);
-
-    let result: Array2<u64> = result.into();
-    result.to_owned().into_pyarray(py).to_owned()*/
-    coverage_op(py, a, b, |cov_a, cov_b| cov_a.union(&cov_b))
-  }
-
-
-
-  /// Perform the difference between two generic coverages
-  ///
-  /// # Arguments
-  ///
-  /// * ``a`` - The spatial coverage being the left operand
-  /// * ``b`` - The spatial coverage being the right operand
-  #[pyfn(m, "coverage_difference")]
-  fn coverage_difference(py: Python, a: PyReadonlyArray2<u64>, b: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-    /*let ranges_a = a.as_array().to_owned();
-    let ranges_b = b.as_array().to_owned();
-
-    let cov_a = coverage::create_ranges_from_py(ranges_a);
-    let cov_b = coverage::create_ranges_from_py(ranges_b);
-
-    let result = cov_a.difference(&cov_b);
-
-    let result: Array2<u64> = result.into();
-    result.into_pyarray(py).to_owned()*/
-    coverage_op(py, a, b, |cov_a, cov_b| cov_a.difference(&cov_b))
-  }
-
-  /// Perform the intersection between two spatial coverages
-  ///
-  /// # Arguments
-  ///
-  /// * ``a`` - The spatial coverage being the left operand
-  /// * ``b`` - The spatial coverage being the right operand
-  #[pyfn(m, "coverage_intersection")]
-  fn coverage_intersection(
-    py: Python,
-    a: PyReadonlyArray2<u64>,
-    b: PyReadonlyArray2<u64>,
-  ) -> Py<PyArray2<u64>> {
-    /*let ranges_a = a.as_array().to_owned();
-    let ranges_b = b.as_array().to_owned();
-
-    let cov_a = coverage::create_ranges_from_py(ranges_a);
-    let cov_b = coverage::create_ranges_from_py(ranges_b);
-
-    let result = cov_a.intersection(&cov_b);
-
-    let result: Array2<u64> = result.into();
-    result.into_pyarray(py).to_owned()*/
-    coverage_op(py, a, b, |cov_a, cov_b| cov_a.intersection(&cov_b))
-  }
-
-  /// Computes the complement of the given nested/ring coverage
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The input spatial coverage
-  #[pyfn(m, "hpx_coverage_complement")]
-  fn hpx_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-    coverage_complement(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
-  }
-
-  /// Computes the complement of the given time coverage
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The input time coverage
-  #[pyfn(m, "time_coverage_complement")]
-  fn time_coverage_complement(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray2<u64>> {
-    coverage_complement(py, ranges, coverage::create_time_ranges_from_py_uncheked)
   }
 
   /// Deserialize a spatial coverage from a json python dictionary
@@ -1084,40 +1036,94 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``input`` dict must have string typed ``key``.
   /// * ``input`` dict values must be a list of unsigned integer encoded
   ///   on 64 bits (i.e. an array of `u64`).
-  #[pyfn(m, "coverage_from_json")]
+  #[pyfn(m)]
   fn coverage_from_json(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
     let coverage = coverage::from_json(py, input)?;
 
     let result: Array2<u64> = mocranges_to_array2(coverage);
     Ok(result.into_pyarray(py).to_owned())
   }
-
+  
   /// Checks if lon lat coordinates are contained into a Space coverage
   ///
   /// # Arguments
   ///
   /// * ``index`` - The index of the Space coverage.
-  /// * ``lon`` - The longitudes.
-  /// * ``lat`` - The latitudes.
+  /// * ``lon`` - The longitudes, in degrees.
+  /// * ``lat`` - The latitudes, in degrees.
   ///
   /// # Errors
   ///
   /// * If `lon` and `lat` do not have the same length
-  #[pyfn(m, "space_coverage_contains")]
-  fn space_coverage_contains(
+  #[pyfn(m)]
+  fn filter_pos(
     py: Python,
-    intervals: PyReadonlyArray2<u64>,
+    index: usize,
     lon: PyReadonlyArrayDyn<f64>,
-    lat: PyReadonlyArrayDyn<f64>) -> PyResult<Py<PyArrayDyn<bool>>> {
-    let lon = lon.as_array();
-    let lat = lat.as_array();
+    lat: PyReadonlyArrayDyn<f64>
+  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    let lon_shape = lon.shape().to_vec();
+    let lat_shape = lat.shape();
+    if lon_shape != lat_shape {
+      return Err(PyValueError::new_err(format!("Lon shape different from lat shape: {:?} != {:?}", lon_shape, lat_shape)));
+    }
+    let it_lon = lon.as_array().into_iter().cloned();
+    let it_lat = lat.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .filter_pos(index, it_lon.zip(it_lat), |b| b)
+      .map_err(PyIOError::new_err)
+      .and_then(|vec_bool| Array::from_shape_vec(lon_shape, vec_bool)
+        .map(|a| a.into_pyarray(py).to_owned())
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+      )
+  }
 
-    let ranges = intervals.as_array().to_owned();
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
+  /// Checks if a given times are contained into a Time coverage
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the Space coverage.
+  /// * ``time`` - The time, in JD.
+  ///
+  #[pyfn(m)]
+  fn filter_time_approx(
+    py: Python,
+    index: usize,
+    times: PyReadonlyArrayDyn<f64>,
+  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    let time_shape = times.shape().to_vec();
+    let it_time = times.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .filter_time_approx(index, it_time, |b| b)
+      .map_err(PyIOError::new_err)
+      .and_then(|vec_bool| Array::from_shape_vec(time_shape, vec_bool)
+        .map(|a| a.into_pyarray(py).to_owned())
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+      )
+  }
 
-    let mut result: ArrayD<bool> = ArrayD::from_elem(lon.shape(), false);
-    spatial_coverage::contains(&coverage, lon, lat, &mut result)?;
-    Ok(result.into_pyarray(py).to_owned())
+  /// Checks if a given times are contained into a Time coverage
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the Space coverage.
+  /// * ``time`` - The time, in microsec since JD=0.
+  ///
+  #[pyfn(m)]
+  fn filter_time(
+    py: Python,
+    index: usize,
+    times: PyReadonlyArrayDyn<u64>,
+  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    let time_shape = times.shape().to_vec();
+    let it_time = times.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .filter_time(index, it_time, |b| b)
+      .map_err(PyIOError::new_err)
+      .and_then(|vec_bool| Array::from_shape_vec(time_shape, vec_bool)
+        .map(|a| a.into_pyarray(py).to_owned())
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+      )
   }
 
   /// Serialize a spatial coverage to a JSON format
@@ -1125,7 +1131,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The spatial coverage ranges to serialize.
-  #[pyfn(m, "coverage_to_json")]
+  #[pyfn(m)]
   fn coverage_to_json(py: Python, ranges: PyReadonlyArray2<u64>) -> PyResult<PyObject> {
     let ranges = ranges.as_array().to_owned();
 
@@ -1143,7 +1149,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///               at the deepest level, in which case the computed depth will not be deep enough)
   /// * ``ranges`` - The list of time ranges to serialize.
   /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_to_fits_file")]
+  #[pyfn(m)]
   fn spatial_moc_to_fits_file(
     depth: u8,
     ranges: PyReadonlyArray2<u64>,
@@ -1155,63 +1161,141 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(|e| PyIOError::new_err(e.to_string()))
   }
 
-  /// Serialize a spatial MOC into an ASCII file.
+  /// Serialize a coverage into FITS blob.
   ///
   /// # Arguments
   ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_to_ascii_file")]
-  fn spatial_moc_to_ascii_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    spatial_coverage::to_ascii_file(depth, ranges, path)
+  /// * ``index`` - The index of the coverage to serialize.
+  /// * ``path`` - the path of the output file
+  #[pyfn(m)]
+  fn to_fits_raw(py: Python, index: usize, pre_v2: bool) -> PyResult<Py<PyArray1<u8>>> {
+    U64MocStore::get_global_store()
+      .to_fits_buff(index, Some(pre_v2))
+      .map(move |b| PyArray1::from_vec(py, b.into_vec()).to_owned())
       .map_err(PyIOError::new_err)
   }
 
-  /// Serialize a spatial MOC into a ASCII string.
+  /// Serialize a coverage into a FITS file
   ///
   /// # Arguments
   ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  #[pyfn(m, "spatial_moc_to_ascii_str")]
-  fn spatial_moc_to_ascii_str(
-    py: Python,
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> Py<PyString> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    PyString::new(py, &spatial_coverage::to_ascii_str(depth, ranges)).into()
-  }
-
-  /// Serialize a spatial MOC into a JSON file.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_to_json_file")]
-  fn spatial_moc_to_json_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    spatial_coverage::to_json_file(depth, ranges, path)
+  /// * ``index`` - The index of the coverage to serialize.
+  /// * ``path`` - the path of the output file
+  #[pyfn(m)]
+  fn to_fits_file(index: usize, path: String, pre_v2: bool) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .to_fits_file(index, path, Some(pre_v2))
       .map_err(PyIOError::new_err)
   }
+
+  /// Serialize a MOC into an ASCII file.
+  ///
+  /// # Arguments
+  ///
+  ///* ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn to_ascii_file(index: usize, path: String) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .to_ascii_file(index, path, None)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into an ASCII file.
+  ///
+  /// # Arguments
+  ///
+  ///* ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  /// * ``fold`` - value of the fold parameter (to limit line width)
+  #[pyfn(m)]
+  fn to_ascii_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .to_ascii_file(index, path, Some(fold))
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into a ASCII string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn to_ascii_str(index: usize) -> PyResult<String> {
+    U64MocStore::get_global_store()
+      .to_ascii_str(index, None)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into a ASCII string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  /// * ``fold`` - value of the fold parameter (to limit line width)
+  #[pyfn(m)]
+  fn to_ascii_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
+    U64MocStore::get_global_store()
+      .to_ascii_str(index, Some(fold))
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into an JSON file.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn to_json_file(index: usize, path: String) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .to_json_file(index, path, None)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into an JSON file.
+  ///
+  /// # Arguments
+  ///
+  ///* ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  /// * ``fold`` - value of the fold parameter (to limit line width)
+  #[pyfn(m)]
+  fn to_json_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .to_json_file(index, path, Some(fold))
+      .map_err(PyIOError::new_err)
+  }
+  
+  /// Serialize a MOC into a JSON string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn to_json_str(index: usize) -> PyResult<String> {
+    U64MocStore::get_global_store()
+      .to_json_str(index, None)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Serialize a MOC into a JSON string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - index in the store of the MOC to be serialized
+  /// * ``path`` - The file path
+  /// * ``fold`` - value of the fold parameter (to limit line width)
+  #[pyfn(m)]
+  fn to_json_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
+    U64MocStore::get_global_store()
+      .to_json_str(index, Some(fold))
+      .map_err(PyIOError::new_err)
+  }
+  
 
   /// Serialize a spatial MOC into a JSON string.
   ///
@@ -1220,7 +1304,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
   ///               at the deepest level, in which case the computed depth will not be deep enough)
   /// * ``ranges`` - The list of time ranges to serialize.
-  #[pyfn(m, "spatial_moc_to_json_str")]
+  #[pyfn(m)]
   fn spatial_moc_to_json_str(
     py: Python,
     depth: u8,
@@ -1274,9 +1358,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// ...
   /// END
   /// ```
-  #[pyfn(m, "spatial_moc_from_multiordermap_fits_file")]
+  #[pyfn(m)]
   fn spatial_moc_from_multiordermap_fits_file(
-    py: Python,
     path: String,
     cumul_from: f64,
     cumul_to: f64,
@@ -1284,20 +1367,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     strict: bool,
     no_split: bool,
     reverse_decent: bool,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    use std::fs::File;
-    use std::io::BufReader;
-    use moc::deser::fits;
-
-    let file = File::open(&path)?;
-    let reader = BufReader::new(file);
-    let ranges = fits::multiordermap::from_fits_multiordermap(
-      reader,
-      cumul_from, cumul_to,
-      asc, strict, no_split, reverse_decent,
-    ).map_err(|e| PyIOError::new_err(e.to_string()))?;
-    let result: Array2<u64> = mocranges_to_array2(ranges.into_moc_ranges());
-    Ok(result.into_pyarray(py).to_owned())
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_multiordermap_fits_file(
+        path, cumul_from, cumul_to, asc, !strict, !no_split, reverse_decent
+      )
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from a FITS file.
@@ -1305,11 +1380,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_from_fits_file")]
-  fn spatial_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = spatial_coverage::from_fits_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn spatial_moc_from_fits_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_smoc_from_fits_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from an ASCII file.
@@ -1317,11 +1392,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_from_ascii_file")]
-  fn spatial_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = spatial_coverage::from_ascii_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn spatial_moc_from_ascii_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_smoc_from_ascii_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from a ASCII string.
@@ -1329,11 +1404,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ascii`` - The json string
-  #[pyfn(m, "spatial_moc_from_ascii_str")]
-  fn spatial_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = spatial_coverage::from_ascii_str(ascii)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn spatial_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_smoc_from_ascii(ascii.as_str())
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from a JSON file.
@@ -1341,11 +1416,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "spatial_moc_from_json_file")]
-  fn spatial_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = spatial_coverage::from_json_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn spatial_moc_from_json_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_smoc_from_json_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from a JSON string.
@@ -1353,122 +1428,25 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``json`` - The json string
-  #[pyfn(m, "spatial_moc_from_json_str")]
-  fn spatial_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = spatial_coverage::from_json_str(json)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
-  }
-
-
-
-
-  /// Serialize a time MOC into a FITS file.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_to_fits_file")]
-  fn time_moc_to_fits_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-    temporal_coverage::to_fits_file(depth, ranges, path)
-      .map_err(|e| PyIOError::new_err(e.to_string()))
-  }
-
-  /// Serialize a time MOC into an ASCII file.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_to_ascii_file")]
-  fn time_moc_to_ascii_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-    temporal_coverage::to_ascii_file(depth, ranges, path)
+  #[pyfn(m)]
+  fn spatial_moc_from_json_str(json: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_smoc_from_json(json.as_str())
       .map_err(PyIOError::new_err)
   }
 
-  /// Serialize a time MOC into a ASCII string.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  #[pyfn(m, "time_moc_to_ascii_str")]
-  fn time_moc_to_ascii_str(
-    py: Python,
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> Py<PyString> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-    PyString::new(py, &temporal_coverage::to_ascii_str(depth, ranges)).into()
-  }
 
-  /// Serialize a time MOC into a JSON file.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_to_json_file")]
-  fn time_moc_to_json_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-    temporal_coverage::to_json_file(depth, ranges, path)
-      .map_err(PyIOError::new_err)
-  }
-
-  /// Serialize a time MOC into a JSON string.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  #[pyfn(m, "time_moc_to_json_str")]
-  fn time_moc_to_json_str(
-    py: Python,
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> Py<PyString> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_time_ranges_from_py_uncheked(ranges);
-    PyString::new(py, &temporal_coverage::to_json_str(depth, ranges)).into()
-  }
 
   /// Deserialize a time MOC from a FITS file.
   ///
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_from_fits_file")]
-  fn time_moc_from_fits_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = temporal_coverage::from_fits_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn time_moc_from_fits_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_fits_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a time MOC from an ASCII file.
@@ -1476,11 +1454,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_from_ascii_file")]
-  fn time_moc_from_ascii_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = temporal_coverage::from_ascii_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn time_moc_from_ascii_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_ascii_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a time MOC from a ASCII string.
@@ -1488,11 +1466,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ascii`` - The json string
-  #[pyfn(m, "time_moc_from_ascii_str")]
-  fn time_moc_from_ascii_str(py: Python, ascii: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = temporal_coverage::from_ascii_str(ascii)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn time_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_ascii(ascii.as_str())
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a time MOC from a JSON file.
@@ -1500,11 +1478,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m, "time_moc_from_json_file")]
-  fn time_moc_from_json_file(py: Python, path: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = temporal_coverage::from_json_file(path)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn time_moc_from_json_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_json_file(path)
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a time MOC from a JSON string.
@@ -1512,159 +1490,103 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``json`` - The json string
-  #[pyfn(m, "time_moc_from_json_str")]
-  fn time_moc_from_json_str(py: Python, json: String) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = temporal_coverage::from_json_str(json)?;
-    let result: Array2<u64> = mocranges_to_array2(ranges);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn time_moc_from_json_str(json: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_json(json.as_str())
+      .map_err(PyIOError::new_err)
   }
-
-
-  /// Degrade a spatial coverage to a specific depth.
+  
+  /// Expand the spatial coverage adding an external edge of max_depth pixels
+  /// and return the index of the newly created moc.
   ///
   /// # Arguments
   ///
-  /// * ``ranges`` - The spatial coverage ranges to degrade.
-  /// * ``depth`` - The depth to degrade the spatial coverage to.
+  /// * ``index`` - The index of the coverage in the store.
   ///
   /// # Errors
   ///
   /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "hpx_coverage_degrade")]
-  fn hpx_coverage_degrade(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
-    depth: u8,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    coverage_degrade(py, ranges, depth, coverage::create_hpx_ranges_from_py_unchecked)
+  #[pyfn(m)]
+  fn extend(index: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .extend(index)
+      .map_err(PyValueError::new_err)
   }
 
-  /// Expand the spatial coverage adding an external edge of max_depth pixels.
+  /// Contract the spatial coverage removing an internal edge of max_depth pixels
+  /// and return the index of the newly created moc.
   ///
   /// # Arguments
   ///
-  /// * ``max_depth`` - The MOC depth.
-  /// * ``ranges`` - The spatial coverage ranges of max depth to be expanded.
+  /// * ``index`` - The index of the coverage in the store.
   ///
-  /// # Errors
-  ///
-  /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "hpx_coverage_expand")]
-  fn hpx_coverage_expand(
-    py: Python,
-    max_depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = ranges.as_array().to_owned();
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    let result = spatial_coverage::expand(max_depth, coverage);
-    let result = mocranges_to_array2(result);
-    Ok(result.into_pyarray(py).to_owned())
-  }
-
-  /// Contract the spatial coverage removing an internal edge of max_depth pixels.
-  ///
-  /// # Arguments
-  ///
-  /// * ``max_depth`` - The MOC depth.
-  /// * ``ranges`` - The spatial coverage ranges of max depth to be contracted.
-  ///
-  /// # Errors
-  ///
-  /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "hpx_coverage_contract")]
-  fn hpx_coverage_contract(
-    py: Python,
-    max_depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = ranges.as_array().to_owned();
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    let result = spatial_coverage::contract(max_depth, coverage);
-    let result = mocranges_to_array2(result);
-    Ok(result.into_pyarray(py).to_owned())
+  #[pyfn(m)]
+  fn contract(index: usize) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .contract(index)
+      .map_err(PyValueError::new_err)
   }
 
   /// Count the number of disjoint MOC this MOC contains.
   ///
   /// # Arguments
   ///
-  /// * ``max_depth`` - The MOC depth.
+  /// * ``index`` - The index of the coverage in the store.
   /// * ``include_indirect_neighbours`` -
   ///     if `false`, only consider  cells having a common edge as been part of a same MOC
   ///     if `true`, also consider cells having a common vertex as been part of the same MOC
-  /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
   ///
-  /// # Errors
-  ///
-  /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "hpx_coverage_split_count")]
-  fn hpx_coverage_split_count(
-    max_depth: u8,
-    include_indirect_neighbours: bool,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> u32 {
-    let ranges = ranges.as_array().to_owned();
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
-    moc.split_into_joint_mocs(include_indirect_neighbours).len() as u32
+  #[pyfn(m)]
+  fn split_count(_py: Python, index: usize, include_indirect_neighbours: bool) -> PyResult<u32> {
+    if include_indirect_neighbours {
+      U64MocStore::get_global_store().split_indirect_count(index)
+    } else {
+      U64MocStore::get_global_store().split_count(index)
+    }.map_err(PyValueError::new_err)
   }
 
   /// Split the input MOC into disjoint MOCs.
   ///
   /// # Arguments
   ///
-  /// * ``max_depth`` - The MOC depth.
+  /// * ``index`` - The index of the coverage in the store.
   /// * ``include_indirect_neighbours`` -
   ///     if `false`, only consider  cells having a common edge as been part of a same MOC
   ///     if `true`, also consider cells having a common vertex as been part of the same MOC
-  /// * ``ranges`` - The spatial coverage ranges of max depth to be split.
   ///
   /// # Errors
   ///
   /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "hpx_coverage_split")]
-  fn hpx_coverage_split(
-    py: Python,
-    max_depth: u8,
+  #[pyfn(m)]
+  fn split(
+    index: usize,
     include_indirect_neighbours: bool,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> PyResult<Py<PyList>> {
-    let ranges = ranges.as_array().to_owned();
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    let moc = RangeMOC::<u64, Hpx<u64>>::new(max_depth, coverage);
-    let mocs: Vec<Py<PyArray2<u64>>> = moc.split_into_joint_mocs(include_indirect_neighbours)
-      .drain(..)
-      .map(|cell_moc|
-        vec_range_to_array2(
-          cell_moc.into_cell_moc_iter().ranges().collect()
-        ).into_pyarray(py).to_owned().into()
-      ).collect();
-    PyList::new(py, mocs).extract()
+  ) -> PyResult<Vec<usize>> {
+    if include_indirect_neighbours {
+      U64MocStore::get_global_store().split_indirect(index)
+    } else {
+      U64MocStore::get_global_store().split(index)
+    }.map_err(PyValueError::new_err)
   }
 
-
-
-  /// Degrade a time coverage to a specific depth.
+  /// Degrade a (1D) coverage to a specific depth.
   ///
   /// # Arguments
   ///
-  /// * ``ranges`` - The time coverage ranges to degrade.
+  /// * ``index`` - The index of the coverage in the store.
   /// * ``depth`` - The depth to degrade the time coverage to.
   ///
-  /// # Errors
-  ///
-  /// * ``depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
-  #[pyfn(m, "time_coverage_degrade")]
-  fn time_coverage_degrade(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
+  #[pyfn(m)]
+  fn degrade(
+    index: usize,
     depth: u8,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    coverage_degrade(py, ranges, depth, coverage::create_time_ranges_from_py_uncheked)
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .degrade(index, depth)
+      .map_err(PyValueError::new_err)
   }
-
-
+  
   /// Make a generic coverage consistent
   ///
   /// # Infos
@@ -1675,7 +1597,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The coverage ranges to make consistent.
-  #[pyfn(m, "coverage_merge_gen_intervals")]
+  #[pyfn(m)]
   fn coverage_merge_gen_intervals(
     py: Python,
     ranges: PyReadonlyArray2<u64>,
@@ -1707,7 +1629,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// * ``min_depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m, "coverage_merge_hpx_intervals")]
+  #[pyfn(m)]
   fn coverage_merge_hpx_intervals(
     py: Python,
     ranges: PyReadonlyArray2<u64>,
@@ -1735,7 +1657,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// * ``min_depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
-  #[pyfn(m, "coverage_merge_time_intervals")]
+  #[pyfn(m)]
   fn coverage_merge_time_intervals(
     py: Python,
     ranges: PyReadonlyArray2<u64>,
@@ -1744,47 +1666,81 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     coverage_merge_intervals(py, ranges, min_depth, coverage::build_time_ranges_from_py)
   }
 
-  /// Compute the depth of a spatial coverage
+  /// Get the depth of a spatial coverage.
   ///
   /// # Arguments
   ///
-  /// * ``ranges`` - The input coverage.
-  #[pyfn(m, "hpx_coverage_depth")]
-  fn hpx_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
-    coverage_depth(py, ranges, coverage::create_hpx_ranges_from_py_unchecked)
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn get_smoc_depth(index: usize) -> PyResult<u8> {
+    U64MocStore::get_global_store()
+      .get_smoc_depth(index)
+      .map_err(PyValueError::new_err)
   }
 
-  /// Compute the depth of a time coverage
+  /// Get the depth of a time coverage.
   ///
   /// # Arguments
   ///
-  /// * ``ranges`` - The input coverage.
-  #[pyfn(m, "time_coverage_depth")]
-  fn time_coverage_depth(py: Python, ranges: PyReadonlyArray2<u64>) -> u8 {
-    coverage_depth(py, ranges, coverage::create_time_ranges_from_py_uncheked)
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn get_tmoc_depth(index: usize) -> PyResult<u8> {
+    U64MocStore::get_global_store()
+      .get_tmoc_depth(index)
+      .map_err(PyValueError::new_err)
   }
 
-  fn coverage_depth<Q, F>(_py: Python, ranges: PyReadonlyArray2<u64>, to_moc_ranges: F) -> u8
-    where
-      Q: MocQty<u64>,
-      F: Fn(Array<u64, Ix2>) -> MocRanges<u64, Q>
-  {
-    let ranges = ranges.as_array().to_owned();
-    let coverage = to_moc_ranges(ranges);
-    coverage::depth(&coverage)
-  }
 
-  /// Compute the sky fraction of a spatial coverage
+  /// Compute the sum of all ranges size
   ///
   /// # Arguments
   ///
-  /// * ``coverage`` - The spatial coverage
-  /// * ``max_depth`` - The max depth of the spatial coverage.
-  #[pyfn(m, "coverage_sky_fraction")]
-  fn coverage_sky_fraction(_py: Python, ranges: PyReadonlyArray2<u64>) -> f32 {
-    let ranges = ranges.as_array().to_owned();
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn ranges_sum(index: usize) -> PyResult<u64> {
+    U64MocStore::get_global_store()
+      .get_ranges_sum(index)
+      .map_err(PyValueError::new_err)
+  }
 
-    coverage::sky_fraction(&ranges)
+  /// Returns the 1st index in the MOC (error if empty MOC).
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn first_index(index: usize) -> PyResult<u64> {
+    U64MocStore::get_global_store()
+      .get_1st_axis_min(index)
+      .and_then(|opt| opt.ok_or_else(|| String::from("No min value in an empty MOC")))
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Returns the last index in the MOC (error if empty MOC).
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn last_index(index: usize) -> PyResult<u64> {
+    U64MocStore::get_global_store()
+      .get_1st_axis_max(index)
+      .and_then(|opt| opt.ok_or_else(|| String::from("No max value in an empty MOC")))
+      .map_err(PyValueError::new_err)
+  }
+
+  
+  /// Compute the coverage fraction of a MOC
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn coverage_fraction(index: usize) -> PyResult<f64> {
+    U64MocStore::get_global_store()
+      .get_coverage_percentage(index)
+      .map(|c| 0.01 * c) // / 100 to transform a percentage in a fraction
+      .map_err(PyValueError::new_err)
   }
 
   /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
@@ -1792,7 +1748,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **uniq** format.
-  #[pyfn(m, "to_nested")]
+  #[pyfn(m)]
   fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
     let ranges = ranges.as_array().to_owned();
     let result: Array2<u64> = if ranges.is_empty() {
@@ -1817,7 +1773,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
-  #[pyfn(m, "to_uniq")]
+  #[pyfn(m)]
   fn to_uniq(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray1<u64>> {
     use moc::moc::range::RangeMOC;
     use moc::moc::{RangeMOCIterator, RangeMOCIntoIterator};
@@ -1843,10 +1799,35 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     result.into_pyarray(py).to_owned()
   }
 
+
+  /// Create a temporal coverage from a list of time values expressed in microseconds since
+  /// jd origin.
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - depth of the MOC
+  /// * ``times`` - The list of time values expressed in microseconds since jd=0
+  ///
+  /// # Errors
+  ///
+  /// * If the number of ``min_times`` and ``max_times`` do not match.
+  #[pyfn(m)]
+  fn from_time_in_microsec_since_jd_origin(
+    depth: u8,
+    times: PyReadonlyArray1<u64>,
+  ) -> PyResult<usize> {
+    let times = times.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .from_microsec_since_jd0(depth, times)
+      .map_err(PyValueError::new_err)
+  }
+  
+  
   /// Create a temporal coverage from a list of time ranges expressed in jd.
   ///
   /// # Arguments
   ///
+  /// * ``depth`` - depth of the MOC
   /// * ``min_times`` - The list of inf bounds of the time ranges expressed in **jd**
   /// * ``max_times`` - The list of sup bounds of the time ranges expressed in **jd**
   ///
@@ -1858,18 +1839,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_times`` and ``max_times`` do not match.
-  #[pyfn(m, "from_time_ranges")]
+  #[pyfn(m)]
   fn from_time_ranges(
-    py: Python,
+    depth: u8,
     min_times: PyReadonlyArray1<f64>,
     max_times: PyReadonlyArray1<f64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let min_times = min_times.as_array().to_owned();
-    let max_times = max_times.as_array().to_owned();
-
-    let coverage: Array2<u64> = temporal_coverage::from_time_ranges(min_times, max_times)?;
-
-    Ok(coverage.into_pyarray(py).to_owned())
+  ) -> PyResult<usize> {
+    let min_times = min_times.as_array().into_iter();
+    let max_times = max_times.as_array().into_iter();
+    U64MocStore::get_global_store()
+      .from_decimal_jd_ranges(depth, min_times.zip(max_times).map(|(min, max)| *min..*max))
+      .map_err(PyValueError::new_err)
   }
 
   /// Create a temporal coverage from a list of time ranges expressed in microseconds since
@@ -1877,6 +1857,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// # Arguments
   ///
+  /// * ``depth`` - depth of the MOC
   /// * ``min_times`` - The list of inf bounds of the time ranges expressed in microseconds since
   ///    jd origin.
   /// * ``max_times`` - The list of sup bounds of the time ranges expressed in microseconds since
@@ -1885,64 +1866,95 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_times`` and ``max_times`` do not match.
-  #[pyfn(m, "from_time_ranges_in_microsec_since_jd_origin")]
+  #[pyfn(m)]
   fn from_time_ranges_in_microsec_since_jd_origin(
-    py: Python,
+    depth: u8,
     min_times: PyReadonlyArray1<u64>,
     max_times: PyReadonlyArray1<u64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let min_times = min_times.as_array().to_owned();
-    let max_times = max_times.as_array().to_owned();
-
-    let coverage: Array2<u64> = temporal_coverage::from_time_ranges_in_microsec_since_jd_origin(min_times, max_times)?;
-
-    Ok(coverage.into_pyarray(py).to_owned())
+  ) -> PyResult<usize> {
+    let min_times = min_times.as_array().into_iter();
+    let max_times = max_times.as_array().into_iter();
+    U64MocStore::get_global_store()
+      .from_microsec_ranges_since_jd0(depth, min_times.zip(max_times).map(|(min, max)| *min..*max))
+      .map_err(PyValueError::new_err)
   }
 
-  /// Flatten HEALPix cells to a specific depth
+  /// Flatten cells to the moc depth
   ///
   /// # Arguments
   ///
   /// * ``data`` - The spatial coverage
-  /// * ``depth`` - The depth to flatten the coverage to.
-  #[pyfn(m, "flatten_pixels")]
-  fn flatten_hpx_pixels(py: Python, data: PyReadonlyArray2<u64>, depth: u8) -> Py<PyArray1<u64>> {
-    let data = data.as_array().to_owned();
+  #[pyfn(m)]
+  fn flatten_to_moc_depth(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+    U64MocStore::get_global_store()
+      .flatten_to_moc_depth(index)
+      .map(move |v| PyArray1::from_vec(py, v).to_owned())
+      .map_err(PyIOError::new_err)
+  }
+  //
 
-    let result = coverage::flatten_hpx_pixels(data, depth);
+  /// Flatten cells to a specific depth
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage.
+  #[pyfn(m)]
+  fn flatten_to_depth(py: Python, index: usize, depth: u8) -> PyResult<Py<PyArray1<u64>>> {
+    U64MocStore::get_global_store()
+      .flatten_to_depth(index, depth)
+      .map(move |v| PyArray1::from_vec(py, v).to_owned())
+    .map_err(PyIOError::new_err)
+  }
 
-    result.into_pyarray(py).to_owned()
+
+  #[pyfn(m)]
+  fn new_empty_smoc(depth: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .new_empty_smoc(depth)
+      .map_err(PyIOError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn new_empty_tmoc(depth: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .new_empty_tmoc(depth)
+      .map_err(PyIOError::new_err)
   }
 
   /// Create a spatial coverage from a list of HEALPix cell indices.
   ///
   /// # Arguments
   ///
-  /// * ``pixels`` - A set of HEALPix cell indices
+  /// * ``depth`` - The depth of the created MOC
   /// * ``depth`` - The depths of each HEALPix cell indices
+  /// * ``pixels`` - A set of HEALPix cell indices
   ///
   /// # Precondition
   ///
   /// ``pixels`` and ``depth`` must be valid. This means that:
-  ///
-  /// * ``depth`` contains values in the range `[0, <T>::MAXDEPTH] = [0, 29]`
+  /// * ``depths`` contains values in the range `[0, <T>::MAXDEPTH] = [0, 29]`
   /// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
   ///
   /// # Errors
   ///
   /// * ``depth`` and ``pixels`` have not the same length.
-  #[pyfn(m, "from_healpix_cells")]
+  #[pyfn(m)]
   fn from_healpix_cells(
-    py: Python,
-    pixels: PyReadonlyArray1<u64>,
-    depth: PyReadonlyArray1<u8>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let pixels = pixels.as_array().to_owned();
-    let depth = depth.as_array().to_owned();
-
-    let result = spatial_coverage::from_healpix_cells(pixels, depth)?;
-
-    Ok(result.into_pyarray(py).to_owned())
+    depth: u8,
+    depths: PyReadonlyArrayDyn<u8>,
+    pixels: PyReadonlyArrayDyn<u64>,
+  ) -> PyResult<usize> {
+    let depths_shape = depths.shape();
+    let pixels_shape = pixels.shape();
+    if depths_shape != pixels_shape {
+      return Err(PyValueError::new_err(format!("Depths shape different from pixels shape: {:?} != {:?}", depths_shape, pixels_shape)));
+    }
+    let depths_it = depths.as_array().into_iter().cloned();
+    let pixels_it = pixels.as_array().into_iter().cloned();
+    
+    U64MocStore::get_global_store()
+      .from_hpx_cells(depth, depths_it.zip(pixels_it), None)
+      .map_err(PyValueError::new_err)
   }
 
 
@@ -1958,7 +1970,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``depth`` is a value in the range `[0, <T>::MAXDEPTH] = [0, 29]`
   /// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
-  #[pyfn(m, "from_healpix_cells")]
+  #[pyfn(m)]
   fn from_healpix_map(
     py: Python,
     pixels: PyReadonlyArray1<u64>,
@@ -1971,48 +1983,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
     Ok(result.into_pyarray(py).to_owned())
   }
-
-  /// Create a spatial coverage from a given ring.
-  ///
-  /// # Arguments
-  ///
-  /// * ``lon_deg`` - longitude of the center of the ring, in degrees
-  /// * ``lat_deg`` - latitude of the center of the ring, in degrees
-  /// * ``r_int_deg`` - Internal radius of the ring, in degrees
-  /// * ``r_ext_deg`` - External radius of the ring, in degrees
-  /// * ``depth`` - The depths of the expected MOC
-  /// * ``delta_depth`` - parameter controlling the approximation (typical value: 2)
-  ///
-  /// # Errors
-  ///
-  /// If one of the following conditions is not met:
-  ///
-  /// * ``depth`` contains values in the range `[0, <T>::MAXDEPTH] = [0, 29]`
-  /// * ``r_int_deg`` contains values in the range `[0, 180]`
-  /// * ``r_ext_deg`` contains values in the range `[0, 180]`
-  /// * ``r_ext_deg > r_int_deg``
-  ///
-  #[pyfn(m, "from_ring")]
-  fn from_ring(
-    py: Python,
-    lon_deg: f64,
-    lat_deg: f64,
-    r_int_deg: f64,
-    r_ext_deg: f64,
-    depth: u8,
-    delta_depth: u8,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let moc_ranges = RangeMOC::from_ring(
-      lon_deg.to_radians(),
-      lat_deg.to_radians(),
-      r_int_deg.to_radians(),
-      r_ext_deg.to_radians(),
-      depth,
-      delta_depth,
-    ).into_moc_ranges();
-    let result = mocranges_to_array2(moc_ranges);
-    Ok(result.into_pyarray(py).to_owned())
-  }
-
+  
   Ok(())
 }

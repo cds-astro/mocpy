@@ -11,8 +11,6 @@ from .moc import MOC, World2ScreenMPL
 from .tmoc import TimeMOC
 from .stmoc import STMOC
 
-from .interval_set import IntervalSet
-
 from .version import __version__
 
 __all__ = [
@@ -20,5 +18,4 @@ __all__ = [
     "TimeMOC",
     "STMOC",
     "World2ScreenMPL",
-    "IntervalSet",
 ]

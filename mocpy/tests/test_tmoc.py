@@ -1,22 +1,22 @@
 import pytest
 
 from astropy.time import Time
-from astropy.io import ascii
-from ..interval_set import IntervalSet
+
+# from astropy.io import ascii
 from ..tmoc import TimeMOC
 
 import numpy as np
 
 
-def test_interval_set_complement():
-    assert TimeMOC().complement() == TimeMOC(
-        IntervalSet(np.array([[0, 2 * 2**61]], dtype=np.uint64))
+def test_complement():
+    assert TimeMOC.new_empty(61).complement() == TimeMOC.from_depth61_ranges(
+        61, np.array([[0, 2 * 2**61]], dtype=np.uint64)
     )
-    assert TimeMOC().complement().complement() == TimeMOC()
-    assert TimeMOC(
-        IntervalSet(np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64))
-    ).complement() == TimeMOC(
-        IntervalSet(np.array([[0, 1], [2, 5], [8, 2 * 2**61]], dtype=np.uint64))
+    assert TimeMOC.new_empty(61).complement().complement() == TimeMOC.new_empty(61)
+    assert TimeMOC.from_depth61_ranges(
+        61, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
+    ).complement() == TimeMOC.from_depth61_ranges(
+        61, np.array([[0, 1], [2, 5], [8, 2 * 2**61]], dtype=np.uint64)
     )
 
 
@@ -28,13 +28,13 @@ def test_empty_tmoc():
 
     with pytest.raises(
         ValueError,
-        match="zero-size array to reduction operation minimum which has no identity",
+        match="No min value in an empty MOC",
     ):
         tmoc.min_time
 
     with pytest.raises(
         ValueError,
-        match="zero-size array to reduction operation maximum which has no identity",
+        match="No max value in an empty MOC",
     ):  # pytest styles : should add the match parameter
         tmoc.max_time
 
@@ -73,12 +73,29 @@ def test_single_range_time_tmoc():
     assert tmoc.max_order == 61
 
 
+""" TEST REMOVE BECAUSE OF THE TMoc.fits HEADER WHICH IS NOT OK (NOT HEALPIX!!):
+XTENSION= 'BINTABLE'           / binary table extension
+BITPIX  =                    8 / array data type
+NAXIS   =                    2 / number of array dimensions
+NAXIS1  =                    8 / length of dimension 1
+NAXIS2  =                91097 / length of dimension 2
+PCOUNT  =                    0 / number of group parameters
+GCOUNT  =                    1 / number of groups
+TFIELDS =                    1 / number of table fields
+TTYPE1  = 'UNIQ    '
+TFORM1  = '1K      '
+PIXTYPE = 'HEALPIX '
+ORDERING= 'NUNIQ   '
+TIMESYS = 'JD      '           / ref system JD BARYCENTRIC TT, 1 usec level 29
+MOCORDER=                   27
+MOCTOOL = 'MOCPy   '
+END
 def test_tmoc_from_time_ranges():
-    """Test tmocs built from time ranges.
+    ""Test tmocs built from time ranges.
 
     Assert a correct tmoc loaded from a fits file is equal to the
     tmoc built from a CSV file containing a list of time intervals.
-    """
+    ""
     tmoc = TimeMOC.from_fits("resources/TMOC/HST_SDSSg/TMoc.fits")
     # Old T-MOC so we have to load it with the Old method.
     # tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
@@ -99,6 +116,7 @@ def test_tmoc_from_time_ranges():
         TimeMOC.from_time_ranges(
             Time([], format="jd", scale="tdb"), Time([3], format="jd", scale="tdb")
         )
+"""
 
 
 def test_tmoc_from_single_time_range():
@@ -155,11 +173,12 @@ def test_add_remove_back_and_forth():
         [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC], format="jd", scale="tdb"
     )
 
-    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(29))
+    tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     tmoc_expected = TimeMOC.from_times(
-        times, delta_t=TimeMOC.order_to_time_resolution(29)
+        times, delta_t=TimeMOC.order_to_time_resolution(61)
     )
 
+    print(tmoc.to_string())
     tmoc.add_neighbours().remove_neighbours()
 
     assert tmoc == tmoc_expected
@@ -176,9 +195,9 @@ def test_contains():
     times_outside = Time(np.linspace(1.01, 2, num=100), format="mjd", scale="tdb")
     times_in_and_out = Time(np.linspace(0.9, 2, num=100), format="mjd", scale="tdb")
 
-    assert tmoc.contains(times_inside).all()
-    assert (~tmoc.contains(times_outside)).all()
-    assert tmoc.contains(times_in_and_out).any()
+    assert tmoc.contains_with_timeresolution(times_inside).all()
+    assert (~tmoc.contains_with_timeresolution(times_outside)).all()
+    assert tmoc.contains_with_timeresolution(times_in_and_out).any()
 
 
 @pytest.mark.parametrize(
