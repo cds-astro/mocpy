@@ -15,25 +15,6 @@ from astropy.time import Time
 DAY_MICRO_SEC = 86400000000.0
 
 
-def uniq2orderipix(uniq):
-    """
-    Convert a HEALPix pixel coded as a NUNIQ number to a (norder, ipix) tuple.
-
-    Parameters
-    ----------
-    uniq : int
-
-    Returns
-    -------
-    (order, ipix): int, int
-    """
-    order = (np.log2(uniq // np.uint8(4))) // np.uint8(2)
-    order = order.astype(np.uint8)
-    ipix = uniq - np.uint64(4) * (np.uint64(4) ** np.uint64(order))
-
-    return order, ipix.astype(np.uint64)
-
-
 def times_to_microseconds(times):
     """
     Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
