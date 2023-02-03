@@ -12,52 +12,28 @@ extern crate pyo3;
 
 use std::ops::Range;
 
-use ndarray::{Array, Array1, Array2, ArrayD, Ix2};
-use numpy::{IntoPyArray, PyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
+use ndarray::{Array, Array1, Array2};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
-use pyo3::{PyObject, ToPyObject, exceptions::{PyIOError, PyValueError}, prelude::{pymodule, Py, PyModule, PyResult, Python}, types::{PyDict, PyList, PyString}, IntoPy};
+use pyo3::{
+  ToPyObject, types::{PyBytes, PyList}, exceptions::{PyIOError, PyValueError}, prelude::{pymodule, Py, PyModule, PyResult, Python}
+};
 
 use moc::{
-  qty::{MocQty, Hpx},
   elemset::range::{
-    HpxRanges, MocRanges,
+    HpxRanges,
     uniq::HpxUniqRanges,
   },
-  moc::{
-    CellMOCIterator, CellMOCIntoIterator,
-    range::RangeMOC,
-  },
-  ranges::{SNORanges, Ranges},
   storage::u64idx::{
     U64MocStore,
-    common::MocQType
   },
 };
-use pyo3::types::PyBytes;
 
 pub mod ndarray_fromto;
 pub mod coverage;
 pub mod spatial_coverage;
 
 use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2};
-
-
-fn coverage_merge_intervals<Q, F>(
-  py: Python,
-  ranges: PyReadonlyArray2<u64>,
-  min_depth: i8,
-  to_moc_ranges: F,
-) -> PyResult<Py<PyArray2<u64>>>
-  where
-    Q: MocQty<u64>,
-    F: Fn(Array2<u64>) -> MocRanges<u64, Q>
-{
-  let ranges = ranges.as_array().to_owned();
-  let mut coverage = to_moc_ranges(ranges);
-  coverage = coverage::merge(coverage, min_depth)?;
-  let result: Array2<u64> = mocranges_to_array2(coverage);
-  Ok(result.into_pyarray(py).to_owned())
-}
 
 
 fn get_spatial_coverages(py: Python, spatial_coverages: &PyList) -> PyResult<Vec<HpxRanges<u64>>> {
@@ -626,6 +602,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+  #[pyfn(m)]
   fn stmoc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_buff(raw_bytes)
@@ -1021,31 +998,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
-  /// Deserialize a spatial coverage from a json python dictionary
-  ///
-  /// JSON python dictionary stores (key, value) pair where:
-  ///
-  /// * the ``key`` is a ``char`` being a depth
-  /// * the ``value`` is a list of HEALPix cell indices at the depth
-  ///   indicated by the ``key``
-  ///
-  /// # Arguments
-  ///
-  /// * ``input`` - The input python dictionary
-  ///
-  /// # Errors
-  ///
-  /// * ``input`` dict must have string typed ``key``.
-  /// * ``input`` dict values must be a list of unsigned integer encoded
-  ///   on 64 bits (i.e. an array of `u64`).
-  #[pyfn(m)]
-  fn coverage_from_json(py: Python, input: &PyDict) -> PyResult<Py<PyArray2<u64>>> {
-    let coverage = coverage::from_json(py, input)?;
-
-    let result: Array2<u64> = mocranges_to_array2(coverage);
-    Ok(result.into_pyarray(py).to_owned())
-  }
-  
   /// Checks if lon lat coordinates are contained into a Space coverage
   ///
   /// # Arguments
@@ -1126,41 +1078,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         .map(|a| a.into_pyarray(py).to_owned())
         .map_err(|e| PyValueError::new_err(e.to_string()))
       )
-  }
-
-  /// Serialize a spatial coverage to a JSON format
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The spatial coverage ranges to serialize.
-  #[pyfn(m)]
-  fn coverage_to_json(py: Python, ranges: PyReadonlyArray2<u64>) -> PyResult<PyObject> {
-    let ranges = ranges.as_array().to_owned();
-
-    let coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-
-    let result = coverage::to_json(py, coverage)?;
-    Ok(result.to_object(py))
-  }
-
-  /// Serialize a spatial MOC into an FITS file.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  /// * ``path`` - The file path
-  #[pyfn(m)]
-  fn spatial_moc_to_fits_file(
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-    path: String,
-  ) -> PyResult<()> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    spatial_coverage::to_fits_file(depth, ranges, path)
-      .map_err(|e| PyIOError::new_err(e.to_string()))
   }
 
   /// Serialize a coverage into FITS blob.
@@ -1296,25 +1213,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_json_str(index, Some(fold))
       .map_err(PyIOError::new_err)
-  }
-  
-
-  /// Serialize a spatial MOC into a JSON string.
-  ///
-  /// # Arguments
-  ///
-  /// * `depth``` - The depth of the MOC (needed to support the case in which there is no cell
-  ///               at the deepest level, in which case the computed depth will not be deep enough)
-  /// * ``ranges`` - The list of time ranges to serialize.
-  #[pyfn(m)]
-  fn spatial_moc_to_json_str(
-    py: Python,
-    depth: u8,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> Py<PyString> {
-    let ranges = ranges.as_array().to_owned();
-    let ranges = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-    PyString::new(py, &spatial_coverage::to_json_str(depth, ranges)).into()
   }
 
   /// Create a 1D spatial coverage from the deserialization of a FITS file containing a multi-order map.
@@ -1458,6 +1356,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+  #[pyfn(m)]
   fn time_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_buff(raw_bytes)
@@ -1600,85 +1499,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     U64MocStore::get_global_store()
       .degrade(index, depth)
       .map_err(PyValueError::new_err)
-  }
-  
-  /// Make a generic coverage consistent
-  ///
-  /// # Infos
-  ///
-  /// This is an internal method whose purpose is not to be called
-  /// by an user. It is called inside of the `mocpy.IntervalSet` class.
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The coverage ranges to make consistent.
-  #[pyfn(m)]
-  fn coverage_merge_gen_intervals(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let ranges = ranges.as_array().to_owned();
-
-    let coverage = coverage::build_ranges_from_py(ranges);
-
-    let result: Array2<u64> = ranges_to_array2(coverage);
-    Ok(result.into_pyarray(py).to_owned())
-  }
-
-  /// Make a spatial coverage consistent
-  ///
-  /// # Infos
-  ///
-  /// This is an internal method whose purpose is not to be called
-  /// by an user. It is called inside of the `mocpy.IntervalSet` class.
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The spatial coverage ranges to make consistent.
-  /// * ``min_depth`` - A minimum depth. This argument is optional.
-  ///   A min depth means that we do not want any HEALPix cells to be
-  ///   of depth < to ``min_depth``. This argument is used for example for
-  ///   plotting a spatial coverage. All HEALPix cells of depth < 2 are splitted
-  ///   into cells of depth 2.
-  ///
-  /// # Errors
-  ///
-  /// * ``min_depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m)]
-  fn coverage_merge_hpx_intervals(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
-    min_depth: i8,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    coverage_merge_intervals(py, ranges, min_depth, coverage::build_hpx_ranges_from_py)
-  }
-
-  /// Make a time coverage consistent
-  ///
-  /// # Infos
-  ///
-  /// This is an internal method whose purpose is not to be called
-  /// by an user. It is called inside of the `mocpy.IntervalSet` class.
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The time coverage ranges to make consistent.
-  /// * ``min_depth`` - A minimum depth. This argument is optional.
-  ///   A min depth means that we do not want any cells to be
-  ///   of depth < to ``min_depth``. This argument is used for example for
-  ///   plotting a time coverage. All time cells of depth < 2 are splitted
-  ///   into cells of depth 2.
-  ///
-  /// # Errors
-  ///
-  /// * ``min_depth`` is not comprised in `[0, Time::<T>::MAX_DEPTH] = [0, 62]`
-  #[pyfn(m)]
-  fn coverage_merge_time_intervals(
-    py: Python,
-    ranges: PyReadonlyArray2<u64>,
-    min_depth: i8,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    coverage_merge_intervals(py, ranges, min_depth, coverage::build_time_ranges_from_py)
   }
 
   /// Get the depth of a spatial coverage.
@@ -1972,32 +1792,5 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-
-  /// Create a spatial coverage from an HEALPix map, i.e. from a list of HEALPix cell indices
-  /// at the same depth.
-  ///
-  /// # Arguments
-  ///
-  /// * ``pixels`` - A set of HEALPix cell indices
-  /// * ``depth`` - The depths of each HEALPix cell indices
-  ///
-  /// # Precondition
-  ///
-  /// * ``depth`` is a value in the range `[0, <T>::MAXDEPTH] = [0, 29]`
-  /// * ``pixels`` contains values in the range `[0, 12*4**(depth)]`
-  #[pyfn(m)]
-  fn from_healpix_map(
-    py: Python,
-    pixels: PyReadonlyArray1<u64>,
-    depth: PyReadonlyArray1<u8>,
-  ) -> PyResult<Py<PyArray2<u64>>> {
-    let pixels = pixels.as_array().to_owned();
-    let depth = depth.as_array().to_owned();
-
-    let result = spatial_coverage::from_healpix_cells(pixels, depth)?;
-
-    Ok(result.into_pyarray(py).to_owned())
-  }
-  
   Ok(())
 }
