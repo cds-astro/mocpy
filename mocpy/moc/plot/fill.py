@@ -71,7 +71,11 @@ def compute_the_patches(moc, wcs):
     matplotlib.patches.PathPatch
         a list of matplotlib patches corresponding to the MOC tiles.
     """
+
     depth_ipix_d = moc.serialize(format="json")
+    # preprocess the moc to:
+    # 1. remove backfacing cells
+    # 2. subdivide too large cells to order 3
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(
         depth_ipix_d=depth_ipix_d, wcs=wcs
     )
