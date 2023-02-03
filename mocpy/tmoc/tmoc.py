@@ -9,13 +9,57 @@ from astropy.time import Time, TimeDelta
 from ..abstract_moc import AbstractMOC
 
 from .. import mocpy
-from .. import utils
 
 __author__ = "Matthieu Baumann, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
 __email__ = "baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
+
+
+DAY_MICRO_SEC = 86400000000.0
+
+
+def times_to_microseconds(times):
+    """
+    Convert a `astropy.time.Time` into an array of integer microseconds since JD=0, keeping the microsecond resolution required for `~mocpy.tmoc.TimeMOC`.
+
+    Parameters
+    ----------
+    times : `astropy.time.Time`
+    Astropy observation times
+
+    Returns
+    -------
+    times_microseconds : `np.array`
+    """
+    times_jd = np.asarray(times.jd, dtype=np.uint64)
+    times_us = np.asarray(
+        (times - Time(times_jd, format="jd", scale="tdb")).jd * DAY_MICRO_SEC,
+        dtype=np.uint64,
+    )
+
+    return times_jd * np.uint64(DAY_MICRO_SEC) + times_us
+
+
+def microseconds_to_times(times_microseconds):
+    """
+    Convert an array of integer microseconds since JD=0, to an array of `astropy.time.Time`.
+
+    Parameters
+    ----------
+    times_microseconds : `np.array`
+
+    Returns
+    -------
+    times : `astropy.time.Time`
+    """
+    jd1 = np.asarray(times_microseconds // DAY_MICRO_SEC, dtype=np.float64)
+    jd2 = np.asarray(
+        (times_microseconds - jd1 * DAY_MICRO_SEC) / DAY_MICRO_SEC, dtype=np.float64
+    )
+
+    return Time(val=jd1, val2=jd2, format="jd", scale="tdb")
 
 
 class TimeMOC(AbstractMOC):
@@ -129,7 +173,7 @@ class TimeMOC(AbstractMOC):
         -------
         time_moc : `~mocpy.tmoc.TimeMOC`
         """
-        times = utils.times_to_microseconds(times)
+        times = times_to_microseconds(times)
         times = np.atleast_1d(times)
 
         depth = TimeMOC.time_resolution_to_order(delta_t)
@@ -159,10 +203,10 @@ class TimeMOC(AbstractMOC):
         # degrade the TimeMoc to the order computed from ``delta_t``
         depth = TimeMOC.time_resolution_to_order(delta_t)
 
-        min_times = utils.times_to_microseconds(min_times)
+        min_times = times_to_microseconds(min_times)
         min_times = np.atleast_1d(min_times)
 
-        max_times = utils.times_to_microseconds(max_times)
+        max_times = times_to_microseconds(max_times)
         max_times = np.atleast_1d(max_times)
 
         assert min_times.shape == max_times.shape
@@ -405,7 +449,7 @@ class TimeMOC(AbstractMOC):
             time of the first observation
 
         """
-        return utils.microseconds_to_times(self.min_index())
+        return microseconds_to_times(self.min_index())
 
     @property
     def max_time(self):
@@ -418,7 +462,7 @@ class TimeMOC(AbstractMOC):
             time of the last observation
 
         """
-        return utils.microseconds_to_times(self.max_index())
+        return microseconds_to_times(self.max_index())
 
     def contains(self, times, keep_inside=True):
         """
@@ -439,7 +483,7 @@ class TimeMOC(AbstractMOC):
         """
         # the requested order for filtering the astropy observations table is more precise than the order
         # of the TimeMoc object
-        pix_arr = utils.times_to_microseconds(times)
+        pix_arr = times_to_microseconds(times)
 
         mask = mocpy.filter_time(self._store_index, pix_arr)
 
@@ -583,12 +627,8 @@ class TimeMOC(AbstractMOC):
 
         y = np.zeros(size)
         for (s_time_us, e_time_us) in plotted_moc._interval_set._intervals:
-            s_index = int(
-                (utils.microseconds_to_times(s_time_us).jd - min_jd_time) / delta
-            )
-            e_index = int(
-                (utils.microseconds_to_times(e_time_us).jd - min_jd_time) / delta
-            )
+            s_index = int((microseconds_to_times(s_time_us).jd - min_jd_time) / delta)
+            e_index = int((microseconds_to_times(e_time_us).jd - min_jd_time) / delta)
             y[s_index : (e_index + 1)] = 1.0
 
         # hack in case of full time mocs.

@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 
-from .. import MOC, TimeMOC, mocpy, utils
+from .. import MOC, mocpy
+from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
 from ..abstract_moc import AbstractMOC
 
 
@@ -49,16 +50,12 @@ class STMOC(AbstractMOC):
     @property
     def max_time(self):
         """Return STMOC max time."""
-        return utils.microseconds_to_times(
-            mocpy.coverage_2d_max_time(self._store_index)
-        )
+        return microseconds_to_times(mocpy.coverage_2d_max_time(self._store_index))
 
     @property
     def min_time(self):
         """Return STMOC min time."""
-        return utils.microseconds_to_times(
-            mocpy.coverage_2d_min_time(self._store_index)
-        )
+        return microseconds_to_times(mocpy.coverage_2d_min_time(self._store_index))
 
     def is_empty(self):
         """Check whether the Space-Time coverage is empty."""
@@ -90,7 +87,7 @@ class STMOC(AbstractMOC):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        times = utils.times_to_microseconds(times)
+        times = times_to_microseconds(times)
         lon = lon.to_value("rad").astype(np.float64)
         lat = lat.to_value("rad").astype(np.float64)
 
@@ -138,8 +135,8 @@ class STMOC(AbstractMOC):
         # times_start = times_start.jd.astype(np.float64)
         # times_end = times_end.jd.astype(np.float64)
 
-        times_start = utils.times_to_microseconds(times_start)
-        times_end = utils.times_to_microseconds(times_end)
+        times_start = times_to_microseconds(times_start)
+        times_end = times_to_microseconds(times_end)
 
         lon = lon.to_value("rad").astype(np.float64)
         lat = lat.to_value("rad").astype(np.float64)
@@ -188,8 +185,8 @@ class STMOC(AbstractMOC):
         """
         # times_start = times_start.jd.astype(np.float64)
         # times_end = times_end.jd.astype(np.float64)
-        times_start = utils.times_to_microseconds(times_start)
-        times_end = utils.times_to_microseconds(times_end)
+        times_start = times_to_microseconds(times_start)
+        times_end = times_to_microseconds(times_end)
 
         if times_start.shape != times_end.shape or times_start.shape[0] != len(
             spatial_coverages
@@ -292,7 +289,7 @@ class STMOC(AbstractMOC):
             A mask boolean array
         """
         # times = times.jd.astype(np.float64)
-        times = utils.times_to_microseconds(times)
+        times = times_to_microseconds(times)
         lon = lon.to_value("rad").astype(np.float64)
         lat = lat.to_value("rad").astype(np.float64)
 
