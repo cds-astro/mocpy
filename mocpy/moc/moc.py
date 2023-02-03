@@ -801,9 +801,9 @@ class MOC(AbstractMOC):
         index = mocpy.from_elliptical_cone(
             np.float64(lon.degree),
             np.float64(lat.degree),
-            np.float64(a.degree),
-            np.float64(b.degree),
-            np.float64(pa.degree),
+            np.float64(a.to_value(u.deg)),
+            np.float64(b.to_value(u.deg)),
+            np.float64(pa.to_value(u.deg)),
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
@@ -855,7 +855,7 @@ class MOC(AbstractMOC):
         index = mocpy.from_cone(
             np.float64(lon.degree),
             np.float64(lat.degree),
-            np.float64(radius.degree),
+            np.float64(radius.to_value(u.deg)),
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
@@ -912,8 +912,8 @@ class MOC(AbstractMOC):
         index = mocpy.from_ring(
             np.float64(lon.degree),
             np.float64(lat.degree),
-            np.float64(internal_radius.degree),
-            np.float64(external_radius.degree),
+            np.float64(internal_radius.to_value(u.deg)),
+            np.float64(external_radius.to_value(u.deg)),
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
@@ -971,7 +971,6 @@ class MOC(AbstractMOC):
         """
         lon = lon if isinstance(lon, Longitude) else Longitude(lon)
         lat = lat if isinstance(lat, Latitude) else Latitude(lat)
-        print(np.float64(lon.degree))
         index = mocpy.from_polygon(
             np.float64(lon.degree),
             np.float64(lat.degree),
@@ -1299,6 +1298,13 @@ class MOC(AbstractMOC):
         else:
             formats = ("fits", "ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))
+
+    @classmethod
+    def from_fits_raw_bytes(cls, raw_bytes):
+        """Load MOC from raw bytes of a FITS file."""
+        print(raw_bytes)
+        index = mocpy.spatial_moc_from_fits_raw_bytes(raw_bytes)
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_string(cls, value, format="ascii"):

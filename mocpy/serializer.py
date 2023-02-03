@@ -26,16 +26,14 @@ class IO:
             raise ValueError("format should be one of %s" % (str(formats)))
 
         if format == "fits":
-            import io
-
-            in_mem_fits = io.BytesIO(mocpy.to_fits_raw(self._store_index, pre_v2))
-            with fits.open(in_mem_fits) as hdulist:
-                hdu = hdulist[1]
-                if optional_kw_dict:
-                    for key in optional_kw_dict:
-                        hdu.header[key] = optional_kw_dict[key]
-
-                return hdulist
+            hdulist = fits.HDUList.fromstring(
+                mocpy.to_fits_raw(self._store_index, pre_v2)
+            )
+            hdu = hdulist[1]
+            if optional_kw_dict:
+                for key in optional_kw_dict:
+                    hdu.header[key] = optional_kw_dict[key]
+            return hdulist
 
         elif format == "str":
             result = self.to_string(format="ascii", fold=0)

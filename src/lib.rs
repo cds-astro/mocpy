@@ -15,12 +15,7 @@ use std::ops::Range;
 use ndarray::{Array, Array1, Array2, ArrayD, Ix2};
 use numpy::{IntoPyArray, PyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
-use pyo3::{
-  PyObject, ToPyObject, 
-  exceptions::{PyIOError, PyValueError},
-  prelude::{pymodule, Py, PyModule, PyResult, Python},
-  types::{PyDict, PyList, PyString},
-};
+use pyo3::{PyObject, ToPyObject, exceptions::{PyIOError, PyValueError}, prelude::{pymodule, Py, PyModule, PyResult, Python}, types::{PyDict, PyList, PyString}, IntoPy};
 
 use moc::{
   qty::{MocQty, Hpx},
@@ -38,6 +33,7 @@ use moc::{
     common::MocQType
   },
 };
+use pyo3::types::PyBytes;
 
 pub mod ndarray_fromto;
 pub mod coverage;
@@ -630,6 +626,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+  fn stmoc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_stmoc_from_fits_buff(raw_bytes)
+      .map_err(PyIOError::new_err)
+  }
+  
   /// Deserialize a Time-Space coverage from an ASCII file (compatible with the MOC v2.0 standard).
   ///
   /// # Arguments
@@ -1168,10 +1170,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``index`` - The index of the coverage to serialize.
   /// * ``path`` - the path of the output file
   #[pyfn(m)]
-  fn to_fits_raw(py: Python, index: usize, pre_v2: bool) -> PyResult<Py<PyArray1<u8>>> {
+  fn to_fits_raw(py: Python, index: usize, pre_v2: bool) -> PyResult<Py<PyBytes>> {
     U64MocStore::get_global_store()
       .to_fits_buff(index, Some(pre_v2))
-      .map(move |b| PyArray1::from_vec(py, b.into_vec()).to_owned())
+      .map(move |b| PyBytes::new(py, &b).into())
       .map_err(PyIOError::new_err)
   }
 
@@ -1386,6 +1388,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .load_smoc_from_fits_file(path)
       .map_err(PyIOError::new_err)
   }
+  
+  #[pyfn(m)]
+  fn spatial_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_from_fits_buff(raw_bytes)
+      .map_err(PyIOError::new_err)
+  }
 
   /// Deserialize a spatial MOC from an ASCII file.
   ///
@@ -1446,6 +1455,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   fn time_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_file(path)
+      .map_err(PyIOError::new_err)
+  }
+
+  fn time_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_tmoc_from_fits_buff(raw_bytes)
       .map_err(PyIOError::new_err)
   }
 

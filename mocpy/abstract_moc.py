@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
+from io import BytesIO
 import numpy as np
 
 from . import serializer
@@ -400,7 +402,7 @@ class AbstractMOC(serializer.IO):
         )
 
     @classmethod
-    def from_fits(cls, filename):
+    def from_fits(cls, path_or_url):
         """
         Loads a MOC from a FITS file.
 
@@ -410,7 +412,7 @@ class AbstractMOC(serializer.IO):
 
         Parameters
         ----------
-        filename : str
+        path : str
             The path to the FITS file.
 
         Returns
@@ -418,13 +420,24 @@ class AbstractMOC(serializer.IO):
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
 
-        Raises
-        ------
-        DeprecationWarning
-            Not compatible with the last version of the MOC 2.0 standard.
-
         """
-        return cls.load(filename, format="fits")
+        if isinstance(path_or_url, BytesIO):
+            bytes = path_or_url.read()
+            return cls.from_fits_raw_bytes(bytes)
+        elif os.path.isfile(path_or_url):
+            return cls.load(path_or_url, format="fits")
+        else:
+            import requests
+
+            response = requests.get(path_or_url, headers={"User-Agent": "MOCPy"})
+            if response:
+                print(response.content)
+                raw_bytes = BytesIO()
+                raw_bytes.write(response.content)
+                raw_bytes.seek(0)
+                return cls.from_fits(raw_bytes)
+            else:
+                response.raise_for_status()
 
     @classmethod
     def from_str(cls, value):

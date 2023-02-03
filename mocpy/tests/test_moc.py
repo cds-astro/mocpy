@@ -255,6 +255,11 @@ def test_moc_from_fits():
     MOC.load(fits_path, "fits")
 
 
+def test_moc_from_fits_url():
+    url = "http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits"
+    MOC.from_fits(url)
+
+
 def test_moc_consistent_with_aladin():
     truth = MOC.load("resources/CDS-I-125A-catalog_MOC.fits", "fits")
     table = parse_single_table("resources/I_125A_catalog.vot").to_table()

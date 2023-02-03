@@ -693,6 +693,12 @@ class TimeMOC(AbstractMOC):
             raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
+    def from_fits_raw_bytes(cls, raw_bytes):
+        """Load MOC from raw bytes of a FITS file."""
+        index = mocpy.time_moc_from_fits_raw_bytes(raw_bytes)
+        return cls(cls.__create_key, index)
+
+    @classmethod
     def from_string(cls, value, format="ascii"):
         """
         Deserialize the Time MOC from the given string.
