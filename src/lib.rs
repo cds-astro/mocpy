@@ -12,7 +12,7 @@ extern crate pyo3;
 
 use std::ops::Range;
 
-use ndarray::{Array, Array1};
+use ndarray::Array;
 use numpy::{IntoPyArray, PyArray1, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::{
@@ -27,8 +27,7 @@ use moc::{
 };
 
 pub mod ndarray_fromto;
-pub mod coverage;
-pub mod spatial_coverage;
+// pub mod coverage;
 
 use self::ndarray_fromto::{array2_to_mocranges};
 
@@ -962,7 +961,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         .map(|a| a.into_pyarray(py).to_owned())
         .map_err(|e| PyValueError::new_err(e.to_string()))
       )
-      // .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned()) TOTO!!
   }
 
   /// Check if (time, position) tuples are contained into a Time-Space coverage
@@ -991,7 +989,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
       .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
-      .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned())
+      // .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned())
+      .map(|vec_bool| PyArray1::<bool>::from_vec(py, vec_bool).to_owned())
       .map_err(PyIOError::new_err)
   }
 
