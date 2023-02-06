@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux64-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10, installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
@@ -25,7 +25,7 @@ jobs:
      - name: "Build and test wheels"
        run: |
          source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[678910]*/bin; do
+         for PYBIN in /opt/python/cp3[78910]*/bin; do
            echo "Loop on PYBIN: $PYBIN"
            # With maturin develop, we have to use virtualenv
            "${PYBIN}/pip" install virtualenv
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 32 bits Docker Hub image that 'build-linux32-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10, installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux2014_i686
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
@@ -58,7 +58,7 @@ jobs:
      - name: "Build and test wheels"
        run: |
          source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[678910]*/bin; do
+         for PYBIN in /opt/python/cp3[78910]*/bin; do
            echo "Loop on PYBIN: $PYBIN"
            # With maturin develop, we have to use virtualenv
            "${PYBIN}/pip" install virtualenv
@@ -78,7 +78,7 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
      # Checkout the project
      - name: "Checkout branch ${{ github.head_ref }}"
@@ -114,7 +114,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
       # Checkout the project       
       - name: "Checkout branch ${{ github.head_ref }}"
@@ -143,7 +143,7 @@ jobs:
           python -m pytest -v mocpy
           deactivate
 
-  # Perform tests with coverage, build the doc and run the tests in the doc (only for python 3.6 on ubuntu)
+  # Perform tests with coverage, build the doc and run the tests in the doc (only for python 3.8 on ubuntu)
   test-cov-and-doc:
     runs-on: ubuntu-latest
     steps:
@@ -154,7 +154,7 @@ jobs:
       - name: "Set up Python 3.6 on Ubuntu"
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.8
             # Test Rust code
       - name: "Test with coverage, build and test doc"
         run: |

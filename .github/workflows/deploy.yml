@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10, installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
      - name: "Checkout the full project"
@@ -24,7 +24,7 @@ jobs:
         MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
        run: |
          source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[678910]*/bin; do
+         for PYBIN in /opt/python/cp3[78910]*/bin; do
            "${PYBIN}/pip" install maturin
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
          done
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10, installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux2014_i686
     steps:
      - name: "Checkout the full project"
@@ -75,7 +75,7 @@ jobs:
             ${{ env.img }} \
             bash -exc 'curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
             source $HOME/.cargo/env && \
-            for PYBIN in /opt/python/cp3[678910]*/bin; do
+            for PYBIN in /opt/python/cp3[78910]*/bin; do
               "${PYBIN}/pip" install maturin
               "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
             done'
@@ -90,7 +90,7 @@ jobs:
       fail-fast: false      
       matrix:
         os: [windows-latest, macOS-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
      - uses: actions/checkout@v2
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -118,7 +118,7 @@ jobs:
       - name: "Set up Python 3.6 on Ubuntu"
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.8
       - name: "Build doc"
         run: |
           # Build the doc
