@@ -1332,21 +1332,7 @@ class MOC(AbstractMOC):
             formats = ("ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))
 
-    # FROM INTERVAL SET
-
     @property
     def uniq_hpx(self):
         """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
         mocpy.to_uniq_hpx(self._store_index)
-
-    # @property
-    # def uniq(self):
-    #    """Return a `np.array` of intervals."""
-    #    if self.empty():
-    #        return np.array([], dtype=np.uint64)
-    #    return mocpy.to_uniq(self._intervals)
-
-    # @property
-    # def nested(self):
-    #    """Return the intervals."""
-    #    return self._intervals

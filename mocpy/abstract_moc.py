@@ -36,8 +36,8 @@ class AbstractMOC(serializer.IO):
         self.__create_sub_key = create_sub_key
         self._store_index = store_index
 
-    # def __repr__(self):
-    #    return self._interval_set.__repr__()
+    def __repr__(self):
+        self.to_string(format="ascii", fold=80)
 
     def __del__(self):
         """Erase MOC."""
