@@ -1578,6 +1578,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  /*
   /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
   ///
   /// # Arguments
@@ -1633,7 +1634,46 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
     result.into_pyarray(py).to_owned()
   }
+  */
 
+  /// Get the **uniq** HEALPix cell indices from the MOC of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
+  #[pyfn(m)]
+  fn to_uniq_hpx(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+    U64MocStore::get_global_store()
+      .to_uniq_hpx(index)
+      .map(|v| v.into_pyarray(py).to_owned())
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Get the generic **uniq** cell indices from the MOC of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
+  #[pyfn(m)]
+  fn to_uniq_gen(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+    U64MocStore::get_global_store()
+      .to_uniq_gen(index)
+      .map(|v| v.into_pyarray(py).to_owned())
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Get the zorder **uniq** cell indices from the MOC of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
+  #[pyfn(m)]
+  fn to_uniq_zorder(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+    U64MocStore::get_global_store()
+      .to_uniq_zorder(index)
+      .map(|v| v.into_pyarray(py).to_owned())
+      .map_err(PyValueError::new_err)
+  }
 
   /// Create a temporal coverage from a list of time values expressed in microseconds since
   /// jd origin.

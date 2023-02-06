@@ -1334,6 +1334,11 @@ class MOC(AbstractMOC):
 
     # FROM INTERVAL SET
 
+    @property
+    def uniq_hpx(self):
+        """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
+        mocpy.to_uniq_hpx(self._store_index)
+
     # @property
     # def uniq(self):
     #    """Return a `np.array` of intervals."""
