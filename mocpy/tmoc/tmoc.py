@@ -264,7 +264,7 @@ class TimeMOC(AbstractMOC):
         smoc : `~mocpy.moc.Moc`
         stmoc : `~mocpy.stmoc.STMoc`
         """
-        store_index = mocpy.project_on_first_dim(smoc, stmoc)
+        store_index = mocpy.project_on_first_dim(smoc._store_index, stmoc._store_index)
         return cls(cls.__create_key, store_index)
 
     def _process_degradation(self, another_moc, order_op):

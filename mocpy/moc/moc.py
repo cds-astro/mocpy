@@ -1063,7 +1063,7 @@ class MOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMoc`
         stmoc : `~mocpy.stmoc.STMoc`
         """
-        store_index = mocpy.project_on_second_dim(tmoc, stmoc)
+        store_index = mocpy.project_on_second_dim(tmoc._store_index, stmoc._store_index)
         return cls(cls.__create_key, store_index)
 
     @staticmethod
