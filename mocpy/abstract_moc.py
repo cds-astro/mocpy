@@ -37,7 +37,7 @@ class AbstractMOC(serializer.IO):
         self._store_index = store_index
 
     def __repr__(self):
-        self.to_string(format="ascii", fold=80)
+        return self.to_string(format="ascii", fold=80)
 
     def __del__(self):
         """Erase MOC."""

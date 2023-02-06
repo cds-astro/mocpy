@@ -12,28 +12,25 @@ extern crate pyo3;
 
 use std::ops::Range;
 
-use ndarray::{Array, Array1, Array2};
-use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
+use ndarray::{Array, Array1};
+use numpy::{IntoPyArray, PyArray1, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::{
-  ToPyObject, types::{PyBytes, PyList}, exceptions::{PyIOError, PyValueError}, prelude::{pymodule, Py, PyModule, PyResult, Python}
+  ToPyObject,
+  prelude::{pymodule, Py, PyModule, PyResult, Python},
+  types::{PyBytes, PyList}, exceptions::{PyIOError, PyValueError}, 
 };
 
 use moc::{
-  elemset::range::{
-    HpxRanges,
-    uniq::HpxUniqRanges,
-  },
-  storage::u64idx::{
-    U64MocStore,
-  },
+  elemset::range::HpxRanges,
+  storage::u64idx::U64MocStore,
 };
 
 pub mod ndarray_fromto;
 pub mod coverage;
 pub mod spatial_coverage;
 
-use crate::ndarray_fromto::{array2_to_mocranges, ranges_to_array2, mocranges_to_array2, vec_range_to_array2};
+use self::ndarray_fromto::{array2_to_mocranges};
 
 
 fn get_spatial_coverages(py: Python, spatial_coverages: &PyList) -> PyResult<Vec<HpxRanges<u64>>> {
@@ -1577,65 +1574,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map(|c| 0.01 * c) // / 100 to transform a percentage in a fraction
       .map_err(PyValueError::new_err)
   }
-
-  /*
-  /// Convert HEALPix cell indices from the **uniq** to the **nested** format.
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The HEALPix cells defined in the **uniq** format.
-  #[pyfn(m)]
-  fn to_nested(py: Python, ranges: PyReadonlyArray1<u64>) -> Py<PyArray2<u64>> {
-    let ranges = ranges.as_array().to_owned();
-    let result: Array2<u64> = if ranges.is_empty() {
-      Array::zeros((0, 2))
-    } else {
-      let shape = (ranges.shape()[0], 1);
-      let start = ranges.into_shape(shape).unwrap();
-      let mut ranges: Vec<Range<u64>> = Vec::with_capacity(start.len());
-      for uniq in start {
-        ranges.push(uniq..uniq + 1)
-      }
-      ranges.sort_by(|a, b| a.start.cmp(&b.start));
-      let nested_coverage = spatial_coverage::to_nested(HpxUniqRanges::new_unchecked(ranges));
-      mocranges_to_array2(nested_coverage)
-    };
-
-    result.into_pyarray(py).to_owned()
-  }
-
-  /// Convert HEALPix cell indices from the **nested** to the **uniq** format.
-  ///
-  /// # Arguments
-  ///
-  /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
-  #[pyfn(m)]
-  fn to_uniq(py: Python, ranges: PyReadonlyArray2<u64>) -> Py<PyArray1<u64>> {
-    use moc::moc::range::RangeMOC;
-    use moc::moc::{RangeMOCIterator, RangeMOCIntoIterator};
-
-    let ranges = ranges.as_array().to_owned();
-
-    let result: Array1<u64> = if ranges.is_empty() {
-      Array::zeros((0, ))
-    } else {
-      let nested_coverage = coverage::create_hpx_ranges_from_py_unchecked(ranges);
-
-      // let uniq_coverage = nested_coverage.into_hpx_uniq();
-      // uniq_ranges_to_array1(uniq_coverage)
-
-      let mut v: Vec<u64> = RangeMOC::new(29, nested_coverage).into_range_moc_iter()
-        .cells()
-        .map(|cell| cell.uniq_hpx())
-        .collect();
-      v.sort_unstable();
-      v.into()
-    };
-
-    result.into_pyarray(py).to_owned()
-  }
-  */
-
+  
   /// Get the **uniq** HEALPix cell indices from the MOC of given index.
   ///
   /// # Arguments
