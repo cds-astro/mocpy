@@ -6,6 +6,6 @@ sphinx
 healpy
 sphinxcontrib-bibtex
 numpydoc
-lark-parser
+requests
 astropy-sphinx-theme
 astropy_healpix

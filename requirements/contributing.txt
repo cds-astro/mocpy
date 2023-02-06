@@ -7,7 +7,7 @@ astropy
 cdshealpix>=0.6.1
 matplotlib
 networkx>=2.5
-lark-parser
+requests
 
 # Optional packages
 astropy_healpix
