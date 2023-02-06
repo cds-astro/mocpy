@@ -16,33 +16,12 @@ use ndarray::Array;
 use numpy::{IntoPyArray, PyArray1, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::{
-  ToPyObject,
+  types::PyBytes,
   prelude::{pymodule, Py, PyModule, PyResult, Python},
-  types::{PyBytes, PyList}, exceptions::{PyIOError, PyValueError}, 
+  exceptions::{PyIOError, PyValueError}, 
 };
 
-use moc::{
-  elemset::range::HpxRanges,
-  storage::u64idx::U64MocStore,
-};
-
-pub mod ndarray_fromto;
-// pub mod coverage;
-
-use self::ndarray_fromto::{array2_to_mocranges};
-
-
-fn get_spatial_coverages(py: Python, spatial_coverages: &PyList) -> PyResult<Vec<HpxRanges<u64>>> {
-  const ERR_CAST: &str = "Cannot cast spatial coverages to Array2<u64>";
-  spatial_coverages.into_iter()
-    .map(|spatial_cov| spatial_cov.to_object(py)
-      .extract::<PyReadonlyArray2<u64>>(py)
-      .map_err(|_| String::from(ERR_CAST))
-      .map(|pyarray| array2_to_mocranges(pyarray.as_array().to_owned()))
-    )
-    .collect::<Result<Vec<HpxRanges<u64>>, String>>()
-    .map_err(PyValueError::new_err)
-}
+use moc::storage::u64idx::U64MocStore;
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -479,20 +458,23 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   #[pyfn(m)]
   fn from_time_ranges_spatial_coverages_approx(
-    py: Python,
     times_min: PyReadonlyArrayDyn<f64>,
     times_max: PyReadonlyArrayDyn<f64>,
     d1: u8,
-    spatial_coverages: &PyList,
+    spatial_coverages: PyReadonlyArrayDyn<usize>,
     d2: u8,
   ) -> PyResult<usize> {
     let times_min = times_min.as_array().to_owned().into_raw_vec();
     let times_max = times_max.as_array().to_owned().into_raw_vec();
-
-    let spatial_coverages: Vec<HpxRanges<u64>> = get_spatial_coverages(py, spatial_coverages)?;
-
+    if times_min.len() != times_max.len() {
+      return Err(PyValueError::new_err("`times_min` and `times_max` do not have the same size."));
+    }
+    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    if times_min.len() != spatial_coverage_indices.len() {
+      return Err(PyValueError::new_err("`times` and `spatial indices` do not have the same size."));
+    }
     U64MocStore::get_global_store()
-      .from_time_ranges_spatial_coverages_approx(times_min, times_max, d1, spatial_coverages, d2)
+      .from_time_ranges_spatial_coverages_in_store_approx(times_min, times_max, d1, spatial_coverage_indices, d2)
       .map_err(PyValueError::new_err)
   }
 
@@ -522,20 +504,24 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   #[pyfn(m)]
   fn from_time_ranges_spatial_coverages(
-    py: Python,
     times_min: PyReadonlyArrayDyn<u64>,
     times_max: PyReadonlyArrayDyn<u64>,
     d1: u8,
-    spatial_coverages: &PyList,
+    spatial_coverages: PyReadonlyArrayDyn<usize>,
     d2: u8,
   ) -> PyResult<usize> {
     let times_min = times_min.as_array().to_owned().into_raw_vec();
     let times_max = times_max.as_array().to_owned().into_raw_vec();
-
-    let spatial_coverages = get_spatial_coverages(py, spatial_coverages)?;
-      
+    if times_min.len() != times_max.len() {
+      return Err(PyValueError::new_err("`times_min` and `times_max` do not have the same size."));
+    }
+    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    if times_min.len() != spatial_coverage_indices.len() {
+      return Err(PyValueError::new_err("`times` and `spatial indices` do not have the same size."));
+    }
+    
     U64MocStore::get_global_store()
-      .from_time_ranges_spatial_coverages(times_min, times_max, d1, spatial_coverages, d2)
+      .from_time_ranges_spatial_coverages_in_store(times_min, times_max, d1, spatial_coverage_indices, d2)
       .map_err(PyValueError::new_err)
   }
 

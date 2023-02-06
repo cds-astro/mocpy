@@ -198,13 +198,12 @@ class STMOC(AbstractMOC):
         if times_start.ndim != 1:
             raise ValueError("Times and spatial coverages must be 1D arrays")
 
-        spatial_coverages = [
-            spatial_coverage._interval_set._intervals
-            for spatial_coverage in spatial_coverages
-        ]
+        spatial_coverages_indices = np.fromiter(
+            (arg._store_index for arg in spatial_coverages), dtype=np.uint
+        )
 
         index = mocpy.from_time_ranges_spatial_coverages(
-            times_start, times_end, time_depth, spatial_coverages
+            times_start, times_end, time_depth, spatial_coverages_indices
         )
         result = cls(cls.__create_key, index)
 
