@@ -14,7 +14,7 @@ jobs:
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
-       uses: actions/checkout@v2
+       uses: actions/checkout@v3
        with:
          ref: ${{ github.head_ref }}
      - name: "Install Rust"
@@ -31,10 +31,12 @@ jobs:
            "${PYBIN}/pip" install virtualenv
            "${PYBIN}/virtualenv" mocpy-env
            source mocpy-env/bin/activate
+           pip install --upgrade pip
            pip install maturin
+           maturin build --release --compatibility manylinux2014
            maturin develop --release
            pip install -r requirements/tests.txt
-           python -m pytest -v mocpy
+           python -m pytest -v -s python/mocpy
            pip freeze > requirements-uninstall.txt
            pip uninstall -r requirements-uninstall.txt -y
            deactivate
@@ -49,30 +51,32 @@ jobs:
     container: quay.io/pypa/manylinux2014_i686
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
-       uses: actions/checkout@v1
-     - name: "Intsall Rust"
+       uses: actions/checkout@v3
+     - name: "Set up QEMU"
+       id: qemu
+       uses: docker/setup-qemu-action@v1
+     - name: Install dependencies
        run: |
-         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host i686-unknown-linux-gnu -y
-     # Build wheels for all pre-installed python versions (in /opt/python/, see docker image comment)
-     # We use maturin: https://github.com/PyO3/maturin#pypy
-     - name: "Build and test wheels"
-       run: |
-         source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[78910]*/bin; do
-           echo "Loop on PYBIN: $PYBIN"
-           # With maturin develop, we have to use virtualenv
-           "${PYBIN}/pip" install virtualenv
-           "${PYBIN}/virtualenv" mocpy-env
-           source mocpy-env/bin/activate
-           pip install maturin
-           maturin develop --release 
-           pip install -r requirements/tests.txt
-           python -m pytest -v mocpy
-           pip freeze > requirements-uninstall.txt
-           pip uninstall -r requirements-uninstall.txt -y
-           deactivate
-           rm -r mocpy-env/
-         done 
+         docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+         ${{ env.img }} \
+         bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+           source $HOME/.cargo/env && \
+           for PYBIN in /opt/python/cp3[78910]*/bin; do
+             echo "Loop on PYBIN: $PYBIN"
+             "${PYBIN}/pip" install virtualenv
+             "${PYBIN}/virtualenv" mocpy-env
+             source mocpy-env/bin/activate
+             pip install --upgrade pip
+             pip install maturin
+             maturin build --release --compatibility manylinux2014
+             maturin develop --release 
+             pip install -r requirements/tests.txt
+             python -m pytest -v -s python/mocpy
+             pip freeze > requirements-uninstall.txt
+             pip uninstall -r requirements-uninstall.txt -y
+             deactivate
+             rm -r mocpy-env/
+           done'
 
   test-macos-wheels: 
     runs-on: macOS-latest
@@ -82,7 +86,7 @@ jobs:
     steps:
      # Checkout the project
      - name: "Checkout branch ${{ github.head_ref }}"
-       uses: actions/checkout@v2
+       uses: actions/checkout@v3
        with:
          ref: ${{ github.head_ref }}   
      # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
@@ -94,16 +98,19 @@ jobs:
      - name: "Build and test wheel for Python ${{ matrix.python-version }} on MacOS"
        run: |
          # Install, create and activate a python virtualenv
+         rustup target add aarch64-apple-darwin
          pip install virtualenv 
          virtualenv mocpy-env
          source mocpy-env/bin/activate
+         pip install --upgrade pip
          # Install and use maturin
-         pip install maturin 
+         pip install maturin
+         maturin build --release --universal2
          maturin develop --release
          # Install dependencies
          pip install -r requirements/tests.txt
          # Run tests
-         python -m pytest -v mocpy
+         python -m pytest -v -s python/mocpy
          # Clean
          pip freeze > requirements-uninstall.txt
          pip uninstall -r requirements-uninstall.txt -y
@@ -118,7 +125,7 @@ jobs:
     steps:
       # Checkout the project       
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: 
           ref: ${{ github.head_ref }}
       # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
@@ -140,7 +147,7 @@ jobs:
           # Install dependencies
           pip install -r requirements\tests.txt
           # Run tests
-          python -m pytest -v mocpy
+          python -m pytest -v -s python\mocpy
           deactivate
 
   # Perform tests with coverage, build the doc and run the tests in the doc (only for python 3.8 on ubuntu)
@@ -148,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: "Set up Python 3.6 on Ubuntu"
@@ -173,7 +180,7 @@ jobs:
           pip install -r requirements/tests.txt
           pip install pytest-cov
           # Run test with coverage
-          python -m pytest -v mocpy --cov-report=term --cov=mocpy
+          python -m pytest -v -s python/mocpy --cov-report=term --cov=mocpy
           # Install dependencies needed to build the docs
           pip install -r requirements/docs.txt
           # Compile the docs and run the test examples

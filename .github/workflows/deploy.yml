@@ -3,6 +3,9 @@ on:
   push:
     tags:
        - v*
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
   # Linux is specific: because of manylinux, we have to use a docker file 
   build-linux64-wheels:
@@ -13,7 +16,7 @@ jobs:
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
      - name: "Checkout the full project"
-       uses: actions/checkout@v1
+       uses: actions/checkout@v3
      - name: "Install Rust"
        run: |
          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -25,8 +28,11 @@ jobs:
        run: |
          source $HOME/.cargo/env
          for PYBIN in /opt/python/cp3[78910]*/bin; do
+           "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --sdist --skip-existing --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
          done
 
   # Linux is specific: because of manylinux, we have to use a docker file 
@@ -35,78 +41,131 @@ jobs:
     # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
-    container: quay.io/pypa/manylinux2014_i686
-    steps:
-     - name: "Checkout the full project"
-       uses: actions/checkout@v1
-     - name: "Install Rust"
-       run: |
-         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host i686-unknown-linux-gnu -y
-     - name: "Build and publish wheels"
-       shell: bash
-       env:
-        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-        MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
-       run: |
-         source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[678910]*/bin; do
-           "${PYBIN}/pip" install maturin
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --no-sdist --manylinux 2014 --username "$MATURIN_USERNAME"
-         done 
-
-  build-aarch64-wheels:
-    runs-on: ubuntu-latest
     env:
-      img: quay.io/pypa/manylinux2014_aarch64
       MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
       MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+      img: quay.io/pypa/manylinux2014_i686
     steps:
      - name: Checkout
-       uses: actions/checkout@v2
-     - name: Set up QEMU
+       uses: actions/checkout@v3
+     - name: "Set up QEMU"
        id: qemu
        uses: docker/setup-qemu-action@v1
      - name: Install dependencies
        run: |
-            docker run --rm \
-            -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
-            -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
-            -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-            ${{ env.img }} \
-            bash -exc 'curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-            source $HOME/.cargo/env && \
-            for PYBIN in /opt/python/cp3[78910]*/bin; do
-              "${PYBIN}/pip" install maturin
-              "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --manylinux 2014 --username "$MATURIN_USERNAME"
-            done'
+         docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+         -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
+         -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
+         ${{ env.img }} \
+         bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+           source $HOME/.cargo/env && \
+           for PYBIN in /opt/python/cp3[8910]*/bin; do
+             echo "Loop on PYBIN: $PYBIN"
+             "${PYBIN}/pip" install --upgrade pip
+             "${PYBIN}/pip" install maturin
+             "${PYBIN}/maturin" -V
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
+           done'
 
-  # Deploy for Windows and MoxOS 64 bits.
-  # If Windows 32 bits neede, check e.g. https://github.com/marketplace/actions/setup-msys2
-  build-macos-and-windows-wheels:      
+  build-aarch64-wheels:
+    runs-on: ubuntu-latest
+    env:
+      MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
+      MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+      img: quay.io/pypa/manylinux2014_aarch64
+    steps:
+     - name: Checkout
+       uses: actions/checkout@v3
+     - name: "Set up QEMU"
+       id: qemu
+       uses: docker/setup-qemu-action@v1
+     - name: Install dependencies
+       run: |
+         docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+         -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
+         -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
+         ${{ env.img }} \
+         bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host aarch64-unknown-linux-gnu -y && \
+           source $HOME/.cargo/env && \
+           for PYBIN in /opt/python/cp3[78910]*/bin; do
+             echo "Loop on PYBIN: $PYBIN"
+             "${PYBIN}/pip" install maturin
+             "${PYBIN}/maturin" -V
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+           done'
+
+  build-windows-wheels:
     runs-on: ${{ matrix.os }}
     strategy:
-      # Run all matrix jobs even if one is failling (default behaviour is to stop all jobs)
-      # To be changed when option --skip-existing will be available in maturin
-      fail-fast: false      
+      # See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategyfail-fast
+      # run all matrix jobs even if on is failling (default behaviour is to stop all jobs)
+      fail-fast: false
       matrix:
-        os: [windows-latest, macOS-latest]
+        os: [windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
-     - uses: actions/checkout@v2
+     # Checkout the project       
+     - uses: actions/checkout@v3
+     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
        uses: actions/setup-python@v2
        with:
          python-version: ${{ matrix.python-version }}
+     # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
      - name: Build and publish wheel for Python ${{ matrix.python-version }} on ${{ matrix.os }}
        # We do not use environement variable for user, because it seems that the way of providing it in the command
        # line is not the same for macos and for windows. We should create 2 different actions (see 
        # https://docs.github.com/en/actions/reference/encrypted-secrets )
        env:
+        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
         MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
        run: |
          #python3 -m pip install maturin
+         pip install --upgrade pip
          pip install maturin
-         maturin publish --interpreter python${{matrix.python_version}} --skip-existing --no-sdist --username fxpineau 
+         #maturin build --release --no-sdist
+         #maturin publish --no-sdist --skip-existing --username fxpineau 
+         maturin -V
+         rustc -vV
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing --username fxpineau
+
+  build-macos-wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategyfail-fast
+      # run all matrix jobs even if on is failling (default behaviour is to stop all jobs)
+      fail-fast: false
+      matrix:
+        os: [macOS-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+    steps:
+     # Checkout the project       
+     - uses: actions/checkout@v3
+     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
+     - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+       uses: actions/setup-python@v2
+       with:
+         python-version: ${{ matrix.python-version }}
+     # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
+     - name: Build and publish wheel for Python ${{ matrix.python-version }} on ${{ matrix.os }}
+       # We do not use environement variable for user, because it seems that the way of providing it in the command
+       # line is not the same for macos and for windows. We should create 2 different actions (see 
+       # https://docs.github.com/en/actions/reference/encrypted-secrets )
+       env:
+        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
+        MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+       run: |
+         #python3 -m pip install maturin
+         rustup target add aarch64-apple-darwin
+         pip install --upgrade pip
+         pip install maturin
+         maturin -V
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --universal2 --skip-existing  --username "$MATURIN_USERNAME"
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing  --username "$MATURIN_USERNAME"
+
+
 
   deploy-doc:
     runs-on: ubuntu-latest

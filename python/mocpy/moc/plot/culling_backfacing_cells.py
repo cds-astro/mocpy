@@ -82,7 +82,7 @@ def from_moc(depth_ipix_d, wcs):
             _, _, frontface_id = backface_culling(xp, yp)
 
             # Get the pixels which are backfacing the projection
-            backfacing_ipix = ipixels[~frontface_id] # backfacing
+            backfacing_ipix = ipixels[~frontface_id]  # backfacing
             frontface_ipix = ipixels[frontface_id]
 
             depth_str = str(depth)
@@ -98,9 +98,7 @@ def from_moc(depth_ipix_d, wcs):
 
         for ipix in too_large_ipix:
             child_ipix = ipix << 2
-            ipixels.extend(
-                [child_ipix, child_ipix + 1, child_ipix + 2, child_ipix + 3]
-            )
+            ipixels.extend([child_ipix, child_ipix + 1, child_ipix + 2, child_ipix + 3])
 
         ipixels = np.asarray(ipixels)
 

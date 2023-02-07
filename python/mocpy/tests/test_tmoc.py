@@ -3,7 +3,7 @@ import pytest
 from astropy.time import Time
 
 # from astropy.io import ascii
-from ..tmoc import *
+from ..tmoc import TimeMOC, times_to_microseconds, microseconds_to_times
 
 import numpy as np
 

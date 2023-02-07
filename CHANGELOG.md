@@ -5,7 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## To do list
-* [ ] add to_unqi in MOC
 * [ ] add to_times in TimeMOC
 * [ ] add to png (at list for S-MOC)
 * [ ] add F-MOC
@@ -18,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * ⚠️ BREAKING: Remove support of pre_v2 ST-MOC fits file writing (reading still ok)
 * Remove the internal class `IntervalSet`
 ### Added
+* `uniq_gen` and `uniq_zorder` added to `AbstractMOC`
+* `flatten` added to `AbstractMOC`
 * constructor `MOC.from_healpix_depth29_ranges`
 * parameter `values_are_densities` in `MOC.from_valued_healpix_cells`
 * parameter `complement` in `MOC.from_polygon`
@@ -25,13 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `contains_skycoords` and `contains_lonlat` to replace `contains`
 * add `fold` parameter into `save` and `to_string`
 ### Changed
+* ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
 * ⚠️ BREAKING: `STMOC.query_by_time` now takes in input a `TimeMOC`
 * ⚠️ BREAKING: `STMOC.query_by_space` now returns a `TimeMOC`
 * ⚠️ BREAKING: `TimeMOC.contains` does not take any longer a time resolution as input parameter
 * ⚠️ BREAKING: `TimeMOC.contains_with_timeresolution` as been added with the previous behaviour of  `TimeMOC.contains`
 * add `save` to `AbstractMOC` and remove from sub-classes
 * add `to_string` to `AbstractMOC` and remove from sub-classes
-* `uniq` and `from_uniq` removed from `IntervalSet` and added to `MOC`
+* `from_uniq` removed from `IntervalSet` and added to `MOC`
 * change the `contains` implementation to be much memory efficient, faster, and thus working at all HEALPix orders.
 * update `cdshealpix` and `moc` dependencies
 * ⚠️ BREAKING: `MOC.from_healpix_cells` 

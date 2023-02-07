@@ -1,6 +1,46 @@
-# Build a MOCPy-x.x.x.tar.gz containing sources (from maturin).
-# We do not use it so far but decided not to remove it.
+# Enrich using https://www.maturin.rs/metadata.html
+[project]
+name = "mocpy"
+# 3.6 is no longer maintained and no more supported by maturin
+requires-python = ">=3.7"
+# https://numpy.org/neps/nep-0029-deprecation_policy.html
+# https://docs.astropy.org/en/stable/changelog.html
+dependencies = [
+    "astropy", 
+    "matplotlib",     # Used in fill and border
+    "cdshealpix",     # Used in fill and border
+    "networkx>=2.5",  # Used in get_boundaries
+    "requests"        # Used to load FITS from URLs
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Rust",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Scientific/Engineering :: Astronomy"
+]
+
+[project.urls]
+repository = "https://github.com/cds-astro/mocpy"
+
+# Build a mocpy-x.x.x.tar.gz containing sources (from maturin).
 [build-system]
-requires = ["maturin>=0.10"]
+requires = ["maturin>=0.13"]
 build-backend = "maturin"
 
+[tool.maturin]
+# See https://github.com/PyO3/maturin#mixed-rustpython-projects
+# "to avoid the  a common ImportError pitfall"
+python-source = "python"
+# Bindings type
+bindings = "pyo3"
+# Strip the library for minimum file size
+strip = true
+# Build artifacts with the specified Cargo profile
+profile = "release"
+# Cargo manifest path
+# manifest-path = "Cargo.toml"
+# Require Cargo.lock and cache are up to date
+frozen = false
+# Require Cargo.lock is up to date
+locked = false

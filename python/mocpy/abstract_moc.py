@@ -19,7 +19,6 @@ __email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, ma
 class AbstractMOC(serializer.IO):
     """Basic functions for manipulating MOCs."""
 
-    __LARK_PARSER_STR = None
     _create_key = object()
 
     def __init__(self, create_key, create_sub_key, store_index):
@@ -389,12 +388,12 @@ class AbstractMOC(serializer.IO):
         """
         prev_store_index = self._store_index
         self._store_index = mocpy.extend(prev_store_index)
-        print(
-            "\n@@ Manually change"
-            + str(prev_store_index)
-            + " into "
-            + str(self._store_index)
-        )
+        # print(
+        #    "\n@@ Manually change"
+        #    + str(prev_store_index)
+        #    + " into "
+        #    + str(self._store_index)
+        # )
         # print("\n@@ Manually drop" + str(prev_store_index))
         # mocpy.drop(prev_store_index)
         return self
@@ -412,12 +411,12 @@ class AbstractMOC(serializer.IO):
         """
         prev_store_index = self._store_index
         self._store_index = mocpy.contract(prev_store_index)
-        print(
-            "\n@@ Manually change"
-            + str(prev_store_index)
-            + " into "
-            + str(self._store_index)
-        )
+        # print(
+        #    "\n@@ Manually change"
+        #    + str(prev_store_index)
+        #    + " into "
+        #    + str(self._store_index)
+        # )
         # print("\n@@ Manually drop" + str(prev_store_index))
         # mocpy.drop(prev_store_index)
         return self

@@ -2,9 +2,10 @@
 name = "MOCPy"
 version = "0.12.0"
 authors = [
-  "Matthieu Baumann <baumannmatthieu0@gmail.com>", 
-  "Thomas Boch <thomas.boch@astro.unistra.fr>", 
-  "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>"
+  "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
+  "Thomas Boch <thomas.boch@astro.unistra.fr>",
+  "Manon Marchand <manon.marchand@astro.unisrta.fr>",
+  "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>",
 ]
 edition = "2018"
 license = "BSD-3-Clause"
@@ -16,22 +17,6 @@ documentation = "https://cds-astro.github.io/mocpy"
 
 [badges]
 maintenance = { status = "actively-developed" }
-
-[package.metadata.maturin]
-# Python dependencies
-requires-dist=[
-  "astropy",
-  "cdshealpix",
-  "matplotlib",  # Used in fill and border
-  "networkx",    # Used in get_boundaries
-  "lark-parser", # Used in from_str for parsing the string given and create the MOC from it
-]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "License :: OSI Approved :: BSD License",
-  "Topic :: Scientific/Engineering :: Astronomy"
-]
 
 [lib]
 name = "mocpy"
