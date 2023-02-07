@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * ⚠️ BREAKING: Deserialisation of ST-MOCs from FITs HDU (reading/writting FITS file fully supported
   on the Rust side)
 * ⚠️ BREAKING: Remove support of pre_v2 ST-MOC fits file writing (reading still ok)
-* Remove the internal class `IntervalSet`
+* ⚠️ BREAKING: internal class `IntervalSet` removed
+* ⚠️ BREAKING: `utils` file removed
 ### Added
 * `uniq_gen` and `uniq_zorder` added to `AbstractMOC`
 * `flatten` added to `AbstractMOC`
@@ -26,9 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `contains_skycoords` and `contains_lonlat` to replace `contains`
 * add `fold` parameter into `save` and `to_string`
 ### Changed
+* ⚠️ BREAKING: `times_to_microseconds` and `microseconds_to_times` moved from `utils` to `tmoc`.
 * ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
 * ⚠️ BREAKING: `STMOC.query_by_time` now takes in input a `TimeMOC`
-* ⚠️ BREAKING: `STMOC.query_by_space` now returns a `TimeMOC`
+* ⚠️ BREAKING: `STMOC.query_by_space` now returns a `MOC`
 * ⚠️ BREAKING: `TimeMOC.contains` does not take any longer a time resolution as input parameter
 * ⚠️ BREAKING: `TimeMOC.contains_with_timeresolution` as been added with the previous behaviour of  `TimeMOC.contains`
 * add `save` to `AbstractMOC` and remove from sub-classes
