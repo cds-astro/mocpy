@@ -13,7 +13,7 @@ __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pi
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unisrta.fr, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 class AbstractMOC(serializer.IO):
@@ -179,18 +179,15 @@ class AbstractMOC(serializer.IO):
         """
         Return a `np.array` of the generic uniq indices of the cell in the MOC.
 
-        WARNING
-        -------
+        Warnings
+        --------
         This is not defined in the MOC standard and is not HEALPix scpecific.
 
-        Info
-        ----
-        It consists on the regular index with a sentinel bit placed at the immediate left
-        of the index's MSB. At a given depth, the sentinel bit is always put o the same bit.
-
-        Why?
-        ----
-        Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices.
+        Notes
+        -----
+        * It consists on the regular index with a sentinel bit placed at the immediate left
+          of the index's MSB. At a given depth, the sentinel bit is always put o the same bit.
+        * Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices.
         """
         mocpy.to_uniq_gen(self._store_index)
 
@@ -199,20 +196,17 @@ class AbstractMOC(serializer.IO):
         """
         Return a `np.array` of the zorder uniq indices of the cell in the MOC.
 
-        WARNING
-        -------
-        This is not defined in the MOC standard and is not HEALPix scpecific.
+        Warnings
+        --------
+        This is not defined in the MOC standard and is not HEALPix specific.
 
-        Info
-        ----
-        It consists on a regular index shifted on the left so that indices at all level have the same MSB.
-        Plus a sentinel bit placed at the immediate right of the LSB.
-
-        Why?
-        ----
-        Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices
-        AND because the natural ordering of such indices follow the same order as the zorder indices
-        (which is very useful for streaming processing, e.g. when dealing with multi-order maps)
+        Notes
+        -----
+        * It consists on a regular index shifted on the left so that indices at all level have the same MSB.
+          Plus a sentinel bit placed at the immediate right of the LSB.
+        * Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices
+          AND because the natural ordering of such indices follow the same order as the zorder indices
+          (which is very useful for streaming processing, e.g. when dealing with multi-order maps)
         """
         mocpy.to_uniq_zorder(self._store_index)
 

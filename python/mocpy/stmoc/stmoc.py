@@ -12,7 +12,7 @@ __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pi
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unisrta.fr, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 class STMOC(AbstractMOC):

@@ -4,7 +4,7 @@ version = "0.12.0"
 authors = [
   "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
   "Thomas Boch <thomas.boch@astro.unistra.fr>",
-  "Manon Marchand <manon.marchand@astro.unisrta.fr>",
+  "Manon Marchand <manon.marchand@astro.unistra.fr>",
   "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>",
 ]
 edition = "2018"

@@ -13,7 +13,7 @@ extern crate pyo3;
 use std::ops::Range;
 
 use ndarray::Array;
-use numpy::{IntoPyArray, PyArray1, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
+use numpy::{Ix3, IntoPyArray, PyArray1, PyArray3, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
 
 use pyo3::{
   types::PyBytes,
@@ -1599,6 +1599,19 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  // to_ranges
+  
+  #[pyfn(m)]
+  fn to_rgba(py: Python, index: usize, size_y: u16) -> PyResult<Py<PyArray3<u8>>> {
+    U64MocStore::get_global_store()
+      .to_image(index, size_y)
+      .map_err(PyValueError::new_err)
+      .and_then(|box_u8|  PyArray1::from_slice(py, &box_u8)
+        .reshape(Ix3((size_y << 1) as usize, size_y as usize, 4_usize))
+        .map(|a| a.to_owned())
+      )
+  }
+  
   /// Create a temporal coverage from a list of time values expressed in microseconds since
   /// jd origin.
   ///

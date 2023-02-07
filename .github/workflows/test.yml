@@ -91,7 +91,7 @@ jobs:
          ref: ${{ github.head_ref }}   
      # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
      - name: "Set up Python ${{ matrix.python-version }} on MacOS"
-       uses: actions/setup-python@v2
+       uses: actions/setup-python@v4
        with:
          python-version: ${{ matrix.python-version }}
      # Test python code
@@ -130,7 +130,7 @@ jobs:
           ref: ${{ github.head_ref }}
       # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
       - name: "Set up Python ${{ matrix.python-version }} on Windows"
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       # Test python code
@@ -159,7 +159,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: "Set up Python 3.6 on Ubuntu"
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
             # Test Rust code

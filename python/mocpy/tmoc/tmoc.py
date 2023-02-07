@@ -385,25 +385,6 @@ class TimeMOC(AbstractMOC):
         return super(TimeMOC, self_degraded).difference(moc_degraded)
 
     @property
-    def _fits_header_keywords(self):
-        return {
-            "PIXTYPE": "HEALPIX",
-            "ORDERING": "NUNIQ",
-            "TIMESYS": ("JD", "ref system JD BARYCENTRIC TT, 1 usec level 29"),
-            "MOCORDER": self.max_order,
-            "MOCTOOL": "MOCPy",
-        }
-
-    @property
-    def _fits_format(self):
-        depth = self.max_order
-        if depth <= 13:
-            fits_format = "1J"
-        else:
-            fits_format = "1K"
-        return fits_format
-
-    @property
     def total_duration(self):
         """
         Get the total duration covered by the temporal moc.

@@ -33,7 +33,7 @@ __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pi
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unisrta.fr, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 class MOC(AbstractMOC):
@@ -1336,3 +1336,10 @@ class MOC(AbstractMOC):
     def uniq_hpx(self):
         """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
         mocpy.to_uniq_hpx(self._store_index)
+
+    def display_preview(self):
+        """Displays a preview of the MOC."""
+        import matplotlib.pyplot as plt
+
+        plt.axis("off")
+        plt.imshow(mocpy.to_rgba(self._store_index, 300))
