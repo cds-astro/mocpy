@@ -47,9 +47,11 @@ locked = false
 
 [tool.ruff.per-file-ignores]
 # D104: Missing docstring in public package
+# D103: Missing docstring in public function
 # D100: Missing docstring in public module
 "__init__.py" = ["D104"]
 "notebooks/*.ipynb" = ["D100"]
+"python/mocpy/tests/*.py" = ["S101", "D103"] # use of "assert" detected
 
 [tool.ruff]
 fix = true
