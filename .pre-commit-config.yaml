@@ -2,44 +2,45 @@ default_language_version:
   # force all unspecified python hooks to run python3.8
   python: python3.8
 repos:
-    - repo: https://github.com/psf/black
-      rev: 22.10.0
-      hooks:
-        - id: black
-    - repo: https://github.com/pycqa/flake8
-      rev: 6.0.0
-      hooks:
-        - id: flake8
-          exclude: (mocpy/version.py|docs/conf.py|^mocpy/moc/plot|^mocpy/tests/|mocpy/__init__.py|mocpy/moc/boundaries.py)
-          additional_dependencies: [flake8-docstrings] 
-          # ---------------------------------------
-          # Other interesting dependencies 
-          # ---------------------------------------
-          # darglint: strictier docstring checks 
-          # flake8-pytest-style to avoid mistakes in the tests
-          # flake8-spellcheck could be useful to check our english in comments and doc
-          # ---------------------------------------
-          # Errors we don't handle
-          # ---------------------------------------
-          # W503 Line break occurred before a binary operator not compatible with black
-          # E501 line length already managed by black
-          # E203 white space before : rule that conflicts with black 
-          # D100/D1O1/D104/D105/D107 missing docstring in public module/class/package/magic method/__init__ 
-          #remove the above exceptions when feeling like writing
-          # D401 : first line should be in imperative mood
-          args: ['--ignore=W503,E501,E203,D100,D101,D104,D105,D107,D401']
-    - repo: https://github.com/nbQA-dev/nbQA
-      rev: 1.5.3
-      hooks:
-      -   id: nbqa-black
-          name: nbqa-black
-          description: "Run 'black' on a Jupyter Notebook"
-          entry: nbqa black
-          language: python
-          require_serial: true
-          types: [jupyter]
-          additional_dependencies: [black]
-      -   id: nbqa-flake8
-          name: nbqa-flake8
-          description: "Run flake8 on a Jupyter notebook"
-          args: ['--max-line-length=89', '--ignore=W503,W291,E501']
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: detect-private-key
+        description: "Check accidental private keys in code"
+      - id: requirements-txt-fixer
+        description: "Sort requirements alphabetically"
+      - id: trailing-whitespace
+        exclude_types:
+          - "svg"
+        description: "Remove trailing whitespaces"
+  # For Sphinx
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: 'v1.10.0'
+    hooks:
+     - id: rst-backticks
+  # Run Black on files
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+    - id: black
+  # Fast linter to replace flake8
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.243'
+    hooks:
+     - id: ruff
+       fail_fast: true
+  # Same tools but for Jupyter notebooks
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.6.1
+    hooks:
+      - id: nbqa-black
+        name: nbqa-black
+        description: "Run 'black' on a Jupyter Notebook"
+        language: python
+        require_serial: true
+      - id: nbqa-ruff
+        name: nbqa-ruff
+        description: "Run ruff on a Jupyter notebook"
+        fail_fast: true
+      - id: nbqa-isort

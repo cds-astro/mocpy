@@ -2,27 +2,24 @@
 # for people wishing to contribute to MOCPy.
 # See https://cds-astro.github.io/mocpy/contribute.html for more details.
 
-# Mandatory packages for MOCPy to work 
+# Mandatory packages for MOCPy to work
 astropy
-cdshealpix>=0.6.1
-matplotlib
-networkx>=2.5
-requests
+astropy-sphinx-theme
 
 # Optional packages
 astropy_healpix
+cdshealpix>=0.6.1
+matplotlib
+networkx>=2.5
+numpydoc
+
+# For pre-commits
+pre-commit==2.20.* # to set hooks
+
+# Pytest extension package enabling test coverage
+pytest-cov
+requests
 
 # Packages for updating the docs
 sphinx
 sphinxcontrib-bibtex
-numpydoc
-astropy-sphinx-theme
-
-# Pytest extension package enabling test coverage
-pytest-cov
-
-# For pre-commits
-pre-commit==2.20.* # to set hooks
-black==22.10.* # python formater
-flake8==6.0.* # python linter
-nbqa==1.5.* # to run black and flake8 in notebooks too
