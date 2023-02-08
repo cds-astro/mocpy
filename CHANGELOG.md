@@ -6,7 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## To do list
 * [ ] add to_times in TimeMOC
-* [ ] add to png (at list for S-MOC)
 * [ ] add F-MOC
 * [ ] add FS-MOC / TS-MOC
 
@@ -38,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `from_uniq` removed from `IntervalSet` and added to `MOC`
 * change the `contains` implementation to be much memory efficient, faster, and thus working at all HEALPix orders.
 * update `cdshealpix` and `moc` dependencies
-* ⚠️ BREAKING: `MOC.from_healpix_cells` 
+* ⚠️ BREAKING: `MOC.from_healpix_cells`
     + now requires the `max_depth`, the depth of the MOC we want to create
     + optional parameter `fully_covered` removed since it was not used
 * ⚠️ BREAKING: in `MOC.from_valued_healpix_cells`, the depth of the deepest cell has to be provided
@@ -76,13 +75,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0]
 ### Changed
-* Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]` 
+* Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]`
 * Add `from_time_ranges_in_microsec_since_jd_origin` in `temporal_coverage.rs`
 * Time operations now precise to the microseconds, see:
     + `utils.times_to_microseconds`
     + `utils.microseconds_to_times`
-* Add several options to `moc.from_valued_healpix_cells` 
-* Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring 
+* Add several options to `moc.from_valued_healpix_cells`
+* Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring
   MOC2.0 compatibility).
 * Improve performance and some operations (like intersection and union)
 * Improve `to_uniq` performances (x5 according to a bench in pure Rust)

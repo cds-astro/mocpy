@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function
-
 from io import BytesIO
 from urllib.parse import urlencode
 
@@ -84,8 +81,10 @@ class MOC(AbstractMOC):
         assert (
             create_key == MOC.__create_key
         ), "S-MOC instantiation is only allowed by class or super-class methods"
-        super(MOC, self).__init__(
-            AbstractMOC._create_key, MOC.__create_key, store_index
+        super().__init__(
+            AbstractMOC._create_key,
+            MOC.__create_key,
+            store_index,
         )
 
     @property
@@ -178,7 +177,9 @@ class MOC(AbstractMOC):
         contains_lonlat
         """
         return self.contains_lonlat(
-            lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, keep_inside=keep_inside
+            lon=skycoords.icrs.ra,
+            lat=skycoords.icrs.dec,
+            keep_inside=keep_inside,
         )
 
     def contains(self, lon, lat, keep_inside=True):
@@ -465,7 +466,9 @@ class MOC(AbstractMOC):
         max_norder = min(max_norder, max_depth_px)
 
         moc = MOC.from_lonlat(
-            lon=skycrd.icrs.ra, lat=skycrd.icrs.dec, max_norder=max_norder
+            lon=skycrd.icrs.ra,
+            lat=skycrd.icrs.dec,
+            max_norder=max_norder,
         )
         return moc
 
@@ -520,7 +523,7 @@ class MOC(AbstractMOC):
         nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
         if nside not in nside_possible_values:
             raise ValueError(
-                "Bad value for nside. Must be in {0}".format(nside_possible_values)
+                f"Bad value for nside. Must be in {nside_possible_values}",
             )
 
         result = cls.from_ivorn("ivo://CDS/" + table_id, nside)
@@ -549,7 +552,7 @@ class MOC(AbstractMOC):
             % (
                 MOC.MOC_SERVER_ROOT_URL,
                 urlencode({"ivorn": ivorn, "get": "moc", "order": int(np.log2(nside))}),
-            )
+            ),
         )
 
     @classmethod
@@ -588,7 +591,9 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         return cls.from_lonlat(
-            lon=skycoords.icrs.ra, lat=skycoords.icrs.dec, max_norder=max_norder
+            lon=skycoords.icrs.ra,
+            lat=skycoords.icrs.dec,
+            max_norder=max_norder,
         )
 
     @classmethod
@@ -863,7 +868,13 @@ class MOC(AbstractMOC):
 
     @classmethod
     def from_ring(
-        cls, lon, lat, internal_radius, external_radius, max_depth, delta_depth=2
+        cls,
+        lon,
+        lat,
+        internal_radius,
+        external_radius,
+        max_depth,
+        delta_depth=2,
     ):
         """
         Creates a MOC from a ring.
@@ -941,7 +952,9 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         return cls.from_polygon(
-            lon=skycoord.icrs.ra, lat=skycoord.icrs.dec, max_depth=np.uint8(max_depth)
+            lon=skycoord.icrs.ra,
+            lat=skycoord.icrs.dec,
+            max_depth=np.uint8(max_depth),
         )
 
     @classmethod
@@ -1022,7 +1035,9 @@ class MOC(AbstractMOC):
             The MOC
         """
         index = mocpy.from_healpix_cells(
-            np.uint8(max_depth), depth.astype(np.uint8), ipix.astype(np.uint64)
+            np.uint8(max_depth),
+            depth.astype(np.uint8),
+            ipix.astype(np.uint64),
         )
         return cls(cls.__create_key, index)
 
@@ -1117,10 +1132,7 @@ class MOC(AbstractMOC):
     @property
     def _fits_format(self):
         depth = self.max_order
-        if depth <= 13:
-            fits_format = "1J"
-        else:
-            fits_format = "1K"
+        fits_format = "1J" if depth <= 13 else "1K"
         return fits_format
 
     @property
@@ -1204,10 +1216,9 @@ class MOC(AbstractMOC):
         from matplotlib.colors import LinearSegmentedColormap
 
         plot_order = 8
-        if self.max_order > plot_order:
-            plotted_moc = self.degrade_to_order(plot_order)
-        else:
-            plotted_moc = self
+        plotted_moc = (
+            self.degrade_to_order(plot_order) if self.max_order > plot_order else self
+        )
 
         num_pixels_map = 1024
         delta = 2.0 * np.pi / num_pixels_map
@@ -1220,7 +1231,7 @@ class MOC(AbstractMOC):
         if frame and not isinstance(frame, BaseCoordinateFrame):
             raise ValueError(
                 "Only Galactic/ICRS coordinate systems are supported."
-                "Please set `coord` to either 'C' or 'G'."
+                "Please set `coord` to either 'C' or 'G'.",
             )
 
         pix_map = hp.lonlat_to_healpix(lon_rad * u.rad, lat_rad * u.rad)
@@ -1255,7 +1266,7 @@ class MOC(AbstractMOC):
                 "240°",
                 "210°",
                 "180°",
-            ]
+            ],
         )
 
         color_map = LinearSegmentedColormap.from_list("w2r", ["#eeeeee", "#aa0000"])
@@ -1337,9 +1348,30 @@ class MOC(AbstractMOC):
         """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
         mocpy.to_uniq_hpx(self._store_index)
 
-    def display_preview(self):
-        """Displays a preview of the MOC."""
+    def to_rgba(self, y_size=300):
+        """
+        Create a matplotlib compatible RGBA preview of the given MOC.
+
+        Parameters
+        ----------
+        y_size : the number of pixels along the y-axis
+
+        Returns
+        -------
+        array : A (2 * y_size, y_size, 4) array of 0-255 int values.
+        """
+        return mocpy.to_rgba(self._store_index, y_size)
+
+    def display_preview(self, y_size=300):
+        """
+        Displays a preview of the MOC (calling internally the `to_rgba` method).
+
+        Parameters
+        ----------
+        y_size : the number of pixels along the y-axis
+        """
         import matplotlib.pyplot as plt
 
         plt.axis("off")
-        plt.imshow(mocpy.to_rgba(self._store_index, 300))
+        plt.imshow(mocpy.to_rgba(self._store_index, y_size))
+        plt.show()

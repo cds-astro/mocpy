@@ -18,7 +18,7 @@ use numpy::{Ix3, IntoPyArray, PyArray1, PyArray3, PyArrayDyn, PyReadonlyArray1, 
 use pyo3::{
   types::PyBytes,
   prelude::{pymodule, Py, PyModule, PyResult, Python},
-  exceptions::{PyIOError, PyValueError}, 
+  exceptions::{PyIOError, PyValueError},
 };
 
 use moc::storage::u64idx::U64MocStore;
@@ -87,8 +87,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .from_microsec_ranges_since_jd0(depth, RangeIt { it })
       .map_err(PyValueError::new_err)
   }
-  
-  
+
+
   /// Create a 1D spatial coverage from a list of
   /// longitudes and latitudes
   ///
@@ -172,7 +172,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       )
       .map_err(PyValueError::new_err)
   }
-  
+
   #[pyfn(m)]
   pub fn from_elliptical_cone(
     lon_deg: f64,
@@ -201,7 +201,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .from_polygon(lon.zip(lat), complement, depth)
       .map_err(PyValueError::new_err)
   }
-  
+
   /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
   ///
   /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
@@ -219,7 +219,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * `strict`: (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
   /// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
   /// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
-  /// 
+  ///
   #[pyfn(m)]
   fn from_valued_hpx_cells(
     max_depth: u8,
@@ -519,7 +519,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     if times_min.len() != spatial_coverage_indices.len() {
       return Err(PyValueError::new_err("`times` and `spatial indices` do not have the same size."));
     }
-    
+
     U64MocStore::get_global_store()
       .from_time_ranges_spatial_coverages_in_store(times_min, times_max, d1, spatial_coverage_indices, d2)
       .map_err(PyValueError::new_err)
@@ -560,7 +560,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .time_fold(tmoc_index, stmoc_index)
       .map_err(PyValueError::new_err)
   }
-  
+
 
 
   /// Deserialize a Time-Space coverage from a FITS file (compatible with the MOC v2.0 standard).
@@ -590,7 +590,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .load_stmoc_from_fits_buff(raw_bytes)
       .map_err(PyIOError::new_err)
   }
-  
+
   /// Deserialize a Time-Space coverage from an ASCII file (compatible with the MOC v2.0 standard).
   ///
   /// # Arguments
@@ -850,7 +850,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .symmetric_difference(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
-  
+
   /// Perform the difference between multiple coverages of same type.
   ///
   /// # Arguments
@@ -876,7 +876,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .difference(id_left, id_right)
       .map_err(PyIOError::new_err)
   }
-  
+
   /// Check the equality between two coverages
   ///
   /// # Arguments
@@ -1169,7 +1169,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .to_json_file(index, path, Some(fold))
       .map_err(PyIOError::new_err)
   }
-  
+
   /// Serialize a MOC into a JSON string.
   ///
   /// # Arguments
@@ -1218,25 +1218,25 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// In this non-flexible approach, we expect the BINTABLE extension to contains:
   ///
   /// ```bash
-  /// XTENSION= 'BINTABLE'           / binary table extension                         
-  /// BITPIX  =                    8 / array data type                                
-  /// NAXIS   =                    2 / number of array dimensions 
-  /// AXIS1  =                    ?? / length of dimension 1                          
-  /// NAXIS2  =                   ?? / length of dimension 2                          
-  /// PCOUNT  =                    0 / number of group parameters                     
-  /// GCOUNT  =                    1 / number of groups                               
+  /// XTENSION= 'BINTABLE'           / binary table extension
+  /// BITPIX  =                    8 / array data type
+  /// NAXIS   =                    2 / number of array dimensions
+  /// AXIS1  =                    ?? / length of dimension 1
+  /// NAXIS2  =                   ?? / length of dimension 2
+  /// PCOUNT  =                    0 / number of group parameters
+  /// GCOUNT  =                    1 / number of groups
   /// TFIELDS =                   xx / number of table fields
-  /// TTYPE1  = 'UNIQ    '                                                            
-  /// TFORM1  = 'K       '                                                            
-  /// TTYPE2  = 'PROBDENSITY'                                                         
-  /// TFORM2  = 'D       '                                                            
-  /// TUNIT2  = 'sr-1    ' 
+  /// TTYPE1  = 'UNIQ    '
+  /// TFORM1  = 'K       '
+  /// TTYPE2  = 'PROBDENSITY'
+  /// TFORM2  = 'D       '
+  /// TUNIT2  = 'sr-1    '
   /// ...
-  /// MOC     =                    T                                                  
-  /// PIXTYPE = 'HEALPIX '           / HEALPIX pixelisation                           
-  /// ORDERING= 'NUNIQ   '           / Pixel ordering scheme: RING, NESTED, or NUNIQ  
-  /// COORDSYS= 'C       '           / Ecliptic, Galactic or Celestial (equatorial)   
-  /// MOCORDER=                   xx / MOC resolution (best order) 
+  /// MOC     =                    T
+  /// PIXTYPE = 'HEALPIX '           / HEALPIX pixelisation
+  /// ORDERING= 'NUNIQ   '           / Pixel ordering scheme: RING, NESTED, or NUNIQ
+  /// COORDSYS= 'C       '           / Ecliptic, Galactic or Celestial (equatorial)
+  /// MOCORDER=                   xx / MOC resolution (best order)
   /// ...
   /// END
   /// ```
@@ -1268,7 +1268,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .load_smoc_from_fits_file(path)
       .map_err(PyIOError::new_err)
   }
-  
+
   #[pyfn(m)]
   fn spatial_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
@@ -1392,7 +1392,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .load_tmoc_from_json(json.as_str())
       .map_err(PyIOError::new_err)
   }
-  
+
   /// Expand the spatial coverage adding an external edge of max_depth pixels
   /// and return the index of the newly created moc.
   ///
@@ -1546,7 +1546,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  
+
   /// Compute the coverage fraction of a MOC
   ///
   /// # Arguments
@@ -1559,7 +1559,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map(|c| 0.01 * c) // / 100 to transform a percentage in a fraction
       .map_err(PyValueError::new_err)
   }
-  
+
   /// Get the **uniq** HEALPix cell indices from the MOC of given index.
   ///
   /// # Arguments
@@ -1600,18 +1600,21 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   }
 
   // to_ranges
-  
+
   #[pyfn(m)]
   fn to_rgba(py: Python, index: usize, size_y: u16) -> PyResult<Py<PyArray3<u8>>> {
     U64MocStore::get_global_store()
       .to_image(index, size_y)
       .map_err(PyValueError::new_err)
-      .and_then(|box_u8|  PyArray1::from_slice(py, &box_u8)
-        .reshape(Ix3((size_y << 1) as usize, size_y as usize, 4_usize))
-        .map(|a| a.to_owned())
+      .and_then(|box_u8|  {
+        PyArray1::from_slice(py, &box_u8)
+          .reshape(Ix3(size_y as usize,(size_y << 1) as usize, 4_usize))
+          .map(|a| a.to_owned())
+
+        }
       )
   }
-  
+
   /// Create a temporal coverage from a list of time values expressed in microseconds since
   /// jd origin.
   ///
@@ -1633,8 +1636,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .from_microsec_since_jd0(depth, times)
       .map_err(PyValueError::new_err)
   }
-  
-  
+
+
   /// Create a temporal coverage from a list of time ranges expressed in jd.
   ///
   /// # Arguments
@@ -1763,7 +1766,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     let depths_it = depths.as_array().into_iter().cloned();
     let pixels_it = pixels.as_array().into_iter().cloned();
-    
+
     U64MocStore::get_global_store()
       .from_hpx_cells(depth, depths_it.zip(pixels_it), None)
       .map_err(PyValueError::new_err)
