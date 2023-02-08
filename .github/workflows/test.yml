@@ -180,7 +180,7 @@ jobs:
           pip install -r requirements/tests.txt
           pip install pytest-cov
           # Run test with coverage
-          python -m pytest -v -s python/mocpy --cov-report=term --cov=mocpy
+          python -m pytest -v -s python/mocpy --cov-report=term --cov=python/mocpy
           # Install dependencies needed to build the docs
           pip install -r requirements/docs.txt
           # Compile the docs and run the test examples
