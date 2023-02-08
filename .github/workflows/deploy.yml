@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Linux is specific: because of manylinux, we have to use a docker file 
+  # Linux is specific: because of manylinux, we have to use a docker file
   build-linux64-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
@@ -35,7 +35,7 @@ jobs:
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
          done
 
-  # Linux is specific: because of manylinux, we have to use a docker file 
+  # Linux is specific: because of manylinux, we have to use a docker file
   build-linux32-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
@@ -106,9 +106,9 @@ jobs:
         os: [windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
-     # Checkout the project       
+     # Checkout the project
      - uses: actions/checkout@v3
-     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
+     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
        uses: actions/setup-python@v4
        with:
@@ -116,7 +116,7 @@ jobs:
      # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
      - name: Build and publish wheel for Python ${{ matrix.python-version }} on ${{ matrix.os }}
        # We do not use environement variable for user, because it seems that the way of providing it in the command
-       # line is not the same for macos and for windows. We should create 2 different actions (see 
+       # line is not the same for macos and for windows. We should create 2 different actions (see
        # https://docs.github.com/en/actions/reference/encrypted-secrets )
        env:
         MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
@@ -126,7 +126,7 @@ jobs:
          pip install --upgrade pip
          pip install maturin
          #maturin build --release --no-sdist
-         #maturin publish --no-sdist --skip-existing --username fxpineau 
+         #maturin publish --no-sdist --skip-existing --username fxpineau
          maturin -V
          rustc -vV
          maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing --username fxpineau
@@ -141,9 +141,9 @@ jobs:
         os: [macOS-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
-     # Checkout the project       
+     # Checkout the project
      - uses: actions/checkout@v3
-     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python  
+     #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
        uses: actions/setup-python@v4
        with:
@@ -151,7 +151,7 @@ jobs:
      # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
      - name: Build and publish wheel for Python ${{ matrix.python-version }} on ${{ matrix.os }}
        # We do not use environement variable for user, because it seems that the way of providing it in the command
-       # line is not the same for macos and for windows. We should create 2 different actions (see 
+       # line is not the same for macos and for windows. We should create 2 different actions (see
        # https://docs.github.com/en/actions/reference/encrypted-secrets )
        env:
         MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
@@ -174,14 +174,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      - name: "Set up Python 3.6 on Ubuntu"
+      - name: "Set up Python on Ubuntu"
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - name: "Build doc"
         run: |
           # Build the doc
-          # - Install virtualenv     
+          # - Install virtualenv
           pip install virtualenv
           # - Create and activate a new virtualenv
           virtualenv mocpy-env
@@ -203,4 +203,4 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/_build/html/
-        
+
