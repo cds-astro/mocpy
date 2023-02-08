@@ -107,4 +107,10 @@ Building the documentation
     make html
     cd ..
 
+- Other API examples found in the documentation can be run with::
+
+    cd docs
+    make doctest
+    cd ..
+
 You will find the html index file in the :file:`docs/_build/html` folder.
