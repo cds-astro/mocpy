@@ -87,7 +87,7 @@ class Boundaries:
 
         # Phase 1: Retrieve the ipixels located at the border of
         # this connexe MOC component
-        ipixels = ipixels.astype(np.int)
+        ipixels = ipixels.astype(int)
         hp = HEALPix(nside=(1 << depth), order="nested", frame=ICRS())
         neighbours = hp.neighbours(ipixels)[[0, 2, 4, 6], :]
         ipixels = ipixels.astype(np.uint64)
