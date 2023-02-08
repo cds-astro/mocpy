@@ -91,6 +91,10 @@ class TimeMOC(AbstractMOC):
         depth = mocpy.get_tmoc_depth(self._store_index)
         return np.uint8(depth)
 
+    def to_time_ranges(self):
+        """Returns the time ranges this TimeMOC contains."""
+        return microseconds_to_times(mocpy.to_ranges(self.store_index))
+
     def degrade_to_order(self, new_order):
         """
         Degrades the MOC instance to a new, less precise, MOC.

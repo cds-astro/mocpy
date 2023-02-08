@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * ⚠️ BREAKING: internal class `IntervalSet` removed
 * ⚠️ BREAKING: `utils` file removed
 ### Added
+* `TimeMOC.to_time_ranges` to get time ranges from a T-MOC
+* `MOC.to_rgba` and `MOC.dsiplay_preview` for a quick S-MOC allsky view 
 * `uniq_gen` and `uniq_zorder` added to `AbstractMOC`
 * `flatten` added to `AbstractMOC`
 * constructor `MOC.from_healpix_depth29_ranges`

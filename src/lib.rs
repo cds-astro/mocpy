@@ -13,7 +13,12 @@ extern crate pyo3;
 use std::ops::Range;
 
 use ndarray::Array;
-use numpy::{Ix3, IntoPyArray, PyArray1, PyArray3, PyArrayDyn, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn};
+use numpy::{
+  Ix2, Ix3,
+  IntoPyArray,
+  PyArray1, PyArray2, PyArray3, PyArrayDyn,
+  PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn
+};
 
 use pyo3::{
   types::PyBytes,
@@ -22,6 +27,7 @@ use pyo3::{
 };
 
 use moc::storage::u64idx::U64MocStore;
+use moc::utils;
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -972,10 +978,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     let it_time = times.as_array().into_iter().cloned();
     let it_lon = lon.as_array().into_iter().cloned();
     let it_lat = lat.as_array().into_iter().cloned();
+    // TODO: check all shapes and return an array of same shape!! (see other methods with reshape!)
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
       .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
-      // .map(|vec_bool| Array1::<bool>::from(vec_bool).into_pyarray(py).to_owned())
       .map(|vec_bool| PyArray1::<bool>::from_vec(py, vec_bool).to_owned())
       .map_err(PyIOError::new_err)
   }
@@ -1599,18 +1605,29 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  // to_ranges
+  #[pyfn(m)]
+  fn to_ranges(py: Python, index: usize) -> PyResult<Py<PyArray2<u64>>> {
+    U64MocStore::get_global_store()
+      .to_ranges(index)
+      .map_err(PyValueError::new_err)
+      .and_then(|mut v| {
+        let len = v.len();
+        // We could have used Array::from_shape_vec; to be checked: no clone in both cases
+        PyArray1::from_vec(py, utils::flatten(&mut v))
+          .reshape(Ix2(len, 2_usize))
+          .map(|a| a.to_owned())
+      })
+  }
 
   #[pyfn(m)]
   fn to_rgba(py: Python, index: usize, size_y: u16) -> PyResult<Py<PyArray3<u8>>> {
     U64MocStore::get_global_store()
       .to_image(index, size_y)
       .map_err(PyValueError::new_err)
-      .and_then(|box_u8|  {
+      .and_then(|box_u8| {
         PyArray1::from_slice(py, &box_u8)
           .reshape(Ix3(size_y as usize,(size_y << 1) as usize, 4_usize))
           .map(|a| a.to_owned())
-
         }
       )
   }
