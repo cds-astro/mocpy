@@ -97,6 +97,28 @@
                 "@type": "Organization",
                 "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
             }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-7123-773X",
+            "givenName": "Matthieu",
+            "familyName": "Baumann",
+            "email": "matthieu.baumann@unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-5818-2781",
+            "givenName": "Thomas",
+            "familyName": "Boch",
+            "email": "thomas.boch@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
         }
     ]
 }
