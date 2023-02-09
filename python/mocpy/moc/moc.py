@@ -1374,3 +1374,12 @@ class MOC(AbstractMOC):
         plt.axis("off")
         plt.imshow(mocpy.to_rgba(self._store_index, y_size))
         plt.show()
+
+    def barycenter(self):
+        """Returns the Barycenter of the MOC"""
+        lonlat = mocpy.get_barycenter(self._store_index)
+        return SkyCoord(lonlat[0], lonlat[1], unit="rad")
+    
+    def largest_distance_from_coo_to_vertices(self, coo):
+        """Retrusn the largest distance between the given coordinates and vertices of the MOC cells."""
+        return mocpy.get_largest_distance_from_coo_to_moc_vertices(self._store_index, coo.ra.radian, coo.dec.radian)

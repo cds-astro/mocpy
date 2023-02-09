@@ -28,6 +28,7 @@ use pyo3::{
 
 use moc::storage::u64idx::U64MocStore;
 use moc::utils;
+use pyo3::types::PyTuple;
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -1487,6 +1488,22 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  #[pyfn(m)]
+  fn get_barycenter(py: Python, index: usize) -> PyResult<Py<PyTuple>> {
+    U64MocStore::get_global_store()
+      .barycenter(index)
+      .map(|(lon, lat)| PyTuple::new(py, vec![lon, lat]).into())
+      .map_err(PyValueError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn get_largest_distance_from_coo_to_moc_vertices(index: usize, lon_rad: f64, lat_rad: f64) -> PyResult<f64> {
+    U64MocStore::get_global_store()
+      .largest_distance_from_coo_to_moc_vertices(index, lon_rad, lat_rad)
+      .map_err(PyValueError::new_err)
+  }
+  
+  
   /// Get the depth of a spatial coverage.
   ///
   /// # Arguments
