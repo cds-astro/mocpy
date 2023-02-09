@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - codemeta.json
+  workflow_dispatch:
 
 jobs:
   build:
