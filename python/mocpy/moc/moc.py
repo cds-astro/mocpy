@@ -1313,7 +1313,6 @@ class MOC(AbstractMOC):
     @classmethod
     def from_fits_raw_bytes(cls, raw_bytes):
         """Load MOC from raw bytes of a FITS file."""
-        print(raw_bytes)
         index = mocpy.spatial_moc_from_fits_raw_bytes(raw_bytes)
         return cls(cls.__create_key, index)
 

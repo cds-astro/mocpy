@@ -466,7 +466,6 @@ class AbstractMOC(serializer.IO):
 
             response = requests.get(path_or_url, headers={"User-Agent": "MOCPy"})
             if response:
-                print(response.content)
                 raw_bytes = BytesIO()
                 raw_bytes.write(response.content)
                 raw_bytes.seek(0)
