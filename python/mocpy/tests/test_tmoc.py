@@ -2,7 +2,7 @@ import pytest
 
 from astropy.time import Time
 
-# from astropy.io import ascii
+from astropy.io import ascii
 from ..tmoc import TimeMOC, times_to_microseconds, microseconds_to_times
 
 import numpy as np
@@ -99,50 +99,32 @@ def test_single_range_time_tmoc():
     assert tmoc.max_order == 61
 
 
-""" TEST REMOVE BECAUSE OF THE TMoc.fits HEADER WHICH IS NOT OK (NOT HEALPIX!!):
-XTENSION= 'BINTABLE'           / binary table extension
-BITPIX  =                    8 / array data type
-NAXIS   =                    2 / number of array dimensions
-NAXIS1  =                    8 / length of dimension 1
-NAXIS2  =                91097 / length of dimension 2
-PCOUNT  =                    0 / number of group parameters
-GCOUNT  =                    1 / number of groups
-TFIELDS =                    1 / number of table fields
-TTYPE1  = 'UNIQ    '
-TFORM1  = '1K      '
-PIXTYPE = 'HEALPIX '
-ORDERING= 'NUNIQ   '
-TIMESYS = 'JD      '           / ref system JD BARYCENTRIC TT, 1 usec level 29
-MOCORDER=                   27
-MOCTOOL = 'MOCPy   '
-END
 def test_tmoc_from_time_ranges():
-    ""Test tmocs built from time ranges.
+    """"Test tmocs built from time ranges.
 
     Assert a correct tmoc loaded from a fits file is equal to the
     tmoc built from a CSV file containing a list of time intervals.
-    ""
-    tmoc = TimeMOC.from_fits("resources/TMOC/HST_SDSSg/TMoc.fits")
-    # Old T-MOC so we have to load it with the Old method.
-    # tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
-    print(tmoc)
+    """
+
+    tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
 
     # Load HST_SDSSg from a CSV file
     data = ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
     tmoc2 = TimeMOC.from_time_ranges_approx(
         Time(data["t_min"], format="mjd", scale="tdb"),
         Time(data["t_max"], format="mjd", scale="tdb"),
-        delta_t=TimeMOC.order_to_time_resolution(61),
+        delta_t=TimeMOC.order_to_time_resolution(57),
     )
-    print(tmoc2)
 
+    assert tmoc.max_order == tmoc2.max_order
+    assert tmoc.min_time == tmoc2.min_time
+    assert tmoc.max_time == tmoc2.max_time
     assert tmoc == tmoc2
 
     with pytest.raises(AssertionError):
         TimeMOC.from_time_ranges(
             Time([], format="jd", scale="tdb"), Time([3], format="jd", scale="tdb")
         )
-"""
 
 
 def test_tmoc_from_single_time_range():

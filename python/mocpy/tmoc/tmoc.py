@@ -434,7 +434,7 @@ class TimeMOC(AbstractMOC):
             time of the first observation
 
         """
-        return microseconds_to_times(self.min_index())
+        return microseconds_to_times(np.atleast_1d(self.min_index))
 
     @property
     def max_time(self):
@@ -447,7 +447,7 @@ class TimeMOC(AbstractMOC):
             time of the last observation
 
         """
-        return microseconds_to_times(self.max_index())
+        return microseconds_to_times(np.atleast_1d(self.max_index))
 
     def contains(self, times, keep_inside=True):
         """
