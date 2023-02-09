@@ -253,12 +253,6 @@ class STMOC(AbstractMOC):
         result : `~mocpy.tmoc.TimeMOC`
             The time ranges observing in the ``spatial_coverage``
         """
-        # Time ranges in µsec
-        # time_ranges = mocpy.project_on_first_dim(
-        #    spatial_coverage._interval_set._intervals, self._store_index
-        # )
-        # return Time(time_ranges / 86400000000, format='jd', scale='tdb')
-        # return utils.microseconds_to_times(time_ranges)
         return TimeMOC.from_stmoc_space_fold(smoc, self)
 
     def contains(self, times, lon, lat, inside=True):
