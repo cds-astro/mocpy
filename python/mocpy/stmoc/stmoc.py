@@ -175,8 +175,6 @@ class STMOC(AbstractMOC):
             List of `mocpy.MOC` spatial coverage objects.
         time_depth : int, optional
             Time depth. By default, the time resolution chosen is 1µs.
-        spatial_depth : int, optional
-            Spatial depth. By default, the space resolution chosen is 393.2μas.
 
         Returns
         -------
@@ -198,6 +196,7 @@ class STMOC(AbstractMOC):
         if times_start.ndim != 1:
             raise ValueError("Times and spatial coverages must be 1D arrays")
 
+        
         spatial_coverages_indices = np.fromiter(
             (arg._store_index for arg in spatial_coverages), dtype=np.uint
         )
