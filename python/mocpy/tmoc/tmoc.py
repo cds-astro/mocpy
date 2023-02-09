@@ -93,7 +93,7 @@ class TimeMOC(AbstractMOC):
 
     def to_time_ranges(self):
         """Returns the time ranges this TimeMOC contains."""
-        return microseconds_to_times(mocpy.to_ranges(self.store_index))
+        return microseconds_to_times(mocpy.to_ranges(self._store_index))
 
     def degrade_to_order(self, new_order):
         """
@@ -611,9 +611,9 @@ class TimeMOC(AbstractMOC):
         )
 
         y = np.zeros(size)
-        for (s_time_us, e_time_us) in plotted_moc._interval_set._intervals:
-            s_index = int((microseconds_to_times(s_time_us).jd - min_jd_time) / delta)
-            e_index = int((microseconds_to_times(e_time_us).jd - min_jd_time) / delta)
+        for (s_time_us, e_time_us) in plotted_moc.to_time_ranges():
+            s_index = int((s_time_us.jd - min_jd_time) / delta)
+            e_index = int((e_time_us.jd - min_jd_time) / delta)
             y[s_index : (e_index + 1)] = 1.0
 
         # hack in case of full time mocs.
