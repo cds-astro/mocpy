@@ -458,7 +458,7 @@ class AbstractMOC(serializer.IO):
         """
         if isinstance(path_or_url, BytesIO):
             bytes = path_or_url.read()
-            return cls.from_fits_raw_bytes(bytes)
+            return cls._from_fits_raw_bytes(bytes)
         elif os.path.isfile(path_or_url):
             return cls.load(path_or_url, format="fits")
         else:

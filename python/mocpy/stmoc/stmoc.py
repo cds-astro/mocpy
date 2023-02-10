@@ -299,29 +299,6 @@ class STMOC(AbstractMOC):
         return result
 
     @classmethod
-    def from_fits(cls, filename):
-        """
-        Load a STMOC from a FITS file, using the astropy.io fits reader.
-
-        Raises
-        ------
-        DeprecationWarning
-            This is deprecated and will be soon removed.
-            Use `load(cls, path, format='fits')` instead.
-
-        Parameters
-        ----------
-        filename : str
-            The path to the FITS file.
-
-        Returns
-        -------
-        result : `~mocpy.moc.STMOC`
-            The resulting STMOC.
-        """
-        return cls.load(filename, "fits")
-
-    @classmethod
     def load(cls, path, format="fits"):
         """
         Load the Spatial MOC from a file.
@@ -352,7 +329,7 @@ class STMOC(AbstractMOC):
             raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
-    def from_fits_raw_bytes(cls, raw_bytes):
+    def _from_fits_raw_bytes(cls, raw_bytes):
         """Load MOC from raw bytes of a FITS file."""
         index = mocpy.stmoc_from_fits_raw_bytes(raw_bytes)
         return cls(cls.__create_key, index)
