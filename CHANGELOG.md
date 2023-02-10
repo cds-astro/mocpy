@@ -42,8 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * ⚠️ BREAKING: `MOC.from_healpix_cells`
     + now requires the `max_depth`, the depth of the MOC we want to create
     + optional parameter `fully_covered` removed since it was not used
-* ⚠️ BREAKING: in `MOC.from_valued_healpix_cells`, the depth of the deepest cell has to be provided
-  and is no more computed automatically; the user possibly have then to degrade manually the resolution
+* ⚠️ BREAKING: in `MOC.from_valued_healpix_cells`, the user now have to degrade manually the resolution
+  if max_depth < deepest cell depth.
 
 
 ## [0.11.0]

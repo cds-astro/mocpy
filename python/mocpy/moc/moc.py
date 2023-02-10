@@ -687,7 +687,7 @@ class MOC(AbstractMOC):
         cls,
         uniq,
         values,
-        max_depth,
+        max_depth=None,
         values_are_densities=False,
         cumul_from=0.0,
         cumul_to=1.0,
@@ -716,8 +716,11 @@ class MOC(AbstractMOC):
             HEALPix cell indices written in uniq. dtype must be np.uint64
         values : `numpy.ndarray`
             Value associated with each ``uniq`` cells. dtype must be np.float64
-        max_depth : int,
-            The max depth of the MOC, must be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
+        max_depth : int, optional
+            The max depth of the MOC, should be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
+            Warnings:
+             1 - the depth of the returned MOC will be at least as deep as the smallest HEALPix cell found in ``uniq``.
+             2 - contrary to MOCPy before v0.12, the user has to degrade the MOC if `max_depth` < smallest HEALPix cell depth.
         values_are_densities: tell whether the values depends on the cell area or not
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
@@ -737,8 +740,9 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        # Create the MOC at the max_depth equals to the smallest cell
-        # found in the uniq array
+        if max_depth is None:
+            max_depth = 0
+        
         index = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth),
             uniq.astype(np.uint64),
@@ -1011,23 +1015,23 @@ class MOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
-    def from_healpix_cells(cls, max_depth, ipix, depth):
+    def from_healpix_cells(cls, ipix, depth, max_depth):
         """
         Creates a MOC from a set of HEALPix cells at various depths.
 
         Parameters
         ----------
-        max_depth : int, The resolution of the MOC
         ipix : `numpy.ndarray`
             HEALPix cell indices in the NESTED notation. dtype must be np.uint64
         depth : `numpy.ndarray`
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
             dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.
+        max_depth : int, The resolution of the MOC (degrades on the fly input cells if necessary)
 
         Raises
         ------
         IndexError
-            When `ipix`, `depth` and `fully_covered` do not have the same shape
+            When `ipix` and `depth` do not have the same shape
 
         Returns
         -------
