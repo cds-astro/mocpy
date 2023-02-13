@@ -1192,7 +1192,7 @@ class MOC(AbstractMOC):
 
         return table
 
-    def get_wcs(self, fig, coordsys="icrs", projection="AIT", rotation=Angle(0, u.radian)):
+    def wcs(self, fig, coordsys="icrs", projection="AIT", rotation=Angle(0, u.radian)):
         """
         Get a wcs that can be given to matplotlib to plot the MOC.
 
@@ -1225,7 +1225,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> wcs = moc.get_wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
+        >>> wcs = moc.wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
         >>> ax = fig.add_subplot(1, 1, 1, projection=wcs)
         >>> # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
         >>> moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")

@@ -10,7 +10,7 @@ moc = MOC.from_fits(filename)
 # Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
-wcs = moc.get_wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
+wcs = moc.wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
 ax = fig.add_subplot(1, 1, 1, projection=wcs)
 # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
 moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
