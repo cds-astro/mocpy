@@ -1,0 +1,124 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/BSD-3-Clause-Attribution",
+    "codeRepository": "https://github.com/cds-astro/mocpy",
+    "contIntegration": "https://github.com/cds-astro/mocpy/tree/master/.github/workflows",
+    "dateCreated": "2015-05-28",
+    "datePublished": "2015-05-28",
+    "dateModified": "2022-02-04",
+    "issueTracker": "https://github.com/cds-astro/mocpy/issues",
+    "name": "MOCpy",
+    "version": "0.11.0",
+    "softwareVersion": "0.11.0",
+    "description": "Python library to easily create and manipulate MOCs (Multi-Order Coverage maps)",
+    "applicationCategory": ["Astronomy", "Science"],
+    "funding": "ESCAPE 824064, ASTERICS 653477",
+    "readme": "https://github.com/cds-astro/mocpy/blob/master/README.rst",
+
+    "funder": {
+        "@type": "Organization",
+        "name": "European Commission Framework Programme Horizon 2020 Research and Innovation action"
+    },
+    "keywords": [
+        "Astronomy",
+        "MOC",
+        "VirtualObservatory",
+        "VO"
+    ],
+    "programmingLanguage": [
+        "Python 3", "Rust"
+    ],
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "MacOS"
+    ],
+    "softwareRequirements": [
+        "https://github.com/cds-astro/mocpy/blob/master/requirements/environment.yml"
+    ],
+    "installUrl": "https://pypi.org/project/mocpy/",
+    "isAccessibleForFree": "True",
+    "relatedLink": ["https://ivoa.net/documents/MOC/20220727/index.html", "https://cds-astro.github.io/mocpy/"],
+    "author": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-7123-773X",
+            "givenName": "Matthieu",
+            "familyName": "Baumann",
+            "email": "matthieu.baumann@unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-5818-2781",
+            "givenName": "Thomas",
+            "familyName": "Boch",
+            "email": "thomas.boch@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/ 0000-0001-5713-0998",
+            "givenName": "Marchand",
+            "familyName": "Manon",
+            "email": "manon.marchand@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-2335-4499",
+            "givenName": "François-Xavier",
+            "familyName": "Pineau",
+            "email": "francois-xavier.pineau@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        }
+    ],
+    "maintainer": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-2335-4499",
+            "givenName": "François-Xavier",
+            "familyName": "Pineau",
+            "email": "francois-xavier.pineau@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-7123-773X",
+            "givenName": "Matthieu",
+            "familyName": "Baumann",
+            "email": "matthieu.baumann@unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-5818-2781",
+            "givenName": "Thomas",
+            "familyName": "Boch",
+            "email": "thomas.boch@astro.unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        }
+    ]
+}
