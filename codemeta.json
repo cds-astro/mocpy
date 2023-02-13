@@ -9,8 +9,8 @@
     "dateModified": "2022-02-04",
     "issueTracker": "https://github.com/cds-astro/mocpy/issues",
     "name": "MOCpy",
-    "version": "0.11.0",
-    "softwareVersion": "0.11.0",
+    "version": "0.12.0",
+    "softwareVersion": "0.12.0",
     "description": "Python library to easily create and manipulate MOCs (Multi-Order Coverage maps)",
     "applicationCategory": ["Astronomy", "Science"],
     "funding": "ESCAPE 824064, ASTERICS 653477",
@@ -20,6 +20,7 @@
         "@type": "Organization",
         "name": "European Commission Framework Programme Horizon 2020 Research and Innovation action"
     },
+    "releaseNotes": "https://github.com/cds-astro/mocpy/blob/master/CHANGELOG.md",
     "keywords": [
         "Astronomy",
         "MOC",
