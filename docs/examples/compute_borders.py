@@ -5,7 +5,7 @@ from astropy.coordinates import Angle, SkyCoord
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
-from mocpy import MOC, World2ScreenMPL
+from mocpy import MOC, WCS
 
 moc = MOC.from_fits("polygon_moc.fits")
 skycoords = moc.get_boundaries()
@@ -13,7 +13,7 @@ skycoords = moc.get_boundaries()
 # Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(10, 10))
 # Define a astropy WCS easily
-with World2ScreenMPL(
+with WCS(
     fig,
     fov=20 * u.deg,
     center=SkyCoord(10, 5, unit="deg", frame="icrs"),

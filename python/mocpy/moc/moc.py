@@ -25,6 +25,7 @@ from .. import mocpy
 from ..abstract_moc import AbstractMOC
 from .boundaries import Boundaries
 from .plot import border, fill
+from .plot.wcs import WCS
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -292,7 +293,7 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, World2ScreenMPL
+        >>> from mocpy import MOC, WCS
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -302,7 +303,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with World2ScreenMPL(fig,
+        >>> with WCS(fig,
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",
@@ -339,7 +340,7 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, World2ScreenMPL
+        >>> from mocpy import MOC, WCS
         >>> from astropy.coordinates import Angle, SkyCoord
         >>> import astropy.units as u
         >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
@@ -349,7 +350,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> fig = plt.figure(111, figsize=(15, 15))
         >>> # Define a WCS as a context
-        >>> with World2ScreenMPL(fig,
+        >>> with WCS(fig,
         ...         fov=50 * u.deg,
         ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
         ...         coordsys="icrs",
@@ -633,7 +634,7 @@ class MOC(AbstractMOC):
         asc=False,
         strict=True,
         no_split=True,
-        reverse_decent=False,
+        reverse_decent=False
     ):
         """
         Creates a MOC from a mutli-order map FITS file.
@@ -694,7 +695,7 @@ class MOC(AbstractMOC):
         asc=False,
         strict=True,
         no_split=True,
-        reverse_decent=False,
+        reverse_decent=False
     ):
         """
         Creates a MOC from a list of uniq associated with values.
@@ -719,9 +720,9 @@ class MOC(AbstractMOC):
         max_depth : int, optional
             The max depth of the MOC, should be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
             Warnings:
-             1 - the depth of the returned MOC will be at least as deep as the smallest HEALPix cell found in ``uniq``.
-             2 - contrary to MOCPy before v0.12, the user has to degrade the MOC if `max_depth` < smallest HEALPix cell depth.
-        values_are_densities: tell whether the values depends on the cell area or not
+            1 - the depth of the returned MOC will be at least as deep as the smallest HEALPix cell found in ``uniq``.
+            2 - contrary to MOCPy before v0.12, the user has to degrade the MOC if `max_depth` < smallest HEALPix cell depth.
+            values_are_densities: tell whether the values depends on the cell area or not
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
@@ -1191,6 +1192,55 @@ class MOC(AbstractMOC):
 
         return table
 
+    def get_wcs(self, fig, coordsys="icrs", projection="AIT", rotation=Angle(0, u.radian)):
+        """
+        Get a wcs that can be given to matplotlib to plot the MOC.
+
+        Parameters
+        ----------
+        fig : `~matplotlib.pyplot.figure`
+            The matplotlib figure used for plotting the MOC.
+        coordsys : str, optional
+            Coordinate system. Default to "icrs". Must be in ["icrs", "galactic"].
+        projection : str, optional
+            World base -> Image base projection type. See http://docs.astropy.org/en/stable/wcs/#supported-projections for
+            the projections currently supported in astropy. Default to Aitoff.
+        rotation : `~astropy.coordinates.Angle`, optional
+            The angle of rotation. Default to no rotation.
+
+        Returns
+        -------
+        wcs : `~astropy.wcs.WCS`
+            The WCS that can be passed to mocpy.MOC.fill/border.
+
+        Examples
+        --------
+        >>> from mocpy import MOC, WCS
+        >>> from astropy.coordinates import Angle, SkyCoord
+        >>> import astropy.units as u
+        >>> # Load a MOC
+        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
+        >>> moc = MOC.from_fits(filename)
+        >>> # Plot the MOC using matplotlib
+        >>> import matplotlib.pyplot as plt
+        >>> fig = plt.figure(111, figsize=(15, 15))
+        >>> # Define a WCS as a context
+        >>> wcs = moc.get_wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
+        >>> ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        >>> # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
+        >>> moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
+        >>> moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
+        >>> plt.xlabel('ra')
+        >>> plt.ylabel('dec')
+        >>> plt.grid(color="black", linestyle="dotted")
+        """
+        # The center is set to the barycenter of all its HEALPix cells
+        center = self.barycenter()
+        # The fov is computed from the largest distance between the center and any cells of it
+        fov = 2 * self.largest_distance_from_coo_to_vertices(center)
+
+        return WCS(fig, fov=fov, center=center, coordsys=coordsys, rotation=rotation, projection=projection).w
+
     def plot(self, title="MOC", frame=None):
         """
         Plot the MOC object using a mollweide projection.
@@ -1386,4 +1436,5 @@ class MOC(AbstractMOC):
     
     def largest_distance_from_coo_to_vertices(self, coo):
         """Retrusn the largest distance between the given coordinates and vertices of the MOC cells."""
-        return mocpy.get_largest_distance_from_coo_to_moc_vertices(self._store_index, coo.ra.radian, coo.dec.radian)
+        angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(self._store_index, coo.ra.rad, coo.dec.rad)
+        return angle * u.rad

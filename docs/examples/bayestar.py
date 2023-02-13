@@ -5,7 +5,7 @@ import numpy as np
 from astropy.coordinates import Angle, SkyCoord
 from astropy.io import fits
 
-from mocpy import MOC, World2ScreenMPL
+from mocpy import MOC, WCS
 
 fits_image_filename = "./../../resources/bayestar.multiorder.fits"
 
@@ -37,7 +37,7 @@ mocs = [MOC.from_valued_healpix_cells(uniq, prob, max_order, cumul_to=c) for c i
 
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
-with World2ScreenMPL(
+with WCS(
     fig,
     fov=50 * u.deg,
     center=SkyCoord(315, 15, unit="deg", frame="icrs"),

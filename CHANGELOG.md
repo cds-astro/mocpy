@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `+`, `|`, `-`, `&`, `~` operators redefinition for `union`, `union`, `difference`, `intersect` and `complement` respectively.
 * `contains_skycoords` and `contains_lonlat` to replace `contains`
 * add `fold` parameter into `save` and `to_string`
+* add `MOC.barycenter` and `MOC.largest_distance_from_coo_to_vertices` of a moc
+* add `MOC.get_wcs` giving an astropy WCS centered around a the barycenter of moc
 ### Changed
 * ⚠️ BREAKING: `times_to_microseconds` and `microseconds_to_times` moved from `utils` to `tmoc`.
 * ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
@@ -44,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     + optional parameter `fully_covered` removed since it was not used
 * ⚠️ BREAKING: in `MOC.from_valued_healpix_cells`, the user now have to degrade manually the resolution
   if max_depth < deepest cell depth.
+* ⚠️ BREAKING: `World2ScreenMPL` has been renamed `WCS`
 
 
 ## [0.11.0]

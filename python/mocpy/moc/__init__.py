@@ -1,4 +1,4 @@
 from .moc import MOC
-from .plot.wcs import World2ScreenMPL
+from .plot.wcs import WCS
 
-__all__ = ["MOC", "World2ScreenMPL"]
+__all__ = ["MOC", "WCS"]

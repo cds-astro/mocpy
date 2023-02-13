@@ -2,8 +2,8 @@ from matplotlib.pyplot import figure, axis
 
 
 def set(ax, wcs):
-    # get the plot dimension the same way as in World2ScreenMPL constructor
-    # This allows to pass an astropy wcs instead of a World2ScreenMPL when plotting
+    # get the plot dimension the same way as in WCS constructor
+    # This allows to pass an astropy wcs instead of a WCS when plotting
     # From issue: https://github.com/cds-astro/mocpy/issues/69
     width_px = wcs.wcs.crpix[0] * 2.0
     height_px = wcs.wcs.crpix[1] * 2.0

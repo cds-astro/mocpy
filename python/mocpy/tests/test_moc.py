@@ -10,7 +10,7 @@ from astropy.io import fits
 
 import cdshealpix
 
-from ..moc import MOC, World2ScreenMPL
+from ..moc import MOC, WCS
 
 
 @pytest.fixture()
@@ -435,7 +435,7 @@ def test_mpl_fill():
     import matplotlib.pyplot as plt
 
     fig = plt.figure(111, figsize=(10, 10))
-    with World2ScreenMPL(
+    with WCS(
         fig,
         fov=50 * u.deg,
         center=SkyCoord(0, 20, unit="deg", frame="icrs"),
@@ -454,7 +454,7 @@ def test_mpl_border():
     import matplotlib.pyplot as plt
 
     fig = plt.figure(111, figsize=(10, 10))
-    with World2ScreenMPL(
+    with WCS(
         fig,
         fov=50 * u.deg,
         center=SkyCoord(0, 20, unit="deg", frame="icrs"),
