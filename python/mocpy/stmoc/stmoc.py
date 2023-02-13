@@ -198,7 +198,7 @@ class STMOC(AbstractMOC):
 
         
         spatial_coverages_indices = np.fromiter(
-            (arg._store_index for arg in spatial_coverages), dtype=np.uint
+            (arg._store_index for arg in spatial_coverages), dtype=np.uint64
         )
 
         index = mocpy.from_time_ranges_spatial_coverages(

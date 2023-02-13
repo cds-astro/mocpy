@@ -246,7 +246,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint),
+                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
             )
             index = mocpy.multi_intersection(store_indices)
         else:
@@ -273,7 +273,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint),
+                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
             )
             index = mocpy.multi_union(store_indices)
         else:
@@ -300,7 +300,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint),
+                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
         else:
@@ -329,7 +329,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint),
+                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
             )
             index_union = mocpy.multi_union(store_indices)
             index = mocpy.difference(self._store_index, index_union)
