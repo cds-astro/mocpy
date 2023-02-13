@@ -5,7 +5,7 @@ ipykernel
 regions
 requests
 cdshealpix>=0.6.1
-lark-parser
+requests
 astropy
 astropy_healpix
 ipywidgets

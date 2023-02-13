@@ -2,7 +2,7 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 from astropy.coordinates import Angle, SkyCoord
 
-from mocpy import MOC, World2ScreenMPL
+from mocpy import MOC, WCS
 
 # Load Galex and SDSS
 sdss = MOC.from_fits("./../../resources/P-SDSS9-r.fits")
@@ -13,7 +13,7 @@ union = sdss + galex
 # Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(10, 10))
 # Define a astropy WCS easily
-with World2ScreenMPL(
+with WCS(
     fig,
     fov=160 * u.deg,
     center=SkyCoord(0, 0, unit="deg", frame="icrs"),

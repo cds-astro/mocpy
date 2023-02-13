@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## To do list
+* [ ] add to_times in TimeMOC
+* [ ] add F-MOC
+* [ ] add FS-MOC / TS-MOC
+
+## [0.12.0]
+#### Removed
+* ⚠️ BREAKING: Deserialisation of ST-MOCs from FITs HDU (reading/writting FITS file fully supported
+  on the Rust side)
+* ⚠️ BREAKING: Remove support of pre_v2 ST-MOC fits file writing (reading still ok)
+* ⚠️ BREAKING: internal class `IntervalSet` removed
+* ⚠️ BREAKING: `utils` file removed
+### Added
+* add `hdu_index` optional parameter in `MOC.from_fits_images`
+* `TimeMOC.to_time_ranges` to get time ranges from a T-MOC
+* `MOC.to_rgba` and `MOC.dsiplay_preview` for a quick S-MOC allsky view
+* `uniq_gen` and `uniq_zorder` added to `AbstractMOC`
+* `flatten` added to `AbstractMOC`
+* constructor `MOC.from_healpix_depth29_ranges`
+* parameter `values_are_densities` in `MOC.from_valued_healpix_cells`
+* parameter `complement` in `MOC.from_polygon`
+* `+`, `|`, `-`, `&`, `~` operators redefinition for `union`, `union`, `difference`, `intersect` and `complement` respectively.
+* `contains_skycoords` and `contains_lonlat` to replace `contains`
+* add `fold` parameter into `save` and `to_string`
+* add `MOC.barycenter` and `MOC.largest_distance_from_coo_to_vertices` of a moc
+* add `MOC.wcs` giving an astropy WCS centered around a the barycenter of moc
+### Changed
+* ⚠️ BREAKING: `times_to_microseconds` and `microseconds_to_times` moved from `utils` to `tmoc`.
+* ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
+* ⚠️ BREAKING: `STMOC.query_by_time` now takes in input a `TimeMOC`
+* ⚠️ BREAKING: `STMOC.query_by_space` now returns a `MOC`
+* ⚠️ BREAKING: `TimeMOC.contains` does not take any longer a time resolution as input parameter
+* ⚠️ BREAKING: `TimeMOC.contains_with_timeresolution` as been added with the previous behaviour of  `TimeMOC.contains`
+* add `save` to `AbstractMOC` and remove from sub-classes
+* add `to_string` to `AbstractMOC` and remove from sub-classes
+* `from_uniq` removed from `IntervalSet` and added to `MOC`
+* change the `contains` implementation to be much memory efficient, faster, and thus working at all HEALPix orders.
+* update `cdshealpix` and `moc` dependencies
+* ⚠️ BREAKING: `MOC.from_healpix_cells`
+    + now requires the `max_depth`, the depth of the MOC we want to create
+    + optional parameter `fully_covered` removed since it was not used
+* ⚠️ BREAKING: in `MOC.from_valued_healpix_cells`, the user now have to degrade manually the resolution
+  if max_depth < deepest cell depth.
+* ⚠️ BREAKING: `World2ScreenMPL` has been renamed `WCS`
+
+
 ## [0.11.0]
 ### Added
 * Add `MOC.from_ring`
@@ -35,13 +81,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0]
 ### Changed
-* Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]` 
+* Add compatibility with MOC2.0: Time depth in now in `[0, 61]` instead of `[0, 29]`
 * Add `from_time_ranges_in_microsec_since_jd_origin` in `temporal_coverage.rs`
 * Time operations now precise to the microseconds, see:
     + `utils.times_to_microseconds`
     + `utils.microseconds_to_times`
-* Add several options to `moc.from_valued_healpix_cells` 
-* Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring 
+* Add several options to `moc.from_valued_healpix_cells`
+* Add `load` and `save` methods for serialization/deserialization in pure Rust (ensuring
   MOC2.0 compatibility).
 * Improve performance and some operations (like intersection and union)
 * Improve `to_uniq` performances (x5 according to a bench in pure Rust)

@@ -91,11 +91,14 @@ Once your environment is set up and activated you can run the tests
 
 - To run the automated tests go to the repo folder and type::
 
-    python -m pytest -v mocpy
+    python -m pytest -v python/mocpy
 
 - To run the tests with coverage report locally::
 
-    python -m pytest -v mocpy --cov-report=term --cov=mocpy mocpy
+    python -m pytest -v python/mocpy --cov-report=term --cov=python/mocpy
+
+You also can have a html output of the coverage. For that set `--cov-report=html`,
+this will generate an `htmlcov` folder where all the static html files can be found.
 
 
 Building the documentation
