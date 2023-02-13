@@ -52,7 +52,8 @@ jobs:
     # CentOS 7 32 bits Docker Hub image that 'build-linux32-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
-    container: quay.io/pypa/manylinux2014_i686
+    env:
+      img: quay.io/pypa/manylinux2014_i686
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
        uses: actions/checkout@v3
