@@ -1,5 +1,5 @@
 name: notebooks-mocpy
-on: [push, pull_request, workflow_dispatch]
+on: workflow_dispatch
 jobs:  
   # Run the notebooks. This add more examples to test the code with.
   # This workflow should not block the deployment pipeline. 
