@@ -21,6 +21,11 @@ use moc::{
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
+  #[pyfn(m)]
+  fn usize_n_bits() -> u8 {
+    (std::mem::size_of::<usize>() as u8) << 3
+  }
+  
   /// Make a new spatial coverage from ranges (at max order) and a depth
   ///
   ///

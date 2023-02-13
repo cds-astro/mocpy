@@ -63,6 +63,16 @@ class AbstractMOC(serializer.IO):
 
         return mocpy.check_eq(self._store_index, other._store_index)
 
+    @staticmethod
+    def store_index_dtype():
+        usize_n_bits = mocpy.usize_n_bits()
+        if usize_n_bits == 64:
+            return np.uint64
+        elif usize_n_bits == 32:
+            return np.uint32
+        else:
+            raise ValueError("Unsupported store index usize type!")
+
     def __add__(self, moc):
         """
         Operator + definition.
@@ -246,7 +256,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
+                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
             )
             index = mocpy.multi_intersection(store_indices)
         else:
@@ -273,7 +283,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
+                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
             )
             index = mocpy.multi_union(store_indices)
         else:
@@ -300,7 +310,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
+                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
         else:
@@ -329,7 +339,7 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=np.uint64),
+                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
             )
             index_union = mocpy.multi_union(store_indices)
             index = mocpy.difference(self._store_index, index_union)
