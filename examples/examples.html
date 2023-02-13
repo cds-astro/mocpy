@@ -1,19 +1,19 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Examples &#8212; mocpy 0.10.1 documentation</title>
+    <title>Examples &#8212; mocpy 0.12.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.10.1 documentation</a>
+	<a href="../index.html">mocpy 0.12.0 documentation</a>
 	 &#187;
       </li>
       
@@ -73,17 +73,17 @@
           <div class="body" role="main">
             
   <section id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h1>
 <p>Notebooks examples can be found on:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/cds-astro/mocpy/tree/master/notebooks">The official github repo</a>.</p></li>
 <li><p><a class="reference external" href="https://mybinder.org/v2/gh/cds-astro/mocpy/master">Binder</a>. This allows you to run and modify the notebooks.</p></li>
 </ul>
 <section id="spatial-coverages">
-<h2>Spatial coverages<a class="headerlink" href="#spatial-coverages" title="Permalink to this headline">¶</a></h2>
+<h2>Spatial coverages<a class="headerlink" href="#spatial-coverages" title="Permalink to this heading">¶</a></h2>
 <p>Here are some code examples manipulating <code class="xref py py-class docutils literal notranslate"><span class="pre">MOC</span></code> objects.</p>
 <section id="loading-and-plotting-the-moc-of-sdss">
-<h3>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Permalink to this headline">¶</a></h3>
+<h3>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Permalink to this heading">¶</a></h3>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverage of SDSS from a FITS file.</p></li>
@@ -95,40 +95,37 @@
 <li><p>Call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.fill()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.border()</span></code> so that mocpy plot on a matplotlib axis.</p></li>
 <li><p>Set the axis labels, a title, enable the grid and plot the final figure.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">World2ScreenMPL</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+
 <span class="c1"># Load a MOC</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;./../../resources/P-SDSS9-r.fits&#39;</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;./../../resources/P-SDSS9-r.fits&quot;</span>
 <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 <span class="c1"># Plot the MOC using matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">World2ScreenMPL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> 
-        <span class="n">fov</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">),</span>
-        <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-        <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-        <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
-    <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
-    <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
-    <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;dec&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of P-SDSS9-r&#39;</span><span class="p">)</span>
+<span class="n">wcs</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">wcs</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
+<span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Coverage of P-SDSS9-r&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/plot_SDSS_r.py">Source code</a>, <a class="reference external" href="../examples/plot_SDSS_r.png">png</a>, <a class="reference external" href="../examples/plot_SDSS_r.hires.png">hires.png</a>, <a class="reference external" href="../examples/plot_SDSS_r.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/plot_SDSS_r.png" src="../_images/plot_SDSS_r.png" />
+<img alt="../_images/plot_SDSS_r.png" class="plot-directive" src="../_images/plot_SDSS_r.png" />
 </figure>
 </section>
 <section id="intersection-between-galex-and-sdss">
-<h3>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Permalink to this headline">¶</a></h3>
+<h3>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Permalink to this heading">¶</a></h3>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverages of SDSS and GALEX from FITS files.</p></li>
@@ -136,49 +133,65 @@
 <li><p>Compute their union</p></li>
 <li><p>Plot the resulting intersection and union on a same matplotlib axis.</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">World2ScreenMPL</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="c1"># Load Galex and SDSS</span>
-<span class="n">sdss</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s1">&#39;./../../resources/P-SDSS9-r.fits&#39;</span><span class="p">)</span>
-<span class="n">galex</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s1">&#39;./../../resources/P-GALEXGR6-AIS-FUV.fits&#39;</span><span class="p">)</span>
-<span class="c1"># Compute their intersection</span>
-<span class="n">inter</span> <span class="o">=</span> <span class="n">sdss</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">galex</span><span class="p">)</span>
-<span class="n">union</span> <span class="o">=</span> <span class="n">sdss</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">galex</span><span class="p">)</span>
-<span class="c1"># Plot the MOC using matplotlib</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+
+<span class="c1"># Load Galex and SDSS</span>
+<span class="n">sdss</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;./../../resources/P-SDSS9-r.fits&quot;</span><span class="p">)</span>
+<span class="n">galex</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;./../../resources/P-GALEXGR6-AIS-FUV.fits&quot;</span><span class="p">)</span>
+<span class="c1"># Compute their intersection</span>
+<span class="n">inter</span> <span class="o">=</span> <span class="n">sdss</span> <span class="o">&amp;</span> <span class="n">galex</span>
+<span class="n">union</span> <span class="o">=</span> <span class="n">sdss</span> <span class="o">+</span> <span class="n">galex</span>
+<span class="c1"># Plot the MOC using matplotlib</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">World2ScreenMPL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> 
-        <span class="n">fov</span><span class="o">=</span><span class="mi">160</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">),</span>
-        <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-        <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-        <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="mi">160</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
     <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
-    <span class="n">union</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Union&quot;</span><span class="p">)</span>
+    <span class="n">union</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Union&quot;</span>
+    <span class="p">)</span>
     <span class="n">union</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
 
-    <span class="n">inter</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intersection&quot;</span><span class="p">)</span>
+    <span class="n">inter</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intersection&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">inter</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;dec&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Logical operations between SDSS and GALEX&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Logical operations between SDSS and GALEX&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/logical_operations.py">Source code</a>, <a class="reference external" href="../examples/logical_operations.png">png</a>, <a class="reference external" href="../examples/logical_operations.hires.png">hires.png</a>, <a class="reference external" href="../examples/logical_operations.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/logical_operations.png" src="../_images/logical_operations.png" />
+<img alt="../_images/logical_operations.png" class="plot-directive" src="../_images/logical_operations.png" />
 </figure>
 </section>
 <section id="using-the-generic-wcs-astropy-class">
-<h3>Using the generic WCS astropy class<a class="headerlink" href="#using-the-generic-wcs-astropy-class" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<h3>Using the generic WCS astropy class<a class="headerlink" href="#using-the-generic-wcs-astropy-class" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;An example for plotting the union of two MOCs with the astropy.wcs module.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">healpy</span> <span class="k">as</span> <span class="nn">hp</span>
@@ -187,25 +200,18 @@
 
 <span class="c1"># Generate an abritrary WCS object</span>
 <span class="n">wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span><span class="n">naxis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">ctype</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RA---AIT&quot;</span><span class="p">,</span> <span class="s2">&quot;DEC--AIT&quot;</span><span class="p">]</span> 
+<span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">ctype</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RA---AIT&quot;</span><span class="p">,</span> <span class="s2">&quot;DEC--AIT&quot;</span><span class="p">]</span>
 <span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crval</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
 <span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.675</span><span class="p">,</span> <span class="mf">0.675</span><span class="p">])</span>
 <span class="n">wcs</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crpix</span> <span class="o">=</span> <span class="p">[</span><span class="mf">240.5</span><span class="p">,</span> <span class="mf">120.5</span><span class="p">]</span>
 
 <span class="c1"># Get HEALPix cell centers</span>
 <span class="n">nside</span> <span class="o">=</span> <span class="mi">64</span>
-<span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span>
-    <span class="n">nside</span><span class="p">,</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">nside</span><span class="p">)),</span>
-    <span class="n">nest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">lonlat</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
+<span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span><span class="n">nside</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">nside</span><span class="p">)),</span> <span class="n">nest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lonlat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># MPL figure with WCS projection</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span>
-    <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span>
-<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
 
 <span class="c1"># Plot the HEALPix centers (just to test)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">get_transform</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">))</span>
@@ -213,18 +219,10 @@
 
 <span class="c1"># Define a MOC union</span>
 <span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
-    <span class="n">lon</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">lat</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">radius</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
+    <span class="n">lon</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
 <span class="p">)</span>
 <span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
-    <span class="n">lon</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">lat</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
+    <span class="n">lon</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span>
 <span class="p">)</span>
 <span class="n">moc</span> <span class="o">=</span> <span class="n">moc1</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
 
@@ -234,102 +232,112 @@
 </div>
 <p>(<a class="reference external" href="../examples/astropy_wcs.py">Source code</a>, <a class="reference external" href="../examples/astropy_wcs.png">png</a>, <a class="reference external" href="../examples/astropy_wcs.hires.png">hires.png</a>, <a class="reference external" href="../examples/astropy_wcs.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/astropy_wcs.png" src="../_images/astropy_wcs.png" />
+<img alt="../_images/astropy_wcs.png" class="plot-directive" src="../_images/astropy_wcs.png" />
 </figure>
 </section>
 <section id="create-a-moc-from-a-concave-polygon">
-<h3>Create a MOC from a concave polygon<a class="headerlink" href="#create-a-moc-from-a-concave-polygon" title="Permalink to this headline">¶</a></h3>
+<h3>Create a MOC from a concave polygon<a class="headerlink" href="#create-a-moc-from-a-concave-polygon" title="Permalink to this heading">¶</a></h3>
 <p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon_skycoord()</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">World2ScreenMPL</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+
 <span class="c1"># The set of points delimiting the polygon in deg</span>
-<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">18.36490956</span><span class="p">,</span>  <span class="mf">5.</span>        <span class="p">],</span>
-                    <span class="p">[</span><span class="mf">15.7446692</span> <span class="p">,</span>  <span class="mf">6.97214743</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">16.80755056</span><span class="p">,</span> <span class="mf">10.29852928</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">13.36215502</span><span class="p">,</span> <span class="mf">10.14616136</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">12.05298691</span><span class="p">,</span> <span class="mf">13.10706197</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">9.54793022</span><span class="p">,</span> <span class="mf">10.4556709</span> <span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">8.7677627</span> <span class="p">,</span>  <span class="mf">7.80921809</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">9.71595962</span><span class="p">,</span>  <span class="mf">5.30855011</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">7.32238541</span><span class="p">,</span>  <span class="mf">6.44905255</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">0.807265</span>  <span class="p">,</span>  <span class="mf">6.53399616</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">1.08855146</span><span class="p">,</span>  <span class="mf">3.51294225</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">2.07615384</span><span class="p">,</span>  <span class="mf">0.7118289</span> <span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">3.90690158</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61886929</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">9.03727956</span><span class="p">,</span>  <span class="mf">2.80521847</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="mf">9.22274427</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38008174</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">10.23563378</span><span class="p">,</span>  <span class="mf">4.06950324</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">10.79931601</span><span class="p">,</span>  <span class="mf">3.77655576</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">14.16533992</span><span class="p">,</span>  <span class="mf">1.7579858</span> <span class="p">],</span>
-                    <span class="p">[</span><span class="mf">19.36243491</span><span class="p">,</span>  <span class="mf">1.78587203</span><span class="p">],</span>
-                    <span class="p">[</span><span class="mf">15.31732084</span><span class="p">,</span>  <span class="mf">5.</span>        <span class="p">]])</span>
+<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mf">18.36490956</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">15.7446692</span><span class="p">,</span> <span class="mf">6.97214743</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">16.80755056</span><span class="p">,</span> <span class="mf">10.29852928</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">13.36215502</span><span class="p">,</span> <span class="mf">10.14616136</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">12.05298691</span><span class="p">,</span> <span class="mf">13.10706197</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.54793022</span><span class="p">,</span> <span class="mf">10.4556709</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">8.7677627</span><span class="p">,</span> <span class="mf">7.80921809</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.71595962</span><span class="p">,</span> <span class="mf">5.30855011</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">7.32238541</span><span class="p">,</span> <span class="mf">6.44905255</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.807265</span><span class="p">,</span> <span class="mf">6.53399616</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.08855146</span><span class="p">,</span> <span class="mf">3.51294225</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">2.07615384</span><span class="p">,</span> <span class="mf">0.7118289</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">3.90690158</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61886929</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.03727956</span><span class="p">,</span> <span class="mf">2.80521847</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.22274427</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38008174</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">10.23563378</span><span class="p">,</span> <span class="mf">4.06950324</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">10.79931601</span><span class="p">,</span> <span class="mf">3.77655576</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">14.16533992</span><span class="p">,</span> <span class="mf">1.7579858</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.36243491</span><span class="p">,</span> <span class="mf">1.78587203</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">15.31732084</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
 <span class="n">skycoord</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
 <span class="c1"># A point that we say it belongs to the inside of the MOC</span>
 <span class="n">inside</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
 <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">skycoord</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
-<span class="n">moc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;polygon_moc.fits&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;polygon_moc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <span class="c1"># Plot the MOC using matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">World2ScreenMPL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> 
-        <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">),</span>
-        <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-        <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-        <span class="c1"># The gnomonic projection transforms great circles into straight lines. </span>
-        <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+    <span class="c1"># The gnomonic projection transforms great circles into straight lines.</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
     <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
     <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;dec&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;MOC from a polygon&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;MOC from a polygon&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/polygon_coverage.py">Source code</a>, <a class="reference external" href="../examples/polygon_coverage.png">png</a>, <a class="reference external" href="../examples/polygon_coverage.hires.png">hires.png</a>, <a class="reference external" href="../examples/polygon_coverage.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/polygon_coverage.png" src="../_images/polygon_coverage.png" />
+<img alt="../_images/polygon_coverage.png" class="plot-directive" src="../_images/polygon_coverage.png" />
 </figure>
 </section>
 <section id="get-the-border-s-of-a-moc">
-<h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this headline">¶</a></h3>
-<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Permalink to this heading">¶</a></h3>
+<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries()</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
 <li><p>Then, a matplotlib path is defined from the projected vertices.</p></li>
 <li><p>Finally the path is plot on top of the MOC.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">World2ScreenMPL</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span><span class="p">,</span> <span class="n">Angle</span>
-
-<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
 <span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">PathPatch</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
 
-<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s1">&#39;polygon_moc.fits&#39;</span><span class="p">)</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;polygon_moc.fits&quot;</span><span class="p">)</span>
 <span class="n">skycoords</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">get_boundaries</span><span class="p">()</span>
 
 <span class="c1"># Plot the MOC using matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">World2ScreenMPL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> 
-        <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">),</span>
-        <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-        <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-        <span class="c1"># The gnomonic projection transforms great circles into straight lines.</span>
-        <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+    <span class="c1"># The gnomonic projection transforms great circles into straight lines.</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
     <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
     <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -337,112 +345,131 @@ In this example:</p>
 
     <span class="c1"># Plot the border</span>
     <span class="kn">from</span> <span class="nn">astropy.wcs.utils</span> <span class="kn">import</span> <span class="n">skycoord_to_pixel</span>
+
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">skycoord_to_pixel</span><span class="p">(</span><span class="n">skycoords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">wcs</span><span class="p">)</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     <span class="n">patch</span> <span class="o">=</span> <span class="n">PathPatch</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;dec&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Get the border(s) of a MOC&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Get the border(s) of a MOC&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/compute_borders.py">Source code</a>, <a class="reference external" href="../examples/compute_borders.png">png</a>, <a class="reference external" href="../examples/compute_borders.hires.png">hires.png</a>, <a class="reference external" href="../examples/compute_borders.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/compute_borders.png" src="../_images/compute_borders.png" />
+<img alt="../_images/compute_borders.png" class="plot-directive" src="../_images/compute_borders.png" />
 </figure>
 </section>
 <section id="gravitational-waves-mocs">
-<h3>Gravitational Waves MOCs<a class="headerlink" href="#gravitational-waves-mocs" title="Permalink to this headline">¶</a></h3>
+<h3>Gravitational Waves MOCs<a class="headerlink" href="#gravitational-waves-mocs" title="Permalink to this heading">¶</a></h3>
 <p>This example shows the probability confidence regions of gravitational waves. HEALPix cells are given under the <a class="reference external" href="http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf">uniq pixel notation</a>. Each
 pixel is associated with a specific value. We can create a MOC from which a GW has x% of change of being localized in it. By definition the MOC which has 100% of chance
 of containing a GW is the full sky MOC.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
-<span class="n">fits_image_filename</span> <span class="o">=</span> <span class="s1">&#39;./../../resources/bayestar.multiorder.fits&#39;</span>    
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">astropy_healpix</span> <span class="k">as</span> <span class="nn">ah</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
 
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+
+<span class="n">fits_image_filename</span> <span class="o">=</span> <span class="s2">&quot;./../../resources/bayestar.multiorder.fits&quot;</span>
+
+<span class="n">max_order</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fits_image_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdul</span><span class="p">:</span>
     <span class="n">hdul</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
     <span class="n">hdul</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">hdul</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">max_order</span> <span class="o">=</span> <span class="n">hdul</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;MOCORDER&quot;</span><span class="p">]</span>
 
-<span class="n">uniq</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;UNIQ&#39;</span><span class="p">]</span>
-<span class="n">probdensity</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;PROBDENSITY&#39;</span><span class="p">]</span>
+<span class="n">uniq</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
+<span class="n">probdensity</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">]</span>
 
-<span class="kn">import</span> <span class="nn">astropy_healpix</span> <span class="k">as</span> <span class="nn">ah</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 
 <span class="n">level</span><span class="p">,</span> <span class="n">ipix</span> <span class="o">=</span> <span class="n">ah</span><span class="o">.</span><span class="n">uniq_to_level_ipix</span><span class="p">(</span><span class="n">uniq</span><span class="p">)</span>
 <span class="n">area</span> <span class="o">=</span> <span class="n">ah</span><span class="o">.</span><span class="n">nside_to_pixel_area</span><span class="p">(</span><span class="n">ah</span><span class="o">.</span><span class="n">level_to_nside</span><span class="p">(</span><span class="n">level</span><span class="p">))</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">steradian</span><span class="p">)</span>
 
 <span class="n">prob</span> <span class="o">=</span> <span class="n">probdensity</span> <span class="o">*</span> <span class="n">area</span>
 
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">cumul_to</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">]</span>
-<span class="n">mocs</span> <span class="o">=</span> <span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_valued_healpix_cells</span><span class="p">(</span><span class="n">uniq</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">cumul_to</span><span class="o">=</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cumul_to</span><span class="p">]</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">]</span>
+<span class="n">mocs</span> <span class="o">=</span> <span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_valued_healpix_cells</span><span class="p">(</span><span class="n">uniq</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">max_order</span><span class="p">,</span> <span class="n">cumul_to</span><span class="o">=</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cumul_to</span><span class="p">]</span>
 
 
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">World2ScreenMPL</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 <span class="c1"># Plot the MOC using matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">World2ScreenMPL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> 
-        <span class="n">fov</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">315</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;icrs&#39;</span><span class="p">),</span>
-        <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-        <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-        <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">315</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
     <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">moc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mocs</span><span class="p">,</span> <span class="n">cumul_to</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
-        <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;confidence probability &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span><span class="p">)</span>
+        <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;confidence probability &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
 
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;dec&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Bayestar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayestar&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/bayestar.py">Source code</a>, <a class="reference external" href="../examples/bayestar.png">png</a>, <a class="reference external" href="../examples/bayestar.hires.png">hires.png</a>, <a class="reference external" href="../examples/bayestar.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/bayestar.png" src="../_images/bayestar.png" />
+<img alt="../_images/bayestar.png" class="plot-directive" src="../_images/bayestar.png" />
 </figure>
 </section>
 <section id="performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc">
-<h3>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Permalink to this headline">¶</a></h3>
+<h3>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Permalink to this heading">¶</a></h3>
 <p>This example shows how a MOC can filter pixels from a specific FITS image (i.e. associated with a WCS). These pixels can
 then be retrieved from the image for performing some computations on them: e.g. mean, variance analysis thanks to numpy/scikit-learn…</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span> <span class="k">as</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">simple_norm</span>
-<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">simple_norm</span>
+<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span> <span class="k">as</span> <span class="n">WCS</span>
+
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="c1"># load 2MASS cutout covering the galactic plane</span>
-<span class="n">hdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS</span><span class="si">%2F</span><span class="s1">P</span><span class="si">%2F</span><span class="s1">2MASS</span><span class="si">%2F</span><span class="s1">K&amp;width=1200&amp;height=700&amp;fov=30&amp;projection=TAN&amp;coordsys=galactic&amp;rotation_angle=0.0&amp;object=gal</span><span class="si">%20c</span><span class="s1">enter&amp;format=fits&#39;</span><span class="p">)</span>
+<span class="n">hdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+    <span class="s2">&quot;http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS</span><span class="si">%2F</span><span class="s2">P</span><span class="si">%2F</span><span class="s2">2MASS</span><span class="si">%2F</span><span class="s2">K&amp;width=1200&amp;height=700&amp;fov=30&amp;projection=TAN&amp;coordsys=galactic&amp;rotation_angle=0.0&amp;object=gal</span><span class="si">%20c</span><span class="s2">enter&amp;format=fits&quot;</span>
+<span class="p">)</span>
 
 <span class="c1"># load Spitzer MOC</span>
-<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s1">&#39;http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits&#39;</span><span class="p">)</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits&quot;</span><span class="p">)</span>
 
 <span class="c1"># create WCS from 2MASS image header</span>
 <span class="n">twomass_wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
 
 <span class="c1"># compute skycoords for every pixel of the image</span>
-<span class="n">width</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS1&#39;</span><span class="p">]</span>
-<span class="n">height</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS2&#39;</span><span class="p">]</span>
+<span class="n">width</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;NAXIS1&quot;</span><span class="p">]</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;NAXIS2&quot;</span><span class="p">]</span>
 
 <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
 <span class="n">skycoords</span> <span class="o">=</span> <span class="n">twomass_wcs</span><span class="o">.</span><span class="n">pixel_to_world</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">)</span>
@@ -458,17 +485,18 @@ then be retrieved from the image for performing some computations on them: e.g. 
 <span class="n">img_test</span><span class="p">[</span><span class="o">~</span><span class="n">mask_in_moc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="c1"># Plot the filtered pixels image</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">twomass_wcs</span><span class="p">)</span>
 
-<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img_test</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="n">img_test</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="n">min_cut</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
+<span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href="../examples/filter_image_pixels.py">Source code</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.png">png</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.hires.png">hires.png</a>, <a class="reference external" href="../examples/filter_image_pixels_00_00.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="../_images/filter_image_pixels_00_00.png" src="../_images/filter_image_pixels_00_00.png" />
+<img alt="../_images/filter_image_pixels_00_00.png" class="plot-directive" src="../_images/filter_image_pixels_00_00.png" />
 </figure>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sum of pixels lying in the MOC</span>
 <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="n">mask_in_moc</span><span class="p">])</span>
@@ -480,18 +508,18 @@ then be retrieved from the image for performing some computations on them: e.g. 
 </section>
 </section>
 <section id="temporal-coverages">
-<h2>Temporal coverages<a class="headerlink" href="#temporal-coverages" title="Permalink to this headline">¶</a></h2>
+<h2>Temporal coverages<a class="headerlink" href="#temporal-coverages" title="Permalink to this heading">¶</a></h2>
 <p>A class <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeMOC</span></code> describes temporal coverages.</p>
 <p>Please refer to the following notebook <a class="reference external" href="https://github.com/cds-astro/mocpy/blob/master/notebooks/tmoc.ipynb">here</a> for how to use it.</p>
 </section>
 <section id="space-time-coverages">
-<h2>Space &amp; Time coverages<a class="headerlink" href="#space-time-coverages" title="Permalink to this headline">¶</a></h2>
+<h2>Space &amp; Time coverages<a class="headerlink" href="#space-time-coverages" title="Permalink to this heading">¶</a></h2>
 <p>Space-Time coverages are a new feature of <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy</span></code> since its version 0.7.0 and are
 an attempt initiated by the Virtual Observatory for binding spatial and temporal coverages together.
 See its description formalized by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
 <p>Space-Time coverages allows you to:</p>
 <ol class="arabic simple">
-<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> ranges).</p></li>
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>

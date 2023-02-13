@@ -1,19 +1,19 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Welcome to MOCPy’s documentation! &#8212; mocpy 0.10.1 documentation</title>
+    <title>Welcome to MOCPy’s documentation! &#8212; mocpy 0.12.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -51,7 +51,7 @@
 	</a>
       </li>
       <li>
-	<a href="#">mocpy 0.10.1 documentation</a>
+	<a href="#">mocpy 0.12.0 documentation</a>
 	 &#187;
       </li>
       
@@ -66,7 +66,7 @@
           <div class="body" role="main">
             
   <section id="welcome-to-mocpy-s-documentation">
-<span id="index"></span><h1>Welcome to MOCPy’s documentation!<a class="headerlink" href="#welcome-to-mocpy-s-documentation" title="Permalink to this headline">¶</a></h1>
+<span id="index"></span><h1>Welcome to MOCPy’s documentation!<a class="headerlink" href="#welcome-to-mocpy-s-documentation" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -83,7 +83,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contribute.html">Contribute</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="contribute.html#setting-up-the-environment">Setting up the environment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contribute.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#pre-commits-setup">Pre-commits setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#now-build-package">Now build package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#running-the-python-tests">Running the python tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contribute.html#building-the-documentation">Building the documentation</a></li>
 </ul>
 </li>
@@ -94,7 +96,7 @@ of MOCs (Multi-Order Coverage maps).</p>
 <p>Its code is hosted on <a class="reference external" href="https://github.com/cds-astro/mocpy/">GitHub</a> and
 distributed under the BSD-3 license.</p>
 <section id="what-is-a-moc">
-<h2>What is a MOC ?<a class="headerlink" href="#what-is-a-moc" title="Permalink to this headline">¶</a></h2>
+<h2>What is a MOC ?<a class="headerlink" href="#what-is-a-moc" title="Permalink to this heading">¶</a></h2>
 <p>MOC is an <a class="reference external" href="http://ivoa.net/documents/MOC/">IVOA standard</a> enabling description
 of arbitrary sky regions. Based on the HEALPix sky tessellation, it maps
 regions on the sky into hierarchically grouped predefined cells.</p>
@@ -103,29 +105,30 @@ respectively the manipulation of spatial and temporal MOCs.</p>
 <p>As an example, here is the sky coverage of the SDSS sky survey:</p>
 <p>(<a class="reference external" href="./examples/plot_SDSS_r.py">Source code</a>, <a class="reference external" href="./examples/plot_SDSS_r.png">png</a>, <a class="reference external" href="./examples/plot_SDSS_r.hires.png">hires.png</a>, <a class="reference external" href="./examples/plot_SDSS_r.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="_images/plot_SDSS_r.png" src="_images/plot_SDSS_r.png" />
+<img alt="_images/plot_SDSS_r.png" class="plot-directive" src="_images/plot_SDSS_r.png" />
 </figure>
 <p>As well as its time coverage:</p>
 <p>(<a class="reference external" href="./examples/plot_TMOC_SDSS_r.py">Source code</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.png">png</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.hires.png">hires.png</a>, <a class="reference external" href="./examples/plot_TMOC_SDSS_r.pdf">pdf</a>)</p>
 <figure class="align-default">
-<img alt="_images/plot_TMOC_SDSS_r.png" src="_images/plot_TMOC_SDSS_r.png" />
+<img alt="_images/plot_TMOC_SDSS_r.png" class="plot-directive" src="_images/plot_TMOC_SDSS_r.png" />
 </figure>
 <ul class="simple">
 <li><p><span id="id1">[<a class="reference internal" href="#id3" title="Pierre Fernique, Thomas Boch, Tom Donaldson, Daniel Durand , Wil O'Mullane, Martin Reinecke, and Mark Taylor. MOC - HEALPix Multi-Order Coverage map Version 1.0. IVOA Recommendation 02 June 2014, pages 602, Jun 2014. doi:10.5479/ADS/bib/2014ivoa.spec.0602F.">FerniqueBochDonaldson+14</a>]</span></p></li>
 </ul>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<p id="id2"><dl class="citation">
-<dt class="label" id="id3"><span class="brackets">FerniqueBochDonaldson+14</span></dt>
-<dd><p>Pierre Fernique, Thomas Boch, Tom Donaldson, Daniel Durand , Wil O'Mullane, Martin Reinecke, and Mark Taylor. MOC - HEALPix Multi-Order Coverage map Version 1.0. <em>IVOA Recommendation 02 June 2014</em>, pages 602, Jun 2014. <a class="reference external" href="https://doi.org/10.5479/ADS/bib/2014ivoa.spec.0602F">doi:10.5479/ADS/bib/2014ivoa.spec.0602F</a>.</p>
-</dd>
-</dl>
-</p>
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">¶</a></h2>
+<div class="docutils container" id="id2">
+<div class="citation" id="id3" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>FerniqueBochDonaldson+14<span class="fn-bracket">]</span></span>
+<p>Pierre Fernique, Thomas Boch, Tom Donaldson, Daniel Durand , Wil O'Mullane, Martin Reinecke, and Mark Taylor. MOC - HEALPix Multi-Order Coverage map Version 1.0. <em>IVOA Recommendation 02 June 2014</em>, pages 602, Jun 2014. <a class="reference external" href="https://doi.org/10.5479/ADS/bib/2014ivoa.spec.0602F">doi:10.5479/ADS/bib/2014ivoa.spec.0602F</a>.</p>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>

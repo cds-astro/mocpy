@@ -1,8 +1,8 @@
-mocpy.World2ScreenMPL
+mocpy.WCS
 =====================
 
 .. currentmodule:: mocpy
 
-.. autoclass:: World2ScreenMPL
+.. autoclass:: WCS
     :members:
     :inherited-members:
