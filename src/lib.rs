@@ -1,14 +1,3 @@
-#[cfg(feature = "rayon")]
-extern crate intervals;
-
-extern crate ndarray;
-extern crate healpix;
-extern crate num;
-extern crate numpy;
-extern crate rayon;
-extern crate time;
-
-extern crate pyo3;
 
 use std::ops::Range;
 
@@ -19,16 +8,16 @@ use numpy::{
   PyArray1, PyArray2, PyArray3, PyArrayDyn,
   PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn
 };
-
 use pyo3::{
-  types::PyBytes,
+  types::{PyBytes, PyTuple},
   prelude::{pymodule, Py, PyModule, PyResult, Python},
   exceptions::{PyIOError, PyValueError},
 };
 
-use moc::storage::u64idx::U64MocStore;
-use moc::utils;
-use pyo3::types::PyTuple;
+use moc::{
+  utils,
+  storage::u64idx::U64MocStore
+};
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -1502,8 +1491,8 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .largest_distance_from_coo_to_moc_vertices(index, lon_rad, lat_rad)
       .map_err(PyValueError::new_err)
   }
-  
-  
+
+
   /// Get the depth of a spatial coverage.
   ///
   /// # Arguments

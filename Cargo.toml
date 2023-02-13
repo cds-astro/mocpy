@@ -2,12 +2,12 @@
 name = "MOCPy"
 version = "0.12.0"
 authors = [
-  "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>", 
+  "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>",
   "Thomas Boch <thomas.boch@astro.unistra.fr>",
   "Manon Marchand <manon.marchand@astro.unistra.fr>",
   "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>",
 ]
-edition = "2018"
+edition = "2021"
 license = "BSD-3-Clause"
 readme = "README.rst"
 categories = ["algorithms", "science"]
@@ -27,13 +27,10 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-# moc = "0.9"
-moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
+moc = { version = "0.10", features = ["storage"] }
 healpix = { package = "cdshealpix", version = "0.6" }
+# moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
-num = "0.4"
-time = "*"
-rayon = "1.6"
 
 [dependencies.numpy]
 version = "0.18"
@@ -47,9 +44,6 @@ features = ["rayon"]
 [dependencies.pyo3]
 version = "0.18"
 features = ["extension-module"]
-
-[dev-dependencies]
-rand = "0.8"
 
 [profile.release]
 opt-level = 3
