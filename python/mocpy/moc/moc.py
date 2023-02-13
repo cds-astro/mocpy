@@ -474,7 +474,7 @@ class MOC(AbstractMOC):
         return moc
 
     @classmethod
-    def from_fits_images(cls, path_l, max_norder):
+    def from_fits_images(cls, path_l, max_norder, hdu_index=0):
         """
         Loads a MOC from a set of FITS file images.
 
@@ -487,6 +487,8 @@ class MOC(AbstractMOC):
             A list of path where the fits image are located.
         max_norder : int
             The MOC resolution.
+        hdu_index : int
+            Index of the the HDU containing the image in each FITS file (default = 0)
 
         Returns
         -------
@@ -496,7 +498,9 @@ class MOC(AbstractMOC):
         moc = MOC.new_empty(max_norder)
         for filename in path_l:
             with fits.open(filename) as hdul:
-                current_moc = MOC.from_fits_image(hdu=hdul[0], max_norder=max_norder)
+                current_moc = MOC.from_fits_image(
+                    hdu=hdul[hdu_index], max_norder=max_norder,
+                )
                 moc = moc.union(current_moc)
 
         return moc
@@ -634,7 +638,7 @@ class MOC(AbstractMOC):
         asc=False,
         strict=True,
         no_split=True,
-        reverse_decent=False
+        reverse_decent=False,
     ):
         """
         Creates a MOC from a mutli-order map FITS file.
@@ -695,7 +699,7 @@ class MOC(AbstractMOC):
         asc=False,
         strict=True,
         no_split=True,
-        reverse_decent=False
+        reverse_decent=False,
     ):
         """
         Creates a MOC from a list of uniq associated with values.
@@ -743,7 +747,7 @@ class MOC(AbstractMOC):
         """
         if max_depth is None:
             max_depth = 0
-        
+
         index = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth),
             uniq.astype(np.uint64),
@@ -1239,7 +1243,14 @@ class MOC(AbstractMOC):
         # The fov is computed from the largest distance between the center and any cells of it
         fov = 2 * self.largest_distance_from_coo_to_vertices(center)
 
-        return WCS(fig, fov=fov, center=center, coordsys=coordsys, rotation=rotation, projection=projection).w
+        return WCS(
+            fig,
+            fov=fov,
+            center=center,
+            coordsys=coordsys,
+            rotation=rotation,
+            projection=projection,
+        ).w
 
     def plot(self, title="MOC", frame=None):
         """
@@ -1430,11 +1441,13 @@ class MOC(AbstractMOC):
         plt.show()
 
     def barycenter(self):
-        """Returns the Barycenter of the MOC"""
+        """Returns the Barycenter of the MOC."""
         lonlat = mocpy.get_barycenter(self._store_index)
         return SkyCoord(lonlat[0], lonlat[1], unit="rad")
-    
+
     def largest_distance_from_coo_to_vertices(self, coo):
         """Retrusn the largest distance between the given coordinates and vertices of the MOC cells."""
-        angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(self._store_index, coo.ra.rad, coo.dec.rad)
+        angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(
+            self._store_index, coo.ra.rad, coo.dec.rad,
+        )
         return angle * u.rad
