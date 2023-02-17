@@ -130,10 +130,10 @@ class MOC(AbstractMOC):
         )
 
         indices = mocpy.split(self._store_index, include_indirect_neighbours)
-        mocs = map(
+        mocs = list(map(
             lambda index: MOC(MOC.__create_key, index),
             indices,
-        )
+        ))
         return mocs
 
     def degrade_to_order(self, new_order):
