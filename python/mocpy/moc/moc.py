@@ -1173,7 +1173,7 @@ class MOC(AbstractMOC):
         from astropy.io.votable import parse_single_table
 
         moc_file = BytesIO()
-        moc_fits = moc.serialize(format="fits")
+        moc_fits = moc.serialize(format="fits", pre_v2=True)
         moc_fits.writeto(moc_file)
 
         r = requests.post(
