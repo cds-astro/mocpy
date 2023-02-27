@@ -7,9 +7,8 @@ from astropy.wcs.utils import skycoord_to_pixel
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-from .utils import build_plotting_moc
+from .utils import build_plotting_moc, _set_wcs
 from . import culling_backfacing_cells
-from . import axis_viewport
 
 
 def compute_healpix_vertices(depth, ipix, wcs):
@@ -50,7 +49,7 @@ def compute_healpix_vertices(depth, ipix, wcs):
 
     path_vertices = cells.reshape((5 * c1.shape[0], 2))
     single_code = np.array(
-        [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY]
+        [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY],
     )
 
     codes = np.tile(single_code, c1.shape[0])
@@ -71,13 +70,12 @@ def compute_the_patches(moc, wcs):
     matplotlib.patches.PathPatch
         a list of matplotlib patches corresponding to the MOC tiles.
     """
-
     depth_ipix_d = moc.serialize(format="json")
     # preprocess the moc to:
     # 1. remove backfacing cells
     # 2. subdivide too large cells to order 3
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(
-        depth_ipix_d=depth_ipix_d, wcs=wcs
+        depth_ipix_d=depth_ipix_d, wcs=wcs,
     )
 
     patches = []
@@ -112,7 +110,7 @@ def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
 
     # Add the patches to the mpl axis
     ax.add_patch(patches_mpl)
-    axis_viewport.set(ax, wcs)
+    _set_wcs(ax, wcs)
 
 
 def fill(moc, ax, wcs, **kw_mpl_pathpatch):
