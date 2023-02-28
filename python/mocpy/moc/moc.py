@@ -709,12 +709,12 @@ class MOC(AbstractMOC):
             HEALPix cell indices written in uniq. dtype must be np.uint64
         values : `numpy.ndarray`
             Value associated with each ``uniq`` cells. dtype must be np.float64
-        max_depth : int, optional
+        max_depth : int
             The max depth of the MOC, should be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
             Warnings:
             1 - the depth of the returned MOC will be at least as deep as the smallest HEALPix cell found in ``uniq``.
             2 - contrary to MOCPy before v0.12, the user has to degrade the MOC if `max_depth` < smallest HEALPix cell depth.
-            values_are_densities: tell whether the values depends on the cell area or not
+        values_are_densities: tell whether the values depend on the cell area or not
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
@@ -734,7 +734,19 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         if max_depth is None:
-            max_depth = 0
+            import warnings
+
+            warnings.warn(
+                "To avoid an extra loop, it is preferable to provide the max_depth parameter."
+                "It will probably become mandatory in future releases.",
+                UserWarning,
+            )
+
+            max_depth = int(np.log2(uniq.max() >> 2)) >> 1
+            if max_depth < 0 or max_depth > 29:
+                raise ValueError(
+                    "Invalid uniq numbers. Too big uniq or negative uniq numbers might be the cause.",
+                )
 
         index = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth),
