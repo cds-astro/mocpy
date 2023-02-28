@@ -31,9 +31,7 @@ jobs:
          for PYBIN in /opt/python/cp3[78910]*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --sdist --skip-existing --username "$MATURIN_USERNAME"
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --target wasm32-unknown-emscripten --username "$MATURIN_USERNAME"
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
          done
 
@@ -173,7 +171,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: "Set up Python on Ubuntu"

@@ -25,7 +25,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   fn usize_n_bits() -> u8 {
     (std::mem::size_of::<usize>() as u8) << 3
   }
-  
+
   /// Make a new spatial coverage from ranges (at max order) and a depth
   ///
   ///
@@ -663,7 +663,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// This method is automatically called by the Python garbage collector.
   #[pyfn(m)]
-  fn drop(_py: Python, index: usize) -> PyResult<()> {
+  fn copy(index: usize) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .copy(index)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Drop the MOC at the given index.
+  ///
+  /// This method is automatically called by the Python garbage collector.
+  #[pyfn(m)]
+  fn drop(index: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .drop(index)
       .map_err(PyIOError::new_err)

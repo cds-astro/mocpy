@@ -16,10 +16,10 @@ from astropy.coordinates import (
 from astropy.io import fits
 from astropy.utils.data import download_file
 
-try:
+import contextlib
+
+with contextlib.suppress(ImportError):
     from astropy_healpix import HEALPix
-except ImportError:
-    pass
 
 from .. import mocpy
 from ..abstract_moc import AbstractMOC
@@ -79,9 +79,11 @@ class MOC(AbstractMOC):
             create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the S-MOC in the rust-side storage
         """
-        assert (
-            create_key == MOC.__create_key
-        ), "S-MOC instantiation is only allowed by class or super-class methods"
+        if create_key != MOC.__create_key:
+            raise PermissionError(
+                "S-MOC instantiation is only allowed by class or super-class methods",
+            )
+
         super().__init__(
             AbstractMOC._create_key,
             MOC.__create_key,
@@ -108,7 +110,7 @@ class MOC(AbstractMOC):
 
     def split(self, include_indirect_neighbours=False):
         """
-        Return the disjoint MOCs this MOC contains.format.
+        Return the disjoint MOCs this MOC contains.
 
         Parameters
         ----------
@@ -116,29 +118,16 @@ class MOC(AbstractMOC):
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
 
-        Raises
-        ------
-        UserWarning
-            Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
-
+        Warning
+        -------
+        Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
         """
-        import warnings
-
-        warnings.warn(
-            "Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high",
-            UserWarning,
-        )
-
         indices = mocpy.split(self._store_index, include_indirect_neighbours)
-        mocs = map(
-            lambda index: MOC(MOC.__create_key, index),
-            indices,
-        )
-        return mocs
+        return [MOC(MOC.__create_key, index) for index in indices]
 
     def degrade_to_order(self, new_order):
         """
-        Degrades the MOC instance to a new, less precise, MOC.
+        Degrade the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest HEALPix cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``.
@@ -158,7 +147,7 @@ class MOC(AbstractMOC):
 
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
-        Returns a boolean mask array of the positions lying inside (or outside) the MOC instance.
+        Return a boolean mask array of the positions lying inside (or outside) the MOC instance.
 
         Parameters
         ----------
@@ -220,7 +209,7 @@ class MOC(AbstractMOC):
         return self.contains_lonlat(lon, lat, keep_inside=keep_inside)
 
     def contains_lonlat(self, lon, lat, keep_inside=True):
-        """Tests wether a MOC contains (or not) the given points. Returns a boolean mask array.
+        """Test wether a MOC contains (or not) the given points. Returns a boolean mask array.
 
         Parameters
         ----------
@@ -269,7 +258,7 @@ class MOC(AbstractMOC):
         )
         if keep_inside:
             return mask
-        else:
+        else:  # noqa: RET505
             return ~mask
 
     # TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
@@ -367,7 +356,7 @@ class MOC(AbstractMOC):
 
     def get_boundaries(self, order=None):
         """
-        Returns the sky coordinates defining the border(s) of the MOC.
+        Return the sky coordinates defining the border(s) of the MOC.
 
         The border(s) are expressed as a list of SkyCoord.
         Each SkyCoord refers to the coordinates of one border of the MOC (i.e.
@@ -406,7 +395,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_fits_image(cls, hdu, max_norder, mask=None):
         """
-        Creates a `~mocpy.moc.MOC` from an image stored as a FITS file.
+        Create a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
         Parameters
         ----------
@@ -471,12 +460,12 @@ class MOC(AbstractMOC):
             lat=skycrd.icrs.dec,
             max_norder=max_norder,
         )
-        return moc
+        return moc  # noqa: RET504
 
     @classmethod
     def from_fits_images(cls, path_l, max_norder, hdu_index=0):
         """
-        Loads a MOC from a set of FITS file images.
+        Load a MOC from a set of FITS file images.
 
         Assumes the data of the image is stored in the first HDU of the FITS file.
         Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.
@@ -499,7 +488,8 @@ class MOC(AbstractMOC):
         for filename in path_l:
             with fits.open(filename) as hdul:
                 current_moc = MOC.from_fits_image(
-                    hdu=hdul[hdu_index], max_norder=max_norder,
+                    hdu=hdul[hdu_index],
+                    max_norder=max_norder,
                 )
                 moc = moc.union(current_moc)
 
@@ -508,7 +498,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_vizier_table(cls, table_id, nside=256):
         """
-        Creates a `~mocpy.moc.MOC` object from a VizieR table.
+        Create a `~mocpy.moc.MOC` object from a VizieR table.
 
         **Info**: This method is already implemented in `astroquery.cds <https://astroquery.readthedocs.io/en/latest/cds/cds.html>`__. You can ask to get a `mocpy.moc.MOC` object
         from a vizier catalog ID.
@@ -530,16 +520,14 @@ class MOC(AbstractMOC):
             raise ValueError(
                 f"Bad value for nside. Must be in {nside_possible_values}",
             )
-
-        result = cls.from_ivorn("ivo://CDS/" + table_id, nside)
-        return result
+        return cls.from_ivorn("ivo://CDS/" + table_id, nside)
 
     MOC_SERVER_ROOT_URL = "http://alasky.unistra.fr/MocServer/query"
 
     @classmethod
     def from_ivorn(cls, ivorn, nside=256):
         """
-        Creates a `~mocpy.moc.MOC` object from a given ivorn.
+        Create a `~mocpy.moc.MOC` object from a given ivorn.
 
         Parameters
         ----------
@@ -563,7 +551,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_url(cls, url):
         """
-        Creates a `~mocpy.moc.MOC` object from a given url.
+        Create a `~mocpy.moc.MOC` object from a given url.
 
         Parameters
         ----------
@@ -581,7 +569,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_skycoords(cls, skycoords, max_norder):
         """
-        Creates a MOC from an `astropy.coordinates.SkyCoord`.
+        Create a MOC from an `astropy.coordinates.SkyCoord`.
 
         Parameters
         ----------
@@ -604,7 +592,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_lonlat(cls, lon, lat, max_norder):
         """
-        Creates a MOC from astropy lon, lat `astropy.units.Quantity`.
+        Create a MOC from astropy lon, lat `astropy.units.Quantity`.
 
         Parameters
         ----------
@@ -641,7 +629,7 @@ class MOC(AbstractMOC):
         reverse_decent=False,
     ):
         """
-        Creates a MOC from a mutli-order map FITS file.
+        Create a MOC from a mutli-order map FITS file.
 
         HEALPix cells are first sorted by their values.
         The MOC contains the cells from which the cumulative value is between
@@ -702,7 +690,7 @@ class MOC(AbstractMOC):
         reverse_decent=False,
     ):
         """
-        Creates a MOC from a list of uniq associated with values.
+        Create a MOC from a list of uniq associated with values.
 
         HEALPix cells are first sorted by their values.
         The MOC contains the cells from which the cumulative value is between
@@ -721,12 +709,12 @@ class MOC(AbstractMOC):
             HEALPix cell indices written in uniq. dtype must be np.uint64
         values : `numpy.ndarray`
             Value associated with each ``uniq`` cells. dtype must be np.float64
-        max_depth : int, optional
+        max_depth : int
             The max depth of the MOC, should be at least as large as the depth corresponding of the smallest HEALPix cell found in ``uniq``.
             Warnings:
             1 - the depth of the returned MOC will be at least as deep as the smallest HEALPix cell found in ``uniq``.
             2 - contrary to MOCPy before v0.12, the user has to degrade the MOC if `max_depth` < smallest HEALPix cell depth.
-            values_are_densities: tell whether the values depends on the cell area or not
+        values_are_densities: tell whether the values depend on the cell area or not
         cumul_from : float
             Cumulative value from which cells will be added to the MOC
         cumul_to : float
@@ -746,7 +734,19 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         if max_depth is None:
-            max_depth = 0
+            import warnings
+
+            warnings.warn(
+                "To avoid an extra loop, it is preferable to provide the max_depth parameter."
+                "It will probably become mandatory in future releases.",
+                UserWarning,
+            )
+
+            max_depth = int(np.log2(uniq.max() >> 2)) >> 1
+            if max_depth < 0 or max_depth > 29:
+                raise ValueError(
+                    "Invalid uniq numbers. Too big uniq or negative uniq numbers might be the cause.",
+                )
 
         index = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth),
@@ -826,7 +826,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
         """
-        Creates a MOC from a cone.
+        Create a MOC from a cone.
 
         The cone is centered around the (`lon`, `lat`) position with a radius expressed by
         `radius`.
@@ -886,7 +886,7 @@ class MOC(AbstractMOC):
         delta_depth=2,
     ):
         """
-        Creates a MOC from a ring.
+        Create a MOC from a ring.
 
         The cone is centered around the (`lon`, `lat`) position with an internal radius expressed by
         `internal_radius` and an external radius expressed by `external_radius`.
@@ -942,7 +942,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
         """
-        Creates a MOC from a polygon.
+        Create a MOC from a polygon.
 
         The polygon is given as an `astropy.coordinates.SkyCoord` that contains the
         vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.
@@ -1004,7 +1004,7 @@ class MOC(AbstractMOC):
     @classmethod
     def new_empty(cls, max_depth):
         """
-        Creates a new empty MOC of given depth.
+        Create a new empty MOC of given depth.
 
         Parameters
         ----------
@@ -1022,7 +1022,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_healpix_cells(cls, ipix, depth, max_depth):
         """
-        Creates a MOC from a set of HEALPix cells at various depths.
+        Create a MOC from a set of HEALPix cells at various depths.
 
         Parameters
         ----------
@@ -1053,13 +1053,14 @@ class MOC(AbstractMOC):
     @classmethod
     def from_depth29_ranges(cls, max_depth, ranges):
         """
-        Creates a MOC from a set of HEALPix ranges at order 29.
+        Create a MOC from a set of HEALPix ranges at order 29.
 
         Parameters
         ----------
         max_depth : int, The resolution of the MOC
-        ranges: `~numpy.ndarray`
-                 a N x 2 numpy array representing the set of depth 29 ranges.
+        ranges : `~numpy.ndarray`, optional
+                a N x 2 numpy array representing the set of depth 29 ranges.
+                defaults to `np.zeros((0, 2), dtype=np.uint64)`
 
         Returns
         -------
@@ -1069,7 +1070,8 @@ class MOC(AbstractMOC):
         # import pdb; pdb.set_trace()
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
-        assert ranges.shape[1] == 2
+        if ranges.shape[1] != 2:
+            raise ValueError("expected a N x 2 numpy array for ranges")
 
         if ranges.dtype is not np.uint64:
             ranges = ranges.astype(np.uint64)
@@ -1106,8 +1108,7 @@ class MOC(AbstractMOC):
             Spatial resolution.
 
         """
-        spatial_resolution = Angle(np.sqrt(np.pi / (3 * 4 ** (order))), unit="rad")
-        return spatial_resolution
+        return Angle(np.sqrt(np.pi / (3 * 4 ** (order))), unit="rad")
 
     @staticmethod
     def spatial_resolution_to_order(spatial_resolution):
@@ -1141,31 +1142,47 @@ class MOC(AbstractMOC):
     @property
     def _fits_format(self):
         depth = self.max_order
-        fits_format = "1J" if depth <= 13 else "1K"
-        return fits_format
+        return "1J" if depth <= 13 else "1K"
 
     @property
     def sky_fraction(self):
         """Sky fraction covered by the MOC."""
-        sky_fraction = mocpy.coverage_fraction(self._store_index)
-        return sky_fraction
+        return mocpy.coverage_fraction(self._store_index)
 
     # TODO : move this in astroquery.Simbad.query_region
     # See https://github.com/astropy/astroquery/pull/1466
-    def query_simbad(self, max_rows=10000):
-        """Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance."""
-        return self._query("SIMBAD", max_rows)
+    def query_simbad(self, max_rows=10000, timeout=1000):
+        """Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.
+
+        Parameters
+        ----------
+        max_rows : int, optional
+                maximum number of row returned
+        timeout : float, optional
+                timeout before aborting the query, default to 1000s
+        """
+        return self._query("SIMBAD", max_rows, timeout)
 
     # TODO : move this in astroquery.Vizier.query_region
     # See https://github.com/astropy/astroquery/pull/1466
-    def query_vizier_table(self, table_id, max_rows=10000):
-        """Query a VizieR table for sources in the coverage of the MOC instance."""
-        return self._query(table_id, max_rows)
+    def query_vizier_table(self, table_id: str, max_rows=10000, timeout=1000):
+        """Query a VizieR table for sources in the coverage of the MOC instance.
+
+        Parameters
+        ----------
+        table_id : str
+                corresponds to a VizieR table id
+        max_rows : int, optional
+                maximum number of row returned
+        timeout : float, optional
+                timeout before aborting the query, default to 1000s
+        """
+        return self._query(table_id, max_rows, timeout)
 
     # TODO : move this in astroquery
-    def _query(moc, resource_id, max_rows=100000):
+    def _query(self, resource_id, max_rows=100000, timeout=1000):
         """
-        Internal method to query Simbad or a VizieR table.
+        Query Simbad or a VizieR table.
 
         Find sources in the coverage of the MOC instance.
         """
@@ -1173,7 +1190,7 @@ class MOC(AbstractMOC):
         from astropy.io.votable import parse_single_table
 
         moc_file = BytesIO()
-        moc_fits = moc.serialize(format="fits", pre_v2=True)
+        moc_fits = self.serialize(format="fits", pre_v2=True)
         moc_fits.writeto(moc_file)
 
         r = requests.post(
@@ -1187,16 +1204,23 @@ class MOC(AbstractMOC):
             files={"moc": moc_file.getvalue()},
             headers={"User-Agent": "MOCPy"},
             stream=True,
+            timeout=timeout,
         )
 
         votable = BytesIO()
         votable.write(r.content)
 
-        table = parse_single_table(votable).to_table()
+        return parse_single_table(votable).to_table()
 
-        return table
-
-    def wcs(self, fig, coordsys="icrs", projection="AIT", rotation=Angle(0, u.radian)):
+    # note to devs: performing function call in function definition won't bring a bug
+    # only because this defines a constant. ignoring BugBear warning B008 here. Do not reproduce.
+    def wcs(
+        self,
+        fig,
+        coordsys="icrs",
+        projection="AIT",
+        rotation=Angle(0, u.radian),
+    ):
         """
         Get a wcs that can be given to matplotlib to plot the MOC.
 
@@ -1207,7 +1231,8 @@ class MOC(AbstractMOC):
         coordsys : str, optional
             Coordinate system. Default to "icrs". Must be in ["icrs", "galactic"].
         projection : str, optional
-            World base -> Image base projection type. See http://docs.astropy.org/en/stable/wcs/#supported-projections for
+            World base -> Image base projection type.
+            See http://docs.astropy.org/en/stable/wcs/#supported-projections for
             the projections currently supported in astropy. Default to Aitoff.
         rotation : `~astropy.coordinates.Angle`, optional
             The angle of rotation. Default to no rotation.
@@ -1341,12 +1366,12 @@ class MOC(AbstractMOC):
         ax.pcolormesh(x, y, z, cmap=color_map, vmin=0, vmax=1)
         ax.tick_params(labelsize=14, labelcolor="#000000")
         plt.title(title)
-        plt.grid(True, linestyle="--", linewidth=1, color="#555555")
+        plt.grid(visible=True, linestyle="--", linewidth=1, color="#555555")
 
         plt.show()
 
     @classmethod
-    def load(cls, path, format="fits"):
+    def load(cls, path, format="fits"):  # noqa: A002
         """
         Load the Spatial MOC from a file.
 
@@ -1365,15 +1390,14 @@ class MOC(AbstractMOC):
         if format == "fits":
             index = mocpy.spatial_moc_from_fits_file(path)
             return cls(cls.__create_key, index)
-        elif format == "ascii":
+        if format == "ascii":
             index = mocpy.spatial_moc_from_ascii_file(path)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.spatial_moc_from_json_file(path)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("fits", "ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -1382,7 +1406,7 @@ class MOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
-    def from_string(cls, value, format="ascii"):
+    def from_string(cls, value, format="ascii"):  # noqa: A002
         """
         Deserialize the Spatial MOC from the given string.
 
@@ -1400,12 +1424,11 @@ class MOC(AbstractMOC):
         if format == "ascii":
             index = mocpy.spatial_moc_from_ascii_str(value)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.spatial_moc_from_json_str(value)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))
 
     @property
     def uniq_hpx(self):
@@ -1428,11 +1451,11 @@ class MOC(AbstractMOC):
 
     def display_preview(self, y_size=300):
         """
-        Displays a preview of the MOC (calling internally the `to_rgba` method).
+        Display a preview of the MOC (calling internally the `to_rgba` method).
 
         Parameters
         ----------
-        y_size : the number of pixels along the y-axis
+        y_size : the number of pixels along the y-axis, default value is 300
         """
         import matplotlib.pyplot as plt
 
@@ -1441,13 +1464,15 @@ class MOC(AbstractMOC):
         plt.show()
 
     def barycenter(self):
-        """Returns the Barycenter of the MOC."""
+        """Return the Barycenter of the MOC."""
         lonlat = mocpy.get_barycenter(self._store_index)
         return SkyCoord(lonlat[0], lonlat[1], unit="rad")
 
     def largest_distance_from_coo_to_vertices(self, coo):
-        """Retrusn the largest distance between the given coordinates and vertices of the MOC cells."""
+        """Return the largest distance between the given coordinates and vertices of the MOC cells."""
         angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(
-            self._store_index, coo.ra.rad, coo.dec.rad,
+            self._store_index,
+            coo.ra.rad,
+            coo.dec.rad,
         )
         return angle * u.rad

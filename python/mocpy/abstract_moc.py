@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 from io import BytesIO
@@ -58,10 +56,17 @@ class AbstractMOC(serializer.IO):
         """
         if not isinstance(other, AbstractMOC):
             raise TypeError(
-                "Cannot compare an AbstractMOC with a {0}".format(type(other))
+                f"Cannot compare an AbstractMOC with a {type(other)}",
             )
 
         return mocpy.check_eq(self._store_index, other._store_index)
+
+    def __copy__(self):
+        mocpy.copy(self._store_index)
+        return self.__class__(self.__create_sub_key, self._store_index)
+
+    def __deepcopy__(self, memo):
+        return self.__copy__()
 
     @staticmethod
     def store_index_dtype():
@@ -256,7 +261,10 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
+                np.fromiter(
+                    (arg._store_index for arg in args),
+                    dtype=AbstractMOC.store_index_dtype(),
+                ),
             )
             index = mocpy.multi_intersection(store_indices)
         else:
@@ -283,7 +291,10 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
+                np.fromiter(
+                    (arg._store_index for arg in args),
+                    dtype=AbstractMOC.store_index_dtype(),
+                ),
             )
             index = mocpy.multi_union(store_indices)
         else:
@@ -310,12 +321,15 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [self._store_index, another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
+                np.fromiter(
+                    (arg._store_index for arg in args),
+                    dtype=AbstractMOC.store_index_dtype(),
+                ),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
         else:
             index = mocpy.symmetric_difference(
-                self._store_index, another_moc._store_index
+                self._store_index, another_moc._store_index,
             )
 
         return self.__class__(self.__create_sub_key, index)
@@ -339,7 +353,10 @@ class AbstractMOC(serializer.IO):
         if args:
             store_indices = np.append(
                 [another_moc._store_index],
-                np.fromiter((arg._store_index for arg in args), dtype=AbstractMOC.store_index_dtype()),
+                np.fromiter(
+                    (arg._store_index for arg in args),
+                    dtype=AbstractMOC.store_index_dtype(),
+                ),
             )
             index_union = mocpy.multi_union(store_indices)
             index = mocpy.difference(self._store_index, index_union)
@@ -443,7 +460,7 @@ class AbstractMOC(serializer.IO):
         import json
 
         return cls.from_string(
-            json.dumps(json_moc, sort_keys=True, indent=2), format="json"
+            json.dumps(json_moc, sort_keys=True, indent=2), format="json",
         )
 
     @classmethod
@@ -584,7 +601,7 @@ class AbstractMOC(serializer.IO):
         if file_exists and not overwrite:
             raise OSError(
                 "File {} already exists! Set ``overwrite`` to "
-                "True if you want to replace it.".format(path)
+                "True if you want to replace it.".format(path),
             )
 
         if format == "fits":
