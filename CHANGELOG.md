@@ -5,22 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## To do list
-
-* [ ] add to_times in TimeMOC
-* [ ] add F-MOC
-* [ ] add FS-MOC / TS-MOC
-
 ## [0.12.1]
+
+### Added
+
+* add methods `AbstractMOC.__copy__` and `AbstractMOC.__deepcopy__`
+* add op parameter `timeout` in `query_simbad` and `query_vizier_table` that defaults to 1000s
+* warning if `max_depth` is not set in `MOC.from_valued_cells`
 
 ### Changed
 
 * ⚠️ BREAKING: public function `set` in `plot.axis_viewport` module has been renamed into `_set_wcs` and moved to module `plot.utils`
-* add optional parameter `timeout` in `query_simbad` and `query_vizier_table` that defaults to 1000s
 
 ### Bugfix
 
 * :bug: a bug was introduced in [0.12.0] on the functions `query_simbad` and `query_vizier_table` that are compatible with `pre_v2` format only
+* :bug: when `max_depth=None` in `MOC.from_valued_cells`
+
 
 ## [0.12.0]
 
@@ -278,4 +279,4 @@ This method does not rely on astropy_healpix as there is for the moment no metho
 * Notebooks have been updated and all the plots now use the new methods `fill` and `border`.
 * A new package `spatial`, invisible from the user, but keeping all the code of spatial   MOCs (plotting methods, border computation, special utils for creating WCS...) has been created. tmocs and core functions are still located in the root of the project.
 * Add of a changelog
-  
+
