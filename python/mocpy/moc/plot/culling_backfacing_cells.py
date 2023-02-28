@@ -8,21 +8,22 @@ from astropy.coordinates import SkyCoord
 
 
 def backface_culling(xp, yp):
-    # Remove cells crossing the MOC after projection
-    # The remaining HEALPix cells are used for computing the patch of the MOC
+    """Remove cells crossing the MOC after projection.
+    
+    The remaining HEALPix cells are used for computing the patch of the MOC
+    """
     vx = xp
     vy = yp
 
     def compute_vector_at_index(X, Y, i):
         cur = i
-        next = (i + 1) % 4
+        next_index = (i + 1) % 4
 
-        x = X[:, next] - X[:, cur]
-        y = Y[:, next] - Y[:, cur]
+        x = X[:, next_index] - X[:, cur]
+        y = Y[:, next_index] - Y[:, cur]
         z = np.zeros(x.shape)
 
-        v = np.vstack((x, y, z)).T
-        return v
+        return np.vstack((x, y, z)).T
 
     # A ----- B
     #  \      |
@@ -55,9 +56,8 @@ def backface_culling(xp, yp):
 
 
 def from_moc(depth_ipix_d, wcs):
-    # Create a new MOC that do not contain the HEALPix
-    # cells that are backfacing the projection
-    depths = [int(depth_str) for depth_str in depth_ipix_d.keys()]
+    """Create a new MOC that do not contain the HEALPix cells that are backfacing the projection."""
+    depths = [int(depth_str) for depth_str in depth_ipix_d]
     min_depth = min(depths)
     max_depth = max(depths)
     ipixels = np.asarray(depth_ipix_d[str(min_depth)])

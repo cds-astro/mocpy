@@ -49,8 +49,10 @@ locked = false
 # D104: Missing docstring in public package
 # D103: Missing docstring in public function
 # D100: Missing docstring in public module
+# B008: Do not perforn function call in argument defaults
 "__init__.py" = ["D104"]
 "notebooks/*.ipynb" = ["D100"]
+"python/mocpy/moc/plot/wcs.py" = ["B008"]
 "python/mocpy/tests/*.py" = ["S101", "D103"] # use of "assert" detected
 
 [tool.ruff]
@@ -63,15 +65,17 @@ target-version = "py37"
 # Allow lines to be as long as 120 characters.
 line-length = 120
 extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
-                 "C4", "EM", "ICN", "RET", "ARG", "PD", "PGH",
+                 "C4", "ICN", "RET", "ARG", "PD", "PGH",
                  "RUF", "YTT", "BLE", "COM", "DTZ", "EXE",
                  "ISC", "ICN001", "PIE", "PTH"
                 ]
-extend-ignore = ["E501", "D203", "D213", "D100", "N816"]
+extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002", "N802"]
 # E501: line length (done by black in our case)
+# N806: variables names should be lowercase (would require to change all API)
 # D203: 1 blank line required before class docstring
-# D213:
+# D105: missing docsting in magic method
 # N816:  Variable `mixed_Case` in global scope should not be mixedCase
+# FBT002: Boolean default in function definition (would require to change all API)
 
 [tool.ruff.flake8-errmsg]
 max-string-length = 20

@@ -9,11 +9,11 @@ from matplotlib.patches import PathPatch
 
 import cdshealpix
 
-from ... import mocpy
 
 
 def border(moc, ax, wcs, **kw_mpl_pathpatch):
-    from .utils import build_plotting_moc
+    """Highlight the borders of a MOC in a plot."""
+    from .utils import build_plotting_moc, _set_wcs
 
     moc_to_plot = build_plotting_moc(moc, wcs)
 
@@ -55,7 +55,7 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
     ipixels_border = ipixels_open[ipixels_border_id]
 
     ipix_lon_boundaries, ipix_lat_boundaries = cdshealpix.vertices(
-        ipixels_border, max_order
+        ipixels_border, max_order,
     )
     ipix_boundaries = SkyCoord(ipix_lon_boundaries, ipix_lat_boundaries, frame=ICRS())
 
@@ -93,7 +93,4 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
     perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
 
     ax.add_patch(perimeter_patch)
-
-    from . import axis_viewport
-
-    axis_viewport.set(ax, wcs)
+    _set_wcs(ax, wcs)
