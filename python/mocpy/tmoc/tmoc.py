@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import warnings
 import numpy as np
@@ -56,7 +54,7 @@ def microseconds_to_times(times_microseconds):
     """
     jd1 = np.asarray(times_microseconds // DAY_MICRO_SEC, dtype=np.float64)
     jd2 = np.asarray(
-        (times_microseconds - jd1 * DAY_MICRO_SEC) / DAY_MICRO_SEC, dtype=np.float64
+        (times_microseconds - jd1 * DAY_MICRO_SEC) / DAY_MICRO_SEC, dtype=np.float64,
     )
 
     return Time(val=jd1, val2=jd2, format="jd", scale="tdb")
@@ -65,8 +63,11 @@ def microseconds_to_times(times_microseconds):
 class TimeMOC(AbstractMOC):
     """Multi-order time coverage class. Experimental."""
 
+    # Maximum order of TimeMOCs
+    MAX_ORDER = np.uint8(61)
+    # Number of microseconds in a day
     DAY_MICRO_SEC = 86400000000.0
-    # default observation time : 30 min
+    # Default observation time : 30 min
     DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format="sec", scale="tdb")
 
     __create_key = object()
@@ -78,8 +79,8 @@ class TimeMOC(AbstractMOC):
             create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the S-MOC in the rust-side storage
         """
-        super(TimeMOC, self).__init__(
-            AbstractMOC._create_key, TimeMOC.__create_key, store_index
+        super().__init__(
+            AbstractMOC._create_key, TimeMOC.__create_key, store_index,
         )
         assert (
             create_key == TimeMOC.__create_key
@@ -216,13 +217,13 @@ class TimeMOC(AbstractMOC):
         assert min_times.shape == max_times.shape
 
         store_index = mocpy.from_time_ranges_in_microsec_since_jd_origin(
-            depth, min_times, max_times
+            depth, min_times, max_times,
         )
         return cls(cls.__create_key, store_index)
 
     @classmethod
     def from_time_ranges_approx(
-        cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME
+        cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Create a TimeMOC from a range defined by two `astropy.time.Time`.
@@ -292,7 +293,7 @@ class TimeMOC(AbstractMOC):
             message = (
                 "Requested time resolution for the operation cannot be applied.\n"
                 "The TimeMoc object resulting from the operation is of time resolution {0} sec.".format(
-                    TimeMOC.order_to_time_resolution(max_order).sec
+                    TimeMOC.order_to_time_resolution(max_order).sec,
                 )
             )
             warnings.warn(message, UserWarning)
@@ -304,7 +305,7 @@ class TimeMOC(AbstractMOC):
         return result
 
     def intersection_with_timeresolution(
-        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME
+        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Intersection between self and moc.
@@ -360,7 +361,7 @@ class TimeMOC(AbstractMOC):
         return super(TimeMOC, self_degraded).union(moc_degraded)
 
     def difference_with_timeresolution(
-        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME
+        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Difference between self and moc.
@@ -401,7 +402,7 @@ class TimeMOC(AbstractMOC):
 
         """
         duration = TimeDelta(
-            mocpy.ranges_sum(self._store_index) / 1e6, format="sec", scale="tdb"
+            mocpy.ranges_sum(self._store_index) / 1e6, format="sec", scale="tdb",
         )
         return duration
 
@@ -478,7 +479,7 @@ class TimeMOC(AbstractMOC):
             return ~mask
 
     def contains_with_timeresolution(
-        self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME
+        self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the TMOC instance.
@@ -508,7 +509,7 @@ class TimeMOC(AbstractMOC):
             message = (
                 "Requested time resolution filtering cannot be applied.\n"
                 "Filtering is applied with a time resolution of {0} sec.".format(
-                    TimeMOC.order_to_time_resolution(current_max_order).sec
+                    TimeMOC.order_to_time_resolution(current_max_order).sec,
                 )
             )
             warnings.warn(message, UserWarning)
@@ -580,19 +581,16 @@ class TimeMOC(AbstractMOC):
             return
 
         plot_order = 30
-        if self.max_order > plot_order:
-            plotted_moc = self.degrade_to_order(plot_order)
-        else:
-            plotted_moc = self
+        plotted_moc = self.degrade_to_order(plot_order) if self.max_order > plot_order else self
 
         min_jd = plotted_moc.min_time.jd if not view[0] else view[0].jd
         max_jd = plotted_moc.max_time.jd if not view[1] else view[1].jd
 
         if max_jd < min_jd:
             raise ValueError(
-                "Invalid selection: max_jd = {0} must be > to min_jd = {1}".format(
-                    max_jd, min_jd
-                )
+                "Invalid selection: max_jd = {} must be > to min_jd = {}".format(
+                    max_jd, min_jd,
+                ),
             )
 
         fig1 = plt.figure(figsize=figsize)
@@ -607,11 +605,11 @@ class TimeMOC(AbstractMOC):
 
         ax.set_xticks([0, size])
         ax.set_xticklabels(
-            Time([min_jd_time, max_jd], format="jd", scale="tdb").iso, rotation=70
+            Time([min_jd_time, max_jd], format="jd", scale="tdb").iso, rotation=70,
         )
 
         y = np.zeros(size)
-        for (s_time_us, e_time_us) in plotted_moc.to_time_ranges():
+        for s_time_us, e_time_us in plotted_moc.to_time_ranges():
             s_index = int((s_time_us.jd - min_jd_time) / delta)
             e_index = int((e_time_us.jd - min_jd_time) / delta)
             y[s_index : (e_index + 1)] = 1.0
@@ -638,7 +636,7 @@ class TimeMOC(AbstractMOC):
 
             time = Time(event.xdata * delta + min_jd_time, format="jd", scale="tdb")
 
-            tx = "{0}".format(time.iso)
+            tx = f"{time.iso}"
             text.set_position((event.xdata - 50, 700))
             text.set_rotation(70)
             text.set_text(tx)

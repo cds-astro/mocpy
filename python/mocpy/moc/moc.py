@@ -70,6 +70,9 @@ class MOC(AbstractMOC):
     5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
     """
 
+    # Maximum order (or depth) of a MOC
+    MAX_ORDER = np.uint8(29)
+
     __create_key = object()
 
     def __init__(self, create_key, store_index):
