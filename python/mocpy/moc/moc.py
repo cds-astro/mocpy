@@ -71,6 +71,7 @@ class MOC(AbstractMOC):
     """
 
     # Maximum order (or depth) of a MOC
+    # (do not remove since it may be used externally).
     MAX_ORDER = np.uint8(29)
 
     __create_key = object()

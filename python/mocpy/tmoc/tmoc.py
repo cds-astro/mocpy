@@ -64,6 +64,7 @@ class TimeMOC(AbstractMOC):
     """Multi-order time coverage class. Experimental."""
 
     # Maximum order of TimeMOCs
+    # (do not remove since it may be used externally).
     MAX_ORDER = np.uint8(61)
     # Number of microseconds in a day
     DAY_MICRO_SEC = 86400000000.0
