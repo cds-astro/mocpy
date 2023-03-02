@@ -1434,7 +1434,15 @@ class MOC(AbstractMOC):
 
     @property
     def uniq_hpx(self):
-        """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
+        """
+        Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC.
+
+        Warning
+        -------
+        The output is not sorted, the order follow the order of HEALPix cells in
+        the underlying sorted array of depth29 nested ranges, i.e. the natural order
+        of the cells is the underlying z-order curve.
+        """
         return mocpy.to_uniq_hpx(self._store_index)
 
     @property
