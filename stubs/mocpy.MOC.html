@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>mocpy.MOC &#8212; mocpy 0.12.1 documentation</title>
+    <title>mocpy.MOC &#8212; mocpy 0.12.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.12.1 documentation</a>
+	<a href="../index.html">mocpy 0.12.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -125,6 +125,8 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 </dd>
 <dt><a class="reference internal" href="#mocpy.MOC.sky_fraction" title="mocpy.MOC.sky_fraction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky_fraction</span></code></a></dt><dd><p>Sky fraction covered by the MOC.</p>
 </dd>
+<dt><a class="reference internal" href="#mocpy.MOC.to_depth29_ranges" title="mocpy.MOC.to_depth29_ranges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_depth29_ranges</span></code></a></dt><dd><p>Return the list of order 29 HEALPix nested ranges this MOC contains.</p>
+</dd>
 <dt><a class="reference internal" href="#mocpy.MOC.uniq_gen" title="mocpy.MOC.uniq_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniq_gen</span></code></a></dt><dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the generic uniq indices of the cell in the MOC.</p>
 </dd>
 <dt><a class="reference internal" href="#mocpy.MOC.uniq_hpx" title="mocpy.MOC.uniq_hpx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniq_hpx</span></code></a></dt><dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the uniq HEALPIx indices of the cell in the MOC.</p>
@@ -186,7 +188,7 @@ python dictionnary (see <a class="reference internal" href="#mocpy.MOC.from_json
 <td><p>Create a MOC from a cone.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.MOC.from_depth29_ranges" title="mocpy.MOC.from_depth29_ranges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_depth29_ranges</span></code></a>(max_depth, ranges)</p></td>
-<td><p>Create a MOC from a set of HEALPix ranges at order 29.</p></td>
+<td><p>Create a MOC from a set of ranges of HEALPix Nested indices at order 29.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mocpy.MOC.from_elliptical_cone" title="mocpy.MOC.from_elliptical_cone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_elliptical_cone</span></code></a>(lon, lat, a, b, pa, ...)</p></td>
 <td><p>Create a MOC from an elliptical cone.</p></td>
@@ -720,12 +722,14 @@ The depth at which the computations will be made will therefore be equal to
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_depth29_ranges">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_depth29_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_depth29_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_depth29_ranges" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a MOC from a set of HEALPix ranges at order 29.</p>
+<dd><p>Create a MOC from a set of ranges of HEALPix Nested indices at order 29.
+For each range, the lower bound is inclusive and the upper bound is exclusive.
+The range <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">12*4^29[</span></code> represents the full-sky.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>max_depth</strong><span class="classifier">int, The resolution of the MOC</span></dt><dd></dd>
-<dt><strong>ranges</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code>, optional</span></dt><dd><p>a N x 2 numpy array representing the set of depth 29 ranges.
+<dt><strong>ranges</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code>, optional</span></dt><dd><p>a N x 2 numpy array representing the set of depth 29 HEALPix nested ranges.
 defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.zeros((0,</span> <span class="pre">2),</span> <span class="pre">dtype=np.uint64)</span></code></p>
 </dd>
 </dl>
@@ -1607,6 +1611,12 @@ if <code class="xref py py-obj docutils literal notranslate"><span class="pre">t
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.MOC.to_depth29_ranges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_depth29_ranges</span></span><a class="headerlink" href="#mocpy.MOC.to_depth29_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of order 29 HEALPix nested ranges this MOC contains.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.to_rgba">
 <span class="sig-name descname"><span class="pre">to_rgba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.to_rgba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.to_rgba" title="Permalink to this definition">¶</a></dt>
@@ -1847,6 +1857,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.MOC.split"><code class="docutils literal notranslate"><span class="pre">MOC.split()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.split_count"><code class="docutils literal notranslate"><span class="pre">MOC.split_count()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">MOC.symmetric_difference()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.to_depth29_ranges"><code class="docutils literal notranslate"><span class="pre">MOC.to_depth29_ranges</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.to_rgba"><code class="docutils literal notranslate"><span class="pre">MOC.to_rgba()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.to_string"><code class="docutils literal notranslate"><span class="pre">MOC.to_string()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.union"><code class="docutils literal notranslate"><span class="pre">MOC.union()</span></code></a></li>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.12.1 documentation</title>
+    <title>mocpy.moc.moc &#8212; mocpy 0.12.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-astropy.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.12.1 documentation</a>
+	<a href="../../../index.html">mocpy 0.12.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -131,6 +131,10 @@
 
 <span class="sd">    5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Maximum order (or depth) of a MOC</span>
+    <span class="c1"># (do not remove since it may be used externally).</span>
+    <span class="n">MAX_ORDER</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">29</span><span class="p">)</span>
 
     <span class="n">__create_key</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
@@ -1115,13 +1119,15 @@
 <div class="viewcode-block" id="MOC.from_depth29_ranges"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_depth29_ranges">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_depth29_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a MOC from a set of HEALPix ranges at order 29.</span>
+<span class="sd">        Create a MOC from a set of ranges of HEALPix Nested indices at order 29.</span>
+<span class="sd">        For each range, the lower bound is inclusive and the upper bound is exclusive.</span>
+<span class="sd">        The range `[0, 12*4^29[` represents the full-sky.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        max_depth : int, The resolution of the MOC</span>
 <span class="sd">        ranges : `~numpy.ndarray`, optional</span>
-<span class="sd">                a N x 2 numpy array representing the set of depth 29 ranges.</span>
+<span class="sd">                a N x 2 numpy array representing the set of depth 29 HEALPix nested ranges.</span>
 <span class="sd">                defaults to `np.zeros((0, 2), dtype=np.uint64)`</span>
 
 <span class="sd">        Returns</span>
@@ -1494,8 +1500,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uniq_hpx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC.&quot;&quot;&quot;</span>
-        <span class="n">mocpy</span><span class="o">.</span><span class="n">to_uniq_hpx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC.</span>
+
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        The output is not sorted, the order follow the order of HEALPix cells in</span>
+<span class="sd">        the underlying sorted array of depth29 nested ranges, i.e. the natural order</span>
+<span class="sd">        of the cells is the underlying z-order curve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_uniq_hpx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">to_depth29_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of order 29 HEALPix nested ranges this MOC contains.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MOC.to_rgba"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.to_rgba">[docs]</a>    <span class="k">def</span> <span class="nf">to_rgba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

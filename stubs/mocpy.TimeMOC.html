@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>mocpy.TimeMOC &#8212; mocpy 0.12.1 documentation</title>
+    <title>mocpy.TimeMOC &#8212; mocpy 0.12.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -58,7 +58,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.12.1 documentation</a>
+	<a href="../index.html">mocpy 0.12.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -93,6 +93,8 @@
 <dt><a class="reference internal" href="#mocpy.TimeMOC.min_index" title="mocpy.TimeMOC.min_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_index</span></code></a></dt><dd><p>Returns the smallest index (at the deepest absolute resolution) the MOC contains.</p>
 </dd>
 <dt><a class="reference internal" href="#mocpy.TimeMOC.min_time" title="mocpy.TimeMOC.min_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></a></dt><dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation.</p>
+</dd>
+<dt><a class="reference internal" href="#mocpy.TimeMOC.to_depth61_ranges" title="mocpy.TimeMOC.to_depth61_ranges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_depth61_ranges</span></code></a></dt><dd><p>Return the list of ranges this TimeMOC contains, in microsec since JD=0.</p>
 </dd>
 <dt><a class="reference internal" href="#mocpy.TimeMOC.total_duration" title="mocpy.TimeMOC.total_duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_duration</span></code></a></dt><dd><p>Get the total duration covered by the temporal moc.</p>
 </dd>
@@ -913,6 +915,12 @@ Default to False.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.TimeMOC.to_depth61_ranges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_depth61_ranges</span></span><a class="headerlink" href="#mocpy.TimeMOC.to_depth61_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of ranges this TimeMOC contains, in microsec since JD=0.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.to_string">
 <span class="sig-name descname"><span class="pre">to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.to_string" title="Permalink to this definition">¶</a></dt>
@@ -1108,6 +1116,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.TimeMOC.serialize"><code class="docutils literal notranslate"><span class="pre">TimeMOC.serialize()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.TimeMOC.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">TimeMOC.symmetric_difference()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.TimeMOC.time_resolution_to_order"><code class="docutils literal notranslate"><span class="pre">TimeMOC.time_resolution_to_order()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.TimeMOC.to_depth61_ranges"><code class="docutils literal notranslate"><span class="pre">TimeMOC.to_depth61_ranges</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.TimeMOC.to_string"><code class="docutils literal notranslate"><span class="pre">TimeMOC.to_string()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.TimeMOC.to_time_ranges"><code class="docutils literal notranslate"><span class="pre">TimeMOC.to_time_ranges()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.TimeMOC.total_duration"><code class="docutils literal notranslate"><span class="pre">TimeMOC.total_duration</span></code></a></li>
