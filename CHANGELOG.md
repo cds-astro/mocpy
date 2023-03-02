@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `MOC.MAX_ORDER` and `TimeMOC.MAX_ORDER` to replace former `IntervalSet.HPX_MAX_ORDER` and `IntervalSet.TIME_MAX_ORDER`
 * `MOC.to_depth29_ranges` (+test) to replace former `IntervalSet.nested`
+* `TimeMOC.to_depth61_ranges`
 * tests on `MOC.uniq_hpx`
 
 ### Bugfix

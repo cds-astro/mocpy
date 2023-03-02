@@ -96,6 +96,11 @@ class TimeMOC(AbstractMOC):
         """Returns the time ranges this TimeMOC contains."""
         return microseconds_to_times(mocpy.to_ranges(self._store_index))
 
+    @property
+    def to_depth61_ranges(self):
+        """Return the list of ranges this TimeMOC contains, in microsec since JD=0."""
+        return mocpy.to_ranges(self._store_index)
+
     def degrade_to_order(self, new_order):
         """
         Degrades the MOC instance to a new, less precise, MOC.
