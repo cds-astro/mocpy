@@ -45,6 +45,10 @@ def test_complement():
         61, np.array([[0, 1], [2, 5], [8, 2 * 2**61]], dtype=np.uint64)
     )
 
+def test_to_depth61_ranges():
+    assert (TimeMOC.from_depth61_ranges(
+        61, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
+    ).to_depth61_ranges == np.array([[1, 2], [5, 8]], dtype=np.uint64)).all()
 
 def test_empty_tmoc():
     times = Time([], format="jd", scale="tdb")

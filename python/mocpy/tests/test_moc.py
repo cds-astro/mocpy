@@ -51,33 +51,71 @@ def isets():
             dtype=np.uint64,
         ),
     )
-    return dict(a=a, b=b)
+    return {"a": a, "b": b}
 
 
 def test_interval_set_consistency(isets):
     assert isets["a"] == MOC.from_depth29_ranges(
-        29, np.array([[27, 126]], dtype=np.uint64)
+        29,
+        np.array([[27, 126]], dtype=np.uint64),
     )
     assert isets["b"] == MOC.from_depth29_ranges(
-        29, np.array([[9, 61], [68, 105]], dtype=np.uint64)
+        29,
+        np.array([[9, 61], [68, 105]], dtype=np.uint64),
     )
+
+
+def test_uniq_hpx():
+    moc = MOC.from_depth29_ranges(29, np.array([[0, 1]], dtype=np.uint64))
+    uniq_hpx = np.array([4 * 4**29], dtype=np.uint64)
+    assert moc.uniq_hpx == uniq_hpx
+
+    moc = MOC.from_depth29_ranges(29, np.array([[7, 76]], dtype=np.uint64))
+    uniq_hpx = np.array(
+        [
+            1 + 4 * 4**27,
+            2 + 4 * 4**27,
+            3 + 4 * 4**27,
+            2 + 4 * 4**28,
+            3 + 4 * 4**28,
+            16 + 4 * 4**28,
+            17 + 4 * 4**28,
+            18 + 4 * 4**28,
+            7 + 4 * 4**29,
+        ],
+        dtype=np.uint64,
+    )
+    assert (np.sort(moc.uniq_hpx) == uniq_hpx).all()
+
+
+def test_to_depth29_ranges(isets):
+    l = isets["a"].to_depth29_ranges
+    r = np.array([[27, 126]], dtype=np.uint64)
+    assert np.array_equal(l, r)
+    l = isets["b"].to_depth29_ranges
+    r = np.array([[9, 61], [68, 105]], dtype=np.uint64)
+    assert np.array_equal(l, r)
 
 
 def test_interval_set_union(isets):
     assert isets["a"].union(isets["b"]) == MOC.from_depth29_ranges(
-        29, np.array([[9, 126]], dtype=np.uint64)
+        29,
+        np.array([[9, 126]], dtype=np.uint64),
     )
     assert isets["a"].union(MOC.new_empty(29)) == MOC.from_depth29_ranges(
-        29, np.array([[27, 126]], dtype=np.uint64)
+        29,
+        np.array([[27, 126]], dtype=np.uint64),
     )
     assert MOC.new_empty(29).union(isets["a"]) == MOC.from_depth29_ranges(
-        29, np.array([[27, 126]], dtype=np.uint64)
+        29,
+        np.array([[27, 126]], dtype=np.uint64),
     )
 
 
 def test_interval_set_intersection(isets):
     assert isets["a"].intersection(isets["b"]) == MOC.from_depth29_ranges(
-        29, np.array([[27, 61], [68, 105]], dtype=np.uint64)
+        29,
+        np.array([[27, 61], [68, 105]], dtype=np.uint64),
     )
     assert isets["a"].intersection(MOC.new_empty(29)) == MOC.new_empty(29)
     assert MOC.new_empty(29).intersection(isets["a"]) == MOC.new_empty(29)
@@ -85,10 +123,12 @@ def test_interval_set_intersection(isets):
 
 def test_interval_set_difference(isets):
     assert isets["a"].difference(isets["b"]) == MOC.from_depth29_ranges(
-        29, np.array([[61, 68], [105, 126]], dtype=np.uint64)
+        29,
+        np.array([[61, 68], [105, 126]], dtype=np.uint64),
     )
     assert isets["b"].difference(isets["a"]) == MOC.from_depth29_ranges(
-        29, np.array([[9, 27]], dtype=np.uint64)
+        29,
+        np.array([[9, 27]], dtype=np.uint64),
     )
     assert MOC.new_empty(29).difference(isets["a"]) == MOC.new_empty(29)
     assert isets["a"].difference(MOC.new_empty(29)) == isets["a"]
@@ -125,17 +165,21 @@ def test_interval_min_depth():
 
 def test_complement():
     assert MOC.from_depth29_ranges(
-        max_depth=29, ranges=None
+        max_depth=29,
+        ranges=None,
     ).complement() == MOC.from_depth29_ranges(
-        max_depth=29, ranges=np.array([[0, 12 * 4**29]], dtype=np.uint64)
+        max_depth=29,
+        ranges=np.array([[0, 12 * 4**29]], dtype=np.uint64),
     )
     assert MOC.new_empty(
-        max_depth=29
+        max_depth=29,
     ).complement().complement() == MOC.from_depth29_ranges(max_depth=29, ranges=None)
     assert MOC.from_depth29_ranges(
-        29, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
+        29,
+        np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64),
     ).complement() == MOC.from_depth29_ranges(
-        29, np.array([[0, 1], [2, 5], [8, 12 * 4**29]], dtype=np.uint64)
+        29,
+        np.array([[0, 1], [2, 5], [8, 12 * 4**29]], dtype=np.uint64),
     )
 
 
@@ -193,7 +237,7 @@ def test_moc_from_lonlat(lonlat_gen_f, size):
 def test_from_healpix_cells():
     ipix = np.array([40, 87, 65])
     depth = np.array([3, 3, 3])
-    fully_covered = np.array([True, True, True])
+    np.array([True, True, True])
 
     MOC.from_healpix_cells(max_depth=29, ipix=ipix, depth=depth)
 
@@ -213,7 +257,9 @@ def test_moc_consistent_with_aladin():
     table = parse_single_table("resources/I_125A_catalog.vot").to_table()
 
     moc = MOC.from_lonlat(
-        table["_RAJ2000"].T * u.deg, table["_DEJ2000"].T * u.deg, max_norder=8
+        table["_RAJ2000"].T * u.deg,
+        table["_DEJ2000"].T * u.deg,
+        max_norder=8,
     )
 
     assert moc == truth
@@ -264,7 +310,7 @@ def test_moc_serialize_and_from_json(moc_from_json):
                     "6": [4500],
                     "7": [],
                     "8": [45],
-                }
+                },
             ),
             "5/8-10 42-46 54\n\r 6/4500 8/45",
         ),
@@ -290,7 +336,7 @@ def test_from_str(expected, moc_str):
                     "6": [4500],
                     "7": [],
                     "8": [45],
-                }
+                },
             ),
             "5/8-10 42-46 54\n\r 6/4500 8/45",
         ),
@@ -342,7 +388,7 @@ def test_moc_serialize_to_json(moc_from_fits_image):
                     "6": [4500],
                     "7": [],
                     "8": [45],
-                }
+                },
             ),
             "5/8-10 42-46 54 6/4500 8/45 ",
         ),
@@ -435,7 +481,9 @@ def test_moc_contains(order):
     should_be_outside_arr = moc.contains_lonlat(lon=lon, lat=lat, keep_inside=False)
     assert not should_be_outside_arr.any()
     should_be_inside_arr = moc_complement.contains_lonlat(
-        lon=lon, lat=lat, keep_inside=False
+        lon=lon,
+        lat=lat,
+        keep_inside=False,
     )
     assert should_be_inside_arr.all()
 
@@ -503,12 +551,12 @@ def mocs():
     moc2 = {"1": [30]}
     moc2_increased = {"0": [7], "1": [8, 9, 25, 43, 41]}
 
-    return dict(
-        moc1=MOC.from_json(moc1),
-        moc1_increased=MOC.from_json(moc1_increased),
-        moc2=MOC.from_json(moc2),
-        moc2_increased=MOC.from_json(moc2_increased),
-    )
+    return {
+        "moc1": MOC.from_json(moc1),
+        "moc1_increased": MOC.from_json(moc1_increased),
+        "moc2": MOC.from_json(moc2),
+        "moc2_increased": MOC.from_json(moc2_increased),
+    }
 
 
 def test_add_neighbours(mocs):
@@ -542,31 +590,31 @@ def test_neighbours(mocs):
 def mocs_op():
     moc1 = MOC.from_json({"0": [0, 2, 3, 4, 5]})
     moc2 = MOC.from_json({"0": [0, 1, 7, 4, 3]})
-    return dict(first=moc1, second=moc2)
+    return {"first": moc1, "second": moc2}
 
 
 def test_moc_union(mocs_op):
     assert mocs_op["first"].union(mocs_op["second"]) == MOC.from_json(
-        {"0": [0, 1, 2, 3, 4, 5, 7]}
+        {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
     assert mocs_op["first"] + mocs_op["second"] == MOC.from_json(
-        {"0": [0, 1, 2, 3, 4, 5, 7]}
+        {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
     assert mocs_op["first"] | mocs_op["second"] == MOC.from_json(
-        {"0": [0, 1, 2, 3, 4, 5, 7]}
+        {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
 
 
 def test_moc_intersection(mocs_op):
     assert mocs_op["first"].intersection(mocs_op["second"]) == MOC.from_json(
-        {"0": [0, 3, 4]}
+        {"0": [0, 3, 4]},
     )
     assert mocs_op["first"] & mocs_op["second"] == MOC.from_json({"0": [0, 3, 4]})
 
 
 def test_moc_difference(mocs_op):
     assert mocs_op["first"].difference(mocs_op["second"]) == MOC.from_json(
-        {"0": [2, 5]}
+        {"0": [2, 5]},
     )
     assert mocs_op["first"] - mocs_op["second"] == MOC.from_json({"0": [2, 5]})
 
@@ -587,7 +635,7 @@ def test_from_fits_old():
         (
             MOC.from_json({"0": [1, 3]}),
             MOC.from_json({"0": [0, 2, 4, 5, 6, 7, 8, 9, 10, 11]}),
-        )
+        ),
     ],
 )
 def test_moc_complement(input, expected):
@@ -616,7 +664,8 @@ def test_from_valued_healpix_cells_different_sizes():
     values = np.array([])
 
     with pytest.raises(
-        ValueError, match="`uniq` and values do not have the same size."
+        ValueError,
+        match="`uniq` and values do not have the same size.",
     ):
         MOC.from_valued_healpix_cells(uniq, values, 12)
 
@@ -638,7 +687,11 @@ def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):
     values = np.array([-1.0])
 
     MOC.from_valued_healpix_cells(
-        uniq, values, 12, cumul_from=cumul_from, cumul_to=cumul_to
+        uniq,
+        values,
+        12,
+        cumul_from=cumul_from,
+        cumul_to=cumul_to,
     )
 
 
@@ -673,7 +726,9 @@ def test_from_valued_healpix_cells_bayestar():
 def test_from_valued_healpix_cells_bayestar_and_split():
     fits_mom_filename = "./resources/bayestar.multiorder.fits"
     moc = MOC.from_multiordermap_fits_file(
-        fits_mom_filename, cumul_from=0.0, cumul_to=0.9
+        fits_mom_filename,
+        cumul_from=0.0,
+        cumul_to=0.9,
     )
     count = moc.split_count()
     assert count == 2

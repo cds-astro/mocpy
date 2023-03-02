@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.2]
+
+### Added
+
+* `MOC.MAX_ORDER` and `TimeMOC.MAX_ORDER` to replace former `IntervalSet.HPX_MAX_ORDER` and `IntervalSet.TIME_MAX_ORDER`
+* `MOC.to_depth29_ranges` (+test) to replace former `IntervalSet.nested`
+* `TimeMOC.to_depth61_ranges`
+* tests on `MOC.uniq_hpx`
+
+### Bugfix
+
+* :bug: return statement was missing in `MOC.uniq_hpx`
+
+
 ## [0.12.1]
 
 ### Added
@@ -53,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * ⚠️ BREAKING: `times_to_microseconds` and `microseconds_to_times` moved from `utils` to `tmoc`.
 * ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
+    +  ⚠️ BREAKING: the output of `uniq_hpx` is not sorted (but follow the order of the cells in the internal range list)
 * ⚠️ BREAKING: `STMOC.query_by_time` now takes in input a `TimeMOC`
 * ⚠️ BREAKING: `STMOC.query_by_space` now returns a `MOC`
 * ⚠️ BREAKING: `TimeMOC.contains` does not take any longer a time resolution as input parameter

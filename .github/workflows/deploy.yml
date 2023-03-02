@@ -92,8 +92,8 @@ jobs:
              echo "Loop on PYBIN: $PYBIN"
              "${PYBIN}/pip" install maturin
              "${PYBIN}/maturin" -V
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
            done'
 
   build-windows-wheels:

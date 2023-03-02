@@ -70,6 +70,10 @@ class MOC(AbstractMOC):
     5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
     """
 
+    # Maximum order (or depth) of a MOC
+    # (do not remove since it may be used externally).
+    MAX_ORDER = np.uint8(29)
+
     __create_key = object()
 
     def __init__(self, create_key, store_index):
@@ -1053,13 +1057,15 @@ class MOC(AbstractMOC):
     @classmethod
     def from_depth29_ranges(cls, max_depth, ranges):
         """
-        Create a MOC from a set of HEALPix ranges at order 29.
+        Create a MOC from a set of ranges of HEALPix Nested indices at order 29.
+        For each range, the lower bound is inclusive and the upper bound is exclusive.
+        The range `[0, 12*4^29[` represents the full-sky.
 
         Parameters
         ----------
         max_depth : int, The resolution of the MOC
         ranges : `~numpy.ndarray`, optional
-                a N x 2 numpy array representing the set of depth 29 ranges.
+                a N x 2 numpy array representing the set of depth 29 HEALPix nested ranges.
                 defaults to `np.zeros((0, 2), dtype=np.uint64)`
 
         Returns
@@ -1432,8 +1438,21 @@ class MOC(AbstractMOC):
 
     @property
     def uniq_hpx(self):
-        """Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC."""
-        mocpy.to_uniq_hpx(self._store_index)
+        """
+        Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC.
+
+        Warning
+        -------
+        The output is not sorted, the order follow the order of HEALPix cells in
+        the underlying sorted array of depth29 nested ranges, i.e. the natural order
+        of the cells is the underlying z-order curve.
+        """
+        return mocpy.to_uniq_hpx(self._store_index)
+
+    @property
+    def to_depth29_ranges(self):
+        """Return the list of order 29 HEALPix nested ranges this MOC contains."""
+        return mocpy.to_ranges(self._store_index)
 
     def to_rgba(self, y_size=300):
         """
