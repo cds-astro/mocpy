@@ -1058,6 +1058,7 @@ class MOC(AbstractMOC):
     def from_depth29_ranges(cls, max_depth, ranges):
         """
         Create a MOC from a set of ranges of HEALPix Nested indices at order 29.
+
         For each range, the lower bound is inclusive and the upper bound is exclusive.
         The range `[0, 12*4^29[` represents the full-sky.
 
@@ -1217,15 +1218,12 @@ class MOC(AbstractMOC):
         votable.write(r.content)
 
         return parse_single_table(votable).to_table()
-
-    # note to devs: performing function call in function definition won't bring a bug
-    # only because this defines a constant. ignoring BugBear warning B008 here. Do not reproduce.
     def wcs(
         self,
         fig,
         coordsys="icrs",
         projection="AIT",
-        rotation=Angle(0, u.radian),
+        rotation=None,
     ):
         """
         Get a wcs that can be given to matplotlib to plot the MOC.
@@ -1269,6 +1267,8 @@ class MOC(AbstractMOC):
         >>> plt.ylabel('dec')
         >>> plt.grid(color="black", linestyle="dotted")
         """
+        if rotation is None:
+            rotation = Angle(0, u.radian)
         # The center is set to the barycenter of all its HEALPix cells
         center = self.barycenter()
         # The fov is computed from the largest distance between the center and any cells of it
