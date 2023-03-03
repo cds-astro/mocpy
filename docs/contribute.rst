@@ -83,6 +83,9 @@ Now build package
    
 This step will inform you of any issue in the rust part.
 
+- After a new version of mocpy goes out, if a `maturin develop --release` does not actualise your `Cargo.toml` file, you might need to before executing the `maturin` command again::
+
+    rm Cargo.lock && cargo clean
 
 Running the python tests
 ------------------------
@@ -96,6 +99,11 @@ Once your environment is set up and activated you can run the tests
 - To run the tests with coverage report locally::
 
     python -m pytest -v python/mocpy --cov-report=term --cov=python/mocpy
+
+- When contributing to the notebooks::
+
+    python -m pip install -r requirements/notebooks.txt
+    python -m pytest --nbmake -n=auto "./notebooks"
 
 You also can have a html output of the coverage. For that set `--cov-report=html`,
 this will generate an `htmlcov` folder where all the static html files can be found.
