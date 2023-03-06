@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Contribute &#8212; mocpy 0.12.2 documentation</title>
+    <title>Contribute &#8212; mocpy 0.12.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -52,7 +52,7 @@
 	
       </li>
       <li>
-	<a href="index.html">mocpy 0.12.2 documentation</a>
+	<a href="index.html">mocpy 0.12.3 documentation</a>
 	 &#187;
       </li>
       
@@ -164,6 +164,13 @@ for developping and testing MOCpy:</p>
 </li>
 </ul>
 <p>This step will inform you of any issue in the rust part.</p>
+<ul>
+<li><p>After a new version of mocpy goes out, if a <code class="xref py py-obj docutils literal notranslate"><span class="pre">maturin</span> <span class="pre">develop</span> <span class="pre">--release</span></code> does not actualise your <code class="xref py py-obj docutils literal notranslate"><span class="pre">Cargo.toml</span></code> file, you might need to before executing the <code class="xref py py-obj docutils literal notranslate"><span class="pre">maturin</span></code> command again:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="n">Cargo</span><span class="o">.</span><span class="n">lock</span> <span class="o">&amp;&amp;</span> <span class="n">cargo</span> <span class="n">clean</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </section>
 <section id="running-the-python-tests">
 <h2>Running the python tests<a class="headerlink" href="#running-the-python-tests" title="Permalink to this heading">¶</a></h2>
@@ -176,6 +183,12 @@ for developping and testing MOCpy:</p>
 </li>
 <li><p>To run the tests with coverage report locally:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="n">python</span><span class="o">/</span><span class="n">mocpy</span> <span class="o">--</span><span class="n">cov</span><span class="o">-</span><span class="n">report</span><span class="o">=</span><span class="n">term</span> <span class="o">--</span><span class="n">cov</span><span class="o">=</span><span class="n">python</span><span class="o">/</span><span class="n">mocpy</span>
+</pre></div>
+</div>
+</li>
+<li><p>When contributing to the notebooks:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">/</span><span class="n">notebooks</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">--</span><span class="n">nbmake</span> <span class="o">-</span><span class="n">n</span><span class="o">=</span><span class="n">auto</span> <span class="s2">&quot;./notebooks&quot;</span>
 </pre></div>
 </div>
 </li>
