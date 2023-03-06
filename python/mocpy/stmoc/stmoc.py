@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function
 
 import numpy as np
 
@@ -27,20 +25,21 @@ class STMOC(AbstractMOC):
             create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the ST-MOC in the rust-side storage
         """
-        super(STMOC, self).__init__(
-            AbstractMOC._create_key, STMOC.__create_key, store_index
+        super().__init__(
+            AbstractMOC._create_key, STMOC.__create_key, store_index,
         )
-        assert (
-            create_key == STMOC.__create_key
-        ), "ST-MOC instantiation is only allowed by class or super-class methods"
+        if create_key != STMOC.__create_key:
+            raise PermissionError(
+                "ST-MOC instantiation is only allowed by class or super-class methods",
+            )
 
     def __del__(self):
         """Erase STMOC."""
-        super(STMOC, self).__del__()
+        super().__del__()
 
     def __eq__(self, other):
         """Assert equality between MOCs."""
-        return super(STMOC, self).__eq__(other)
+        return super().__eq__(other)
 
     @property
     def max_depth(self):
@@ -98,13 +97,12 @@ class STMOC(AbstractMOC):
             raise ValueError("Times and positions must be 1D arrays.")
 
         index = mocpy.from_time_lonlat(times, time_depth, lon, lat, spatial_depth)
-        result = cls(cls.__create_key, index)
 
-        return result
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_time_ranges_positions(
-        cls, times_start, times_end, lon, lat, time_depth=61, spatial_depth=29
+        cls, times_start, times_end, lon, lat, time_depth=61, spatial_depth=29,
     ):
         """
         Create a 2D Coverage from a set of times and positions associated to each time.
@@ -152,15 +150,14 @@ class STMOC(AbstractMOC):
             raise ValueError("Times and positions must be 1D arrays.")
 
         index = mocpy.from_time_ranges_lonlat(
-            times_start, times_end, time_depth, lon, lat, spatial_depth
+            times_start, times_end, time_depth, lon, lat, spatial_depth,
         )
-        result = cls(cls.__create_key, index)
 
-        return result
+        return cls(cls.__create_key, index)
 
     @classmethod
     def from_spatial_coverages(
-        cls, times_start, times_end, spatial_coverages, time_depth=61
+        cls, times_start, times_end, spatial_coverages, time_depth=61,
     ):
         """
         Create a 2D Coverage from a set of time ranges and spatial coverages associated to them.
@@ -187,10 +184,10 @@ class STMOC(AbstractMOC):
         times_end = times_to_microseconds(times_end)
 
         if times_start.shape != times_end.shape or times_start.shape[0] != len(
-            spatial_coverages
+            spatial_coverages,
         ):
             raise ValueError(
-                "Time ranges and spatial coverages must have the same length"
+                "Time ranges and spatial coverages must have the same length",
             )
 
         if times_start.ndim != 1:
@@ -198,14 +195,13 @@ class STMOC(AbstractMOC):
 
 
         spatial_coverages_indices = np.fromiter(
-            (arg._store_index for arg in spatial_coverages), dtype=AbstractMOC.store_index_dtype()
+            (arg._store_index for arg in spatial_coverages), dtype=AbstractMOC.store_index_dtype(),
         )
         index = mocpy.from_time_ranges_spatial_coverages(
-            times_start, times_end, time_depth, spatial_coverages_indices
+            times_start, times_end, time_depth, spatial_coverages_indices,
         )
-        result = cls(cls.__create_key, index)
 
-        return result
+        return cls(cls.__create_key, index)
 
     def query_by_time(self, tmoc):
         """
@@ -295,10 +291,11 @@ class STMOC(AbstractMOC):
         if not inside:
             result = ~result
 
-        return result
+        return result # noqa: RET504
 
     @classmethod
-    def load(cls, path, format="fits"):
+    # A002: Argument `format` is shadowing a python function
+    def load(cls, path, format="fits"): # noqa: A002
         """
         Load the Spatial MOC from a file.
 
@@ -317,15 +314,14 @@ class STMOC(AbstractMOC):
         if format == "fits":
             index = mocpy.coverage_2d_from_fits_file(path)
             return cls(cls.__create_key, index)
-        elif format == "ascii":
+        if format == "ascii":
             index = mocpy.coverage_2d_from_ascii_file(path)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.coverage_2d_from_json_file(path)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("fits", "ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -334,7 +330,8 @@ class STMOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
-    def from_string(cls, value, format="ascii"):
+    # A002: Argument `format` is shadowing a python function
+    def from_string(cls, value, format="ascii"): # noqa: A002
         """
         Deserialize the Spatial MOC from the given string.
 
@@ -350,9 +347,8 @@ class STMOC(AbstractMOC):
         if format == "ascii":
             index = mocpy.coverage_2d_from_ascii_str(value)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.coverage_2d_from_json_str(value)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))

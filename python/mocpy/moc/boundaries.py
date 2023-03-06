@@ -9,10 +9,8 @@ except ImportError:
     pass
 
 from astropy.coordinates import ICRS, SkyCoord
-from astropy.wcs.utils import skycoord_to_pixel
 import astropy.units as u
 
-from .. import mocpy
 
 
 class Boundaries:
@@ -25,7 +23,7 @@ class Boundaries:
 
         # Split the global MOC graph into all its non connected subgraphs.
         graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(
-            max_order, ipixels
+            max_order, ipixels,
         )
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
@@ -34,9 +32,8 @@ class Boundaries:
     @staticmethod
     def _compute_HEALPix_indices(m, order):
         moc = m
-        if order:
-            if m.max_order > order:
-                moc = m.degrade_to_order(order)
+        if order and m.max_order > order:
+            moc = m.degrade_to_order(order)
 
         max_order = moc.max_order
         ipixels = moc.flatten()
@@ -44,7 +41,7 @@ class Boundaries:
         # Take the complement if the MOC covers more than half of the sky => the perimeter(MOC) = perimeter(complement(MOC))
         # but we process less hpx cells
         num_ipixels = 3 << (2 * (max_order + 1))
-        sky_fraction = ipixels.shape[0] / float(num_ipixels)
+        ipixels.shape[0] / float(num_ipixels)
 
         # if sky_fraction > 0.5:
         #    ipixels_all = np.arange(num_ipixels)
@@ -111,10 +108,10 @@ class Boundaries:
         ipix_lat_deg = ipix_lat.to_value(u.deg)
 
         ipix_lon_repr = np.around(
-            np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3
+            np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3,
         ).tolist()
         ipix_lat_repr = np.around(
-            np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3
+            np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3,
         ).tolist()
 
         west_border = ~isin_border[0, :]
