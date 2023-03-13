@@ -42,4 +42,33 @@ For more information about the MOCPy Rust core, see the `moc crate <https://crat
 .. |Doc| image:: https://img.shields.io/badge/Documentation-link-green.svg
     :target: https://cds-astro.github.io/mocpy/
 
+Installation
+------------
+
+We strongly recommend to work in an environnement
+
+Latest stable version
+*********************
+
+- from pip ``pip install mocpy``
+- from conda ``conda install mocpy``
+- from this repository
+
+.. code::
+
+   git clone https://github.com/cds-astro/mocpy.git
+   cd mocpy
+   pip install .
+ 
+Note that the point is important.
+
+Developpement version
+*********************
+
+.. code::
+
+   git clone -b develop https://github.com/cds-astro/mocpy.git
+   cd mocpy
+   pip install .
+
 
