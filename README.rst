@@ -51,7 +51,7 @@ Latest stable version
 *********************
 
 - from pip ``pip install mocpy``
-- from conda ``conda install mocpy``
+- from conda ``conda install -c conda-forge mocpy``
 - from this repository
 
 .. code::
