@@ -77,9 +77,6 @@ extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803",
 # N816:  Variable `mixed_Case` in global scope should not be mixedCase
 # FBT002: Boolean default in function definition (would require to change all API)
 
-[tool.ruff.flake8-errmsg]
-max-string-length = 20
-
 [tool.ruff.flake8-import-conventions]
 # Declare the default aliases.
 # seaborn = "sns"
