@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * `sum([moc1, moc2, moc3])` now works correctly
+* `MOC.wcs()` now works correctly for non-squared figures
 
 ## [0.12.3]
 
