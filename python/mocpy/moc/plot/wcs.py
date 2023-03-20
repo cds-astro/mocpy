@@ -72,9 +72,12 @@ class WCS:
         width_px, height_px = fig.get_size_inches() * float(fig.dpi)
 
         cdelt_x = fov.to_value("deg") / float(width_px)
+        cdelt_y = fov.to_value("deg") / float(height_px)
+
+        cdelt = max(cdelt_x, cdelt_y)
 
         self.w.wcs.crpix = [width_px / 2.0, height_px / 2.0]
-        self.w.wcs.cdelt = [-cdelt_x, cdelt_x]
+        self.w.wcs.cdelt = [-cdelt, cdelt]
 
         if coordsys == "icrs":
             self.w.wcs.crval = [center.icrs.ra.deg, center.icrs.dec.deg]
