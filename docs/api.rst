@@ -8,7 +8,7 @@ Class overview
 
 .. autosummary::
    :toctree: stubs
-   
+
    mocpy.MOC
    mocpy.TimeMOC
    mocpy.STMOC
