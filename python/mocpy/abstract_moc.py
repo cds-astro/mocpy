@@ -1,5 +1,6 @@
 
 import os
+from pathlib import Path
 from io import BytesIO
 import numpy as np
 
@@ -27,9 +28,10 @@ class AbstractMOC(serializer.IO):
             create_sub_key: Object ensuring sub-classes __init__ is called from this (abstract) class or the sub-class
             store_index: index of the ST-MOC in the rust-side storage
         """
-        assert (
-            create_key == AbstractMOC._create_key
-        ), "Abstract MOC instantiation is only allowed by sub-class methods"
+        if create_key != AbstractMOC.__create_key:
+            raise PermissionError(
+                "S-MOC instantiation is only allowed by class or super-class methods",
+            )
         self.__create_sub_key = create_sub_key
         self._store_index = store_index
 
@@ -69,14 +71,22 @@ class AbstractMOC(serializer.IO):
         return self.__copy__()
 
     @staticmethod
-    def store_index_dtype():
+    def _store_index_dtype():
+        """Store the datatype of the index.
+
+        This function is used for portability between 32 and 64 bits systems.
+
+        Returns
+        -------
+        _type_
+            Type of the index, can only take the values np.uint64 or np.uint32
+        """
         usize_n_bits = mocpy.usize_n_bits()
         if usize_n_bits == 64:
             return np.uint64
-        elif usize_n_bits == 32:
+        if usize_n_bits == 32:
             return np.uint32
-        else:
-            raise ValueError("Unsupported store index usize type!")
+        raise ValueError("Unsupported store index usize type!")
 
     def __add__(self, moc):
         """
@@ -165,7 +175,7 @@ class AbstractMOC(serializer.IO):
 
     def empty(self):
         """
-        Checks whether the MOC is empty or not.
+        Check whether the MOC is empty or not.
 
         Returns
         -------
@@ -181,12 +191,12 @@ class AbstractMOC(serializer.IO):
 
     @property
     def min_index(self):
-        """Returns the smallest index (at the deepest absolute resolution) the MOC contains."""
+        """Return the smallest index (at the deepest absolute resolution) the MOC contains."""
         return mocpy.first_index(self._store_index)
 
     @property
     def max_index(self):
-        """Returns the largest index (at the deepest absolute resolution) the MOC contains."""
+        """Return the largest index (at the deepest absolute resolution) the MOC contains."""
         return mocpy.last_index(self._store_index)
 
     @property
@@ -231,7 +241,7 @@ class AbstractMOC(serializer.IO):
 
     def complement(self):
         """
-        Returns the complement of the MOC instance.
+        Return the complement of the MOC instance.
 
         Returns
         -------
@@ -263,7 +273,7 @@ class AbstractMOC(serializer.IO):
                 [self._store_index, another_moc._store_index],
                 np.fromiter(
                     (arg._store_index for arg in args),
-                    dtype=AbstractMOC.store_index_dtype(),
+                    dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_intersection(store_indices)
@@ -293,7 +303,7 @@ class AbstractMOC(serializer.IO):
                 [self._store_index, another_moc._store_index],
                 np.fromiter(
                     (arg._store_index for arg in args),
-                    dtype=AbstractMOC.store_index_dtype(),
+                    dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_union(store_indices)
@@ -304,7 +314,7 @@ class AbstractMOC(serializer.IO):
 
     def symmetric_difference(self, another_moc, *args):
         """
-        Symmetruic difference (XOR) between the MOC instance and other MOCs.
+        Symmetric difference (XOR) between the MOC instance and other MOCs.
 
         Parameters
         ----------
@@ -323,7 +333,7 @@ class AbstractMOC(serializer.IO):
                 [self._store_index, another_moc._store_index],
                 np.fromiter(
                     (arg._store_index for arg in args),
-                    dtype=AbstractMOC.store_index_dtype(),
+                    dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
@@ -355,7 +365,7 @@ class AbstractMOC(serializer.IO):
                 [another_moc._store_index],
                 np.fromiter(
                     (arg._store_index for arg in args),
-                    dtype=AbstractMOC.store_index_dtype(),
+                    dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index_union = mocpy.multi_union(store_indices)
@@ -368,7 +378,7 @@ class AbstractMOC(serializer.IO):
 
     def extended(self):
         """
-        Returns the MOC extended by the external border made of cells at the MOC maximum depth.
+        Return the MOC extended by the external border made of cells at the MOC maximum depth.
 
         The only difference with respect to `add_neighbours` is that `extended` returns a new MOC
         instead of modifying the existing one.
@@ -383,7 +393,7 @@ class AbstractMOC(serializer.IO):
 
     def contracted(self):
         """
-        Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
+        Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
 
         The only difference with respect to `remove_neighbours` is that `contracted` returns a new MOC
         instead of modifying the existing one.
@@ -398,7 +408,7 @@ class AbstractMOC(serializer.IO):
 
     def add_neighbours(self):
         """
-        Extends the MOC instance so that it includes the HEALPix cells touching its border.
+        Extend the MOC instance so that it includes the HEALPix cells touching its border.
 
         The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.
 
@@ -421,7 +431,7 @@ class AbstractMOC(serializer.IO):
 
     def remove_neighbours(self):
         """
-        Removes from the MOC instance the HEALPix cells located at its border.
+        Remove from the MOC instance the HEALPix cells located at its border.
 
         The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.
 
@@ -445,7 +455,7 @@ class AbstractMOC(serializer.IO):
     @classmethod
     def from_json(cls, json_moc):
         """
-        Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
+        Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
 
         Parameters
         ----------
@@ -466,7 +476,7 @@ class AbstractMOC(serializer.IO):
     @classmethod
     def from_fits(cls, path_or_url):
         """
-        Loads a MOC from a FITS file.
+        Load a MOC from a FITS file.
 
         The specified FITS file must store the MOC
         (i.e. the list of HEALPix cells it contains)
@@ -484,9 +494,8 @@ class AbstractMOC(serializer.IO):
 
         """
         if isinstance(path_or_url, BytesIO):
-            bytes = path_or_url.read()
-            return cls._from_fits_raw_bytes(bytes)
-        elif os.path.isfile(path_or_url):
+            return cls._from_fits_raw_bytes(path_or_url.read())
+        if os.path.isfile(path_or_url):
             return cls.load(path_or_url, format="fits")
         else:
             import requests
@@ -527,7 +536,7 @@ class AbstractMOC(serializer.IO):
 
     def degrade_to_order(self, new_order):
         """
-        Degrades the MOC instance to a new, less precise, MOC.
+        Degrade the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``.

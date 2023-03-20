@@ -16,7 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [unreleased]
 
+### Changed
+
 * `AbstractMOC.__init__` raises `PermissionError` if user tries to modify order manually
+* `AbstractMOC.store_index_dtype` became `AbstractMOC._store_index_dtype` as is is intended for internal use only to handle 32 and 64b systems
 
 # [0.12.3]
 
