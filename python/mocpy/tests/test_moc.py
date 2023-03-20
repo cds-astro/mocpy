@@ -89,10 +89,10 @@ def test_uniq_hpx():
 
 
 def test_to_depth29_ranges(isets):
-    l = isets["a"].to_depth29_ranges
+    l = isets["a"].to_depth29_ranges # noqa: E741
     r = np.array([[27, 126]], dtype=np.uint64)
     assert np.array_equal(l, r)
-    l = isets["b"].to_depth29_ranges
+    l = isets["b"].to_depth29_ranges # noqa: E741
     r = np.array([[9, 61], [68, 105]], dtype=np.uint64)
     assert np.array_equal(l, r)
 
@@ -280,9 +280,7 @@ def moc_from_fits_image():
     image_path = "resources/image_with_mask.fits.gz"
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
-
-    return moc
+        return MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
 
 
 @pytest.fixture()
@@ -413,7 +411,7 @@ def test_serialize_to_str(moc, expected):
         ("moc", False, "ascii", True),
     ],
 )
-def test_write(moc_from_json, filename, overwrite, format, os_error):
+def test_write(moc_from_json, filename, overwrite, format, os_error): # noqa: A002
     if os_error:
         with pytest.raises(OSError):  # TODO add the match parameter of the exception
             moc_from_json.save(filename, format=format, overwrite=overwrite)
@@ -603,7 +601,11 @@ def test_moc_union(mocs_op):
     assert mocs_op["first"] | mocs_op["second"] == MOC.from_json(
         {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
-
+    
+def test_sum(mocs_op):
+    assert sum([mocs_op["first"], mocs_op["second"]]) == MOC.from_json(
+        {"0": [0, 1, 2, 3, 4, 5, 7]},
+    )
 
 def test_moc_intersection(mocs_op):
     assert mocs_op["first"].intersection(mocs_op["second"]) == MOC.from_json(
@@ -630,7 +632,7 @@ def test_from_fits_old():
 
 
 @pytest.mark.parametrize(
-    "input, expected",
+    "input_MOC, expected",
     [
         (
             MOC.from_json({"0": [1, 3]}),
@@ -638,9 +640,9 @@ def test_from_fits_old():
         ),
     ],
 )
-def test_moc_complement(input, expected):
-    assert input.complement() == expected
-    assert ~input == expected
+def test_moc_complement(input_MOC, expected):
+    assert input_MOC.complement() == expected
+    assert ~input_MOC == expected
 
 
 def test_spatial_res_to_order():

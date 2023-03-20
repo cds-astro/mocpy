@@ -1,8 +1,7 @@
 
-import os
-from pathlib import Path
 from io import BytesIO
 import numpy as np
+from pathlib import Path
 
 from . import serializer
 
@@ -28,7 +27,7 @@ class AbstractMOC(serializer.IO):
             create_sub_key: Object ensuring sub-classes __init__ is called from this (abstract) class or the sub-class
             store_index: index of the ST-MOC in the rust-side storage
         """
-        if create_key != AbstractMOC.__create_key:
+        if create_key != AbstractMOC._create_key:
             raise PermissionError(
                 "S-MOC instantiation is only allowed by class or super-class methods",
             )
@@ -104,6 +103,27 @@ class AbstractMOC(serializer.IO):
         result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
             The union of self and moc.
         """
+        return self.union(moc)
+    
+    def __radd__(self, moc):
+        """
+        Operator + definition.
+
+        Computes the union of self with another MOC
+
+        Parameters
+        ----------
+        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            Another MOC to compute the union with.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+            The union of self and moc.
+        """
+        if moc == 0:
+            # allows to use the sum() method on a list of MOCs
+            return self
         return self.union(moc)
 
     def __or__(self, moc):
@@ -474,7 +494,7 @@ class AbstractMOC(serializer.IO):
         )
 
     @classmethod
-    def from_fits(cls, path_or_url):
+    def from_fits(cls, path_or_url, timeout=1000):
         """
         Load a MOC from a FITS file.
 
@@ -486,6 +506,8 @@ class AbstractMOC(serializer.IO):
         ----------
         path : str
             The path to the FITS file.
+        timeout : float
+            Timeout for the query, defaults to 1000s
 
         Returns
         -------
@@ -495,19 +517,19 @@ class AbstractMOC(serializer.IO):
         """
         if isinstance(path_or_url, BytesIO):
             return cls._from_fits_raw_bytes(path_or_url.read())
-        if os.path.isfile(path_or_url):
+        if Path(path_or_url).is_file():
             return cls.load(path_or_url, format="fits")
-        else:
-            import requests
+        
+        import requests
 
-            response = requests.get(path_or_url, headers={"User-Agent": "MOCPy"})
-            if response:
-                raw_bytes = BytesIO()
-                raw_bytes.write(response.content)
-                raw_bytes.seek(0)
-                return cls.from_fits(raw_bytes)
-            else:
-                response.raise_for_status()
+        response = requests.get(path_or_url, headers={"User-Agent": "MOCPy"}, timeout=timeout)
+        if response:
+            raw_bytes = BytesIO()
+            raw_bytes.write(response.content)
+            raw_bytes.seek(0)
+            return cls.from_fits(raw_bytes)
+        response.raise_for_status()
+        return None
 
     @classmethod
     def from_str(cls, value):
@@ -553,9 +575,9 @@ class AbstractMOC(serializer.IO):
         """
         raise NotImplementedError("Method degrade_to_order not implemented")
 
-    def to_string(self, format="ascii", fold=0):
+    def to_string(self, format="ascii", fold=0): # noqa: A002
         """
-        Writes the MOC into a string.
+        Write the MOC into a string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
 
@@ -571,20 +593,17 @@ class AbstractMOC(serializer.IO):
         if format == "ascii":
             if fold > 0:
                 return mocpy.to_ascii_str_with_fold(self._store_index, fold)
-            else:
-                return mocpy.to_ascii_str(self._store_index)
-        elif format == "json":
+            return mocpy.to_ascii_str(self._store_index)
+        if format == "json":
             if fold > 0:
                 return mocpy.to_json_str_with_fold(self._store_index, fold)
-            else:
-                return mocpy.to_json_str(self._store_index)
-        else:
-            formats = ("ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+            return mocpy.to_json_str(self._store_index)
+        formats = ("ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))
 
-    def save(self, path, format="fits", overwrite=False, pre_v2=False, fold=0):
+    def save(self, path, format="fits", overwrite=False, pre_v2=False, fold=0): # noqa: A002
         """
-        Writes the MOC to a file.
+        Write the MOC to a file.
 
         Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
 
@@ -602,10 +621,9 @@ class AbstractMOC(serializer.IO):
         fold: int
             if >0, print ascii or json output with a maximum line width
         """
-        path = str(path)
-        import os
+        path = Path(path)
 
-        file_exists = os.path.isfile(path)
+        file_exists = path.is_file()
 
         if file_exists and not overwrite:
             raise OSError(
@@ -614,17 +632,17 @@ class AbstractMOC(serializer.IO):
             )
 
         if format == "fits":
-            mocpy.to_fits_file(self._store_index, path, pre_v2)
+            mocpy.to_fits_file(self._store_index, str(path), pre_v2)
         elif format == "ascii":
             if fold > 0:
-                mocpy.to_ascii_file(self._store_index, path)
+                mocpy.to_ascii_file(self._store_index, str(path))
             else:
-                mocpy.to_ascii_file_with_fold(self._store_index, path, fold)
+                mocpy.to_ascii_file_with_fold(self._store_index, str(path), fold)
         elif format == "json":
             if fold > 0:
-                mocpy.to_json_file(self._store_index, path)
+                mocpy.to_json_file(self._store_index, str(path))
             else:
-                mocpy.to_json_file_with_fold(self._store_index, path, fold)
+                mocpy.to_json_file_with_fold(self._store_index, str(path), fold)
         else:
             formats = ("fits", "ascii", "json")
             raise ValueError("format should be one of %s" % (str(formats)))

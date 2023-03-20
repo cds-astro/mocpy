@@ -14,14 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Fixed** for any bug fixes.
 * **Security** in case of vulnerabilities.
 
-# [unreleased]
+## [unreleased]
 
 ### Changed
 
 * `AbstractMOC.__init__` raises `PermissionError` if user tries to modify order manually
 * `AbstractMOC.store_index_dtype` became `AbstractMOC._store_index_dtype` as is is intended for internal use only to handle 32 and 64b systems
 
-# [0.12.3]
+### Fixed
+
+* `sum([moc1, moc2, moc3])` now works correctly
+
+## [0.12.3]
 
 ### Added
 
@@ -61,7 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * :bug: a bug was introduced in [0.12.0] on the functions `query_simbad` and `query_vizier_table` that are compatible with `pre_v2` format only
 * :bug: when `max_depth=None` in `MOC.from_valued_cells`
 
-
 ## [0.12.0]
 
 ### Removed
@@ -92,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * ⚠️ BREAKING: `times_to_microseconds` and `microseconds_to_times` moved from `utils` to `tmoc`.
 * ⚠️ BREAKING: `uniq` removed from `IntervalSet`, but replacing method `uniq_hpx` added to `MOC`
-    +  ⚠️ BREAKING: the output of `uniq_hpx` is not sorted (but follow the order of the cells in the internal range list)
+  * ⚠️ BREAKING: the output of `uniq_hpx` is not sorted (but follow the order of the cells in the internal range list)
 * ⚠️ BREAKING: `STMOC.query_by_time` now takes in input a `TimeMOC`
 * ⚠️ BREAKING: `STMOC.query_by_space` now returns a `MOC`
 * ⚠️ BREAKING: `TimeMOC.contains` does not take any longer a time resolution as input parameter
@@ -319,4 +322,3 @@ This method does not rely on astropy_healpix as there is for the moment no metho
 * Notebooks have been updated and all the plots now use the new methods `fill` and `border`.
 * A new package `spatial`, invisible from the user, but keeping all the code of spatial   MOCs (plotting methods, border computation, special utils for creating WCS...) has been created. tmocs and core functions are still located in the root of the project.
 * Add of a changelog
-
