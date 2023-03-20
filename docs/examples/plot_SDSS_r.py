@@ -1,8 +1,8 @@
 import astropy.units as u
 import matplotlib.pyplot as plt
-from astropy.coordinates import Angle, SkyCoord
+from astropy.coordinates import Angle
 
-from mocpy import MOC, WCS
+from mocpy import MOC
 
 # Load a MOC
 filename = "./../../resources/P-SDSS9-r.fits"
