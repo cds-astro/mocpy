@@ -208,6 +208,7 @@ class MOC(AbstractMOC):
         warnings.warn(
             "This method is deprecated and has been replaced by contains_lonlat",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return self.contains_lonlat(lon, lat, keep_inside=keep_inside)
@@ -393,6 +394,7 @@ class MOC(AbstractMOC):
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
             DeprecationWarning,
+            stacklevel=2,
         )
         return Boundaries.get(self, order)
 
@@ -744,6 +746,7 @@ class MOC(AbstractMOC):
                 "To avoid an extra loop, it is preferable to provide the max_depth parameter."
                 "It will probably become mandatory in future releases.",
                 UserWarning,
+                stacklevel=2,
             )
 
             max_depth = int(np.log2(uniq.max() >> 2)) >> 1
@@ -1218,6 +1221,7 @@ class MOC(AbstractMOC):
         votable.write(r.content)
 
         return parse_single_table(votable).to_table()
+
     def wcs(
         self,
         fig,
@@ -1304,6 +1308,7 @@ class MOC(AbstractMOC):
             "Please refer to this documentation page for plotting MOCs using"
             "matplotlib: https://cds-astro.github.io/mocpy/xamples/examples.html#loading-and-plotting-the-moc-of-sdss",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         frame = ICRS() if frame is None else frame
