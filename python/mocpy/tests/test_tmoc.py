@@ -36,19 +36,28 @@ def test_time_to_microsec_2():
 
 def test_complement():
     assert TimeMOC.new_empty(61).complement() == TimeMOC.from_depth61_ranges(
-        61, np.array([[0, 2 * 2**61]], dtype=np.uint64)
+        61,
+        np.array([[0, 2 * 2**61]], dtype=np.uint64),
     )
     assert TimeMOC.new_empty(61).complement().complement() == TimeMOC.new_empty(61)
     assert TimeMOC.from_depth61_ranges(
-        61, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
+        61,
+        np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64),
     ).complement() == TimeMOC.from_depth61_ranges(
-        61, np.array([[0, 1], [2, 5], [8, 2 * 2**61]], dtype=np.uint64)
+        61,
+        np.array([[0, 1], [2, 5], [8, 2 * 2**61]], dtype=np.uint64),
     )
 
+
 def test_to_depth61_ranges():
-    assert (TimeMOC.from_depth61_ranges(
-        61, np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64)
-    ).to_depth61_ranges == np.array([[1, 2], [5, 8]], dtype=np.uint64)).all()
+    assert (
+        TimeMOC.from_depth61_ranges(
+            61,
+            np.array([[1, 2], [6, 8], [5, 6]], dtype=np.uint64),
+        ).to_depth61_ranges
+        == np.array([[1, 2], [5, 8]], dtype=np.uint64)
+    ).all()
+
 
 def test_empty_tmoc():
     times = Time([], format="jd", scale="tdb")
@@ -75,7 +84,9 @@ def test_empty_tmoc():
 
 def test_simple_tmoc():
     times = Time(
-        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC], format="jd", scale="tdb"
+        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
+        format="jd",
+        scale="tdb",
     )
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 2 * 1e-6
@@ -97,20 +108,21 @@ def test_single_range_time_tmoc():
     max_times = Time(3 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb")
 
     tmoc = TimeMOC.from_time_ranges(
-        min_times, max_times, delta_t=TimeMOC.order_to_time_resolution(61)
+        min_times,
+        max_times,
+        delta_t=TimeMOC.order_to_time_resolution(61),
     )
     assert tmoc.total_duration.sec == 1 * 1e-6
     assert tmoc.max_order == 61
 
 
 def test_tmoc_from_time_ranges():
-    """"Test tmocs built from time ranges.
+    """Test tmocs built from time ranges.
 
     Assert a correct tmoc loaded from a fits file is equal to the
     tmoc built from a CSV file containing a list of time intervals.
     """
-
-    tmoc = TimeMOC.load('resources/TMOC/HST_SDSSg/TMoc.fits', 'fits')
+    tmoc = TimeMOC.load("resources/TMOC/HST_SDSSg/TMoc.fits", "fits")
 
     # Load HST_SDSSg from a CSV file
     data = ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
@@ -125,9 +137,10 @@ def test_tmoc_from_time_ranges():
     assert tmoc.max_time == tmoc2.max_time
     assert tmoc == tmoc2
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         TimeMOC.from_time_ranges(
-            Time([], format="jd", scale="tdb"), Time([3], format="jd", scale="tdb")
+            Time([], format="jd", scale="tdb"),
+            Time([3], format="jd", scale="tdb"),
         )
 
 
@@ -147,15 +160,20 @@ def test_tmoc_from_single_time_range():
 
 def test_add_neighbours():
     times = Time(
-        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC], format="jd", scale="tdb"
+        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
+        format="jd",
+        scale="tdb",
     )
     times_expected = Time(
-        np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb"
+        np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC,
+        format="jd",
+        scale="tdb",
     )
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
 
     tmoc_expected = TimeMOC.from_times(
-        times_expected, delta_t=TimeMOC.order_to_time_resolution(61)
+        times_expected,
+        delta_t=TimeMOC.order_to_time_resolution(61),
     )
     tmoc.add_neighbours()
 
@@ -164,15 +182,20 @@ def test_add_neighbours():
 
 def test_remove_neighbours():
     times = Time(
-        np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb"
+        np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC,
+        format="jd",
+        scale="tdb",
     )
     times_expected = Time(
-        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC], format="jd", scale="tdb"
+        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
+        format="jd",
+        scale="tdb",
     )
 
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     tmoc_expected = TimeMOC.from_times(
-        times_expected, delta_t=TimeMOC.order_to_time_resolution(61)
+        times_expected,
+        delta_t=TimeMOC.order_to_time_resolution(61),
     )
 
     tmoc.remove_neighbours()
@@ -182,12 +205,15 @@ def test_remove_neighbours():
 
 def test_add_remove_back_and_forth():
     times = Time(
-        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC], format="jd", scale="tdb"
+        [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
+        format="jd",
+        scale="tdb",
     )
 
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     tmoc_expected = TimeMOC.from_times(
-        times, delta_t=TimeMOC.order_to_time_resolution(61)
+        times,
+        delta_t=TimeMOC.order_to_time_resolution(61),
     )
 
     print(tmoc.to_string())
