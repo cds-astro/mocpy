@@ -7,11 +7,11 @@ from ..abstract_moc import AbstractMOC
 
 from .. import mocpy
 
-__author__ = "Matthieu Baumann, François-Xavier Pineau"
+__author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 DAY_MICRO_SEC = 86400000000.0
@@ -74,7 +74,7 @@ class TimeMOC(AbstractMOC):
     __create_key = object()
 
     def __init__(self, create_key, store_index):
-        """Is a Spatial Coverage (S-MOC).
+        """Is a Time Coverage (T-MOC).
 
         Args:
             create_key: Object ensure __init__ is called by super-class/class-methods only

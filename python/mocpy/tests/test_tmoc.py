@@ -326,10 +326,11 @@ def test_tmoc_save_load_deser():
     """
     tmoc = TimeMOC.from_string("31/1 32/4 35/")
     tmoc_ascii = tmoc.to_string("ascii")
-    tmoc_ascii
+    print(tmoc_ascii)
     tmoc_json = tmoc.to_string("json")
-    tmoc_json
+    print(tmoc_json)
     tmoc_bis = TimeMOC.from_string(tmoc_json, "json")
+    print(tmoc_bis)
     assert tmoc == tmoc_bis
 
     tmoc_bis = TimeMOC.load("resources/MOC2.0/tmoc.ascii.txt", "ascii")
