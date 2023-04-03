@@ -1453,7 +1453,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   #[pyfn(m)]
   fn time_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .load_fmoc_from_json(json.as_str())
+      .load_tmoc_from_json(json.as_str())
       .map_err(PyIOError::new_err)
   }
 
