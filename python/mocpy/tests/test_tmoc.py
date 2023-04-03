@@ -6,6 +6,7 @@ from astropy.io import ascii
 from ..tmoc import TimeMOC, times_to_microseconds, microseconds_to_times
 
 import numpy as np
+import re
 
 
 def test_time_to_microsec_1():
@@ -316,7 +317,7 @@ def test_intersection(a, b, expect):
     assert res == expect
 
 
-# ------- TESTING new features -------#
+# ------- TESTING IO features -------#
 def test_tmoc_save_load_deser():
     """Test of IO features.
 
@@ -325,25 +326,33 @@ def test_tmoc_save_load_deser():
     3. Save
     """
     tmoc = TimeMOC.from_string("31/1 32/4 35/")
-    tmoc_ascii = tmoc.to_string("ascii")
-    tmoc_ascii
+    
+
+    # test to_string "json"
     tmoc_json = tmoc.to_string("json")
-    tmoc_json
-    tmoc_bis = TimeMOC.from_string(tmoc_json, "json")
-    assert tmoc == tmoc_bis
+    tmoc_from_json = TimeMOC.from_string(tmoc_json, "json")
+    assert tmoc == tmoc_from_json
 
-    tmoc_bis = TimeMOC.load("resources/MOC2.0/tmoc.ascii.txt", "ascii")
-    assert tmoc == tmoc_bis
+    # test to_string "ascii"
+    tmoc_ascii = tmoc.to_string("ascii")
+    tmoc_from_ascii = TimeMOC.from_string(tmoc_ascii, "ascii")
+    assert tmoc == tmoc_from_ascii
 
-    tmoc_bis = TimeMOC.load("resources/MOC2.0/TMOC.fits", "fits")
-    assert tmoc == tmoc_bis
+    # test load from an ascii file
+    tmoc_load_ascii = TimeMOC.load("resources/MOC2.0/tmoc.ascii.txt", "ascii")
+    assert tmoc == tmoc_load_ascii
 
+    # test load from fits
+    tmoc_load_fits = TimeMOC.load("resources/MOC2.0/TMOC.fits", "fits")
+    assert tmoc == tmoc_load_fits
+
+    # tests of save in the three formats
     tmoc.save("resources/MOC2.0/tmoc.py.test.fits", format="fits", overwrite=True)
     tmoc.save("resources/MOC2.0/tmoc.py.test.json", format="json", overwrite=True)
     tmoc.save("resources/MOC2.0/tmoc.py.test.ascii", format="ascii", overwrite=True)
-    tmoc_bis = TimeMOC.load("resources/MOC2.0/tmoc.py.test.fits", "fits")
-    assert tmoc == tmoc_bis
-    tmoc_bis = TimeMOC.load("resources/MOC2.0/tmoc.py.test.json", "json")
-    assert tmoc == tmoc_bis
-    tmoc_bis = TimeMOC.load("resources/MOC2.0/tmoc.py.test.ascii", "ascii")
-    assert tmoc == tmoc_bis
+    tmoc_saved_fits = TimeMOC.load("resources/MOC2.0/tmoc.py.test.fits", "fits")
+    assert tmoc == tmoc_saved_fits
+    tmoc_saved_json = TimeMOC.load("resources/MOC2.0/tmoc.py.test.json", "json")
+    assert tmoc == tmoc_saved_json
+    tmoc_saved_ascii = TimeMOC.load("resources/MOC2.0/tmoc.py.test.ascii", "ascii")
+    assert tmoc == tmoc_saved_ascii
