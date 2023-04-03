@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from .. import MOC, mocpy
@@ -26,7 +25,9 @@ class STMOC(AbstractMOC):
             store_index: index of the ST-MOC in the rust-side storage
         """
         super().__init__(
-            AbstractMOC._create_key, STMOC.__create_key, store_index,
+            AbstractMOC._create_key,
+            STMOC.__create_key,
+            store_index,
         )
         if create_key != STMOC.__create_key:
             raise PermissionError(
@@ -102,7 +103,13 @@ class STMOC(AbstractMOC):
 
     @classmethod
     def from_time_ranges_positions(
-        cls, times_start, times_end, lon, lat, time_depth=61, spatial_depth=29,
+        cls,
+        times_start,
+        times_end,
+        lon,
+        lat,
+        time_depth=61,
+        spatial_depth=29,
     ):
         """
         Create a 2D Coverage from a set of times and positions associated to each time.
@@ -150,14 +157,23 @@ class STMOC(AbstractMOC):
             raise ValueError("Times and positions must be 1D arrays.")
 
         index = mocpy.from_time_ranges_lonlat(
-            times_start, times_end, time_depth, lon, lat, spatial_depth,
+            times_start,
+            times_end,
+            time_depth,
+            lon,
+            lat,
+            spatial_depth,
         )
 
         return cls(cls.__create_key, index)
 
     @classmethod
     def from_spatial_coverages(
-        cls, times_start, times_end, spatial_coverages, time_depth=61,
+        cls,
+        times_start,
+        times_end,
+        spatial_coverages,
+        time_depth=61,
     ):
         """
         Create a 2D Coverage from a set of time ranges and spatial coverages associated to them.
@@ -193,12 +209,15 @@ class STMOC(AbstractMOC):
         if times_start.ndim != 1:
             raise ValueError("Times and spatial coverages must be 1D arrays")
 
-
         spatial_coverages_indices = np.fromiter(
-            (arg._store_index for arg in spatial_coverages), dtype=AbstractMOC.store_index_dtype(),
+            (arg._store_index for arg in spatial_coverages),
+            dtype=AbstractMOC._store_index_dtype(),
         )
         index = mocpy.from_time_ranges_spatial_coverages(
-            times_start, times_end, time_depth, spatial_coverages_indices,
+            times_start,
+            times_end,
+            time_depth,
+            spatial_coverages_indices,
         )
 
         return cls(cls.__create_key, index)
@@ -291,11 +310,11 @@ class STMOC(AbstractMOC):
         if not inside:
             result = ~result
 
-        return result # noqa: RET504
+        return result
 
     @classmethod
     # A002: Argument `format` is shadowing a python function
-    def load(cls, path, format="fits"): # noqa: A002
+    def load(cls, path, format="fits"):  # noqa: A002
         """
         Load the Spatial MOC from a file.
 
@@ -331,7 +350,7 @@ class STMOC(AbstractMOC):
 
     @classmethod
     # A002: Argument `format` is shadowing a python function
-    def from_string(cls, value, format="ascii"): # noqa: A002
+    def from_string(cls, value, format="ascii"):  # noqa: A002
         """
         Deserialize the Spatial MOC from the given string.
 

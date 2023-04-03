@@ -10,6 +10,7 @@ It allows creation, parsing and comparison of TMOCs.
 
 from .moc import MOC, WCS
 from .tmoc import TimeMOC
+from .fmoc import FrequencyMOC
 from .stmoc import STMOC
 
 from .version import __version__
@@ -17,6 +18,7 @@ from .version import __version__
 __all__ = [
     "MOC",
     "TimeMOC",
+    "FrequencyMOC",
     "STMOC",
     "WCS",
     "__version__",
