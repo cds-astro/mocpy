@@ -1,4 +1,3 @@
-
 from io import BytesIO
 import numpy as np
 from pathlib import Path
@@ -104,7 +103,7 @@ class AbstractMOC(serializer.IO):
             The union of self and moc.
         """
         return self.union(moc)
-    
+
     def __radd__(self, moc):
         """
         Operator + definition.
@@ -359,7 +358,8 @@ class AbstractMOC(serializer.IO):
             index = mocpy.multi_symmetric_difference(store_indices)
         else:
             index = mocpy.symmetric_difference(
-                self._store_index, another_moc._store_index,
+                self._store_index,
+                another_moc._store_index,
             )
 
         return self.__class__(self.__create_sub_key, index)
@@ -490,7 +490,8 @@ class AbstractMOC(serializer.IO):
         import json
 
         return cls.from_string(
-            json.dumps(json_moc, sort_keys=True, indent=2), format="json",
+            json.dumps(json_moc, sort_keys=True, indent=2),
+            format="json",
         )
 
     @classmethod
@@ -517,12 +518,23 @@ class AbstractMOC(serializer.IO):
         """
         if isinstance(path_or_url, BytesIO):
             return cls._from_fits_raw_bytes(path_or_url.read())
-        if Path(path_or_url).is_file():
-            return cls.load(path_or_url, format="fits")
-        
+
+        # this try except clause is there to support
+        # Windows users with python 3.7 and should be dropped
+        # when we remove support of python 3.7
+        try:
+            if Path(path_or_url).is_file():
+                return cls.load(path_or_url, format="fits")
+        except OSError:
+            pass
+
         import requests
 
-        response = requests.get(path_or_url, headers={"User-Agent": "MOCPy"}, timeout=timeout)
+        response = requests.get(
+            path_or_url,
+            headers={"User-Agent": "MOCPy"},
+            timeout=timeout,
+        )
         if response:
             raw_bytes = BytesIO()
             raw_bytes.write(response.content)
@@ -575,7 +587,7 @@ class AbstractMOC(serializer.IO):
         """
         raise NotImplementedError("Method degrade_to_order not implemented")
 
-    def to_string(self, format="ascii", fold=0): # noqa: A002
+    def to_string(self, format="ascii", fold=0):  # noqa: A002
         """
         Write the MOC into a string.
 
@@ -601,7 +613,14 @@ class AbstractMOC(serializer.IO):
         formats = ("ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
-    def save(self, path, format="fits", overwrite=False, pre_v2=False, fold=0): # noqa: A002
+    def save(
+        self,
+        path,
+        format="fits",  # noqa: A002
+        overwrite=False,
+        pre_v2=False,
+        fold=0,
+    ):
         """
         Write the MOC to a file.
 
