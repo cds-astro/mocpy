@@ -70,5 +70,8 @@ Developpement version
    git clone -b develop https://github.com/cds-astro/mocpy.git
    cd mocpy
    pip install .
+   
+For use in pyodide
+******************
 
-
+Wheels that run in pyodide can be downloaded from `this repository assets <https://github.com/cds-astro/mocpy/releases/download/v0.12.3/mocpy-0.12.3-cp310-cp310-emscripten_3_1_27_wasm32.whl>`__. This is not fully tested. 
