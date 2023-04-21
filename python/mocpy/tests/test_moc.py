@@ -275,6 +275,9 @@ def test_from_fits_images_2():
     MOC.from_fits_images(["resources/u_gal.fits"], max_norder=10)
 
 
+def test_from_fits_image_without_cdelt():
+    MOC.from_fits_images(["resources/horsehead.fits"], max_norder=15)
+
 @pytest.fixture()
 def moc_from_fits_image():
     image_path = "resources/image_with_mask.fits.gz"

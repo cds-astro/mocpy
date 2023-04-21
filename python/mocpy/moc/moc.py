@@ -454,8 +454,10 @@ class MOC(AbstractMOC):
         skycrd = SkyCoord(world, unit="deg", frame=frame)
 
         # Compute the order based on the CDELT
-        c1 = header["CDELT1"]
-        c2 = header["CDELT2"]
+        # Should work even if the fits is defined using cd_ij or crota, see:
+        # https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt
+        [c1, c2] = w.wcs.get_cdelt()
+
         max_res_px = np.sqrt(c1 * c1 + c2 * c2) * np.pi / 180.0
         max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
 
