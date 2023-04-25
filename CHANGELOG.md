@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+* brand new support of frequency MOC ! :rocket:
+
 ### Changed
 
 * `AbstractMOC.__init__` raises `PermissionError` if user tries to modify order manually
@@ -23,8 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* `sum([moc1, moc2, moc3])` now works correctly
-* `MOC.wcs()` now works correctly for non-squared figures
+* `sum([moc1, moc2, moc3])` now works correctly (fixes #99)
+* `MOC.wcs()` now works correctly for non-squared figures (fixes #98)
+* `MOC.from_fits_image` now works even when the fits file has no CDELT (fixes #90)
 
 ## [0.12.3]
 
