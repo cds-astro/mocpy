@@ -1,6 +1,6 @@
 default_language_version:
-  # force all unspecified python hooks to run python3.8
-  python: python3.8
+  # force all unspecified python hooks to run python3.10
+  python: python3.10
 repos:
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -26,7 +26,7 @@ repos:
     - id: black
   # Fast linter to replace flake8
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.260'
+    rev: 'v0.0.263'
     hooks:
      - id: ruff
        fail_fast: true
