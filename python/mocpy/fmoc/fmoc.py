@@ -27,7 +27,7 @@ class FrequencyMOC(AbstractMOC):
     __create_key = object()
 
     def __init__(self, create_key, store_index):
-        """Is a Frequency Coverage (S-MOC).
+        """Is a Frequency Coverage (F-MOC).
 
         Args:
             create_key: Object ensure __init__ is called by super-class/class-methods only
@@ -63,20 +63,20 @@ class FrequencyMOC(AbstractMOC):
 
     def degrade_to_order(self, new_order):
         """
-        Degrade the MOC instance to a new, less precise, MOC.
+        Degrade the FrequencyMOC instance to a new, less precise, FrequencyMOC.
 
-        The maximum depth (i.e. the depth of the smallest Time cells that can be found in the MOC) of the
-        degraded MOC is set to ``new_order``.
+        The maximum depth (i.e. the depth of the smallest Time cells that can be found in the F-MOC) of the
+        degraded F-MOC is set to ``new_order``.
 
         Parameters
         ----------
         new_order : int
-            Maximum depth of the output degraded MOC.
+            Maximum depth of the output degraded F-MOC.
 
         Returns
         -------
-        moc : `~mocpy.fmoc.FrequencyMOC`
-            The degraded MOC.
+        `~mocpy.fmoc.FrequencyMOC`
+            The degraded F-MOC.
         """
         index = mocpy.degrade(self._store_index, new_order)
         return FrequencyMOC(FrequencyMOC.__create_key, index)
@@ -93,8 +93,8 @@ class FrequencyMOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.fmoc.FrequencyMOC`
-            The MOC
+        `~mocpy.fmoc.FrequencyMOC`
+            The F-MOC
         """
         index = mocpy.new_empty_fmoc(np.uint8(max_depth))
         return cls(cls.__create_key, index)
@@ -112,8 +112,8 @@ class FrequencyMOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.tmoc.TimeMOC`
-            The MOC
+        `~mocpy.fmoc.FrequencyMOC`
+            The F-MOC
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
@@ -141,7 +141,7 @@ class FrequencyMOC(AbstractMOC):
 
         Returns
         -------
-        frequency_moc : `~mocpy.fmoc.FrequencyMOC`
+        `~mocpy.fmoc.FrequencyMOC`
         """
         frequencies = frequencies.to(u.Hz)
         frequencies = np.atleast_1d(frequencies)
@@ -164,7 +164,7 @@ class FrequencyMOC(AbstractMOC):
 
         Returns
         -------
-        frequency_moc : `~mocpy.fmoc.FrequencyMOC`
+        `~mocpy.fmoc.FrequencyMOC`
         """
         min_freq = min_freq.to(u.Hz)
         min_freq = np.atleast_1d(min_freq)
@@ -187,7 +187,7 @@ class FrequencyMOC(AbstractMOC):
     @property
     def min_freq(self):
         """
-        Get the `~astropy.units.Quantity` frequency of the fmoc first observation.
+        Get the `~astropy.units.Quantity` frequency of the F-MOC smallest frequency.
 
         Returns
         -------
@@ -200,7 +200,7 @@ class FrequencyMOC(AbstractMOC):
     @property
     def max_freq(self):
         """
-        Get the `~astropy.units.Quantity` frequency of the fmoc last observation.
+        Get the `~astropy.units.Quantity` frequency of the F-MOC largest frequency.
 
         Returns
         -------
@@ -212,12 +212,12 @@ class FrequencyMOC(AbstractMOC):
 
     def contains(self, frequencies, keep_inside=True):
         """
-        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the FMOC instance.
+        Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the F-MOC instance.
 
         Parameters
         ----------
         frequencies : `astropy.units.Quantity`
-            astropy quantity (converted into Hz) to check whether they are contained in the FMOC or not.
+            astropy quantity (converted into Hz) to check whether they are contained in the F-MOC or not.
         keep_inside : bool, optional
             True by default. If so the filtered table contains only observations that are located the MOC.
             If ``keep_inside`` is False, the filtered table contains all observations lying outside the MOC.
@@ -239,7 +239,7 @@ class FrequencyMOC(AbstractMOC):
     @staticmethod
     def order_to_relative_precision(order):
         """
-        Convert a Frequency Moc order to a relative precision range.
+        Convert a FrequencyMOC order to a relative precision range.
 
         Parameters
         ----------
@@ -262,7 +262,7 @@ class FrequencyMOC(AbstractMOC):
         Parameters
         ----------
         frequency_precision : `float`
-            precision to be converted in Frequency MOC order
+            precision to be converted in FrequencyMOC order
 
         Returns
         -------
@@ -280,16 +280,16 @@ class FrequencyMOC(AbstractMOC):
     @classmethod
     def load(cls, path, format="fits"):  # noqa: A002
         """
-        Load the FrequencyMOC MOC from a file.
+        Load the FrequencyMOC from a file.
 
         Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
 
         Parameters
         ----------
         path : str or pathlib.Path
-            The path to the file to load the MOC from.
+            The path to the file to load the F-MOC from.
         format : str, optional
-            The format from which the MOC is loaded.
+            The format from which the F-MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
         """
@@ -308,14 +308,14 @@ class FrequencyMOC(AbstractMOC):
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
-        """Load Frequency MOC from raw bytes of a FITS file."""
+        """Load FrequencyMOC from raw bytes of a FITS file."""
         index = mocpy.frequency_moc_from_fits_raw_bytes(raw_bytes)
         return cls(cls.__create_key, index)
 
     @classmethod
     def from_string(cls, value, format="ascii"):  # noqa: A002
         """
-        Deserialize the Frequency MOC from the given string.
+        Deserialize the FrequencyMOC from the given string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
 
@@ -324,7 +324,7 @@ class FrequencyMOC(AbstractMOC):
         Parameters
         ----------
         format : str, optional
-            The format in which the MOC will be serialized before being saved.
+            The format in which the F-MOC will be serialized before being saved.
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
         """
