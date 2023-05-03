@@ -51,10 +51,12 @@ locked = false
 # D100: Missing docstring in public module
 # B008: Do not perforn function call in argument defaults
 "__init__.py" = ["D104"]
-"notebooks/*.ipynb" = ["D100"]
 "python/mocpy/moc/plot/wcs.py" = ["B008"]
 "python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
 "python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
+
+[tool.nbqa.addopts]
+ruff = ["--ignore=B018"]
 
 [tool.ruff]
 fix = true
