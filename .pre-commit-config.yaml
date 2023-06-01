@@ -43,4 +43,3 @@ repos:
         name: nbqa-ruff
         description: "Run ruff on a Jupyter notebook"
         fail_fast: true
-      - id: nbqa-isort
