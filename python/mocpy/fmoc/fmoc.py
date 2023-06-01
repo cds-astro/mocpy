@@ -195,7 +195,7 @@ class FrequencyMOC(AbstractMOC):
             frequency of the first observation
 
         """
-        return np.atleast_1d(mocpy.first_fmoc_hz(self._store_index) * u.Hz)
+        return mocpy.first_fmoc_hz(self._store_index) * u.Hz
 
     @property
     def max_freq(self):
@@ -208,7 +208,7 @@ class FrequencyMOC(AbstractMOC):
             frequency of the last observation
 
         """
-        return np.atleast_1d(mocpy.last_fmoc_hz(self._store_index) * u.Hz)
+        return mocpy.last_fmoc_hz(self._store_index) * u.Hz
 
     def contains(self, frequencies, keep_inside=True):
         """
@@ -336,3 +336,117 @@ class FrequencyMOC(AbstractMOC):
             return cls(cls.__create_key, index)
         formats = ("ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
+
+    def plot_frequencies(self, ax, color="blue", frequency_unit="Hz"):
+        """Plot a frequency moc.
+
+        This method applies a ``matplotlib.collections.PatchCollection``
+        to an existing ``matplotlib.axes._axes.Axes`` object.
+
+        Parameters
+        ----------
+        ax: matplotlib.axes._axes.Axes
+        color: str
+               any format supported by matplotlib for colors, see
+               https://matplotlib.org/stable/tutorials/colors/colors.html
+               Defaults to 'blue'
+        length_unit: str, astropy.units.core.PrefixUnit, astropy.units.core.IrreductibleUnit
+                     any string or astropy.unit of physical type 'frequency', see
+                     https://docs.astropy.org/en/stable/api/astropy.units.physical.PhysicalType.html#astropy.units.physical.PhysicalType
+                     Defaults to Hertz 'Hz'
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> fmoc = FrequencyMOC.from_frequencies(10, [1, 0.1, 0.01, 0.001] * u.Hz)
+        >>> fig, ax = plt.subplots(figsize=(15, 1))
+        >>> fmoc.plot_frequencies(ax, color="pink", frequency_unit="1 / ks")
+        """
+        if u.get_physical_type(u.Unit(frequency_unit)) != "frequency":
+            raise TypeError(
+                f"frequency_unit is of type '{u.get_physical_type(u.Unit(frequency_unit))}'"
+                " instead of 'frequency', see astropy.units for more information",
+            )
+
+        from matplotlib.patches import Rectangle
+        from matplotlib.collections import PatchCollection
+
+        min_freq = self.min_freq.to(frequency_unit).value
+        max_freq = self.max_freq.to(frequency_unit).value
+
+        patches = []
+        for freq_range in self.to_hz_ranges():
+            freq0 = (freq_range[0] * u.Hz).to(frequency_unit).value
+            freq1 = (freq_range[1] * u.Hz).to(frequency_unit).value
+            patches += [Rectangle((freq0, 0), freq1 - freq0, 1, color=color)]
+        patches_collection = PatchCollection(patches, match_original=True)
+        ax.add_collection(patches_collection)
+        ax.tick_params(left=False)
+        ax.set(
+            yticklabels=[],
+            xlim=(min_freq, max_freq),
+            xlabel=f"Frequency ({frequency_unit})",
+            xscale="log",
+        )
+
+    def plot_wavelengths(self, ax, color="blue", length_unit="m"):
+        """Plot a FrequencyMOC with a conversion to wavelengths.
+
+        This method applies a ``matplotlib.collections.PatchCollection``
+        to an existing ``matplotlib.axes._axes.Axes`` object.
+
+        Parameters
+        ----------
+        ax: matplotlib.axes._axes.Axes
+        color: str
+               any format supported by matplotlib for colors, see
+               https://matplotlib.org/stable/tutorials/colors/colors.html
+               Defaults to 'blue'
+        length_unit: str, astropy.units.core.PrefixUnit, astropy.units.core.IrreductibleUnit
+                     any string or astropy.unit of physical type 'length', see
+                     https://docs.astropy.org/en/stable/api/astropy.units.physical.PhysicalType.html#astropy.units.physical.PhysicalType
+                     Defaults to meters 'm'
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> fmoc = FrequencyMOC.from_frequencies(10, [1, 0.1, 0.01, 0.001] * u.Hz)
+        >>> fig, ax = plt.subplots(figsize=(15, 1))
+        >>> fmoc.plot_wavelengths(ax, color="lightblue", frequency_unit=u.nm)
+        """
+        # Tests the physical type of `length_unit`
+        if u.get_physical_type(u.Unit(length_unit)) != "length":
+            raise TypeError(
+                f"length_unit is of type '{u.get_physical_type(u.Unit(length_unit))}'"
+                " instead of 'length', see astropy.units for more information",
+            )
+
+        from matplotlib.patches import Rectangle
+        from matplotlib.collections import PatchCollection
+
+        # get default bonds
+        min_lambda = self.max_freq.to(length_unit, equivalencies=u.spectral()).value
+        max_lambda = self.min_freq.to(length_unit, equivalencies=u.spectral()).value
+
+        # fetches the patches corresponding to each frequency range
+        patches = []
+        for freq_range in self.to_hz_ranges():
+            # converts to wavelengths
+            lambda0 = (
+                (freq_range[1] * u.Hz).to(length_unit, equivalencies=u.spectral()).value
+            )
+            lambda1 = (
+                (freq_range[0] * u.Hz).to(length_unit, equivalencies=u.spectral()).value
+            )
+            patches += [Rectangle((lambda0, 0), lambda1 - lambda0, 1, color=color)]
+        patches_collection = PatchCollection(patches, match_original=True)
+
+        # default behaviour, can be overwritten by the user with a call on the `ax` object
+        ax.add_collection(patches_collection)
+        ax.tick_params(left=False)
+        ax.set(
+            yticklabels=[],
+            xlim=(min_lambda, max_lambda),
+            xlabel=f"Wavelength ({length_unit})",
+            xscale="log",
+        )
