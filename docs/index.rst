@@ -3,20 +3,25 @@
 Welcome to MOCPy's documentation!
 =================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. image:: _static/MOCpy-light.svg
+    :height: 150px
+    :alt: MOCpy's logo
 
-   install
-   examples/examples
-   api
-   contribute
-
-MOCPy is a Python library allowing easy creation, parsing and manipulation
+``MOCPy`` is a Python library allowing easy creation, parsing and manipulation
 of MOCs (Multi-Order Coverage maps).
 
 Its code is hosted on `GitHub <https://github.com/cds-astro/mocpy/>`__ and
 distributed under the BSD-3 license.
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+
+   install
+   examples/examples
+   fmoc
+   api
+   contribute
 
 What is a MOC ?
 ---------------

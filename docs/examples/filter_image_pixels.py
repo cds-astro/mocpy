@@ -9,7 +9,7 @@ from mocpy import MOC
 
 # load 2MASS cutout covering the galactic plane
 hdu = fits.open(
-    "http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS%2FP%2F2MASS%2FK&width=1200&height=700&fov=30&projection=TAN&coordsys=galactic&rotation_angle=0.0&object=gal%20center&format=fits"
+    "http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS%2FP%2F2MASS%2FK&width=1200&height=700&fov=30&projection=TAN&coordsys=galactic&rotation_angle=0.0&object=gal%20center&format=fits",
 )
 
 # load Spitzer MOC
@@ -40,7 +40,9 @@ fig = plt.figure(111, figsize=(15, 10))
 ax = fig.add_subplot(1, 1, 1, projection=twomass_wcs)
 
 im = ax.imshow(
-    img_test, origin="lower", norm=simple_norm(hdu[0].data, "sqrt", min_cut=-1, max_cut=150),
+    img_test,
+    origin="lower",
+    norm=simple_norm(hdu[0].data, "sqrt", min_cut=-1, max_cut=150),
 )
 plt.show()
 

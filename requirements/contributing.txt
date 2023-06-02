@@ -18,6 +18,8 @@ pre-commit==2.20.* # to set hooks
 
 # Pytest extension package enabling test coverage
 pytest-cov
+
+# Optional dependency
 requests
 
 # Packages for updating the docs

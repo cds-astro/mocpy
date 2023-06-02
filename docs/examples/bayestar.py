@@ -12,8 +12,6 @@ fits_image_filename = "./../../resources/bayestar.multiorder.fits"
 max_order = None
 with fits.open(fits_image_filename) as hdul:
     hdul.info()
-    hdul[1].columns
-
     data = hdul[1].data
     max_order = hdul[1].header["MOCORDER"]
 
@@ -29,7 +27,9 @@ prob = probdensity * area
 
 cumul_to = np.linspace(0.5, 0.9, 5)[::-1]
 colors = ["blue", "green", "yellow", "orange", "red"]
-mocs = [MOC.from_valued_healpix_cells(uniq, prob, max_order, cumul_to=c) for c in cumul_to]
+mocs = [
+    MOC.from_valued_healpix_cells(uniq, prob, max_order, cumul_to=c) for c in cumul_to
+]
 
 
 # Plot the MOC using matplotlib
@@ -47,7 +47,7 @@ with WCS(
 ) as wcs:
     ax = fig.add_subplot(1, 1, 1, projection=wcs)
     # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
-    for (moc, c, col) in zip(mocs, cumul_to, colors):
+    for moc, c, col in zip(mocs, cumul_to, colors):
         moc.fill(
             ax=ax,
             wcs=wcs,

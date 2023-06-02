@@ -15,15 +15,31 @@
 import os
 import sys
 
+try:
+    from sphinx_astropy.conf.v1 import *  # noqa
+except ImportError:
+    print(
+        "ERROR: the documentation requires the sphinx-astropy package to be installed"
+    )
+    sys.exit(1)
+
 sys.path.insert(0, os.path.abspath(".."))
 
 import mocpy
 
 # -- Project information -----------------------------------------------------
 
-project = "mocpy"
-copyright = "2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
-author = "Thomas Boch, Matthieu Baumann, François-Xavier Pineau"
+# Get configuration information from setup.cfg
+import tomllib
+
+with open("../Cargo.toml", "rb") as config:
+    cargotoml = tomllib.load(config)
+import datetime
+
+project = cargotoml["package"]["name"]
+author = " ".join(cargotoml["package"]["authors"])
+
+copyright = f"{datetime.datetime.now().year}, {author}"
 
 # The short X.Y version
 version = mocpy.__version__
@@ -32,6 +48,11 @@ release = mocpy.__version__
 
 
 # -- General configuration ---------------------------------------------------
+
+
+# By default, highlight as Python 3.
+highlight_language = "python3"
+
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -52,11 +73,13 @@ extensions = [
     # To support Numpy docstrings, we use this extension:
     # see https://numpydoc.readthedocs.io/en/latest/install.html
     "numpydoc",
+    "jupyter_sphinx",
 ]
 bibtex_bibfiles = ["references.bib"]
 
 default_role = "py:obj"
 numpydoc_class_members_toctree = False
+numpydoc_show_class_members = False
 autosummary_generate = False
 
 # Add any paths that contain templates here, relative to this directory.
@@ -111,7 +134,13 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
 # No static so far
-html_static_path = []
+html_static_path = ["_static"]  # html_theme = None
+html_style = "mocpy.css"
+
+# The name of an image file (within the static path) to use as favicon of the
+# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# pixels large.
+html_favicon = "_static/MOCpy-icon.svg"
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -128,6 +157,9 @@ html_static_path = []
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "mocpydoc"
+
+# Prefixes that are ignored for sorting the Python module index
+modindex_common_prefix = ["mocpy."]
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -155,7 +187,7 @@ latex_documents = [
         master_doc,
         "mocpy.tex",
         "mocpy Documentation",
-        "Thomas Boch, Matthieu Baumann, François-Xavier Pineau",
+        author,
         "manual",
     ),
 ]
@@ -180,7 +212,7 @@ texinfo_documents = [
         "mocpy Documentation",
         author,
         "mocpy",
-        "One line description of project.",
+        "A python packages to handle MOCs.",
         "Miscellaneous",
     ),
 ]
@@ -190,12 +222,14 @@ texinfo_documents = [
 
 # -- Options for intersphinx extension ---------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
+# Include other packages to link against
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
     "astropy": ("http://docs.astropy.org/en/latest/", None),
     "matplotlib": ("https://matplotlib.org/", None),
     "networkx": ("https://networkx.github.io/documentation/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
 

@@ -42,12 +42,6 @@ This example:
 .. plot:: examples/logical_operations.py
     :include-source:
 
-Using the generic WCS astropy class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. plot:: examples/astropy_wcs.py
-    :include-source:
-
 Create a MOC from a concave polygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -59,7 +53,7 @@ This example shows how to call :py:meth:`mocpy.moc.MOC.from_polygon` or :py:meth
 Get the border(s) of a MOC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows how to call :py:meth:`mocpy.moc.MOC.get_boundaries`. The borders are returned as a list of `~astropy.coordinates.SkyCoord` each defining one border.
+This example shows how to call `mocpy.moc.MOC.get_boundaries`. The borders are returned as a list of `~astropy.coordinates.SkyCoord` each defining one border.
 In this example:
 
 1. The sky coordinates defining the border of the MOC are projected to the pixel image system.
@@ -91,20 +85,20 @@ then be retrieved from the image for performing some computations on them: e.g. 
 Temporal coverages
 ------------------
 
-A class :py:class:`TimeMOC` describes temporal coverages. 
+A class :py:class:`TimeMOC` describes temporal coverages.
 
 Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/master/notebooks/tmoc.ipynb>`__ for how to use it.
 
 Space & Time coverages
 ----------------------
 
-Space-Time coverages are a new feature of `mocpy` since its version 0.7.0 and are
+Space-Time coverages are a new feature of ``mocpy`` since its version 0.7.0 and are
 an attempt initiated by the Virtual Observatory for binding spatial and temporal coverages together.
 See its description formalized by the IVOA `here <http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf>`__.
 
 Space-Time coverages allows you to:
 
-1. Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. `~astropy.time.Time` ranges).
+1. Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. `astropy.time.Time` ranges).
 2. Retrieve the temporal coverage observed by a mission within a spatial coverage.
 
 As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.

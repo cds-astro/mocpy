@@ -10,7 +10,6 @@ dependencies = [
     "matplotlib",     # Used in fill and border
     "cdshealpix",     # Used in fill and border
     "networkx>=2.5",  # Used in get_boundaries
-    "requests"        # Used to load FITS from URLs
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -18,6 +17,14 @@ classifiers = [
     "Programming Language :: Rust",
     "License :: OSI Approved :: BSD License",
     "Topic :: Scientific/Engineering :: Astronomy"
+]
+
+[project.optional-dependencies]
+query_fits = ["requests"] # Used to load FITS from URLs
+docs = [
+    "sphinx",
+    "numpydoc"
+
 ]
 
 [project.urls]
@@ -56,7 +63,7 @@ locked = false
 "python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
 
 [tool.nbqa.addopts]
-ruff = ["--ignore=B018"]
+ruff = ["--ignore=B018,FBT003"]
 
 [tool.ruff]
 fix = true

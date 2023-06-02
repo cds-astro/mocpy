@@ -193,8 +193,7 @@ class AbstractMOC(serializer.IO):
         return self.complement()
 
     def empty(self):
-        """
-        Check whether the MOC is empty or not.
+        """(e.g. a numpy boolean array).
 
         Returns
         -------
@@ -439,14 +438,6 @@ class AbstractMOC(serializer.IO):
         """
         prev_store_index = self._store_index
         self._store_index = mocpy.extend(prev_store_index)
-        # print(
-        #    "\n@@ Manually change"
-        #    + str(prev_store_index)
-        #    + " into "
-        #    + str(self._store_index)
-        # )
-        # print("\n@@ Manually drop" + str(prev_store_index))
-        # mocpy.drop(prev_store_index)
         return self
 
     def remove_neighbours(self):
@@ -462,14 +453,6 @@ class AbstractMOC(serializer.IO):
         """
         prev_store_index = self._store_index
         self._store_index = mocpy.contract(prev_store_index)
-        # print(
-        #    "\n@@ Manually change"
-        #    + str(prev_store_index)
-        #    + " into "
-        #    + str(self._store_index)
-        # )
-        # print("\n@@ Manually drop" + str(prev_store_index))
-        # mocpy.drop(prev_store_index)
         return self
 
     @classmethod
@@ -528,20 +511,24 @@ class AbstractMOC(serializer.IO):
         except OSError:
             pass
 
-        import requests
+        try:
+            import requests
 
-        response = requests.get(
-            path_or_url,
-            headers={"User-Agent": "MOCPy"},
-            timeout=timeout,
-        )
-        if response:
-            raw_bytes = BytesIO()
-            raw_bytes.write(response.content)
-            raw_bytes.seek(0)
-            return cls.from_fits(raw_bytes)
-        response.raise_for_status()
-        return None
+            response = requests.get(
+                path_or_url,
+                headers={"User-Agent": "MOCPy"},
+                timeout=timeout,
+            )
+            if response:
+                raw_bytes = BytesIO()
+                raw_bytes.write(response.content)
+                raw_bytes.seek(0)
+                return cls.from_fits(raw_bytes)
+            response.raise_for_status()
+        except ModuleNotFoundError:
+            raise UserWarning(
+                "The `requests` module is required to fetch FITS files from an url",
+            ) from ModuleNotFoundError
 
     @classmethod
     def from_str(cls, value):
@@ -604,8 +591,8 @@ class AbstractMOC(serializer.IO):
         """
         if format == "ascii":
             if fold > 0:
-                return mocpy.to_ascii_str_with_fold(self._store_index, fold)
-            return mocpy.to_ascii_str(self._store_index)
+                return mocpy.to_ascii_str_with_fold(self._store_index, fold)[:-1]
+            return mocpy.to_ascii_str(self._store_index)[:-1]
         if format == "json":
             if fold > 0:
                 return mocpy.to_json_str_with_fold(self._store_index, fold)
@@ -653,12 +640,12 @@ class AbstractMOC(serializer.IO):
         if format == "fits":
             mocpy.to_fits_file(self._store_index, str(path), pre_v2)
         elif format == "ascii":
-            if fold > 0:
+            if fold <= 0:
                 mocpy.to_ascii_file(self._store_index, str(path))
             else:
                 mocpy.to_ascii_file_with_fold(self._store_index, str(path), fold)
         elif format == "json":
-            if fold > 0:
+            if fold <= 0:
                 mocpy.to_json_file(self._store_index, str(path))
             else:
                 mocpy.to_json_file_with_fold(self._store_index, str(path), fold)

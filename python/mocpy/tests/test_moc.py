@@ -89,10 +89,10 @@ def test_uniq_hpx():
 
 
 def test_to_depth29_ranges(isets):
-    l = isets["a"].to_depth29_ranges # noqa: E741
+    l = isets["a"].to_depth29_ranges  # noqa: E741
     r = np.array([[27, 126]], dtype=np.uint64)
     assert np.array_equal(l, r)
-    l = isets["b"].to_depth29_ranges # noqa: E741
+    l = isets["b"].to_depth29_ranges  # noqa: E741
     r = np.array([[9, 61], [68, 105]], dtype=np.uint64)
     assert np.array_equal(l, r)
 
@@ -278,6 +278,7 @@ def test_from_fits_images_2():
 def test_from_fits_image_without_cdelt():
     MOC.from_fits_images(["resources/horsehead.fits"], max_norder=15)
 
+
 @pytest.fixture()
 def moc_from_fits_image():
     image_path = "resources/image_with_mask.fits.gz"
@@ -414,7 +415,7 @@ def test_serialize_to_str(moc, expected):
         ("moc", False, "ascii", True),
     ],
 )
-def test_write(moc_from_json, filename, overwrite, format, os_error): # noqa: A002
+def test_write(moc_from_json, filename, overwrite, format, os_error):  # noqa: A002
     if os_error:
         with pytest.raises(OSError):  # TODO add the match parameter of the exception
             moc_from_json.save(filename, format=format, overwrite=overwrite)
@@ -604,11 +605,13 @@ def test_moc_union(mocs_op):
     assert mocs_op["first"] | mocs_op["second"] == MOC.from_json(
         {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
-    
+
+
 def test_sum(mocs_op):
     assert sum([mocs_op["first"], mocs_op["second"]]) == MOC.from_json(
         {"0": [0, 1, 2, 3, 4, 5, 7]},
     )
+
 
 def test_moc_intersection(mocs_op):
     assert mocs_op["first"].intersection(mocs_op["second"]) == MOC.from_json(
@@ -706,9 +709,6 @@ def test_from_valued_healpix_cells_bayestar():
     fits_image_filename = "./resources/bayestar.multiorder.fits"
 
     with fits.open(fits_image_filename) as hdul:
-        hdul.info()
-        hdul[1].columns
-
         data = hdul[1].data
 
     uniq = data["UNIQ"]
@@ -746,10 +746,8 @@ def test_from_valued_healpix_cells_bayestar_and_split():
 # --- TESTING new features ---#
 def test_moc_save_load_deser():
     smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", "ascii")
-    smoc_ascii = smoc.to_string("ascii")
-    smoc_ascii
+    smoc.to_string("ascii")
     smoc_json = smoc.to_string("json")
-    smoc_json
     smoc_bis = MOC.from_string(smoc_json, "json")
     assert smoc == smoc_bis
 

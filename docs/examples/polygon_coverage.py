@@ -28,7 +28,7 @@ vertices = np.array(
         [14.16533992, 1.7579858],
         [19.36243491, 1.78587203],
         [15.31732084, 5.0],
-    ]
+    ],
 )
 skycoord = SkyCoord(vertices, unit="deg", frame="icrs")
 # A point that we say it belongs to the inside of the MOC

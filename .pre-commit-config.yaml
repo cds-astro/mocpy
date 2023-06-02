@@ -14,11 +14,6 @@ repos:
         exclude_types:
           - "svg"
         description: "Remove trailing whitespaces"
-  # For Sphinx
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: 'v1.10.0'
-    hooks:
-     - id: rst-backticks
   # Run Black on files
   - repo: https://github.com/psf/black
     rev: 23.3.0

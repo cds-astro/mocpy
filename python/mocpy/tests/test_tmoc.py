@@ -6,16 +6,11 @@ from astropy.io import ascii
 from ..tmoc import TimeMOC, times_to_microseconds, microseconds_to_times
 
 import numpy as np
-import re
 
 
 def test_time_to_microsec_1():
     """Test of the time conversion from `astropy.time` with format isot to microseconds."""
-    # t = Time([['1998-01-01', '1999-01-01']], format="iso", scale="tdb")
-
     t = Time("1999-01-01T00:00:00.123456789", format="isot", scale="tdb")
-    # t = Time('0000-01-01T00:00:00.123456789', format='isot', scale='tdb')
-    # print(t.jd * utils.DAY_MICRO_SEC)
     us = times_to_microseconds(t)
     jd = microseconds_to_times(us)
     assert us == 211781908800123456
@@ -66,17 +61,14 @@ def test_empty_tmoc():
     assert tmoc.empty()
     assert tmoc.total_duration == 0
 
-    with pytest.raises(
-        ValueError,
-        match="No min value in an empty MOC",
-    ):
-        tmoc.min_time
+    with pytest.raises(ValueError, match="No min value in an empty MOC"):
+        _ = tmoc.min_time  # follow ruff recommendation /ruff/issues/3831
 
     with pytest.raises(
         ValueError,
         match="No max value in an empty MOC",
     ):  # pytest styles : should add the match parameter
-        tmoc.max_time
+        _ = tmoc.max_time
 
     tmoc_ranges = TimeMOC.from_time_ranges(times, times)
     assert tmoc_ranges.empty()
@@ -326,7 +318,6 @@ def test_tmoc_save_load_deser():
     3. Save
     """
     tmoc = TimeMOC.from_string("31/1 32/4 35/")
-    
 
     # test to_string "json"
     tmoc_json = tmoc.to_string("json")

@@ -7,5 +7,6 @@ matplotlib
 networkx>=2.5
 numpydoc
 requests
-sphinx
+sphinx>7.0.0 # autoclass does not show properties in older versions
+sphinx-astropy
 sphinxcontrib-bibtex
