@@ -6,10 +6,10 @@ requires-python = ">=3.7"
 # https://numpy.org/neps/nep-0029-deprecation_policy.html
 # https://docs.astropy.org/en/stable/changelog.html
 dependencies = [
-    "astropy",
-    "matplotlib",     # Used in fill and border
-    "cdshealpix",     # Used in fill and border
-    "networkx>=2.5",  # Used in get_boundaries
+    "astropy>=5.2.1",
+    "matplotlib>=3.7.1",     # Used in fill and border
+    "cdshealpix>=0.6.4",     # Used in fill and border
+    "networkx>=2.5",         # Used in get_boundaries
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
