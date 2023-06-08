@@ -166,7 +166,7 @@ jobs:
       - name: "Set up Python on Ubuntu"
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
             # Test Rust code
       - name: "Test with coverage, build and test doc"
         run: |
