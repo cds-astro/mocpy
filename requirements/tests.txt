@@ -5,5 +5,5 @@ cdshealpix>=0.6.1
 matplotlib
 networkx>=2.5
 
-pytest
+pytest>6.0
 requests
