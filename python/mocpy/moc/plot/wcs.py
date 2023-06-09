@@ -35,27 +35,27 @@ class WCS:
     --------
     >>> from mocpy import MOC, WCS
     >>> from astropy.coordinates import Angle, SkyCoord
-    >>> import astropy.units as u
-    >>> # Load a MOC
-    >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-    >>> moc = MOC.from_fits(filename)
-    >>> # Plot the MOC using matplotlib
     >>> import matplotlib.pyplot as plt
-    >>> fig = plt.figure(111, figsize=(15, 15))
-    >>> # Define a WCS as a context
+    >>> import astropy.units as u
+    >>> # Create a MOC
+    >>> moc = MOC.from_elliptical_cone(lon = 0 * u.rad,
+    ...                                lat = 0 * u.rad,
+    ...                                a = 50 * u.deg,
+    ...                                b = 20 * u.deg,
+    ...                                pa = 90 * u.deg,
+    ...                                max_depth = 13,
+    ...                                )
+    >>> fig = plt.figure(figsize=(10, 10))
     >>> with WCS(fig,
-    ...         fov=200 * u.deg,
-    ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-    ...         coordsys="icrs",
-    ...         rotation=Angle(0, u.degree),
-    ...         projection="AIT") as wcs:
-    ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)
-    ...     # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
-    ...     moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
-    ...     moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
-    >>> plt.xlabel('ra')
-    >>> plt.ylabel('dec')
-    >>> plt.grid(color="black", linestyle="dotted")
+    ...           fov=200 * u.deg,
+    ...           center=SkyCoord(0, 20, unit='deg', frame='icrs'),
+    ...           coordsys="icrs",
+    ...           rotation=Angle(0, u.degree),
+    ...           projection="AIT") as wcs: wcs = wcs
+    >>> ax = fig.add_subplot(projection=wcs)
+    >>> # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
+    >>> moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
+    >>> moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
     """
 
     def __init__(

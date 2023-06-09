@@ -66,7 +66,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx.ext.doctest",
     "sphinxcontrib.bibtex",
     # Extension for plotting image in the doc
     "matplotlib.sphinxext.plot_directive",
