@@ -66,7 +66,7 @@ jobs:
          ${{ env.img }} \
          bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
            source $HOME/.cargo/env && \
-           for PYBIN in /opt/python/cp3[78910]*/bin; do
+           for PYBIN in /opt/python/cp{37,38,39,310,311}-*/bin; do
              echo "Loop on PYBIN: $PYBIN"
              "${PYBIN}/pip" install virtualenv
              "${PYBIN}/virtualenv" mocpy-env
