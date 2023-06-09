@@ -29,7 +29,7 @@ jobs:
      - name: "Build and test wheels"
        run: |
          source $HOME/.cargo/env
-         for PYBIN in /opt/python/cp3[78910]*/bin; do
+         for PYBIN in /opt/python/cp{37,38,39,310,311}/bin; do
            echo "Loop on PYBIN: $PYBIN"
            # With maturin develop, we have to use virtualenv
            "${PYBIN}/pip" install virtualenv

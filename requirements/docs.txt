@@ -3,6 +3,7 @@ astropy-sphinx-theme
 astropy_healpix
 cdshealpix>=0.6.1
 healpy
+jupyter-sphinx
 matplotlib
 networkx>=2.5
 numpydoc
