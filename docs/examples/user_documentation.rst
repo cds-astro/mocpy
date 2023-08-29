@@ -1,15 +1,31 @@
-Examples
-========
+##################
+User documentation
+##################
 
-Notebooks examples can be found on:
+***********************************
+SMOC (a.k.a MOC): Spatial coverages
+***********************************
 
-* `The official github repo <https://github.com/cds-astro/mocpy/tree/master/notebooks>`__.
-* `Binder <https://mybinder.org/v2/gh/cds-astro/mocpy/master>`__. This allows you to run and modify the notebooks.
+Gallery of notebooks examples using SMOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Spatial coverages
------------------
+.. nbgallery::
+    ../_collections/notebooks/00-MOCpy_introduction
+    ../_collections/notebooks/compute_moc_borders.ipynb
+    ../_collections/notebooks/filtering_astropy_table
+    ../_collections/notebooks/FITS-image-pixels-intersecting-MOC
+    ../_collections/notebooks/from_astropy_table.ipynb
+    ../_collections/notebooks/from_polygon
+    ../_collections/notebooks/from_fits_and_intersection
+    ../_collections/notebooks/from_image_with_mask
+    ../_collections/notebooks/from_vizier_table
+    ../_collections/notebooks/query_vizier_table
 
 Here are some code examples manipulating :py:class:`MOC` objects.
+
+Examples use cases
+==================
+
 
 Loading and plotting the MOC of SDSS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,25 +98,47 @@ then be retrieved from the image for performing some computations on them: e.g. 
 .. plot:: examples/filter_image_pixels.py
     :include-source:
 
-Temporal coverages
-------------------
+************************
+TMOC: Temporal coverages
+************************
 
-A class :py:class:`TimeMOC` describes temporal coverages.
+The :py:class:`TimeMOC` class represents a temporal coverage.
 
-Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/master/notebooks/tmoc.ipynb>`__ for how to use it.
+Gallery of notebooks examples using TMOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Space & Time coverages
-----------------------
+.. nbgallery::
+    ../_collections/notebooks/tmoc
 
-Space-Time coverages are a new feature of ``mocpy`` since its version 0.7.0 and are
-an attempt initiated by the Virtual Observatory for binding spatial and temporal coverages together.
-See its description formalized by the IVOA `here <http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf>`__.
 
-Space-Time coverages allows you to:
+*****************************
+STMOC: Space & Time coverages
+*****************************
+
+Space-Time coverages are a new feature of ``mocpy`` since its version 0.7.0 and are bind spatial and temporal coverages together.
+The standard description is published by the IVOA `here <http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf>`__.
+
+Space-Time coverages allow to:
 
 1. Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. `astropy.time.Time` ranges).
 2. Retrieve the temporal coverage observed by a mission within a spatial coverage.
 
 As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.
 
-Please refer to the following notebook `here <https://github.com/cds-astro/mocpy/blob/master/notebooks/Space%20%26%20Time%20coverages.ipynb>`__ for how to compute and query Space-Time coverages.
+Gallery of notebooks examples using STMOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. nbgallery::
+    ../_collections/notebooks/STMOC from time ranges
+    ../_collections/notebooks/Space & Time coverages
+
+*************************
+FMOC: Frequency coverages
+*************************
+
+Gallery of notebooks examples using FMOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. nbgallery::
+    ../_collections/notebooks/First_Steps_with_FMOCs
+

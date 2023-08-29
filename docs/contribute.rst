@@ -92,7 +92,7 @@ Running the python tests
 
 Once your environment is set up and activated you can run the tests
 
-- To run the automated tests go to the repo folder and type::
+- To run the automated tests and the doctring examples, go to the repo folder and type::
 
     python -m pytest -v python/mocpy
 

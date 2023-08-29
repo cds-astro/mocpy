@@ -18,8 +18,7 @@ distributed under the BSD-3 license.
    :caption: Contents:
 
    install
-   examples/examples
-   fmoc
+   examples/user_documentation
    api
    contribute
 

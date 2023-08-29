@@ -67,12 +67,16 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
+    "sphinxcontrib.collections",
     # Extension for plotting image in the doc
     "matplotlib.sphinxext.plot_directive",
     # To support Numpy docstrings, we use this extension:
     # see https://numpydoc.readthedocs.io/en/latest/install.html
     "numpydoc",
-    "jupyter_sphinx",
+    # "jupyter_sphinx",
+    "nbsphinx",
+    "sphinx_copybutton",
+    "sphinx_gallery.load_style",
 ]
 bibtex_bibfiles = ["references.bib"]
 
@@ -118,7 +122,7 @@ html_theme = "bootstrap-astropy"
 html_show_sphinx = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
+# further.  For a list of options available for each theme, see theZXing library
 # documentation.
 #
 html_theme_options = {
@@ -150,6 +154,21 @@ html_favicon = "_static/MOCpy-icon.svg"
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
+# -- Add the notebooks to Sphinx root folder with collections ----------------
+
+collections = {
+    "notebooks": {
+        "driver": "copy_folder",
+        "source": "../notebooks/",
+        "target": "notebooks",
+        "ignore": [".fits", ".ipynb_checkpoints/*"],
+    }
+}
+
+# -- Configuration for nbsphinx ----------------------------------------------
+
+nbsphinx_allow_errors = True
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
