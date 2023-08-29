@@ -7,6 +7,7 @@ matplotlib
 nbsphinx
 networkx>=2.5
 numpydoc
+pandoc
 requests
 sphinx>7.0.0 # autoclass does not show properties in older versions
 sphinx-astropy
