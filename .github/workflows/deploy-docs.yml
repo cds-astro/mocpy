@@ -1,0 +1,46 @@
+name: deploy-documentation
+on:
+  push:
+    tags:
+       - v*
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout branch ${{ github.head_ref }}"
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: "Set up Python on Ubuntu"
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: "Build doc"
+        run: |
+          # Build the doc
+          # - Install virtualenv
+          pip install virtualenv
+          # - Create and activate a new virtualenv
+          virtualenv mocpy-env
+          source mocpy-env/bin/activate
+          # - Install maturin
+          pip install maturin
+          # - Build and install mocpy
+          maturin develop --release
+          # - Install dependencies needed to build the docs
+          pip install -r requirements/docs.txt
+          sudo apt-get install pandoc
+          # - Build the doc: once done, it is in docs/_build/html/
+          cd ./docs
+          make html
+          cd ..
+          # Switch off the virtualenv
+          deactivate
+      - name: "Publish doc on github pages (commit on branch gh-pages)"
+        uses: JamesIves/github-pages-deploy-action@4.1.0
+        with:
+          branch: gh-pages
+          folder: docs/_build/html/
