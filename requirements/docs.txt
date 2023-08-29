@@ -3,11 +3,14 @@ astropy-sphinx-theme
 astropy_healpix
 cdshealpix>=0.6.1
 healpy
-jupyter-sphinx
 matplotlib
+nbsphinx
 networkx>=2.5
 numpydoc
 requests
 sphinx>7.0.0 # autoclass does not show properties in older versions
 sphinx-astropy
+sphinx-collections
+sphinx-copybutton
+sphinx-gallery
 sphinxcontrib-bibtex

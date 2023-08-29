@@ -23,8 +23,13 @@ classifiers = [
 query_fits = ["requests"] # Used to load FITS from URLs
 docs = [
     "sphinx",
-    "numpydoc"
-
+    "numpydoc",
+    "nbsphinx",
+    "sphinx-astropy",
+    "sphinx-collections",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "sphinxcontrib-bibtex"
 ]
 
 [project.urls]
