@@ -177,7 +177,7 @@ jobs:
       - name: "Set up Python on Ubuntu"
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
       - name: "Build doc"
         run: |
           # Build the doc
@@ -190,8 +190,9 @@ jobs:
           pip install maturin
           # - Build and install mocpy
           maturin develop --release
-          # - Install dependencies needed to run benches
+          # - Install dependencies needed to build the docs
           pip install -r requirements/docs.txt
+          sudo apt-get install pandoc
           # - Build the doc: once done, it is in docs/_build/html/
           cd ./docs
           make html
