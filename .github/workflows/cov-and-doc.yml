@@ -43,6 +43,7 @@ jobs:
           python -m pytest -v -s --doctest-modules python/mocpy --cov-report=term --cov=python/mocpy
           # Install dependencies needed to build the docs
           pip install -r requirements/docs.txt
+          sudo apt-get install pandoc
           # Compile the docs and run the test examples
           cd ./docs
           # * Generate the HTML files

@@ -112,6 +112,9 @@ this will generate an ``htmlcov`` folder where all the static html files can be 
 Building the documentation
 --------------------------
 
+To see the documentation locally, you'll need to install the python packages in
+:file:`requirements/docs.txt` and the pandoc software.
+
 - To build the docs from the repo directory::
 
     cd docs
