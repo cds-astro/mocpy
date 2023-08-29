@@ -1,20 +1,25 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.plot.wcs &#8212; mocpy 0.12.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-astropy.css" />
+    <title>mocpy.moc.plot.wcs &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script type="text/javascript" src="../../../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
@@ -44,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../../index.html">mocpy 0.12.3 documentation</a>
+	<a href="../../../../index.html">MOCPy 0.13.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -68,7 +73,9 @@
 <span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 
 
-<div class="viewcode-block" id="WCS"><a class="viewcode-back" href="../../../../stubs/mocpy.WCS.html#mocpy.WCS">[docs]</a><span class="k">class</span> <span class="nc">WCS</span><span class="p">:</span>
+<div class="viewcode-block" id="WCS">
+<a class="viewcode-back" href="../../../../stubs/mocpy.WCS.html#mocpy.WCS">[docs]</a>
+<span class="k">class</span> <span class="nc">WCS</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a WCS for vizualizing a MOC in a matplotlib axis.</span>
 
@@ -97,27 +104,27 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from mocpy import MOC, WCS</span>
 <span class="sd">    &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
-<span class="sd">    &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">    &gt;&gt;&gt; # Load a MOC</span>
-<span class="sd">    &gt;&gt;&gt; filename = &#39;./../resources/P-GALEXGR6-AIS-FUV.fits&#39;</span>
-<span class="sd">    &gt;&gt;&gt; moc = MOC.from_fits(filename)</span>
-<span class="sd">    &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
 <span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
-<span class="sd">    &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
-<span class="sd">    &gt;&gt;&gt; # Define a WCS as a context</span>
+<span class="sd">    &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">    &gt;&gt;&gt; # Create a MOC</span>
+<span class="sd">    &gt;&gt;&gt; moc = MOC.from_elliptical_cone(lon = 0 * u.rad,</span>
+<span class="sd">    ...                                lat = 0 * u.rad,</span>
+<span class="sd">    ...                                a = 50 * u.deg,</span>
+<span class="sd">    ...                                b = 20 * u.deg,</span>
+<span class="sd">    ...                                pa = 90 * u.deg,</span>
+<span class="sd">    ...                                max_depth = 13,</span>
+<span class="sd">    ...                                )</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure(figsize=(10, 10))</span>
 <span class="sd">    &gt;&gt;&gt; with WCS(fig,</span>
-<span class="sd">    ...         fov=200 * u.deg,</span>
-<span class="sd">    ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
-<span class="sd">    ...         coordsys=&quot;icrs&quot;,</span>
-<span class="sd">    ...         rotation=Angle(0, u.degree),</span>
-<span class="sd">    ...         projection=&quot;AIT&quot;) as wcs:</span>
-<span class="sd">    ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)</span>
-<span class="sd">    ...     # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
-<span class="sd">    ...     moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;green&quot;)</span>
-<span class="sd">    ...     moc.border(ax=ax, wcs=wcs, alpha=0.5, color=&quot;black&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; plt.xlabel(&#39;ra&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; plt.ylabel(&#39;dec&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)</span>
+<span class="sd">    ...           fov=200 * u.deg,</span>
+<span class="sd">    ...           center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
+<span class="sd">    ...           coordsys=&quot;icrs&quot;,</span>
+<span class="sd">    ...           rotation=Angle(0, u.degree),</span>
+<span class="sd">    ...           projection=&quot;AIT&quot;) as wcs: wcs = wcs</span>
+<span class="sd">    &gt;&gt;&gt; ax = fig.add_subplot(projection=wcs)</span>
+<span class="sd">    &gt;&gt;&gt; # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
+<span class="sd">    &gt;&gt;&gt; moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;green&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; moc.border(ax=ax, wcs=wcs, alpha=0.5, color=&quot;black&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -134,9 +141,12 @@
         <span class="n">width_px</span><span class="p">,</span> <span class="n">height_px</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_size_inches</span><span class="p">()</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi</span><span class="p">)</span>
 
         <span class="n">cdelt_x</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">width_px</span><span class="p">)</span>
+        <span class="n">cdelt_y</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">height_px</span><span class="p">)</span>
+
+        <span class="n">cdelt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cdelt_x</span><span class="p">,</span> <span class="n">cdelt_y</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crpix</span> <span class="o">=</span> <span class="p">[</span><span class="n">width_px</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">height_px</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">cdelt_x</span><span class="p">,</span> <span class="n">cdelt_x</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">cdelt</span><span class="p">,</span> <span class="n">cdelt</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">coordsys</span> <span class="o">==</span> <span class="s2">&quot;icrs&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crval</span> <span class="o">=</span> <span class="p">[</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">center</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
@@ -156,6 +166,7 @@
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
         <span class="k">pass</span></div>
+
 </pre></div>
 
             <div class="clearer"></div>
@@ -166,11 +177,6 @@
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 
 
-<form action="../../../../search.html" method="get">
-  <input type="text" name="q" placeholder="Search" />
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
         </div>
       </div>
       <div class="clearer"></div>
@@ -179,7 +185,8 @@
   <p class="pull-right"> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
   </p>
 </footer>
   </body>

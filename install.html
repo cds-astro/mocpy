@@ -1,24 +1,29 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Install &#8212; mocpy 0.12.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
+    <title>Install &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
     
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/documentation_options.js?v=1019fba8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="icon" href="_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="examples/examples.html" />
+    <link rel="next" title="User documentation" href="examples/user_documentation.html" />
     <link rel="prev" title="Welcome to MOCPy’s documentation!" href="index.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -47,7 +52,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="examples/examples.html" title="Examples">
+	<a href="examples/user_documentation.html" title="User documentation">
 	  next &raquo;
 	</a>
       </li>
@@ -58,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="index.html">mocpy 0.12.3 documentation</a>
+	<a href="index.html">MOCPy 0.13.0 documentation</a>
 	 &#187;
       </li>
       
@@ -73,28 +78,24 @@
           <div class="body" role="main">
             
   <section id="install">
-<h1>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h1>
+<h1>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h1>
 <p>MOCPy relies on the following mandatory external dependencies :</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://cds-astro.github.io/cds-healpix-python/">cdshealpix</a></p></li>
 <li><p><a class="reference external" href="http://docs.astropy.org/en/stable/">astropy</a></p></li>
 <li><p><a class="reference external" href="https://matplotlib.org/">matplotlib</a></p></li>
-<li><p><a class="reference external" href="http://networkx.github.io/">networkx</a> used in <a class="reference internal" href="stubs/mocpy.MOC.html#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a></p></li>
-<li><p><a class="reference external" href="https://github.com/lark-parser/lark">lark-parser</a> used for
-serializing the sky coverages to ASCII format</p></li>
+<li><p><a class="reference external" href="http://networkx.github.io/">networkx</a> used in <code class="docutils literal notranslate"><span class="pre">~mocpy.MOC.get_boundaries</span></code></p></li>
 </ul>
-<p>It has also a few optional dependencies that are mainly used in
-deprecated methods and will be removed in the future:</p>
+<p>It has an optional dependency to query FITS files by url:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="http://astropy-healpix.readthedocs.io/en/latest/">astropy-healpix</a>
-is used by the old plotting methods as well as in <a class="reference internal" href="stubs/mocpy.MOC.html#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a></p></li>
+<li><p><a class="reference external" href="https://github.com/psf/requests">requests</a></p></li>
 </ul>
 <p>To upgrade the <code class="docutils literal notranslate"><span class="pre">mocpy</span></code> package to the latest version:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mocpy</span> <span class="o">-</span><span class="n">U</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mocpy</span> <span class="o">-</span><span class="n">U</span>
 </pre></div>
 </div>
 <p>To install <code class="docutils literal notranslate"><span class="pre">mocpy</span></code> type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mocpy</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mocpy</span>
 </pre></div>
 </div>
 </section>
@@ -111,28 +112,6 @@ is used by the old plotting methods as well as in <a class="reference internal" 
 </ul>
 
 
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="index.html"
-                          title="previous chapter">Welcome to MOCPy’s documentation!</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="examples/examples.html"
-                          title="next chapter">Examples</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/install.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<form action="search.html" method="get">
-  <input type="text" name="q" placeholder="Search" />
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
         </div>
       </div>
       <div class="clearer"></div>
@@ -143,7 +122,8 @@ is used by the old plotting methods as well as in <a class="reference internal" 
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
   </p>
 </footer>
   </body>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Create a MOC from a polygon &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    
+    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Intersection between MOCs" href="from_fits_and_intersection.html" />
+    <link rel="prev" title="Create a MOC from an astropy Table" href="from_astropy_table.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="from_fits_and_intersection.html" title="Intersection between MOCs">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="from_astropy_table.html" title="Create a MOC from an astropy Table">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
+      
+      <li>Create a MOC from a polygon</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Create-a-MOC-from-a-polygon">
+<h1>Create a MOC from a polygon<a class="headerlink" href="#Create-a-MOC-from-a-polygon" title="Link to this heading">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import MOC
+import numpy as np
+
+from astropy import units as u
+
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Methods for defining random polygons
+
+
+def generate_rand_polygon(num_points):
+    &quot;&quot;&quot;Generate a random polygon.
+
+    Parameters
+    ----------
+        num_points : int
+            number of random points to generate
+
+    Returns
+    -------
+        (astropy.units.quantity.Quantity, astropy.units.quantity.Quantity)
+            a tuple containing the longitutes and lattitudes of the random points
+    &quot;&quot;&quot;
+    lon_min, lon_max = (-5, 5)
+    lat_min, lat_max = (-5, 5)
+    lon = (np.random.random(num_points) * (lon_max - lon_min) + lon_min) * u.deg
+    lat = (np.random.random(num_points) * (lat_max - lat_min) + lat_min) * u.deg
+    return lon, lat
+
+
+def generate_concave_polygon(num_points, lon_offset, lat_offset):
+    &quot;&quot;&quot;Generate a concave polygon.
+
+    Parameters
+    ----------
+    num_points : int
+        the number of corners
+    lon_offset : float
+        offset in longitudinal direction
+    lat_offset : float
+        offset in latitudinal direction
+
+    Returns
+    -------
+    (astropy.units.quantity.Quantity, astropy.units.quantity.Quantity)
+        a tuple containing the longitutes and lattitudes of the random points
+    &quot;&quot;&quot;
+    radius_max = 10
+
+    angles = np.linspace(0, 2 * np.pi, num_points)
+    radius = np.random.random(angles.shape[0]) * radius_max
+
+    lon = (np.cos(angles) * radius + lon_offset) * u.deg
+    lat = (np.sin(angles) * radius + lat_offset) * u.deg
+    return lon, lat
+
+
+def generate_convexe_polygon(num_points, lon_offset, lat_offset):
+    &quot;&quot;&quot;Generate the corners on a convexe polygon.
+
+    Parameters
+    ----------
+    num_points : int
+        the number of corners
+    lon_offset : float
+        offset in longitudinal direction
+    lat_offset : float
+        offset in latitudinal direction
+
+    Returns
+    -------
+    (astropy.units.quantity.Quantity, astropy.units.quantity.Quantity)
+        a tuple containing the longitutes and lattitudes of the random points
+    &quot;&quot;&quot;
+    radius_max = 10
+
+    angles = np.linspace(0, 2 * np.pi, num_points)
+    radius = np.random.random() * radius_max * np.ones(angles.shape[0])
+
+    lon = (np.cos(angles) * radius + lon_offset) * u.deg
+    lat = (np.sin(angles) * radius + lat_offset) * u.deg
+    return lon, lat
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+# Let&#39;s generate four MOCs
+
+
+## Two random ones
+lon, lat = generate_rand_polygon(12)
+random_moc_1 = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+
+lon, lat = generate_rand_polygon(5)
+random_moc_2 = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+
+## A convexe one
+lon, lat = generate_convexe_polygon(15, 20, 7)
+convexe_moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+
+## A concave one
+lon, lat = generate_concave_polygon(15, 20, 7)
+concave_moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 21.4 ms, sys: 1.12 ms, total: 22.5 ms
+Wall time: 23.5 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Let&#39;s plot the results
+
+fig = plt.figure()
+
+wcs = convexe_moc.wcs(fig)  # automatically creates a wcs for the MOC
+ax1 = fig.add_subplot(221, projection=wcs)  # The first of a 2*2 grig of subplots
+convexe_moc.fill(
+    ax1,
+    wcs,
+    color=&quot;hotpink&quot;,
+    alpha=0.5,
+)  # Where the MOC is added to the plot
+ax1.set_title(&quot;A convexe MOC&quot;)  # Comments and titles
+
+wcs = random_moc_1.wcs(fig)
+ax2 = fig.add_subplot(222, projection=wcs)
+random_moc_1.fill(ax2, wcs, color=&quot;lightblue&quot;, alpha=0.5)
+ax2.set_title(&quot;A first random MOC&quot;)
+
+wcs = random_moc_2.wcs(fig)
+ax3 = fig.add_subplot(223, projection=wcs)
+random_moc_2.fill(ax3, wcs, color=&quot;lightgreen&quot;, alpha=0.5)
+ax3.set_title(&quot;A second random MOC&quot;)
+
+wcs = concave_moc.wcs(fig)
+ax4 = fig.add_subplot(224, projection=wcs)
+concave_moc.fill(ax4, wcs, color=&quot;yellow&quot;, alpha=0.5)
+ax4.set_title(&quot;And a concave one&quot;)
+
+fig.tight_layout()  # prevents overlapping labels
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_from_polygon_4_0.png" src="../../_images/_collections_notebooks_from_polygon_4_0.png" />
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Create a MOC from a polygon</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/_collections/notebooks/from_polygon.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
+  </p>
+</footer>
+  </body>
+</html>

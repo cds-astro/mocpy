@@ -1,0 +1,9 @@
+@import url("bootstrap-astropy.css");
+
+div.topbar a.brand {
+    background-image: url("MOCpy-icon.svg"), none;
+}
+
+div.sphinxsidebarwrapper {
+
+}

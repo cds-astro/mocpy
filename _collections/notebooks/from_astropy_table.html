@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Create a MOC from an astropy Table &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    
+    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Create a MOC from a polygon" href="from_polygon.html" />
+    <link rel="prev" title="Overlay the MOC of Spitzer on a 2MASS cutout" href="FITS-image-pixels-intersecting-MOC.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="from_polygon.html" title="Create a MOC from a polygon">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="FITS-image-pixels-intersecting-MOC.html" title="Overlay the MOC of Spitzer on a 2MASS cutout">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
+      
+      <li>Create a MOC from an astropy Table</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Create-a-MOC-from-an-astropy-Table">
+<h1>Create a MOC from an astropy Table<a class="headerlink" href="#Create-a-MOC-from-an-astropy-Table" title="Link to this heading">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import MOC, WCS
+
+from astropy import units as u
+from astropy.coordinates import SkyCoord, Angle
+
+from astroquery.vizier import Vizier
+
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+<p>Let’s load a VizieR catalog</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>viz = Vizier(columns=[&quot;*&quot;, &quot;_RAJ2000&quot;, &quot;_DEJ2000&quot;])
+viz.ROW_LIMIT = -1  # sets the limit to infinity
+table = viz.get_catalogs(&quot;I/293/npm2cros&quot;)[0]
+
+print(table)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ _RAJ2000   _DEJ2000    NPM2   KLA  RAJ2000   ...  IQ  IN r_Star  mag  tyc
+   deg        deg                             ...                 mag
+---------- ---------- -------- --- ---------- ... --- --- ------ ----- ---
+339.638333  83.166667 +83.0016 HPM 22 38 33.2 ...   0   0    811 14.20
+339.638333  83.166667 +83.0016 HPM 22 38 33.2 ...   0   0    813 14.20
+349.530833  83.010556 +83.0022 VAR 23 18 07.4 ...   0   0    843    --   T
+349.530833  83.010556 +83.0022 SRA 23 18 07.4 ...   0   0      1  9.60   T
+323.854167  82.997222 +82.0030 UBV 21 35 25.0 ...   0   0      5 10.08   T
+332.107917  82.747500 +82.0055  WD 22 08 25.9 ...   0   0   1012 16.00
+332.933750  82.607778 +82.0059 HPM 22 11 44.1 ...   0   0    811 16.70
+335.088750  82.970833 +82.0065 HPM 22 20 21.3 ...   0   0    811 11.00   T
+337.119167  82.763889 +82.0074 UBV 22 28 28.6 ...   0   0      5 10.42   T
+337.274583  82.662222 +82.0075 HPM 22 29 05.9 ...   1   0    811 17.40
+       ...        ...      ... ...        ... ... ... ...    ...   ... ...
+257.227500 -23.094167 -23.0151 ELS 17 08 54.6 ...   0   0    511 13.50
+267.989583 -23.012222 -23.0162 CMC 17 51 57.5 ...   0   0    817 11.13   T
+267.989583 -23.012222 -23.0162 ELS 17 51 57.5 ...   0   0    252    --   T
+270.244583 -23.032222 -23.0164 CMC 18 00 58.7 ...   0   0    817 10.52   T
+270.244583 -23.032222 -23.0164  EA 18 00 58.7 ...   0   0      1 10.20   T
+270.337500 -23.000556 -23.0165 COM 18 01 21.0 ...   0   0    819 11.20   T
+270.442917 -23.020000 -23.0166 UNK 18 01 46.3 ...   0   0    816 14.00
+270.474167 -23.028889 -23.0167 COM 18 01 53.8 ...   1   0    819 11.60   T
+271.357083 -23.005556 -23.0168 ELS 18 05 25.7 ...   0   0    252    --   T
+271.357083 -23.005556 -23.0168  OB 18 05 25.7 ...   0   0    393  9.70   T
+Length = 46887 rows
+</pre></div></div>
+</div>
+<p>Let’s create a MOC from the coordinates of this table</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>moc = MOC.from_lonlat(
+    table[&quot;_RAJ2000&quot;].T * u.deg,
+    table[&quot;_DEJ2000&quot;].T * u.deg,
+    max_norder=6,
+)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(figsize=(9, 7))
+
+with WCS(
+    fig,
+    fov=270 * u.deg,
+    center=SkyCoord(0, 0, unit=&quot;deg&quot;, frame=&quot;galactic&quot;),
+    coordsys=&quot;galactic&quot;,
+    rotation=Angle(0, u.degree),
+    projection=&quot;AIT&quot;,
+) as wcs:
+    ax = fig.add_subplot(1, 1, 1, projection=wcs)
+
+    moc.fill(
+        ax=ax,
+        wcs=wcs,
+        edgecolor=&quot;teal&quot;,
+        facecolor=&quot;orange&quot;,
+        linewidth=1.0,
+        fill=True,
+        alpha=0.8,
+    )
+    moc.border(ax=ax, wcs=wcs, color=&quot;k&quot;)
+
+ax.grid(True)
+
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_from_astropy_table_6_0.png" src="../../_images/_collections_notebooks_from_astropy_table_6_0.png" />
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Create a MOC from an astropy Table</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/_collections/notebooks/from_astropy_table.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
+  </p>
+</footer>
+  </body>
+</html>

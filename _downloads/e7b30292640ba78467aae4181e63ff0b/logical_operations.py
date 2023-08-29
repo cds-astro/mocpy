@@ -24,7 +24,13 @@ with WCS(
     ax = fig.add_subplot(1, 1, 1, projection=wcs)
     # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
     union.fill(
-        ax=ax, wcs=wcs, alpha=0.5, fill=True, color="red", linewidth=0, label="Union"
+        ax=ax,
+        wcs=wcs,
+        alpha=0.5,
+        fill=True,
+        color="red",
+        linewidth=0,
+        label="Union",
     )
     union.border(ax=ax, wcs=wcs, alpha=1, color="red")
 

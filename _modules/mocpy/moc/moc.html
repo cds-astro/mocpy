@@ -1,20 +1,25 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; mocpy 0.12.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-astropy.css" />
+    <title>mocpy.moc.moc &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script type="text/javascript" src="../../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
@@ -44,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">mocpy 0.12.3 documentation</a>
+	<a href="../../../index.html">MOCPy 0.13.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -96,7 +101,9 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr&quot;</span>
 
 
-<div class="viewcode-block" id="MOC"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC">[docs]</a><span class="k">class</span> <span class="nc">MOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC">[docs]</a>
+<span class="k">class</span> <span class="nc">MOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multi-order spatial coverage class.</span>
 
@@ -162,7 +169,9 @@
         <span class="n">depth</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_smoc_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MOC.split_count"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split_count">[docs]</a>    <span class="k">def</span> <span class="nf">split_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.split_count">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split_count">[docs]</a>
+    <span class="k">def</span> <span class="nf">split_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of disjoint MOCs the given MOC contains.</span>
 
@@ -174,7 +183,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">split_count</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.split"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.split">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.split">[docs]</a>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the disjoint MOCs this MOC contains.</span>
 
@@ -191,7 +203,10 @@
         <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">include_indirect_neighbours</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">MOC</span><span class="p">(</span><span class="n">MOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MOC.degrade_to_order"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.degrade_to_order">[docs]</a>    <span class="k">def</span> <span class="nf">degrade_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.degrade_to_order">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.degrade_to_order">[docs]</a>
+    <span class="k">def</span> <span class="nf">degrade_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Degrade the MOC instance to a new, less precise, MOC.</span>
 
@@ -211,7 +226,10 @@
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">degrade</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">new_order</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">MOC</span><span class="p">(</span><span class="n">MOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.contains_skycoords"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains_skycoords">[docs]</a>    <span class="k">def</span> <span class="nf">contains_skycoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skycoords</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.contains_skycoords">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains_skycoords">[docs]</a>
+    <span class="k">def</span> <span class="nf">contains_skycoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skycoords</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a boolean mask array of the positions lying inside (or outside) the MOC instance.</span>
 
@@ -238,7 +256,10 @@
             <span class="n">keep_inside</span><span class="o">=</span><span class="n">keep_inside</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.contains"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.contains">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains">[docs]</a>
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test wether a MOC contains --or not-- the given points. Returns a boolean mask array.</span>
 
 <span class="sd">        .. deprecated:: 0.11.1</span>
@@ -270,11 +291,15 @@
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is deprecated and has been replaced by contains_lonlat&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contains_lonlat</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="n">keep_inside</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.contains_lonlat"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains_lonlat">[docs]</a>    <span class="k">def</span> <span class="nf">contains_lonlat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.contains_lonlat">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.contains_lonlat">[docs]</a>
+    <span class="k">def</span> <span class="nf">contains_lonlat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test wether a MOC contains (or not) the given points. Returns a boolean mask array.</span>
 
 <span class="sd">        Parameters</span>
@@ -327,9 +352,12 @@
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># noqa: RET505</span>
             <span class="k">return</span> <span class="o">~</span><span class="n">mask</span></div>
 
+
     <span class="c1"># TODO: implement: def contains_including_surrounding(self, lon, lat, distance)</span>
 
-<div class="viewcode-block" id="MOC.fill"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.fill">[docs]</a>    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.fill">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.fill">[docs]</a>
+    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Draw the MOC on a matplotlib axis.</span>
 
@@ -348,35 +376,27 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, WCS</span>
-<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">        &gt;&gt;&gt; # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV</span>
-<span class="sd">        &gt;&gt;&gt; filename = &#39;./../resources/P-GALEXGR6-AIS-FUV.fits&#39;</span>
-<span class="sd">        &gt;&gt;&gt; moc = MOC.load(filename, &#39;fits&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
-<span class="sd">        &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
-<span class="sd">        &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">        &gt;&gt;&gt; with WCS(fig,</span>
-<span class="sd">        ...         fov=50 * u.deg,</span>
-<span class="sd">        ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
-<span class="sd">        ...         coordsys=&quot;icrs&quot;,</span>
-<span class="sd">        ...         rotation=Angle(0, u.degree),</span>
-<span class="sd">        ...         projection=&quot;AIT&quot;) as wcs:</span>
-<span class="sd">        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)</span>
-<span class="sd">        ...     # Call fill giving the matplotlib axe and the `~astropy.wcs.WCS` object.</span>
-<span class="sd">        ...     # We will set the matplotlib keyword linewidth to 0 so that it does not plot</span>
-<span class="sd">        ...     # the border of each HEALPix cell.</span>
-<span class="sd">        ...     # The color can also be specified along with an alpha value.</span>
-<span class="sd">        ...     moc.fill(ax=ax, wcs=wcs, linewidth=0, alpha=0.5, fill=True, color=&quot;green&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.xlabel(&#39;ra&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.ylabel(&#39;dec&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # Create a MOC</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_ring(external_radius=2*u.deg,</span>
+<span class="sd">        ...                     internal_radius=1*u.deg,</span>
+<span class="sd">        ...                     lat=0*u.rad, lon=0*u.rad,</span>
+<span class="sd">        ...                     max_depth=13,</span>
+<span class="sd">        ...                    )</span>
+<span class="sd">        &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
+<span class="sd">        &gt;&gt;&gt; fig = plt.figure(figsize=(10, 10))</span>
+<span class="sd">        &gt;&gt;&gt; wcs = moc.wcs(fig)</span>
+<span class="sd">        &gt;&gt;&gt; ax = fig.add_subplot(projection=wcs)</span>
+<span class="sd">        &gt;&gt;&gt; moc.fill(ax, wcs, color=&#39;blue&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fill</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.border"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.border">[docs]</a>    <span class="k">def</span> <span class="nf">border</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.border">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.border">[docs]</a>
+    <span class="k">def</span> <span class="nf">border</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Draw the MOC border.s on a matplotlib axis.</span>
 
@@ -395,32 +415,26 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, WCS</span>
-<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Latitude, Longitude</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">        &gt;&gt;&gt; # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV</span>
-<span class="sd">        &gt;&gt;&gt; filename = &#39;./../resources/P-GALEXGR6-AIS-FUV.fits&#39;</span>
-<span class="sd">        &gt;&gt;&gt; moc = MOC.load(filename, &#39;fits&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
-<span class="sd">        &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
-<span class="sd">        &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">        &gt;&gt;&gt; with WCS(fig,</span>
-<span class="sd">        ...         fov=50 * u.deg,</span>
-<span class="sd">        ...         center=SkyCoord(0, 20, unit=&#39;deg&#39;, frame=&#39;icrs&#39;),</span>
-<span class="sd">        ...         coordsys=&quot;icrs&quot;,</span>
-<span class="sd">        ...         rotation=Angle(0, u.degree),</span>
-<span class="sd">        ...         projection=&quot;AIT&quot;) as wcs:</span>
-<span class="sd">        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)</span>
-<span class="sd">        ...     # Call border giving the matplotlib axe and the `~astropy.wcs.WCS` object.</span>
-<span class="sd">        ...     moc.border(ax=ax, wcs=wcs, alpha=0.5, color=&quot;red&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.xlabel(&#39;ra&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.ylabel(&#39;dec&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # Create a MOC</span>
+<span class="sd">        &gt;&gt;&gt; lon = Longitude([5, -5, -5, 5], u.deg)</span>
+<span class="sd">        &gt;&gt;&gt; lat = Latitude([5, 5, -5, -5], u.deg)</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_polygon(lon, lat)</span>
+<span class="sd">        &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
+<span class="sd">        &gt;&gt;&gt; fig = plt.figure(figsize=(10, 10))</span>
+<span class="sd">        &gt;&gt;&gt; wcs = moc.wcs(fig)</span>
+<span class="sd">        &gt;&gt;&gt; ax = fig.add_subplot(projection=wcs)</span>
+<span class="sd">        &gt;&gt;&gt; moc.border(ax, wcs, color=&#39;blue&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">border</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.get_boundaries"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.get_boundaries">[docs]</a>    <span class="k">def</span> <span class="nf">get_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.get_boundaries">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.get_boundaries">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the sky coordinates defining the border(s) of the MOC.</span>
 
@@ -455,10 +469,14 @@
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is not stable. A future more stable algorithm will be implemented!&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">Boundaries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_fits_image"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_image">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_fits_image">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_image">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_fits_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdu</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `~mocpy.moc.MOC` from an image stored as a FITS file.</span>
@@ -514,8 +532,10 @@
         <span class="n">skycrd</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span>
 
         <span class="c1"># Compute the order based on the CDELT</span>
-        <span class="n">c1</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT1&quot;</span><span class="p">]</span>
-        <span class="n">c2</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span>
+        <span class="c1"># Should work even if the fits is defined using cd_ij or crota, see:</span>
+        <span class="c1"># https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt</span>
+        <span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">get_cdelt</span><span class="p">()</span>
+
         <span class="n">max_res_px</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">c1</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">+</span> <span class="n">c2</span> <span class="o">*</span> <span class="n">c2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
         <span class="n">max_depth_px</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">max_res_px</span> <span class="o">*</span> <span class="n">max_res_px</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
 
@@ -528,7 +548,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">moc</span>  <span class="c1"># noqa: RET504</span></div>
 
-<div class="viewcode-block" id="MOC.from_fits_images"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_images">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_fits_images">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_images">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_fits_images</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path_l</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">hdu_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a MOC from a set of FITS file images.</span>
@@ -561,7 +584,10 @@
 
         <span class="k">return</span> <span class="n">moc</span></div>
 
-<div class="viewcode-block" id="MOC.from_vizier_table"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_vizier_table">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_vizier_table">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_vizier_table">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_vizier_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">table_id</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `~mocpy.moc.MOC` object from a VizieR table.</span>
@@ -588,9 +614,12 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_ivorn</span><span class="p">(</span><span class="s2">&quot;ivo://CDS/&quot;</span> <span class="o">+</span> <span class="n">table_id</span><span class="p">,</span> <span class="n">nside</span><span class="p">)</span></div>
 
+
     <span class="n">MOC_SERVER_ROOT_URL</span> <span class="o">=</span> <span class="s2">&quot;http://alasky.unistra.fr/MocServer/query&quot;</span>
 
-<div class="viewcode-block" id="MOC.from_ivorn"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ivorn">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MOC.from_ivorn">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ivorn">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_ivorn</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ivorn</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `~mocpy.moc.MOC` object from a given ivorn.</span>
@@ -607,14 +636,16 @@
 <span class="sd">            The resulting MOC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">?</span><span class="si">%s</span><span class="s2">&quot;</span>
-            <span class="o">%</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">?</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">MOC</span><span class="o">.</span><span class="n">MOC_SERVER_ROOT_URL</span><span class="p">,</span>
                 <span class="n">urlencode</span><span class="p">({</span><span class="s2">&quot;ivorn&quot;</span><span class="p">:</span> <span class="n">ivorn</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;moc&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">nside</span><span class="p">))}),</span>
             <span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_url"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_url">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_url">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_url">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `~mocpy.moc.MOC` object from a given url.</span>
@@ -632,7 +663,10 @@
         <span class="n">path</span> <span class="o">=</span> <span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;fits&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_skycoords"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_skycoords">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_skycoords">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_skycoords">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_skycoords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoords</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from an `astropy.coordinates.SkyCoord`.</span>
@@ -655,7 +689,10 @@
             <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_lonlat"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_lonlat">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_lonlat">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_lonlat">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_lonlat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from astropy lon, lat `astropy.units.Quantity`.</span>
@@ -683,7 +720,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_multiordermap_fits_file"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_multiordermap_fits_file">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_multiordermap_fits_file">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_multiordermap_fits_file">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_multiordermap_fits_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
@@ -741,7 +781,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_valued_healpix_cells"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_valued_healpix_cells">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_valued_healpix_cells">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_valued_healpix_cells">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_valued_healpix_cells</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">uniq</span><span class="p">,</span>
@@ -806,6 +849,7 @@
                 <span class="s2">&quot;To avoid an extra loop, it is preferable to provide the max_depth parameter.&quot;</span>
                 <span class="s2">&quot;It will probably become mandatory in future releases.&quot;</span><span class="p">,</span>
                 <span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">max_depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
@@ -828,7 +872,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_elliptical_cone"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_elliptical_cone">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_elliptical_cone">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_elliptical_cone">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_elliptical_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from an elliptical cone.</span>
@@ -889,7 +936,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_cone"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_cone">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_cone">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_cone">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a cone.</span>
@@ -941,7 +991,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_ring"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ring">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_ring">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ring">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_ring</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">lon</span><span class="p">,</span>
@@ -1005,7 +1058,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_polygon_skycoord"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon_skycoord">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_polygon_skycoord">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon_skycoord">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_polygon_skycoord</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoord</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a polygon.</span>
@@ -1032,7 +1088,10 @@
             <span class="n">max_depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_polygon"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_polygon">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_polygon</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">complement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a polygon.</span>
@@ -1067,7 +1126,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.new_empty"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.new_empty">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.new_empty">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.new_empty">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">new_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new empty MOC of given depth.</span>
@@ -1085,7 +1147,10 @@
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">new_empty_smoc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_healpix_cells"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_healpix_cells">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_healpix_cells">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_healpix_cells">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_healpix_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ipix</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a set of HEALPix cells at various depths.</span>
@@ -1116,7 +1181,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_depth29_ranges"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_depth29_ranges">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_depth29_ranges">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_depth29_ranges">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_depth29_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a set of ranges of HEALPix Nested indices at order 29.</span>
@@ -1136,7 +1204,6 @@
 <span class="sd">        moc : `~mocpy.moc.MOC`</span>
 <span class="sd">            The MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># import pdb; pdb.set_trace()</span>
         <span class="n">ranges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="k">if</span> <span class="n">ranges</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ranges</span>
 
         <span class="k">if</span> <span class="n">ranges</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -1148,7 +1215,10 @@
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_hpx_ranges</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">ranges</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.from_stmoc_time_fold"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_stmoc_time_fold">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.from_stmoc_time_fold">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_stmoc_time_fold">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_stmoc_time_fold</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tmoc</span><span class="p">,</span> <span class="n">stmoc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build a new S-MOC from the fold operation of the given ST-MOC by the given T-MOC.</span>
@@ -1161,7 +1231,10 @@
         <span class="n">store_index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_second_dim</span><span class="p">(</span><span class="n">tmoc</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">stmoc</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.order_to_spatial_resolution"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.order_to_spatial_resolution">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="MOC.order_to_spatial_resolution">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.order_to_spatial_resolution">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">order_to_spatial_resolution</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a depth to its equivalent spatial resolution.</span>
@@ -1179,7 +1252,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">**</span> <span class="p">(</span><span class="n">order</span><span class="p">))),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.spatial_resolution_to_order"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.spatial_resolution_to_order">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="MOC.spatial_resolution_to_order">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.spatial_resolution_to_order">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">spatial_resolution_to_order</span><span class="p">(</span><span class="n">spatial_resolution</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a spatial resolution to a MOC order.</span>
@@ -1197,6 +1273,7 @@
         <span class="n">res_rad</span> <span class="o">=</span> <span class="n">spatial_resolution</span><span class="o">.</span><span class="n">rad</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">res_rad</span> <span class="o">*</span> <span class="n">res_rad</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">order</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_fits_header_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1220,7 +1297,9 @@
 
     <span class="c1"># TODO : move this in astroquery.Simbad.query_region</span>
     <span class="c1"># See https://github.com/astropy/astroquery/pull/1466</span>
-<div class="viewcode-block" id="MOC.query_simbad"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.query_simbad">[docs]</a>    <span class="k">def</span> <span class="nf">query_simbad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.query_simbad">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.query_simbad">[docs]</a>
+    <span class="k">def</span> <span class="nf">query_simbad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -1232,9 +1311,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span><span class="p">(</span><span class="s2">&quot;SIMBAD&quot;</span><span class="p">,</span> <span class="n">max_rows</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span></div>
 
+
     <span class="c1"># TODO : move this in astroquery.Vizier.query_region</span>
     <span class="c1"># See https://github.com/astropy/astroquery/pull/1466</span>
-<div class="viewcode-block" id="MOC.query_vizier_table"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.query_vizier_table">[docs]</a>    <span class="k">def</span> <span class="nf">query_vizier_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.query_vizier_table">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.query_vizier_table">[docs]</a>
+    <span class="k">def</span> <span class="nf">query_vizier_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Query a VizieR table for sources in the coverage of the MOC instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -1247,6 +1329,7 @@
 <span class="sd">                timeout before aborting the query, default to 1000s</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span><span class="p">(</span><span class="n">table_id</span><span class="p">,</span> <span class="n">max_rows</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span></div>
+
 
     <span class="c1"># TODO : move this in astroquery</span>
     <span class="k">def</span> <span class="nf">_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
@@ -1280,7 +1363,10 @@
         <span class="n">votable</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parse_single_table</span><span class="p">(</span><span class="n">votable</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
-<div class="viewcode-block" id="MOC.wcs"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.wcs">[docs]</a>    <span class="k">def</span> <span class="nf">wcs</span><span class="p">(</span>
+
+<div class="viewcode-block" id="MOC.wcs">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.wcs">[docs]</a>
+    <span class="k">def</span> <span class="nf">wcs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fig</span><span class="p">,</span>
         <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
@@ -1310,24 +1396,21 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, WCS</span>
-<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, SkyCoord</span>
-<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">        &gt;&gt;&gt; # Load a MOC</span>
-<span class="sd">        &gt;&gt;&gt; filename = &#39;./../resources/P-GALEXGR6-AIS-FUV.fits&#39;</span>
-<span class="sd">        &gt;&gt;&gt; moc = MOC.from_fits(filename)</span>
-<span class="sd">        &gt;&gt;&gt; # Plot the MOC using matplotlib</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
-<span class="sd">        &gt;&gt;&gt; fig = plt.figure(111, figsize=(15, 15))</span>
-<span class="sd">        &gt;&gt;&gt; # Define a WCS as a context</span>
-<span class="sd">        &gt;&gt;&gt; wcs = moc.wcs(fig, coordsys=&quot;icrs&quot;, rotation=Angle(0, u.degree), projection=&quot;AIT&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; ax = fig.add_subplot(1, 1, 1, projection=wcs)</span>
-<span class="sd">        &gt;&gt;&gt; # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
-<span class="sd">        &gt;&gt;&gt; moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;green&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; moc.border(ax=ax, wcs=wcs, alpha=0.5, color=&quot;black&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.xlabel(&#39;ra&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.ylabel(&#39;dec&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;2/2-25 28 29 4/0 6/&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">        &gt;&gt;&gt; moc.wcs(fig)</span>
+<span class="sd">        WCS Keywords</span>
+<span class="sd">        &lt;BLANKLINE&gt;</span>
+<span class="sd">        Number of WCS axes: 2</span>
+<span class="sd">        CTYPE : &#39;RA---AIT&#39;  &#39;DEC--AIT&#39;</span>
+<span class="sd">        CRVAL : 92.29966711743452  54.33295312309193</span>
+<span class="sd">        CRPIX : 320.0  240.0</span>
+<span class="sd">        PC1_1 PC1_2  : 1.0  -0.0</span>
+<span class="sd">        PC2_1 PC2_2  : 0.0  1.0</span>
+<span class="sd">        CDELT : -0.27794934051515896  0.27794934051515896</span>
+<span class="sd">        NAXIS : 0  0</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">rotation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rotation</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">radian</span><span class="p">)</span>
@@ -1345,7 +1428,10 @@
             <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">w</span></div>
 
-<div class="viewcode-block" id="MOC.plot"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;MOC&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.plot">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;MOC&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the MOC object using a mollweide projection.</span>
 
@@ -1363,9 +1449,9 @@
 
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is deprecated and is no longer tested.&quot;</span>
-            <span class="s2">&quot;Please refer to this documentation page for plotting MOCs using&quot;</span>
-            <span class="s2">&quot;matplotlib: https://cds-astro.github.io/mocpy/xamples/examples.html#loading-and-plotting-the-moc-of-sdss&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Please refer to `MOC.fill` and `MOC.border` methods&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">frame</span> <span class="o">=</span> <span class="n">ICRS</span><span class="p">()</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">frame</span>
@@ -1438,7 +1524,10 @@
 
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="MOC.load"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.load">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MOC.load">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.load">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the Spatial MOC from a file.</span>
@@ -1467,13 +1556,16 @@
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load MOC from raw bytes of a FITS file.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">spatial_moc_from_fits_raw_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MOC.from_string"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_string">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MOC.from_string">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deserialize the Spatial MOC from the given string.</span>
@@ -1498,6 +1590,7 @@
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uniq_hpx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1516,7 +1609,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of order 29 HEALPix nested ranges this MOC contains.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MOC.to_rgba"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.to_rgba">[docs]</a>    <span class="k">def</span> <span class="nf">to_rgba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="MOC.to_rgba">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.to_rgba">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_rgba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a matplotlib compatible RGBA preview of the given MOC.</span>
 
@@ -1530,7 +1625,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">y_size</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.display_preview"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.display_preview">[docs]</a>    <span class="k">def</span> <span class="nf">display_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.display_preview">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.display_preview">[docs]</a>
+    <span class="k">def</span> <span class="nf">display_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display a preview of the MOC (calling internally the `to_rgba` method).</span>
 
@@ -1544,19 +1642,27 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">y_size</span><span class="p">))</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="MOC.barycenter"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.barycenter">[docs]</a>    <span class="k">def</span> <span class="nf">barycenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.barycenter">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.barycenter">[docs]</a>
+    <span class="k">def</span> <span class="nf">barycenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Barycenter of the MOC.&quot;&quot;&quot;</span>
         <span class="n">lonlat</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_barycenter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lonlat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MOC.largest_distance_from_coo_to_vertices"><a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.largest_distance_from_coo_to_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">largest_distance_from_coo_to_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coo</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MOC.largest_distance_from_coo_to_vertices">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.largest_distance_from_coo_to_vertices">[docs]</a>
+    <span class="k">def</span> <span class="nf">largest_distance_from_coo_to_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coo</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the largest distance between the given coordinates and vertices of the MOC cells.&quot;&quot;&quot;</span>
         <span class="n">angle</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_largest_distance_from_coo_to_moc_vertices</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span>
             <span class="n">coo</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
             <span class="n">coo</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">angle</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span></div></div>
+        <span class="k">return</span> <span class="n">angle</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span></div>
+</div>
+
 </pre></div>
 
             <div class="clearer"></div>
@@ -1567,11 +1673,6 @@
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 
 
-<form action="../../../search.html" method="get">
-  <input type="text" name="q" placeholder="Search" />
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1580,7 +1681,8 @@
   <p class="pull-right"> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
   </p>
 </footer>
   </body>

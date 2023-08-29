@@ -1,24 +1,29 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.STMOC &#8212; mocpy 0.12.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-astropy.css" />
+    <title>mocpy.STMOC &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="mocpy.WCS" href="mocpy.WCS.html" />
+    <link rel="next" title="mocpy.FrequencyMOC" href="mocpy.FrequencyMOC.html" />
     <link rel="prev" title="mocpy.TimeMOC" href="mocpy.TimeMOC.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -47,7 +52,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="mocpy.WCS.html" title="mocpy.WCS">
+	<a href="mocpy.FrequencyMOC.html" title="mocpy.FrequencyMOC">
 	  next &raquo;
 	</a>
       </li>
@@ -58,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">mocpy 0.12.3 documentation</a>
+	<a href="../index.html">MOCPy 0.13.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -74,133 +79,21 @@
           <div class="body" role="main">
             
   <section id="mocpy-stmoc">
-<h1>mocpy.STMOC<a class="headerlink" href="#mocpy-stmoc" title="Permalink to this heading">¶</a></h1>
+<h1>mocpy.STMOC<a class="headerlink" href="#mocpy-stmoc" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mocpy.STMOC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">STMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">STMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC" title="Link to this definition">¶</a></dt>
 <dd><p>Time-Spatial Coverage class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="#mocpy.STMOC.max_depth" title="mocpy.STMOC.max_depth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_depth</span></code></a></dt><dd><p>Return max depth of MOC.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.max_index" title="mocpy.STMOC.max_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_index</span></code></a></dt><dd><p>Returns the largest index (at the deepest absolute resolution) the MOC contains.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.max_order" title="mocpy.STMOC.max_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></a></dt><dd><p>Depth of the MOC instance.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.max_time" title="mocpy.STMOC.max_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></a></dt><dd><p>Return STMOC max time.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.min_index" title="mocpy.STMOC.min_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_index</span></code></a></dt><dd><p>Returns the smallest index (at the deepest absolute resolution) the MOC contains.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.min_time" title="mocpy.STMOC.min_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_time</span></code></a></dt><dd><p>Return STMOC min time.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.uniq_gen" title="mocpy.STMOC.uniq_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniq_gen</span></code></a></dt><dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the generic uniq indices of the cell in the MOC.</p>
-</dd>
-<dt><a class="reference internal" href="#mocpy.STMOC.uniq_zorder" title="mocpy.STMOC.uniq_zorder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniq_zorder</span></code></a></dt><dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the zorder uniq indices of the cell in the MOC.</p>
+<p>Is a Time-Spatial Coverage (ST-MOC).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>create_key: Object ensure __init__ is called by super-class/class-methods only
+store_index: index of the ST-MOC in the rust-side storage</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p class="rubric">Methods</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.add_neighbours" title="mocpy.STMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a>()</p></td>
-<td><p>Extends the MOC instance so that it includes the HEALPix cells touching its border.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.complement" title="mocpy.STMOC.complement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complement</span></code></a>()</p></td>
-<td><p>Returns the complement of the MOC instance.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.contains" title="mocpy.STMOC.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code></a>(times, lon, lat[, inside])</p></td>
-<td><p>Return a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.contracted" title="mocpy.STMOC.contracted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contracted</span></code></a>()</p></td>
-<td><p>Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.degrade_to_order" title="mocpy.STMOC.degrade_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrade_to_order</span></code></a>(new_order)</p></td>
-<td><p>Degrades the MOC instance to a new, less precise, MOC.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.difference" title="mocpy.STMOC.difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code></a>(another_moc, *args)</p></td>
-<td><p>Difference between the MOC instance and other MOCs.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.empty" title="mocpy.STMOC.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>()</p></td>
-<td><p>Checks whether the MOC is empty or not.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.extended" title="mocpy.STMOC.extended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extended</span></code></a>()</p></td>
-<td><p>Returns the MOC extended by the external border made of cells at the MOC maximum depth.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.flatten" title="mocpy.STMOC.flatten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code></a>()</p></td>
-<td><p>Return the list of indices of all cells in the MOC at the MOC depth.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_fits" title="mocpy.STMOC.from_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_fits</span></code></a>(path_or_url)</p></td>
-<td><p>Loads a MOC from a FITS file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_json" title="mocpy.STMOC.from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json</span></code></a>(json_moc)</p></td>
-<td><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_spatial_coverages" title="mocpy.STMOC.from_spatial_coverages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code></a>(times_start, ...[, ...])</p></td>
-<td><p>Create a 2D Coverage from a set of time ranges and spatial coverages associated to them.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_str" title="mocpy.STMOC.from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_str</span></code></a>(value)</p></td>
-<td><p>Create a MOC from a str.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_string" title="mocpy.STMOC.from_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code></a>(value[, format])</p></td>
-<td><p>Deserialize the Spatial MOC from the given string.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.from_time_ranges_positions" title="mocpy.STMOC.from_time_ranges_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_time_ranges_positions</span></code></a>(times_start, ...)</p></td>
-<td><p>Create a 2D Coverage from a set of times and positions associated to each time.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.from_times_positions" title="mocpy.STMOC.from_times_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_times_positions</span></code></a>(times, time_depth, lon, ...)</p></td>
-<td><p>Create a 2D Coverage from a set of times and positions associated to each time.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.intersection" title="mocpy.STMOC.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(another_moc, *args)</p></td>
-<td><p>Intersection between the MOC instance and other MOCs.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.is_empty" title="mocpy.STMOC.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
-<td><p>Check whether the Space-Time coverage is empty.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.load" title="mocpy.STMOC.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path[, format])</p></td>
-<td><p>Load the Spatial MOC from a file.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_space" title="mocpy.STMOC.query_by_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></a>(smoc)</p></td>
-<td><p>Query the ST-MOC by space coverage.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.query_by_time" title="mocpy.STMOC.query_by_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_time</span></code></a>(tmoc)</p></td>
-<td><p>Query the ST-MOC by time T-MOC.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.remove_neighbours" title="mocpy.STMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a>()</p></td>
-<td><p>Removes from the MOC instance the HEALPix cells located at its border.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.save" title="mocpy.STMOC.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path[, format, overwrite, pre_v2, fold])</p></td>
-<td><p>Writes the MOC to a file.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.serialize" title="mocpy.STMOC.serialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialize</span></code></a>([format, optional_kw_dict, pre_v2])</p></td>
-<td><p>Serializes the MOC into a specific format.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.symmetric_difference" title="mocpy.STMOC.symmetric_difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">symmetric_difference</span></code></a>(another_moc, *args)</p></td>
-<td><p>Symmetruic difference (XOR) between the MOC instance and other MOCs.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.to_string" title="mocpy.STMOC.to_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code></a>([format, fold])</p></td>
-<td><p>Writes the MOC into a string.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mocpy.STMOC.union" title="mocpy.STMOC.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(another_moc, *args)</p></td>
-<td><p>Union between the MOC instance and other MOCs.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mocpy.STMOC.write" title="mocpy.STMOC.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path[, format, overwrite, ...])</p></td>
-<td><p>Writes the MOC to a file.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><strong>store_index_dtype</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.add_neighbours">
-<span class="sig-name descname"><span class="pre">add_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.add_neighbours" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extends the MOC instance so that it includes the HEALPix cells touching its border.</p>
+<span class="sig-name descname"><span class="pre">add_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.add_neighbours" title="Link to this definition">¶</a></dt>
+<dd><p>Extend the MOC instance so that it includes the HEALPix cells touching its border.</p>
 <p>The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -214,8 +107,8 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.complement">
-<span class="sig-name descname"><span class="pre">complement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.complement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the complement of the MOC instance.</p>
+<span class="sig-name descname"><span class="pre">complement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.complement" title="Link to this definition">¶</a></dt>
+<dd><p>Return the complement of the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -228,16 +121,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.contains" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.contains" title="Link to this definition">¶</a></dt>
 <dd><p>Return a boolean mask array of the (times, positions) lying inside (or outside) the Space-Time coverage.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. The returned mask array has true values for (time, position)
 lying inside the Space-Time coverage.</p>
@@ -260,8 +153,8 @@ lying inside the Space-Time coverage.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.contracted">
-<span class="sig-name descname"><span class="pre">contracted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.contracted" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the MOC contracted by removing the internal border made of cells at the MOC maximum depth.</p>
+<span class="sig-name descname"><span class="pre">contracted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.contracted" title="Link to this definition">¶</a></dt>
+<dd><p>Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.</p>
 <p>The only difference with respect to <a class="reference internal" href="#mocpy.STMOC.remove_neighbours" title="mocpy.STMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.STMOC.contracted" title="mocpy.STMOC.contracted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contracted</span></code></a> returns a new MOC
 instead of modifying the existing one.</p>
 <dl class="field-list">
@@ -276,8 +169,8 @@ instead of modifying the existing one.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.degrade_to_order">
-<span class="sig-name descname"><span class="pre">degrade_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.degrade_to_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Degrades the MOC instance to a new, less precise, MOC.</p>
+<span class="sig-name descname"><span class="pre">degrade_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.degrade_to_order" title="Link to this definition">¶</a></dt>
+<dd><p>Degrade the MOC instance to a new, less precise, MOC.</p>
 <p>The maximum depth (i.e. the depth of the smallest cells that can be found in the MOC) of the
 degraded MOC is set to <code class="docutils literal notranslate"><span class="pre">new_order</span></code>.</p>
 <dl class="field-list">
@@ -298,7 +191,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.difference">
-<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.difference" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.difference" title="Link to this definition">¶</a></dt>
 <dd><p>Difference between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -320,8 +213,8 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.empty">
-<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.empty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether the MOC is empty or not.</p>
+<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.empty" title="Link to this definition">¶</a></dt>
+<dd><p>(e.g. a numpy boolean array).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -334,8 +227,8 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.extended">
-<span class="sig-name descname"><span class="pre">extended</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.extended" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the MOC extended by the external border made of cells at the MOC maximum depth.</p>
+<span class="sig-name descname"><span class="pre">extended</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.extended" title="Link to this definition">¶</a></dt>
+<dd><p>Return the MOC extended by the external border made of cells at the MOC maximum depth.</p>
 <p>The only difference with respect to <a class="reference internal" href="#mocpy.STMOC.add_neighbours" title="mocpy.STMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.STMOC.extended" title="mocpy.STMOC.extended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extended</span></code></a> returns a new MOC
 instead of modifying the existing one.</p>
 <dl class="field-list">
@@ -350,14 +243,14 @@ instead of modifying the existing one.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.flatten">
-<span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.flatten" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.flatten" title="Link to this definition">¶</a></dt>
 <dd><p>Return the list of indices of all cells in the MOC at the MOC depth.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_fits">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_fits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a MOC from a FITS file.</p>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_fits" title="Link to this definition">¶</a></dt>
+<dd><p>Load a MOC from a FITS file.</p>
 <p>The specified FITS file must store the MOC
 (i.e. the list of HEALPix cells it contains)
 in a binary HDU table.</p>
@@ -365,6 +258,8 @@ in a binary HDU table.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
+</dd>
+<dt><strong>timeout</strong><span class="classifier">float</span></dt><dd><p>Timeout for the query, defaults to 1000s</p>
 </dd>
 </dl>
 </dd>
@@ -379,8 +274,8 @@ in a binary HDU table.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_moc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_moc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -399,14 +294,14 @@ in a binary HDU table.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_spatial_coverages">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spatial_coverages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_coverages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_spatial_coverages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_spatial_coverages" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spatial_coverages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_coverages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_spatial_coverages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_spatial_coverages" title="Link to this definition">¶</a></dt>
 <dd><p>Create a 2D Coverage from a set of time ranges and spatial coverages associated to them.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
+<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
 </dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
+<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
 </dd>
 <dt><strong>spatial_coverages</strong><span class="classifier">list</span></dt><dd><p>List of <a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a> spatial coverage objects.</p>
 </dd>
@@ -425,7 +320,7 @@ in a binary HDU table.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_str">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_str" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.from_str" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a str.</p>
 <p>This grammar is expressed is the <a class="reference external" href="http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf">MOC IVOA</a>
 specification at section 2.3.2.</p>
@@ -452,7 +347,7 @@ specification at section 2.3.2.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_string">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_string" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Deserialize the Spatial MOC from the given string.</p>
 <p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -469,22 +364,22 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_time_ranges_positions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_time_ranges_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_time_ranges_positions" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_time_ranges_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_time_ranges_positions" title="Link to this definition">¶</a></dt>
 <dd><p>Create a 2D Coverage from a set of times and positions associated to each time.</p>
 <ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
+<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
+<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
+<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
 </dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
+<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>time_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Time depth. By default, the time resolution chosen is 1µs.</p>
 </dd>
@@ -503,22 +398,22 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.from_times_positions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_times_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_times_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_times_positions" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_times_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_times_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_times_positions" title="Link to this definition">¶</a></dt>
 <dd><p>Create a 2D Coverage from a set of times and positions associated to each time.</p>
 <ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
+<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
+<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
 </dd>
 <dt><strong>time_depth</strong><span class="classifier">int</span></dt><dd><p>Time depth.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>spatial_depth</strong><span class="classifier">int</span></dt><dd><p>Spatial depth.</p>
 </dd>
@@ -535,7 +430,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.intersection">
-<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.intersection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.intersection" title="Link to this definition">¶</a></dt>
 <dd><p>Intersection between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -557,13 +452,13 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.is_empty">
-<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.is_empty" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.is_empty" title="Link to this definition">¶</a></dt>
 <dd><p>Check whether the Space-Time coverage is empty.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.load">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.load" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.load" title="Link to this definition">¶</a></dt>
 <dd><p>Load the Spatial MOC from a file.</p>
 <p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -582,43 +477,43 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.max_depth">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_depth</span></span><a class="headerlink" href="#mocpy.STMOC.max_depth" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_depth</span></span><a class="headerlink" href="#mocpy.STMOC.max_depth" title="Link to this definition">¶</a></dt>
 <dd><p>Return max depth of MOC.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.max_index">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_index</span></span><a class="headerlink" href="#mocpy.STMOC.max_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the largest index (at the deepest absolute resolution) the MOC contains.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_index</span></span><a class="headerlink" href="#mocpy.STMOC.max_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return the largest index (at the deepest absolute resolution) the MOC contains.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.max_order">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_order</span></span><a class="headerlink" href="#mocpy.STMOC.max_order" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_order</span></span><a class="headerlink" href="#mocpy.STMOC.max_order" title="Link to this definition">¶</a></dt>
 <dd><p>Depth of the MOC instance.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.max_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_time</span></span><a class="headerlink" href="#mocpy.STMOC.max_time" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_time</span></span><a class="headerlink" href="#mocpy.STMOC.max_time" title="Link to this definition">¶</a></dt>
 <dd><p>Return STMOC max time.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.min_index">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_index</span></span><a class="headerlink" href="#mocpy.STMOC.min_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the smallest index (at the deepest absolute resolution) the MOC contains.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_index</span></span><a class="headerlink" href="#mocpy.STMOC.min_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return the smallest index (at the deepest absolute resolution) the MOC contains.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.min_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_time</span></span><a class="headerlink" href="#mocpy.STMOC.min_time" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_time</span></span><a class="headerlink" href="#mocpy.STMOC.min_time" title="Link to this definition">¶</a></dt>
 <dd><p>Return STMOC min time.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.query_by_space">
-<span class="sig-name descname"><span class="pre">query_by_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_space" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">query_by_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_space" title="Link to this definition">¶</a></dt>
 <dd><p>Query the ST-MOC by space coverage.</p>
 <p>This will perform the union of all the time ranges whose associated
 spatial coverages lie in <code class="docutils literal notranslate"><span class="pre">moc</span></code>.</p>
@@ -640,7 +535,7 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.query_by_time">
-<span class="sig-name descname"><span class="pre">query_by_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">query_by_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Link to this definition">¶</a></dt>
 <dd><p>Query the ST-MOC by time T-MOC.</p>
 <p>This will perform the union of all the spatial coverages lying in a set of time ranges.</p>
 <dl class="field-list">
@@ -661,8 +556,8 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.remove_neighbours">
-<span class="sig-name descname"><span class="pre">remove_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.remove_neighbours" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes from the MOC instance the HEALPix cells located at its border.</p>
+<span class="sig-name descname"><span class="pre">remove_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.remove_neighbours" title="Link to this definition">¶</a></dt>
+<dd><p>Remove from the MOC instance the HEALPix cells located at its border.</p>
 <p>The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -676,8 +571,8 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the MOC to a file.</p>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.save" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -700,8 +595,8 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.serialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serializes the MOC into a specific format.</p>
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -714,7 +609,7 @@ Default to False.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v5.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -723,8 +618,8 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.symmetric_difference">
-<span class="sig-name descname"><span class="pre">symmetric_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.symmetric_difference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Symmetruic difference (XOR) between the MOC instance and other MOCs.</p>
+<span class="sig-name descname"><span class="pre">symmetric_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.symmetric_difference" title="Link to this definition">¶</a></dt>
+<dd><p>Symmetric difference (XOR) between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -745,8 +640,8 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.to_string">
-<span class="sig-name descname"><span class="pre">to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.to_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the MOC into a string.</p>
+<span class="sig-name descname"><span class="pre">to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.to_string" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC into a string.</p>
 <p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -764,7 +659,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.union">
-<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.union" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.union" title="Link to this definition">¶</a></dt>
 <dd><p>Union between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -786,7 +681,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.uniq_gen">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_gen</span></span><a class="headerlink" href="#mocpy.STMOC.uniq_gen" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_gen</span></span><a class="headerlink" href="#mocpy.STMOC.uniq_gen" title="Link to this definition">¶</a></dt>
 <dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the generic uniq indices of the cell in the MOC.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -802,7 +697,7 @@ of the index’s MSB. At a given depth, the sentinel bit is always put o the sam
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.STMOC.uniq_zorder">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_zorder</span></span><a class="headerlink" href="#mocpy.STMOC.uniq_zorder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_zorder</span></span><a class="headerlink" href="#mocpy.STMOC.uniq_zorder" title="Link to this definition">¶</a></dt>
 <dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the zorder uniq indices of the cell in the MOC.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -820,8 +715,8 @@ AND because the natural ordering of such indices follow the same order as the zo
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the MOC to a file.</p>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.write" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -897,28 +792,6 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </ul>
 
 
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="mocpy.TimeMOC.html"
-                          title="previous chapter">mocpy.TimeMOC</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="mocpy.WCS.html"
-                          title="next chapter">mocpy.WCS</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/stubs/mocpy.STMOC.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<form action="../search.html" method="get">
-  <input type="text" name="q" placeholder="Search" />
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
         </div>
       </div>
       <div class="clearer"></div>
@@ -929,7 +802,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2021, Thomas Boch, Matthieu Baumann, François-Xavier Pineau.<br/>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
   </p>
 </footer>
   </body>

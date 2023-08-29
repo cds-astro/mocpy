@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Query the sources of a VizieR table that are in a sky region &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    
+    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Loading a TimeMoc from a fits file" href="tmoc.html" />
+    <link rel="prev" title="Get the MOC corresponding to a table" href="from_vizier_table.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="tmoc.html" title="Loading a TimeMoc from a fits file">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="from_vizier_table.html" title="Get the MOC corresponding to a table">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
+      
+      <li>Query the sources of a VizieR table that are in a sky region</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Query-the-sources-of-a-VizieR-table-that-are-in-a-sky-region">
+<h1>Query the sources of a VizieR table that are in a sky region<a class="headerlink" href="#Query-the-sources-of-a-VizieR-table-that-are-in-a-sky-region" title="Link to this heading">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import MOC
+import astropy.units as u
+</pre></div>
+</div>
+</div>
+<p>First, we retrieve the MOC for VizieR table VIII/84/7c</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>moc = MOC.from_vizier_table(&quot;VIII/84/7c&quot;, nside=64)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING: Keyword &#39;TTYPE1&#39; found more than once in a same HDU! We use the first occurrence.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>moc.display_preview()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_query_vizier_table_4_0.png" src="../../_images/_collections_notebooks_query_vizier_table_4_0.png" />
+</div>
+</div>
+<p>Then, we query Hipparcos catalogue to get all sources in the MOC coverage</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># table = moc.query_simbad(10000)
+table = moc.query_vizier_table(&quot;I/239/hip_main&quot;, max_rows=100000)
+print(table)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+   _RAJ2000       _DEJ2000    recno   HIP   ... Notes   _RA.icrs     _DE.icrs
+     deg            deg                     ...           deg          deg
+-------------- -------------- ------ ------ ... ----- ------------ ------------
+  1.5468688953  87.8894244013    513    513 ...         1.54686890  87.88942440
+  4.0222774349  88.4011934198   1284   1284 ...         4.02227743  88.40119342
+  4.4701298766  44.5779461534   1433   1434 ...         4.47012988  44.57794615
+  4.5823503880  44.5584124080   1473   1474 ...         4.58235039  44.55841241
+  4.5953557332  44.0229534917   1474   1475 ...         4.59535573  44.02295349
+  4.6695923454  44.6299885536   1495   1496 ...         4.66959235  44.62998855
+  4.6757036057  43.7911411989   1500   1501 ...         4.67570361  43.79114120
+  4.9750713825  44.7094160244   1591   1593 ...         4.97507138  44.70941602
+  5.1325470462  43.6942792303   1639   1641 ...         5.13254705  43.69427923
+  5.1375081607  45.5089274590   1640   1642 ...         5.13750816  45.50892746
+           ...            ...    ...    ... ...   ...          ...          ...
+282.1275858638  72.4330734846  92200  92284 ...     D 282.12758586  72.43307348
+282.2003081762  68.8765968536  92222  92306 ...       282.20030818  68.87659685
+283.2537664404  71.7872258744  92587  92672 ...       283.25376644  71.78722587
+283.5993944657  71.2971919103  92697  92782 ...       283.59939447  71.29719191
+284.3387071233  71.9985386037  92974  93059 ...       284.33870712  71.99853860
+284.4097604809  72.8411366755  92995  93080 ...       284.40976048  72.84113668
+309.6976234553  89.4065064126 101792 101884 ...       309.69762346  89.40650641
+323.7139039566  89.2229491933 106464 106556 ...       323.71390396  89.22294919
+351.7536416060  87.3075039848 115644 115746 ...       351.75364161  87.30750398
+355.9505221876  87.3548934198 116949 117053 ...       355.95052219  87.35489342
+Length = 16379 rows
+</pre></div></div>
+</div>
+<p>Finally, we plot the positions of the sources in the table to check if they lie in the MOC coverage</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>moc_table = MOC.from_lonlat(table[&quot;_RAJ2000&quot;].T * u.deg, table[&quot;_DEJ2000&quot;].T * u.deg, 7)
+moc_table.display_preview()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_query_vizier_table_8_0.png" src="../../_images/_collections_notebooks_query_vizier_table_8_0.png" />
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Query the sources of a VizieR table that are in a sky region</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/_collections/notebooks/query_vizier_table.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
+  </p>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title># Space &amp; Time coverages &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    
+    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="First steps with Frequency MOCs" href="First_Steps_with_FMOCs.html" />
+    <link rel="prev" title="Space and time MOC" href="STMOC%20from%20time%20ranges.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="First_Steps_with_FMOCs.html" title="First steps with Frequency MOCs">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="STMOC%20from%20time%20ranges.html" title="Space and time MOC">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
+      
+      <li># Space &amp; Time coverages</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="#-Space-&amp;-Time-coverages">
+<h1># Space &amp; Time coverages<a class="headerlink" href="##-Space-&-Time-coverages" title="Link to this heading">¶</a></h1>
+<p>This notebook shows:</p>
+<ol class="arabic">
+<li><p>How to <strong>create</strong> Space-Time coverages of the 2MASS image catalog and the XMM_DR8 catalog</p></li>
+<li><p>How to <strong>perform logical operations</strong> (e.g. intersection) of two Space-Time coverages</p></li>
+<li><p>How to <strong>filter</strong> a catalog by a Space-Time coverage</p></li>
+<li><p>How to <strong>save</strong> a Space-Time coverage in a FITS file</p></li>
+<li><p class="rubric" id="how-to-vizualize-space-time-coverages-within-a-specific-time-frame">How to <strong>vizualize</strong> Space-Time coverages within a specific time frame</p>
+<p class="rubric" id="space-time-coverages-creation-of-2mass-and-xmm-dr8">1. Space-Time coverages creation of <em>2MASS</em> and <em>XMM_DR8</em></p>
+</li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import WCS, STMOC, TimeMOC
+from astropy.coordinates import ICRS
+import numpy as np
+from astropy import units as u
+from astropy.table import Table
+from astropy.coordinates import Angle, SkyCoord
+from astropy.time import Time, TimeDelta
+import ipywidgets as widgets
+
+from astroquery.vizier import Vizier
+
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+</pre></div>
+</div>
+</div>
+<p>Creation of the Space-Time coverage of 2MASS at the depth (time, space) = 23, 7 i.e.: - a <strong>time</strong> resolution of ~3 days - a <strong>spatial</strong> resolution of ~27 arcsecs</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Loading the data
+two_mass_data = Table.read(
+    &quot;./../resources/STMOC/2MASS-list-images.fits.gz&quot;,
+    format=&quot;fits&quot;,
+)
+
+# Definition of the times, longitudes and latitudes
+times_2mass = Time(two_mass_data[&quot;mjd&quot;].data, format=&quot;mjd&quot;, scale=&quot;tdb&quot;)
+lon_2mass = two_mass_data[&quot;ra&quot;].quantity
+lat_2mass = two_mass_data[&quot;dec&quot;].quantity
+print(&quot;Number of rows in 2MASS: &quot;, lon_2mass.shape[0])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of rows in 2MASS:  4879128
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+# Creation of the STMOC ~ wait around 1 minute
+time_depth = 23
+spatial_depth = 7
+two_mass = STMOC.from_times_positions(
+    times_2mass,
+    time_depth,
+    lon_2mass,
+    lat_2mass,
+    spatial_depth,
+)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 11.4 s, sys: 17.8 s, total: 29.2 s
+Wall time: 18.5 s
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Time of the first observation: &quot;, two_mass.min_time.iso)
+print(&quot;Time of the last observation: &quot;, two_mass.max_time.iso)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time of the first observation:  1997-06-03 20:25:27.103
+Time of the last observation:  2001-02-18 03:38:35.462
+</pre></div></div>
+</div>
+<hr class="docutils" />
+<section id="Query-a-ST-MOC-by-a-time-range">
+<h2>Query a ST-MOC by a time range<a class="headerlink" href="#Query-a-ST-MOC-by-a-time-range" title="Link to this heading">¶</a></h2>
+<p>Let’s query the ST-MOC of <strong>2MASS</strong> to retrieve the regions being observed each year.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def add_to_plot(fig, label, wcs, title, moc):
+    &quot;&quot;&quot;Add a MOC to a plot.&quot;&quot;&quot;
+    ax = fig.add_subplot(label, projection=wcs)
+
+    ax.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)
+    ax.set_title(title)
+    ax.set_xlabel(&quot;lon&quot;)
+    ax.set_ylabel(&quot;lat&quot;)
+
+    moc.fill(ax=ax, wcs=wcs, alpha=0.9, fill=True, linewidth=0, color=&quot;#00bb00&quot;)
+    # moc.border(ax=ax, wcs=wcs, linewidth=1, color=&quot;green&quot;)
+
+
+fig = plt.figure(figsize=(10, 10))
+
+time_ranges = Time(
+    [
+        [[&quot;1997-06-03&quot;, &quot;1998-01-01&quot;]],
+        [[&quot;1998-01-01&quot;, &quot;1999-01-01&quot;]],
+        [[&quot;1999-01-01&quot;, &quot;2000-01-01&quot;]],
+        [[&quot;2000-01-01&quot;, &quot;2001-02-18&quot;]],
+    ],
+    format=&quot;iso&quot;,
+    scale=&quot;tdb&quot;,
+    out_subfmt=&quot;date&quot;,
+)
+with WCS(
+    fig,
+    fov=330 * u.deg,
+    center=SkyCoord(0, 0, unit=&quot;deg&quot;, frame=&quot;galactic&quot;),
+    coordsys=&quot;galactic&quot;,
+    rotation=Angle(0, u.degree),
+    projection=&quot;AIT&quot;,
+) as wcs:
+    for i in range(0, 4):
+        tmoc = TimeMOC.from_time_ranges(
+            min_times=time_ranges[i][0, 0],
+            max_times=time_ranges[i][0, 1],
+            delta_t=TimeDelta(1e-6, scale=&quot;tdb&quot;, format=&quot;sec&quot;),
+        )
+
+        moc_2mass = two_mass.query_by_time(tmoc)
+        title = &quot;2MASS observations between \n{} and {}&quot;.format(
+            time_ranges[i][0, 0].iso,
+            time_ranges[i][0, 1].iso,
+        )
+        id_subplot = int(&quot;22&quot; + str(i + 1))
+        add_to_plot(fig, id_subplot, wcs, title, moc_2mass)
+
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_Space_%26_Time_coverages_8_0.png" src="../../_images/_collections_notebooks_Space_%26_Time_coverages_8_0.png" />
+</div>
+</div>
+<p>Creation of the Space-Time coverage of XMM_DR8 at the depth (time, space) = 10, 7</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Loading &amp; preparing the data
+xmm_dr8_data = Table.read(&quot;../resources/STMOC/vizier_votable.b64&quot;)
+times_xmm = Time(xmm_dr8_data[&quot;MJD0&quot;].data, format=&quot;mjd&quot;, scale=&quot;tdb&quot;)
+lon_xmm = xmm_dr8_data[&quot;RA_ICRS&quot;].quantity
+lat_xmm = xmm_dr8_data[&quot;DE_ICRS&quot;].quantity
+print(&quot;Number of rows in XMM_DR8: &quot;, lon_xmm.shape[0])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of rows in XMM_DR8:  531454
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+# Create the STMOC
+xmm_dr8_stmoc = STMOC.from_times_positions(
+    times_xmm,
+    time_depth,
+    lon_xmm,
+    lat_xmm,
+    spatial_depth,
+)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 1.42 s, sys: 353 ms, total: 1.77 s
+Wall time: 728 ms
+</pre></div></div>
+</div>
+<hr class="docutils" />
+<section id="2.-Intersection-between-the-2MASS-and-XMM_DR8-Space-Time-coverages">
+<h3>2. Intersection between the <em>2MASS</em> and <em>XMM_DR8</em> Space-Time coverages<a class="headerlink" href="#2.-Intersection-between-the-2MASS-and-XMM_DR8-Space-Time-coverages" title="Link to this heading">¶</a></h3>
+<p>ST-MOCs are very convinient when it comes to perform logical operations between them (as it is already possible with spatial footprints).</p>
+<p>As an example, it is possible to <strong>retrieve the areas that have been observed at the same time by the 2MASS and XMM survey</strong>! It benefits from the good performance of MOC (thanks to its core functions written in Rust).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+# Compute their intersection and check that it is not empty
+xmm_inter_2mass = xmm_dr8_stmoc.intersection(two_mass)
+
+print(&quot;Is the MOC intersection empty?:&quot;, xmm_inter_2mass.is_empty())
+
+print(&quot;Time of the first observation:&quot;, xmm_inter_2mass.min_time.iso)
+print(&quot;Time of the last observation:&quot;, xmm_inter_2mass.max_time.iso)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time of the first observation: 2000-02-18 06:49:16.163
+Time of the last observation: 2000-11-05 03:55:44.532
+CPU times: user 6.84 ms, sys: 221 µs, total: 7.07 ms
+Wall time: 7.01 ms
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="3.-Filter-catalogs-by-a-Space-Time-coverage">
+<h3>3. Filter catalogs by a Space-Time coverage<a class="headerlink" href="#3.-Filter-catalogs-by-a-Space-Time-coverage" title="Link to this heading">¶</a></h3>
+<p>ST-MOCs can be used to retrieve the sources in <em>2MASS</em> and <em>XMM_DR8</em> that have been observed at the same time i.e. <strong>within a ~3 days time resolution</strong> and a <strong>27 arcsec spatial resolution</strong>.</p>
+<p>Let’s retrieve the XMM sources being observed at the <strong>same time</strong> by 2MASS.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+# Filtering a 4.8M rows table is quite fast
+mask_xmm = xmm_inter_2mass.contains(times_xmm, lon_xmm, lat_xmm)
+sources_xmm = xmm_dr8_data[mask_xmm]
+
+print(f&quot;\n {len(sources_xmm)} sources in XMM\n&quot;)
+sources_xmm
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+ 10 sources in XMM
+
+CPU times: user 240 ms, sys: 37.3 ms, total: 278 ms
+Wall time: 278 ms
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><i>Table length=10</i>
+<table id="table140498205124048" class="table-striped table-bordered table-condensed">
+<thead><tr><th>RA_ICRS</th><th>DE_ICRS</th><th>MJD0</th><th>recno</th></tr></thead>
+<thead><tr><th>deg</th><th>deg</th><th>d</th><th></th></tr></thead>
+<thead><tr><th>float64</th><th>float64</th><th>float64</th><th>int32</th></tr></thead>
+<tr><td>89.637991</td><td>-50.397917</td><td>51604.6465</td><td>147242</td></tr>
+<tr><td>89.665918</td><td>-50.524772</td><td>51604.6465</td><td>147293</td></tr>
+<tr><td>89.787931</td><td>-50.275894</td><td>51604.6465</td><td>147436</td></tr>
+<tr><td>89.818302</td><td>-50.509235</td><td>51604.6465</td><td>147462</td></tr>
+<tr><td>89.910377</td><td>-50.361675</td><td>51604.6465</td><td>147530</td></tr>
+<tr><td>89.920087</td><td>-50.386144</td><td>51604.6465</td><td>147542</td></tr>
+<tr><td>89.936948</td><td>-50.444740</td><td>51604.6465</td><td>147560</td></tr>
+<tr><td>89.945907</td><td>-50.465488</td><td>51604.6465</td><td>147577</td></tr>
+<tr><td>89.978749</td><td>-50.510436</td><td>51604.6465</td><td>147634</td></tr>
+<tr><td>89.986374</td><td>-50.533013</td><td>51604.6465</td><td>147640</td></tr>
+</table></div></div>
+</div>
+<p>One can then use <strong>astroquery.vizier</strong> to get more informations about the filtered sources.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xmm_skycoords = SkyCoord(
+    sources_xmm[&quot;RA_ICRS&quot;].data,
+    sources_xmm[&quot;DE_ICRS&quot;].data,
+    unit=&quot;deg&quot;,
+    frame=ICRS(),
+)
+
+# Query the IX/55/xmm3r8s catalog with the three first positions + 0.1 arcsec
+result = Vizier.query_region(
+    xmm_skycoords[:3],
+    radius=Angle(0.1, &quot;arcsec&quot;),
+    catalog=&quot;IX/55/xmm3r8s&quot;,
+)[0]
+result
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="4.-Save-into-a-FITS-file">
+<h3>4. Save into a FITS file<a class="headerlink" href="#4.-Save-into-a-FITS-file" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xmm_inter_2mass.save(&quot;xmm_inter_2mass_stmoc.fits&quot;, format=&quot;fits&quot;, overwrite=True)
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="5.-Vizualize-a-Space-Time-coverage-interactively">
+<h3>5. Vizualize a Space-Time coverage interactively<a class="headerlink" href="#5.-Vizualize-a-Space-Time-coverage-interactively" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>An interactive slider allows to select a time range. Whenever the slider moves, the ST-MOC is queried by the new time range. Each <strong>time query gives back the spatial footprint during that time</strong> (i.e. a mocpy.MOC object).</p></li>
+<li><p>You can change the field of view to zoom in (resp. zoom out) if you want. By reducing the FoV you will be able to vizualize the sources in XMM filtered by the intersection Space-Time coverage.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>output = widgets.Output()
+
+
+def update(change):
+    &quot;&quot;&quot;Define an interactive plot for time MOCs.&quot;&quot;&quot;
+    global t, output, time_slider
+    global last_t1, last_t2
+    global moc
+    output.clear_output(wait=True)
+
+    new_values = time_slider.value if change is None else change.new
+
+    new_t1, new_t2 = new_values
+
+    tmoc_constraint = TimeMOC.from_time_ranges(
+        min_times=Time([new_t1], format=&quot;mjd&quot;, scale=&quot;tdb&quot;),
+        max_times=Time([new_t2], format=&quot;mjd&quot;, scale=&quot;tdb&quot;),
+        delta_t=TimeDelta(1e-6, scale=&quot;tdb&quot;, format=&quot;sec&quot;),
+    )
+    # Query the Space-Time coverages with the same time frame
+    # This operation returns a spatial coverage and is pretty fast thanks to
+    # the data-structure used for storing Space-Time coverages.
+    moc_2mass = two_mass.query_by_time(tmoc_constraint)
+    moc_xmm_dr8 = xmm_dr8_stmoc.query_by_time(tmoc_constraint)
+    moc_xmm_dr8_inter_2mass = xmm_inter_2mass.query_by_time(tmoc_constraint)
+
+    # Plot the spatial coverages
+    with output:
+        fig = plt.figure(111, figsize=(15, 10))
+
+        with WCS(
+            fig,
+            fov=50 * u.deg,
+            center=SkyCoord(140, 30, unit=&quot;deg&quot;, frame=&quot;galactic&quot;),
+            coordsys=&quot;galactic&quot;,
+            rotation=Angle(0, u.degree),
+            projection=&quot;AIT&quot;,
+        ) as wcs:
+            ax = fig.add_subplot(1, 1, 1, projection=wcs)
+            # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
+            moc_2mass.fill(
+                ax=ax,
+                wcs=wcs,
+                alpha=0.5,
+                fill=True,
+                color=&quot;green&quot;,
+                label=&quot;2mass&quot;,
+            )
+            moc_xmm_dr8.fill(
+                ax=ax,
+                wcs=wcs,
+                alpha=0.5,
+                fill=True,
+                color=&quot;red&quot;,
+                label=&quot;xmm_dr8&quot;,
+            )
+            moc_xmm_dr8_inter_2mass.fill(
+                ax=ax,
+                wcs=wcs,
+                alpha=0.5,
+                fill=True,
+                color=&quot;blue&quot;,
+                label=&quot;xmm_dr8 inter 2mass&quot;,
+            )
+
+            # Plot the sources contained into `xmm_inter_2mass`
+            skycoords = SkyCoord(
+                sources_xmm[&quot;RA_ICRS&quot;].data,
+                sources_xmm[&quot;DE_ICRS&quot;].data,
+                unit=&quot;deg&quot;,
+                frame=ICRS(),
+            )
+            X, Y = SkyCoord.to_pixel(skycoords, wcs)
+            ax.scatter(
+                X,
+                Y,
+                color=&quot;yellow&quot;,
+                alpha=1,
+                marker=&quot;x&quot;,
+                label=&quot;sources from XMM filtered through \nxmm_dr8 inter 2mass&quot;,
+                zorder=2,
+            )
+
+            ax.legend(loc=&quot;lower left&quot;)
+
+        plt.xlabel(&quot;GLON&quot;)
+        plt.ylabel(&quot;GLAT&quot;)
+
+        plt.title(
+            &quot;Coverage of 2MASS images, XMM_DR8 and their intersection between MJD %d and %d&quot;
+            % (new_values[0], new_values[1]),
+        )
+        plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)
+        plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>min_time = int(np.min(two_mass_data[&quot;mjd&quot;])) - 1
+max_time = int(np.max(two_mass_data[&quot;mjd&quot;])) + 1
+
+time_slider = widgets.IntRangeSlider(
+    value=[51594, 51917],
+    min=min_time,
+    max=max_time,
+    step=1,
+    description=&quot;MJD interval:&quot;,
+    disabled=False,
+    continuous_update=False,
+    orientation=&quot;horizontal&quot;,
+    layout={&quot;width&quot;: &quot;90%&quot;},
+)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># In blue is a region that has been observed by 2MASS and XMM_DR8 at the same time
+time_slider.observe(update, &quot;value&quot;)
+update(None)
+widgets.VBox([time_slider, output])
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#"># Space &amp; Time coverages</a><ul>
+<li><a class="reference internal" href="#Query-a-ST-MOC-by-a-time-range">Query a ST-MOC by a time range</a><ul>
+<li><a class="reference internal" href="#2.-Intersection-between-the-2MASS-and-XMM_DR8-Space-Time-coverages">2. Intersection between the <em>2MASS</em> and <em>XMM_DR8</em> Space-Time coverages</a></li>
+<li><a class="reference internal" href="#3.-Filter-catalogs-by-a-Space-Time-coverage">3. Filter catalogs by a Space-Time coverage</a></li>
+<li><a class="reference internal" href="#4.-Save-into-a-FITS-file">4. Save into a FITS file</a></li>
+<li><a class="reference internal" href="#5.-Vizualize-a-Space-Time-coverage-interactively">5. Vizualize a Space-Time coverage interactively</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/_collections/notebooks/Space &amp; Time coverages.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
+  </p>
+</footer>
+  </body>
+</html>

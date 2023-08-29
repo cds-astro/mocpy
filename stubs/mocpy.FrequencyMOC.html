@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mocpy.FrequencyMOC &#8212; MOCPy 0.13.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    
+    <script src="../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mocpy.WCS" href="mocpy.WCS.html" />
+    <link rel="prev" title="mocpy.STMOC" href="mocpy.STMOC.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="mocpy.WCS.html" title="mocpy.WCS">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="mocpy.STMOC.html" title="mocpy.STMOC">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../index.html">MOCPy 0.13.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
+      
+      <li>mocpy.FrequencyMOC</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mocpy-frequencymoc">
+<h1>mocpy.FrequencyMOC<a class="headerlink" href="#mocpy-frequencymoc" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mocpy.</span></span><span class="sig-name descname"><span class="pre">FrequencyMOC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC" title="Link to this definition">¶</a></dt>
+<dd><p>Multi-order frequency coverage class. Experimental.</p>
+<p>Is a Frequency Coverage (F-MOC).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>create_key : Object ensure __init__ is called by super-class/class-methods only
+store_index : index of the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> in the rust-side storage</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.add_neighbours">
+<span class="sig-name descname"><span class="pre">add_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.add_neighbours" title="Link to this definition">¶</a></dt>
+<dd><p>Extend the MOC instance so that it includes the HEALPix cells touching its border.</p>
+<p>The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>self extended by one degree of neighbours.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.complement">
+<span class="sig-name descname"><span class="pre">complement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.complement" title="Link to this definition">¶</a></dt>
+<dd><p>Return the complement of the MOC instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_inside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Test is a frequency – or list of frequencies – is comprised in this <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>astropy quantity (converted into Hz) to check whether they are contained in the F-MOC or not.</p>
+</dd>
+<dt><strong>keep_inside</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
+If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>array</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>A mask boolean array</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s create a FMOC at order 10 for frequencies comprised between</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1Hz and 10Hz.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># We can now test wether fmoc contains a list of frequencies between</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1Hz and 15Hz.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="go">array([ True,  True,  True,  True,  True,  True,  True,  True,  True,</span>
+<span class="go">       False, False, False, False, False])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.contracted">
+<span class="sig-name descname"><span class="pre">contracted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.contracted" title="Link to this definition">¶</a></dt>
+<dd><p>Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.</p>
+<p>The only difference with respect to <a class="reference internal" href="#mocpy.FrequencyMOC.remove_neighbours" title="mocpy.FrequencyMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.FrequencyMOC.contracted" title="mocpy.FrequencyMOC.contracted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contracted</span></code></a> returns a new MOC
+instead of modifying the existing one.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The extended MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.degrade_to_order">
+<span class="sig-name descname"><span class="pre">degrade_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.degrade_to_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.degrade_to_order" title="Link to this definition">¶</a></dt>
+<dd><p>Degrade the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> instance to a new, less precise, <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a>.</p>
+<p>The maximum depth (i.e. the depth of the smallest Time cells that can be found in the F-MOC) of the
+degraded F-MOC is set to <code class="docutils literal notranslate"><span class="pre">new_order</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>new_order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Maximum depth of the output degraded F-MOC.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a></dt><dd><p>The degraded F-MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span>
+<span class="go">40/807453851648</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">10/752</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.difference">
+<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.difference" title="Link to this definition">¶</a></dt>
+<dd><p>Difference between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used that will be substracted to self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.empty">
+<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.empty" title="Link to this definition">¶</a></dt>
+<dd><p>(e.g. a numpy boolean array).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>result: bool</dt><dd><p>True if the MOC instance is empty.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.extended">
+<span class="sig-name descname"><span class="pre">extended</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.extended" title="Link to this definition">¶</a></dt>
+<dd><p>Return the MOC extended by the external border made of cells at the MOC maximum depth.</p>
+<p>The only difference with respect to <a class="reference internal" href="#mocpy.FrequencyMOC.add_neighbours" title="mocpy.FrequencyMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.FrequencyMOC.extended" title="mocpy.FrequencyMOC.extended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extended</span></code></a> returns a new MOC
+instead of modifying the existing one.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The extended MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.flatten">
+<span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.flatten" title="Link to this definition">¶</a></dt>
+<dd><p>Return the list of indices of all cells in the MOC at the MOC depth.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_depth59_ranges">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_depth59_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.from_depth59_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.from_depth59_ranges" title="Link to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> from a set of <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> ranges at order 59.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, The resolution of the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a></span></dt><dd></dd>
+<dt><strong>ranges</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a></span></dt><dd><p>a N x 2 numpy array or list representing the set of depth 61 ranges.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></dt><dd><p>The F-MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_depth59_ranges</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">]])</span>
+<span class="go">36/0</span>
+<span class="go">38/4</span>
+<span class="go">40/</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_fits">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.from_fits" title="Link to this definition">¶</a></dt>
+<dd><p>Load a MOC from a FITS file.</p>
+<p>The specified FITS file must store the MOC
+(i.e. the list of HEALPix cells it contains)
+in a binary HDU table.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
+</dd>
+<dt><strong>timeout</strong><span class="classifier">float</span></dt><dd><p>Timeout for the query, defaults to 1000s</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_frequencies">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.from_frequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.from_frequencies" title="Link to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> that are internally converted in Hertz.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The resolution of the FrequencyMOC: see <a class="reference internal" href="#mocpy.FrequencyMOC.relative_precision_to_order" title="mocpy.FrequencyMOC.relative_precision_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_precision_to_order</span></code></a></p>
+</dd>
+<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Quantity converted internally in Hertz</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="p">[</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="go">42/2544289697882 2887042656632 3229815406592</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_frequency_ranges">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_frequency_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.from_frequency_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.from_frequency_ranges" title="Link to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> converted in Hertz.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The resolution of the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a>: see <a class="reference internal" href="#mocpy.FrequencyMOC.relative_precision_to_order" title="mocpy.FrequencyMOC.relative_precision_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_precision_to_order</span></code></a></p>
+</dd>
+<dt><strong>min_freq</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>astropy quantity converted in Hertz and defining the left part of the intervals</p>
+</dd>
+<dt><strong>max_freq</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>astropy quantity converted in Hertz and defining the right part of the intervals</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">60</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="go">8/195</span>
+<span class="go">9/389 392 397-398</span>
+<span class="go">10/798</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_moc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>json_moc</strong><span class="classifier">dict(str</span><span class="classifier">[int]</span></dt><dd><p>A dictionary of HEALPix cell arrays indexed by their depth.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>the MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_str">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.from_str" title="Link to this definition">¶</a></dt>
+<dd><p>Create a MOC from a str.</p>
+<p>This grammar is expressed is the <a class="reference external" href="http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf">MOC IVOA</a>
+specification at section 2.3.2.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>value</strong><span class="classifier">str</span></dt><dd><p>The MOC as a string following the grammar rules.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.from_string">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.from_string" title="Link to this definition">¶</a></dt>
+<dd><p>Deserialize the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> from the given string.</p>
+<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<p>WARNING: the serialization must be strict, i.e. <strong>must not</strong> contain overlapping elements</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>format</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>The format in which the F-MOC will be serialized before being saved.
+Possible formats are “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “ascii”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;4/4&quot;</span><span class="p">)</span>
+<span class="go">4/4</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.intersection">
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.intersection" title="Link to this definition">¶</a></dt>
+<dd><p>Intersection between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the intersection with self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the intersection with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.load" title="Link to this definition">¶</a></dt>
+<dd><p>Load the <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> from a file.</p>
+<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>path</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a></span></dt><dd><p>The path to the file to load the F-MOC from.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional {‘ascii’, ‘fits’, ‘json’}</span></dt><dd><p>The format from which the F-MOC is loaded.
+Possible formats are “fits”, “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.max_freq">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_freq</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.max_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> largest frequency of the F-MOC.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>max_freq</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>frequency of the last observation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># this order is pretty low, thus the returned max frequency</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># corresponds to the high limit of the cell containing 10 Hz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># at order 10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">fmoc</span><span class="o">.</span><span class="n">max_freq</span><span class="p">)</span>
+<span class="go">11.0 Hz</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.max_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_index</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.max_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return the largest index (at the deepest absolute resolution) the MOC contains.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.max_order">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_order</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.max_order" title="Link to this definition">¶</a></dt>
+<dd><p>Depth/order of the F-MOC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.uint8</span></code></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_json</span><span class="p">({</span><span class="mi">8</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span> <span class="mi">22</span><span class="p">:</span> <span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">122</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span><span class="o">.</span><span class="n">max_order</span>
+<span class="go">22</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.min_freq">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_freq</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.min_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a> frequency of the F-MOC smallest frequency.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>min_freq</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>frequency of the first observation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">fmoc</span><span class="o">.</span><span class="n">min_freq</span><span class="p">)</span>
+<span class="go">1.0 Hz</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.min_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_index</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.min_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return the smallest index (at the deepest absolute resolution) the MOC contains.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.new_empty">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.new_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.new_empty" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new empty <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> of given depth.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>max_depth</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The resolution of the FrequencyMOC</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">5/</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.order_to_relative_precision">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">order_to_relative_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.order_to_relative_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.order_to_relative_precision" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> order to a <strong>relative</strong> precision range.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>order to convert</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>lower and upper relative precisions</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>In FMOCs, the precision of a cell depends on its position
+along the electromagnetic axis. The array returned by
+<a class="reference internal" href="#mocpy.FrequencyMOC.order_to_relative_precision" title="mocpy.FrequencyMOC.order_to_relative_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_to_relative_precision</span></code></a> corresponds to the lower and upper
+<strong>relative</strong> precisions.
+These must be multiplied by the value of the observed frequency
+to obtain the <strong>absolute</strong> upper and lower precisions.</p>
+<p>In the code example, we see that at order 10:</p>
+<div class="math notranslate nohighlight">
+\[F = 10_{- 0.6}^{+ 1}~\mathrm{Hz}\]</div>
+<div class="math notranslate nohighlight">
+\[F = 1e3_{- 6e1}^{+ 1e2}~\mathrm{Hz}\]</div>
+<p>At order 20 these precisions become:</p>
+<div class="math notranslate nohighlight">
+\[F = 10_{- 6e-4}^{+ 1e-3}~\mathrm{Hz}\]</div>
+<div class="math notranslate nohighlight">
+\[F = 1e3_{- 6e-2}^{+ 1e-1}~\mathrm{Hz}\]</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">order_to_relative_precision</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">array([0.0625, 0.125 ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">order_to_relative_precision</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="go">array([6.10351562e-05, 1.22070312e-04])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.plot_frequencies">
+<span class="sig-name descname"><span class="pre">plot_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Hz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.plot_frequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.plot_frequencies" title="Link to this definition">¶</a></dt>
+<dd><p>Plot a frequency moc.</p>
+<p>This method applies a <a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PatchCollection" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.collections.PatchCollection</span></code></a>
+to an existing <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes._axes.Axes</span></code></a> object.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes._axes.Axes</span></code></a></span></dt><dd></dd>
+<dt><strong>color</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, default ‘blue’</span></dt><dd><p>any format supported by matplotlib for colors, see
+<a class="reference external" href="https://matplotlib.org/stable/api/colors_api.html#module-matplotlib.colors" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.colors</span></code></a></p>
+</dd>
+<dt><strong>length_unit</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Unit.html#astropy.units.Unit" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.core.Unit</span></code></a>, optional</span></dt><dd><p>any string or astropy.unit of physical type ‘frequency’, see
+<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.physical.get_physical_type.html#astropy.units.physical.get_physical_type" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.physical.get_physical_type</span></code></a>
+Defaults to Hertz ‘Hz’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span><span class="o">.</span><span class="n">plot_frequencies</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;pink&quot;</span><span class="p">,</span> <span class="n">frequency_unit</span><span class="o">=</span><span class="s2">&quot;1 / ks&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.plot_wavelengths">
+<span class="sig-name descname"><span class="pre">plot_wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.plot_wavelengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.plot_wavelengths" title="Link to this definition">¶</a></dt>
+<dd><p>Plot a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> with a conversion to wavelengths.</p>
+<p>This method applies a <a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PatchCollection" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.collections.PatchCollection</span></code></a>
+to an existing <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes._axes.Axes</span></code></a> object.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes._axes.Axes</span></code></a></span></dt><dd></dd>
+<dt><strong>color</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, default ‘blue’</span></dt><dd><p>any format supported by matplotlib for colors, see
+<a class="reference external" href="https://matplotlib.org/stable/api/colors_api.html#module-matplotlib.colors" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.colors</span></code></a>.</p>
+</dd>
+<dt><strong>length_unit</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Unit.html#astropy.units.Unit" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.core.Unit</span></code></a>, default ‘m’</span></dt><dd><p>any string or astropy.unit of physical type ‘length’, see
+<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.get_physical_type.html#astropy.units.get_physical_type" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.get_physical_type</span></code></a>
+Defaults to meters ‘m’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequencies</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span><span class="o">.</span><span class="n">plot_wavelengths</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">length_unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">nm</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.relative_precision_to_order">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_precision_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_precision</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.relative_precision_to_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.relative_precision_to_order" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a relative frequency precision into a <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> order.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>frequency_precision</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>precision to be converted in FrequencyMOC order</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>order</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The less precise order fulfilling the given <code class="docutils literal notranslate"><span class="pre">frequency_precision</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.remove_neighbours">
+<span class="sig-name descname"><span class="pre">remove_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.remove_neighbours" title="Link to this definition">¶</a></dt>
+<dd><p>Remove from the MOC instance the HEALPix cells located at its border.</p>
+<p>The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>self minus its HEALPix cells located at its border.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.save" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC to a file.</p>
+<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str or pathlib.Path</span></dt><dd><p>The path to the file to save the MOC in.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC is saved.
+Possible formats are “fits”, “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+<dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword.
+Default to False.</p>
+</dd>
+<dt><strong>fold: int</strong></dt><dd><p>if &gt;0, print ascii or json output with a maximum line width</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the MOC into a specific format.</p>
+<p>Possible formats are FITS, JSON and STRING</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>format</strong><span class="classifier">str</span></dt><dd><p>‘fits’ by default. The other possible choice is ‘json’ or ‘str’.</p>
+</dd>
+<dt><strong>optional_kw_dict</strong><span class="classifier">dict</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.symmetric_difference">
+<span class="sig-name descname"><span class="pre">symmetric_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.symmetric_difference" title="Link to this definition">¶</a></dt>
+<dd><p>Symmetric difference (XOR) between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used that will be substracted to self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.to_depth59_ranges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_depth59_ranges</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.to_depth59_ranges" title="Link to this definition">¶</a></dt>
+<dd><p>Return the list of ranges this <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> contains, at the maximum precision.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">59</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="mf">1.4</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">fmoc</span><span class="o">.</span><span class="n">to_depth59_ranges</span><span class="p">)</span>
+<span class="go">[[423338364972826624 425139804823774822]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.to_hz_ranges">
+<span class="sig-name descname"><span class="pre">to_hz_ranges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/fmoc/fmoc.html#FrequencyMOC.to_hz_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.FrequencyMOC.to_hz_ranges" title="Link to this definition">¶</a></dt>
+<dd><p>Return the Hertz ranges this <a class="reference internal" href="#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a> contains, in Hertz.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">fmoc</span><span class="o">.</span><span class="n">to_hz_ranges</span><span class="p">())</span>
+<span class="go">[[0.00976562 0.05078125]</span>
+<span class="go"> [0.09375    0.5       ]</span>
+<span class="go"> [1.         1.5       ]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.to_string">
+<span class="sig-name descname"><span class="pre">to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.to_string" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC into a string.</p>
+<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved.
+Possible formats are “ascii” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “ascii”.</p>
+</dd>
+<dt><strong>fold: int</strong></dt><dd><p>if &gt;0, print ascii or json output with a maximum line width</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.union">
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.union" title="Link to this definition">¶</a></dt>
+<dd><p>Union between the MOC instance and other MOCs.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the union with self.</p>
+</dd>
+<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the union with.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.uniq_gen">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_gen</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.uniq_gen" title="Link to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the generic uniq indices of the cell in the MOC.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This is not defined in the MOC standard and is not HEALPix scpecific.</p>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>It consists on the regular index with a sentinel bit placed at the immediate left
+of the index’s MSB. At a given depth, the sentinel bit is always put o the same bit.</p></li>
+<li><p>Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.uniq_zorder">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniq_zorder</span></span><a class="headerlink" href="#mocpy.FrequencyMOC.uniq_zorder" title="Link to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code> of the zorder uniq indices of the cell in the MOC.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This is not defined in the MOC standard and is not HEALPix specific.</p>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>It consists on a regular index shifted on the left so that indices at all level have the same MSB.
+Plus a sentinel bit placed at the immediate right of the LSB.</p></li>
+<li><p>Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices
+AND because the natural ordering of such indices follow the same order as the zorder indices
+(which is very useful for streaming processing, e.g. when dealing with multi-order maps)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.FrequencyMOC.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.FrequencyMOC.write" title="Link to this definition">¶</a></dt>
+<dd><p>Write the MOC to a file.</p>
+<p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the file to save the MOC in.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved. Possible formats are “fits” or “json”.
+By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
+</dd>
+<dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword. Default to False.</p>
+</dd>
+<dt><strong>optional_kw_dict</strong><span class="classifier">optional</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">mocpy.FrequencyMOC</a><ul>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC</span></code></a><ul>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.add_neighbours"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.add_neighbours()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.complement"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.complement()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.contains"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.contains()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.contracted"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.contracted()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.degrade_to_order"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.degrade_to_order()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.difference"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.difference()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.empty"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.empty()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.extended"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.extended()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.flatten"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.flatten()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_depth59_ranges"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_depth59_ranges()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_fits"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_fits()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_frequencies"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_frequencies()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_frequency_ranges"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_frequency_ranges()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_json"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_json()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_str"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_str()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.from_string"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.from_string()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.intersection"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.intersection()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.load"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.load()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.max_freq"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.max_freq</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.max_index"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.max_index</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.max_order"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.max_order</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.min_freq"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.min_freq</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.min_index"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.min_index</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.new_empty"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.new_empty()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.order_to_relative_precision"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.order_to_relative_precision()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.plot_frequencies"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.plot_frequencies()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.plot_wavelengths"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.plot_wavelengths()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.relative_precision_to_order"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.relative_precision_to_order()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.remove_neighbours"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.remove_neighbours()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.save"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.save()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.serialize"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.serialize()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.symmetric_difference()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.to_depth59_ranges"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.to_depth59_ranges</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.to_hz_ranges"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.to_hz_ranges()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.to_string"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.to_string()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.union"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.union()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.uniq_gen"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.uniq_gen</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.uniq_zorder"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.uniq_zorder</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.FrequencyMOC.write"><code class="docutils literal notranslate"><span class="pre">FrequencyMOC.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../_sources/stubs/mocpy.FrequencyMOC.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 29 Aug 2023. <br/>
+  </p>
+</footer>
+  </body>
+</html>

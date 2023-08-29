@@ -1,0 +1,585 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "0f34087a",
+   "metadata": {},
+   "source": [
+    "# First steps with Frequency MOCs "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "8ac2cf7a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Standard Library\n",
+    "from pathlib import Path\n",
+    "\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# General and astronomy packages\n",
+    "import numpy as np\n",
+    "from astropy.units import Unit\n",
+    "from maser.data import Data\n",
+    "\n",
+    "# Specific to FMOCs\n",
+    "from mocpy import FrequencyMOC"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ba2fca9",
+   "metadata": {},
+   "source": [
+    "We use a file from the Cassini/RPWS/HFR database. This radio instrument has a configurable spectral sampling. \n",
+    "The data file is a level 2 data file, containing the centers and widths of each spectral bin. \n",
+    "\n",
+    "The file (and many others) is available for download here: https://lesia.obspm.fr/kronos/data/2012_091_180/n2/"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "266e5fe7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "file = Path(\"../resources/FMOC/P2012180.20\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0141e19a",
+   "metadata": {},
+   "source": [
+    "We load the data using the `maser.data` module, which recognizes the file "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "4af31f5f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "dict_keys(['ydh', 'num', 't97', 'f', 'dt', 'df', 'autoX', 'autoZ', 'crossR', 'crossI', 'ant'])"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "n2 = Data(file)\n",
+    "n2.fields"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "ed764e59",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'co_rpws_hfr_kronos_n2'"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "n2.dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "090e0a45",
+   "metadata": {},
+   "source": [
+    "Spectral sweeps are available as a generator using the `.sweeps` property."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "ad662d30",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "This sweep has 359 spectral steps\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "dtype([('ydh', '<u4'), ('num', '<u4'), ('t97', '<f8'), ('f', '<f4'), ('dt', '<f4'), ('df', '<f4'), ('autoX', '<f4'), ('autoZ', '<f4'), ('crossR', '<f4'), ('crossI', '<f4'), ('ant', 'i1')])"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sweep = next(n2.sweeps)\n",
+    "print(f\"This sweep has {len(sweep.data)} spectral steps\")\n",
+    "sweep.data.dtype"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "26714eab",
+   "metadata": {},
+   "source": [
+    "Then we get the central frequency and widths for each channel and we can infer the minimumm and maximum frequencyes for each sweep."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "0c31810c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Central frequency\n",
+    "freqs = np.float64(sweep.data[\"f\"]) * Unit(\"kHz\")\n",
+    "# Width of each channel\n",
+    "dfreq = np.float64(sweep.data[\"df\"]) * Unit(\"kHz\")\n",
+    "\n",
+    "fmin = freqs - dfreq / 2\n",
+    "fmax = freqs + dfreq / 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "ee9b4ee7",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/latex": [
+       "$[3.59346,~3.7664249,~3.9476776,~\\dots,~15812.5,~15912.5,~16012.5] \\; \\mathrm{kHz}$"
+      ],
+      "text/plain": [
+       "<Quantity [3.59346004e+00, 3.76642492e+00, 3.94767762e+00, 4.13760752e+00,\n",
+       "           4.33679996e+00, 4.54545017e+00, 4.76424021e+00, 4.99346252e+00,\n",
+       "           5.23380002e+00, 5.48564236e+00, 5.74967247e+00, 6.02637759e+00,\n",
+       "           6.31634259e+00, 6.62034759e+00, 6.93897747e+00, 7.27291517e+00,\n",
+       "           7.62293990e+00, 7.98973510e+00, 8.37427475e+00, 8.77724275e+00,\n",
+       "           9.19961263e+00, 9.64235981e+00, 1.01064596e+01, 1.05927899e+01,\n",
+       "           1.11025203e+01, 1.16368198e+01, 1.21968597e+01, 1.27838099e+01,\n",
+       "           1.33990354e+01, 1.40439003e+01, 1.47197704e+01, 1.54281074e+01,\n",
+       "           1.61705694e+01, 1.69488150e+01, 1.77644993e+01, 1.86193798e+01,\n",
+       "           1.95154055e+01, 2.04546218e+01, 2.14389833e+01, 2.24707273e+01,\n",
+       "           2.35521001e+01, 2.46855380e+01, 2.58734770e+01, 2.71186492e+01,\n",
+       "           2.84236876e+01, 2.97916125e+01, 3.12252542e+01, 3.27280197e+01,\n",
+       "           3.43030332e+01, 3.59538093e+01, 3.76841383e+01, 3.94976388e+01,\n",
+       "           4.13984023e+01, 4.33907171e+01, 4.54788754e+01, 4.76675559e+01,\n",
+       "           4.99615345e+01, 5.23658841e+01, 5.48859681e+01, 5.75273395e+01,\n",
+       "           6.02957556e+01, 6.31974541e+01, 6.62388691e+01, 6.94265356e+01,\n",
+       "           7.27676617e+01, 7.62695669e+01, 7.99400544e+01, 8.37871134e+01,\n",
+       "           8.78193209e+01, 9.20455582e+01, 9.64752724e+01, 1.01118127e+02,\n",
+       "           1.05984349e+02, 1.11084770e+02, 1.16430697e+02, 1.22033830e+02,\n",
+       "           1.27906741e+02, 1.34062113e+02, 1.40513782e+02, 1.47275999e+02,\n",
+       "           1.54363554e+02, 1.61792276e+02, 1.69578440e+02, 1.77739289e+02,\n",
+       "           1.86292960e+02, 1.95258181e+02, 2.04654934e+02, 2.14503808e+02,\n",
+       "           2.24826719e+02, 2.35646384e+02, 2.46986799e+02, 2.58872944e+02,\n",
+       "           2.71331092e+02, 2.84388766e+02, 2.98074859e+02, 3.12419540e+02,\n",
+       "           3.12500000e+02, 3.25000000e+02, 3.37500000e+02, 3.50000000e+02,\n",
+       "           3.62500000e+02, 3.75000000e+02, 3.87500000e+02, 4.00000000e+02,\n",
+       "           4.12500000e+02, 4.25000000e+02, 4.37500000e+02, 4.50000000e+02,\n",
+       "           4.62500000e+02, 4.75000000e+02, 4.87500000e+02, 5.00000000e+02,\n",
+       "           5.12500000e+02, 5.25000000e+02, 5.37500000e+02, 5.50000000e+02,\n",
+       "           5.62500000e+02, 5.75000000e+02, 5.87500000e+02, 6.00000000e+02,\n",
+       "           6.12500000e+02, 6.25000000e+02, 6.37500000e+02, 6.50000000e+02,\n",
+       "           6.62500000e+02, 6.75000000e+02, 6.87500000e+02, 7.00000000e+02,\n",
+       "           7.12500000e+02, 7.25000000e+02, 7.37500000e+02, 7.50000000e+02,\n",
+       "           7.62500000e+02, 7.75000000e+02, 7.87500000e+02, 8.00000000e+02,\n",
+       "           8.12500000e+02, 8.25000000e+02, 8.37500000e+02, 8.50000000e+02,\n",
+       "           8.62500000e+02, 8.75000000e+02, 8.87500000e+02, 9.00000000e+02,\n",
+       "           9.12500000e+02, 9.25000000e+02, 9.37500000e+02, 9.50000000e+02,\n",
+       "           9.62500000e+02, 9.75000000e+02, 9.87500000e+02, 1.00000000e+03,\n",
+       "           1.01250000e+03, 1.02500000e+03, 1.03750000e+03, 1.05000000e+03,\n",
+       "           1.06250000e+03, 1.07500000e+03, 1.08750000e+03, 1.10000000e+03,\n",
+       "           1.11250000e+03, 1.12500000e+03, 1.13750000e+03, 1.15000000e+03,\n",
+       "           1.16250000e+03, 1.17500000e+03, 1.18750000e+03, 1.20000000e+03,\n",
+       "           1.21250000e+03, 1.22500000e+03, 1.23750000e+03, 1.25000000e+03,\n",
+       "           1.26250000e+03, 1.27500000e+03, 1.28750000e+03, 1.30000000e+03,\n",
+       "           1.31250000e+03, 1.32500000e+03, 1.33750000e+03, 1.35000000e+03,\n",
+       "           1.36250000e+03, 1.37500000e+03, 1.38750000e+03, 1.40000000e+03,\n",
+       "           1.41250000e+03, 1.42500000e+03, 1.43750000e+03, 1.45000000e+03,\n",
+       "           1.46250000e+03, 1.47500000e+03, 1.48750000e+03, 1.50000000e+03,\n",
+       "           1.51250000e+03, 1.52500000e+03, 1.53750000e+03, 1.55000000e+03,\n",
+       "           1.56250000e+03, 1.57500000e+03, 1.58750000e+03, 1.60000000e+03,\n",
+       "           1.61250000e+03, 1.62500000e+03, 1.63750000e+03, 1.65000000e+03,\n",
+       "           1.66250000e+03, 1.67500000e+03, 1.68750000e+03, 1.70000000e+03,\n",
+       "           1.71250000e+03, 1.72500000e+03, 1.73750000e+03, 1.75000000e+03,\n",
+       "           1.76250000e+03, 1.77500000e+03, 1.78750000e+03, 1.80000000e+03,\n",
+       "           1.81250000e+03, 1.91250000e+03, 2.01250000e+03, 2.11250000e+03,\n",
+       "           2.21250000e+03, 2.31250000e+03, 2.41250000e+03, 2.51250000e+03,\n",
+       "           2.61250000e+03, 2.71250000e+03, 2.81250000e+03, 2.91250000e+03,\n",
+       "           3.01250000e+03, 3.11250000e+03, 3.21250000e+03, 3.31250000e+03,\n",
+       "           3.41250000e+03, 3.51250000e+03, 3.61250000e+03, 3.71250000e+03,\n",
+       "           3.81250000e+03, 3.91250000e+03, 4.01250000e+03, 4.11250000e+03,\n",
+       "           4.21250000e+03, 4.31250000e+03, 4.41250000e+03, 4.51250000e+03,\n",
+       "           4.61250000e+03, 4.71250000e+03, 4.81250000e+03, 4.91250000e+03,\n",
+       "           5.01250000e+03, 5.11250000e+03, 5.21250000e+03, 5.31250000e+03,\n",
+       "           5.41250000e+03, 5.51250000e+03, 5.61250000e+03, 5.71250000e+03,\n",
+       "           5.81250000e+03, 5.91250000e+03, 6.01250000e+03, 6.11250000e+03,\n",
+       "           6.21250000e+03, 6.31250000e+03, 6.41250000e+03, 6.51250000e+03,\n",
+       "           6.61250000e+03, 6.71250000e+03, 6.81250000e+03, 6.91250000e+03,\n",
+       "           7.01250000e+03, 7.11250000e+03, 7.21250000e+03, 7.31250000e+03,\n",
+       "           7.41250000e+03, 7.51250000e+03, 7.61250000e+03, 7.71250000e+03,\n",
+       "           7.81250000e+03, 7.91250000e+03, 8.01250000e+03, 8.11250000e+03,\n",
+       "           8.21250000e+03, 8.31250000e+03, 8.41250000e+03, 8.51250000e+03,\n",
+       "           8.61250000e+03, 8.71250000e+03, 8.81250000e+03, 8.91250000e+03,\n",
+       "           9.01250000e+03, 9.11250000e+03, 9.21250000e+03, 9.31250000e+03,\n",
+       "           9.41250000e+03, 9.51250000e+03, 9.61250000e+03, 9.71250000e+03,\n",
+       "           9.81250000e+03, 9.91250000e+03, 1.00125000e+04, 1.01125000e+04,\n",
+       "           1.02125000e+04, 1.03125000e+04, 1.04125000e+04, 1.05125000e+04,\n",
+       "           1.06125000e+04, 1.07125000e+04, 1.08125000e+04, 1.09125000e+04,\n",
+       "           1.10125000e+04, 1.11125000e+04, 1.12125000e+04, 1.13125000e+04,\n",
+       "           1.14125000e+04, 1.15125000e+04, 1.16125000e+04, 1.17125000e+04,\n",
+       "           1.18125000e+04, 1.19125000e+04, 1.20125000e+04, 1.21125000e+04,\n",
+       "           1.22125000e+04, 1.23125000e+04, 1.24125000e+04, 1.25125000e+04,\n",
+       "           1.26125000e+04, 1.27125000e+04, 1.28125000e+04, 1.29125000e+04,\n",
+       "           1.30125000e+04, 1.31125000e+04, 1.32125000e+04, 1.33125000e+04,\n",
+       "           1.34125000e+04, 1.35125000e+04, 1.36125000e+04, 1.37125000e+04,\n",
+       "           1.38125000e+04, 1.39125000e+04, 1.40125000e+04, 1.41125000e+04,\n",
+       "           1.42125000e+04, 1.43125000e+04, 1.44125000e+04, 1.45125000e+04,\n",
+       "           1.46125000e+04, 1.47125000e+04, 1.48125000e+04, 1.49125000e+04,\n",
+       "           1.50125000e+04, 1.51125000e+04, 1.52125000e+04, 1.53125000e+04,\n",
+       "           1.54125000e+04, 1.55125000e+04, 1.56125000e+04, 1.57125000e+04,\n",
+       "           1.58125000e+04, 1.59125000e+04, 1.60125000e+04] kHz>"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "fmin"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "587b7d0c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/latex": [
+       "$[3.77774,~3.9595749,~4.1501226,~\\dots,~15837.5,~15937.5,~16037.5] \\; \\mathrm{kHz}$"
+      ],
+      "text/plain": [
+       "<Quantity [3.77774005e+00, 3.95957492e+00, 4.15012264e+00, 4.34979253e+00,\n",
+       "           4.55919995e+00, 4.77855019e+00, 5.00856023e+00, 5.24953751e+00,\n",
+       "           5.50220004e+00, 5.76695736e+00, 6.04452747e+00, 6.33542261e+00,\n",
+       "           6.64025760e+00, 6.95985261e+00, 7.29482247e+00, 7.64588518e+00,\n",
+       "           8.01385991e+00, 8.39946511e+00, 8.80372475e+00, 9.22735777e+00,\n",
+       "           9.67138766e+00, 1.01368398e+01, 1.06247396e+01, 1.11360099e+01,\n",
+       "           1.16718804e+01, 1.22335797e+01, 1.28223397e+01, 1.34393899e+01,\n",
+       "           1.40861655e+01, 1.47641003e+01, 1.54746304e+01, 1.62192925e+01,\n",
+       "           1.69998294e+01, 1.78179850e+01, 1.86754993e+01, 1.95742199e+01,\n",
+       "           2.05161955e+01, 2.15035768e+01, 2.25384184e+01, 2.36230723e+01,\n",
+       "           2.47599002e+01, 2.59514630e+01, 2.72003221e+01, 2.85093492e+01,\n",
+       "           2.98813127e+01, 3.13193876e+01, 3.28265494e+01, 3.44063797e+01,\n",
+       "           3.60621631e+01, 3.77975945e+01, 3.96166582e+01, 4.15231589e+01,\n",
+       "           4.35213975e+01, 4.56158823e+01, 4.78111255e+01, 5.01120461e+01,\n",
+       "           5.25236645e+01, 5.50513141e+01, 5.77006332e+01, 6.04774594e+01,\n",
+       "           6.33878458e+01, 6.64383491e+01, 6.96357342e+01, 7.29868708e+01,\n",
+       "           7.64993366e+01, 8.01808268e+01, 8.40395446e+01, 8.80838888e+01,\n",
+       "           9.23228757e+01, 9.67658432e+01, 1.01422723e+02, 1.06303672e+02,\n",
+       "           1.11419444e+02, 1.16781425e+02, 1.22401502e+02, 1.28291975e+02,\n",
+       "           1.34466061e+02, 1.40937093e+02, 1.47719617e+02, 1.54828615e+02,\n",
+       "           1.62279634e+02, 1.70089316e+02, 1.78274770e+02, 1.86854125e+02,\n",
+       "           1.95846445e+02, 2.05271421e+02, 2.15150059e+02, 2.25504004e+02,\n",
+       "           2.36356295e+02, 2.47730814e+02, 2.59652789e+02, 2.72148479e+02,\n",
+       "           2.85245507e+02, 2.98972806e+02, 3.13360749e+02, 3.28441055e+02,\n",
+       "           3.25000000e+02, 3.37500000e+02, 3.50000000e+02, 3.62500000e+02,\n",
+       "           3.75000000e+02, 3.87500000e+02, 4.00000000e+02, 4.12500000e+02,\n",
+       "           4.25000000e+02, 4.37500000e+02, 4.50000000e+02, 4.62500000e+02,\n",
+       "           4.75000000e+02, 4.87500000e+02, 5.00000000e+02, 5.12500000e+02,\n",
+       "           5.25000000e+02, 5.37500000e+02, 5.50000000e+02, 5.62500000e+02,\n",
+       "           5.75000000e+02, 5.87500000e+02, 6.00000000e+02, 6.12500000e+02,\n",
+       "           6.25000000e+02, 6.37500000e+02, 6.50000000e+02, 6.62500000e+02,\n",
+       "           6.75000000e+02, 6.87500000e+02, 7.00000000e+02, 7.12500000e+02,\n",
+       "           7.25000000e+02, 7.37500000e+02, 7.50000000e+02, 7.62500000e+02,\n",
+       "           7.75000000e+02, 7.87500000e+02, 8.00000000e+02, 8.12500000e+02,\n",
+       "           8.25000000e+02, 8.37500000e+02, 8.50000000e+02, 8.62500000e+02,\n",
+       "           8.75000000e+02, 8.87500000e+02, 9.00000000e+02, 9.12500000e+02,\n",
+       "           9.25000000e+02, 9.37500000e+02, 9.50000000e+02, 9.62500000e+02,\n",
+       "           9.75000000e+02, 9.87500000e+02, 1.00000000e+03, 1.01250000e+03,\n",
+       "           1.02500000e+03, 1.03750000e+03, 1.05000000e+03, 1.06250000e+03,\n",
+       "           1.07500000e+03, 1.08750000e+03, 1.10000000e+03, 1.11250000e+03,\n",
+       "           1.12500000e+03, 1.13750000e+03, 1.15000000e+03, 1.16250000e+03,\n",
+       "           1.17500000e+03, 1.18750000e+03, 1.20000000e+03, 1.21250000e+03,\n",
+       "           1.22500000e+03, 1.23750000e+03, 1.25000000e+03, 1.26250000e+03,\n",
+       "           1.27500000e+03, 1.28750000e+03, 1.30000000e+03, 1.31250000e+03,\n",
+       "           1.32500000e+03, 1.33750000e+03, 1.35000000e+03, 1.36250000e+03,\n",
+       "           1.37500000e+03, 1.38750000e+03, 1.40000000e+03, 1.41250000e+03,\n",
+       "           1.42500000e+03, 1.43750000e+03, 1.45000000e+03, 1.46250000e+03,\n",
+       "           1.47500000e+03, 1.48750000e+03, 1.50000000e+03, 1.51250000e+03,\n",
+       "           1.52500000e+03, 1.53750000e+03, 1.55000000e+03, 1.56250000e+03,\n",
+       "           1.57500000e+03, 1.58750000e+03, 1.60000000e+03, 1.61250000e+03,\n",
+       "           1.62500000e+03, 1.63750000e+03, 1.65000000e+03, 1.66250000e+03,\n",
+       "           1.67500000e+03, 1.68750000e+03, 1.70000000e+03, 1.71250000e+03,\n",
+       "           1.72500000e+03, 1.73750000e+03, 1.75000000e+03, 1.76250000e+03,\n",
+       "           1.77500000e+03, 1.78750000e+03, 1.80000000e+03, 1.81250000e+03,\n",
+       "           1.83750000e+03, 1.93750000e+03, 2.03750000e+03, 2.13750000e+03,\n",
+       "           2.23750000e+03, 2.33750000e+03, 2.43750000e+03, 2.53750000e+03,\n",
+       "           2.63750000e+03, 2.73750000e+03, 2.83750000e+03, 2.93750000e+03,\n",
+       "           3.03750000e+03, 3.13750000e+03, 3.23750000e+03, 3.33750000e+03,\n",
+       "           3.43750000e+03, 3.53750000e+03, 3.63750000e+03, 3.73750000e+03,\n",
+       "           3.83750000e+03, 3.93750000e+03, 4.03750000e+03, 4.13750000e+03,\n",
+       "           4.23750000e+03, 4.33750000e+03, 4.43750000e+03, 4.53750000e+03,\n",
+       "           4.63750000e+03, 4.73750000e+03, 4.83750000e+03, 4.93750000e+03,\n",
+       "           5.03750000e+03, 5.13750000e+03, 5.23750000e+03, 5.33750000e+03,\n",
+       "           5.43750000e+03, 5.53750000e+03, 5.63750000e+03, 5.73750000e+03,\n",
+       "           5.83750000e+03, 5.93750000e+03, 6.03750000e+03, 6.13750000e+03,\n",
+       "           6.23750000e+03, 6.33750000e+03, 6.43750000e+03, 6.53750000e+03,\n",
+       "           6.63750000e+03, 6.73750000e+03, 6.83750000e+03, 6.93750000e+03,\n",
+       "           7.03750000e+03, 7.13750000e+03, 7.23750000e+03, 7.33750000e+03,\n",
+       "           7.43750000e+03, 7.53750000e+03, 7.63750000e+03, 7.73750000e+03,\n",
+       "           7.83750000e+03, 7.93750000e+03, 8.03750000e+03, 8.13750000e+03,\n",
+       "           8.23750000e+03, 8.33750000e+03, 8.43750000e+03, 8.53750000e+03,\n",
+       "           8.63750000e+03, 8.73750000e+03, 8.83750000e+03, 8.93750000e+03,\n",
+       "           9.03750000e+03, 9.13750000e+03, 9.23750000e+03, 9.33750000e+03,\n",
+       "           9.43750000e+03, 9.53750000e+03, 9.63750000e+03, 9.73750000e+03,\n",
+       "           9.83750000e+03, 9.93750000e+03, 1.00375000e+04, 1.01375000e+04,\n",
+       "           1.02375000e+04, 1.03375000e+04, 1.04375000e+04, 1.05375000e+04,\n",
+       "           1.06375000e+04, 1.07375000e+04, 1.08375000e+04, 1.09375000e+04,\n",
+       "           1.10375000e+04, 1.11375000e+04, 1.12375000e+04, 1.13375000e+04,\n",
+       "           1.14375000e+04, 1.15375000e+04, 1.16375000e+04, 1.17375000e+04,\n",
+       "           1.18375000e+04, 1.19375000e+04, 1.20375000e+04, 1.21375000e+04,\n",
+       "           1.22375000e+04, 1.23375000e+04, 1.24375000e+04, 1.25375000e+04,\n",
+       "           1.26375000e+04, 1.27375000e+04, 1.28375000e+04, 1.29375000e+04,\n",
+       "           1.30375000e+04, 1.31375000e+04, 1.32375000e+04, 1.33375000e+04,\n",
+       "           1.34375000e+04, 1.35375000e+04, 1.36375000e+04, 1.37375000e+04,\n",
+       "           1.38375000e+04, 1.39375000e+04, 1.40375000e+04, 1.41375000e+04,\n",
+       "           1.42375000e+04, 1.43375000e+04, 1.44375000e+04, 1.45375000e+04,\n",
+       "           1.46375000e+04, 1.47375000e+04, 1.48375000e+04, 1.49375000e+04,\n",
+       "           1.50375000e+04, 1.51375000e+04, 1.52375000e+04, 1.53375000e+04,\n",
+       "           1.54375000e+04, 1.55375000e+04, 1.56375000e+04, 1.57375000e+04,\n",
+       "           1.58375000e+04, 1.59375000e+04, 1.60375000e+04] kHz>"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "fmax"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "cd7c638d",
+   "metadata": {},
+   "source": [
+    "Now let's start playing with this F-MOCs. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "f66bd8d5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fmoc = FrequencyMOC.from_frequency_ranges(order=50, min_freq=fmin, max_freq=fmax)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "2b0d7ade",
+   "metadata": {},
+   "source": [
+    "We can plot it in frequency or wavelength"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "697893a5",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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",
+      "text/plain": [
+       "<Figure size 1500x100 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(15, 1))\n",
+    "fmoc.plot_frequencies(ax, color=\"purple\")\n",
+    "# this method plots the frequency ranges in log scale by default\n",
+    "# but we can change it to linear if needed\n",
+    "ax.set(xscale=\"linear\")\n",
+    "# and any customization on the ax of fig objects will work too\n",
+    "ax.spines[[\"left\", \"top\", \"right\"]].set_visible(False)  # noqa: FBT003"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "e3a468f1",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAABJ4AAACQCAYAAABJVqGJAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjcuMSwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy/bCgiHAAAACXBIWXMAAA9hAAAPYQGoP6dpAAATc0lEQVR4nO3df3SWdf0/8NfG+CGwUQEHHBshKIRQQyU45JExwiZ1oKgEhT/Mo3y006FOlh07UmhEek7Kx0QEPnICjoGVnOJw0CUHzmYUJERuZYkVAhKIRKFsCKLs+v7Bl/s43GCwXWywx+McD/f9fl/36/26Bud97vP0uq5lJUmSBAAAAAA0s+yWbgAAAACAi5PgCQAAAIBUCJ4AAAAASIXgCQAAAIBUCJ4AAAAASIXgCQAAAIBUCJ4AAAAASEVOYw6qra2NvXv3Rm5ubmRlZaXdEwAAAACtWJIkUV1dHfn5+ZGd3fB1TY0Knvbu3RuFhYXN1hwAAAAAF77du3dHQUFBg/ONCp5yc3NPvPhmRHRsjraIiPi/if8X/7P6f87puJNjja1R32ca+vNcapypt+YYa8zr5299PiIiipcUN/i6sTVP95mzmWuO98N6D4vKfZVnfUwaYxFxxmMbM95QnVPHz2auvnkAAABS8E5E/O/7MqMGNCp4ytxe1zEiOjWxMTI6d+3cqJ9nfcedHGtsjfo+09Cf51LjTL01x1hjXnfN7Xpi4DSvG1vzdJ85m7nmeJ+XlxddD3c962PSGIuIMx7bmPGG6pw6fjZz9c0DAACQnjM9ksnDxQEAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIheAJAAAAgFQIngAAAABIRU5jDkqS5MSLd9Jspe15u+btiKPndtzJscbWqO8zDf15LjXO1FtzjDXmdU11zYmB07xubM3TfeZs5prj/aEuh06Mn+UxaYxl1j/NsY0Zb6jOqeNnM1ffPAAAACn4/xlRJjNqQFZypiMi4l//+lcUFhY2S18AAAAAXBx2794dBQUFDc43Kniqra2NvXv3Rm5ubmRlZTV43Cc/+cnYsmXLuXV6AWjt59eS/Z2PtdNao7nqNrXOuX7+0KFDUVhYGLt37468vLxzXp9z19r3hqZq7edn72vZmva+tqm17wtN1drPz77XsnXte21Xa98bmqq1n5+9r2Vr1lcrSZKorq6O/Pz8yM5u+ElOjbrVLjs7+7Tp1Unt2rW7qDfB1n5+Ldnf+Vg7rTWaq25T6zT183l5ea363+fFrLXvDU3V2s/P3teyNe19bVNr3xeaqrWfn32vZeva99qu1r43NFVrPz97X8vWbKhWt27dzvjZZn24+Ne+9rXmLNfqtPbza8n+zsfaaa3RXHWbWqe1//uiYRf7311rPz97X8vWtPe1TRf731trPz/7XsvWte+1XRf7311rPz97X8vWbEqtRt1qB7Rehw4dim7dusVbb73Vqv8PBUBzsvcBbY19D7hQNesVT8D517Fjx5g1a1Z07NixpVsBOG/sfUBbY98DLlSueAIAAAAgFa54AgAAACAVgicAAAAAUiF4AgAAACAVgicAAAAAUiF4AgAAACAVgidoQyZNmhQf/vCH48tf/nJLtwKQmjVr1sSgQYPiiiuuiMWLF7d0OwDnhe95QGuVlSRJ0tJNAOdHRUVFVFdXx7Jly2LlypUt3Q5As3vvvffiyiuvjPLy8ujWrVtcc801sXHjxujevXtL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zvGzZ89ORo0alSRJkuzYsSOJiGTx4sWZ+b/+9a9JRCQvv/xykiRJMmXKlORzn/tcnRrTpk1LunXrlnl/6ronRUQyc+bMzPuampokIpKysrJ6fyZJkiRFRUXJD37wgzpjS5YsSbp165Zs27YtKSwsTL7+9a8ntbW1mfny8vIkIpJ169Zlxh544IEkIpLt27dnxu64446ktLS0Tu2qqqokIpKdO3c22BMAQGO44gkAaBZjxoyJw4cPx5YtW2LDhg0xcODA6NmzZxQXF2ee81RRURH9+/ePvn37RkTE1q1bY8KECdG3b9/Izc2N4uLiiDjxTKOIiGHDhsXgwYMzVz09//zzsX///rjxxhsjIqKqqipqamqie/fu0bVr18x/O3bsqPfh5YcPH47t27fHbbfdVuf4H/7whx84/hOf+ETm9aWXXhoRkbkN8JVXXokRI0bUOf7U96fz/tpdunSJvLy8TO36HDlyJDp16lTv+HXXXRdf/OIX4yc/+UlkZWWddq1evXpF586do3///nXGTl37kksuiYj4wC14AABnK6elGwAALg6XX355FBQURHl5eRw8eDATIuXn50dhYWFs3LgxysvLY+zYsRFxIgQqLS2N0tLSWL58efTs2TNee+21KC0tjWPHjmXqTps2LVasWBH33HNPrFixIm644Ybo3r17RJz4zXmnPlvqpJPPW3q/mpqaiDjxfKaRI0fWmWvXrl2d9+3bt8+8Phno1NbWnuVPpX7vr32y/ulq9+jRIw4ePPiB8Y4dO8a4ceNizZo1cffdd9f7DKhTz6Mxa5+87a9nz55nPhkAgNMQPAEAzaakpCQqKiri4MGDcffdd2fGR48eHWVlZbF58+b46le/GhER27Zti//85z/x4IMPRmFhYUREnd+Kd9LUqVNj5syZsXXr1li5cmUsXLgwM3f11VfHvn37IicnJ/r163fG/nr16hX5+fnx6quvxrRp0875PAcNGhRbtmypM3bq+w4dOsTx48fPeY33u+qqq+Jvf/vbB8azs7PjySefjKlTp2Z+9vn5+U1e76WXXoqCgoLo0aNHk2sBAG2bW+0AgGZTUlISv/vd76KysjJzxVNERHFxcSxatCiOHTuWebB43759o0OHDjFv3rx49dVXY/Xq1TF79uwP1OzXr1986lOfittuuy2OHz8eEydOzMyNGzcuRo0aFV/4whdi7dq1sXPnzti4cWPce++99YZYESce7P3AAw/Eo48+Gn//+9/jL3/5SyxZsiTmzp3b6POcMWNGPPvsszF37tz4xz/+EYsWLYqysrI6t7r169cvduzYEZWVlXHgwIEmPai7tLQ0Nm3aVG+Q1a5du1i+fHkUFRXF2LFjY9++fee8zkkbNmyIz3zmM02uAwAgeAIAmk1JSUkcOXIkLr/88ujVq1dmvLi4OKqrq2PQoEGZ5yX17Nkzli5dGk8//XRceeWV8eCDD8ZDDz1Ub91p06ZFVVVVTJo0KfP8oYgTt4k9++yzMXr06Lj11ltj4MCBcdNNN8WuXbvqrP9+t99+eyxevDiWLFkSH//4x6O4uDiWLl0al112WaPP89prr42FCxfG3Llzo6ioKH7zm9/EN7/5zTrPYfrSl74UN9xwQ5SUlETPnj3jqaeeanT9U40fPz5ycnJi3bp19c7n5OTEU089FUOGDImxY8ee9nlRZ3L06NFYtWpVTJ8+/ZxrAACclJUkSdLSTQAAXOimT58e27Ztiw0bNqRSf/78+bF69ep47rnnUql/0oIFC+LXv/51rF27NtV1AIC2wTOeAADOwUMPPRTXX399dOnSJcrKymLZsmXx+OOPp7beHXfcEW+++WZUV1dHbm5uauu0b98+5s2bl1p9AKBtccUTAMA5mDx5clRUVER1dXX0798/ZsyYEXfeeWdLtwUA0KoIngAAAABIhYeLAwAAAJAKwRMAAAAAqRA8AQAAAJAKwRMAAAAAqRA8AQAAAJAKwRMAAAAAqRA8AQAAAJAKwRMAAAAAqfh/MNBmA6Zd2gQAAAAASUVORK5CYII=",
+      "text/plain": [
+       "<Figure size 1500x100 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(15, 1))\n",
+    "fmoc.plot_wavelengths(ax, color=\"g\", length_unit=\"km\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5632cddb",
+   "metadata": {},
+   "source": [
+    "We create a dictionnary of FMOCs with less and less precise order ranging from 50 to 10."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "46f501a0",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "we first create an initial FMOC at order 50 and then generate the dictionnary\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\n",
+    "    f\"we first create an initial FMOC at order {fmoc.max_order}\"\n",
+    "    \" and then generate the dictionnary\",\n",
+    ")\n",
+    "fmocs = {n: fmoc.degrade_to_order(n) for n in np.linspace(50, 10, 5, dtype=int)}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "4c750bf8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "At order 50, this F-MOC has 143 non overlapping spectral intervals\n",
+      "At order 40, this F-MOC has 143 non overlapping spectral intervals\n",
+      "At order 30, this F-MOC has 143 non overlapping spectral intervals\n",
+      "At order 20, this F-MOC has 143 non overlapping spectral intervals\n",
+      "At order 10, this F-MOC has 1 non overlapping spectral intervals\n"
+     ]
+    }
+   ],
+   "source": [
+    "for order in fmocs:\n",
+    "    print(\n",
+    "        f\"At order {order}, this F-MOC has {len(fmocs[order].to_hz_ranges())} \"\n",
+    "        \"non overlapping spectral intervals\",\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "520b5fe0",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "At order 50, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\n",
+      "At order 40, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\n",
+      "At order 30, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\n",
+      "At order 20, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\n",
+      "At order 10, the spectrum covers 3584 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\n"
+     ]
+    }
+   ],
+   "source": [
+    "for order in fmocs:\n",
+    "    print(\n",
+    "        f\"At order {order}, the spectrum covers {round(fmocs[order].to_hz_ranges()[0][0])} Hz\"\n",
+    "        \" to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz\",\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "85388fc3",
+   "metadata": {},
+   "source": [
+    "Next step is FT-MOC, in order to manage the time series of sweep. \n",
+    "\n",
+    "**NB:** Cassini/RPWS observed continously from january 2000 to september 2017 :-) "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "mocpy-tests",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
