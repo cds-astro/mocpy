@@ -18,6 +18,7 @@ use moc::{
   utils,
   storage::u64idx::U64MocStore
 };
+use moc::qty::Frequency;
 
 #[pymodule]
 fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -86,6 +87,36 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     }
     U64MocStore::get_global_store()
       .from_microsec_ranges_since_jd0(depth, RangeIt { it })
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Create a frequency coverage from a list of frequency ranges expressed in the FMOC system
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - depth of the MOC
+  /// * ``ranges``: PyReadonlyArray2<u64>,
+  #[pyfn(m)]
+  fn from_fmoc_ranges_array2(
+    depth: u8,
+    ranges: PyReadonlyArray2<u64>,
+  ) -> PyResult<usize> {
+    let it = ranges.as_array().into_iter().cloned();
+    struct RangeIt<T: Iterator<Item=u64>> {
+      it: T
+    }
+    impl<T: Iterator<Item=u64>> Iterator for RangeIt<T> {
+      type Item = Range<u64>;
+      fn next(&mut self) -> Option<Self::Item> {
+        if let (Some(start), Some(end)) = (self.it.next(), self.it.next()) {
+          Some(start..end)
+        } else {
+          None
+        }
+      }
+    }
+    U64MocStore::get_global_store()
+      .from_fmoc_ranges(depth, RangeIt { it })
       .map_err(PyValueError::new_err)
   }
 
@@ -1071,6 +1102,30 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       )
   }
 
+  /// Checks if a given frequencies are contained into a Frequency coverage
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the Space coverage.
+  /// * ``frequencies`` - The time, in microsec since JD=0.
+  ///
+  #[pyfn(m)]
+  fn filter_freq(
+    py: Python,
+    index: usize,
+    frequencies: PyReadonlyArrayDyn<f64>,
+  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    let freq_shape = frequencies.shape().to_vec();
+    let it_freq = frequencies.as_array().into_iter().cloned();
+    U64MocStore::get_global_store()
+      .filter_freq(index, it_freq, |b| b)
+      .map_err(PyIOError::new_err)
+      .and_then(|vec_bool| Array::from_shape_vec(freq_shape, vec_bool)
+        .map(|a| a.into_pyarray(py).to_owned())
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+      )
+  }
+
   /// Serialize a coverage into FITS blob.
   ///
   /// # Arguments
@@ -1402,6 +1457,75 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+
+  /// Deserialize a Frequency MOC from a FITS file.
+  ///
+  /// # Arguments
+  ///
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn frequency_moc_from_fits_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_fits_file(path)
+      .map_err(PyIOError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn frequency_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_fits_buff(raw_bytes)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Deserialize a Frequency MOC from an ASCII file.
+  ///
+  /// # Arguments
+  ///
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn frequency_moc_from_ascii_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_ascii_file(path)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Deserialize a Frequency MOC from a ASCII string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``ascii`` - The json string
+  #[pyfn(m)]
+  fn frequency_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_ascii(ascii.as_str())
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Deserialize a Frequency MOC from a JSON file.
+  ///
+  /// # Arguments
+  ///
+  /// * ``path`` - The file path
+  #[pyfn(m)]
+  fn frequency_moc_from_json_file(path: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_json_file(path)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Deserialize a Frequency MOC from a JSON string.
+  ///
+  /// # Arguments
+  ///
+  /// * ``json`` - The json string
+  #[pyfn(m)]
+  fn frequency_moc_from_json_str(json: String) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .load_fmoc_from_json(json.as_str())
+      .map_err(PyIOError::new_err)
+  }
+
+
   /// Expand the spatial coverage adding an external edge of max_depth pixels
   /// and return the index of the newly created moc.
   ///
@@ -1532,6 +1656,17 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  /// Get the depth of a frequency coverage.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - Index of the coverage in the store.
+  #[pyfn(m)]
+  fn get_fmoc_depth(index: usize) -> PyResult<u8> {
+    U64MocStore::get_global_store()
+      .get_fmoc_depth(index)
+      .map_err(PyValueError::new_err)
+  }
 
   /// Compute the sum of all ranges size
   ///
@@ -1569,6 +1704,24 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .get_1st_axis_max(index)
       .and_then(|opt| opt.ok_or_else(|| String::from("No max value in an empty MOC")))
       .map_err(PyValueError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn first_fmoc_hz(index: usize) -> PyResult<f64> {
+    U64MocStore::get_global_store()
+      .get_1st_axis_min(index)
+      .and_then(|opt| opt.map(|h| Frequency::<u64>::hash2freq(h))
+        .ok_or_else(|| String::from("No min value in an empty MOC"))
+      ).map_err(PyValueError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn last_fmoc_hz(index: usize) -> PyResult<f64> {
+    U64MocStore::get_global_store()
+      .get_1st_axis_max(index)
+      .and_then(|opt| opt.map(|h| Frequency::<u64>::hash2freq(h))
+        .ok_or_else(|| String::from("No max value in an empty MOC"))
+      ).map_err(PyValueError::new_err)
   }
 
 
@@ -1730,6 +1883,81 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+
+  /// Re-create a F-MOC from F-MOC ranges
+  #[pyfn(m)]
+  fn from_fmoc_ranges(
+    depth: u8,
+    min_fmoc_range: PyReadonlyArray1<u64>,
+    max_fmoc_range: PyReadonlyArray1<u64>,
+  ) -> PyResult<usize> {
+    let min_fmoc_range = min_fmoc_range.as_array().into_iter();
+    let max_fmoc_range = max_fmoc_range.as_array().into_iter();
+    U64MocStore::get_global_store()
+      .from_fmoc_ranges(depth, min_fmoc_range.zip(max_fmoc_range).map(|(min, max)| *min..*max))
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Create a frequency coverage from a list of frequency ranges in **Hz**.
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - depth of the MOC
+  /// * ``min_freq`` - The list of inf bounds of the frequency ranges expressed in **Hz**
+  /// * ``max_freq`` - The list of sup bounds of the frequency ranges expressed in **Hz**
+  ///
+  /// # Errors
+  ///
+  /// * If the number of ``min_freq`` and ``max_freq`` do not match.
+  #[pyfn(m)]
+  fn from_freq_values(
+    depth: u8,
+    freq: PyReadonlyArray1<f64>,
+  ) -> PyResult<usize> {
+    let freq = freq.as_array().into_iter();
+    U64MocStore::get_global_store()
+      .from_hz_values(depth, freq.cloned())
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Create a frequency coverage from a list of frequency ranges in **Hz**.
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - depth of the MOC
+  /// * ``min_freq`` - The list of inf bounds of the frequency ranges expressed in **Hz**
+  /// * ``max_freq`` - The list of sup bounds of the frequency ranges expressed in **Hz**
+  ///
+  /// # Errors
+  ///
+  /// * If the number of ``min_freq`` and ``max_freq`` do not match.
+  #[pyfn(m)]
+  fn from_freq_ranges(
+    depth: u8,
+    min_freq: PyReadonlyArray1<f64>,
+    max_freq: PyReadonlyArray1<f64>,
+  ) -> PyResult<usize> {
+    let min_freq = min_freq.as_array().into_iter();
+    let max_freq = max_freq.as_array().into_iter();
+    U64MocStore::get_global_store()
+      .from_hz_ranges(depth, min_freq.zip(max_freq).map(|(min, max)| *min..*max))
+      .map_err(PyValueError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn to_freq_ranges(py: Python, index: usize) -> PyResult<Py<PyArray2<f64>>> {
+    U64MocStore::get_global_store()
+      .to_hz_ranges(index)
+      .map_err(PyValueError::new_err)
+      .and_then(|mut v| {
+        let len = v.len();
+        // We could have used Array::from_shape_vec; to be checked: no clone in both cases
+        PyArray1::from_vec(py, utils::flatten(&mut v))
+          .reshape(Ix2(len, 2_usize))
+          .map(|a| a.to_owned())
+      })
+  }
+
   /// Flatten cells to the moc depth
   ///
   /// # Arguments
@@ -1769,6 +1997,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   fn new_empty_tmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_tmoc(depth)
+      .map_err(PyIOError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn new_empty_fmoc(depth: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .new_empty_fmoc(depth)
       .map_err(PyIOError::new_err)
   }
 

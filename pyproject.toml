@@ -6,11 +6,10 @@ requires-python = ">=3.7"
 # https://numpy.org/neps/nep-0029-deprecation_policy.html
 # https://docs.astropy.org/en/stable/changelog.html
 dependencies = [
-    "astropy>=5.2.1",
-    "matplotlib>=3.7.1",     # Used in fill and border
+    "astropy",
+    "matplotlib",     # Used in fill and border
     "cdshealpix>=0.6.4",     # Used in fill and border
     "networkx>=2.5",         # Used in get_boundaries
-    "requests>=2.28.2"       # Used to load FITS from URLs
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -18,6 +17,19 @@ classifiers = [
     "Programming Language :: Rust",
     "License :: OSI Approved :: BSD License",
     "Topic :: Scientific/Engineering :: Astronomy"
+]
+
+[project.optional-dependencies]
+query_fits = ["requests"] # Used to load FITS from URLs
+docs = [
+    "sphinx",
+    "numpydoc",
+    "nbsphinx",
+    "sphinx-astropy",
+    "sphinx-collections",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "sphinxcontrib-bibtex"
 ]
 
 [project.urls]
@@ -51,19 +63,21 @@ locked = false
 # D100: Missing docstring in public module
 # B008: Do not perforn function call in argument defaults
 "__init__.py" = ["D104"]
-"notebooks/*.ipynb" = ["D100"]
 "python/mocpy/moc/plot/wcs.py" = ["B008"]
-"python/mocpy/tests/*.py" = ["S101", "D103"] # use of "assert" detected
+"python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
+"python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
+
+[tool.nbqa.addopts]
+ruff = ["--ignore=B018,FBT003"]
 
 [tool.ruff]
 fix = true
 force-exclude = true
+exclude = ["docs/conf.py"]
 format = "grouped"
 show-source = true
 ignore-init-module-imports = true
 target-version = "py37"
-# Allow lines to be as long as 120 characters.
-line-length = 120
 extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "C4", "ICN", "RET", "ARG", "PD", "PGH",
                  "RUF", "YTT", "BLE", "COM", "DTZ", "EXE",
@@ -71,20 +85,16 @@ extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                 ]
 extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002", "N802"]
 # E501: line length (done by black in our case)
-# N806: variables names should be lowercase (would require to change all API)
-# D203: 1 blank line required before class docstring
-# D105: missing docsting in magic method
-# N816:  Variable `mixed_Case` in global scope should not be mixedCase
+# N806, N816: variables names should be lowercase (would require to change all API)
+# D203: 1 blank line required before class docstring (not compatible with numpy docstyle)
 # FBT002: Boolean default in function definition (would require to change all API)
 
-[tool.ruff.flake8-errmsg]
-max-string-length = 20
-
-[tool.ruff.flake8-import-conventions]
-# Declare the default aliases.
-# seaborn = "sns"
-# "dask.dataframe" = "dd"
 
 [tool.ruff.pydocstyle]
 convention = "numpy"  # Accepts: "google", "numpy", or "pep257"
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+doctest_optionflags = "NORMALIZE_WHITESPACE"
+testpaths = "python"
 

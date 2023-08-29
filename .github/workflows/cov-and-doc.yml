@@ -1,0 +1,51 @@
+name: test-doc
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+
+  # Perform tests with coverage, build the doc and run the tests in the doc (only for python 3.8 on ubuntu)
+  test-cov-and-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout branch ${{ github.head_ref }}"
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: "Set up Python on Ubuntu"
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+            # Test Rust code
+      - name: "Test with coverage, build and test doc"
+        run: |
+          # Install virtualenv
+          pip install virtualenv
+          # Create and activate a new virtualenv
+          virtualenv mocpy-env
+          source mocpy-env/bin/activate
+          # For debug purpose (see dependencies)
+          cargo tree
+          # Install maturin
+          pip install maturin
+          # Build and install mocpy
+          maturin develop --release
+          # Install pytest-cov, needed to test with coverage
+          pip install -r requirements/tests.txt
+          pip install pytest-cov
+          # Run test with coverage and doctests
+          python -m pytest -v -s --doctest-modules python/mocpy --cov-report=term --cov=python/mocpy
+          # Install dependencies needed to build the docs
+          pip install -r requirements/docs.txt
+          sudo apt-get install pandoc
+          # Compile the docs and run the test examples
+          cd ./docs
+          # * Generate the HTML files
+          make html
+          deactivate

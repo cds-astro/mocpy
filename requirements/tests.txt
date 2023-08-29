@@ -1,9 +1,9 @@
 astropy
+
+astropy_healpix
 cdshealpix>=0.6.1
 matplotlib
 networkx>=2.5
+
+pytest>6.0
 requests
-
-astropy_healpix
-
-pytest

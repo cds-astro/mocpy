@@ -208,6 +208,7 @@ class MOC(AbstractMOC):
         warnings.warn(
             "This method is deprecated and has been replaced by contains_lonlat",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return self.contains_lonlat(lon, lat, keep_inside=keep_inside)
@@ -286,31 +287,20 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, WCS
-        >>> from astropy.coordinates import Angle, SkyCoord
+        >>> from mocpy import MOC
         >>> import astropy.units as u
-        >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
-        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-        >>> moc = MOC.load(filename, 'fits')
-        >>> # Plot the MOC using matplotlib
         >>> import matplotlib.pyplot as plt
-        >>> fig = plt.figure(111, figsize=(15, 15))
-        >>> # Define a WCS as a context
-        >>> with WCS(fig,
-        ...         fov=50 * u.deg,
-        ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-        ...         coordsys="icrs",
-        ...         rotation=Angle(0, u.degree),
-        ...         projection="AIT") as wcs:
-        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        ...     # Call fill giving the matplotlib axe and the `~astropy.wcs.WCS` object.
-        ...     # We will set the matplotlib keyword linewidth to 0 so that it does not plot
-        ...     # the border of each HEALPix cell.
-        ...     # The color can also be specified along with an alpha value.
-        ...     moc.fill(ax=ax, wcs=wcs, linewidth=0, alpha=0.5, fill=True, color="green")
-        >>> plt.xlabel('ra')
-        >>> plt.ylabel('dec')
-        >>> plt.grid(color="black", linestyle="dotted")
+        >>> # Create a MOC
+        >>> moc = MOC.from_ring(external_radius=2*u.deg,
+        ...                     internal_radius=1*u.deg,
+        ...                     lat=0*u.rad, lon=0*u.rad,
+        ...                     max_depth=13,
+        ...                    )
+        >>> # Plot the MOC using matplotlib
+        >>> fig = plt.figure(figsize=(10, 10))
+        >>> wcs = moc.wcs(fig)
+        >>> ax = fig.add_subplot(projection=wcs)
+        >>> moc.fill(ax, wcs, color='blue')
         """
         fill.fill(self, ax, wcs, **kw_mpl_pathpatch)
 
@@ -333,28 +323,19 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, WCS
-        >>> from astropy.coordinates import Angle, SkyCoord
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import Latitude, Longitude
         >>> import astropy.units as u
-        >>> # Load a MOC, e.g. the MOC of GALEXGR6-AIS-FUV
-        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-        >>> moc = MOC.load(filename, 'fits')
-        >>> # Plot the MOC using matplotlib
         >>> import matplotlib.pyplot as plt
-        >>> fig = plt.figure(111, figsize=(15, 15))
-        >>> # Define a WCS as a context
-        >>> with WCS(fig,
-        ...         fov=50 * u.deg,
-        ...         center=SkyCoord(0, 20, unit='deg', frame='icrs'),
-        ...         coordsys="icrs",
-        ...         rotation=Angle(0, u.degree),
-        ...         projection="AIT") as wcs:
-        ...     ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        ...     # Call border giving the matplotlib axe and the `~astropy.wcs.WCS` object.
-        ...     moc.border(ax=ax, wcs=wcs, alpha=0.5, color="red")
-        >>> plt.xlabel('ra')
-        >>> plt.ylabel('dec')
-        >>> plt.grid(color="black", linestyle="dotted")
+        >>> # Create a MOC
+        >>> lon = Longitude([5, -5, -5, 5], u.deg)
+        >>> lat = Latitude([5, 5, -5, -5], u.deg)
+        >>> moc = MOC.from_polygon(lon, lat)
+        >>> # Plot the MOC using matplotlib
+        >>> fig = plt.figure(figsize=(10, 10))
+        >>> wcs = moc.wcs(fig)
+        >>> ax = fig.add_subplot(projection=wcs)
+        >>> moc.border(ax, wcs, color='blue')
         """
         border.border(self, ax, wcs, **kw_mpl_pathpatch)
 
@@ -393,6 +374,7 @@ class MOC(AbstractMOC):
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
             DeprecationWarning,
+            stacklevel=2,
         )
         return Boundaries.get(self, order)
 
@@ -452,8 +434,10 @@ class MOC(AbstractMOC):
         skycrd = SkyCoord(world, unit="deg", frame=frame)
 
         # Compute the order based on the CDELT
-        c1 = header["CDELT1"]
-        c2 = header["CDELT2"]
+        # Should work even if the fits is defined using cd_ij or crota, see:
+        # https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt
+        [c1, c2] = w.wcs.get_cdelt()
+
         max_res_px = np.sqrt(c1 * c1 + c2 * c2) * np.pi / 180.0
         max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
 
@@ -545,8 +529,7 @@ class MOC(AbstractMOC):
             The resulting MOC.
         """
         return cls.from_url(
-            "%s?%s"
-            % (
+            "{}?{}".format(
                 MOC.MOC_SERVER_ROOT_URL,
                 urlencode({"ivorn": ivorn, "get": "moc", "order": int(np.log2(nside))}),
             ),
@@ -744,6 +727,7 @@ class MOC(AbstractMOC):
                 "To avoid an extra loop, it is preferable to provide the max_depth parameter."
                 "It will probably become mandatory in future releases.",
                 UserWarning,
+                stacklevel=2,
             )
 
             max_depth = int(np.log2(uniq.max() >> 2)) >> 1
@@ -1074,7 +1058,6 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The MOC
         """
-        # import pdb; pdb.set_trace()
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
         if ranges.shape[1] != 2:
@@ -1218,6 +1201,7 @@ class MOC(AbstractMOC):
         votable.write(r.content)
 
         return parse_single_table(votable).to_table()
+
     def wcs(
         self,
         fig,
@@ -1248,24 +1232,21 @@ class MOC(AbstractMOC):
 
         Examples
         --------
-        >>> from mocpy import MOC, WCS
-        >>> from astropy.coordinates import Angle, SkyCoord
-        >>> import astropy.units as u
-        >>> # Load a MOC
-        >>> filename = './../resources/P-GALEXGR6-AIS-FUV.fits'
-        >>> moc = MOC.from_fits(filename)
-        >>> # Plot the MOC using matplotlib
+        >>> from mocpy import MOC
         >>> import matplotlib.pyplot as plt
-        >>> fig = plt.figure(111, figsize=(15, 15))
-        >>> # Define a WCS as a context
-        >>> wcs = moc.wcs(fig, coordsys="icrs", rotation=Angle(0, u.degree), projection="AIT")
-        >>> ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        >>> # Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
-        >>> moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
-        >>> moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
-        >>> plt.xlabel('ra')
-        >>> plt.ylabel('dec')
-        >>> plt.grid(color="black", linestyle="dotted")
+        >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
+        >>> fig = plt.figure()
+        >>> moc.wcs(fig)
+        WCS Keywords
+        <BLANKLINE>
+        Number of WCS axes: 2
+        CTYPE : 'RA---AIT'  'DEC--AIT'
+        CRVAL : 92.29966711743452  54.33295312309193
+        CRPIX : 320.0  240.0
+        PC1_1 PC1_2  : 1.0  -0.0
+        PC2_1 PC2_2  : 0.0  1.0
+        CDELT : -0.27794934051515896  0.27794934051515896
+        NAXIS : 0  0
         """
         if rotation is None:
             rotation = Angle(0, u.radian)
@@ -1301,9 +1282,9 @@ class MOC(AbstractMOC):
 
         warnings.warn(
             "This method is deprecated and is no longer tested."
-            "Please refer to this documentation page for plotting MOCs using"
-            "matplotlib: https://cds-astro.github.io/mocpy/xamples/examples.html#loading-and-plotting-the-moc-of-sdss",
+            "Please refer to `MOC.fill` and `MOC.border` methods",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         frame = ICRS() if frame is None else frame

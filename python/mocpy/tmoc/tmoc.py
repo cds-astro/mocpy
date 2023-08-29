@@ -1,4 +1,3 @@
-
 import warnings
 import numpy as np
 
@@ -8,11 +7,11 @@ from ..abstract_moc import AbstractMOC
 
 from .. import mocpy
 
-__author__ = "Matthieu Baumann, François-Xavier Pineau"
+__author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
-__email__ = "baumannmatthieu0@gmail.com, francois-xavier.pineau@astro.unistra.fr"
+__email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
 DAY_MICRO_SEC = 86400000000.0
@@ -54,7 +53,8 @@ def microseconds_to_times(times_microseconds):
     """
     jd1 = np.asarray(times_microseconds // DAY_MICRO_SEC, dtype=np.float64)
     jd2 = np.asarray(
-        (times_microseconds - jd1 * DAY_MICRO_SEC) / DAY_MICRO_SEC, dtype=np.float64,
+        (times_microseconds - jd1 * DAY_MICRO_SEC) / DAY_MICRO_SEC,
+        dtype=np.float64,
     )
 
     return Time(val=jd1, val2=jd2, format="jd", scale="tdb")
@@ -74,18 +74,21 @@ class TimeMOC(AbstractMOC):
     __create_key = object()
 
     def __init__(self, create_key, store_index):
-        """Is a Spatial Coverage (S-MOC).
+        """Is a Time Coverage (T-MOC).
 
         Args:
             create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the S-MOC in the rust-side storage
         """
         super().__init__(
-            AbstractMOC._create_key, TimeMOC.__create_key, store_index,
+            AbstractMOC._create_key,
+            TimeMOC.__create_key,
+            store_index,
         )
-        assert (
-            create_key == TimeMOC.__create_key
-        ), "T-MOC instantiation is only allowed by class or super-class methods"
+        if create_key != TimeMOC.__create_key:
+            raise PermissionError(
+                "T-MOC instantiation is only allowed by class or super-class methods",
+            )
 
     @property
     def max_order(self):
@@ -94,7 +97,7 @@ class TimeMOC(AbstractMOC):
         return np.uint8(depth)
 
     def to_time_ranges(self):
-        """Returns the time ranges this TimeMOC contains."""
+        """Return the time ranges this TimeMOC contains."""
         return microseconds_to_times(mocpy.to_ranges(self._store_index))
 
     @property
@@ -104,7 +107,7 @@ class TimeMOC(AbstractMOC):
 
     def degrade_to_order(self, new_order):
         """
-        Degrades the MOC instance to a new, less precise, MOC.
+        Degrade the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest Time cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``.
@@ -125,7 +128,7 @@ class TimeMOC(AbstractMOC):
     @classmethod
     def new_empty(cls, max_depth):
         """
-        Creates a new empty TimeMOC of given depth.
+        Create a new empty TimeMOC of given depth.
 
         Parameters
         ----------
@@ -143,7 +146,7 @@ class TimeMOC(AbstractMOC):
     @classmethod
     def from_depth61_ranges(cls, max_depth, ranges):
         """
-        Creates a TimeMOC from a set of Time ranges at order 61 (i.e. ranges of microseconds since JD=0).
+        Create a TimeMOC from a set of Time ranges at order 61 (i.e. ranges of microseconds since JD=0).
 
         Parameters
         ----------
@@ -158,7 +161,10 @@ class TimeMOC(AbstractMOC):
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
-        assert ranges.shape[1] == 2
+        if ranges.shape[1] != 2:
+            raise ValueError(
+                f"Expected a N x 2 numpy ndarray but second dimension is {ranges.shape[1]}",
+            )
 
         if ranges.dtype is not np.uint64:
             ranges = ranges.astype(np.uint64)
@@ -220,16 +226,24 @@ class TimeMOC(AbstractMOC):
         max_times = times_to_microseconds(max_times)
         max_times = np.atleast_1d(max_times)
 
-        assert min_times.shape == max_times.shape
+        if min_times.shape != max_times.shape:
+            raise ValueError(
+                f"Mismatch between min_times and max_times of shapes {min_times.shape} and {max_times.shape}",
+            )
 
         store_index = mocpy.from_time_ranges_in_microsec_since_jd_origin(
-            depth, min_times, max_times,
+            depth,
+            min_times,
+            max_times,
         )
         return cls(cls.__create_key, store_index)
 
     @classmethod
     def from_time_ranges_approx(
-        cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME,
+        cls,
+        min_times,
+        max_times,
+        delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Create a TimeMOC from a range defined by two `astropy.time.Time`.
@@ -259,8 +273,10 @@ class TimeMOC(AbstractMOC):
 
         max_times = np.asarray(max_times.jd)
         max_times = np.atleast_1d(max_times)
-
-        assert min_times.shape == max_times.shape
+        if min_times.shape != max_times.shape:
+            raise ValueError(
+                f"Mismatch between min_times and max_times of shapes {min_times.shape} and {max_times.shape}",
+            )
 
         store_index = mocpy.from_time_ranges(depth, min_times, max_times)
         return cls(cls.__create_key, store_index)
@@ -298,20 +314,20 @@ class TimeMOC(AbstractMOC):
         if order_op > max_order:
             message = (
                 "Requested time resolution for the operation cannot be applied.\n"
-                "The TimeMoc object resulting from the operation is of time resolution {0} sec.".format(
+                "The TimeMoc object resulting from the operation is of time resolution {} sec.".format(
                     TimeMOC.order_to_time_resolution(max_order).sec,
                 )
             )
-            warnings.warn(message, UserWarning)
+            warnings.warn(message, UserWarning, stacklevel=2)
 
         self_degradation = self.degrade_to_order(order_op)
         another_moc_degradation = another_moc.degrade_to_order(order_op)
-
-        result = self_degradation, another_moc_degradation
-        return result
+        return self_degradation, another_moc_degradation
 
     def intersection_with_timeresolution(
-        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME,
+        self,
+        another_moc,
+        delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Intersection between self and moc.
@@ -367,7 +383,9 @@ class TimeMOC(AbstractMOC):
         return super(TimeMOC, self_degraded).union(moc_degraded)
 
     def difference_with_timeresolution(
-        self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME,
+        self,
+        another_moc,
+        delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Difference between self and moc.
@@ -407,10 +425,11 @@ class TimeMOC(AbstractMOC):
             total duration of all the observation times of the tmoc
 
         """
-        duration = TimeDelta(
-            mocpy.ranges_sum(self._store_index) / 1e6, format="sec", scale="tdb",
+        return TimeDelta(
+            mocpy.ranges_sum(self._store_index) / 1e6,
+            format="sec",
+            scale="tdb",
         )
-        return duration
 
     @property
     def consistency(self):
@@ -427,8 +446,7 @@ class TimeMOC(AbstractMOC):
             fill percentage (between 0 and 1.)
 
         """
-        result = self.total_duration.jd / (self.max_time - self.min_time).jd
-        return result
+        return self.total_duration.jd / (self.max_time - self.min_time).jd
 
     @property
     def min_time(self):
@@ -481,11 +499,13 @@ class TimeMOC(AbstractMOC):
 
         if keep_inside:
             return mask
-        else:
-            return ~mask
+        return ~mask
 
     def contains_with_timeresolution(
-        self, times, keep_inside=True, delta_t=DEFAULT_OBSERVATION_TIME,
+        self,
+        times,
+        keep_inside=True,
+        delta_t=DEFAULT_OBSERVATION_TIME,
     ):
         """
         Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the TMOC instance.
@@ -514,11 +534,11 @@ class TimeMOC(AbstractMOC):
         if new_max_order > current_max_order:
             message = (
                 "Requested time resolution filtering cannot be applied.\n"
-                "Filtering is applied with a time resolution of {0} sec.".format(
+                "Filtering is applied with a time resolution of {} sec.".format(
                     TimeMOC.order_to_time_resolution(current_max_order).sec,
                 )
             )
-            warnings.warn(message, UserWarning)
+            warnings.warn(message, UserWarning, stacklevel=2)
 
         rough_tmoc = self.degrade_to_order(new_max_order)
         return rough_tmoc.contains(times, keep_inside)
@@ -539,8 +559,7 @@ class TimeMOC(AbstractMOC):
             time equivalent to ``order``
 
         """
-        delta_t = TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tdb")
-        return delta_t
+        return TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tdb")
 
     @staticmethod
     def time_resolution_to_order(delta_time):
@@ -583,11 +602,13 @@ class TimeMOC(AbstractMOC):
         if self.empty():
             import warnings
 
-            warnings.warn("This time moc is empty", UserWarning)
+            warnings.warn("This time moc is empty", UserWarning, stacklevel=2)
             return
 
         plot_order = 30
-        plotted_moc = self.degrade_to_order(plot_order) if self.max_order > plot_order else self
+        plotted_moc = (
+            self.degrade_to_order(plot_order) if self.max_order > plot_order else self
+        )
 
         min_jd = plotted_moc.min_time.jd if not view[0] else view[0].jd
         max_jd = plotted_moc.max_time.jd if not view[1] else view[1].jd
@@ -595,7 +616,8 @@ class TimeMOC(AbstractMOC):
         if max_jd < min_jd:
             raise ValueError(
                 "Invalid selection: max_jd = {} must be > to min_jd = {}".format(
-                    max_jd, min_jd,
+                    max_jd,
+                    min_jd,
                 ),
             )
 
@@ -603,7 +625,7 @@ class TimeMOC(AbstractMOC):
         ax = fig1.add_subplot(111)
 
         ax.set_xlabel("iso")
-        ax.get_yaxis().set_visible(False)
+        ax.get_yaxis().set_visible(b=False)
 
         size = 2000
         delta = (max_jd - min_jd) / size
@@ -611,7 +633,8 @@ class TimeMOC(AbstractMOC):
 
         ax.set_xticks([0, size])
         ax.set_xticklabels(
-            Time([min_jd_time, max_jd], format="jd", scale="tdb").iso, rotation=70,
+            Time([min_jd_time, max_jd], format="jd", scale="tdb").iso,
+            rotation=70,
         )
 
         y = np.zeros(size)
@@ -636,7 +659,7 @@ class TimeMOC(AbstractMOC):
 
         def on_mouse_motion(event):
             for txt in ax.texts:
-                txt.set_visible(False)
+                txt.set_visible(b=False)
 
             text = ax.text(0, 0, "", va="bottom", ha="left")
 
@@ -652,7 +675,7 @@ class TimeMOC(AbstractMOC):
         plt.show()
 
     @classmethod
-    def load(cls, path, format="fits"):
+    def load(cls, path, format="fits"):  # noqa: A002
         """
         Load the Time MOC from a file.
 
@@ -671,15 +694,14 @@ class TimeMOC(AbstractMOC):
         if format == "fits":
             index = mocpy.time_moc_from_fits_file(path)
             return cls(cls.__create_key, index)
-        elif format == "ascii":
+        if format == "ascii":
             index = mocpy.time_moc_from_ascii_file(path)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.time_moc_from_json_file(path)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("fits", "ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -688,7 +710,7 @@ class TimeMOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
-    def from_string(cls, value, format="ascii"):
+    def from_string(cls, value, format="ascii"):  # noqa: A002
         """
         Deserialize the Time MOC from the given string.
 
@@ -706,9 +728,8 @@ class TimeMOC(AbstractMOC):
         if format == "ascii":
             index = mocpy.time_moc_from_ascii_str(value)
             return cls(cls.__create_key, index)
-        elif format == "json":
+        if format == "json":
             index = mocpy.time_moc_from_json_str(value)
             return cls(cls.__create_key, index)
-        else:
-            formats = ("ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+        formats = ("ascii", "json")
+        raise ValueError("format should be one of %s" % (str(formats)))

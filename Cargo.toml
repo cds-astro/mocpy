@@ -1,6 +1,6 @@
 [package]
 name = "MOCPy"
-version = "0.12.3"
+version = "0.13.0"
 authors = [
   "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>",
   "Thomas Boch <thomas.boch@astro.unistra.fr>",
@@ -33,7 +33,7 @@ healpix = { package = "cdshealpix", version = "0.6" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 
 [dependencies.numpy]
-version = "0.18"
+version = "0.17"
 
 [dependencies.ndarray]
 version = "0.15"
@@ -42,7 +42,7 @@ default-features = false # do not include the default features, and optionally
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.18"
+version = "0.17.3"
 features = ["extension-module"]
 
 [profile.release]

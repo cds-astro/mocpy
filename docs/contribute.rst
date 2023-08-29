@@ -40,7 +40,7 @@ Using virtualenv
 
     virtualenv -p /usr/bin/python3 mocpy-env
 
-`Virtualenv` will create a directory named `mocpy-env` in your home.
+``Virtualenv`` will create a directory named ``mocpy-env`` in your home.
 This directory contains a new independent python interpreter
 (in this case, a python3 one, instanciated from /usr/bin/python3)
 along with a new empty pip package manager.
@@ -49,8 +49,8 @@ along with a new empty pip package manager.
 
     source ~/mocpy-env/bin/activate
 
-`pip list` will tell you that there is no package installed and `python`
-opens a session with the `mocpy-env` interpreter.
+``pip list`` will tell you that there is no package installed and ``python``
+opens a session with the ``mocpy-env`` interpreter.
 
 - You can now install all the necessary pip packages
   for developping and testing MOCpy::
@@ -64,10 +64,10 @@ opens a session with the `mocpy-env` interpreter.
 Pre-commits setup
 -----------------
 
-- You'll need to install the pre-commits in your `.git/hooks` to check your code locally::
+- You'll need to install the pre-commits in your ``.git/hooks`` to check your code locally::
 
     pre-commit install
-   
+
 It will run linting and formating tests at each of your commits.
 
 Now build package
@@ -80,10 +80,10 @@ Now build package
 - Move to your root's mocpy location and run maturin::
 
     maturin develop --release
-   
+
 This step will inform you of any issue in the rust part.
 
-- After a new version of mocpy goes out, if a `maturin develop --release` does not actualise your `Cargo.toml` file, you might need to before executing the `maturin` command again::
+- After a new version of mocpy goes out, if a ``maturin develop --release`` does not actualise your ``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
 
     rm Cargo.lock && cargo clean
 
@@ -92,7 +92,7 @@ Running the python tests
 
 Once your environment is set up and activated you can run the tests
 
-- To run the automated tests go to the repo folder and type::
+- To run the automated tests and the doctring examples, go to the repo folder and type::
 
     python -m pytest -v python/mocpy
 
@@ -105,12 +105,15 @@ Once your environment is set up and activated you can run the tests
     python -m pip install -r requirements/notebooks.txt
     python -m pytest --nbmake -n=auto "./notebooks"
 
-You also can have a html output of the coverage. For that set `--cov-report=html`,
-this will generate an `htmlcov` folder where all the static html files can be found.
+You also can have a html output of the coverage. For that set ``--cov-report=html``,
+this will generate an ``htmlcov`` folder where all the static html files can be found.
 
 
 Building the documentation
 --------------------------
+
+To see the documentation locally, you'll need to install the python packages in
+:file:`requirements/docs.txt` and the pandoc software.
 
 - To build the docs from the repo directory::
 

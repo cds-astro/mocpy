@@ -1,6 +1,6 @@
 default_language_version:
-  # force all unspecified python hooks to run python3.8
-  python: python3.8
+  # force all unspecified python hooks to run python3.10
+  python: python3.10
 repos:
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -14,25 +14,20 @@ repos:
         exclude_types:
           - "svg"
         description: "Remove trailing whitespaces"
-  # For Sphinx
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: 'v1.10.0'
-    hooks:
-     - id: rst-backticks
   # Run Black on files
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
     - id: black
   # Fast linter to replace flake8
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.247'
+    rev: 'v0.0.263'
     hooks:
      - id: ruff
        fail_fast: true
   # Same tools but for Jupyter notebooks
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.6.3
+    rev: 1.7.0
     hooks:
       - id: nbqa-black
         name: nbqa-black
@@ -43,4 +38,3 @@ repos:
         name: nbqa-ruff
         description: "Run ruff on a Jupyter notebook"
         fail_fast: true
-      - id: nbqa-isort

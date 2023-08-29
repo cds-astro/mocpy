@@ -1,11 +1,14 @@
 from astropy.io import fits
 from . import mocpy
+from pathlib import Path
 
 
 class IO:
+    """Input and outputs for MOCs."""
+
     def serialize(self, format="fits", optional_kw_dict=None, pre_v2=False):
         """
-        Serializes the MOC into a specific format.
+        Serialize the MOC into a specific format.
 
         Possible formats are FITS, JSON and STRING
 
@@ -27,7 +30,7 @@ class IO:
 
         if format == "fits":
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self._store_index, pre_v2)
+                mocpy.to_fits_raw(self._store_index, pre_v2),
             )
             hdu = hdulist[1]
             if optional_kw_dict:
@@ -35,21 +38,24 @@ class IO:
                     hdu.header[key] = optional_kw_dict[key]
             return hdulist
 
-        elif format == "str":
-            result = self.to_string(format="ascii", fold=0)
-        else:
-            import json
+        if format == "str":
+            return self.to_string(format="ascii", fold=0)
 
-            json_str = self.to_string(format="json")
-            result = json.loads(json_str)
+        import json
 
-        return result
+        json_str = self.to_string(format="json")
+        return json.loads(json_str)
 
     def write(
-        self, path, format="fits", overwrite=False, optional_kw_dict=None, pre_v2=False
+        self,
+        path,
+        format="fits",
+        overwrite=False,
+        optional_kw_dict=None,
+        pre_v2=False,
     ):
         """
-        Writes the MOC to a file.
+        Write the MOC to a file.
 
         Format can be 'fits' or 'json', though only the fits format is officially supported by the IVOA.
 
@@ -70,29 +76,30 @@ class IO:
         warnings.warn(
             'This method is deprecated. Use MOC.save(path, "fits") instead!',
             DeprecationWarning,
+            stacklevel=2,
         )
         serialization = self.serialize(
-            format=format, optional_kw_dict=optional_kw_dict, pre_v2=pre_v2
+            format=format,
+            optional_kw_dict=optional_kw_dict,
+            pre_v2=pre_v2,
         )
 
         if format == "fits":
             serialization.writeto(path, overwrite=overwrite)
         else:
-            import os
-
-            file_exists = os.path.isfile(path)
+            file_exists = Path(path).is_file()
 
             if file_exists and not overwrite:
                 raise OSError(
                     "File {} already exists! Set ``overwrite`` to "
-                    "True if you want to replace it.".format(path)
+                    "True if you want to replace it.".format(path),
                 )
 
             if format == "json":
                 import json
 
-                with open(path, "w") as f_out:
+                with Path(path).open("w") as f_out:
                     f_out.write(json.dumps(serialization, sort_keys=True, indent=2))
             elif format == "str":
-                with open(path, "w") as f_out:
+                with Path(path).open("w") as f_out:
                     f_out.write(serialization)

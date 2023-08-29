@@ -89,10 +89,10 @@ def test_uniq_hpx():
 
 
 def test_to_depth29_ranges(isets):
-    l = isets["a"].to_depth29_ranges
+    l = isets["a"].to_depth29_ranges  # noqa: E741
     r = np.array([[27, 126]], dtype=np.uint64)
     assert np.array_equal(l, r)
-    l = isets["b"].to_depth29_ranges
+    l = isets["b"].to_depth29_ranges  # noqa: E741
     r = np.array([[9, 61], [68, 105]], dtype=np.uint64)
     assert np.array_equal(l, r)
 
@@ -275,14 +275,16 @@ def test_from_fits_images_2():
     MOC.from_fits_images(["resources/u_gal.fits"], max_norder=10)
 
 
+def test_from_fits_image_without_cdelt():
+    MOC.from_fits_images(["resources/horsehead.fits"], max_norder=15)
+
+
 @pytest.fixture()
 def moc_from_fits_image():
     image_path = "resources/image_with_mask.fits.gz"
 
     with fits.open(image_path) as hdulist:
-        moc = MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
-
-    return moc
+        return MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
 
 
 @pytest.fixture()
@@ -390,12 +392,12 @@ def test_moc_serialize_to_json(moc_from_fits_image):
                     "8": [45],
                 },
             ),
-            "5/8-10 42-46 54 6/4500 8/45 ",
+            "5/8-10 42-46 54 6/4500 8/45",
         ),
-        (MOC.from_json({}), "0/ "),
-        (MOC.from_json({"29": [101]}), "29/101 "),
-        (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9 "),
-        (MOC.from_json({"0": [2, 9]}), "0/2 9 "),
+        (MOC.from_json({}), "0/"),
+        (MOC.from_json({"29": [101]}), "29/101"),
+        (MOC.from_json({"0": [1, 0, 9]}), "0/0-1 9"),
+        (MOC.from_json({"0": [2, 9]}), "0/2 9"),
     ],
     #  (MOC.from_json({"0": [2, 9], "1": [9]}), "0/2 9"),
 )
@@ -413,7 +415,7 @@ def test_serialize_to_str(moc, expected):
         ("moc", False, "ascii", True),
     ],
 )
-def test_write(moc_from_json, filename, overwrite, format, os_error):
+def test_write(moc_from_json, filename, overwrite, format, os_error):  # noqa: A002
     if os_error:
         with pytest.raises(OSError):  # TODO add the match parameter of the exception
             moc_from_json.save(filename, format=format, overwrite=overwrite)
@@ -605,6 +607,12 @@ def test_moc_union(mocs_op):
     )
 
 
+def test_sum(mocs_op):
+    assert sum([mocs_op["first"], mocs_op["second"]]) == MOC.from_json(
+        {"0": [0, 1, 2, 3, 4, 5, 7]},
+    )
+
+
 def test_moc_intersection(mocs_op):
     assert mocs_op["first"].intersection(mocs_op["second"]) == MOC.from_json(
         {"0": [0, 3, 4]},
@@ -630,7 +638,7 @@ def test_from_fits_old():
 
 
 @pytest.mark.parametrize(
-    "input, expected",
+    "input_MOC, expected",
     [
         (
             MOC.from_json({"0": [1, 3]}),
@@ -638,9 +646,9 @@ def test_from_fits_old():
         ),
     ],
 )
-def test_moc_complement(input, expected):
-    assert input.complement() == expected
-    assert ~input == expected
+def test_moc_complement(input_MOC, expected):
+    assert input_MOC.complement() == expected
+    assert ~input_MOC == expected
 
 
 def test_spatial_res_to_order():
@@ -701,9 +709,6 @@ def test_from_valued_healpix_cells_bayestar():
     fits_image_filename = "./resources/bayestar.multiorder.fits"
 
     with fits.open(fits_image_filename) as hdul:
-        hdul.info()
-        hdul[1].columns
-
         data = hdul[1].data
 
     uniq = data["UNIQ"]
@@ -741,10 +746,8 @@ def test_from_valued_healpix_cells_bayestar_and_split():
 # --- TESTING new features ---#
 def test_moc_save_load_deser():
     smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", "ascii")
-    smoc_ascii = smoc.to_string("ascii")
-    smoc_ascii
+    smoc.to_string("ascii")
     smoc_json = smoc.to_string("json")
-    smoc_json
     smoc_bis = MOC.from_string(smoc_json, "json")
     assert smoc == smoc_bis
 

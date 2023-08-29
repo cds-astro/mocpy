@@ -3,7 +3,7 @@ import numpy as np
 # A python module handling graph manipulations
 import networkx as nx
 
-try:
+try:  # noqa: SIM105
     from astropy_healpix import HEALPix
 except ImportError:
     pass
@@ -12,10 +12,9 @@ from astropy.coordinates import ICRS, SkyCoord
 import astropy.units as u
 
 
-
-class Boundaries:
+class Boundaries:  # noqa: D101
     @staticmethod
-    def get(moc, order):
+    def get(moc, order):  # noqa: D102
         boundaries_l = []
 
         # Get the ipixels of the MOC at the deepest order
@@ -23,7 +22,8 @@ class Boundaries:
 
         # Split the global MOC graph into all its non connected subgraphs.
         graph_boundaries = Boundaries._compute_graph_HEALPix_boundaries(
-            max_order, ipixels,
+            max_order,
+            ipixels,
         )
         boundaries_l.extend(Boundaries._retrieve_skycoords(graph_boundaries))
 
@@ -69,13 +69,15 @@ class Boundaries:
                 # only nodes of degrees 1 or 2 (i.e. to be lines).
                 if G.degree[l1] >= 2:
                     l1 += "_"
-            except:
+            # TODO: Fix bare except
+            except:  # noqa: S110, E722
                 pass
 
             try:
                 if G.degree[l2] >= 2:
                     l2 += "_"
-            except:
+            # TODO: fix bare except
+            except:  # noqa: S110, E722
                 pass
             # Set the skycoord instance as an attribute of the nodes
             G.add_node(l1, ra=p1_lon, dec=p1_lat)
@@ -108,10 +110,12 @@ class Boundaries:
         ipix_lat_deg = ipix_lat.to_value(u.deg)
 
         ipix_lon_repr = np.around(
-            np.asarray(ipix_lon.reshape((1, -1))[0]), decimals=3,
+            np.asarray(ipix_lon.reshape((1, -1))[0]),
+            decimals=3,
         ).tolist()
         ipix_lat_repr = np.around(
-            np.asarray(ipix_lat.reshape((1, -1))[0]), decimals=3,
+            np.asarray(ipix_lat.reshape((1, -1))[0]),
+            decimals=3,
         ).tolist()
 
         west_border = ~isin_border[0, :]
@@ -179,7 +183,7 @@ class Boundaries:
             mst = nx.minimum_spanning_tree(v)
             # Get one end of the span tree by looping over its node and checking if the degree is one
             src = None
-            for (node, deg) in mst.degree():
+            for node, deg in mst.degree():
                 if deg == 1:
                     src = node
                     break
