@@ -162,7 +162,7 @@ jobs:
          pip install --upgrade pip
          pip install maturin
          maturin -V
-         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --universal2 --skip-existing  --username "$MATURIN_USERNAME"
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --target universal2-apple-darwin --skip-existing  --username "$MATURIN_USERNAME"
          maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing  --username "$MATURIN_USERNAME"
 
 
