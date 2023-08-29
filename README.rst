@@ -3,6 +3,11 @@ MOCPy
 *****
 |PyPI version| |Build/Test status| |Notebook Binder| |Doc|
 
+
+.. figure:: ./docs/_static/MOCpy-light.svg
+   :width: 200 px
+   :alt: mocpy's logo
+
 MOCPy is a Python library allowing easy creation and manipulation of MOCs (Multi-Order Coverage maps).
 
 MOC is an IVOA standard  enabling description of arbitrary sky regions.
