@@ -16,14 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.13.0]
+
 ### Added
 
 * brand new support of frequency MOC ! :rocket:
+* documentation has galleries of notebooks
 
 ### Changed
 
 * `AbstractMOC.__init__` raises `PermissionError` if user tries to modify order manually
 * `AbstractMOC.store_index_dtype` became `AbstractMOC._store_index_dtype` as is is intended for internal use only to handle 32 and 64b systems
+* tests in doctrings now run in CI too
+* CI won't run for linux 32 anymore, but support will still be provided upon bug repports
 
 ### Fixed
 

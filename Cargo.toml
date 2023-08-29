@@ -1,6 +1,6 @@
 [package]
 name = "MOCPy"
-version = "0.12.3"
+version = "0.13.0"
 authors = [
   "Matthieu Baumann <matthieu.baumann@astro.unistra.fr>",
   "Thomas Boch <thomas.boch@astro.unistra.fr>",
