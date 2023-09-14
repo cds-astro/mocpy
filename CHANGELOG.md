@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* all methods of `MOC` with signatures like `function(self, lon, lat, **kwargs)` now accept both lists of coordinates and single coordinates
+
 ## [0.13.0]
 
 ### Added

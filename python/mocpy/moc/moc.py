@@ -1,5 +1,6 @@
 from io import BytesIO
 from urllib.parse import urlencode
+import functools
 
 import numpy as np
 from astropy import units as u
@@ -32,6 +33,46 @@ __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
 
 __license__ = "BSD 3-Clause License"
 __email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
+
+
+def validate_lonlat(function):
+    """Validate the longitude and latitudes entries of methods of the MOC class.
+
+    Parameters
+    ----------
+    function : <class 'function'>
+        must have the sighature function(self, lon, lat, **kwargs)
+
+    Returns
+    -------
+        applies desired transformations for the `lon` and `lat` arguments and calls
+        `function` with these modified arguments
+
+    Raises
+    ------
+    ValueError
+        If `lon` and `lat` have inconsistent shapes.
+    """
+
+    @functools.wraps(function)
+    def _validate_lonlat_wrap(self, lon, lat, **kwargs):
+        # be sure that lon and lat are of the same shape
+        if lon.shape != lat.shape:
+            raise ValueError(
+                f"'lon' and 'lat' should have the same shape but are of shapes {lon.shape} and {lat.shape}",
+            )
+        # lon and lat should be casted to arrays
+        lon = np.atleast_1d(lon)
+        lat = np.atleast_1d(lat)
+        # convert into astropy objects
+        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
+        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
+        # convert to degrees
+        lon = lon.to_value(u.deg).astype(np.float64)
+        lat = lat.to_value(u.deg).astype(np.float64)
+        return function(self, lon, lat, **kwargs)
+
+    return _validate_lonlat_wrap
 
 
 class MOC(AbstractMOC):
@@ -213,6 +254,7 @@ class MOC(AbstractMOC):
 
         return self.contains_lonlat(lon, lat, keep_inside=keep_inside)
 
+    @validate_lonlat
     def contains_lonlat(self, lon, lat, keep_inside=True):
         """Test wether a MOC contains (or not) the given points. Returns a boolean mask array.
 
@@ -254,12 +296,10 @@ class MOC(AbstractMOC):
         --------
         contains_skycoords
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         mask = mocpy.filter_pos(
             self._store_index,
-            lon.to_value(u.deg).astype(np.float64),
-            lat.to_value(u.deg).astype(np.float64),
+            lon,
+            lat,
         )
         if keep_inside:
             return mask
@@ -577,6 +617,7 @@ class MOC(AbstractMOC):
         )
 
     @classmethod
+    @validate_lonlat
     def from_lonlat(cls, lon, lat, max_norder):
         """
         Create a MOC from astropy lon, lat `astropy.units.Quantity`.
@@ -595,12 +636,10 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         index = mocpy.from_lonlat(
             max_norder,
-            lon.to_value(u.deg).astype(np.float64),
-            lat.to_value(u.deg).astype(np.float64),
+            lon,
+            lat,
         )
         return cls(cls.__create_key, index)
 
@@ -751,6 +790,7 @@ class MOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
+    @validate_lonlat
     def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
         """
         Create a MOC from an elliptical cone.
@@ -798,11 +838,9 @@ class MOC(AbstractMOC):
         ...  max_depth=10
         ... )
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         index = mocpy.from_elliptical_cone(
-            np.float64(lon.degree),
-            np.float64(lat.degree),
+            lon,
+            lat,
             np.float64(a.to_value(u.deg)),
             np.float64(b.to_value(u.deg)),
             np.float64(pa.to_value(u.deg)),
@@ -812,6 +850,7 @@ class MOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
+    @validate_lonlat
     def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
         """
         Create a MOC from a cone.
@@ -852,11 +891,9 @@ class MOC(AbstractMOC):
         ...  max_depth=10
         ... )
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         index = mocpy.from_cone(
-            np.float64(lon.degree),
-            np.float64(lat.degree),
+            lon,
+            lat,
             np.float64(radius.to_value(u.deg)),
             np.uint8(max_depth),
             np.uint8(delta_depth),
@@ -864,6 +901,7 @@ class MOC(AbstractMOC):
         return cls(cls.__create_key, index)
 
     @classmethod
+    @validate_lonlat
     def from_ring(
         cls,
         lon,
@@ -915,11 +953,9 @@ class MOC(AbstractMOC):
         ...  max_depth=10
         ... )
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         index = mocpy.from_ring(
-            np.float64(lon.degree),
-            np.float64(lat.degree),
+            lon,
+            lat,
             np.float64(internal_radius.to_value(u.deg)),
             np.float64(external_radius.to_value(u.deg)),
             np.uint8(max_depth),
@@ -955,6 +991,7 @@ class MOC(AbstractMOC):
         )
 
     @classmethod
+    @validate_lonlat
     def from_polygon(cls, lon, lat, complement=False, max_depth=10):
         """
         Create a MOC from a polygon.
@@ -979,11 +1016,9 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC
         """
-        lon = lon if isinstance(lon, Longitude) else Longitude(lon)
-        lat = lat if isinstance(lat, Latitude) else Latitude(lat)
         index = mocpy.from_polygon(
-            np.float64(lon.degree),
-            np.float64(lat.degree),
+            lon,
+            lat,
             complement,
             np.uint8(max_depth),
         )

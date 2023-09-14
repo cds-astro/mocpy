@@ -1,5 +1,6 @@
 import pytest
 import copy
+import re
 
 import numpy as np
 
@@ -488,6 +489,9 @@ def test_moc_contains(order):
         keep_inside=False,
     )
     assert should_be_inside_arr.all()
+    # test only floats in arguments, this is a regression test from #108
+    moc = MOC.from_string("2/4")
+    assert moc.contains_lonlat(164.43 * u.deg, 45.54 * u.deg) == [False]
 
 
 # test 2d-arrays as lon lat input
@@ -500,7 +504,12 @@ def test_moc_contains_2d_parameters():
     should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
     assert should_be_inside.all()
     # test mismatched
-    with pytest.raises(ValueError, match=r"Lon shape different from lat shape.*"):
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "'lon' and 'lat' should have the same shape but are of shapes (2, 3) and (2, 4)",
+        ),
+    ):
         moc.contains_lonlat(lon=lon, lat=lat2)
 
 
