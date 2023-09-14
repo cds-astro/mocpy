@@ -489,6 +489,9 @@ def test_moc_contains(order):
         keep_inside=False,
     )
     assert should_be_inside_arr.all()
+    # test only floats in arguments, this is a regression test from #108
+    moc = MOC.from_string("2/4")
+    assert moc.contains_lonlat(164.43 * u.deg, 45.54 * u.deg) == [False]
 
 
 # test 2d-arrays as lon lat input
