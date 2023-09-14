@@ -77,6 +77,8 @@ Latest stable version
 - from conda ``conda install -c conda-forge mocpy``
 - from this repository
 
+Developpement version
+*********************
 .. code::
 
    git clone https://github.com/cds-astro/mocpy.git
@@ -84,15 +86,6 @@ Latest stable version
    pip install .
  
 Note that the point is important.
-
-Developpement version
-*********************
-
-.. code::
-
-   git clone -b develop https://github.com/cds-astro/mocpy.git
-   cd mocpy
-   pip install .
    
 For use in pyodide
 ******************
