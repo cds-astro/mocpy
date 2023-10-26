@@ -232,7 +232,7 @@ class AbstractMOC(serializer.IO):
           of the index's MSB. At a given depth, the sentinel bit is always put o the same bit.
         * Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices.
         """
-        mocpy.to_uniq_gen(self._store_index)
+        return mocpy.to_uniq_gen(self._store_index)
 
     @property
     def uniq_zorder(self):
@@ -251,7 +251,7 @@ class AbstractMOC(serializer.IO):
           AND because the natural ordering of such indices follow the same order as the zorder indices
           (which is very useful for streaming processing, e.g. when dealing with multi-order maps)
         """
-        mocpy.to_uniq_zorder(self._store_index)
+        return mocpy.to_uniq_zorder(self._store_index)
 
     def flatten(self):
         """Return the list of indices of all cells in the MOC at the MOC depth."""
