@@ -1,23 +1,22 @@
 name: notebooks-mocpy
 on: workflow_dispatch
-jobs:  
+jobs:
   # Run the notebooks. This add more examples to test the code with.
-  # This workflow should not block the deployment pipeline. 
+  # This workflow should not block the deployment pipeline.
   run-notebooks:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-      - name: "Set up Python 3.8 on Ubuntu"
+      - name: "Set up Python 3.12 on Ubuntu"
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
-            # Test Rust code
+          python-version: 3.12
       - name: "Run notebooks"
         run: |
-          # Install virtualenv     
+          # Install virtualenv
           pip install virtualenv
           # Create and activate a new virtualenv
           virtualenv mocpy-env
@@ -29,7 +28,7 @@ jobs:
           # Build and install mocpy
           maturin develop --release
           # Install pytest-cov, needed to test with coverage
-          pip install -r requirements/notebooks.txt
+          pip install .[notebooks]
           # Add the mocpy-env environnement as a jupyter kernel
           python -m ipykernel install --user --name mocpy-env
           # Run the notebooks under that kernel
