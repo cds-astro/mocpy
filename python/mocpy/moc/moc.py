@@ -41,7 +41,7 @@ def validate_lonlat(function):
     Parameters
     ----------
     function : <class 'function'>
-        must have the sighature function(self, lon, lat, **kwargs)
+        must have the signature function(self, lon, lat, **kwargs)
 
     Returns
     -------
@@ -88,7 +88,7 @@ class MOC(AbstractMOC):
 
     - From a FITS file that stores HEALPix cells (see `load(path, 'fits')`).
     - Directly from a list of HEALPix cells expressed either as a numpy structural array (see `from_healpix_cells`) or a simple
-      python dictionnary (see `from_json`).
+      python dictionary (see `from_json`).
     - From a list of sky coordinates (see `from_skycoords`, `from_lonlat`).
     - From a convex/concave polygon (see `from_polygon`).
     - From a cone (will be implemented in a next version).
@@ -385,12 +385,12 @@ class MOC(AbstractMOC):
 
         The border(s) are expressed as a list of SkyCoord.
         Each SkyCoord refers to the coordinates of one border of the MOC (i.e.
-        either a border of a connexe MOC part or a border of a hole
-        located in a connexe MOC part).
-        This function is currently not stable: encoding a vertice of a
+        either a border of a connected MOC part or a border of a hole
+        located in a connected MOC part).
+        This function is currently not stable: encoding a vertex of a
         HEALPix cell (N, E, S, W) should not depend on the position of the
-        vertice but rather on the uniq value (+ 2 bits to encode the direction
-        of the vertice).
+        vertex but rather on the uniq value (+ 2 bits to encode the direction
+        of the vertex).
 
         Parameters
         ----------

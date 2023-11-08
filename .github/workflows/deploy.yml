@@ -28,7 +28,7 @@ jobs:
        run: |
          source $HOME/.cargo/env
          rustup target add wasm32-unknown-emscripten
-         for PYBIN in /opt/python/cp3[78910]*/bin; do
+         for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
@@ -47,10 +47,10 @@ jobs:
       img: quay.io/pypa/manylinux2014_i686
     steps:
      - name: Checkout
-       uses: actions/checkout@v3
+       uses: actions/checkout@v4
      - name: "Set up QEMU"
        id: qemu
-       uses: docker/setup-qemu-action@v1
+       uses: docker/setup-qemu-action@v3
      - name: Install dependencies
        run: |
          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
@@ -59,7 +59,7 @@ jobs:
          ${{ env.img }} \
          bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
            source $HOME/.cargo/env && \
-           for PYBIN in /opt/python/cp3[8910]*/bin; do
+           for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
              echo "Loop on PYBIN: $PYBIN"
              "${PYBIN}/pip" install --upgrade pip
              "${PYBIN}/pip" install maturin
@@ -76,10 +76,10 @@ jobs:
       img: quay.io/pypa/manylinux2014_aarch64
     steps:
      - name: Checkout
-       uses: actions/checkout@v3
+       uses: actions/checkout@v4
      - name: "Set up QEMU"
        id: qemu
-       uses: docker/setup-qemu-action@v1
+       uses: docker/setup-qemu-action@v3
      - name: Install dependencies
        run: |
          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
@@ -88,7 +88,7 @@ jobs:
          ${{ env.img }} \
          bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host aarch64-unknown-linux-gnu -y && \
            source $HOME/.cargo/env && \
-           for PYBIN in /opt/python/cp3[78910]*/bin; do
+           for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
              echo "Loop on PYBIN: $PYBIN"
              "${PYBIN}/pip" install maturin
              "${PYBIN}/maturin" -V
@@ -104,10 +104,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11','3.12']
     steps:
      # Checkout the project
-     - uses: actions/checkout@v3
+     - uses: actions/checkout@v4
      #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
        uses: actions/setup-python@v4
@@ -139,10 +139,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macOS-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
      # Checkout the project
-     - uses: actions/checkout@v3
+     - uses: actions/checkout@v4
      #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
        uses: actions/setup-python@v4

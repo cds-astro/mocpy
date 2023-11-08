@@ -77,17 +77,26 @@ Latest stable version
 - from conda ``conda install -c conda-forge mocpy``
 - from this repository
 
-Developpement version
-*********************
+Unreleased latest version
+*************************
 .. code::
 
    git clone https://github.com/cds-astro/mocpy.git
    cd mocpy
    pip install .
- 
+
 Note that the point is important.
-   
+
+To run the notebooks
+********************
+
+The example notebooks require additional dependencies. They can be installed with
+
+.. code::
+
+    pip install mocpy[notebooks]
+
 For use in pyodide
 ******************
 
-Wheels that run in pyodide can be downloaded from `this repository assets <https://github.com/cds-astro/mocpy/releases/download/v0.12.3/mocpy-0.12.3-cp310-cp310-emscripten_3_1_27_wasm32.whl>`__. This is not fully tested. 
+Wheels that run in pyodide can be downloaded from `this repository assets <https://github.com/cds-astro/mocpy/releases/download/v0.12.3/mocpy-0.12.3-cp310-cp310-emscripten_3_1_27_wasm32.whl>`__. This is not fully tested.
