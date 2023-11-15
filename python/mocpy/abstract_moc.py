@@ -1,10 +1,9 @@
 from io import BytesIO
-import numpy as np
 from pathlib import Path
 
-from . import serializer
+import numpy as np
 
-from . import mocpy
+from . import mocpy, serializer
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -607,6 +606,7 @@ class AbstractMOC(serializer.IO):
         overwrite=False,
         pre_v2=False,
         fold=0,
+        fits_keywords=None,
     ):
         """
         Write the MOC to a file.
@@ -626,29 +626,53 @@ class AbstractMOC(serializer.IO):
             Default to False.
         fold: int
             if >0, print ascii or json output with a maximum line width
+        fits_keywords: dict, optional
+            Additional keywords to add to the FITS header.
         """
         path = Path(path)
-
-        file_exists = path.is_file()
-
-        if file_exists and not overwrite:
+        if path.is_file() and not overwrite:
             raise OSError(
-                "File {} already exists! Set ``overwrite`` to "
-                "True if you want to replace it.".format(path),
+                f"File '{path}' already exists! Set ``overwrite`` to "
+                "True if you want to replace it.",
             )
 
         if format == "fits":
-            mocpy.to_fits_file(self._store_index, str(path), pre_v2)
-        elif format == "ascii":
+            if fold != 0:
+                raise ValueError(
+                    "The ``fold`` argument is only applied for the ``json`` and ``ascii`` output formats.",
+                )
+            from astropy.io import fits
+
+            hdulist = fits.HDUList.fromstring(
+                mocpy.to_fits_raw(self._store_index, pre_v2),
+            )
+            hdu = hdulist[1]
+            if fits_keywords:
+                for key in fits_keywords:
+                    hdu.header[key] = fits_keywords[key]
+            hdulist.writeto(path, overwrite=overwrite)
+            return
+
+        if fits_keywords:
+            raise ValueError(
+                "The ``fits_keyword`` argument is only valid when ``fits`` is the output format.",
+            )
+
+        if format == "ascii":
             if fold <= 0:
                 mocpy.to_ascii_file(self._store_index, str(path))
             else:
                 mocpy.to_ascii_file_with_fold(self._store_index, str(path), fold)
-        elif format == "json":
+            return
+
+        if format == "json":
             if fold <= 0:
                 mocpy.to_json_file(self._store_index, str(path))
             else:
                 mocpy.to_json_file_with_fold(self._store_index, str(path), fold)
-        else:
-            formats = ("fits", "ascii", "json")
-            raise ValueError("format should be one of %s" % (str(formats)))
+            return
+
+        formats = ("fits", "ascii", "json")
+        raise ValueError(
+            f"'format' should be one of {formats} but '{format}' was encountered.",
+        )

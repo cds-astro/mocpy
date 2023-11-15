@@ -93,10 +93,11 @@ ruff = ["--ignore=B018,FBT003"]
 
 [tool.ruff]
 fix = true
+show-fixes = true
 force-exclude = true
 exclude = ["docs/conf.py"]
 extend-include = ["*.ipynb"]
-format = "grouped"
+output-format = "grouped"
 show-source = true
 ignore-init-module-imports = true
 target-version = "py37"
