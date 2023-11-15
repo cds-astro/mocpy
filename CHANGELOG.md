@@ -19,10 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * currently supported versions of python now range from 3.8 to 3.12. There is a catch for python 3.8: the corresponding astropy version is pinned to astropy<5.3
+* the deprecated `write` method now calls `save` internally
 
 ### Fixed
 
 * all methods of `MOC` with signatures like `function(self, lon, lat, **kwargs)` now accept both lists of coordinates and single coordinates
+* * `mocpy.stmoc.STMOC.from_spatial_coverages` also accepts single moc objects (had to be a list before)
+
+### Added
+
+* `save` now accepts `fits_keywords` that are added to the fits header before writing the file
+* `n_cells` gives the number of cells corresponding to a given order
 
 ## [0.13.0]
 
