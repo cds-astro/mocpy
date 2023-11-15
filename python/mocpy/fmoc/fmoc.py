@@ -1,9 +1,8 @@
 import numpy as np
 from astropy import units as u
 
-from ..abstract_moc import AbstractMOC
-
 from .. import mocpy
+from ..abstract_moc import AbstractMOC
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -60,6 +59,33 @@ class FrequencyMOC(AbstractMOC):
         """
         depth = mocpy.get_fmoc_depth(self._store_index)
         return np.uint8(depth)
+
+    @classmethod
+    def n_cells(cls, depth):
+        """Get the number of cells for a given depth.
+
+        Parameters
+        ----------
+        depth : int
+            The depth. It is comprised between 0 and `~mocpy.fmoc.FrequencyMOC.MAX_ORDER`
+
+        Returns
+        -------
+        int
+            The number of cells at the given order
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> FrequencyMOC.n_cells(0)
+        2
+        """
+        if depth < 0 or depth > cls.MAX_ORDER:
+            raise ValueError(
+                f"The depth should be comprised between 0 and {cls.MAX_ORDER}, but {depth}"
+                " was provided.",
+            )
+        return mocpy.n_cells_fmoc(depth)
 
     def to_hz_ranges(self):
         """Return the Hertz ranges this `FrequencyMOC` contains, in Hertz.
@@ -514,8 +540,8 @@ class FrequencyMOC(AbstractMOC):
                 " instead of 'frequency', see astropy.units for more information",
             )
 
-        from matplotlib.patches import Rectangle
         from matplotlib.collections import PatchCollection
+        from matplotlib.patches import Rectangle
 
         min_freq = self.min_freq.to(frequency_unit).value
         max_freq = self.max_freq.to(frequency_unit).value
@@ -568,8 +594,8 @@ class FrequencyMOC(AbstractMOC):
                 " instead of 'length', see astropy.units for more information",
             )
 
-        from matplotlib.patches import Rectangle
         from matplotlib.collections import PatchCollection
+        from matplotlib.patches import Rectangle
 
         # get default bonds
         min_lambda = self.max_freq.to(length_unit, equivalencies=u.spectral()).value

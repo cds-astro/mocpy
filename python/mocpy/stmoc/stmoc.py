@@ -1,9 +1,8 @@
 import numpy as np
 
 from .. import MOC, mocpy
-from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
 from ..abstract_moc import AbstractMOC
-
+from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -56,6 +55,39 @@ class STMOC(AbstractMOC):
     def min_time(self):
         """Return STMOC min time."""
         return microseconds_to_times(mocpy.coverage_2d_min_time(self._store_index))
+
+    @classmethod
+    def n_cells(cls, depth, dimension):
+        """Get the number of cells for a given depth.
+
+        Parameters
+        ----------
+        depth : int
+            The depth. It is comprised between 0 and `~mocpy.moc.MOC.MAX_ORDER` if
+            dimension='space' and between 0 and `~mocpy.tmoc.TimeMOC.MAX_ORDER` if
+            dimension='time'.
+
+        dimension : str
+            Can be either 'time' or 'space'.
+
+        Returns
+        -------
+        int
+            The number of cells at the given order
+
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> STMOC.n_cells(0, dimension='space')
+        12
+        """
+        if dimension == "space":
+            return MOC.n_cells(depth)
+        if dimension == "time":
+            return TimeMOC.n_cells(depth)
+        raise ValueError(
+            f"Dimension should be either 'time' of 'space' but '{dimension}' was provided.",
+        )
 
     def is_empty(self):
         """Check whether the Space-Time coverage is empty."""
@@ -194,8 +226,11 @@ class STMOC(AbstractMOC):
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
         """
-        # times_start = times_start.jd.astype(np.float64)
-        # times_end = times_end.jd.astype(np.float64)
+        # accept also when there is a single spatial moc
+        times_start = np.atleast_1d(times_start)
+        times_end = np.atleast_1d(times_end)
+        spatial_coverages = np.atleast_1d(spatial_coverages)
+
         times_start = times_to_microseconds(times_start)
         times_end = times_to_microseconds(times_end)
 

@@ -1,6 +1,7 @@
+import contextlib
+import functools
 from io import BytesIO
 from urllib.parse import urlencode
-import functools
 
 import numpy as np
 from astropy import units as u
@@ -16,8 +17,6 @@ from astropy.coordinates import (
 )
 from astropy.io import fits
 from astropy.utils.data import download_file
-
-import contextlib
 
 with contextlib.suppress(ImportError):
     from astropy_healpix import HEALPix
@@ -140,6 +139,33 @@ class MOC(AbstractMOC):
         """Depth/order of the S-MOC."""
         depth = mocpy.get_smoc_depth(self._store_index)
         return np.uint8(depth)
+
+    @classmethod
+    def n_cells(cls, depth):
+        """Get the number of cells for a given depth.
+
+        Parameters
+        ----------
+        depth : int
+            The depth. It is comprised between 0 and `~mocpy.moc.MOC.MAX_ORDER`
+
+        Returns
+        -------
+        int
+            The number of cells at the given order
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.n_cells(0)
+        12
+        """
+        if depth < 0 or depth > cls.MAX_ORDER:
+            raise ValueError(
+                f"The depth should be comprised between 0 and {cls.MAX_ORDER}, but {depth}"
+                " was provided.",
+            )
+        return mocpy.n_cells_smoc(depth)
 
     def split_count(self, include_indirect_neighbours=False):
         """

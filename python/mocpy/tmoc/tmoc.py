@@ -1,11 +1,10 @@
 import warnings
-import numpy as np
 
+import numpy as np
 from astropy.time import Time, TimeDelta
 
-from ..abstract_moc import AbstractMOC
-
 from .. import mocpy
+from ..abstract_moc import AbstractMOC
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -95,6 +94,33 @@ class TimeMOC(AbstractMOC):
         """Depth/order of the T-MOC."""
         depth = mocpy.get_tmoc_depth(self._store_index)
         return np.uint8(depth)
+
+    @classmethod
+    def n_cells(cls, depth):
+        """Get the number of cells for a given depth.
+
+        Parameters
+        ----------
+        depth : int
+            The depth. It is comprised between 0 and `~mocpy.tmoc.TimeMOC.MAX_ORDER`
+
+        Returns
+        -------
+        int
+            The number of cells at the given order
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> TimeMOC.n_cells(0)
+        2
+        """
+        if depth < 0 or depth > cls.MAX_ORDER:
+            raise ValueError(
+                f"The depth should be comprised between 0 and {cls.MAX_ORDER}, but {depth}"
+                " was provided.",
+            )
+        return mocpy.n_cells_tmoc(depth)
 
     def to_time_ranges(self):
         """Return the time ranges this TimeMOC contains."""
@@ -596,8 +622,8 @@ class TimeMOC(AbstractMOC):
             all the observation time window is rendered).
 
         """
-        from matplotlib.colors import LinearSegmentedColormap
         import matplotlib.pyplot as plt
+        from matplotlib.colors import LinearSegmentedColormap
 
         if self.empty():
             import warnings
@@ -615,10 +641,7 @@ class TimeMOC(AbstractMOC):
 
         if max_jd < min_jd:
             raise ValueError(
-                "Invalid selection: max_jd = {} must be > to min_jd = {}".format(
-                    max_jd,
-                    min_jd,
-                ),
+                f"Invalid selection: max_jd = {max_jd} must be > to min_jd = {min_jd}",
             )
 
         fig1 = plt.figure(figsize=figsize)

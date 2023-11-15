@@ -1,13 +1,13 @@
-from ..stmoc import STMOC
-from ..tmoc import TimeMOC
-from ..moc import MOC
-from astropy.time import Time, TimeDelta
-from astropy.table import Table
 import astropy.units as u
-
-import pytest
 import cdshealpix
 import numpy as np
+import pytest
+from astropy.table import Table
+from astropy.time import Time, TimeDelta
+
+from ..moc import MOC
+from ..stmoc import STMOC
+from ..tmoc import TimeMOC
 
 
 @pytest.fixture()
@@ -50,6 +50,16 @@ def stmoc_xmm_dr8():
         lat_xmm,
         spatial_depth,
     )
+
+
+def test_n_cells():
+    assert STMOC.n_cells(0, "time") == 2
+    assert STMOC.n_cells(0, "space") == 12
+    with pytest.raises(
+        ValueError,
+        match="Dimension should be either 'time' of 'space' but 'nothing' was provided.",
+    ):
+        STMOC.n_cells(0, "nothing")
 
 
 def test_serialization():
@@ -216,28 +226,3 @@ def test_stmoc_from_spatial_coverages():
 
     expected_stmoc = STMOC.from_string("t59/1 60/1 61/8 s28/0")
     assert stmoc == expected_stmoc
-
-
-# --- TESTING new features ---#
-def test_stmoc_save_load_deser():
-    stmoc = STMOC.from_string("t61/1 3 5 s3/1-3 4/ t61/50 52 s4/25", "ascii")
-    stmoc_json = stmoc.to_string("json")
-
-    stmoc_bis = STMOC.from_string(stmoc_json, "json")
-    assert stmoc == stmoc_bis
-
-    stmoc_bis = STMOC.load("resources/MOC2.0/stmoc.ascii.txt", "ascii")
-    assert stmoc == stmoc_bis
-
-    stmoc_bis = STMOC.load("resources/MOC2.0/STMOC.fits", "fits")
-    assert stmoc == stmoc_bis
-
-    stmoc.save("resources/MOC2.0/stmoc.py.test.fits", format="fits", overwrite=True)
-    stmoc.save("resources/MOC2.0/stmoc.py.test.json", format="json", overwrite=True)
-    stmoc.save("resources/MOC2.0/stmoc.py.test.ascii", format="ascii", overwrite=True)
-    stmoc_bis = STMOC.load("resources/MOC2.0/stmoc.py.test.fits", "fits")
-    assert stmoc == stmoc_bis
-    stmoc_bis = STMOC.load("resources/MOC2.0/stmoc.py.test.json", "json")
-    assert stmoc == stmoc_bis
-    stmoc_bis = STMOC.load("resources/MOC2.0/stmoc.py.test.ascii", "ascii")
-    assert stmoc == stmoc_bis

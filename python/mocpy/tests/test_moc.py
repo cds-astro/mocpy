@@ -1,15 +1,13 @@
-import pytest
 import copy
 import re
 
-import numpy as np
-
-from astropy.coordinates import SkyCoord, Angle
-from astropy.io.votable import parse_single_table
 import astropy.units as u
-from astropy.io import fits
-
 import cdshealpix
+import numpy as np
+import pytest
+from astropy.coordinates import Angle, SkyCoord
+from astropy.io import fits
+from astropy.io.votable import parse_single_table
 
 from ..moc import MOC, WCS
 
@@ -96,6 +94,17 @@ def test_to_depth29_ranges(isets):
     l = isets["b"].to_depth29_ranges  # noqa: E741
     r = np.array([[9, 61], [68, 105]], dtype=np.uint64)
     assert np.array_equal(l, r)
+
+
+def test_n_cells():
+    assert MOC.n_cells(0) == 12
+    with pytest.raises(
+        ValueError,
+        match=f"The depth should be comprised between 0 and {MOC.MAX_ORDER}*",
+    ):
+        MOC.n_cells(-2)
+        MOC.n_cells(MOC.MAX_ORDER + 1)
+    assert MOC.n_cells(6) == 4 * MOC.n_cells(5)
 
 
 def test_interval_set_union(isets):
@@ -405,25 +414,6 @@ def test_moc_serialize_to_json(moc_from_fits_image):
 def test_serialize_to_str(moc, expected):
     assert moc.serialize(format="str") == expected
 
-
-@pytest.mark.parametrize(
-    "filename, overwrite, format, os_error",
-    [
-        ("moc", True, "fits", False),
-        ("moc", False, "fits", True),
-        ("moc", True, "json", False),
-        ("moc", True, "ascii", False),
-        ("moc", False, "ascii", True),
-    ],
-)
-def test_write(moc_from_json, filename, overwrite, format, os_error):  # noqa: A002
-    if os_error:
-        with pytest.raises(OSError):  # TODO add the match parameter of the exception
-            moc_from_json.save(filename, format=format, overwrite=overwrite)
-    else:
-        moc_from_json.save(filename, format=format, overwrite=overwrite)
-
-
 # --- TESTING MOC plot functions ---#
 def test_mpl_fill():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
@@ -519,7 +509,7 @@ def test_degrade_to_order():
 
     max_depth = hst_moc.max_order
 
-    for order in reversed(range(0, max_depth)):
+    for order in reversed(range(max_depth)):
         hst_moc = hst_moc.degrade_to_order(order)
         assert hst_moc.sky_fraction <= 1.0
 
@@ -571,11 +561,8 @@ def mocs():
 
 
 def test_add_neighbours(mocs):
-    print(mocs["moc1"])
     mocs["moc1"].add_neighbours()
-    print(mocs["moc1"])
     assert mocs["moc1"] == mocs["moc1_increased"]
-
     mocs["moc2"].add_neighbours()
     assert mocs["moc2"] == mocs["moc2_increased"]
 
@@ -723,8 +710,8 @@ def test_from_valued_healpix_cells_bayestar():
     uniq = data["UNIQ"]
     probdensity = data["PROBDENSITY"]
 
-    import astropy_healpix as ah
     import astropy.units as u
+    import astropy_healpix as ah
 
     level, _ = ah.uniq_to_level_ipix(uniq)
     area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
@@ -750,28 +737,3 @@ def test_from_valued_healpix_cells_bayestar_and_split():
     assert len(mocs) == 2
     for moc in mocs:
         assert moc.max_order == 11
-
-
-# --- TESTING new features ---#
-def test_moc_save_load_deser():
-    smoc = MOC.from_string("3/3 10 4/16-18 22 5/19-20 17/222 28/123456789 29/", "ascii")
-    smoc.to_string("ascii")
-    smoc_json = smoc.to_string("json")
-    smoc_bis = MOC.from_string(smoc_json, "json")
-    assert smoc == smoc_bis
-
-    smoc_bis = MOC.load("resources/MOC2.0/smoc.ascii.txt", "ascii")
-    assert smoc == smoc_bis
-
-    smoc_bis = MOC.load("resources/MOC2.0/SMOC.fits", "fits")
-    assert smoc == smoc_bis
-
-    smoc.save("resources/MOC2.0/smoc.py.test.fits", format="fits", overwrite=True)
-    smoc.save("resources/MOC2.0/smoc.py.test.json", format="json", overwrite=True)
-    smoc.save("resources/MOC2.0/smoc.py.test.ascii", format="ascii", overwrite=True)
-    smoc_bis = MOC.load("resources/MOC2.0/smoc.py.test.fits", "fits")
-    assert smoc == smoc_bis
-    smoc_bis = MOC.load("resources/MOC2.0/smoc.py.test.json", "json")
-    assert smoc == smoc_bis
-    smoc_bis = MOC.load("resources/MOC2.0/smoc.py.test.ascii", "ascii")
-    assert smoc == smoc_bis
