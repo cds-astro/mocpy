@@ -49,7 +49,8 @@ notebooks = [
     "astroquery",
     "ipyaladin",
     "maser-data",
-    "regions"
+    "regions",
+    "nbmake" # to test the notebooks
 ]
 
 [project.urls]
@@ -94,6 +95,7 @@ ruff = ["--ignore=B018,FBT003"]
 fix = true
 force-exclude = true
 exclude = ["docs/conf.py"]
+extend-include = ["*.ipynb"]
 format = "grouped"
 show-source = true
 ignore-init-module-imports = true
@@ -101,7 +103,7 @@ target-version = "py37"
 extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "C4", "ICN", "RET", "ARG", "PD", "PGH",
                  "RUF", "YTT", "BLE", "COM", "DTZ", "EXE",
-                 "ISC", "ICN001", "PIE", "PTH"
+                 "ISC", "ICN001", "PIE", "PTH", "W", "I", "T20"
                 ]
 extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002", "N802"]
 # E501: line length (done by black in our case)
