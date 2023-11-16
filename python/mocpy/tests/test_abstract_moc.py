@@ -5,18 +5,18 @@ import pytest
 from astropy.io import fits
 from astropy.time import Time
 
+from ..abstract_moc import AbstractMOC
 from ..fmoc import FrequencyMOC
 from ..moc import MOC
 from ..stmoc import STMOC
 from ..tmoc import TimeMOC
 
-# ---------------------------------
-# A fixture with a moc of each type
-# ---------------------------------
+# -----------------------------------------------------------fixtures
 
 
 @pytest.fixture
 def all_moc_types():
+    """Create a fixture with a MOC of each type."""
     moc = MOC.from_str("0/0-11")
     tmoc = TimeMOC.from_str("0/0-2")
     fmoc = FrequencyMOC.from_str("0/0-2")
@@ -34,9 +34,18 @@ def path(tmp_path):
     return tmp_path / "path"
 
 
-# ---------
-# Test save
-# ---------
+# ------------------------------------------------------instantiation
+
+
+def test_failing_instantiation():
+    with pytest.raises(
+        TypeError,
+        match="Can't instantiate abstract class AbstractMOC*",
+    ):
+        AbstractMOC()
+
+
+# ---------------------------------------------------------------save
 
 
 def test_failing_save(moc, path):
@@ -101,8 +110,11 @@ def test_passing_save(all_moc_types, path):
         path.unlink()
 
 
+# --------------------------------------------------------------write
+
+
 def test_write(moc, path, mocker):
-    # test that the warning is raised
+    # test that the deprecation warning is raised
     with pytest.warns(
         DeprecationWarning,
         match=r"This method is deprecated. Use MOC.save*",

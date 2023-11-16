@@ -114,30 +114,19 @@ class MOC(AbstractMOC):
     # (do not remove since it may be used externally).
     MAX_ORDER = np.uint8(29)
 
-    __create_key = object()
-
-    def __init__(self, create_key, store_index):
+    def __init__(self, store_index):
         """Is a Spatial Coverage (S-MOC).
 
         Args:
             create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the S-MOC in the rust-side storage
         """
-        if create_key != MOC.__create_key:
-            raise PermissionError(
-                "S-MOC instantiation is only allowed by class or super-class methods",
-            )
-
-        super().__init__(
-            AbstractMOC._create_key,
-            MOC.__create_key,
-            store_index,
-        )
+        self.store_index = store_index
 
     @property
     def max_order(self):
         """Depth/order of the S-MOC."""
-        depth = mocpy.get_smoc_depth(self._store_index)
+        depth = mocpy.get_smoc_depth(self.store_index)
         return np.uint8(depth)
 
     @classmethod
@@ -177,7 +166,7 @@ class MOC(AbstractMOC):
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
         """
-        return mocpy.split_count(self._store_index, include_indirect_neighbours)
+        return mocpy.split_count(self.store_index, include_indirect_neighbours)
 
     def split(self, include_indirect_neighbours=False):
         """
@@ -193,8 +182,8 @@ class MOC(AbstractMOC):
         -------
         Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
         """
-        indices = mocpy.split(self._store_index, include_indirect_neighbours)
-        return [MOC(MOC.__create_key, index) for index in indices]
+        indices = mocpy.split(self.store_index, include_indirect_neighbours)
+        return [MOC(index) for index in indices]
 
     def degrade_to_order(self, new_order):
         """
@@ -213,8 +202,8 @@ class MOC(AbstractMOC):
         moc : `~mocpy.moc.MOC`
             The degraded MOC.
         """
-        index = mocpy.degrade(self._store_index, new_order)
-        return MOC(MOC.__create_key, index)
+        index = mocpy.degrade(self.store_index, new_order)
+        return MOC(index)
 
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
@@ -323,7 +312,7 @@ class MOC(AbstractMOC):
         contains_skycoords
         """
         mask = mocpy.filter_pos(
-            self._store_index,
+            self.store_index,
             lon,
             lat,
         )
@@ -616,6 +605,7 @@ class MOC(AbstractMOC):
         result : `~mocpy.moc.MOC`
             The resulting MOC.
         """
+        # TODO: as is, this is a duplicate of abstract class `from_fits` called with an url
         path = download_file(url, show_progress=False, timeout=60)
         return cls.load(path, "fits")
 
@@ -667,7 +657,7 @@ class MOC(AbstractMOC):
             lon,
             lat,
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_multiordermap_fits_file(
@@ -725,7 +715,7 @@ class MOC(AbstractMOC):
             no_split,
             reverse_decent,
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_valued_healpix_cells(
@@ -813,7 +803,7 @@ class MOC(AbstractMOC):
             no_split,
             reverse_decent,
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     @validate_lonlat
@@ -873,7 +863,7 @@ class MOC(AbstractMOC):
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     @validate_lonlat
@@ -924,7 +914,7 @@ class MOC(AbstractMOC):
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     @validate_lonlat
@@ -987,7 +977,7 @@ class MOC(AbstractMOC):
             np.uint8(max_depth),
             np.uint8(delta_depth),
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_polygon_skycoord(cls, skycoord, max_depth=10):
@@ -1048,7 +1038,7 @@ class MOC(AbstractMOC):
             complement,
             np.uint8(max_depth),
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def new_empty(cls, max_depth):
@@ -1066,7 +1056,7 @@ class MOC(AbstractMOC):
             The MOC
         """
         index = mocpy.new_empty_smoc(np.uint8(max_depth))
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_healpix_cells(cls, ipix, depth, max_depth):
@@ -1097,7 +1087,7 @@ class MOC(AbstractMOC):
             depth.astype(np.uint8),
             ipix.astype(np.uint64),
         )
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_depth29_ranges(cls, max_depth, ranges):
@@ -1128,7 +1118,7 @@ class MOC(AbstractMOC):
             ranges = ranges.astype(np.uint64)
 
         index = mocpy.from_hpx_ranges(np.uint8(max_depth), ranges)
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_stmoc_time_fold(cls, tmoc, stmoc):
@@ -1140,8 +1130,8 @@ class MOC(AbstractMOC):
         tmoc : `~mocpy.tmoc.TimeMoc`
         stmoc : `~mocpy.stmoc.STMoc`
         """
-        store_index = mocpy.project_on_second_dim(tmoc._store_index, stmoc._store_index)
-        return cls(cls.__create_key, store_index)
+        store_index = mocpy.project_on_second_dim(tmoc.store_index, stmoc.store_index)
+        return cls(store_index)
 
     @staticmethod
     def order_to_spatial_resolution(order):
@@ -1197,8 +1187,15 @@ class MOC(AbstractMOC):
 
     @property
     def sky_fraction(self):
-        """Sky fraction covered by the MOC."""
-        return mocpy.coverage_fraction(self._store_index)
+        """Sky fraction covered by the MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.from_string("0/0-11").sky_fraction # all sky
+        1.0
+        """
+        return mocpy.coverage_fraction(self.store_index)
 
     # TODO : move this in astroquery.Simbad.query_region
     # See https://github.com/astropy/astroquery/pull/1466
@@ -1437,13 +1434,13 @@ class MOC(AbstractMOC):
         path = str(path)
         if format == "fits":
             index = mocpy.spatial_moc_from_fits_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "ascii":
             index = mocpy.spatial_moc_from_ascii_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "json":
             index = mocpy.spatial_moc_from_json_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         formats = ("fits", "ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
@@ -1451,7 +1448,7 @@ class MOC(AbstractMOC):
     def _from_fits_raw_bytes(cls, raw_bytes):
         """Load MOC from raw bytes of a FITS file."""
         index = mocpy.spatial_moc_from_fits_raw_bytes(raw_bytes)
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_string(cls, value, format="ascii"):  # noqa: A002
@@ -1471,10 +1468,10 @@ class MOC(AbstractMOC):
         """
         if format == "ascii":
             index = mocpy.spatial_moc_from_ascii_str(value)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "json":
             index = mocpy.spatial_moc_from_json_str(value)
-            return cls(cls.__create_key, index)
+            return cls(index)
         formats = ("ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
@@ -1489,12 +1486,12 @@ class MOC(AbstractMOC):
         the underlying sorted array of depth29 nested ranges, i.e. the natural order
         of the cells is the underlying z-order curve.
         """
-        return mocpy.to_uniq_hpx(self._store_index)
+        return mocpy.to_uniq_hpx(self.store_index)
 
     @property
     def to_depth29_ranges(self):
         """Return the list of order 29 HEALPix nested ranges this MOC contains."""
-        return mocpy.to_ranges(self._store_index)
+        return mocpy.to_ranges(self.store_index)
 
     def to_rgba(self, y_size=300):
         """
@@ -1508,7 +1505,7 @@ class MOC(AbstractMOC):
         -------
         array : A (2 * y_size, y_size, 4) array of 0-255 int values.
         """
-        return mocpy.to_rgba(self._store_index, y_size)
+        return mocpy.to_rgba(self.store_index, y_size)
 
     def display_preview(self, y_size=300):
         """
@@ -1521,18 +1518,18 @@ class MOC(AbstractMOC):
         import matplotlib.pyplot as plt
 
         plt.axis("off")
-        plt.imshow(mocpy.to_rgba(self._store_index, y_size))
+        plt.imshow(mocpy.to_rgba(self.store_index, y_size))
         plt.show()
 
     def barycenter(self):
         """Return the Barycenter of the MOC."""
-        lonlat = mocpy.get_barycenter(self._store_index)
+        lonlat = mocpy.get_barycenter(self.store_index)
         return SkyCoord(lonlat[0], lonlat[1], unit="rad")
 
     def largest_distance_from_coo_to_vertices(self, coo):
         """Return the largest distance between the given coordinates and vertices of the MOC cells."""
         angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(
-            self._store_index,
+            self.store_index,
             coo.ra.rad,
             coo.dec.rad,
         )

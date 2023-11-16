@@ -30,7 +30,7 @@ class IO:
 
         if format == "fits":
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self._store_index, pre_v2),
+                mocpy.to_fits_raw(self.store_index, pre_v2),
             )
             hdu = hdulist[1]
             if optional_kw_dict:

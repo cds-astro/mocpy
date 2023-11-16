@@ -1,3 +1,4 @@
+import abc
 from io import BytesIO
 from pathlib import Path
 
@@ -12,32 +13,15 @@ __license__ = "BSD 3-Clause License"
 __email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr"
 
 
-class AbstractMOC(serializer.IO):
-    """Basic functions for manipulating MOCs."""
-
-    _create_key = object()
-
-    def __init__(self, create_key, create_sub_key, store_index):
-        """Is an abstract coverage MOC.
-
-        Args:
-            create_key: Object ensuring __init__ is called by (sub)class-methods only
-            create_sub_key: Object ensuring sub-classes __init__ is called from this (abstract) class or the sub-class
-            store_index: index of the ST-MOC in the rust-side storage
-        """
-        if create_key != AbstractMOC._create_key:
-            raise PermissionError(
-                "S-MOC instantiation is only allowed by class or super-class methods",
-            )
-        self.__create_sub_key = create_sub_key
-        self._store_index = store_index
+class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
+    """Is an abstract coverage MOC.."""
 
     def __repr__(self):
         return self.to_string(format="ascii", fold=80)
 
     def __del__(self):
         """Erase MOC."""
-        mocpy.drop(self._store_index)
+        mocpy.drop(self.store_index)
 
     def __eq__(self, other):
         """
@@ -55,14 +39,14 @@ class AbstractMOC(serializer.IO):
         """
         if not isinstance(other, AbstractMOC):
             raise TypeError(
-                f"Cannot compare an AbstractMOC with a {type(other)}",
+                f"Cannot compare a {type(self)} with a {type(other)}",
             )
 
-        return mocpy.check_eq(self._store_index, other._store_index)
+        return mocpy.check_eq(self.store_index, other.store_index)
 
     def __copy__(self):
-        mocpy.copy(self._store_index)
-        return self.__class__(self.__create_sub_key, self._store_index)
+        mocpy.copy(self.store_index)
+        return self.__class__(self.store_index)
 
     def __deepcopy__(self, memo):
         return self.__copy__()
@@ -199,22 +183,21 @@ class AbstractMOC(serializer.IO):
         result: bool
             True if the MOC instance is empty.
         """
-        return mocpy.is_empty(self._store_index)
+        return mocpy.is_empty(self.store_index)
 
-    @property
+    @abc.abstractproperty
     def max_order(self):
         """Depth of the MOC instance."""
-        raise NotImplementedError("Method max_order not implemented")
 
     @property
     def min_index(self):
         """Return the smallest index (at the deepest absolute resolution) the MOC contains."""
-        return mocpy.first_index(self._store_index)
+        return mocpy.first_index(self.store_index)
 
     @property
     def max_index(self):
         """Return the largest index (at the deepest absolute resolution) the MOC contains."""
-        return mocpy.last_index(self._store_index)
+        return mocpy.last_index(self.store_index)
 
     @property
     def uniq_gen(self):
@@ -231,7 +214,11 @@ class AbstractMOC(serializer.IO):
           of the index's MSB. At a given depth, the sentinel bit is always put o the same bit.
         * Because the uniq HEALPix encoding is not adapted for non-HEALPIx indices.
         """
-        return mocpy.to_uniq_gen(self._store_index)
+        return mocpy.to_uniq_gen(self.store_index)
+
+    @abc.abstractclassmethod
+    def n_cells(cls, depth, dimension=None):
+        """Give the number of cells for the given depth. This is defined in children classes."""
 
     @property
     def uniq_zorder(self):
@@ -250,11 +237,11 @@ class AbstractMOC(serializer.IO):
           AND because the natural ordering of such indices follow the same order as the zorder indices
           (which is very useful for streaming processing, e.g. when dealing with multi-order maps)
         """
-        return mocpy.to_uniq_zorder(self._store_index)
+        return mocpy.to_uniq_zorder(self.store_index)
 
     def flatten(self):
         """Return the list of indices of all cells in the MOC at the MOC depth."""
-        return mocpy.flatten_to_moc_depth(self._store_index)
+        return mocpy.flatten_to_moc_depth(self.store_index)
 
     def complement(self):
         """
@@ -265,9 +252,9 @@ class AbstractMOC(serializer.IO):
         result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
             The resulting MOC.
         """
-        index = mocpy.complement(self._store_index)
+        index = mocpy.complement(self.store_index)
 
-        return self.__class__(self.__create_sub_key, index)
+        return self.__class__(index)
 
     def intersection(self, another_moc, *args):
         """
@@ -287,17 +274,17 @@ class AbstractMOC(serializer.IO):
         """
         if args:
             store_indices = np.append(
-                [self._store_index, another_moc._store_index],
+                [self.store_index, another_moc.store_index],
                 np.fromiter(
-                    (arg._store_index for arg in args),
+                    (arg.store_index for arg in args),
                     dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_intersection(store_indices)
         else:
-            index = mocpy.intersection(self._store_index, another_moc._store_index)
+            index = mocpy.intersection(self.store_index, another_moc.store_index)
 
-        return self.__class__(self.__create_sub_key, index)
+        return self.__class__(index)
 
     def union(self, another_moc, *args):
         """
@@ -317,17 +304,17 @@ class AbstractMOC(serializer.IO):
         """
         if args:
             store_indices = np.append(
-                [self._store_index, another_moc._store_index],
+                [self.store_index, another_moc.store_index],
                 np.fromiter(
-                    (arg._store_index for arg in args),
+                    (arg.store_index for arg in args),
                     dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_union(store_indices)
         else:
-            index = mocpy.union(self._store_index, another_moc._store_index)
+            index = mocpy.union(self.store_index, another_moc.store_index)
 
-        return self.__class__(self.__create_sub_key, index)
+        return self.__class__(index)
 
     def symmetric_difference(self, another_moc, *args):
         """
@@ -347,20 +334,20 @@ class AbstractMOC(serializer.IO):
         """
         if args:
             store_indices = np.append(
-                [self._store_index, another_moc._store_index],
+                [self.store_index, another_moc.store_index],
                 np.fromiter(
-                    (arg._store_index for arg in args),
+                    (arg.store_index for arg in args),
                     dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
         else:
             index = mocpy.symmetric_difference(
-                self._store_index,
-                another_moc._store_index,
+                self.store_index,
+                another_moc.store_index,
             )
 
-        return self.__class__(self.__create_sub_key, index)
+        return self.__class__(index)
 
     def difference(self, another_moc, *args):
         """
@@ -380,19 +367,19 @@ class AbstractMOC(serializer.IO):
         """
         if args:
             store_indices = np.append(
-                [another_moc._store_index],
+                [another_moc.store_index],
                 np.fromiter(
-                    (arg._store_index for arg in args),
+                    (arg.store_index for arg in args),
                     dtype=AbstractMOC._store_index_dtype(),
                 ),
             )
             index_union = mocpy.multi_union(store_indices)
-            index = mocpy.difference(self._store_index, index_union)
+            index = mocpy.difference(self.store_index, index_union)
             mocpy.drop(index_union)
         else:
-            index = mocpy.difference(self._store_index, another_moc._store_index)
+            index = mocpy.difference(self.store_index, another_moc.store_index)
 
-        return self.__class__(self.__create_sub_key, index)
+        return self.__class__(index)
 
     def extended(self):
         """
@@ -406,8 +393,8 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC`
             The extended MOC
         """
-        index = mocpy.extend(self._store_index)
-        return self.__class__(self.__create_sub_key, index)
+        index = mocpy.extend(self.store_index)
+        return self.__class__(index)
 
     def contracted(self):
         """
@@ -421,8 +408,8 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC`
             The extended MOC
         """
-        index = mocpy.contract(self._store_index)
-        return self.__class__(self.__create_sub_key, index)
+        index = mocpy.contract(self.store_index)
+        return self.__class__(index)
 
     def add_neighbours(self):
         """
@@ -435,8 +422,8 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC`
             self extended by one degree of neighbours.
         """
-        prev_store_index = self._store_index
-        self._store_index = mocpy.extend(prev_store_index)
+        prevstore_index = self.store_index
+        self.store_index = mocpy.extend(prevstore_index)
         return self
 
     def remove_neighbours(self):
@@ -450,9 +437,13 @@ class AbstractMOC(serializer.IO):
         moc : `~mocpy.moc.MOC`
             self minus its HEALPix cells located at its border.
         """
-        prev_store_index = self._store_index
-        self._store_index = mocpy.contract(prev_store_index)
+        prevstore_index = self.store_index
+        self.store_index = mocpy.contract(prevstore_index)
         return self
+
+    @abc.abstractclassmethod
+    def load(cls):
+        """Load a MOC, has to be defined in children classes."""
 
     @classmethod
     def from_json(cls, json_moc):
@@ -551,7 +542,12 @@ class AbstractMOC(serializer.IO):
         --------
         >>> from mocpy import MOC
         >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
+
+        See Also
+        --------
+        ``from_string`` a duplicate of this method, with added ``fold`` option
         """
+        # TODO : decide if we want to remove this duplicated method
         return cls.from_string(value, format="ascii")
 
     def degrade_to_order(self, new_order):
@@ -590,12 +586,12 @@ class AbstractMOC(serializer.IO):
         """
         if format == "ascii":
             if fold > 0:
-                return mocpy.to_ascii_str_with_fold(self._store_index, fold)[:-1]
-            return mocpy.to_ascii_str(self._store_index)[:-1]
+                return mocpy.to_ascii_str_with_fold(self.store_index, fold)[:-1]
+            return mocpy.to_ascii_str(self.store_index)[:-1]
         if format == "json":
             if fold > 0:
-                return mocpy.to_json_str_with_fold(self._store_index, fold)
-            return mocpy.to_json_str(self._store_index)
+                return mocpy.to_json_str_with_fold(self.store_index, fold)
+            return mocpy.to_json_str(self.store_index)
         formats = ("ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
@@ -644,7 +640,7 @@ class AbstractMOC(serializer.IO):
             from astropy.io import fits
 
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self._store_index, pre_v2),
+                mocpy.to_fits_raw(self.store_index, pre_v2),
             )
             hdu = hdulist[1]
             if fits_keywords:
@@ -660,16 +656,16 @@ class AbstractMOC(serializer.IO):
 
         if format == "ascii":
             if fold <= 0:
-                mocpy.to_ascii_file(self._store_index, str(path))
+                mocpy.to_ascii_file(self.store_index, str(path))
             else:
-                mocpy.to_ascii_file_with_fold(self._store_index, str(path), fold)
+                mocpy.to_ascii_file_with_fold(self.store_index, str(path), fold)
             return
 
         if format == "json":
             if fold <= 0:
-                mocpy.to_json_file(self._store_index, str(path))
+                mocpy.to_json_file(self.store_index, str(path))
             else:
-                mocpy.to_json_file_with_fold(self._store_index, str(path), fold)
+                mocpy.to_json_file_with_fold(self.store_index, str(path), fold)
             return
 
         formats = ("fits", "ascii", "json")
