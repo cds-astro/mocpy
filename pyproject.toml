@@ -41,6 +41,7 @@ dev = [
     "astropy_healpix",
     "pre-commit >= 2.20",
     "pytest > 6.0",
+    "pytest-mock",
     "pytest-cov",
     "requests"
 ]
