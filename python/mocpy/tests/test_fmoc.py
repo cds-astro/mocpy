@@ -1,7 +1,8 @@
 import numpy as np
+import pytest
+from astropy import units as u
 
 from ..fmoc import FrequencyMOC
-from astropy import units as u
 
 
 def test_new_empty():
@@ -12,6 +13,17 @@ def test_new_empty():
 def test_max_order():
     fmoc = FrequencyMOC.new_empty(32)
     assert fmoc.max_order == 32
+
+
+def test_n_cells():
+    assert FrequencyMOC.n_cells(0) == 2
+    with pytest.raises(
+        ValueError,
+        match=f"The depth should be comprised between 0 and {FrequencyMOC.MAX_ORDER}*",
+    ):
+        FrequencyMOC.n_cells(-1)
+        FrequencyMOC.n_cells(FrequencyMOC.MAX_ORDER + 1)
+    assert FrequencyMOC.n_cells(5) == 2 * FrequencyMOC.n_cells(4)
 
 
 def test_to_depth59_ranges():

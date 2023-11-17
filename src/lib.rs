@@ -12,7 +12,7 @@ use pyo3::{
 };
 
 use moc::{
-  qty::{Frequency, Hpx, MocQty},
+  qty::{Frequency, Hpx, MocQty, Time},
   storage::u64idx::U64MocStore,
   utils,
 };
@@ -2017,6 +2017,36 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     U64MocStore::get_global_store()
       .new_empty_fmoc(depth)
       .map_err(PyIOError::new_err)
+  }
+
+  /// Gives the number of cells for a specific depth in a spatial MOC
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - The depth for which we want to know the corresponding number of healpix cells.
+  #[pyfn(m)]
+  fn n_cells_smoc(depth: u8) -> u64 {
+    Hpx::<u64>::n_cells(depth)
+  }
+
+  /// Gives the number of cells for a specific depth in a time MOC
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - The depth for which we want to know the corresponding number of cells.
+  #[pyfn(m)]
+  fn n_cells_tmoc(depth: u8) -> u64 {
+    Time::<u64>::n_cells(depth)
+  }
+
+  /// Gives the number of cells for a specific depth in a frequency MOC
+  ///
+  /// # Arguments
+  ///
+  /// * ``depth`` - The depth for which we want to know the corresponding number of cells.
+  #[pyfn(m)]
+  fn n_cells_fmoc(depth: u8) -> u64 {
+    Frequency::<u64>::n_cells(depth)
   }
 
   /// Create a spatial coverage from a list of HEALPix cell indices.

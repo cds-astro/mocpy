@@ -1,6 +1,6 @@
 from astropy.io import fits
+
 from . import mocpy
-from pathlib import Path
 
 
 class IO:
@@ -30,7 +30,7 @@ class IO:
 
         if format == "fits":
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self._store_index, pre_v2),
+                mocpy.to_fits_raw(self.store_index, pre_v2),
             )
             hdu = hdulist[1]
             if optional_kw_dict:
@@ -78,28 +78,4 @@ class IO:
             DeprecationWarning,
             stacklevel=2,
         )
-        serialization = self.serialize(
-            format=format,
-            optional_kw_dict=optional_kw_dict,
-            pre_v2=pre_v2,
-        )
-
-        if format == "fits":
-            serialization.writeto(path, overwrite=overwrite)
-        else:
-            file_exists = Path(path).is_file()
-
-            if file_exists and not overwrite:
-                raise OSError(
-                    "File {} already exists! Set ``overwrite`` to "
-                    "True if you want to replace it.".format(path),
-                )
-
-            if format == "json":
-                import json
-
-                with Path(path).open("w") as f_out:
-                    f_out.write(json.dumps(serialization, sort_keys=True, indent=2))
-            elif format == "str":
-                with Path(path).open("w") as f_out:
-                    f_out.write(serialization)
+        self.save(path, format, overwrite, pre_v2, fits_keywords=optional_kw_dict)

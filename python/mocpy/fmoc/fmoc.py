@@ -1,9 +1,8 @@
 import numpy as np
 from astropy import units as u
 
-from ..abstract_moc import AbstractMOC
-
 from .. import mocpy
+from ..abstract_moc import AbstractMOC
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -24,24 +23,14 @@ class FrequencyMOC(AbstractMOC):
     # Largest value, in Hz, a F-MOC can encode
     FREQ_MAX_HZ = 5.846_006_549_323_611e48
 
-    __create_key = object()
-
-    def __init__(self, create_key, store_index):
+    def __init__(self, store_index):
         """Is a Frequency Coverage (F-MOC).
 
         Args:
             create_key : Object ensure __init__ is called by super-class/class-methods only
             store_index : index of the `FrequencyMOC` in the rust-side storage
         """
-        super().__init__(
-            AbstractMOC._create_key,
-            FrequencyMOC.__create_key,
-            store_index,
-        )
-        if create_key != FrequencyMOC.__create_key:
-            raise PermissionError(
-                "F-MOC instantiation is only allowed by class or super-class methods",
-            )
+        self.store_index = store_index
 
     @property
     def max_order(self):
@@ -58,8 +47,35 @@ class FrequencyMOC(AbstractMOC):
         >>> fmoc.max_order
         22
         """
-        depth = mocpy.get_fmoc_depth(self._store_index)
+        depth = mocpy.get_fmoc_depth(self.store_index)
         return np.uint8(depth)
+
+    @classmethod
+    def n_cells(cls, depth):
+        """Get the number of cells for a given depth.
+
+        Parameters
+        ----------
+        depth : int
+            The depth. It is comprised between 0 and `~mocpy.fmoc.FrequencyMOC.MAX_ORDER`
+
+        Returns
+        -------
+        int
+            The number of cells at the given order
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> FrequencyMOC.n_cells(0)
+        2
+        """
+        if depth < 0 or depth > cls.MAX_ORDER:
+            raise ValueError(
+                f"The depth should be comprised between 0 and {cls.MAX_ORDER}, but {depth}"
+                " was provided.",
+            )
+        return mocpy.n_cells_fmoc(depth)
 
     def to_hz_ranges(self):
         """Return the Hertz ranges this `FrequencyMOC` contains, in Hertz.
@@ -75,7 +91,7 @@ class FrequencyMOC(AbstractMOC):
          [1.         1.5       ]]
         """
         return np.asarray(
-            mocpy.to_freq_ranges(self._store_index) * u.Hz,
+            mocpy.to_freq_ranges(self.store_index) * u.Hz,
             dtype=np.float64,
         )
 
@@ -91,7 +107,7 @@ class FrequencyMOC(AbstractMOC):
         >>> print(fmoc.to_depth59_ranges)
         [[423338364972826624 425139804823774822]]
         """
-        return mocpy.to_ranges(self._store_index)
+        return mocpy.to_ranges(self.store_index)
 
     def degrade_to_order(self, new_order):
         """
@@ -120,8 +136,8 @@ class FrequencyMOC(AbstractMOC):
         >>> fmoc.degrade_to_order(10)
         10/752
         """
-        index = mocpy.degrade(self._store_index, new_order)
-        return FrequencyMOC(FrequencyMOC.__create_key, index)
+        index = mocpy.degrade(self.store_index, new_order)
+        return FrequencyMOC(index)
 
     @classmethod
     def new_empty(cls, max_depth):
@@ -145,7 +161,7 @@ class FrequencyMOC(AbstractMOC):
         5/
         """
         index = mocpy.new_empty_fmoc(np.uint8(max_depth))
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_depth59_ranges(cls, order, ranges):
@@ -184,7 +200,7 @@ class FrequencyMOC(AbstractMOC):
             ranges = ranges.astype(np.uint64)
 
         index = mocpy.from_fmoc_ranges_array2(np.uint8(order), ranges)
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_frequencies(cls, order, frequencies):
@@ -213,7 +229,7 @@ class FrequencyMOC(AbstractMOC):
         frequencies = np.atleast_1d(frequencies)
 
         store_index = mocpy.from_freq_values(order, frequencies)
-        return cls(cls.__create_key, store_index)
+        return cls(store_index)
 
     @classmethod
     def from_frequency_ranges(cls, order, min_freq, max_freq):
@@ -258,7 +274,7 @@ class FrequencyMOC(AbstractMOC):
             min_freq,
             max_freq,
         )
-        return cls(cls.__create_key, store_index)
+        return cls(store_index)
 
     @property
     def min_freq(self):
@@ -278,7 +294,7 @@ class FrequencyMOC(AbstractMOC):
         >>> print(fmoc.min_freq)
         1.0 Hz
         """
-        return mocpy.first_fmoc_hz(self._store_index) * u.Hz
+        return mocpy.first_fmoc_hz(self.store_index) * u.Hz
 
     @property
     def max_freq(self):
@@ -302,7 +318,7 @@ class FrequencyMOC(AbstractMOC):
         11.0 Hz
 
         """
-        return mocpy.last_fmoc_hz(self._store_index) * u.Hz
+        return mocpy.last_fmoc_hz(self.store_index) * u.Hz
 
     def contains(self, frequencies, keep_inside=True):
         """
@@ -337,7 +353,7 @@ class FrequencyMOC(AbstractMOC):
         freq = frequencies.to(u.Hz)
         freq = np.atleast_1d(freq)
 
-        mask = mocpy.filter_freq(self._store_index, freq)
+        mask = mocpy.filter_freq(self.store_index, freq)
 
         if keep_inside:
             return mask
@@ -435,13 +451,13 @@ class FrequencyMOC(AbstractMOC):
         path = str(path)
         if format == "fits":
             index = mocpy.frequency_moc_from_fits_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "ascii":
             index = mocpy.frequency_moc_from_ascii_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "json":
             index = mocpy.frequency_moc_from_json_file(path)
-            return cls(cls.__create_key, index)
+            return cls(index)
         formats = ("fits", "ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
@@ -449,7 +465,7 @@ class FrequencyMOC(AbstractMOC):
     def _from_fits_raw_bytes(cls, raw_bytes):
         """Load FrequencyMOC from raw bytes of a FITS file."""
         index = mocpy.frequency_moc_from_fits_raw_bytes(raw_bytes)
-        return cls(cls.__create_key, index)
+        return cls(index)
 
     @classmethod
     def from_string(cls, value, format="ascii"):  # noqa: A002
@@ -475,10 +491,10 @@ class FrequencyMOC(AbstractMOC):
         """
         if format == "ascii":
             index = mocpy.frequency_moc_from_ascii_str(value)
-            return cls(cls.__create_key, index)
+            return cls(index)
         if format == "json":
             index = mocpy.frequency_moc_from_json_str(value)
-            return cls(cls.__create_key, index)
+            return cls(index)
         formats = ("ascii", "json")
         raise ValueError("format should be one of %s" % (str(formats)))
 
@@ -514,8 +530,8 @@ class FrequencyMOC(AbstractMOC):
                 " instead of 'frequency', see astropy.units for more information",
             )
 
-        from matplotlib.patches import Rectangle
         from matplotlib.collections import PatchCollection
+        from matplotlib.patches import Rectangle
 
         min_freq = self.min_freq.to(frequency_unit).value
         max_freq = self.max_freq.to(frequency_unit).value
@@ -568,8 +584,8 @@ class FrequencyMOC(AbstractMOC):
                 " instead of 'length', see astropy.units for more information",
             )
 
-        from matplotlib.patches import Rectangle
         from matplotlib.collections import PatchCollection
+        from matplotlib.patches import Rectangle
 
         # get default bonds
         min_lambda = self.max_freq.to(length_unit, equivalencies=u.spectral()).value
