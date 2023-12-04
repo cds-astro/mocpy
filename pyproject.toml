@@ -88,9 +88,10 @@ locked = false
 "python/mocpy/moc/plot/wcs.py" = ["B008"]
 "python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
 "python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
+"notebooks/*.ipynb" = ["T201"] # print is okish in notebooks
 
 [tool.nbqa.addopts]
-ruff = ["--ignore=B018,FBT003"]
+ruff = ["--ignore=B018,FBT003,T201"]
 
 [tool.ruff]
 fix = true

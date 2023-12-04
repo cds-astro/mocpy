@@ -18,13 +18,13 @@ repos:
     - id: black
   # Fast linter to replace flake8
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.1.5'
+    rev: 'v0.1.6'
     hooks:
      - id: ruff
        fail_fast: true
   # Same tools but for Jupyter notebooks
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.0
+    rev: 1.7.1
     hooks:
       - id: nbqa-black
         name: nbqa-black
