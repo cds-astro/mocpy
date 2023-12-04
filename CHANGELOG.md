@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.13.1]
+
 ### Changed
 
 * currently supported versions of python now range from 3.8 to 3.12. There is a catch for python 3.8: the corresponding astropy version is pinned to astropy<5.3
