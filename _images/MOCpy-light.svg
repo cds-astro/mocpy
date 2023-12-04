@@ -7,7 +7,7 @@
    viewBox="0 0 27.13563 13.148732"
    version="1.1"
    id="svg12882"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    sodipodi:docname="MOCpy-light.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,10 +25,10 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="10.59046"
-     inkscape:cx="40.460943"
+     inkscape:cx="40.413731"
      inkscape:cy="27.760834"
      inkscape:window-width="2560"
-     inkscape:window-height="1367"
+     inkscape:window-height="1368"
      inkscape:window-x="2560"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -76,32 +76,16 @@
        id="path95863"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccc" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.97071px;line-height:1.25;font-family:'Linux Biolinum';-inkscape-font-specification:'Linux Biolinum, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.224268;stroke-linecap:butt;stroke-linejoin:round"
-       x="47.231823"
-       y="139.03654"
+    <path
+       style="font-size:8.97071px;line-height:1.25;font-family:Stop;-inkscape-font-specification:'Stop, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.224268;stroke-linejoin:round"
+       d="m 47.591002,133.05753 h 4.240062 q 0.740259,0 1.169521,0.10513 0.416122,0.10074 0.731498,0.49058 0.201491,0.24968 0.289096,0.59571 0.0876,0.34166 0.0876,0.88043 v 3.90716 h -1.629445 v -3.84146 q 0,-0.24529 -0.03504,-0.36794 -0.03066,-0.12264 -0.118266,-0.20587 -0.08323,-0.0788 -0.214631,-0.1095 -0.127027,-0.035 -0.337278,-0.035 h -2.553674 v 4.55981 h -1.629445 z m 4.01667,2.29962 v 3.67939 h -1.511179 v -3.67939 z"
        id="text156498"
-       inkscape:export-xdpi="300"
-       inkscape:export-ydpi="300"><tspan
-         sodipodi:role="line"
-         id="tspan156496"
-         x="47.231823"
-         y="139.03654"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.97071px;font-family:Stop;-inkscape-font-specification:'Stop, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.224268;stroke-linecap:butt;stroke-linejoin:round">m</tspan></text>
-    <text
+       aria-label="m" />
+    <path
+       d="m 68.706495,133.05753 v 1.4192 h -0.604472 q -0.481825,0 -0.801582,0.1314 -0.319757,0.13141 -0.556289,0.42489 -0.354799,0.43802 -0.354799,1.02497 0,0.55191 0.341658,0.97679 0.249673,0.31538 0.57819,0.45116 0.332898,0.13141 0.862906,0.13141 h 0.534388 v 1.41919 h -0.805963 q -0.915468,0 -1.572502,-0.30223 -0.652654,-0.30224 -1.086297,-0.92423 -0.262814,-0.3767 -0.402981,-0.82786 -0.140167,-0.45117 -0.140167,-0.91547 0,-0.46869 0.144547,-0.93299 0.144548,-0.46868 0.411742,-0.84976 0.271574,-0.38984 0.643894,-0.6658 0.372319,-0.27595 0.792821,-0.3986 0.556289,-0.16207 1.270267,-0.16207 z"
        id="text156502"
-       y="139.03654"
-       x="64.457672"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.97071px;line-height:1.25;font-family:Stop;-inkscape-font-specification:'Stop, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.224268;stroke-linecap:butt;stroke-linejoin:round"
-       xml:space="preserve"
-       inkscape:export-xdpi="300"
-       inkscape:export-ydpi="300"><tspan
-         sodipodi:role="line"
-         id="tspan156504"
-         x="64.457672"
-         y="139.03654"
-         style="fill:#000000;fill-opacity:1;stroke-width:0.224268;stroke-linecap:butt;stroke-linejoin:round">c</tspan></text>
+       style="font-size:8.97071px;line-height:1.25;font-family:Stop;-inkscape-font-specification:'Stop, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.224268;stroke-linejoin:round"
+       aria-label="c" />
     <path
        inkscape:connector-curvature="0"
        id="path91159"

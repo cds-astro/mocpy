@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Compute the borders of a MOC &#8212; MOCPy 0.13.0 documentation</title>
+    <title>Compute the borders of a MOC &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     
-    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/documentation_options.js?v=b4617fb1"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -87,17 +87,15 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-from mocpy import MOC, WCS
-
-from astropy.wcs.utils import skycoord_to_pixel
-
-import astropy.units as u
-from astropy.coordinates import SkyCoord, Angle
-
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import astropy.units as u
 import matplotlib.pyplot as plt
+import numpy as np
+from astropy.coordinates import Angle, SkyCoord
+from astropy.visualization.wcsaxes.frame import EllipticalFrame
+from astropy.wcs.utils import skycoord_to_pixel
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path
+from mocpy import MOC, WCS
 </pre></div>
 </div>
 </div>
@@ -144,7 +142,7 @@ boundaries_l = moc.get_boundaries()
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 &lt;timed exec&gt;:9: DeprecationWarning: This method is not stable. A future more stable algorithm will be implemented!
-/home/manon.marchand/.conda/envs/mocpy-tests/lib/python3.11/site-packages/astropy_healpix/core.py:659: RuntimeWarning: invalid value encountered in neighbours_nested
+/home/manon.marchand/.conda/envs/mocpy-dev/lib/python3.12/site-packages/astropy_healpix/core.py:659: RuntimeWarning: invalid value encountered in neighbours_nested
   return np.stack(func(healpix_index, nside))
 </pre></div></div>
 </div>
@@ -153,8 +151,8 @@ boundaries_l = moc.get_boundaries()
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 1.26 s, sys: 37.9 ms, total: 1.3 s
-Wall time: 1.31 s
+CPU times: user 890 ms, sys: 21.3 ms, total: 911 ms
+Wall time: 910 ms
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -168,7 +166,7 @@ Wall time: 1.31 s
     RGB color; the keyword argument name must be a standard matplotlib
     colormap name.
     &quot;&quot;&quot;
-    return plt.cm.get_cmap(name, n)
+    return plt.get_cmap(name, n)
 
 
 def add_patch_path(ax, wcs, coords, **kw_mpl_pathpatch):
@@ -191,22 +189,21 @@ def add_patch_path(ax, wcs, coords, **kw_mpl_pathpatch):
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(111, figsize=(15, 15))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(111, figsize=(16, 8))
 cmap = get_cmap(100)
 
 with WCS(
     fig,
-    fov=330 * u.deg,
+    fov=160 * u.deg,
     center=SkyCoord(0, 0, unit=&quot;deg&quot;, frame=&quot;galactic&quot;),
     coordsys=&quot;galactic&quot;,
     rotation=Angle(0, u.degree),
     projection=&quot;AIT&quot;,
 ) as wcs:
-    ax = fig.add_subplot(1, 1, 1, projection=wcs)
-
+    ax = fig.add_subplot(111, projection=wcs, frame_class=EllipticalFrame)
     moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;r&quot;)
     # Draw the borders, each plotted in a different color.
     for border_coords in boundaries_l:
@@ -227,23 +224,16 @@ plt.show()
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/tmp/ipykernel_359807/573143703.py:8: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed two minor releases later. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap(obj)`` instead.
-  return plt.cm.get_cmap(name, n)
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/_collections_notebooks_compute_moc_borders_5_1.png" src="../../_images/_collections_notebooks_compute_moc_borders_5_1.png" />
+<img alt="../../_images/_collections_notebooks_compute_moc_borders_5_0.png" src="../../_images/_collections_notebooks_compute_moc_borders_5_0.png" />
 </div>
 </div>
-</section>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {}, "version_major": 2, "version_minor": 0}
+</script></section>
 
 
             <div class="clearer"></div>
@@ -268,7 +258,7 @@ plt.show()
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>

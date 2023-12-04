@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Intersection between MOCs &#8212; MOCPy 0.13.0 documentation</title>
+    <title>Intersection between MOCs &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     
-    <script src="../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../_static/documentation_options.js?v=b4617fb1"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.13.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -84,13 +84,14 @@
   <section id="Intersection-between-MOCs">
 <h1>Intersection between MOCs<a class="headerlink" href="#Intersection-between-MOCs" title="Link to this heading">¶</a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span><span class="p">,</span> <span class="n">Angle</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">WCS</span><span class="p">,</span> <span class="n">MOC</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import astropy.units as u
+import matplotlib.pyplot as plt
+from astropy.coordinates import Angle, SkyCoord
+from astropy.visualization.wcsaxes.frame import EllipticalFrame
+from mocpy import MOC, WCS
 </pre></div>
 </div>
 </div>
@@ -99,62 +100,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
-<span class="n">m1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;../resources/P-SDSS9-r.fits&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CPU times: user 58.6 ms, sys: 8.9 ms, total: 67.5 ms
-Wall time: 63.1 ms
-</pre></div></div>
-</div>
-<p>Now, we load MOC for GALEX GR6 AIS FUV:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
-<span class="n">m2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;../resources/P-GALEXGR6-AIS-FUV.fits&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CPU times: user 11.1 ms, sys: 1.1 ms, total: 12.2 ms
-Wall time: 12.3 ms
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
-
-
-<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
-    <span class="n">fig</span><span class="p">,</span>
-    <span class="n">fov</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
-    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
-
-    <span class="o">%</span><span class="n">time</span> <span class="n">m1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
-    <span class="o">%</span><span class="n">time</span> <span class="n">m2</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+m1 = MOC.from_fits(&quot;../resources/P-SDSS9-r.fits&quot;)
 </pre></div>
 </div>
 </div>
@@ -163,10 +110,80 @@ Wall time: 12.3 ms
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 71.7 ms, sys: 947 µs, total: 72.6 ms
-Wall time: 66.8 ms
-CPU times: user 192 ms, sys: 17.8 ms, total: 210 ms
-Wall time: 200 ms
+CPU times: user 4 ms, sys: 445 µs, total: 4.44 ms
+Wall time: 4.43 ms
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING: Wrong depth_max 29. Reset to 13
+</pre></div></div>
+</div>
+<p>Now, we load MOC for GALEX GR6 AIS FUV:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
+m2 = MOC.from_fits(&quot;../resources/P-GALEXGR6-AIS-FUV.fits&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.01 ms, sys: 0 ns, total: 2.01 ms
+Wall time: 1.98 ms
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING: Wrong depth_max 29. Reset to 13
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(111, figsize=(16, 8))
+
+
+with WCS(
+    fig,
+    fov=160 * u.deg,
+    center=SkyCoord(0, 20, unit=&quot;deg&quot;, frame=&quot;icrs&quot;),
+    coordsys=&quot;icrs&quot;,
+    rotation=Angle(0, u.degree),
+    projection=&quot;AIT&quot;,
+) as wcs:
+    ax = fig.add_subplot(1, 1, 1, projection=wcs, frame_class=EllipticalFrame)
+
+    %time m1.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;green&quot;)
+    %time m2.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;dodgerblue&quot;)
+
+plt.xlabel(&quot;ra&quot;)
+plt.ylabel(&quot;dec&quot;)
+plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 1.25 s, sys: 22.6 ms, total: 1.28 s
+Wall time: 1.26 s
+CPU times: user 4.94 s, sys: 41.1 ms, total: 4.98 s
+Wall time: 4.96 s
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -181,26 +198,26 @@ Wall time: 200 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>m_intersect = m1.intersection(m2)
 
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+fig = plt.figure(111, figsize=(16, 8))
 
-<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
-    <span class="n">fig</span><span class="p">,</span>
-    <span class="n">fov</span><span class="o">=</span><span class="mi">250</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
-    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
+with WCS(
+    fig,
+    fov=160 * u.deg,
+    center=SkyCoord(20, 15, unit=&quot;deg&quot;, frame=&quot;icrs&quot;),
+    coordsys=&quot;icrs&quot;,
+    rotation=Angle(0, u.degree),
+    projection=&quot;AIT&quot;,
+) as wcs:
+    ax = fig.add_subplot(1, 1, 1, projection=wcs, frame_class=EllipticalFrame)
 
-    <span class="o">%</span><span class="n">time</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
-    <span class="o">%</span><span class="n">time</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+    %time m_intersect.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;y&quot;)
+    %time m_intersect.border(ax=ax, wcs=wcs, alpha=0.5, fill=True, color=&quot;black&quot;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+plt.xlabel(&quot;ra&quot;)
+plt.ylabel(&quot;dec&quot;)
+plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)
 </pre></div>
 </div>
 </div>
@@ -209,10 +226,10 @@ Wall time: 200 ms
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 53.6 ms, sys: 0 ns, total: 53.6 ms
-Wall time: 48.7 ms
-CPU times: user 70.3 ms, sys: 0 ns, total: 70.3 ms
-Wall time: 67.1 ms
+CPU times: user 2.44 s, sys: 36.4 ms, total: 2.48 s
+Wall time: 2.47 s
+CPU times: user 1.62 s, sys: 58 ms, total: 1.67 s
+Wall time: 1.62 s
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -224,10 +241,10 @@ Wall time: 67.1 ms
 </div>
 <p>And serialize it to FITS (official serialization):</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">time</span> <span class="n">hdulist</span> <span class="o">=</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time hdulist = m_intersect.serialize(format=&#39;fits&#39;)
 </pre></div>
 </div>
 </div>
@@ -236,19 +253,21 @@ Wall time: 67.1 ms
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 13.9 ms, sys: 3.49 ms, total: 17.4 ms
-Wall time: 16.8 ms
+CPU times: user 1.97 ms, sys: 0 ns, total: 1.97 ms
+Wall time: 1.99 ms
 </pre></div></div>
 </div>
-<p>MOC can also be serialized in JSON:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Or write it directly to a FITS/JSON file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="o">=&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">write_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="o">/</span><span class="s1">&#39;fits&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
 </section>
+<section id="MOC-can-also-be-serialized-in-JSON:">
+<h1>MOC can also be serialized in JSON:<a class="headerlink" href="#MOC-can-also-be-serialized-in-JSON:" title="Link to this heading">¶</a></h1>
+<p>m_intersect.to_string(format=’json’)</p>
+</section>
+<section id="Or-write-it-directly-to-a-FITS/JSON-file:">
+<h1>Or write it directly to a FITS/JSON file:<a class="headerlink" href="#Or-write-it-directly-to-a-FITS/JSON-file:" title="Link to this heading">¶</a></h1>
+<p>m_intersect.save(path=”/tmp/moc”, write_to_file=True, format=’json’)</p>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {}, "version_major": 2, "version_minor": 0}
+</script></section>
 
 
             <div class="clearer"></div>
@@ -259,6 +278,8 @@ Wall time: 16.8 ms
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">Intersection between MOCs</a></li>
+<li><a class="reference internal" href="#MOC-can-also-be-serialized-in-JSON:">MOC can also be serialized in JSON:</a></li>
+<li><a class="reference internal" href="#Or-write-it-directly-to-a-FITS/JSON-file:">Or write it directly to a FITS/JSON file:</a></li>
 </ul>
 
 
@@ -273,7 +294,7 @@ Wall time: 16.8 ms
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>

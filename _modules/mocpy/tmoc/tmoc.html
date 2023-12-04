@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.tmoc.tmoc &#8212; MOCPy 0.13.0 documentation</title>
+    <title>mocpy.tmoc.tmoc &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/documentation_options.js?v=b4617fb1"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.13.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -66,13 +66,12 @@
             
   <h1>Source code for mocpy.tmoc.tmoc</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
 
-<span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="kn">import</span> <span class="n">AbstractMOC</span>
-
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mocpy</span>
+<span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="kn">import</span> <span class="n">AbstractMOC</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
@@ -140,42 +139,61 @@
     <span class="c1"># Default observation time : 30 min</span>
     <span class="n">DEFAULT_OBSERVATION_TIME</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">)</span>
 
-    <span class="n">__create_key</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a Time Coverage (T-MOC).</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            create_key: Object ensure __init__ is called by super-class/class-methods only</span>
 <span class="sd">            store_index: index of the S-MOC in the rust-side storage</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">AbstractMOC</span><span class="o">.</span><span class="n">_create_key</span><span class="p">,</span>
-            <span class="n">TimeMOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span>
-            <span class="n">store_index</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">create_key</span> <span class="o">!=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
-                <span class="s2">&quot;T-MOC instantiation is only allowed by class or super-class methods&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span> <span class="o">=</span> <span class="n">store_index</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Depth/order of the T-MOC.&quot;&quot;&quot;</span>
-        <span class="n">depth</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_tmoc_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_tmoc_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TimeMOC.n_cells">
+<a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.n_cells">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">n_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of cells for a given depth.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        depth : int</span>
+<span class="sd">            The depth. It is comprised between 0 and `~mocpy.tmoc.TimeMOC.MAX_ORDER`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of cells at the given order</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import TimeMOC</span>
+<span class="sd">        &gt;&gt;&gt; TimeMOC.n_cells(0)</span>
+<span class="sd">        2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="bp">cls</span><span class="o">.</span><span class="n">MAX_ORDER</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The depth should be comprised between 0 and </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">MAX_ORDER</span><span class="si">}</span><span class="s2">, but </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; was provided.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">n_cells_tmoc</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="TimeMOC.to_time_ranges">
 <a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.to_time_ranges">[docs]</a>
     <span class="k">def</span> <span class="nf">to_time_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the time ranges this TimeMOC contains.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">))</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">to_depth61_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of ranges this TimeMOC contains, in microsec since JD=0.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeMOC.degrade_to_order">
 <a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.degrade_to_order">[docs]</a>
@@ -196,8 +214,8 @@
 <span class="sd">        moc : `~mocpy.tmoc.TimeMOC`</span>
 <span class="sd">            The degraded MOC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">degrade</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">new_order</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">degrade</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">new_order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TimeMOC</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.new_empty">
@@ -218,7 +236,7 @@
 <span class="sd">            The MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">new_empty_tmoc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.from_depth61_ranges">
@@ -250,7 +268,7 @@
             <span class="n">ranges</span> <span class="o">=</span> <span class="n">ranges</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_ranges_array2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">ranges</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.from_times">
@@ -278,7 +296,7 @@
 
         <span class="n">depth</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span>
         <span class="n">store_index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_in_microsec_since_jd_origin</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">store_index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.from_time_ranges">
@@ -322,7 +340,7 @@
             <span class="n">min_times</span><span class="p">,</span>
             <span class="n">max_times</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">store_index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.from_time_ranges_approx">
@@ -368,7 +386,7 @@
             <span class="p">)</span>
 
         <span class="n">store_index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">min_times</span><span class="p">,</span> <span class="n">max_times</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">store_index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeMOC.from_stmoc_space_fold">
@@ -383,8 +401,8 @@
 <span class="sd">        smoc : `~mocpy.moc.Moc`</span>
 <span class="sd">        stmoc : `~mocpy.stmoc.STMoc`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">store_index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">smoc</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">stmoc</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">)</span></div>
+        <span class="n">store_index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_first_dim</span><span class="p">(</span><span class="n">smoc</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">stmoc</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">store_index</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">_process_degradation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_moc</span><span class="p">,</span> <span class="n">order_op</span><span class="p">):</span>
@@ -528,7 +546,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">TimeDelta</span><span class="p">(</span>
-            <span class="n">mocpy</span><span class="o">.</span><span class="n">ranges_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span>
+            <span class="n">mocpy</span><span class="o">.</span><span class="n">ranges_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span>
             <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">,</span>
             <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -599,7 +617,7 @@
         <span class="c1"># of the TimeMoc object</span>
         <span class="n">pix_arr</span> <span class="o">=</span> <span class="n">times_to_microseconds</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
 
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">filter_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">pix_arr</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">filter_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">pix_arr</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">keep_inside</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">mask</span>
@@ -712,8 +730,8 @@
 <span class="sd">            all the observation time window is rendered).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
         <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
             <span class="kn">import</span> <span class="nn">warnings</span>
@@ -731,10 +749,7 @@
 
         <span class="k">if</span> <span class="n">max_jd</span> <span class="o">&lt;</span> <span class="n">min_jd</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid selection: max_jd = </span><span class="si">{}</span><span class="s2"> must be &gt; to min_jd = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">max_jd</span><span class="p">,</span>
-                    <span class="n">min_jd</span><span class="p">,</span>
-                <span class="p">),</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid selection: max_jd = </span><span class="si">{</span><span class="n">max_jd</span><span class="si">}</span><span class="s2"> must be &gt; to min_jd = </span><span class="si">{</span><span class="n">min_jd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">fig1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
@@ -812,13 +827,13 @@
         <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;fits&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_fits_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_ascii_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
@@ -827,7 +842,7 @@
     <span class="k">def</span> <span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load MOC from raw bytes of a FITS file.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_fits_raw_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeMOC.from_string">
 <a class="viewcode-back" href="../../../stubs/mocpy.TimeMOC.html#mocpy.TimeMOC.from_string">[docs]</a>
@@ -849,10 +864,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_ascii_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">time_moc_from_json_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 </div>
@@ -876,7 +891,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>

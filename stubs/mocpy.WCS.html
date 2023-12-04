@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.WCS &#8212; MOCPy 0.13.0 documentation</title>
+    <title>mocpy.WCS &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../_static/documentation_options.js?v=b4617fb1"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.13.0 documentation</a>
+	<a href="../index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -87,24 +87,24 @@
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>fig</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">figure</span></code></a></span></dt><dd><p>The matplotlib figure used for plotting the MOC.</p>
+<dt><strong>fig</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">figure</span></code></a></span></dt><dd><p>The matplotlib figure used for plotting the MOC.</p>
 </dd>
-<dt><strong>fov</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>Size of the field of view.</p>
+<dt><strong>fov</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>Size of the field of view.</p>
 </dd>
-<dt><strong>center</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a>, optional</span></dt><dd><p>World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame).</p>
+<dt><strong>center</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a>, optional</span></dt><dd><p>World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame).</p>
 </dd>
 <dt><strong>coordsys</strong><span class="classifier">str, optional</span></dt><dd><p>Coordinate system. Default to “icrs”. Must be in [“icrs”, “galactic”].</p>
 </dd>
 <dt><strong>projection</strong><span class="classifier">str, optional</span></dt><dd><p>World base -&gt; Image base projection type. See <a class="reference external" href="http://docs.astropy.org/en/stable/wcs/#supported-projections">http://docs.astropy.org/en/stable/wcs/#supported-projections</a> for
 the projections currently supported in astropy. Default to Aitoff.</p>
 </dd>
-<dt><strong>rotation</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a>, optional</span></dt><dd><p>The angle of rotation. Default to no rotation.</p>
+<dt><strong>rotation</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a>, optional</span></dt><dd><p>The angle of rotation. Default to no rotation.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v6.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WCS</span></code></a></span></dt><dd><p>The WCS that can be passed to mocpy.MOC.fill/border.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WCS</span></code></a></span></dt><dd><p>The WCS that can be passed to mocpy.MOC.fill/border.</p>
 </dd>
 </dl>
 </dd>
@@ -165,7 +165,7 @@ the projections currently supported in astropy. Default to Aitoff.</p>
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>

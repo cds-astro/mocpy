@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.stmoc.stmoc &#8212; MOCPy 0.13.0 documentation</title>
+    <title>mocpy.stmoc.stmoc &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/documentation_options.js?v=b4617fb1"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.13.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -68,9 +68,8 @@
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">mocpy</span>
-<span class="kn">from</span> <span class="nn">..tmoc</span> <span class="kn">import</span> <span class="n">TimeMOC</span><span class="p">,</span> <span class="n">microseconds_to_times</span><span class="p">,</span> <span class="n">times_to_microseconds</span>
 <span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="kn">import</span> <span class="n">AbstractMOC</span>
-
+<span class="kn">from</span> <span class="nn">..tmoc</span> <span class="kn">import</span> <span class="n">TimeMOC</span><span class="p">,</span> <span class="n">microseconds_to_times</span><span class="p">,</span> <span class="n">times_to_microseconds</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
@@ -84,24 +83,14 @@
 <span class="k">class</span> <span class="nc">STMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Time-Spatial Coverage class.&quot;&quot;&quot;</span>
 
-    <span class="n">__create_key</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_key</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a Time-Spatial Coverage (ST-MOC).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            create_key: Object ensure __init__ is called by super-class/class-methods only</span>
 <span class="sd">            store_index: index of the ST-MOC in the rust-side storage</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">AbstractMOC</span><span class="o">.</span><span class="n">_create_key</span><span class="p">,</span>
-            <span class="n">STMOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span>
-            <span class="n">store_index</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">create_key</span> <span class="o">!=</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">__create_key</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
-                <span class="s2">&quot;ST-MOC instantiation is only allowed by class or super-class methods&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span> <span class="o">=</span> <span class="n">store_index</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Erase STMOC.&quot;&quot;&quot;</span>
@@ -114,23 +103,73 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return max depth of MOC.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a clone of max_depth, to preserve the api between moc types.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return STMOC max time.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_max_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_max_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return STMOC min time.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">microseconds_to_times</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">))</span>
+
+<div class="viewcode-block" id="STMOC.n_cells">
+<a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.n_cells">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">n_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of cells for a given depth.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        depth : int</span>
+<span class="sd">            The depth. It is comprised between 0 and `~mocpy.moc.MOC.MAX_ORDER` if</span>
+<span class="sd">            dimension=&#39;space&#39; and between 0 and `~mocpy.tmoc.TimeMOC.MAX_ORDER` if</span>
+<span class="sd">            dimension=&#39;time&#39;.</span>
+
+<span class="sd">        dimension : str</span>
+<span class="sd">            Can be either &#39;time&#39; or &#39;space&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of cells at the given order</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import STMOC</span>
+<span class="sd">        &gt;&gt;&gt; STMOC.n_cells(0, dimension=&#39;space&#39;)</span>
+<span class="sd">        12</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="s2">&quot;space&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Dimension should be either &#39;time&#39; of &#39;space&#39; but &#39;</span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&#39; was provided.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="STMOC.new_empty">
+<a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.new_empty">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">new_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new empty STMOC.&quot;&quot;&quot;</span>
+        <span class="c1"># TODO</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="STMOC.is_empty">
 <a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.is_empty">[docs]</a>
     <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the Space-Time coverage is empty.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="STMOC.from_times_positions">
@@ -173,7 +212,7 @@
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_lonlat</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">time_depth</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">spatial_depth</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="STMOC.from_time_ranges_positions">
@@ -242,7 +281,7 @@
             <span class="n">spatial_depth</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="STMOC.from_spatial_coverages">
@@ -274,8 +313,11 @@
 <span class="sd">        result : `~mocpy.stmoc.STMOC`</span>
 <span class="sd">            The resulting Spatial-Time Coverage map.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># times_start = times_start.jd.astype(np.float64)</span>
-        <span class="c1"># times_end = times_end.jd.astype(np.float64)</span>
+        <span class="c1"># accept also when there is a single spatial moc</span>
+        <span class="n">times_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">times_start</span><span class="p">)</span>
+        <span class="n">times_end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">times_end</span><span class="p">)</span>
+        <span class="n">spatial_coverages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">spatial_coverages</span><span class="p">)</span>
+
         <span class="n">times_start</span> <span class="o">=</span> <span class="n">times_to_microseconds</span><span class="p">(</span><span class="n">times_start</span><span class="p">)</span>
         <span class="n">times_end</span> <span class="o">=</span> <span class="n">times_to_microseconds</span><span class="p">(</span><span class="n">times_end</span><span class="p">)</span>
 
@@ -290,7 +332,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and spatial coverages must be 1D arrays&quot;</span><span class="p">)</span>
 
         <span class="n">spatial_coverages_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">_store_index</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">spatial_coverages</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">store_index</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">spatial_coverages</span><span class="p">),</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">AbstractMOC</span><span class="o">.</span><span class="n">_store_index_dtype</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_time_ranges_spatial_coverages</span><span class="p">(</span>
@@ -300,7 +342,7 @@
             <span class="n">spatial_coverages_indices</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="STMOC.query_by_time">
@@ -328,7 +370,7 @@
 
         <span class="c1"># times = np.asarray(times.jd * 86400000000, dtype=np.uint64)</span>
         <span class="c1"># times = utils.times_to_microseconds(times)</span>
-        <span class="c1"># ranges = mocpy.project_on_second_dim(times, self._store_index)</span>
+        <span class="c1"># ranges = mocpy.project_on_second_dim(times, self.store_index)</span>
         <span class="c1"># return MOC(IntervalSet(ranges, make_consistent=False))</span>
         <span class="c1"># store_index = from_stmoc_time_fold(cls, tmoc, stmoc):</span>
         <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_stmoc_time_fold</span><span class="p">(</span><span class="n">tmoc</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
@@ -394,7 +436,7 @@
         <span class="k">if</span> <span class="n">times</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Times and positions must be 1D arrays.&quot;</span><span class="p">)</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store_index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="o">~</span><span class="n">result</span>
@@ -424,13 +466,13 @@
         <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;fits&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_from_fits_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_from_ascii_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_from_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 
@@ -439,7 +481,7 @@
     <span class="k">def</span> <span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load MOC from raw bytes of a FITS file.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">stmoc_from_fits_raw_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="STMOC.from_string">
 <a class="viewcode-back" href="../../../stubs/mocpy.STMOC.html#mocpy.STMOC.from_string">[docs]</a>
@@ -460,10 +502,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_from_ascii_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_2d_from_json_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__create_key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
 </div>
@@ -487,7 +529,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>

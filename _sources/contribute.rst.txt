@@ -10,24 +10,24 @@ interpreter and package manager.
 Setting up the environment
 --------------------------
 
-There is two ways to set up an environment.
+Here we highlight two ways to set up an environment.
 Using conda (installed from miniconda or anaconda) or
-using the pip package called
+using the pip package
 `virtualenv <https://python-guide-pt-br.readthedocs.io/fr/latest/dev/virtualenvs.html>`__ .
-Choose the one you prefer.
+Choose the one you prefer, or your own one.
 
 Using conda
 ~~~~~~~~~~~
 
 - Set up the conda environment and activate it::
 
-    conda env create -q python=3.8 -f <path_to_mocpy>/requirements/environment.yml -n mocpy-env
-    source activate mocpy-env
+    conda create -n mocpy-dev python==3.12.*
+    source activate mocpy-dev
 
 - Once you are done with your developments you can
   deactivate your conda environment::
 
-    source deactivate
+    conda deactivate
 
 Using virtualenv
 ~~~~~~~~~~~~~~~~
@@ -53,9 +53,9 @@ along with a new empty pip package manager.
 opens a session with the ``mocpy-env`` interpreter.
 
 - You can now install all the necessary pip packages
-  for developping and testing MOCpy::
+  for developing and testing MOCpy::
 
-    pip install -r <path_to_mocpy_repo>/requirements/contributing.txt
+    pip install .[dev]
 
 - Once you are done with your developments you can deactivate the virtual env::
 
@@ -68,7 +68,7 @@ Pre-commits setup
 
     pre-commit install
 
-It will run linting and formating tests at each of your commits.
+It will run linting and formatting tests at each of your commits.
 
 Now build package
 -----------------
@@ -83,7 +83,8 @@ Now build package
 
 This step will inform you of any issue in the rust part.
 
-- After a new version of mocpy goes out, if a ``maturin develop --release`` does not actualise your ``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
+- After a new version of mocpy goes out, if a ``maturin develop --release`` does not actualize your
+  ``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
 
     rm Cargo.lock && cargo clean
 
@@ -102,29 +103,28 @@ Once your environment is set up and activated you can run the tests
 
 - When contributing to the notebooks::
 
-    python -m pip install -r requirements/notebooks.txt
+    python -m pip install .[notebooks]
     python -m pytest --nbmake -n=auto "./notebooks"
 
-You also can have a html output of the coverage. For that set ``--cov-report=html``,
-this will generate an ``htmlcov`` folder where all the static html files can be found.
+You also can have a html output of the coverage with the flag ``--cov-report=html``.
+This will generate an ``htmlcov`` folder where all the static html files can be found.
 
 
 Building the documentation
 --------------------------
 
-To see the documentation locally, you'll need to install the python packages in
-:file:`requirements/docs.txt` and the pandoc software.
+To see the documentation locally, you'll need to install the additional python dependencies with
+
+    pip install .[docs]
+
+and the pandoc software (``sudo apt-get install pandoc`` on ubuntu,
+``choco install pandoc`` on windows, ``brew install pandoc`` on mac,
+``pacman -S haskell-pandoc`` on arch).
 
 - To build the docs from the repo directory::
 
     cd docs
     make html
-    cd ..
-
-- Other API examples found in the documentation can be run with::
-
-    cd docs
-    make doctest
     cd ..
 
 You will find the html index file in the :file:`docs/_build/html` folder.

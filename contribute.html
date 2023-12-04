@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Contribute &#8212; MOCPy 0.13.0 documentation</title>
+    <title>Contribute &#8212; MOCPy 0.13.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="_static/documentation_options.js?v=1019fba8"></script>
+    <script src="_static/documentation_options.js?v=b4617fb1"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
 	
       </li>
       <li>
-	<a href="index.html">MOCPy 0.13.0 documentation</a>
+	<a href="index.html">MOCPy 0.13.1 documentation</a>
 	 &#187;
       </li>
       
@@ -79,23 +79,23 @@ environment that will act independently from your current installed
 interpreter and package manager.</p>
 <section id="setting-up-the-environment">
 <h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Link to this heading">¶</a></h2>
-<p>There is two ways to set up an environment.
+<p>Here we highlight two ways to set up an environment.
 Using conda (installed from miniconda or anaconda) or
-using the pip package called
+using the pip package
 <a class="reference external" href="https://python-guide-pt-br.readthedocs.io/fr/latest/dev/virtualenvs.html">virtualenv</a> .
-Choose the one you prefer.</p>
+Choose the one you prefer, or your own one.</p>
 <section id="using-conda">
 <h3>Using conda<a class="headerlink" href="#using-conda" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Set up the conda environment and activate it:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">q</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.8</span> <span class="o">-</span><span class="n">f</span> <span class="o">&lt;</span><span class="n">path_to_mocpy</span><span class="o">&gt;/</span><span class="n">requirements</span><span class="o">/</span><span class="n">environment</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">n</span> <span class="n">mocpy</span><span class="o">-</span><span class="n">env</span>
-<span class="n">source</span> <span class="n">activate</span> <span class="n">mocpy</span><span class="o">-</span><span class="n">env</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">mocpy</span><span class="o">-</span><span class="n">dev</span> <span class="n">python</span><span class="o">==</span><span class="mf">3.12</span><span class="o">.*</span>
+<span class="n">source</span> <span class="n">activate</span> <span class="n">mocpy</span><span class="o">-</span><span class="n">dev</span>
 </pre></div>
 </div>
 </li>
 <li><p>Once you are done with your developments you can
 deactivate your conda environment:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">deactivate</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">deactivate</span>
 </pre></div>
 </div>
 </li>
@@ -130,8 +130,8 @@ along with a new empty pip package manager.</p>
 opens a session with the <code class="docutils literal notranslate"><span class="pre">mocpy-env</span></code> interpreter.</p>
 <ul>
 <li><p>You can now install all the necessary pip packages
-for developping and testing MOCpy:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="o">&lt;</span><span class="n">path_to_mocpy_repo</span><span class="o">&gt;/</span><span class="n">requirements</span><span class="o">/</span><span class="n">contributing</span><span class="o">.</span><span class="n">txt</span>
+for developing and testing MOCpy:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span><span class="p">[</span><span class="n">dev</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -152,7 +152,7 @@ for developping and testing MOCpy:</p>
 </div>
 </li>
 </ul>
-<p>It will run linting and formating tests at each of your commits.</p>
+<p>It will run linting and formatting tests at each of your commits.</p>
 </section>
 <section id="now-build-package">
 <h2>Now build package<a class="headerlink" href="#now-build-package" title="Link to this heading">¶</a></h2>
@@ -170,7 +170,8 @@ for developping and testing MOCpy:</p>
 </ul>
 <p>This step will inform you of any issue in the rust part.</p>
 <ul>
-<li><p>After a new version of mocpy goes out, if a <code class="docutils literal notranslate"><span class="pre">maturin</span> <span class="pre">develop</span> <span class="pre">--release</span></code> does not actualise your <code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code> file, you might need to before executing the <code class="docutils literal notranslate"><span class="pre">maturin</span></code> command again:</p>
+<li><p>After a new version of mocpy goes out, if a <code class="docutils literal notranslate"><span class="pre">maturin</span> <span class="pre">develop</span> <span class="pre">--release</span></code> does not actualize your
+<code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code> file, you might need to before executing the <code class="docutils literal notranslate"><span class="pre">maturin</span></code> command again:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="n">Cargo</span><span class="o">.</span><span class="n">lock</span> <span class="o">&amp;&amp;</span> <span class="n">cargo</span> <span class="n">clean</span>
 </pre></div>
 </div>
@@ -192,30 +193,28 @@ for developping and testing MOCpy:</p>
 </div>
 </li>
 <li><p>When contributing to the notebooks:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">/</span><span class="n">notebooks</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span><span class="p">[</span><span class="n">notebooks</span><span class="p">]</span>
 <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">--</span><span class="n">nbmake</span> <span class="o">-</span><span class="n">n</span><span class="o">=</span><span class="n">auto</span> <span class="s2">&quot;./notebooks&quot;</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>You also can have a html output of the coverage. For that set <code class="docutils literal notranslate"><span class="pre">--cov-report=html</span></code>,
-this will generate an <code class="docutils literal notranslate"><span class="pre">htmlcov</span></code> folder where all the static html files can be found.</p>
+<p>You also can have a html output of the coverage with the flag <code class="docutils literal notranslate"><span class="pre">--cov-report=html</span></code>.
+This will generate an <code class="docutils literal notranslate"><span class="pre">htmlcov</span></code> folder where all the static html files can be found.</p>
 </section>
 <section id="building-the-documentation">
 <h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Link to this heading">¶</a></h2>
-<p>To see the documentation locally, you’ll need to install the python packages in
-<code class="file docutils literal notranslate"><span class="pre">requirements/docs.txt</span></code> and the pandoc software.</p>
+<p>To see the documentation locally, you’ll need to install the additional python dependencies with</p>
+<blockquote>
+<div><p>pip install .[docs]</p>
+</div></blockquote>
+<p>and the pandoc software (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">pandoc</span></code> on ubuntu,
+<code class="docutils literal notranslate"><span class="pre">choco</span> <span class="pre">install</span> <span class="pre">pandoc</span></code> on windows, <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">pandoc</span></code> on mac,
+<code class="docutils literal notranslate"><span class="pre">pacman</span> <span class="pre">-S</span> <span class="pre">haskell-pandoc</span></code> on arch).</p>
 <ul>
 <li><p>To build the docs from the repo directory:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
 <span class="n">make</span> <span class="n">html</span>
-<span class="n">cd</span> <span class="o">..</span>
-</pre></div>
-</div>
-</li>
-<li><p>Other API examples found in the documentation can be run with:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
-<span class="n">make</span> <span class="n">doctest</span>
 <span class="n">cd</span> <span class="o">..</span>
 </pre></div>
 </div>
@@ -259,7 +258,7 @@ this will generate an <code class="docutils literal notranslate"><span class="pr
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 29 Aug 2023. <br/>
+    Last built 04 Dec 2023. <br/>
   </p>
 </footer>
   </body>
