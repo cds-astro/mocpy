@@ -84,7 +84,7 @@ Now build package
 This step will inform you of any issue in the rust part.
 
 - After a new version of mocpy goes out, if a ``maturin develop --release`` does not actualize your
-``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
+  ``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
 
     rm Cargo.lock && cargo clean
 

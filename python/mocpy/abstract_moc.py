@@ -545,7 +545,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         See Also
         --------
-        ``from_string`` a duplicate of this method, with added ``fold`` option
+        from_string: a duplicate of this method, with added ``fold`` option
         """
         # TODO : decide if we want to remove this duplicated method
         return cls.from_string(value, format="ascii")

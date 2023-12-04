@@ -855,8 +855,8 @@ class MOC(AbstractMOC):
         ... )
         """
         index = mocpy.from_elliptical_cone(
-            lon,
-            lat,
+            lon[0],
+            lat[0],
             np.float64(a.to_value(u.deg)),
             np.float64(b.to_value(u.deg)),
             np.float64(pa.to_value(u.deg)),
@@ -908,8 +908,8 @@ class MOC(AbstractMOC):
         ... )
         """
         index = mocpy.from_cone(
-            lon,
-            lat,
+            lon[0],
+            lat[0],
             np.float64(radius.to_value(u.deg)),
             np.uint8(max_depth),
             np.uint8(delta_depth),
@@ -970,8 +970,8 @@ class MOC(AbstractMOC):
         ... )
         """
         index = mocpy.from_ring(
-            lon,
-            lat,
+            lon[0],
+            lat[0],
             np.float64(internal_radius.to_value(u.deg)),
             np.float64(external_radius.to_value(u.deg)),
             np.uint8(max_depth),
