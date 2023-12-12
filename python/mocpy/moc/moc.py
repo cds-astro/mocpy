@@ -1041,6 +1041,32 @@ class MOC(AbstractMOC):
         return cls(index)
 
     @classmethod
+    def from_stcs(cls, stcs, max_depth, delta_depth=2):
+        """
+        Create a MOC from a STC-S.
+
+
+        Parameters
+        ----------
+        stcs : str
+            The STC-S string.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+        """
+        index = mocpy.from_stcs(stcs, np.uint8(max_depth), np.uint8(delta_depth))
+        return cls(index)
+    
+    @classmethod
     def new_empty(cls, max_depth):
         """
         Create a new empty MOC of given depth.

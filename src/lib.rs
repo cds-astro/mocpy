@@ -213,6 +213,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  #[pyfn(m)]
+  pub fn from_stcs(stcs_ascii: &str, depth: u8, delta_depth: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_stcs(depth, delta_depth, stcs_ascii)
+      .map_err(PyValueError::new_err)
+  }
+
   /// Create a 1D spatial coverage from a list of uniq cells each associated with a value.
   ///
   /// The coverage computed contains the cells summing from ``cumul_from`` to ``cumul_to``.
