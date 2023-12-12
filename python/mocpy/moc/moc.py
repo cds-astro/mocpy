@@ -1045,6 +1045,19 @@ class MOC(AbstractMOC):
         """
         Create a MOC from a STC-S.
 
+        Info
+        ----
+        Time, Spectral and Redshift sub-phrases are ignored.
+
+        Warning
+        -------
+        There is so far no implicit conversion, so the STC-S string will be rejected if:
+        * the frame is different from `ICRS`
+        * the flavor is different from `Spher2`
+        * the units are different from `degrees`
+        The implementation is not (yet?) fully compliant with the STC standard (see MOC Lib rust for more details):
+        * DIFFERENCE is so far interpreted as a symmetrical difference (XOR) while it is a MINUS in the STC standard
+        * Self-intersecting Polygons are supported, and the "interior" usually has the smallest area
 
         Parameters
         ----------
@@ -1062,10 +1075,17 @@ class MOC(AbstractMOC):
         -------
         result : `~mocpy.moc.MOC`
             The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", max_depth=14)
+        >>> moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg, radius=Angle(0.4, u.deg), max_depth=14)
+        >>> assert (moc1 == moc2)
         """
         index = mocpy.from_stcs(stcs, np.uint8(max_depth), np.uint8(delta_depth))
         return cls(index)
-    
+
     @classmethod
     def new_empty(cls, max_depth):
         """

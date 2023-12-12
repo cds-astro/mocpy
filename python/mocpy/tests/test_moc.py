@@ -414,6 +414,7 @@ def test_moc_serialize_to_json(moc_from_fits_image):
 def test_serialize_to_str(moc, expected):
     assert moc.serialize(format="str") == expected
 
+
 # --- TESTING MOC plot functions ---#
 def test_mpl_fill():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
@@ -737,3 +738,14 @@ def test_from_valued_healpix_cells_bayestar_and_split():
     assert len(mocs) == 2
     for moc in mocs:
         assert moc.max_order == 11
+
+
+def test_from_stcs():
+    moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", 14, 2)
+    moc2 = MOC.from_cone(
+        lon=147.6 * u.deg,
+        lat=69.9 * u.deg,
+        radius=Angle(0.4, u.deg),
+        max_depth=14,
+    )
+    assert moc1 == moc2

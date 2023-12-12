@@ -18,8 +18,8 @@ from ..tmoc import TimeMOC
 def all_moc_types():
     """Create a fixture with a MOC of each type."""
     moc = MOC.from_str("0/0-11")
-    tmoc = TimeMOC.from_str("0/0-2")
-    fmoc = FrequencyMOC.from_str("0/0-2")
+    tmoc = TimeMOC.from_str("0/0-1")
+    fmoc = FrequencyMOC.from_str("0/0-1")
     stmoc = STMOC.from_spatial_coverages(Time("2023-11-13"), Time("2023-11-14"), moc)
     return [moc, tmoc, fmoc, stmoc]
 
@@ -89,7 +89,7 @@ def test_passing_save(all_moc_types, path):
             moc_json = json.load(f)
         # test that it is a valid dictionary
         indices = moc_json[0]["s"]["0"] if isinstance(moc, STMOC) else moc_json["0"]
-        assert {0, 1, 2}.issubset(set(indices))
+        assert {0, 1}.issubset(set(indices))
         # delete the moc we just created
         path.unlink()
         # -----
