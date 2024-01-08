@@ -33,7 +33,7 @@ jobs:
           sccache: 'true'
           rust-toolchain: nightly
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wasm-wheels
           path: dist
