@@ -19,8 +19,6 @@ jobs:
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
        uses: actions/checkout@v3
-       with:
-         ref: ${{ github.head_ref }}
      - name: "Install Rust"
        run: |
          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -56,8 +54,6 @@ jobs:
      # Checkout the project
      - name: "Checkout branch ${{ github.head_ref }}"
        uses: actions/checkout@v4
-       with:
-         ref: ${{ github.head_ref }}
      # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: "Set up Python ${{ matrix.python-version }} on MacOS"
        uses: actions/setup-python@v4
@@ -95,8 +91,6 @@ jobs:
       # Checkout the project
       - name: "Checkout branch ${{ github.head_ref }}"
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
       - name: "Set up Python ${{ matrix.python-version }} on Windows"
         uses: actions/setup-python@v4
