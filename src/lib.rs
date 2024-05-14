@@ -1450,10 +1450,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
           .zip(value_mask.as_array().into_iter().cloned()),
       )
       .filter_map(|(key_val, (mask_key, mask_val))| {
-        if mask_key & mask_val {
-          Some(key_val)
-        } else {
+        if mask_key | mask_val {
           None
+        } else {
+          Some(key_val)
         }
       });
     U64MocStore::get_global_store()
@@ -2142,6 +2142,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   fn new_empty_fmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_fmoc(depth)
+      .map_err(PyIOError::new_err)
+  }
+
+  #[pyfn(m)]
+  fn new_empty_stmoc(depth_time: u8, depth_space: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .new_empty_stmoc(depth_time, depth_space)
       .map_err(PyIOError::new_err)
   }
 
