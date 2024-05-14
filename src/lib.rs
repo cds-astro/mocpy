@@ -12,6 +12,7 @@ use pyo3::{
 };
 
 use moc::{
+  moc::range::CellSelection,
   qty::{Frequency, Hpx, MocQty, Time},
   storage::u64idx::U64MocStore,
   utils,
@@ -146,7 +147,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     delta_depth: u8,
   ) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .from_cone(lon_deg, lat_deg, radius_deg, depth, delta_depth)
+      .from_cone(
+        lon_deg,
+        lat_deg,
+        radius_deg,
+        depth,
+        delta_depth,
+        CellSelection::All,
+      )
       .map_err(PyValueError::new_err)
   }
 
@@ -180,7 +188,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     delta_depth: u8,
   ) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .from_ring(lon_deg, lat_deg, r_int_deg, r_ext_deg, depth, delta_depth)
+      .from_ring(
+        lon_deg,
+        lat_deg,
+        r_int_deg,
+        r_ext_deg,
+        depth,
+        delta_depth,
+        CellSelection::All,
+      )
       .map_err(PyValueError::new_err)
   }
 
@@ -195,7 +211,16 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     delta_depth: u8,
   ) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .from_elliptical_cone(lon_deg, lat_deg, a_deg, b_deg, pa_deg, depth, delta_depth)
+      .from_elliptical_cone(
+        lon_deg,
+        lat_deg,
+        a_deg,
+        b_deg,
+        pa_deg,
+        depth,
+        delta_depth,
+        CellSelection::All,
+      )
       .map_err(PyValueError::new_err)
   }
 
@@ -209,7 +234,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     let lon = lon_deg.as_array().into_iter().cloned();
     let lat = lat_deg.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
-      .from_polygon(lon.zip(lat), complement, depth)
+      .from_polygon(lon.zip(lat), complement, depth, CellSelection::All)
       .map_err(PyValueError::new_err)
   }
 
@@ -1339,6 +1364,100 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         !no_split,
         reverse_decent,
       )
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Get the sum of the given multiorder map values that are in the S-MOC
+  /// of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``path`` - The path of the multi-order map file.
+  ///
+  /// # Warning
+  /// * `PROBDENSITY` values are multiplied by the area of the HEALPix
+  ///   cell they are associated with to compute the values that are summed.
+  ///
+  /// # Info
+  ///
+  /// We expect the FITS file to be a BINTABLE containing a multi-order map.
+  /// In this non-flexible approach, we expect the BINTABLE extension to contains:
+  ///
+  /// ```bash
+  /// XTENSION= 'BINTABLE'           / binary table extension
+  /// BITPIX  =                    8 / array data type
+  /// NAXIS   =                    2 / number of array dimensions
+  /// AXIS1  =                    ?? / length of dimension 1
+  /// NAXIS2  =                   ?? / length of dimension 2
+  /// PCOUNT  =                    0 / number of group parameters
+  /// GCOUNT  =                    1 / number of groups
+  /// TFIELDS =                   xx / number of table fields
+  /// TTYPE1  = 'UNIQ    '
+  /// TFORM1  = 'K       '
+  /// TTYPE2  = 'PROBDENSITY'
+  /// TFORM2  = 'D       '
+  /// TUNIT2  = 'sr-1    '
+  /// ...
+  /// MOC     =                    T
+  /// PIXTYPE = 'HEALPIX '           / HEALPIX pixelisation
+  /// ORDERING= 'NUNIQ   '           / Pixel ordering scheme: RING, NESTED, or NUNIQ
+  /// COORDSYS= 'C       '           / Ecliptic, Galactic or Celestial (equatorial)
+  /// MOCORDER=                   xx / MOC resolution (best order)
+  /// ...
+  /// END
+  /// ```
+  #[pyfn(m)]
+  fn multiordermap_sum_in_smoc_from_file(index: usize, path: String) -> PyResult<f64> {
+    U64MocStore::get_global_store()
+      .multiordermap_sum_in_moc_from_path(index, path)
+      .map_err(PyIOError::new_err)
+  }
+
+  /// Get the sum of the value for the UNIQ HEAPix cells which are in
+  /// the S-MOC of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``uniq`` - UNIQ HEALPix values.
+  /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
+  /// * ``value`` - Values to be summed.
+  /// * ``value_mask`` - mask on the values to be summed.
+  ///
+  /// # Warning
+  /// * contrary to `multiordermap_sum_in_smoc_from_file`, nothing is known
+  /// about the values that are summed, so we do not multiply them be the area
+  /// of the cells
+  #[pyfn(m)]
+  fn multiordermap_sum_in_smoc(
+    index: usize,
+    uniq: PyReadonlyArrayDyn<u64>,
+    uniq_mask: PyReadonlyArrayDyn<bool>,
+    value: PyReadonlyArrayDyn<f64>,
+    value_mask: PyReadonlyArrayDyn<bool>,
+  ) -> PyResult<f64> {
+    let it = uniq
+      .as_array()
+      .into_iter()
+      .cloned()
+      .zip(value.as_array().into_iter().cloned())
+      .zip(
+        uniq_mask
+          .as_array()
+          .into_iter()
+          .cloned()
+          .zip(value_mask.as_array().into_iter().cloned()),
+      )
+      .filter_map(|(key_val, (mask_key, mask_val))| {
+        if mask_key & mask_val {
+          Some(key_val)
+        } else {
+          None
+        }
+      });
+    U64MocStore::get_global_store()
+      .multiordermap_sum_in_moc(index, it)
       .map_err(PyIOError::new_err)
   }
 
