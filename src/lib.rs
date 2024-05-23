@@ -1461,6 +1461,52 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+  /// Get the sum of the probability for the UNIQ HEAPix cells which are in
+  /// the S-MOC of given index. We assume that input values are probability densities
+  /// that we have to multiply by the cell area to get the probability value.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``uniq`` - UNIQ HEALPix values.
+  /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
+  /// * ``probdens`` - Probability densities to be converted into probabilities before being summed.
+  /// * ``probdens_mask`` - mask on the probability densities.
+  #[pyfn(m)]
+  fn multiorder_probdens_map_sum_in_smoc(
+    index: usize,
+    uniq: PyReadonlyArrayDyn<u64>,
+    uniq_mask: PyReadonlyArrayDyn<bool>,
+    probdens: PyReadonlyArrayDyn<f64>,
+    probdens_mask: PyReadonlyArrayDyn<bool>,
+  ) -> PyResult<f64> {
+    let it = uniq
+      .as_array()
+      .into_iter()
+      .cloned()
+      .zip(probdens.as_array().into_iter().cloned())
+      .zip(
+        uniq_mask
+          .as_array()
+          .into_iter()
+          .cloned()
+          .zip(probdens_mask.as_array().into_iter().cloned()),
+      )
+      .filter_map(|((uniq, dens), (mask_key, mask_val))| {
+        if mask_key | mask_val {
+          None
+        } else {
+          let (depth, _ipix) = Hpx::<u64>::from_uniq_hpx(uniq);
+          let area = (std::f64::consts::PI / 3.0) / (1_u64 << (depth << 1) as u32) as f64;
+          let proba = dens * area;
+          Some((uniq, proba))
+        }
+      });
+    U64MocStore::get_global_store()
+      .multiordermap_sum_in_moc(index, it)
+      .map_err(PyIOError::new_err)
+  }
+
   /// Deserialize a spatial MOC from a FITS file.
   ///
   /// # Arguments
