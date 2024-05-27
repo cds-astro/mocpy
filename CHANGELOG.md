@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 a column name to sum. It returns the sum of the column in the intersection between the
 MOC and the Multi-order-map. `MOC.probability_in_multiordermap_intersection` has a similar
 behavior but also converts a probability-density into a probability.
+* `STMOC.new_empty()` allows to create a new empty Space-Time MOC.
 
 ## [0.13.1]
 

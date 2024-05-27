@@ -52,6 +52,10 @@ def stmoc_xmm_dr8():
     )
 
 
+def test_new_empty():
+    assert STMOC.new_empty(0, 0).is_empty()
+
+
 def test_n_cells():
     assert STMOC.n_cells(0, "time") == 2
     assert STMOC.n_cells(0, "space") == 12
