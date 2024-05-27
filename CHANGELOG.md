@@ -18,9 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* `MOC.sum_in_multiordermap_intersection` takes an astropy table with a `UNIQ` column and
+* `MOC.sum_in_multiordermap` takes an astropy table with a `UNIQ` column and
 a column name to sum. It returns the sum of the column in the intersection between the
-MOC and the Multi-order-map. `MOC.probability_in_multiordermap_intersection` has a similar
+MOC and the Multi-order-map. `MOC.probability_in_multiordermap` has a similar
 behavior but also converts a probability-density into a probability.
 * `STMOC.new_empty()` allows to create a new empty Space-Time MOC.
 

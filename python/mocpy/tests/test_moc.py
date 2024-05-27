@@ -741,18 +741,18 @@ def test_from_valued_healpix_cells_bayestar_and_split():
         assert moc.max_order == 11
 
 
-def test_probability_in_multiordermap_intersection():
+def test_probability_in_multiordermap():
     # from path
     moc = MOC.from_str("0/4")
     fits_mom_filename = "./resources/bayestar.multiorder.fits"
-    proba = moc.probability_in_multiordermap_intersection(fits_mom_filename)
+    proba = moc.probability_in_multiordermap(fits_mom_filename)
     assert np.isclose(proba, 0.20877154164727782)
 
     # has no mask
     mom = QTable()
     mom["UNIQ"] = [4 + x for x in range(20)]
     mom["PROBDENSITY"] = [x / 10 for x in range(20)]
-    proba = moc.probability_in_multiordermap_intersection(mom)
+    proba = moc.probability_in_multiordermap(mom)
     assert np.isclose(proba, 0.41887902047863906)
 
     # is not a valid mom or path
@@ -761,16 +761,16 @@ def test_probability_in_multiordermap_intersection():
         match="An argument of type 'str', 'pathlib.Path', or "
         "'astropy.table.Table' is expected. Got '<class 'int'>'",
     ):
-        moc.probability_in_multiordermap_intersection(1)
+        moc.probability_in_multiordermap(1)
 
 
-def test_sum_in_multiordermap_intersection():
+def test_sum_in_multiordermap():
     all_sky = MOC.from_str("0/0-11")
     mom = QTable()
     range_20 = range(20)
     mom["UNIQ"] = [4 * 4**3 + x for x in range_20]
     mom["TO_SUM"] = range_20
-    assert all_sky.sum_in_multiordermap_intersection(mom, "TO_SUM") == sum(range_20)
+    assert all_sky.sum_in_multiordermap(mom, "TO_SUM") == sum(range_20)
 
 
 def test_from_stcs():

@@ -719,7 +719,7 @@ class MOC(AbstractMOC):
         )
         return cls(index)
 
-    def probability_in_multiordermap_intersection(self, multiordermap):
+    def probability_in_multiordermap(self, multiordermap):
         """Calculate the probability in the intersection between the multiordermap and the MOC.
 
         ``PROBDENSITY`` values are multiplied by the area of their associated HEALPix
@@ -752,7 +752,7 @@ class MOC(AbstractMOC):
         >>> probdensity = rng.random(20) / 100
         >>> multi_order_map = Table([uniq, probdensity], names=("UNIQ", "PROBDENSITY"))
         >>> # The probability to be in the intersection with the all sky is
-        >>> round(all_sky.probability_in_multiordermap_intersection(multi_order_map), 4)
+        >>> round(all_sky.probability_in_multiordermap(multi_order_map), 4)
         0.0004
 
         """
@@ -783,7 +783,7 @@ class MOC(AbstractMOC):
             f" is expected. Got '{type(multiordermap)}'",
         )
 
-    def sum_in_multiordermap_intersection(self, multiordermap: Table, column: str):
+    def sum_in_multiordermap(self, multiordermap: Table, column: str):
         """Calculate the sum of a column from a multiordermap in the intersection with the MOC.
 
         Parameters
@@ -811,7 +811,7 @@ class MOC(AbstractMOC):
         >>> rng = np.random.default_rng(0)
         >>> column = rng.random(200)
         >>> multi_order_map = Table([uniq, column], names=("UNIQ", "column"))
-        >>> round(all_sky.sum_in_multiordermap_intersection(multi_order_map, "column"), 4)
+        >>> round(all_sky.sum_in_multiordermap(multi_order_map, "column"), 4)
         107.9259
 
         """
