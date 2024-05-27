@@ -85,15 +85,15 @@ class STMOC(AbstractMOC):
         )
 
     @classmethod
-    def new_empty(cls, max_depth_space, max_depth_time):
+    def new_empty(cls, max_depth_time, max_depth_space):
         """Create a new empty STMOC.
 
         Parameters
         ----------
-        max_depth_space : int
-            The space resolution of the STMOC. Should be comprised between 0 and 29.
         max_depth_time : int
             The time resolution of the STMOC. Should be comprised between 0 and 61.
+        max_depth_space : int
+            The space resolution of the STMOC. Should be comprised between 0 and 29.
 
         Returns
         -------
@@ -102,7 +102,8 @@ class STMOC(AbstractMOC):
         Examples
         --------
         >>> from mocpy import STMOC
-        >>> STMOC.new_empty(12, 42)
+        >>> STMOC.new_empty(42, 12)
+        t42/ s12/
 
         """
         index = mocpy.new_empty_stmoc(
