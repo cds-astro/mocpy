@@ -63,7 +63,7 @@ jobs:
      - name: "Build and test wheel for Python ${{ matrix.python-version }} on MacOS"
        run: |
          # Install, create and activate a python virtualenv
-         rustup target add aarch64-apple-darwin
+         rustup target add x86_64-apple-darwin
          pip install virtualenv
          virtualenv mocpy-env
          source mocpy-env/bin/activate
