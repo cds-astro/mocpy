@@ -1,6 +1,7 @@
 import contextlib
 import functools
 from io import BytesIO
+from pathlib import Path
 from urllib.parse import urlencode
 
 import numpy as np
@@ -16,6 +17,7 @@ from astropy.coordinates import (
     SkyCoord,
 )
 from astropy.io import fits
+from astropy.table import Table
 from astropy.utils.data import download_file
 
 with contextlib.suppress(ImportError):
@@ -716,6 +718,120 @@ class MOC(AbstractMOC):
             reverse_decent,
         )
         return cls(index)
+
+    def probability_in_multiordermap_intersection(self, multiordermap):
+        """Calculate the probability in the intersection between the multiordermap and the MOC.
+
+        ``PROBDENSITY`` values are multiplied by the area of their associated HEALPix
+        cell before summing them. For cells that are not complete, the ratio of the area
+        is used.
+
+        Parameters
+        ----------
+        multiordermap : str, pathlib.Path, astropy.table.Table, or astropy.table.QTable
+            If ``multiordermap`` is given as a string or `~pathlib.Path`, the probability
+            will be read from the column ``PROBDENSITY`` of the FITS file.
+            If it is an `~astropy.table.Table`, then it should have a column ``UNIQ`` that
+            corresponds to HEALPix cells and a ``PROBDENSITY`` column.
+
+        Returns
+        -------
+        float
+            The probability in the intersection between the MOC and the Multi-Order-Map
+            coverages.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> from astropy.table import Table
+        >>> all_sky = MOC.from_str("0/0-11")
+        >>> # Let's create a meaningless multiorder map
+        >>> uniq = [4 * 4**4 + x for x in range(20)]
+        >>> rng = np.random.default_rng(0)
+        >>> probdensity = rng.random(20) / 100
+        >>> multi_order_map = Table([uniq, probdensity], names=("UNIQ", "PROBDENSITY"))
+        >>> # The probability to be in the intersection with the all sky is
+        >>> round(all_sky.probability_in_multiordermap_intersection(multi_order_map), 4)
+        0.0004
+
+        """
+        index = self.store_index
+
+        if isinstance(multiordermap, Table):
+            uniq = multiordermap["UNIQ"]
+            probdensity = multiordermap["PROBDENSITY"]
+            try:
+                uniq_mask = uniq.data.mask
+                probdensity_mask = probdensity.data.mask
+            except AttributeError:
+                uniq_mask = np.zeros(uniq.shape)
+                probdensity_mask = np.zeros(probdensity.shape)
+
+            return mocpy.multiorder_probdens_map_sum_in_smoc(
+                index,
+                np.array(uniq.data, dtype="uint64"),
+                np.array(uniq_mask, dtype="bool"),
+                np.array(probdensity.data, dtype="float"),
+                np.array(probdensity_mask, dtype="bool"),
+            )
+        if isinstance(multiordermap, (Path, str)):
+            return mocpy.multiordermap_sum_in_smoc_from_file(index, str(multiordermap))
+
+        raise ValueError(
+            "An argument of type 'str', 'pathlib.Path', or 'astropy.table.Table'"
+            f" is expected. Got '{type(multiordermap)}'",
+        )
+
+    def sum_in_multiordermap_intersection(self, multiordermap: Table, column: str):
+        """Calculate the sum of a column from a multiordermap in the intersection with the MOC.
+
+        Parameters
+        ----------
+        multiordermap : astropy.table.Table
+            The table should have a ``UNIQ`` that corresponds to HEALPix cells in the uniq
+            notation.
+        column : str
+            The name of the column to sum.
+
+        Returns
+        -------
+        float
+            The sum of the values in the intersection between the MOC and the
+            multiorder map coverages.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> from astropy.table import Table
+        >>> all_sky = MOC.from_str("0/0-11")
+        >>> # Let's create a meaningless multiorder map
+        >>> uniq = [4 * 4**5 + x for x in np.arange(200)]
+        >>> rng = np.random.default_rng(0)
+        >>> column = rng.random(200)
+        >>> multi_order_map = Table([uniq, column], names=("UNIQ", "column"))
+        >>> round(all_sky.sum_in_multiordermap_intersection(multi_order_map, "column"), 4)
+        107.9259
+
+        """
+        index = self.store_index
+        uniq = multiordermap["UNIQ"]
+        values_to_sum = multiordermap[column]
+        try:
+            uniq_mask = uniq.data.mask
+            values_to_sum_mask = values_to_sum.data.mask
+        except AttributeError:
+            uniq_mask = np.zeros(uniq.shape)
+            values_to_sum_mask = uniq_mask
+
+        return mocpy.multiordermap_sum_in_smoc(
+            index,
+            np.array(uniq.data, dtype="uint64"),
+            np.array(uniq_mask, dtype="bool"),
+            np.array(values_to_sum.data, dtype="float"),
+            np.array(values_to_sum_mask, dtype="bool"),
+        )
 
     @classmethod
     def from_valued_healpix_cells(

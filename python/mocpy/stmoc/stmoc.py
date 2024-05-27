@@ -39,7 +39,7 @@ class STMOC(AbstractMOC):
     @property
     def max_order(self):
         """Is a clone of max_depth, to preserve the api between moc types."""
-        return self.max_depth()
+        return self.max_depth
 
     @property
     def max_time(self):
@@ -85,10 +85,31 @@ class STMOC(AbstractMOC):
         )
 
     @classmethod
-    def new_empty(cls):
-        """Create a new empty STMOC."""
-        # TODO
-        raise NotImplementedError("This method is not implemented yet.")
+    def new_empty(cls, max_depth_space, max_depth_time):
+        """Create a new empty STMOC.
+
+        Parameters
+        ----------
+        max_depth_space : int
+            The space resolution of the STMOC. Should be comprised between 0 and 29.
+        max_depth_time : int
+            The time resolution of the STMOC. Should be comprised between 0 and 61.
+
+        Returns
+        -------
+        `~mocpy.moc.STMOC`
+
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> STMOC.new_empty(12, 42)
+
+        """
+        index = mocpy.new_empty_stmoc(
+            np.uint8(max_depth_time),
+            np.uint8(max_depth_space),
+        )
+        return cls(index)
 
     def is_empty(self):
         """Check whether the Space-Time coverage is empty."""
