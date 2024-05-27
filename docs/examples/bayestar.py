@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.coordinates import Angle, SkyCoord
 from astropy.io import fits
-
 from mocpy import MOC, WCS
 
+# this can be found in mocpy's repository
+# https://github.com/cds-astro/mocpy/blob/master/resources/bayestar.multiorder.fits
 fits_image_filename = "./../../resources/bayestar.multiorder.fits"
 
-max_order = None
 with fits.open(fits_image_filename) as hdul:
     hdul.info()
     data = hdul[1].data
@@ -18,13 +18,12 @@ with fits.open(fits_image_filename) as hdul:
 uniq = data["UNIQ"]
 probdensity = data["PROBDENSITY"]
 
-
+# let's convert the probability density into a probability
 level, ipix = ah.uniq_to_level_ipix(uniq)
 area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
-
 prob = probdensity * area
 
-
+# now we create the mocs corresponding to different probability thresholds
 cumul_to = np.linspace(0.5, 0.9, 5)[::-1]
 colors = ["blue", "green", "yellow", "orange", "red"]
 mocs = [
@@ -33,8 +32,6 @@ mocs = [
 
 
 # Plot the MOC using matplotlib
-
-
 fig = plt.figure(111, figsize=(15, 10))
 # Define a astropy WCS easily
 with WCS(
@@ -58,9 +55,7 @@ with WCS(
             label="confidence probability " + str(round(c * 100)) + "%",
         )
         moc.border(ax=ax, wcs=wcs, alpha=0.5, color=col)
-
     ax.legend()
-
 plt.xlabel("ra")
 plt.ylabel("dec")
 plt.title("Bayestar")

@@ -82,9 +82,13 @@ In this example:
 Gravitational Waves MOCs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows the probability confidence regions of gravitational waves. HEALPix cells are given under the `uniq pixel notation <http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf>`__. Each
-pixel is associated with a specific value. We can create a MOC from which a GW has x% of change of being localized in it. By definition the MOC which has 100% of chance
-of containing a GW is the full sky MOC.
+This example shows the probability confidence regions of gravitational waves.
+HEALPix cells are given under the
+`uniq pixel notation <http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf>`__.
+Each pixel is associated with a specific probability density value. We convert this into
+a probability by multiplying it with the area of each cell.
+Then, we can create a MOC from which a GW has x% of chance of being localized in it.
+By definition the MOC which has 100% of chance of containing a GW is the full sky MOC.
 
 .. plot:: examples/bayestar.py
     :include-source:
