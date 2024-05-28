@@ -16,8 +16,6 @@ jobs:
     steps:
       - name: "Checkout branch ${{ github.head_ref }}"
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - name: "Set up Python on Ubuntu"
         uses: actions/setup-python@v4
         with:
