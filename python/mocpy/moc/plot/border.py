@@ -1,19 +1,14 @@
-import numpy as np
-
-from astropy.coordinates import ICRS, SkyCoord
-
-from astropy.wcs.utils import skycoord_to_pixel
-
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-
 import cdshealpix
-
+import numpy as np
+from astropy.coordinates import ICRS, SkyCoord
+from astropy.wcs.utils import skycoord_to_pixel
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path
 
 
 def border(moc, ax, wcs, **kw_mpl_pathpatch):
     """Highlight the borders of a MOC in a plot."""
-    from .utils import build_plotting_moc, _set_wcs
+    from .utils import _set_wcs, build_plotting_moc
 
     moc_to_plot = build_plotting_moc(moc, wcs)
 
@@ -55,7 +50,8 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
     ipixels_border = ipixels_open[ipixels_border_id]
 
     ipix_lon_boundaries, ipix_lat_boundaries = cdshealpix.vertices(
-        ipixels_border, max_order,
+        ipixels_border,
+        max_order,
     )
     ipix_boundaries = SkyCoord(ipix_lon_boundaries, ipix_lat_boundaries, frame=ICRS())
 
@@ -75,22 +71,23 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
         vy = yp[i]
         if not north_border[i]:
             path_vertices_l += [(vx[0], vy[0]), (vx[1], vy[1]), (0, 0)]
-            codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+            codes += [Path.MOVETO, Path.LINETO, Path.CLOSEPOLY]
 
         if not east_border[i]:
             path_vertices_l += [(vx[1], vy[1]), (vx[2], vy[2]), (0, 0)]
-            codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+            codes += [Path.MOVETO, Path.LINETO, Path.CLOSEPOLY]
 
         if not south_border[i]:
             path_vertices_l += [(vx[2], vy[2]), (vx[3], vy[3]), (0, 0)]
-            codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+            codes += [Path.MOVETO, Path.LINETO, Path.CLOSEPOLY]
 
         if not west_border[i]:
             path_vertices_l += [(vx[3], vy[3]), (vx[0], vy[0]), (0, 0)]
-            codes += [Path.MOVETO] + [Path.LINETO] + [Path.CLOSEPOLY]
+            codes += [Path.MOVETO, Path.LINETO, Path.CLOSEPOLY]
 
-    path = Path(path_vertices_l, codes)
-    perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
+    if len(path_vertices_l) > 0:
+        path = Path(path_vertices_l, codes)
+        perimeter_patch = PathPatch(path, **kw_mpl_pathpatch)
 
-    ax.add_patch(perimeter_patch)
-    _set_wcs(ax, wcs)
+        ax.add_patch(perimeter_patch)
+        _set_wcs(ax, wcs)
