@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* `MOC.border` no does not attempt on plotting the border when the MOc is out of the
+view anymore.
+
 ### Added
 
 * `MOC.sum_in_multiordermap` takes an astropy table with a `UNIQ` column and
