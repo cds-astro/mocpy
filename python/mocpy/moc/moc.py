@@ -1031,6 +1031,57 @@ class MOC(AbstractMOC):
             np.uint8(delta_depth),
         )
         return cls(index)
+    
+    @classmethod
+    @validate_lonlat
+    def from_box(cls, lon, lat, a, b, angle, max_depth):
+        """
+        Create a MOC from a box/rectangle.
+
+        The box is centered around the (`lon`, `lat`) position.
+
+        Parameters
+        ----------
+        lon : `~astropy.coordinates.Longitude` or its supertype `~astropy.units.Quantity`
+            The longitude of the center of the cone.
+        lat : `~astropy.coordinates.Latitude` or its supertype `~astropy.units.Quantity`
+            The latitude of the center of the cone.
+        a : `~astropy.coordinates.Angle`
+            The semi-major axis of the box, i.e. half of the box's width.
+        b : `~astropy.coordinates.Angle`
+            The semi-minor axis of the box, i.e. half of the box's height.
+        angle : `astropy.coordinates.Angle`
+            The tilt angle between the north and the semi-major axis, east of north.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+
+        Returns
+        -------
+        result : `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
+        >>> moc = MOC.from_box(
+        ...  lon=Longitude("0d"),
+        ...  lat=Latitude("0d"),
+        ...  a=Angle("10d"),
+        ...  b=Angle("2d"),
+        ...  angle=Angle("30d"),
+        ...  max_depth=10
+        ... )
+        """
+        index = mocpy.from_box(
+            lon[0],
+            lat[0],
+            np.float64(a.to_value(u.deg)),
+            np.float64(b.to_value(u.deg)),
+            np.float64(angle.to_value(u.deg)),
+            np.uint8(max_depth)
+        )
+        return cls(index)
 
     @classmethod
     @validate_lonlat
