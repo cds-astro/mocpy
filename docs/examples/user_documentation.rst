@@ -93,6 +93,14 @@ By definition the MOC which has 100% of chance of containing a GW is the full sk
 .. plot:: examples/bayestar.py
     :include-source:
 
+Calculate MOC sky area
+~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to Calculate the sky area of a MOC instance.
+
+.. plot:: examples/calculate_moc_sky_area.py
+    :include-source:
+
 Performing computation on the pixels of an FITS image lying in a MOC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
