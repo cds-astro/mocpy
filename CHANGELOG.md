@@ -28,6 +28,7 @@ a column name to sum. It returns the sum of the column in the intersection betwe
 MOC and the Multi-order-map. `MOC.probability_in_multiordermap` has a similar
 behavior but also converts a probability-density into a probability.
 * `STMOC.new_empty()` allows to create a new empty Space-Time MOC.
+* `MOC.from_box` to create rectangular MOCs
 
 ## [0.13.1]
 

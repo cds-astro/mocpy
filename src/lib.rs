@@ -158,6 +158,40 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  /// Create and store a MOC from the given box.
+  ///
+  /// # Input
+  /// * `lon` the longitude of the center of the box, in degrees
+  /// * `la` the latitude of the center of the box, in degrees
+  /// * `a` the semi-major axis of the box (half the box width), in degrees
+  /// * `b` the semi-minor axis of the box (half the box height), in degrees
+  /// * `angle` the position angle (i.e. the angle between the north and the semi-major axis, east-of-north), in degrees
+  /// * `depth`: the MOC depth
+  ///
+  /// # Output
+  /// - The index in the storage
+  #[pyfn(m)]
+  pub fn from_box(
+    lon: f64,
+    lat: f64,
+    a: f64,
+    b: f64,
+    angle: f64,
+    depth: u8,
+  ) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_box(
+        lon,
+        lat,
+        a,
+        b,
+        angle,
+        depth,
+        CellSelection::All
+      )
+      .map_err(PyValueError::new_err)
+  }
+
   /// Create a spatial coverage from a given ring.
   ///
   /// # Arguments

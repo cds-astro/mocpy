@@ -1,4 +1,5 @@
 import copy
+import math
 import re
 
 import astropy.units as u
@@ -525,6 +526,17 @@ def test_from_ring():
         max_depth=10,
     )
 
+def test_from_box():
+    a = Angle("10d")
+    b = Angle("2d")
+    moc = MOC.from_box(
+        lon=Longitude("0d"), lat=Latitude("0d"),
+        a=a, b=b, angle=Angle("30d"),max_depth=10)
+    area = moc.sky_fraction * 4 * math.pi * u.steradian
+    # the moc covers a slightly bigger area than the region defined by the
+    # parameters
+    assert area.to(u.deg**2).value > 80
+    assert area.to(u.deg**2).value < 90
 
 # TODO: IMPROVE THE ALGO
 """
