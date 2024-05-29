@@ -21,6 +21,7 @@ from astropy.table import Table
 from astropy.utils.data import download_file
 
 with contextlib.suppress(ImportError):
+    import regions
     from astropy_healpix import HEALPix
 
 from .. import mocpy
@@ -1031,7 +1032,7 @@ class MOC(AbstractMOC):
             np.uint8(delta_depth),
         )
         return cls(index)
-    
+
     @classmethod
     @validate_lonlat
     def from_box(cls, lon, lat, a, b, angle, max_depth):
@@ -1079,7 +1080,7 @@ class MOC(AbstractMOC):
             np.float64(a.to_value(u.deg)),
             np.float64(b.to_value(u.deg)),
             np.float64(angle.to_value(u.deg)),
-            np.uint8(max_depth)
+            np.uint8(max_depth),
         )
         return cls(index)
 
@@ -1252,6 +1253,92 @@ class MOC(AbstractMOC):
         """
         index = mocpy.from_stcs(stcs, np.uint8(max_depth), np.uint8(delta_depth))
         return cls(index)
+
+    @classmethod
+    def from_astropy_regions(cls, region, max_depth: int):
+        """Create a SMOC from an astropy regions.
+
+        This creates the MOC of the requested order that contains entirely the astropy
+        region. See https://github.com/astropy/regions.
+
+        Parameters
+        ----------
+        region : `~regions.SkyRegion`
+            The supported sky regions are `~regions.CircleSkyRegion`,
+            `~regions.CircleAnnulusSkyRegion`, `~regions.EllipseSkyRegion`,
+            `~regions.RectangleSkyRegion`, `~regions.PolygonSkyRegion`,
+            `~regions.PointSkyRegion`.
+        max_depth : int
+            The maximum HEALPix cell resolution of the MOC. Should be comprised between
+            0 and 29.
+
+        Returns
+        -------
+        `~mocpy.moc.MOC`
+
+        Examples
+        --------
+        >>> from astropy.coordinates import SkyCoord
+        >>> point = SkyCoord("+23h20m48.3s +61d12m06s")
+        >>> point_region = regions.PointSkyRegion(point)
+        >>> moc_point = MOC.from_astropy_regions(point_region, max_depth=10)
+        >>> moc_point
+        10/3663728
+        """
+        supported_regions_types = (
+            regions.CircleSkyRegion,
+            regions.CircleAnnulusSkyRegion,
+            regions.EllipseSkyRegion,
+            regions.RectangleSkyRegion,
+            regions.PolygonSkyRegion,
+            regions.PointSkyRegion,
+        )
+        if isinstance(region, regions.CircleSkyRegion):
+            center = region.center.icrs
+            return cls.from_cone(
+                center.ra,
+                center.dec,
+                radius=region.radius,
+                max_depth=max_depth,
+            )
+        if isinstance(region, regions.CircleAnnulusSkyRegion):
+            center = region.center.icrs
+            return cls.from_ring(
+                center.ra,
+                center.dec,
+                internal_radius=region.inner_radius,
+                external_radius=region.outer_radius,
+                max_depth=max_depth,
+            )
+        if isinstance(region, regions.EllipseSkyRegion):
+            center = region.center.icrs
+            return cls.from_elliptical_cone(
+                center.ra,
+                center.dec,
+                a=region.height / 2,
+                b=region.width / 2,
+                pa=region.angle,
+                max_depth=max_depth,
+            )
+        if isinstance(region, regions.RectangleSkyRegion):
+            center = region.center.icrs
+            return cls.from_box(
+                center.ra,
+                center.dec,
+                a=region.width / 2,
+                b=region.height / 2,
+                angle=region.angle + Angle("90d"),
+                max_depth=max_depth,
+            )
+        if isinstance(region, regions.PolygonSkyRegion):
+            return cls.from_polygon_skycoord(region.vertices, max_depth=max_depth)
+        if isinstance(region, regions.PointSkyRegion):
+            return cls.from_skycoords(region.center, max_norder=max_depth)
+
+        raise ValueError(
+            "'from_astropy_regions' does not support this region type."
+            f"The supported regions are: {supported_regions_types}",
+        )
 
     @classmethod
     def new_empty(cls, max_depth):

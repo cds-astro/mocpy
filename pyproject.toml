@@ -23,6 +23,8 @@ classifiers = [
 [project.optional-dependencies]
 # optional to load FITS from URLs
 query_fits = ["requests"]
+# optional to support astropy regions
+astropy_regions = ["regions"]
 # for the documentation
 docs = [
     "astropy-sphinx-theme",
@@ -43,7 +45,8 @@ dev = [
     "pytest > 6.0",
     "pytest-mock",
     "pytest-cov",
-    "requests"
+    "requests",
+    "regions"
 ]
 # to run the notebooks
 notebooks = [

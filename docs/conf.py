@@ -248,6 +248,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/", None),
     "networkx": ("https://networkx.github.io/documentation/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "regions": ("https://astropy-regions.readthedocs.io/en/stable", None),
 }
 
 

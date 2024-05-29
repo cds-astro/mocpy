@@ -6,7 +6,8 @@ import astropy.units as u
 import cdshealpix
 import numpy as np
 import pytest
-from astropy.coordinates import Angle, SkyCoord
+import regions
+from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
 from astropy.table import QTable
@@ -526,17 +527,60 @@ def test_from_ring():
         max_depth=10,
     )
 
+
 def test_from_box():
     a = Angle("10d")
     b = Angle("2d")
     moc = MOC.from_box(
-        lon=Longitude("0d"), lat=Latitude("0d"),
-        a=a, b=b, angle=Angle("30d"),max_depth=10)
+        lon=Longitude("0d"),
+        lat=Latitude("0d"),
+        a=a,
+        b=b,
+        angle=Angle("30d"),
+        max_depth=10,
+    )
     area = moc.sky_fraction * 4 * math.pi * u.steradian
     # the moc covers a slightly bigger area than the region defined by the
     # parameters
     assert area.to(u.deg**2).value > 80
     assert area.to(u.deg**2).value < 90
+
+
+def test_from_astropy_regions():
+    center = SkyCoord(42, 43, unit="deg", frame="fk5")
+    # circle
+    circle = regions.CircleSkyRegion(center, radius=3 * u.deg)
+    moc = MOC.from_astropy_regions(circle, max_depth=10)
+    assert round(moc.barycenter().ra.value) == 42
+    assert round(moc.barycenter().dec.value) == 43
+    assert round(moc.largest_distance_from_coo_to_vertices(center).to("deg").value) == 3
+    # ring
+    ring = regions.CircleAnnulusSkyRegion(center, 3 * u.deg, 4 * u.deg)
+    moc = MOC.from_astropy_regions(ring, max_depth=9)
+    assert not moc.contains_skycoords(center)
+    # ellipse
+    ellipse = regions.EllipseSkyRegion(center, 3 * u.deg, 6 * u.deg, 10 * u.deg)
+    moc = MOC.from_astropy_regions(ellipse, max_depth=9)
+    assert moc.contains_skycoords(center)
+    assert round(moc.largest_distance_from_coo_to_vertices(center).to("deg").value) == 3
+    # rectangle
+    box = regions.RectangleSkyRegion(center, 12 * u.deg, 6 * u.deg, 10 * u.deg)
+    moc = MOC.from_astropy_regions(box, max_depth=8)
+    assert all(
+        moc.contains_skycoords(SkyCoord([42, 45], [44, 44], unit="deg", frame="icrs")),
+    )
+    # polygons
+    vertices = SkyCoord([1, 2, 2], [1, 1, 2], unit="deg", frame="fk5")
+    polygon = regions.PolygonSkyRegion(vertices)
+    moc = MOC.from_astropy_regions(polygon, max_depth=10)
+    assert all(moc.contains_skycoords(vertices))
+    # points
+    point = SkyCoord("+23h20m48.3s +61d12m06s")
+    region_point = regions.PointSkyRegion(point)
+    moc = MOC.from_astropy_regions(region_point, max_depth=10)
+    assert moc.max_order == 10
+    assert moc.contains_skycoords(point)
+
 
 # TODO: IMPROVE THE ALGO
 """
