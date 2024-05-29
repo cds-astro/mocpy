@@ -15,6 +15,7 @@ Gallery of notebooks examples using SMOCs
     ../_collections/notebooks/filtering_astropy_table
     ../_collections/notebooks/FITS-image-pixels-intersecting-MOC
     ../_collections/notebooks/from_astropy_table.ipynb
+    ../_collections/notebooks/from-astropy-regions
     ../_collections/notebooks/from_polygon
     ../_collections/notebooks/from_fits_and_intersection
     ../_collections/notebooks/from_image_with_mask
