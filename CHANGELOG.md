@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `MOC.border` no does not attempt on plotting the border when the MOc is out of the
 view anymore.
+* fix an issue where the number of references to the rust side was not
+incremented when a moc was created from a pickle file. This also solves a lot of issues
+with the multiprocessing module that calls pickle behind the scenes.
 
 ### Added
 
