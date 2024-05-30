@@ -51,11 +51,15 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
     def __deepcopy__(self, memo):
         return self.__copy__()
 
+    def __getstate__(self):
+        return self.serialize(format="json")
+
     def __setstate__(self, state):
         # this is called when a MOC is unpickled
         # we create a new ref count with copy
-        mocpy.copy(state["store_index"])
-        self.__dict__ = state
+        moc = self.from_json(state)
+        mocpy.copy(moc.store_index)
+        self.__dict__ = moc.__dict__
 
     @staticmethod
     def _store_index_dtype():
