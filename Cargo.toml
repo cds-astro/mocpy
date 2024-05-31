@@ -31,9 +31,10 @@ moc = { version = "0.14", features = ["storage"] }
 # moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
 healpix = { package = "cdshealpix", version = "0.6" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
+rayon = "1.10"
 
 [dependencies.numpy]
-version = "0.19"
+version = "0.20"
 
 [dependencies.ndarray]
 version = "0.15"
@@ -42,7 +43,7 @@ default-features = false # do not include the default features, and optionally
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.19"
+version = "0.20"
 features = ["extension-module"]
 
 [profile.release]
