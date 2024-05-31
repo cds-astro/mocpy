@@ -10,6 +10,7 @@ use pyo3::{
   prelude::{pymodule, Py, PyModule, PyResult, Python},
   types::{PyBytes, PyTuple},
 };
+use rayon::prelude::*;
 
 use moc::{
   moc::range::CellSelection,
@@ -171,24 +172,9 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Output
   /// - The index in the storage
   #[pyfn(m)]
-  pub fn from_box(
-    lon: f64,
-    lat: f64,
-    a: f64,
-    b: f64,
-    angle: f64,
-    depth: u8,
-  ) -> PyResult<usize> {
+  pub fn from_box(lon: f64, lat: f64, a: f64, b: f64, angle: f64, depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
-      .from_box(
-        lon,
-        lat,
-        a,
-        b,
-        angle,
-        depth,
-        CellSelection::All
-      )
+      .from_box(lon, lat, a, b, angle, depth, CellSelection::All)
       .map_err(PyValueError::new_err)
   }
 
@@ -1539,6 +1525,60 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     U64MocStore::get_global_store()
       .multiordermap_sum_in_moc(index, it)
       .map_err(PyIOError::new_err)
+  }
+
+  /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
+  #[pyfn(m)]
+  fn multi_multiorder_probdens_map_sum_in_smoc(
+    py: Python,
+    indices: PyReadonlyArrayDyn<usize>,
+    uniq: PyReadonlyArrayDyn<u64>,
+    uniq_mask: PyReadonlyArrayDyn<bool>,
+    probdens: PyReadonlyArrayDyn<f64>,
+    probdens_mask: PyReadonlyArrayDyn<bool>,
+  ) -> PyResult<Py<PyArray1<f64>>> {
+    // Create MOM
+    let mom: Vec<(u64, f64)> = uniq
+      .as_array()
+      .into_iter()
+      .cloned()
+      .zip(probdens.as_array().into_iter().cloned())
+      .zip(
+        uniq_mask
+          .as_array()
+          .into_iter()
+          .cloned()
+          .zip(probdens_mask.as_array().into_iter().cloned()),
+      )
+      .filter_map(|((uniq, dens), (mask_key, mask_val))| {
+        if mask_key | mask_val {
+          None
+        } else {
+          let (depth, _ipix) = Hpx::<u64>::from_uniq_hpx(uniq);
+          let area = (std::f64::consts::PI / 3.0) / (1_u64 << (depth << 1) as u32) as f64;
+          let proba = dens * area;
+          Some((uniq, proba))
+        }
+      })
+      .collect();
+    let comp = |mom: Vec<(u64, f64)>, indices: &[usize]| {
+      indices
+        .par_iter()
+        .map(|index| {
+          U64MocStore::get_global_store().multiordermap_sum_in_moc(*index, mom.iter().cloned())
+        })
+        .collect::<Result<Vec<f64>, String>>()
+    };
+    match indices.as_slice() {
+      Ok(indices) => comp(mom, indices),
+      Err(_) => {
+        // Make first a copy :o/
+        let indices = indices.as_array().iter().cloned().collect::<Vec<usize>>();
+        comp(mom, indices.as_ref())
+      }
+    }
+    .map_err(PyIOError::new_err)
+    .map(|probas| PyArray1::<f64>::from_vec(py, probas).to_owned())
   }
 
   /// Deserialize a spatial MOC from a FITS file.
