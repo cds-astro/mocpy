@@ -723,6 +723,7 @@ class MOC(AbstractMOC):
     @classmethod
     def probabilities_in_multiordermap(cls, mocs, multiordermap, n_threads=None):
         """Calculate the probabilities in the intersection between the multiordermap and the given MOCs.
+
         Multi-MOC version of `probability_in_multiordermap`
 
         Parameters
@@ -1221,6 +1222,29 @@ class MOC(AbstractMOC):
             lat=skycoord.icrs.dec,
             max_depth=np.uint8(max_depth),
         )
+
+    @classmethod
+    def from_polygons(cls, lon_lat_list, max_depth=10, n_threads=None):
+        """
+        Create a MOC list from polygons.
+
+        Parameters
+        ----------
+        lon_lat_list :
+            A list alternating between an array of `astropy.coordinates.Longitude`
+            and an array of `astropy.coordinates.Latitude` suche that the list looks like:
+            [longitudes_polygon_1, latitudes_polygon_1, longitudes_polygon_2, latitudes_polygon_2, ... longitudes_polygon_n, latitudes_polygon_n]
+         max_depth : int, optional
+            The resolution of the MOC. Set to 10 by default.
+        n_threads : int, optional
+            The number of threads to be used
+        """
+        indices = mocpy.from_polygons(lon_lat_list, np.uint8(max_depth), n_threads)
+
+        def moc_from_index(index):
+            return cls(index)
+
+        return list(map(moc_from_index, indices))
 
     @classmethod
     @validate_lonlat
