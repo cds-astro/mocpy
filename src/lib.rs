@@ -266,9 +266,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     depth: u8,
     n_threads: Option<u16>,
   ) -> PyResult<Vec<usize>> {
+    #[cfg(not(target_arch = "wasm32"))]
     let n_threads = n_threads
       .map(|v| v as usize)
       .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+    #[cfg(not(target_arch = "wasm32"))]
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
@@ -285,21 +287,38 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       })
       .collect::<Result<Vec<(&[f64], &[f64])>, String>>()
       .map_err(PyIOError::new_err)?;
-    pool
-      .install(|| {
-        lon_lat_deg
-          .par_iter()
-          .map(|(lon, lat)| {
-            U64MocStore::get_global_store().from_polygon(
-              lon.iter().cloned().zip(lat.iter().cloned()),
-              false,
-              depth,
-              CellSelection::All,
-            )
-          })
-          .collect::<Result<Vec<usize>, String>>()
-      })
-      .map_err(PyIOError::new_err)
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+      pool
+        .install(|| {
+          lon_lat_deg
+            .par_iter()
+            .map(|(lon, lat)| {
+              U64MocStore::get_global_store().from_polygon(
+                lon.iter().cloned().zip(lat.iter().cloned()),
+                false,
+                depth,
+                CellSelection::All,
+              )
+            })
+            .collect::<Result<Vec<usize>, String>>()
+        })
+        .map_err(PyIOError::new_err)
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+      lon_lat_deg
+        .par()
+        .map(|(lon, lat)| {
+          U64MocStore::get_global_store().from_polygon(
+            lon.iter().cloned().zip(lat.iter().cloned()),
+            false,
+            depth,
+            CellSelection::All,
+          )
+        })
+        .collect::<Result<Vec<usize>, String>>()
+    }
   }
 
   #[pyfn(m)]
@@ -1582,9 +1601,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     probdens_mask: PyReadonlyArrayDyn<bool>,
     n_threads: Option<u16>,
   ) -> PyResult<Py<PyArray1<f64>>> {
+    #[cfg(not(target_arch = "wasm32"))]
     let n_threads = n_threads
       .map(|v| v as usize)
       .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+    #[cfg(not(target_arch = "wasm32"))]
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
@@ -1613,6 +1634,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         }
       })
       .collect();
+    #[cfg(not(target_arch = "wasm32"))]
     let comp = |mom: Vec<(u64, f64)>, indices: &[usize]| {
       pool.install(|| {
         indices
@@ -1622,6 +1644,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
           })
           .collect::<Result<Vec<f64>, String>>()
       })
+    };
+    #[cfg(target_arch = "wasm32")]
+    let comp = |mom: Vec<(u64, f64)>, indices: &[usize]| {
+      indices
+        .iter()
+        .map(|index| {
+          U64MocStore::get_global_store().multiordermap_sum_in_moc(*index, mom.iter().cloned())
+        })
+        .collect::<Result<Vec<f64>, String>>()
     };
     match indices.as_slice() {
       Ok(indices) => comp(mom, indices),
