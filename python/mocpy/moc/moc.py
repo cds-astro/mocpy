@@ -720,6 +720,54 @@ class MOC(AbstractMOC):
         )
         return cls(index)
 
+    @classmethod
+    def probabilities_in_multiordermap(cls, mocs, multiordermap, n_threads=None):
+        """Calculate the probabilities in the intersection between the multiordermap and the given MOCs.
+        Multi-MOC version of `probability_in_multiordermap`
+
+        Parameters
+        ----------
+        mocs: a list of MOCs
+        multiordermap : astropy.table.Table, or astropy.table.QTable
+            Should have a column ``UNIQ`` that
+            corresponds to HEALPix cells and a ``PROBDENSITY`` column.
+        n_threads: number of threads to be used (all available threads by default)
+        """
+
+        def get_store_index(moc):
+            return moc.store_index
+
+        indices = np.array("i", map(get_store_index, mocs))
+
+        if isinstance(multiordermap, Table):
+            uniq = multiordermap["UNIQ"]
+            probdensity = multiordermap["PROBDENSITY"]
+            try:
+                uniq_mask = uniq.data.mask
+                probdensity_mask = probdensity.data.mask
+            except AttributeError:
+                uniq_mask = np.zeros(uniq.shape)
+                probdensity_mask = np.zeros(probdensity.shape)
+
+            store_indices = mocpy.multiorder_probdens_map_sum_in_smoc(
+                indices,
+                np.array(uniq.data, dtype="uint64"),
+                np.array(uniq_mask, dtype="bool"),
+                np.array(probdensity.data, dtype="float"),
+                np.array(probdensity_mask, dtype="bool"),
+                n_threads,
+            )
+
+            def moc_from_index(index):
+                return cls(index)
+
+            return list(map(moc_from_index, store_indices.tolist()))
+
+        raise ValueError(
+            "An argument of type 'astropy.table.Table'"
+            f" is expected. Got '{type(multiordermap)}'",
+        )
+
     def probability_in_multiordermap(self, multiordermap):
         """Calculate the probability in the intersection between the multiordermap and the MOC.
 
