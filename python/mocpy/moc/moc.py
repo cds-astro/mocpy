@@ -722,51 +722,59 @@ class MOC(AbstractMOC):
 
     @classmethod
     def probabilities_in_multiordermap(cls, mocs, multiordermap, n_threads=None):
-        """Calculate the probabilities in the intersection between the multiordermap and the given MOCs.
+        """Calculate the probabilities in the intersection between the multiordermap and the MOCs.
 
-        Multi-MOC version of `probability_in_multiordermap`
+        Multi-MOC version of `probability_in_multiordermap`. This is parallelized.
 
         Parameters
         ----------
-        mocs: a list of MOCs
+        mocs : list[mocpy.MOC]
+            A list of `mocpy.MOC`.
         multiordermap : astropy.table.Table, or astropy.table.QTable
             Should have a column ``UNIQ`` that
             corresponds to HEALPix cells and a ``PROBDENSITY`` column.
-        n_threads: number of threads to be used (all available threads by default)
+        n_threads : int
+            Number of threads to be used (all available threads by default)
+
+        Returns
+        -------
+        list[float]
+            A list containing the probability for each MOC
+
+        Notes
+        -----
+        In wasm compilations (ex for pyodide), this won't raise an error, but will be
+        single-threaded.
+
         """
-
-        def get_store_index(moc):
-            return moc.store_index
-
-        indices = np.array("i", map(get_store_index, mocs))
-
-        if isinstance(multiordermap, Table):
-            uniq = multiordermap["UNIQ"]
-            probdensity = multiordermap["PROBDENSITY"]
-            try:
-                uniq_mask = uniq.data.mask
-                probdensity_mask = probdensity.data.mask
-            except AttributeError:
-                uniq_mask = np.zeros(uniq.shape)
-                probdensity_mask = np.zeros(probdensity.shape)
-
-            store_indices = mocpy.multiorder_probdens_map_sum_in_smoc(
-                indices,
-                np.array(uniq.data, dtype="uint64"),
-                np.array(uniq_mask, dtype="bool"),
-                np.array(probdensity.data, dtype="float"),
-                np.array(probdensity_mask, dtype="bool"),
-                n_threads,
+        if not isinstance(multiordermap, Table):
+            raise ValueError(
+                "An argument of type 'astropy.table.Table'"
+                f" is expected. Got '{type(multiordermap)}'",
             )
 
-            def moc_from_index(index):
-                return cls(index)
+        indices = np.array(
+            [moc.store_index for moc in mocs],
+            dtype=cls._store_index_dtype(),
+        )
 
-            return list(map(moc_from_index, store_indices.tolist()))
+        uniq = multiordermap["UNIQ"]
+        probdensity = multiordermap["PROBDENSITY"]
 
-        raise ValueError(
-            "An argument of type 'astropy.table.Table'"
-            f" is expected. Got '{type(multiordermap)}'",
+        try:
+            uniq_mask = uniq.data.mask
+            probdensity_mask = probdensity.data.mask
+        except AttributeError:
+            uniq_mask = np.zeros(uniq.shape)
+            probdensity_mask = np.zeros(probdensity.shape)
+
+        return mocpy.multi_multiorder_probdens_map_sum_in_smoc(
+            indices,
+            np.array(uniq.data, dtype="uint64"),
+            np.array(uniq_mask, dtype="bool"),
+            np.array(probdensity.data, dtype="float"),
+            np.array(probdensity_mask, dtype="bool"),
+            n_threads,
         )
 
     def probability_in_multiordermap(self, multiordermap):
@@ -804,6 +812,11 @@ class MOC(AbstractMOC):
         >>> # The probability to be in the intersection with the all sky is
         >>> round(all_sky.probability_in_multiordermap(multi_order_map), 4)
         0.0004
+
+        See Also
+        --------
+        probabilities_in_multiordermap: makes this calculation for a list of MOCs in a
+        parallelized way.
 
         """
         index = self.store_index
