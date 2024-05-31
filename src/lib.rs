@@ -259,6 +259,49 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  // Vec: lon_array_1, lat_array_1, lon_array_2, lat_array_2, ..., lon_array_b, lat_array_n
+  #[pyfn(m)]
+  pub fn from_polygons(
+    lon_lat_deg: Vec<PyReadonlyArrayDyn<f64>>,
+    depth: u8,
+    n_threads: Option<u16>,
+  ) -> PyResult<Vec<usize>> {
+    let n_threads = n_threads
+      .map(|v| v as usize)
+      .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+    let pool = rayon::ThreadPoolBuilder::new()
+      .num_threads(n_threads)
+      .build()
+      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+    let lon_lat_deg = lon_lat_deg
+      .iter()
+      .step_by(2)
+      .zip(lon_lat_deg.iter().skip(1).step_by(2))
+      .map(|(lon, lat)| match (lon.as_slice(), lat.as_slice()) {
+        (Ok(lon), Ok(lat)) => Ok((lon, lat)),
+        _ => Err(String::from(
+          "Polygon vertices coordinates must be contiguous and in standard order.",
+        )),
+      })
+      .collect::<Result<Vec<(&[f64], &[f64])>, String>>()
+      .map_err(PyIOError::new_err)?;
+    pool
+      .install(|| {
+        lon_lat_deg
+          .par_iter()
+          .map(|(lon, lat)| {
+            U64MocStore::get_global_store().from_polygon(
+              lon.iter().cloned().zip(lat.iter().cloned()),
+              false,
+              depth,
+              CellSelection::All,
+            )
+          })
+          .collect::<Result<Vec<usize>, String>>()
+      })
+      .map_err(PyIOError::new_err)
+  }
+
   #[pyfn(m)]
   pub fn from_stcs(stcs_ascii: &str, depth: u8, delta_depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
