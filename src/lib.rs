@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 use ndarray::Array;
+use num_threads::num_threads;
 use numpy::{
   IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyReadonlyArray1,
   PyReadonlyArray2, PyReadonlyArrayDyn,
@@ -1536,7 +1537,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     uniq_mask: PyReadonlyArrayDyn<bool>,
     probdens: PyReadonlyArrayDyn<f64>,
     probdens_mask: PyReadonlyArrayDyn<bool>,
+    n_threads: Option<u16>,
   ) -> PyResult<Py<PyArray1<f64>>> {
+    let n_threads = n_threads
+      .map(|v| v as usize)
+      .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+    let pool = rayon::ThreadPoolBuilder::new()
+      .num_threads(n_threads)
+      .build()
+      .map_err(|e| PyIOError::new_err(e.to_string()))?;
     // Create MOM
     let mom: Vec<(u64, f64)> = uniq
       .as_array()
@@ -1562,12 +1571,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       })
       .collect();
     let comp = |mom: Vec<(u64, f64)>, indices: &[usize]| {
-      indices
-        .par_iter()
-        .map(|index| {
-          U64MocStore::get_global_store().multiordermap_sum_in_moc(*index, mom.iter().cloned())
-        })
-        .collect::<Result<Vec<f64>, String>>()
+      pool.install(|| {
+        indices
+          .par_iter()
+          .map(|index| {
+            U64MocStore::get_global_store().multiordermap_sum_in_moc(*index, mom.iter().cloned())
+          })
+          .collect::<Result<Vec<f64>, String>>()
+      })
     };
     match indices.as_slice() {
       Ok(indices) => comp(mom, indices),
