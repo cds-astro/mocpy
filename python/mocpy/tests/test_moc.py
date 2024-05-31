@@ -820,6 +820,18 @@ def test_probability_in_multiordermap():
         moc.probability_in_multiordermap(1)
 
 
+def test_probabilities_in_multiordermap():
+    moc = MOC.from_str("0/4")
+    mocs = [moc, moc]
+
+    mom = QTable()
+    mom["UNIQ"] = [4 + x for x in range(20)]
+    mom["PROBDENSITY"] = [x / 10 for x in range(20)]
+    proba = moc.probability_in_multiordermap(mom)
+    list_probas = MOC.probabilities_in_multiordermap(mocs, mom)
+    assert proba == list_probas[0]
+
+
 def test_sum_in_multiordermap():
     all_sky = MOC.from_str("0/0-11")
     mom = QTable()
