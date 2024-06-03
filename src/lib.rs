@@ -308,7 +308,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     #[cfg(target_arch = "wasm32")]
     {
       lon_lat_deg
-        .par()
+        .iter()
         .map(|(lon, lat)| {
           U64MocStore::get_global_store().from_polygon(
             lon.iter().cloned().zip(lat.iter().cloned()),
