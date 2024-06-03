@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 use ndarray::Array;
+#[cfg(not(target_arch = "wasm32"))]
 use num_threads::num_threads;
 use numpy::{
   IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyReadonlyArray1,
@@ -11,6 +12,7 @@ use pyo3::{
   prelude::{pymodule, Py, PyModule, PyResult, Python},
   types::{PyBytes, PyTuple},
 };
+#[cfg(not(target_arch = "wasm32"))]
 use rayon::prelude::*;
 
 use moc::{
@@ -318,6 +320,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
+        .map_err(PyIOError::new_err)
     }
   }
 
