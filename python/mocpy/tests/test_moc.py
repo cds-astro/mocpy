@@ -207,11 +207,6 @@ def get_random_skycoords(size):
     )
 
 
-skycoords1 = get_random_skycoords(size=1000)
-skycoords2 = get_random_skycoords(size=2000)
-skycoords3 = get_random_skycoords(size=50000)
-
-
 @pytest.fixture()
 def skycoords_gen_f():
     def gen_f(size):
