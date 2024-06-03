@@ -13,7 +13,7 @@ jobs:
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
-    container: quay.io/pypa/manylinux2014_x86_64
+    container: quay.io/pypa/manylinux_2_28_x86_64:latest
     steps:
      - name: "Checkout the full project"
        uses: actions/checkout@v3
@@ -23,16 +23,15 @@ jobs:
      - name: "Build and publish wheels"
        shell: bash
        env:
-        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-        MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+        MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
        run: |
          source $HOME/.cargo/env
          rustup target add wasm32-unknown-emscripten
          for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux_2_28
+           # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
          done
 
   # Linux is specific: because of manylinux, we have to use a docker file
@@ -42,8 +41,7 @@ jobs:
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
     env:
-      MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-      MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+      MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
       img: quay.io/pypa/manylinux2014_i686
     steps:
      - name: Checkout
@@ -54,8 +52,7 @@ jobs:
      - name: Install dependencies
        run: |
          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-         -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
-         -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
+         -e MATURIN_PYPI_TOKEN=${{ secrets.PYPI_API_TOKEN_FXP }} \
          ${{ env.img }} \
          bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
            source $HOME/.cargo/env && \
@@ -64,15 +61,14 @@ jobs:
              "${PYBIN}/pip" install --upgrade pip
              "${PYBIN}/pip" install maturin
              "${PYBIN}/maturin" -V
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME"
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility manylinux2014
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility musllinux_1_2
            done'
 
   build-aarch64-wheels:
     runs-on: ubuntu-latest
     env:
-      MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-      MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+      MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
       img: quay.io/pypa/manylinux2014_aarch64
     steps:
      - name: Checkout
@@ -83,8 +79,7 @@ jobs:
      - name: Install dependencies
        run: |
          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-         -e MATURIN_USERNAME=${{ env.MATURIN_USERNAME }} \
-         -e MATURIN_PASSWORD=${{ env.MATURIN_PASSWORD}} \
+         -e MATURIN_PYPI_TOKEN=${{ secrets.PYPI_API_TOKEN_FXP }} \
          ${{ env.img }} \
          bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-host aarch64-unknown-linux-gnu -y && \
            source $HOME/.cargo/env && \
@@ -92,8 +87,8 @@ jobs:
              echo "Loop on PYBIN: $PYBIN"
              "${PYBIN}/pip" install maturin
              "${PYBIN}/maturin" -V
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --username "$MATURIN_USERNAME" --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility manylinux2014 --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
+             "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2 --target aarch64-unknown-linux-gnu --config "net.git-fetch-with-cli = true"
            done'
 
   build-windows-wheels:
@@ -119,17 +114,16 @@ jobs:
        # line is not the same for macos and for windows. We should create 2 different actions (see
        # https://docs.github.com/en/actions/reference/encrypted-secrets )
        env:
-        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-        MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+        MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
        run: |
          #python3 -m pip install maturin
          pip install --upgrade pip
          pip install maturin
          #maturin build --release --no-sdist
-         #maturin publish --no-sdist --skip-existing --username fxpineau
+         #maturin publish --no-sdist --skip-existing
          maturin -V
          rustc -vV
-         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing --username fxpineau
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing
 
   build-macos-wheels:
     runs-on: ${{ matrix.os }}
@@ -154,14 +148,13 @@ jobs:
        # line is not the same for macos and for windows. We should create 2 different actions (see
        # https://docs.github.com/en/actions/reference/encrypted-secrets )
        env:
-        MATURIN_USERNAME: ${{ secrets.PYPI_USERNAME_FXP }}
-        MATURIN_PASSWORD: ${{ secrets.PYPI_PASSWORD_FXP }}
+        MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
        run: |
          #python3 -m pip install maturin
          rustup target add x86_64-apple-darwin
          pip install --upgrade pip
          pip install maturin
          maturin -V
-         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --target universal2-apple-darwin --skip-existing  --username "$MATURIN_USERNAME"
-         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing  --username "$MATURIN_USERNAME"
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --target universal2-apple-darwin --skip-existing
+         maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing
 
