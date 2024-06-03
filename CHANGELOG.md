@@ -30,6 +30,10 @@ with the multiprocessing module that calls pickle behind the scenes.
 a column name to sum. It returns the sum of the column in the intersection between the
 MOC and the Multi-order-map. `MOC.probability_in_multiordermap` has a similar
 behavior but also converts a probability-density into a probability.
+* added `MOC.probabilities_in_multiordermap`, which is a multithreaded (on the Rust side) version of
+`MOC.probability_in_multiordermap`.
+* `MOC.from_polygons` now allows to create more efficiently some SpaceMOCs from a list a
+of polygons.
 * `STMOC.new_empty()` allows to create a new empty Space-Time MOC.
 * `MOC.from_box` to create rectangular MOCs
 * `MOC.from_astropy_regions` to create MOCs from astropy regions.
