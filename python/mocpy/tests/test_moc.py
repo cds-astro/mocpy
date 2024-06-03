@@ -250,6 +250,18 @@ def test_from_healpix_cells():
     MOC.from_healpix_cells(max_depth=29, ipix=ipix, depth=depth)
 
 
+def test_from_polygons():
+    list_vertices = [
+        SkyCoord([-4, 4, 4, -4], [4, 4, -4, -4], unit="deg"),
+        SkyCoord([0, 6, 0, -6], [6, 0, -6, 0], unit="deg"),
+    ]
+    list_mocs = MOC.from_polygons(list_vertices)
+    assert all(
+        moc.barycenter().separation(SkyCoord(0, 0, unit="deg")) < 0.1 * u.arcmin
+        for moc in list_mocs
+    )
+
+
 def test_moc_from_fits():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
     MOC.load(fits_path, "fits")
