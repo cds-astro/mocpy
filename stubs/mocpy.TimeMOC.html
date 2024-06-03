@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.TimeMOC &#8212; MOCPy 0.13.1 documentation</title>
+    <title>mocpy.TimeMOC &#8212; MOCPy 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../_static/documentation_options.js?v=b4617fb1"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/documentation_options.js?v=9e420a66"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.13.1 documentation</a>
+	<a href="../index.html">MOCPy 0.14.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -142,7 +142,7 @@ a lot of time without big pauses.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
 If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
@@ -165,12 +165,12 @@ If <code class="docutils literal notranslate"><span class="pre">keep_inside</spa
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
 If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -256,7 +256,7 @@ performing the tmoc diff.</p>
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMoc to substract from self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -442,15 +442,15 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
 </dd>
-<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -467,16 +467,16 @@ is able to discriminate two observations separated by <code class="docutils lite
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges_approx">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges_approx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges_approx" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <p>Uses the following approximation: simple take the JD time and multiply by the number of microseconds in a day.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
 </dd>
-<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -493,13 +493,13 @@ is able to discriminate two observations separated by <code class="docutils lite
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_times">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t=&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tdb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_times" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Astropy observation times</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Astropy observation times</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>The duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>The duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -546,7 +546,7 @@ to set a time resolution for performing the tmoc intersection</p>
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMOC used for performing the intersection with self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -595,11 +595,11 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.max_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.max_time" title="Link to this definition">¶</a></dt>
-<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation.</p>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></span></dt><dd><p>time of the last observation</p>
+<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></span></dt><dd><p>time of the last observation</p>
 </dd>
 </dl>
 </dd>
@@ -615,11 +615,11 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.min_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.min_time" title="Link to this definition">¶</a></dt>
-<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation.</p>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation.</p>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>time of the first observation</p>
+<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>time of the first observation</p>
 </dd>
 </dl>
 </dd>
@@ -684,7 +684,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time equivalent to <code class="docutils literal notranslate"><span class="pre">order</span></code></p>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time equivalent to <code class="docutils literal notranslate"><span class="pre">order</span></code></p>
 </dd>
 </dl>
 </dd>
@@ -702,7 +702,7 @@ time (at the mouse position).</p>
 <dd class="field-odd"><dl>
 <dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Set to ‘TimeMoc’ by default.</p>
 </dd>
-<dt><strong>view</strong><span class="classifier">(<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>), optional</span></dt><dd><p>Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
+<dt><strong>view</strong><span class="classifier">(<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>), optional</span></dt><dd><p>Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
 all the observation time window is rendered).</p>
 </dd>
 </dl>
@@ -767,7 +767,7 @@ Default to False.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -803,7 +803,7 @@ Default to False.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>delta_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time to convert</p>
+<dt><strong>delta_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time to convert</p>
 </dd>
 </dl>
 </dd>
@@ -854,7 +854,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>duration</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>total duration of all the observation times of the tmoc
+<dt><strong>duration</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>total duration of all the observation times of the tmoc
 total duration of all the observation times of the tmoc</p>
 </dd>
 </dl>
@@ -895,7 +895,7 @@ to set a time resolution for performing the tmoc union</p>
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMOC</span></code></span></dt><dd><p>the MOC/TimeMoc to bind to self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMoc order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -1044,8 +1044,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 04 Dec 2023. <br/>
+    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 03 Jun 2024. <br/>
   </p>
 </footer>
   </body>

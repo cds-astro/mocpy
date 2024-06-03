@@ -15,6 +15,7 @@ Gallery of notebooks examples using SMOCs
     ../_collections/notebooks/filtering_astropy_table
     ../_collections/notebooks/FITS-image-pixels-intersecting-MOC
     ../_collections/notebooks/from_astropy_table.ipynb
+    ../_collections/notebooks/from-astropy-regions
     ../_collections/notebooks/from_polygon
     ../_collections/notebooks/from_fits_and_intersection
     ../_collections/notebooks/from_image_with_mask
@@ -82,11 +83,23 @@ In this example:
 Gravitational Waves MOCs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows the probability confidence regions of gravitational waves. HEALPix cells are given under the `uniq pixel notation <http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf>`__. Each
-pixel is associated with a specific value. We can create a MOC from which a GW has x% of change of being localized in it. By definition the MOC which has 100% of chance
-of containing a GW is the full sky MOC.
+This example shows the probability confidence regions of gravitational waves.
+HEALPix cells are given under the
+`uniq pixel notation <http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf>`__.
+Each pixel is associated with a specific probability density value. We convert this into
+a probability by multiplying it with the area of each cell.
+Then, we can create a MOC from which a GW has x% of chance of being localized in it.
+By definition the MOC which has 100% of chance of containing a GW is the full sky MOC.
 
 .. plot:: examples/bayestar.py
+    :include-source:
+
+Calculate MOC sky area
+~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to Calculate the sky area of a MOC instance.
+
+.. plot:: examples/calculate_moc_sky_area.py
     :include-source:
 
 Performing computation on the pixels of an FITS image lying in a MOC

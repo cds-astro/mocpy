@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.MOC &#8212; MOCPy 0.13.1 documentation</title>
+    <title>mocpy.MOC &#8212; MOCPy 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../_static/documentation_options.js?v=b4617fb1"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/documentation_options.js?v=9e420a66"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.13.1 documentation</a>
+	<a href="../index.html">MOCPy 0.14.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
@@ -117,7 +117,7 @@ python dictionary (see <a class="reference internal" href="#mocpy.MOC.from_json"
 </ul>
 <ol class="arabic simple" start="4">
 <li><p>Get the sky coordinates defining the border(s) of <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects (see <a class="reference internal" href="#mocpy.MOC.get_boundaries" title="mocpy.MOC.get_boundaries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code></a>).</p></li>
-<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
+<li><p>Serialize <code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> objects to <a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary and save it to a file.</p></li>
 </ol>
 <p>Is a Spatial Coverage (S-MOC).</p>
 <dl class="simple">
@@ -151,16 +151,16 @@ store_index: index of the S-MOC in the rust-side storage</p>
 <span class="sig-name descname"><span class="pre">border</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wcs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw_mpl_pathpatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.border"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.border" title="Link to this definition">¶</a></dt>
 <dd><p>Draw the MOC border.s on a matplotlib axis.</p>
 <p>This performs the projection of the sky coordinates defining the perimeter of the MOC to the pixel image coordinate system.
-You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
+You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
 (see the <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch">list of valid keywords</a>).</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
-<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a></p>
+<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a></p>
 </dd>
 </dl>
 </dd>
@@ -209,9 +209,9 @@ Please consider switching.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array in deg</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array in deg</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array in deg</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array in deg</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the mask describes coordinates lying inside the MOC. If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code>
 is false, contains will return the mask of the coordinates lying outside the MOC.</p>
@@ -240,9 +240,9 @@ is false, contains will return the mask of the coordinates lying outside the MOC
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array in deg</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Right ascension array in deg</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array in deg</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>Declination array in deg</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the mask describes coordinates lying inside the MOC. If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code>
 is false, contains will return the mask of the coordinates lying outside the MOC.</p>
@@ -291,7 +291,7 @@ is false, contains will return the mask of the coordinates lying outside the MOC
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will be tested.</p>
+<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will be tested.</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the mask describes coordinates lying inside the MOC. If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code>
 is false, contains will return the mask of the coordinates lying outside the MOC.</p>
@@ -421,16 +421,16 @@ instead of modifying the existing one.</p>
 <span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wcs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw_mpl_pathpatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.fill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.fill" title="Link to this definition">¶</a></dt>
 <dd><p>Draw the MOC on a matplotlib axis.</p>
 <p>This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
-You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
+You are able to specify various styling kwargs for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>
 (see the <a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch">list of valid keywords</a>).</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></span></dt><dd><p>Matplotlib axis.</p>
 </dd>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.wcs.WCS</span></code></a></span></dt><dd><p>WCS defining the World system &lt;-&gt; Image system projection.</p>
 </dd>
-<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>.</p>
+<dt><strong>kw_mpl_pathpatch</strong></dt><dd><p>Plotting arguments for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.patches.PathPatch</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -461,6 +461,86 @@ You are able to specify various styling kwargs for <a class="reference external"
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.from_astropy_regions">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_astropy_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_astropy_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_astropy_regions" title="Link to this definition">¶</a></dt>
+<dd><p>Create a SMOC from an astropy regions.</p>
+<p>This creates the MOC of the requested order that contains entirely the astropy
+region. See <a class="reference external" href="https://github.com/astropy/regions">https://github.com/astropy/regions</a>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>region</strong><span class="classifier"><a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.SkyRegion.html#regions.SkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyRegion</span></code></a></span></dt><dd><p>The supported sky regions are <a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.CircleSkyRegion.html#regions.CircleSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CircleSkyRegion</span></code></a>,
+<a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.CircleAnnulusSkyRegion.html#regions.CircleAnnulusSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CircleAnnulusSkyRegion</span></code></a>, <a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.EllipseSkyRegion.html#regions.EllipseSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EllipseSkyRegion</span></code></a>,
+<a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.RectangleSkyRegion.html#regions.RectangleSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RectangleSkyRegion</span></code></a>, <a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.PolygonSkyRegion.html#regions.PolygonSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PolygonSkyRegion</span></code></a>,
+<a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/api/regions.PointSkyRegion.html#regions.PointSkyRegion" title="(in regions v0.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSkyRegion</span></code></a>.</p>
+</dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>The maximum HEALPix cell resolution of the MOC. Should be comprised between
+0 and 29.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="s2">&quot;+23h20m48.3s +61d12m06s&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_region</span> <span class="o">=</span> <span class="n">regions</span><span class="o">.</span><span class="n">PointSkyRegion</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc_point</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_astropy_regions</span><span class="p">(</span><span class="n">point_region</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc_point</span>
+<span class="go">10/3663728</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.from_box">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_box" title="Link to this definition">¶</a></dt>
+<dd><p>Create a MOC from a box/rectangle.</p>
+<p>The box is centered around the (<code class="xref py py-obj docutils literal notranslate"><span class="pre">lon</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">lat</span></code>) position.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the cone.</p>
+</dd>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the cone.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>The semi-major axis of the box, i.e. half of the box’s width.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>The semi-minor axis of the box, i.e. half of the box’s height.</p>
+</dd>
+<dt><strong>angle</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The tilt angle between the north and the semi-major axis, east of north.</p>
+</dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The resulting MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">Longitude</span><span class="p">,</span> <span class="n">Latitude</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_box</span><span class="p">(</span>
+<span class="gp">... </span> <span class="n">lon</span><span class="o">=</span><span class="n">Longitude</span><span class="p">(</span><span class="s2">&quot;0d&quot;</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">lat</span><span class="o">=</span><span class="n">Latitude</span><span class="p">(</span><span class="s2">&quot;0d&quot;</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">a</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;10d&quot;</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">b</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;2d&quot;</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">angle</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;30d&quot;</span><span class="p">),</span>
+<span class="gp">... </span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_cone">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_cone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_cone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_cone" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a cone.</p>
@@ -469,11 +549,11 @@ You are able to specify various styling kwargs for <a class="reference external"
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the cone.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the cone.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the cone.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the cone.</p>
 </dd>
-<dt><strong>radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The radius angle of the cone.</p>
+<dt><strong>radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The radius angle of the cone.</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
 </dd>
@@ -535,19 +615,19 @@ defaults to <code class="xref py py-obj docutils literal notranslate"><span clas
 <dd><p>Create a MOC from an elliptical cone.</p>
 <p>The ellipse is centered around the (<code class="xref py py-obj docutils literal notranslate"><span class="pre">lon</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">lat</span></code>) position. <code class="xref py py-obj docutils literal notranslate"><span class="pre">a</span></code> (resp. <code class="xref py py-obj docutils literal notranslate"><span class="pre">b</span></code>) corresponds
 to the semi-major axis magnitude (resp. semi-minor axis magnitude). <code class="xref py py-obj docutils literal notranslate"><span class="pre">pa</span></code> is expressed as a
-<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a> and defines the position angle of the elliptical cone.</p>
+<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a> and defines the position angle of the elliptical cone.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the elliptical cone.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the elliptical cone.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the elliptical cone.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the elliptical cone.</p>
 </dd>
-<dt><strong>a</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The semi-major axis angle of the elliptical cone.</p>
+<dt><strong>a</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The semi-major axis angle of the elliptical cone.</p>
 </dd>
-<dt><strong>b</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The semi-minor axis angle of the elliptical cone.</p>
+<dt><strong>b</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The semi-minor axis angle of the elliptical cone.</p>
 </dd>
-<dt><strong>pa</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The position angle (i.e. the angle between the north and the semi-major axis, east-of-north).</p>
+<dt><strong>pa</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The position angle (i.e. the angle between the north and the semi-major axis, east-of-north).</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
 </dd>
@@ -731,13 +811,13 @@ dtype must be np.uint8. Corresponds to the <code class="xref py py-obj docutils 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_lonlat">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_lonlat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_norder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_lonlat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_lonlat" title="Link to this definition">¶</a></dt>
-<dd><p>Create a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p>
+<dd><p>Create a MOC from astropy lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates belonging to the MOC.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates belonging to the MOC.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates belonging to the MOC.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates belonging to the MOC.</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The depth of the smallest HEALPix cells contained in the MOC.</p>
 </dd>
@@ -796,15 +876,15 @@ is somewhat arbitrary.</p>
 <dt class="sig sig-object py" id="mocpy.MOC.from_polygon">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_polygon" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a polygon.</p>
-<p>The polygon is given as lon and lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> that define the
+<p>The polygon is given as lon and lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> that define the
 vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes defining the polygon. Can describe convex and
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes defining the polygon. Can describe convex and
 concave polygons but not self-intersecting ones.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes defining the polygon. Can describe convex and concave
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes defining the polygon. Can describe convex and concave
 polygons but not self-intersecting ones.</p>
 </dd>
 <dt><strong>complement</strong><span class="classifier">return the complement of the polygon. Set to False by default.</span></dt><dd></dd>
@@ -825,12 +905,12 @@ polygons but not self-intersecting ones.</p>
 <dt class="sig sig-object py" id="mocpy.MOC.from_polygon_skycoord">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_polygon_skycoord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skycoord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_polygon_skycoord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_polygon_skycoord" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a polygon.</p>
-<p>The polygon is given as an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a> that contains the
+<p>The polygon is given as an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a> that contains the
 vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>skycoord</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates defining the vertices of a polygon. It can describe a convex or
+<dt><strong>skycoord</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates defining the vertices of a polygon. It can describe a convex or
 concave polygon but not a self-intersecting one.</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int, optional</span></dt><dd><p>The resolution of the MOC. Set to 10 by default.</p>
@@ -847,6 +927,46 @@ concave polygon but not a self-intersecting one.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.from_polygons">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_polygons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_polygons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_polygons" title="Link to this definition">¶</a></dt>
+<dd><p>Create a list of MOCs list from a list of polygons.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>list_vertices</strong><span class="classifier">list[<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a>]</span></dt><dd><blockquote>
+<div><p>A list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> objects. Each SkyCoord object should
+contain more than three vertices and they should each describe a polygon.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>max_depth<span class="classifier">int, optional</span></dt><dd><p>The resolution of the MOC. Set to 10 by default.</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>n_threads</strong><span class="classifier">int, optional</span></dt><dd><p>The number of threads to be used</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list[<a class="reference internal" href="#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>]</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_vertices</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">SkyCoord</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">SkyCoord</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_mocs</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span><span class="n">list_vertices</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">list_mocs</span><span class="p">)</span> <span class="c1"># two mocs are created</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_ring">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_ring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_ring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_ring" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a ring.</p>
@@ -855,13 +975,13 @@ concave polygon but not a self-intersecting one.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the ring.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Longitude.html#astropy.coordinates.Longitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Longitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitude of the center of the ring.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the ring.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Latitude.html#astropy.coordinates.Latitude" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Latitude</span></code></a> or its supertype <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitude of the center of the ring.</p>
 </dd>
-<dt><strong>internal_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The internal radius angle of the ring.</p>
+<dt><strong>internal_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The internal radius angle of the ring.</p>
 </dd>
-<dt><strong>external_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The external radius angle of the ring.</p>
+<dt><strong>external_radius</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.Angle</span></code></a></span></dt><dd><p>The external radius angle of the ring.</p>
 </dd>
 <dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
 </dd>
@@ -897,11 +1017,11 @@ The depth at which the computations will be made will therefore be equal to
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.MOC.from_skycoords">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_skycoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skycoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_norder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_skycoords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_skycoords" title="Link to this definition">¶</a></dt>
-<dd><p>Create a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p>
+<dd><p>Create a MOC from an <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will belong to the MOC.</p>
+<dt><strong>skycoords</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.SkyCoord</span></code></a></span></dt><dd><p>The sky coordinates that will belong to the MOC.</p>
 </dd>
 <dt><strong>max_norder</strong><span class="classifier">int</span></dt><dd><p>The depth of the smallest HEALPix cells contained in the MOC.</p>
 </dd>
@@ -914,6 +1034,40 @@ The depth at which the computations will be made will therefore be equal to
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.from_stcs">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_stcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.from_stcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.from_stcs" title="Link to this definition">¶</a></dt>
+<dd><p>Create a MOC from a STC-S.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>stcs</strong><span class="classifier">str</span></dt><dd><p>The STC-S string.</p>
+</dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>Maximum HEALPix cell resolution.</p>
+</dd>
+<dt><strong>delta_depth</strong><span class="classifier">int, optional</span></dt><dd><p>To control the approximation, you can choose to perform the computations at a deeper
+depth using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth_delta</span></code> parameter.
+The depth at which the computations will be made will therefore be equal to
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_depth</span></code> + <code class="xref py py-obj docutils literal notranslate"><span class="pre">depth_delta</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The resulting MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_stcs</span><span class="p">(</span><span class="s2">&quot;Circle ICRS 147.6 69.9 0.4&quot;</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="mf">147.6</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="mf">69.9</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">moc1</span> <span class="o">==</span> <span class="n">moc2</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1097,7 +1251,7 @@ By default the maximum depth of the MOC is taken.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>coords: [<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a>]</dt><dd><p>A list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each describing one border.</p>
+<dt>coords: [<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a>]</dt><dd><p>A list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each describing one border.</p>
 </dd>
 </dl>
 </dd>
@@ -1233,7 +1387,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>spatial_resolution</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>Spatial resolution.</p>
+<dt><strong>spatial_resolution</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>Spatial resolution.</p>
 </dd>
 </dl>
 </dd>
@@ -1251,11 +1405,40 @@ matplotlib style parameters.</p>
 <dd class="field-odd"><dl>
 <dt><strong>title</strong><span class="classifier">str</span></dt><dd><p>The title of the plot</p>
 </dd>
-<dt><strong>frame</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.BaseCoordinateFrame.html#astropy.coordinates.BaseCoordinateFrame" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.BaseCoordinateFrame</span></code></a>, optional</span></dt><dd><p>Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</p>
+<dt><strong>frame</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.BaseCoordinateFrame.html#astropy.coordinates.BaseCoordinateFrame" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.coordinates.BaseCoordinateFrame</span></code></a>, optional</span></dt><dd><p>Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</p>
 </dd>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.probabilities_in_multiordermap">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">probabilities_in_multiordermap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mocs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiordermap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.probabilities_in_multiordermap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.probabilities_in_multiordermap" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the probabilities in the intersection between the multiordermap and the MOCs.</p>
+<p>Multi-MOC version of <code class="xref py py-obj docutils literal notranslate"><span class="pre">probability_in_multiordermap</span></code>. This is parallelized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mocs</strong><span class="classifier">list[mocpy.MOC]</span></dt><dd><p>A list of <a class="reference internal" href="#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>.</p>
+</dd>
+<dt><strong>multiordermap</strong><span class="classifier">astropy.table.Table, or astropy.table.QTable</span></dt><dd><p>Should have a column <code class="docutils literal notranslate"><span class="pre">UNIQ</span></code> that
+corresponds to HEALPix cells and a <code class="docutils literal notranslate"><span class="pre">PROBDENSITY</span></code> column.</p>
+</dd>
+<dt><strong>n_threads</strong><span class="classifier">int</span></dt><dd><p>Number of threads to be used (all available threads by default)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list[float]</dt><dd><p>A list containing the probability for each MOC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>In wasm compilations (ex for pyodide), this won’t raise an error, but will be
+single-threaded.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1349,7 +1532,7 @@ Default to False.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -1375,7 +1558,7 @@ Default to False.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>spatial_resolution</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>Spatial resolution</p>
+<dt><strong>spatial_resolution</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a></span></dt><dd><p>Spatial resolution</p>
 </dd>
 </dl>
 </dd>
@@ -1416,6 +1599,44 @@ if <code class="xref py py-obj docutils literal notranslate"><span class="pre">t
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.MOC.sum_in_multiordermap">
+<span class="sig-name descname"><span class="pre">sum_in_multiordermap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multiordermap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.table.Table.html#astropy.table.Table" title="(in Astropy v7.0)"><span class="pre">Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/moc/moc.html#MOC.sum_in_multiordermap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.MOC.sum_in_multiordermap" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the sum of a column from a multiordermap in the intersection with the MOC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>multiordermap</strong><span class="classifier">astropy.table.Table</span></dt><dd><p>The table should have a <code class="docutils literal notranslate"><span class="pre">UNIQ</span></code> that corresponds to HEALPix cells in the uniq
+notation.</p>
+</dd>
+<dt><strong>column</strong><span class="classifier">str</span></dt><dd><p>The name of the column to sum.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The sum of the values in the intersection between the MOC and the
+multiorder map coverages.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">all_sky</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s create a meaningless multiorder map</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uniq</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="o">**</span><span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">200</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">column</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">multi_order_map</span> <span class="o">=</span> <span class="n">Table</span><span class="p">([</span><span class="n">uniq</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">,</span> <span class="s2">&quot;column&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">all_sky</span><span class="o">.</span><span class="n">sum_in_multiordermap</span><span class="p">(</span><span class="n">multi_order_map</span><span class="p">,</span> <span class="s2">&quot;column&quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">107.9259</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1552,7 +1773,7 @@ AND because the natural ordering of such indices follow the same order as the zo
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>fig</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="(in Matplotlib v3.8.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">figure</span></code></a></span></dt><dd><p>The matplotlib figure used for plotting the MOC.</p>
+<dt><strong>fig</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="(in Matplotlib v3.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">figure</span></code></a></span></dt><dd><p>The matplotlib figure used for plotting the MOC.</p>
 </dd>
 <dt><strong>coordsys</strong><span class="classifier">str, optional</span></dt><dd><p>Coordinate system. Default to “icrs”. Must be in [“icrs”, “galactic”].</p>
 </dd>
@@ -1560,13 +1781,13 @@ AND because the natural ordering of such indices follow the same order as the zo
 See <a class="reference external" href="http://docs.astropy.org/en/stable/wcs/#supported-projections">http://docs.astropy.org/en/stable/wcs/#supported-projections</a> for
 the projections currently supported in astropy. Default to Aitoff.</p>
 </dd>
-<dt><strong>rotation</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a>, optional</span></dt><dd><p>The angle of rotation. Default to no rotation.</p>
+<dt><strong>rotation</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.Angle.html#astropy.coordinates.Angle" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Angle</span></code></a>, optional</span></dt><dd><p>The angle of rotation. Default to no rotation.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WCS</span></code></a></span></dt><dd><p>The WCS that can be passed to mocpy.MOC.fill/border.</p>
+<dt><strong>wcs</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.wcs.WCS.html#astropy.wcs.WCS" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WCS</span></code></a></span></dt><dd><p>The WCS that can be passed to mocpy.MOC.fill/border.</p>
 </dd>
 </dl>
 </dd>
@@ -1642,6 +1863,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.MOC.extended"><code class="docutils literal notranslate"><span class="pre">MOC.extended()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.fill"><code class="docutils literal notranslate"><span class="pre">MOC.fill()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.flatten"><code class="docutils literal notranslate"><span class="pre">MOC.flatten()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.from_astropy_regions"><code class="docutils literal notranslate"><span class="pre">MOC.from_astropy_regions()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.from_box"><code class="docutils literal notranslate"><span class="pre">MOC.from_box()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_cone"><code class="docutils literal notranslate"><span class="pre">MOC.from_cone()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_depth29_ranges"><code class="docutils literal notranslate"><span class="pre">MOC.from_depth29_ranges()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_elliptical_cone"><code class="docutils literal notranslate"><span class="pre">MOC.from_elliptical_cone()</span></code></a></li>
@@ -1655,8 +1878,10 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.MOC.from_multiordermap_fits_file"><code class="docutils literal notranslate"><span class="pre">MOC.from_multiordermap_fits_file()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_polygon"><code class="docutils literal notranslate"><span class="pre">MOC.from_polygon()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_polygon_skycoord"><code class="docutils literal notranslate"><span class="pre">MOC.from_polygon_skycoord()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.from_polygons"><code class="docutils literal notranslate"><span class="pre">MOC.from_polygons()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_ring"><code class="docutils literal notranslate"><span class="pre">MOC.from_ring()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_skycoords"><code class="docutils literal notranslate"><span class="pre">MOC.from_skycoords()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.from_stcs"><code class="docutils literal notranslate"><span class="pre">MOC.from_stcs()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_stmoc_time_fold"><code class="docutils literal notranslate"><span class="pre">MOC.from_stmoc_time_fold()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_str"><code class="docutils literal notranslate"><span class="pre">MOC.from_str()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.from_string"><code class="docutils literal notranslate"><span class="pre">MOC.from_string()</span></code></a></li>
@@ -1674,6 +1899,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.MOC.new_empty"><code class="docutils literal notranslate"><span class="pre">MOC.new_empty()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.order_to_spatial_resolution"><code class="docutils literal notranslate"><span class="pre">MOC.order_to_spatial_resolution()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.plot"><code class="docutils literal notranslate"><span class="pre">MOC.plot()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.probabilities_in_multiordermap"><code class="docutils literal notranslate"><span class="pre">MOC.probabilities_in_multiordermap()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.query_simbad"><code class="docutils literal notranslate"><span class="pre">MOC.query_simbad()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.query_vizier_table"><code class="docutils literal notranslate"><span class="pre">MOC.query_vizier_table()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.remove_neighbours"><code class="docutils literal notranslate"><span class="pre">MOC.remove_neighbours()</span></code></a></li>
@@ -1683,6 +1909,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.MOC.spatial_resolution_to_order"><code class="docutils literal notranslate"><span class="pre">MOC.spatial_resolution_to_order()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.split"><code class="docutils literal notranslate"><span class="pre">MOC.split()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.split_count"><code class="docutils literal notranslate"><span class="pre">MOC.split_count()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.MOC.sum_in_multiordermap"><code class="docutils literal notranslate"><span class="pre">MOC.sum_in_multiordermap()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">MOC.symmetric_difference()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.to_depth29_ranges"><code class="docutils literal notranslate"><span class="pre">MOC.to_depth29_ranges</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.MOC.to_rgba"><code class="docutils literal notranslate"><span class="pre">MOC.to_rgba()</span></code></a></li>
@@ -1710,8 +1937,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 04 Dec 2023. <br/>
+    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 03 Jun 2024. <br/>
   </p>
 </footer>
   </body>

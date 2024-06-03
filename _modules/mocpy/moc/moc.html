@@ -4,15 +4,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; MOCPy 0.13.1 documentation</title>
+    <title>mocpy.moc.moc &#8212; MOCPy 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../../../_static/documentation_options.js?v=b4617fb1"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=9e420a66"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.13.1 documentation</a>
+	<a href="../../../index.html">MOCPy 0.14.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -68,6 +68,7 @@
 <span></span><span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -83,9 +84,11 @@
     <span class="n">SkyCoord</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
 <span class="kn">from</span> <span class="nn">astropy.utils.data</span> <span class="kn">import</span> <span class="n">download_file</span>
 
 <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">regions</span>
     <span class="kn">from</span> <span class="nn">astropy_healpix</span> <span class="kn">import</span> <span class="n">HEALPix</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mocpy</span>
@@ -840,6 +843,188 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="MOC.probabilities_in_multiordermap">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.probabilities_in_multiordermap">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">probabilities_in_multiordermap</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mocs</span><span class="p">,</span> <span class="n">multiordermap</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the probabilities in the intersection between the multiordermap and the MOCs.</span>
+
+<span class="sd">        Multi-MOC version of `probability_in_multiordermap`. This is parallelized.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mocs : list[mocpy.MOC]</span>
+<span class="sd">            A list of `mocpy.MOC`.</span>
+<span class="sd">        multiordermap : astropy.table.Table, or astropy.table.QTable</span>
+<span class="sd">            Should have a column ``UNIQ`` that</span>
+<span class="sd">            corresponds to HEALPix cells and a ``PROBDENSITY`` column.</span>
+<span class="sd">        n_threads : int</span>
+<span class="sd">            Number of threads to be used (all available threads by default)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[float]</span>
+<span class="sd">            A list containing the probability for each MOC</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        In wasm compilations (ex for pyodide), this won&#39;t raise an error, but will be</span>
+<span class="sd">        single-threaded.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;An argument of type &#39;astropy.table.Table&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; is expected. Got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">moc</span><span class="o">.</span><span class="n">store_index</span> <span class="k">for</span> <span class="n">moc</span> <span class="ow">in</span> <span class="n">mocs</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">_store_index_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
+        <span class="n">probdensity</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+            <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multi_multiorder_probdens_map_sum_in_smoc</span><span class="p">(</span>
+            <span class="n">indices</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="n">n_threads</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">probability_in_multiordermap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiordermap</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the probability in the intersection between the multiordermap and the MOC.</span>
+
+<span class="sd">        ``PROBDENSITY`` values are multiplied by the area of their associated HEALPix</span>
+<span class="sd">        cell before summing them. For cells that are not complete, the ratio of the area</span>
+<span class="sd">        is used.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        multiordermap : str, pathlib.Path, astropy.table.Table, or astropy.table.QTable</span>
+<span class="sd">            If ``multiordermap`` is given as a string or `~pathlib.Path`, the probability</span>
+<span class="sd">            will be read from the column ``PROBDENSITY`` of the FITS file.</span>
+<span class="sd">            If it is an `~astropy.table.Table`, then it should have a column ``UNIQ`` that</span>
+<span class="sd">            corresponds to HEALPix cells and a ``PROBDENSITY`` column.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The probability in the intersection between the MOC and the Multi-Order-Map</span>
+<span class="sd">            coverages.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.table import Table</span>
+<span class="sd">        &gt;&gt;&gt; all_sky = MOC.from_str(&quot;0/0-11&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # Let&#39;s create a meaningless multiorder map</span>
+<span class="sd">        &gt;&gt;&gt; uniq = [4 * 4**4 + x for x in range(20)]</span>
+<span class="sd">        &gt;&gt;&gt; rng = np.random.default_rng(0)</span>
+<span class="sd">        &gt;&gt;&gt; probdensity = rng.random(20) / 100</span>
+<span class="sd">        &gt;&gt;&gt; multi_order_map = Table([uniq, probdensity], names=(&quot;UNIQ&quot;, &quot;PROBDENSITY&quot;))</span>
+<span class="sd">        &gt;&gt;&gt; # The probability to be in the intersection with the all sky is</span>
+<span class="sd">        &gt;&gt;&gt; round(all_sky.probability_in_multiordermap(multi_order_map), 4)</span>
+<span class="sd">        0.0004</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        probabilities_in_multiordermap: makes this calculation for a list of MOCs in a</span>
+<span class="sd">        parallelized way.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
+            <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
+            <span class="n">probdensity</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+                <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiorder_probdens_map_sum_in_smoc</span><span class="p">(</span>
+                <span class="n">index</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiordermap_sum_in_smoc_from_file</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">))</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;An argument of type &#39;str&#39;, &#39;pathlib.Path&#39;, or &#39;astropy.table.Table&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; is expected. Got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MOC.sum_in_multiordermap">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.sum_in_multiordermap">[docs]</a>
+    <span class="k">def</span> <span class="nf">sum_in_multiordermap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiordermap</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the sum of a column from a multiordermap in the intersection with the MOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        multiordermap : astropy.table.Table</span>
+<span class="sd">            The table should have a ``UNIQ`` that corresponds to HEALPix cells in the uniq</span>
+<span class="sd">            notation.</span>
+<span class="sd">        column : str</span>
+<span class="sd">            The name of the column to sum.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The sum of the values in the intersection between the MOC and the</span>
+<span class="sd">            multiorder map coverages.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.table import Table</span>
+<span class="sd">        &gt;&gt;&gt; all_sky = MOC.from_str(&quot;0/0-11&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # Let&#39;s create a meaningless multiorder map</span>
+<span class="sd">        &gt;&gt;&gt; uniq = [4 * 4**5 + x for x in np.arange(200)]</span>
+<span class="sd">        &gt;&gt;&gt; rng = np.random.default_rng(0)</span>
+<span class="sd">        &gt;&gt;&gt; column = rng.random(200)</span>
+<span class="sd">        &gt;&gt;&gt; multi_order_map = Table([uniq, column], names=(&quot;UNIQ&quot;, &quot;column&quot;))</span>
+<span class="sd">        &gt;&gt;&gt; round(all_sky.sum_in_multiordermap(multi_order_map, &quot;column&quot;), 4)</span>
+<span class="sd">        107.9259</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
+        <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
+        <span class="n">values_to_sum</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+            <span class="n">values_to_sum_mask</span> <span class="o">=</span> <span class="n">values_to_sum</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">values_to_sum_mask</span> <span class="o">=</span> <span class="n">uniq_mask</span>
+
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiordermap_sum_in_smoc</span><span class="p">(</span>
+            <span class="n">index</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values_to_sum</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values_to_sum_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MOC.from_valued_healpix_cells">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_valued_healpix_cells">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1048,6 +1233,60 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="MOC.from_box">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_box">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_lonlat</span>
+    <span class="k">def</span> <span class="nf">from_box</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a MOC from a box/rectangle.</span>
+
+<span class="sd">        The box is centered around the (`lon`, `lat`) position.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon : `~astropy.coordinates.Longitude` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The longitude of the center of the cone.</span>
+<span class="sd">        lat : `~astropy.coordinates.Latitude` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The latitude of the center of the cone.</span>
+<span class="sd">        a : `~astropy.coordinates.Angle`</span>
+<span class="sd">            The semi-major axis of the box, i.e. half of the box&#39;s width.</span>
+<span class="sd">        b : `~astropy.coordinates.Angle`</span>
+<span class="sd">            The semi-minor axis of the box, i.e. half of the box&#39;s height.</span>
+<span class="sd">        angle : `astropy.coordinates.Angle`</span>
+<span class="sd">            The tilt angle between the north and the semi-major axis, east of north.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC`</span>
+<span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle, Longitude, Latitude</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_box(</span>
+<span class="sd">        ...  lon=Longitude(&quot;0d&quot;),</span>
+<span class="sd">        ...  lat=Latitude(&quot;0d&quot;),</span>
+<span class="sd">        ...  a=Angle(&quot;10d&quot;),</span>
+<span class="sd">        ...  b=Angle(&quot;2d&quot;),</span>
+<span class="sd">        ...  angle=Angle(&quot;30d&quot;),</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_box</span><span class="p">(</span>
+            <span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">angle</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MOC.from_ring">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ring">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1144,6 +1383,49 @@
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="MOC.from_polygons">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygons">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_polygons</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">list_vertices</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a list of MOCs list from a list of polygons.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_vertices : list[`~astropy.coordinates.SkyCoord`]</span>
+<span class="sd">            A list of `~astropy.coordinates.SkyCoord` objects. Each SkyCoord object should</span>
+<span class="sd">            contain more than three vertices and they should each describe a polygon.</span>
+<span class="sd">         max_depth : int, optional</span>
+<span class="sd">            The resolution of the MOC. Set to 10 by default.</span>
+<span class="sd">        n_threads : int, optional</span>
+<span class="sd">            The number of threads to be used</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[`mocpy.MOC`]</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; list_vertices = [</span>
+<span class="sd">        ...     SkyCoord([-4, 4, 4, -4], [4, 4, -4, -4], unit=&quot;deg&quot;),</span>
+<span class="sd">        ...     SkyCoord([0, 6, 0, -6], [6, 0, -6, 0], unit=&quot;deg&quot;)</span>
+<span class="sd">        ... ]</span>
+<span class="sd">        &gt;&gt;&gt; list_mocs = MOC.from_polygons(list_vertices)</span>
+<span class="sd">        &gt;&gt;&gt; len(list_mocs) # two mocs are created</span>
+<span class="sd">        2</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lon_lat_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_vertices</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span><span class="n">lon_lat_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">n_threads</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
+
+
 <div class="viewcode-block" id="MOC.from_polygon">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1179,6 +1461,144 @@
             <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.from_stcs">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_stcs">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_stcs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">stcs</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a MOC from a STC-S.</span>
+
+<span class="sd">        Info</span>
+<span class="sd">        ----</span>
+<span class="sd">        Time, Spectral and Redshift sub-phrases are ignored.</span>
+
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        There is so far no implicit conversion, so the STC-S string will be rejected if:</span>
+<span class="sd">        * the frame is different from `ICRS`</span>
+<span class="sd">        * the flavor is different from `Spher2`</span>
+<span class="sd">        * the units are different from `degrees`</span>
+<span class="sd">        The implementation is not (yet?) fully compliant with the STC standard (see MOC Lib rust for more details):</span>
+<span class="sd">        * DIFFERENCE is so far interpreted as a symmetrical difference (XOR) while it is a MINUS in the STC standard</span>
+<span class="sd">        * Self-intersecting Polygons are supported, and the &quot;interior&quot; usually has the smallest area</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stcs : str</span>
+<span class="sd">            The STC-S string.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        delta_depth : int, optional</span>
+<span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
+<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
+<span class="sd">            `max_depth` + `depth_delta`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : `~mocpy.moc.MOC`</span>
+<span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; moc1 = MOC.from_stcs(&quot;Circle ICRS 147.6 69.9 0.4&quot;, max_depth=14)</span>
+<span class="sd">        &gt;&gt;&gt; moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg, radius=Angle(0.4, u.deg), max_depth=14)</span>
+<span class="sd">        &gt;&gt;&gt; assert (moc1 == moc2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_stcs</span><span class="p">(</span><span class="n">stcs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.from_astropy_regions">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_astropy_regions">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_astropy_regions</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a SMOC from an astropy regions.</span>
+
+<span class="sd">        This creates the MOC of the requested order that contains entirely the astropy</span>
+<span class="sd">        region. See https://github.com/astropy/regions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        region : `~regions.SkyRegion`</span>
+<span class="sd">            The supported sky regions are `~regions.CircleSkyRegion`,</span>
+<span class="sd">            `~regions.CircleAnnulusSkyRegion`, `~regions.EllipseSkyRegion`,</span>
+<span class="sd">            `~regions.RectangleSkyRegion`, `~regions.PolygonSkyRegion`,</span>
+<span class="sd">            `~regions.PointSkyRegion`.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            The maximum HEALPix cell resolution of the MOC. Should be comprised between</span>
+<span class="sd">            0 and 29.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.moc.MOC`</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; point = SkyCoord(&quot;+23h20m48.3s +61d12m06s&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; point_region = regions.PointSkyRegion(point)</span>
+<span class="sd">        &gt;&gt;&gt; moc_point = MOC.from_astropy_regions(point_region, max_depth=10)</span>
+<span class="sd">        &gt;&gt;&gt; moc_point</span>
+<span class="sd">        10/3663728</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">supported_regions_types</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">CircleSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">CircleAnnulusSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">EllipseSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">RectangleSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">PolygonSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">PointSkyRegion</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">CircleSkyRegion</span><span class="p">):</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+                <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">CircleAnnulusSkyRegion</span><span class="p">):</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_ring</span><span class="p">(</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+                <span class="n">internal_radius</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">inner_radius</span><span class="p">,</span>
+                <span class="n">external_radius</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">outer_radius</span><span class="p">,</span>
+                <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">EllipseSkyRegion</span><span class="p">):</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_elliptical_cone</span><span class="p">(</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">pa</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span>
+                <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">RectangleSkyRegion</span><span class="p">):</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_box</span><span class="p">(</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+                <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">angle</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;90d&quot;</span><span class="p">),</span>
+                <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">PolygonSkyRegion</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">PointSkyRegion</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_skycoords</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">max_norder</span><span class="o">=</span><span class="n">max_depth</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;from_astropy_regions&#39; does not support this region type.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;The supported regions are: </span><span class="si">{</span><span class="n">supported_regions_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MOC.new_empty">
@@ -1742,8 +2162,8 @@
   <p class="pull-right"> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2023, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 04 Dec 2023. <br/>
+    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 03 Jun 2024. <br/>
   </p>
 </footer>
   </body>
