@@ -1307,9 +1307,13 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        list_vertices : list[`~astropy.coordinates.SkyCoord`]
-            A list of `~astropy.coordinates.SkyCoord` objects. Each SkyCoord object should
-            contain more than three vertices and they should each describe a polygon.
+        list_vertices : list[`~astropy.coordinates.SkyCoord`] OR numpy.ndarray
+            - If list_vertices is a list of `~astropy.coordinates.SkyCoord` objects, each
+            SkyCoord object should contain more than three vertices and they should each
+            describe a polygon.
+            - If list_vertices is a numpy.ndarray, it should be in the form
+            [lon_array1, lat_array1, lon_array2, lat_array2, lon_array3, lat_array3, ...].
+            They should be valid longitudes and latitudes in degrees in ICRS.
          max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
         n_threads : int, optional
@@ -1328,16 +1332,29 @@ class MOC(AbstractMOC):
         ...     SkyCoord([0, 6, 0, -6], [6, 0, -6, 0], unit="deg")
         ... ]
         >>> list_mocs = MOC.from_polygons(list_vertices)
-        >>> len(list_mocs) # two mocs are created
-        2
+        >>> # without the SkyCoord object, we need to adapt the coordinates
+        >>> list_vertices = [[356, 4, 4, 356], [4, 4, -4, -4],
+        ...                  [0, 6, 0, 354], [6, 0, -6, 0]]
+        >>> list_mocs_no_check = MOC.from_polygons(list_vertices)
+        >>> list_mocs == list_mocs_no_check
+        True
 
         """
-        lon_lat_list = [
-            f(x)
-            for x in list_vertices
-            for f in (lambda x: x.icrs.ra.deg, lambda x: x.icrs.dec.deg)
-        ]
-        indices = mocpy.from_polygons(lon_lat_list, np.uint8(max_depth), n_threads)
+        if isinstance(list_vertices[0], SkyCoord):
+            lon_lat_list = [
+                f(x)
+                for x in list_vertices
+                for f in (lambda x: x.icrs.ra.deg, lambda x: x.icrs.dec.deg)
+            ]
+            indices = mocpy.from_polygons(lon_lat_list, np.uint8(max_depth), n_threads)
+        else:
+            # This is the unsafe version where the users should provide correct coordinates
+            # without checks on our side
+            indices = mocpy.from_polygons(
+                np.array(list_vertices, dtype=np.float64),
+                np.uint8(max_depth),
+                n_threads,
+            )
         return [cls(index) for index in indices]
 
     @classmethod

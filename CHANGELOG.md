@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * a new method `MOC.from_cones` allows to create a list of MOCs from a list of centers
 and radii.
 
+### Changed
+
+* `MOC.from_polygons` now accepts list of coordinates (that it assumes to be in degrees and
+ICRS frame) rather than only lists of SkyCoord objects [#137]
+
 ## [0.14.0]
 
 ### Fixed

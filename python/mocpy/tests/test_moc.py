@@ -260,6 +260,10 @@ def test_from_polygons():
         moc.barycenter().separation(SkyCoord(0, 0, unit="deg")) < 0.1 * u.arcmin
         for moc in list_mocs
     )
+    list_mocs_no_skycoord = MOC.from_polygons(
+        [[356, 4, 4, 356], [4, 4, -4, -4], [0, 6, 0, 354], [6, 0, -6, 0]],
+    )
+    assert list_mocs == list_mocs_no_skycoord
 
 
 def test_moc_from_fits():
