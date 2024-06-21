@@ -350,6 +350,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * `b` the semi-minor axis of the boxes (half the box height), in degrees
   /// * `angle` the position angle of the boxes (i.e. the angle between the north and the semi-major axis, east-of-north), in degrees
   /// * `depth`: the MOCs depth
+  /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   ///
   /// # Output
   /// - The MOC indices in the storage
@@ -433,6 +434,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * `b` the semi-minor axis of the boxes (half the box height), in degrees
   /// * `angle` the position angle of the boxes (i.e. the angle between the north and the semi-major axis, east-of-north), in degrees
   /// * `depth`: the MOCs depth
+  /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   ///
   /// # Output
   /// - The MOC indices in the storage

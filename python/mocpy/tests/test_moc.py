@@ -547,7 +547,7 @@ def test_from_box():
         lat=Latitude("0d"),
         a=a,
         b=b,
-        angle=Angle("30d"),
+        angle=Angle("30deg"),
         max_depth=10,
     )
     area = moc.sky_fraction * 4 * math.pi * u.steradian
@@ -555,6 +555,40 @@ def test_from_box():
     # parameters
     assert area.to(u.deg**2).value > 80
     assert area.to(u.deg**2).value < 90
+    # test from_boxes
+    list_boxes_same = MOC.from_boxes(
+        lon=[0, 0] * u.deg,
+        lat=[0, 0] * u.deg,
+        a=a,
+        b=b,
+        angle=30 * u.deg,
+        max_depth=10,
+    )
+    assert len(list_boxes_same) == 2
+    assert list_boxes_same[0] == moc
+    a = [Angle("10d"), Angle("20d")]
+    b = [Angle("2d"), Angle("4d")]
+    list_boxes_different = MOC.from_boxes(
+        lon=[0, 0] * u.deg,
+        lat=[0, 0] * u.deg,
+        a=a,
+        b=b,
+        angle=[30, 45] * u.deg,
+        max_depth=10,
+    )
+    assert len(list_boxes_different) == 2
+    assert list_boxes_different[0] == moc
+
+    # mixed iterables and scalars raise an error
+    with pytest.raises(ValueError, match="'a', 'b' and 'angle' should*"):
+        MOC.from_boxes(
+            lon=[0, 0] * u.deg,
+            lat=[0, 0] * u.deg,
+            a=a,
+            b=b,
+            angle=30 * u.deg,
+            max_depth=10,
+        )
 
 
 def test_from_astropy_regions():

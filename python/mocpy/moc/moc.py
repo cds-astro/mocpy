@@ -1120,8 +1120,8 @@ class MOC(AbstractMOC):
             The depth at which the computations will be made will therefore be equal to
             `max_depth` + `depth_delta`.
         n_threads : int, optional
-            The number of threads to be used if it is not set, the maximum number of
-            available threads will be used.
+            The number of threads to be used. If this is set to None (default value),
+            all available threads will be used.
 
         Returns
         -------
@@ -1209,6 +1209,90 @@ class MOC(AbstractMOC):
             np.uint8(max_depth),
         )
         return cls(index)
+
+    @classmethod
+    @validate_lonlat
+    def from_boxes(cls, lon, lat, a, b, angle, max_depth, *, n_threads=None):
+        """
+        Create a MOC from a box/rectangle.
+
+        The box is centered around the (`lon`, `lat`) position.
+
+        Parameters
+        ----------
+        lon : `~astropy.coordinates.Longitude` or its supertype `~astropy.units.Quantity`
+            The longitude of the center of the cone.
+        lat : `~astropy.coordinates.Latitude` or its supertype `~astropy.units.Quantity`
+            The latitude of the center of the cone.
+        a : `~astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`
+            The semi-major axis of the box, i.e. half of the box's width.
+        b : `~astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`
+            The semi-minor axis of the box, i.e. half of the box's height.
+        angle : `astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`
+            The tilt angle between the north and the semi-major axis, east of north.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        n_threads : int, optional
+            The number of threads to be used. If this is set to None (default value),
+            all available threads will be used.
+
+        Returns
+        -------
+        result : list[`~mocpy.moc.MOC`]
+            The resulting list of MOCs.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> # similar boxes, same size and orientation
+        >>> moc_list = MOC.from_boxes(
+        ...  lon=[1, 2]*u.deg,
+        ...  lat=[1, 2]*u.deg,
+        ...  a=10*u.deg,
+        ...  b=5*u.deg,
+        ...  angle=30*u.deg,
+        ...  max_depth=10
+        ... )
+        >>> # different boxes
+        >>> moc_list = MOC.from_boxes(
+        ...  lon=[1, 2]*u.deg,
+        ...  lat=[1, 2]*u.deg,
+        ...  a=[10, 20]*u.deg,
+        ...  b=[5, 10]*u.deg,
+        ...  angle=[30, 10]*u.deg,
+        ...  max_depth=10
+        ... )
+        """
+        params = [a, b, angle]
+        if any(isinstance(param, u.Quantity) and param.isscalar for param in params):
+            if not all(isinstance(param, u.Quantity) for param in params):
+                raise ValueError(
+                    "'a', 'b' and 'angle' should either be all astropy angle-equivalent"
+                    "scalar values or they should all be iterable angle-equivalent. "
+                    "They cannot be a mix of both.",
+                )
+            indices = mocpy.from_same_boxes(
+                lon,
+                lat,
+                np.float64(a.to_value(u.deg)),
+                np.float64(b.to_value(u.deg)),
+                np.float64(angle.to_value(u.deg)),
+                np.uint8(max_depth),
+                n_threads=n_threads,
+            )
+            return [cls(index) for index in indices]
+        # different boxes
+        indices = mocpy.from_boxes(
+            lon,
+            lat,
+            np.array(Angle(a).to_value(u.deg), dtype=np.float64),
+            np.array(Angle(b).to_value(u.deg), dtype=np.float64),
+            np.array(Angle(angle).to_value(u.deg), dtype=np.float64),
+            np.uint8(max_depth),
+            n_threads=n_threads,
+        )
+        return [cls(index) for index in indices]
 
     @classmethod
     @validate_lonlat
@@ -1317,7 +1401,8 @@ class MOC(AbstractMOC):
          max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
         n_threads : int, optional
-            The number of threads to be used
+            The number of threads to be used. If this is set to None (default value),
+            all available threads will be used.
 
         Returns
         -------
@@ -1335,8 +1420,8 @@ class MOC(AbstractMOC):
         >>> # without the SkyCoord object, we need to adapt the coordinates
         >>> list_vertices = [[356, 4, 4, 356], [4, 4, -4, -4],
         ...                  [0, 6, 0, 354], [6, 0, -6, 0]]
-        >>> list_mocs_no_check = MOC.from_polygons(list_vertices)
-        >>> list_mocs == list_mocs_no_check
+        >>> list_mocs_no_check_no_wrap = MOC.from_polygons(list_vertices)
+        >>> list_mocs == list_mocs_no_check_no_wrap
         True
 
         """
@@ -1432,7 +1517,8 @@ class MOC(AbstractMOC):
         >>> from mocpy import MOC
         >>> moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", max_depth=14)
         >>> moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg, radius=Angle(0.4, u.deg), max_depth=14)
-        >>> assert (moc1 == moc2)
+        >>> moc1 == moc2
+        True
         """
         index = mocpy.from_stcs(stcs, np.uint8(max_depth), np.uint8(delta_depth))
         return cls(index)
