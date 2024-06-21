@@ -7,7 +7,7 @@ import cdshealpix
 import numpy as np
 import pytest
 import regions
-from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord
+from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord, angular_separation
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
 from astropy.table import QTable
@@ -608,6 +608,31 @@ def test_from_elliptical_cone():
         pa=Angle(0, u.deg),
         max_depth=10,
     )
+
+
+def test_from_cones():
+    # same radius
+    radius = 2 * u.arcmin
+    lon = [2, 4] * u.deg
+    lat = [5, 6] * u.deg
+    cones = MOC.from_cones(lon, lat, radius=radius, max_depth=14)
+    for cone, lon_unique, lat_unique in zip(cones, lon, lat):
+        barycenter = cone.barycenter()
+        assert angular_separation(
+            lon_unique,
+            lat_unique,
+            barycenter.ra,
+            barycenter.dec,
+        ) < Angle(1 * u.arcsec)
+    # different radii
+    radii = [5, 6] * u.arcmin
+    cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
+    for cone, radius in zip(cones, radii):
+        # we check their area (Pi simplifies)
+        assert (
+            cone.sky_fraction
+            > (((radius) ** 2).to(u.steradian) / 4 * u.steradian).value
+        )
 
 
 @pytest.fixture()

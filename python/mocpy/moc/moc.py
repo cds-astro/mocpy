@@ -986,7 +986,7 @@ class MOC(AbstractMOC):
 
     @classmethod
     @validate_lonlat
-    def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, delta_depth=2):
+    def from_elliptical_cone(cls, lon, lat, a, b, pa, max_depth, *, delta_depth=2):
         """
         Create a MOC from an elliptical cone.
 
@@ -1046,7 +1046,7 @@ class MOC(AbstractMOC):
 
     @classmethod
     @validate_lonlat
-    def from_cone(cls, lon, lat, radius, max_depth, delta_depth=2):
+    def from_cone(cls, lon, lat, radius, max_depth, *, delta_depth=2):
         """
         Create a MOC from a cone.
 
@@ -1091,9 +1091,73 @@ class MOC(AbstractMOC):
             lat[0],
             np.float64(radius.to_value(u.deg)),
             np.uint8(max_depth),
-            np.uint8(delta_depth),
+            delta_depth=np.uint8(delta_depth),
         )
         return cls(index)
+
+    @classmethod
+    @validate_lonlat
+    def from_cones(cls, lon, lat, radius, max_depth, *, delta_depth=2, n_threads=None):
+        """
+        Create a list of MOCs from cones.
+
+        Each cone is centered around the (`lon`, `lat`) position with a radius expressed by
+        `radius`. Coordinates should be in the ICRS frame, as stipulated in the MOC standard.
+
+        Parameters
+        ----------
+        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
+            The longitude of the center of the cone. Can be scalar or a list of longitudes.
+        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
+            The latitude of the center of the cone. Can be scalar or a list of latitudes.
+        radius : `astropy.coordinates.Angle` or its supertype `astropy.units.Quantity`
+            The radius angle of the cone. Can be scalar or a list of radii.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+        delta_depth : int, optional
+            To control the approximation, you can choose to perform the computations at a deeper
+            depth using the `depth_delta` parameter.
+            The depth at which the computations will be made will therefore be equal to
+            `max_depth` + `depth_delta`.
+        n_threads : int, optional
+            The number of threads to be used if it is not set, the maximum number of
+            available threads will be used.
+
+        Returns
+        -------
+        result : List[`~mocpy.moc.MOC`]
+            The resulting list of MOCs
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> moc = MOC.from_cone(
+        ...  lon=[1, 4] * u.deg,
+        ...  lat=[2, 5] * u.deg,
+        ...  radius=10 * u.deg,
+        ...  max_depth=10
+        ... )
+        """
+        if radius.isscalar:
+            indices = mocpy.from_same_cones(
+                lon,
+                lat,
+                np.float64(Angle(radius).to_value(u.deg)),
+                np.uint8(max_depth),
+                delta_depth=np.uint8(delta_depth),
+                n_threads=n_threads,
+            )
+            return [cls(index) for index in indices]
+        indices = mocpy.from_cones(
+            lon,
+            lat,
+            np.float64(Angle(radius).to_value(u.deg)),
+            np.uint8(max_depth),
+            delta_depth=np.uint8(delta_depth),
+            n_threads=n_threads,
+        )
+        return [cls(index) for index in indices]
 
     @classmethod
     @validate_lonlat
