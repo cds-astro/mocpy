@@ -17,10 +17,10 @@ def border(moc, ax, wcs, **kw_mpl_pathpatch):
 
     max_order = moc_to_plot.max_order
     ipixels_open = moc_to_plot.flatten()
+    num_ipixels = 3 << (2 * (max_order + 1))
 
     # Take the complement if the MOC covers more than half of the sky
-    num_ipixels = 3 << (2 * (max_order + 1))
-    sky_fraction = ipixels_open.shape[0] / float(num_ipixels)
+    sky_fraction = moc_to_plot.sky_fraction
 
     if sky_fraction > 0.5:
         ipixels_all = np.arange(num_ipixels)
