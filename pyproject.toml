@@ -8,6 +8,7 @@ requires-python = ">=3.8"
 dependencies = [
     "astropy<5.3; python_version == '3.8'",
     "astropy; python_version > '3.8'",
+    "numpy<2.0",
     "matplotlib",     # Used in fill and border
     "cdshealpix>=0.6.4",     # Used in fill and border
     "networkx>=2.5",         # Used in get_boundaries
