@@ -224,7 +224,6 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       lon
         .iter()
         .zip(lat.iter())
-        .iter()
         .map(|(lon_deg, lat_deg)| {
           U64MocStore::get_global_store().from_cone(
             *lon_deg,
