@@ -7,7 +7,7 @@ import cdshealpix
 import numpy as np
 import pytest
 import regions
-from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord
+from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord, angular_separation
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
 from astropy.table import QTable
@@ -260,6 +260,10 @@ def test_from_polygons():
         moc.barycenter().separation(SkyCoord(0, 0, unit="deg")) < 0.1 * u.arcmin
         for moc in list_mocs
     )
+    list_mocs_no_skycoord = MOC.from_polygons(
+        [[356, 4, 4, 356], [4, 4, -4, -4], [0, 6, 0, 354], [6, 0, -6, 0]],
+    )
+    assert list_mocs == list_mocs_no_skycoord
 
 
 def test_moc_from_fits():
@@ -543,7 +547,7 @@ def test_from_box():
         lat=Latitude("0d"),
         a=a,
         b=b,
-        angle=Angle("30d"),
+        angle=Angle("30deg"),
         max_depth=10,
     )
     area = moc.sky_fraction * 4 * math.pi * u.steradian
@@ -551,6 +555,40 @@ def test_from_box():
     # parameters
     assert area.to(u.deg**2).value > 80
     assert area.to(u.deg**2).value < 90
+    # test from_boxes
+    list_boxes_same = MOC.from_boxes(
+        lon=[0, 0] * u.deg,
+        lat=[0, 0] * u.deg,
+        a=a,
+        b=b,
+        angle=30 * u.deg,
+        max_depth=10,
+    )
+    assert len(list_boxes_same) == 2
+    assert list_boxes_same[0] == moc
+    a = [Angle("10d"), Angle("20d")]
+    b = [Angle("2d"), Angle("4d")]
+    list_boxes_different = MOC.from_boxes(
+        lon=[0, 0] * u.deg,
+        lat=[0, 0] * u.deg,
+        a=a,
+        b=b,
+        angle=[30, 45] * u.deg,
+        max_depth=10,
+    )
+    assert len(list_boxes_different) == 2
+    assert list_boxes_different[0] == moc
+
+    # mixed iterables and scalars raise an error
+    with pytest.raises(ValueError, match="'a', 'b' and 'angle' should*"):
+        MOC.from_boxes(
+            lon=[0, 0] * u.deg,
+            lat=[0, 0] * u.deg,
+            a=a,
+            b=b,
+            angle=30 * u.deg,
+            max_depth=10,
+        )
 
 
 def test_from_astropy_regions():
@@ -608,6 +646,31 @@ def test_from_elliptical_cone():
         pa=Angle(0, u.deg),
         max_depth=10,
     )
+
+
+def test_from_cones():
+    # same radius
+    radius = 2 * u.arcmin
+    lon = [2, 4] * u.deg
+    lat = [5, 6] * u.deg
+    cones = MOC.from_cones(lon, lat, radius=radius, max_depth=14)
+    for cone, lon_unique, lat_unique in zip(cones, lon, lat):
+        barycenter = cone.barycenter()
+        assert angular_separation(
+            lon_unique,
+            lat_unique,
+            barycenter.ra,
+            barycenter.dec,
+        ) < Angle(1 * u.arcsec)
+    # different radii
+    radii = [5, 6] * u.arcmin
+    cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
+    for cone, radius in zip(cones, radii):
+        # we check their area (Pi simplifies)
+        assert (
+            cone.sky_fraction
+            > (((radius) ** 2).to(u.steradian) / 4 * u.steradian).value
+        )
 
 
 @pytest.fixture()

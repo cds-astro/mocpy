@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+* a new method `MOC.from_cones` allows to create a list of MOCs from a list of centers
+and radii. This is multi-threaded.
+* new method `MOC.from_boxes` allows to create lists of MOCs from boxes. This is multi-threaded.
+
+### Changed
+
+* `MOC.from_polygons` now accepts list of coordinates (that it assumes to be in degrees and
+ICRS frame) rather than only lists of SkyCoord objects [#137]
+
 ## [0.14.0]
 
 ### Fixed
