@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.15.0]
+
 ### Added
 
 * a new method `MOC.from_cones` allows to create a list of MOCs from a list of centers
