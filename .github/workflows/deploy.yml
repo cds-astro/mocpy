@@ -34,7 +34,7 @@ jobs:
          done
 
   build-linux64-wheels-manylinux2014:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.8, 3.9, 3.10, 3.11 and 3.12 installed in /opt/python/<python tag>-<abi tag>
@@ -54,7 +54,7 @@ jobs:
          for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
-           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux_2014
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014
            # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
          done
 
