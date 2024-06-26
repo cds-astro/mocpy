@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.8, 3.9, 3.10, 3.11 and 3.12 installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux_2_28_x86_64:latest
     steps:
      - name: "Checkout the full project"
@@ -34,12 +34,38 @@ jobs:
            # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
          done
 
+  build-linux64-wheels-manylinux2014:
+    runs-on: ubuntu-20.04
+    # CentOS 7 64 bits Docker Hub image that 'build-linux-wheels' executes in.
+    # See https://github.com/pypa/manylinux for this particular container:
+    # * CPython 3.8, 3.9, 3.10, 3.11 and 3.12 installed in /opt/python/<python tag>-<abi tag>
+    container: quay.io/pypa/manylinux2014_x86_64:latest
+    steps:
+     - name: "Checkout the full project"
+       uses: actions/checkout@v3
+     - name: "Install Rust"
+       run: |
+         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+     - name: "Build and publish wheels"
+       shell: bash
+       env:
+        MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
+       run: |
+         source $HOME/.cargo/env
+         rustup target add wasm32-unknown-emscripten
+         for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
+           "${PYBIN}/pip" install --upgrade pip
+           "${PYBIN}/pip" install maturin
+           "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux_2014
+           # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
+         done
+
   # Linux is specific: because of manylinux, we have to use a docker file
   build-linux32-wheels:
     runs-on: ubuntu-latest
     # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11, installed in /opt/python/<python tag>-<abi tag>
+    # * CPython 3.7, 3.8, 3.9, 3.10, 3.11, and 3.12 installed in /opt/python/<python tag>-<abi tag>
     env:
       MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
       img: quay.io/pypa/manylinux2014_i686
@@ -95,7 +121,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       # See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategyfail-fast
-      # run all matrix jobs even if on is failling (default behaviour is to stop all jobs)
+      # run all matrix jobs even if on is failing (default behavior is to stop all jobs)
       fail-fast: false
       matrix:
         os: [windows-latest]
