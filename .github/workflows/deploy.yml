@@ -26,7 +26,6 @@ jobs:
         MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
        run: |
          source $HOME/.cargo/env
-         rustup target add wasm32-unknown-emscripten
          for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
@@ -52,7 +51,6 @@ jobs:
         MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
        run: |
          source $HOME/.cargo/env
-         rustup target add wasm32-unknown-emscripten
          for PYBIN in /opt/python/cp3{8,9,10,11,12}-*/bin; do
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
