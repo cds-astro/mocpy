@@ -1120,7 +1120,7 @@
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_elliptical_cone">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@validate_lonlat</span>
-    <span class="k">def</span> <span class="nf">from_elliptical_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_elliptical_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from an elliptical cone.</span>
 
@@ -1183,7 +1183,7 @@
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_cone">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@validate_lonlat</span>
-    <span class="k">def</span> <span class="nf">from_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_cone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a cone.</span>
 
@@ -1228,9 +1228,76 @@
             <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">radius</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
             <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
+            <span class="n">delta_depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.from_cones">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_cones">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_lonlat</span>
+    <span class="k">def</span> <span class="nf">from_cones</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a list of MOCs from cones.</span>
+
+<span class="sd">        Each cone is centered around the (`lon`, `lat`) position with a radius expressed by</span>
+<span class="sd">        `radius`. Coordinates should be in the ICRS frame, as stipulated in the MOC standard.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`</span>
+<span class="sd">            The longitude of the center of the cone. Can be scalar or a list of longitudes.</span>
+<span class="sd">        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`</span>
+<span class="sd">            The latitude of the center of the cone. Can be scalar or a list of latitudes.</span>
+<span class="sd">        radius : `astropy.coordinates.Angle` or its supertype `astropy.units.Quantity`</span>
+<span class="sd">            The radius angle of the cone. Can be scalar or a list of radii.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        delta_depth : int, optional</span>
+<span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
+<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
+<span class="sd">            `max_depth` + `depth_delta`.</span>
+<span class="sd">        n_threads : int, optional</span>
+<span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
+<span class="sd">            all available threads will be used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : List[`~mocpy.moc.MOC`]</span>
+<span class="sd">            The resulting list of MOCs</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_cone(</span>
+<span class="sd">        ...  lon=[1, 4] * u.deg,</span>
+<span class="sd">        ...  lat=[2, 5] * u.deg,</span>
+<span class="sd">        ...  radius=10 * u.deg,</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">radius</span><span class="o">.</span><span class="n">isscalar</span><span class="p">:</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_same_cones</span><span class="p">(</span>
+                <span class="n">lon</span><span class="p">,</span>
+                <span class="n">lat</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">delta_depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_cones</span><span class="p">(</span>
+            <span class="n">lon</span><span class="p">,</span>
+            <span class="n">lat</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+            <span class="n">delta_depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
+            <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="MOC.from_box">
@@ -1285,6 +1352,93 @@
             <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.from_boxes">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_boxes">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_lonlat</span>
+    <span class="k">def</span> <span class="nf">from_boxes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a MOC from a box/rectangle.</span>
+
+<span class="sd">        The box is centered around the (`lon`, `lat`) position.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon : `~astropy.coordinates.Longitude` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The longitude of the center of the cone.</span>
+<span class="sd">        lat : `~astropy.coordinates.Latitude` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The latitude of the center of the cone.</span>
+<span class="sd">        a : `~astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The semi-major axis of the box, i.e. half of the box&#39;s width.</span>
+<span class="sd">        b : `~astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The semi-minor axis of the box, i.e. half of the box&#39;s height.</span>
+<span class="sd">        angle : `astropy.coordinates.Angle` or its supertype `~astropy.units.Quantity`</span>
+<span class="sd">            The tilt angle between the north and the semi-major axis, east of north.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        n_threads : int, optional</span>
+<span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
+<span class="sd">            all available threads will be used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : list[`~mocpy.moc.MOC`]</span>
+<span class="sd">            The resulting list of MOCs.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; # similar boxes, same size and orientation</span>
+<span class="sd">        &gt;&gt;&gt; moc_list = MOC.from_boxes(</span>
+<span class="sd">        ...  lon=[1, 2]*u.deg,</span>
+<span class="sd">        ...  lat=[1, 2]*u.deg,</span>
+<span class="sd">        ...  a=10*u.deg,</span>
+<span class="sd">        ...  b=5*u.deg,</span>
+<span class="sd">        ...  angle=30*u.deg,</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; # different boxes</span>
+<span class="sd">        &gt;&gt;&gt; moc_list = MOC.from_boxes(</span>
+<span class="sd">        ...  lon=[1, 2]*u.deg,</span>
+<span class="sd">        ...  lat=[1, 2]*u.deg,</span>
+<span class="sd">        ...  a=[10, 20]*u.deg,</span>
+<span class="sd">        ...  b=[5, 10]*u.deg,</span>
+<span class="sd">        ...  angle=[30, 10]*u.deg,</span>
+<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">)</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">isscalar</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;&#39;a&#39;, &#39;b&#39; and &#39;angle&#39; should either be all astropy angle-equivalent&quot;</span>
+                    <span class="s2">&quot;scalar values or they should all be iterable angle-equivalent. &quot;</span>
+                    <span class="s2">&quot;They cannot be a mix of both.&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_same_boxes</span><span class="p">(</span>
+                <span class="n">lon</span><span class="p">,</span>
+                <span class="n">lat</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">angle</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="c1"># different boxes</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_boxes</span><span class="p">(</span>
+            <span class="n">lon</span><span class="p">,</span>
+            <span class="n">lat</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+            <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="MOC.from_ring">
@@ -1392,13 +1546,18 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        list_vertices : list[`~astropy.coordinates.SkyCoord`]</span>
-<span class="sd">            A list of `~astropy.coordinates.SkyCoord` objects. Each SkyCoord object should</span>
-<span class="sd">            contain more than three vertices and they should each describe a polygon.</span>
+<span class="sd">        list_vertices : list[`~astropy.coordinates.SkyCoord`] OR numpy.ndarray</span>
+<span class="sd">            - If list_vertices is a list of `~astropy.coordinates.SkyCoord` objects, each</span>
+<span class="sd">            SkyCoord object should contain more than three vertices and they should each</span>
+<span class="sd">            describe a polygon.</span>
+<span class="sd">            - If list_vertices is a numpy.ndarray, it should be in the form</span>
+<span class="sd">            [lon_array1, lat_array1, lon_array2, lat_array2, lon_array3, lat_array3, ...].</span>
+<span class="sd">            They should be valid longitudes and latitudes in degrees in ICRS.</span>
 <span class="sd">         max_depth : int, optional</span>
 <span class="sd">            The resolution of the MOC. Set to 10 by default.</span>
 <span class="sd">        n_threads : int, optional</span>
-<span class="sd">            The number of threads to be used</span>
+<span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
+<span class="sd">            all available threads will be used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1413,16 +1572,29 @@
 <span class="sd">        ...     SkyCoord([0, 6, 0, -6], [6, 0, -6, 0], unit=&quot;deg&quot;)</span>
 <span class="sd">        ... ]</span>
 <span class="sd">        &gt;&gt;&gt; list_mocs = MOC.from_polygons(list_vertices)</span>
-<span class="sd">        &gt;&gt;&gt; len(list_mocs) # two mocs are created</span>
-<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; # without the SkyCoord object, we need to adapt the coordinates</span>
+<span class="sd">        &gt;&gt;&gt; list_vertices = [[356, 4, 4, 356], [4, 4, -4, -4],</span>
+<span class="sd">        ...                  [0, 6, 0, 354], [6, 0, -6, 0]]</span>
+<span class="sd">        &gt;&gt;&gt; list_mocs_no_check_no_wrap = MOC.from_polygons(list_vertices)</span>
+<span class="sd">        &gt;&gt;&gt; list_mocs == list_mocs_no_check_no_wrap</span>
+<span class="sd">        True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">lon_lat_list</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_vertices</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span><span class="n">lon_lat_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">n_threads</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SkyCoord</span><span class="p">):</span>
+            <span class="n">lon_lat_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_vertices</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span><span class="n">lon_lat_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">n_threads</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># This is the unsafe version where the users should provide correct coordinates</span>
+            <span class="c1"># without checks on our side</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
 
 
@@ -1506,7 +1678,8 @@
 <span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
 <span class="sd">        &gt;&gt;&gt; moc1 = MOC.from_stcs(&quot;Circle ICRS 147.6 69.9 0.4&quot;, max_depth=14)</span>
 <span class="sd">        &gt;&gt;&gt; moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg, radius=Angle(0.4, u.deg), max_depth=14)</span>
-<span class="sd">        &gt;&gt;&gt; assert (moc1 == moc2)</span>
+<span class="sd">        &gt;&gt;&gt; moc1 == moc2</span>
+<span class="sd">        True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_stcs</span><span class="p">(</span><span class="n">stcs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
@@ -2163,7 +2336,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 03 Jun 2024. <br/>
+    Last built 26 Jun 2024. <br/>
   </p>
 </footer>
   </body>
