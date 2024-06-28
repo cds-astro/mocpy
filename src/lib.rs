@@ -4,12 +4,12 @@ use ndarray::Array;
 #[cfg(not(target_arch = "wasm32"))]
 use num_threads::num_threads;
 use numpy::{
-  IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyReadonlyArray1,
-  PyReadonlyArray2, PyReadonlyArrayDyn,
+  IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
+  PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
 };
 use pyo3::{
   exceptions::{PyIOError, PyValueError},
-  prelude::{pymodule, Py, PyModule, PyResult, Python},
+  prelude::{pymodule, Bound, PyModule, PyResult, Python},
   types::{PyBytes, PyTuple},
 };
 #[cfg(not(target_arch = "wasm32"))]
@@ -24,7 +24,7 @@ use moc::{
 use ndarray::parallel::prelude::IntoParallelRefIterator;
 
 #[pymodule]
-fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
+fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   #[pyfn(m)]
   fn usize_n_bits() -> u8 {
     (std::mem::size_of::<usize>() as u8) << 3
@@ -1417,13 +1417,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// Method kept temporarily to ensure backward compatibility.
   ///
   #[pyfn(m)]
-  fn coverage_2d_contains_approx(
-    py: Python,
+  fn coverage_2d_contains_approx<'a>(
+    py: Python<'a>,
     index: usize,
-    times: PyReadonlyArrayDyn<f64>,
-    lon: PyReadonlyArrayDyn<f64>,
-    lat: PyReadonlyArrayDyn<f64>,
-  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    times: PyReadonlyArrayDyn<'a, f64>,
+    lon: PyReadonlyArrayDyn<'a, f64>,
+    lat: PyReadonlyArrayDyn<'a, f64>,
+  ) -> PyResult<Bound<'a, PyArrayDyn<bool>>> {
     let time_shape = times.shape().to_vec();
     let lon_shape = lon.shape();
     let lat_shape = lat.shape();
@@ -1448,7 +1448,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray(py).to_owned())
+          .map(|a| a.into_pyarray_bound(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1466,13 +1466,13 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * If `lon`, `lat` and `times` do not have the same length
   #[pyfn(m)]
-  fn coverage_2d_contains(
-    py: Python,
+  fn coverage_2d_contains<'a>(
+    py: Python<'a>,
     index: usize,
-    times: PyReadonlyArrayDyn<u64>,
-    lon: PyReadonlyArrayDyn<f64>,
-    lat: PyReadonlyArrayDyn<f64>,
-  ) -> PyResult<Py<PyArray1<bool>>> {
+    times: PyReadonlyArrayDyn<'a, u64>,
+    lon: PyReadonlyArrayDyn<'a, f64>,
+    lat: PyReadonlyArrayDyn<'a, f64>,
+  ) -> PyResult<Bound<'a, PyArray1<bool>>> {
     let it_time = times.as_array().into_iter().cloned();
     let it_lon = lon.as_array().into_iter().cloned();
     let it_lat = lat.as_array().into_iter().cloned();
@@ -1480,7 +1480,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
       .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
-      .map(|vec_bool| PyArray1::<bool>::from_vec(py, vec_bool).to_owned())
+      .map(|vec_bool| PyArray1::<bool>::from_vec_bound(py, vec_bool).to_owned())
       .map_err(PyIOError::new_err)
   }
 
@@ -1496,12 +1496,12 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * If `lon` and `lat` do not have the same length
   #[pyfn(m)]
-  fn filter_pos(
-    py: Python,
+  fn filter_pos<'a>(
+    py: Python<'a>,
     index: usize,
-    lon: PyReadonlyArrayDyn<f64>,
-    lat: PyReadonlyArrayDyn<f64>,
-  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    lon: PyReadonlyArrayDyn<'a, f64>,
+    lat: PyReadonlyArrayDyn<'a, f64>,
+  ) -> PyResult<Bound<'a, PyArrayDyn<bool>>> {
     let lon_shape = lon.shape().to_vec();
     let lat_shape = lat.shape();
     if lon_shape != lat_shape {
@@ -1517,7 +1517,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(lon_shape, vec_bool)
-          .map(|a| a.into_pyarray(py).to_owned())
+          .map(|a| a.into_pyarray_bound(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1530,11 +1530,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``time`` - The time, in JD.
   ///
   #[pyfn(m)]
-  fn filter_time_approx(
-    py: Python,
+  fn filter_time_approx<'a>(
+    py: Python<'a>,
     index: usize,
-    times: PyReadonlyArrayDyn<f64>,
-  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    times: PyReadonlyArrayDyn<'a, f64>,
+  ) -> PyResult<Bound<'a, PyArrayDyn<bool>>> {
     let time_shape = times.shape().to_vec();
     let it_time = times.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
@@ -1542,7 +1542,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray(py).to_owned())
+          .map(|a| a.into_pyarray_bound(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1555,11 +1555,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``time`` - The time, in microsec since JD=0.
   ///
   #[pyfn(m)]
-  fn filter_time(
-    py: Python,
+  fn filter_time<'a>(
+    py: Python<'a>,
     index: usize,
-    times: PyReadonlyArrayDyn<u64>,
-  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    times: PyReadonlyArrayDyn<'a, u64>,
+  ) -> PyResult<Bound<'a, PyArrayDyn<bool>>> {
     let time_shape = times.shape().to_vec();
     let it_time = times.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
@@ -1567,7 +1567,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray(py).to_owned())
+          .map(|a| a.into_pyarray_bound(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1580,11 +1580,11 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``frequencies`` - The time, in microsec since JD=0.
   ///
   #[pyfn(m)]
-  fn filter_freq(
-    py: Python,
+  fn filter_freq<'a>(
+    py: Python<'a>,
     index: usize,
-    frequencies: PyReadonlyArrayDyn<f64>,
-  ) -> PyResult<Py<PyArrayDyn<bool>>> {
+    frequencies: PyReadonlyArrayDyn<'a, f64>,
+  ) -> PyResult<Bound<'a, PyArrayDyn<bool>>> {
     let freq_shape = frequencies.shape().to_vec();
     let it_freq = frequencies.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
@@ -1592,7 +1592,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(freq_shape, vec_bool)
-          .map(|a| a.into_pyarray(py).to_owned())
+          .map(|a| a.into_pyarray_bound(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1604,10 +1604,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// * ``index`` - The index of the coverage to serialize.
   /// * ``path`` - the path of the output file
   #[pyfn(m)]
-  fn to_fits_raw(py: Python, index: usize, pre_v2: bool) -> PyResult<Py<PyBytes>> {
+  fn to_fits_raw<'a>(py: Python<'a>, index: usize, pre_v2: bool) -> PyResult<Bound<'a, PyBytes>> {
     U64MocStore::get_global_store()
       .to_fits_buff(index, Some(pre_v2))
-      .map(move |b| PyBytes::new(py, &b).into())
+      .map(move |b| PyBytes::new_bound(py, &b))
       .map_err(PyIOError::new_err)
   }
 
@@ -1940,15 +1940,15 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
 
   /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
   #[pyfn(m)]
-  fn multi_multiorder_probdens_map_sum_in_smoc(
-    py: Python,
-    indices: PyReadonlyArrayDyn<usize>,
-    uniq: PyReadonlyArrayDyn<u64>,
-    uniq_mask: PyReadonlyArrayDyn<bool>,
-    probdens: PyReadonlyArrayDyn<f64>,
-    probdens_mask: PyReadonlyArrayDyn<bool>,
+  fn multi_multiorder_probdens_map_sum_in_smoc<'a>(
+    py: Python<'a>,
+    indices: PyReadonlyArrayDyn<'a, usize>,
+    uniq: PyReadonlyArrayDyn<'a, u64>,
+    uniq_mask: PyReadonlyArrayDyn<'a, bool>,
+    probdens: PyReadonlyArrayDyn<'a, f64>,
+    probdens_mask: PyReadonlyArrayDyn<'a, bool>,
     n_threads: Option<u16>,
-  ) -> PyResult<Py<PyArray1<f64>>> {
+  ) -> PyResult<Bound<'a, PyArray1<f64>>> {
     #[cfg(not(target_arch = "wasm32"))]
     let n_threads = n_threads
       .map(|v| v as usize)
@@ -2011,7 +2011,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
       }
     }
     .map_err(PyIOError::new_err)
-    .map(|probas| PyArray1::<f64>::from_vec(py, probas).to_owned())
+    .map(|probas| PyArray1::<f64>::from_vec_bound(py, probas))
   }
 
   /// Deserialize a spatial MOC from a FITS file.
@@ -2302,10 +2302,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   }
 
   #[pyfn(m)]
-  fn get_barycenter(py: Python, index: usize) -> PyResult<Py<PyTuple>> {
+  fn get_barycenter<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyTuple>> {
     U64MocStore::get_global_store()
       .barycenter(index)
-      .map(|(lon, lat)| PyTuple::new(py, vec![lon, lat]).into())
+      .map(|(lon, lat)| PyTuple::new_bound(py, vec![lon, lat]))
       .map_err(PyValueError::new_err)
   }
 
@@ -2437,10 +2437,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
   #[pyfn(m)]
-  fn to_uniq_hpx(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+  fn to_uniq_hpx<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_hpx(index)
-      .map(|v| v.into_pyarray(py).to_owned())
+      .map(|v| v.into_pyarray_bound(py))
       .map_err(PyValueError::new_err)
   }
 
@@ -2450,10 +2450,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
   #[pyfn(m)]
-  fn to_uniq_gen(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+  fn to_uniq_gen<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_gen(index)
-      .map(|v| v.into_pyarray(py).to_owned())
+      .map(|v| v.into_pyarray_bound(py))
       .map_err(PyValueError::new_err)
   }
 
@@ -2463,36 +2463,36 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
   #[pyfn(m)]
-  fn to_uniq_zorder(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+  fn to_uniq_zorder<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_zorder(index)
-      .map(|v| v.into_pyarray(py).to_owned())
+      .map(|v| v.into_pyarray_bound(py))
       .map_err(PyValueError::new_err)
   }
 
   #[pyfn(m)]
-  fn to_ranges(py: Python, index: usize) -> PyResult<Py<PyArray2<u64>>> {
+  fn to_ranges<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray2<u64>>> {
     U64MocStore::get_global_store()
       .to_ranges(index)
       .map_err(PyValueError::new_err)
       .and_then(|mut v| {
         let len = v.len();
         // We could have used Array::from_shape_vec; to be checked: no clone in both cases
-        PyArray1::from_vec(py, utils::flatten(&mut v))
-          .reshape(Ix2(len, 2_usize))
-          .map(|a| a.to_owned())
+        PyArray1::from_vec_bound(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
       })
   }
 
   #[pyfn(m)]
-  fn to_rgba(py: Python, index: usize, size_y: u16) -> PyResult<Py<PyArray3<u8>>> {
+  fn to_rgba<'a>(py: Python<'a>, index: usize, size_y: u16) -> PyResult<Bound<'a, PyArray3<u8>>> {
     U64MocStore::get_global_store()
       .to_image(index, size_y)
       .map_err(PyValueError::new_err)
       .and_then(|box_u8| {
-        PyArray1::from_slice(py, &box_u8)
-          .reshape(Ix3(size_y as usize, (size_y << 1) as usize, 4_usize))
-          .map(|a| a.to_owned())
+        PyArray1::from_slice_bound(py, &box_u8).reshape(Ix3(
+          size_y as usize,
+          (size_y << 1) as usize,
+          4_usize,
+        ))
       })
   }
 
@@ -2637,16 +2637,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   }
 
   #[pyfn(m)]
-  fn to_freq_ranges(py: Python, index: usize) -> PyResult<Py<PyArray2<f64>>> {
+  fn to_freq_ranges<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray2<f64>>> {
     U64MocStore::get_global_store()
       .to_hz_ranges(index)
       .map_err(PyValueError::new_err)
       .and_then(|mut v| {
         let len = v.len();
         // We could have used Array::from_shape_vec; to be checked: no clone in both cases
-        PyArray1::from_vec(py, utils::flatten(&mut v))
-          .reshape(Ix2(len, 2_usize))
-          .map(|a| a.to_owned())
+        PyArray1::from_vec_bound(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
       })
   }
 
@@ -2656,10 +2654,10 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``data`` - The spatial coverage
   #[pyfn(m)]
-  fn flatten_to_moc_depth(py: Python, index: usize) -> PyResult<Py<PyArray1<u64>>> {
+  fn flatten_to_moc_depth<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .flatten_to_moc_depth(index)
-      .map(move |v| PyArray1::from_vec(py, v).to_owned())
+      .map(move |v| PyArray1::from_vec_bound(py, v))
       .map_err(PyIOError::new_err)
   }
   //
@@ -2670,10 +2668,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   ///
   /// * ``index`` - The index of the coverage.
   #[pyfn(m)]
-  fn flatten_to_depth(py: Python, index: usize, depth: u8) -> PyResult<Py<PyArray1<u64>>> {
+  fn flatten_to_depth<'a>(
+    py: Python<'a>,
+    index: usize,
+    depth: u8,
+  ) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .flatten_to_depth(index, depth)
-      .map(move |v| PyArray1::from_vec(py, v).to_owned())
+      .map(move |v| PyArray1::from_vec_bound(py, v))
       .map_err(PyIOError::new_err)
   }
 
