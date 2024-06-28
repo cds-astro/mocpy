@@ -28,8 +28,8 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-moc = { version = "0.15", features = ["storage"] }
-# moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
+# moc = { version = "0.15", features = ["storage"] }
+moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
 healpix = { package = "cdshealpix", version = "0.6" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 rayon = "1.10"

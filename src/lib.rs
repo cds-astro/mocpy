@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::{f64::consts::FRAC_PI_3, ops::Range};
 
 use ndarray::Array;
 #[cfg(not(target_arch = "wasm32"))]
@@ -1858,7 +1858,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Warning
   /// * contrary to `multiordermap_sum_in_smoc_from_file`, nothing is known
-  /// about the values that are summed, so we do not multiply them be the area
+  /// about the values that are summed, so we do not multiply them by the area
   /// of the cells
   #[pyfn(m)]
   fn multiordermap_sum_in_smoc(
@@ -1928,7 +1928,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           None
         } else {
           let (depth, _ipix) = Hpx::<u64>::from_uniq_hpx(uniq);
-          let area = (std::f64::consts::PI / 3.0) / (1_u64 << (depth << 1) as u32) as f64;
+          let area = FRAC_PI_3 / (1_u64 << (depth << 1) as u32) as f64;
           let proba = dens * area;
           Some((uniq, proba))
         }
@@ -1976,7 +1976,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           None
         } else {
           let (depth, _ipix) = Hpx::<u64>::from_uniq_hpx(uniq);
-          let area = (std::f64::consts::PI / 3.0) / (1_u64 << (depth << 1) as u32) as f64;
+          let area = FRAC_PI_3 / (1_u64 << (depth << 1) as u32) as f64;
           let proba = dens * area;
           Some((uniq, proba))
         }
@@ -2012,6 +2012,56 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     }
     .map_err(PyIOError::new_err)
     .map(|probas| PyArray1::<f64>::from_vec_bound(py, probas))
+  }
+
+  /// Get the values and surface area for the UNIQ HEAPix cells which are in
+  /// the S-MOC of given index. We assume nothing about input values so they are returned
+  /// unmodified (they are not multiplied by the area of the cells).
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``uniq`` - UNIQ HEALPix values.
+  /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
+  /// * ``values`` - Values to be returned.
+  /// * ``values_mask`` - mask on the values to be returned.
+  #[pyfn(m)]
+  fn multiorder_values_and_weights_in_smoc<'a>(
+    py: Python<'a>,
+    index: usize,
+    uniq: PyReadonlyArrayDyn<'a, u64>,
+    uniq_mask: PyReadonlyArrayDyn<'a, bool>,
+    values: PyReadonlyArrayDyn<'a, f64>,
+    values_mask: PyReadonlyArrayDyn<'a, bool>,
+  ) -> PyResult<(Bound<'a, PyArray1<f64>>, Bound<'a, PyArray1<f64>>)> {
+    let it = uniq
+      .as_array()
+      .into_iter()
+      .cloned()
+      .zip(values.as_array().into_iter().cloned())
+      .zip(
+        uniq_mask
+          .as_array()
+          .into_iter()
+          .cloned()
+          .zip(values_mask.as_array().into_iter().cloned()),
+      )
+      .filter_map(|(key_val, (mask_key, mask_val))| {
+        if mask_key | mask_val {
+          None
+        } else {
+          Some(key_val)
+        }
+      });
+    U64MocStore::get_global_store()
+      .multiordermap_filter_in_moc(index, it)
+      .map(|(values, weights)| {
+        (
+          values.into_pyarray_bound(py),
+          weights.into_pyarray_bound(py),
+        )
+      })
+      .map_err(PyIOError::new_err)
   }
 
   /// Deserialize a spatial MOC from a FITS file.
