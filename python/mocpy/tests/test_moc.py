@@ -839,10 +839,9 @@ def test_from_valued_healpix_cells_bayestar():
     probdensity = data["PROBDENSITY"]
 
     import astropy.units as u
-    import astropy_healpix as ah
 
-    level, _ = ah.uniq_to_level_ipix(uniq)
-    area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
+    orders = (np.log2(uniq // 4)) // 2
+    area = 4 * np.pi / np.array([MOC.n_cells(int(order)) for order in orders]) * u.sr
 
     prob = probdensity * area
 

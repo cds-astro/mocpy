@@ -30,7 +30,6 @@ astropy_regions = ["regions"]
 docs = [
     "astropy-sphinx-theme",
     "astropy_healpix",
-    "healpy",
     "nbsphinx",
     "numpydoc",
     "sphinx-astropy",
