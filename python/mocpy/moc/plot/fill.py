@@ -1,14 +1,12 @@
+import cdshealpix
 import numpy as np
 from astropy.coordinates import ICRS, SkyCoord
-import cdshealpix
-
 from astropy.wcs.utils import skycoord_to_pixel
-
-from matplotlib.path import Path
 from matplotlib.patches import PathPatch
+from matplotlib.path import Path
 
-from .utils import build_plotting_moc, _set_wcs
 from . import culling_backfacing_cells
+from .utils import _set_wcs, build_plotting_moc
 
 
 def compute_healpix_vertices(depth, ipix, wcs):
@@ -75,7 +73,8 @@ def compute_the_patches(moc, wcs):
     # 1. remove backfacing cells
     # 2. subdivide too large cells to order 3
     depth_ipix_clean_d = culling_backfacing_cells.from_moc(
-        depth_ipix_d=depth_ipix_d, wcs=wcs,
+        depth_ipix_d=depth_ipix_d,
+        wcs=wcs,
     )
 
     patches = []

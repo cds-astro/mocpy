@@ -1,15 +1,12 @@
-import numpy as np
-
-from astropy.coordinates import ICRS
-from astropy.wcs.utils import skycoord_to_pixel
-
 import cdshealpix
-from astropy.coordinates import SkyCoord
+import numpy as np
+from astropy.coordinates import ICRS, SkyCoord
+from astropy.wcs.utils import skycoord_to_pixel
 
 
 def backface_culling(xp, yp):
     """Remove cells crossing the MOC after projection.
-    
+
     The remaining HEALPix cells are used for computing the patch of the MOC
     """
     vx = xp

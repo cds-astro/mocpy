@@ -459,7 +459,7 @@ class FrequencyMOC(AbstractMOC):
             index = mocpy.frequency_moc_from_json_file(path)
             return cls(index)
         formats = ("fits", "ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -496,7 +496,7 @@ class FrequencyMOC(AbstractMOC):
             index = mocpy.frequency_moc_from_json_str(value)
             return cls(index)
         formats = ("ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")
 
     def plot_frequencies(self, ax, color="blue", frequency_unit="Hz"):
         """Plot a frequency moc.
