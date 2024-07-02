@@ -26,7 +26,7 @@ class IO:
         """
         formats = ("fits", "json", "str")
         if format not in formats:
-            raise ValueError("format should be one of %s" % (str(formats)))
+            raise ValueError(f"format should be one of {formats}")
 
         if format == "fits":
             hdulist = fits.HDUList.fromstring(

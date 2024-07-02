@@ -1,21 +1,25 @@
-import numpy as np
-
-from astropy import coordinates
-from astropy import wcs
+from collections.abc import Sequence
 
 import astropy.units as u
+import numpy as np
+from astropy import coordinates, wcs
 
 
 class WCS:
     """
-    Create a WCS for vizualizing a MOC in a matplotlib axis.
+    Create a WCS for visualizing a MOC in a matplotlib axis.
+
+    This method is a quick astropy WCS instantiation and does not fit every use case.
+    It is especially not designed for all-sky plots.
 
     Parameters
     ----------
     fig : `~matplotlib.pyplot.figure`
         The matplotlib figure used for plotting the MOC.
-    fov : `~astropy.units.Quantity`
+    fov : `~astropy.units.Quantity` or Sequence[`~astropy.units.Quantity`, `~astropy.units.Quantity`]
         Size of the field of view.
+        If it is a sequence, it must be of length 2 and represent the longitudinal and latitudinal
+        field of views.
     center : `~astropy.coordinates.SkyCoord`, optional
         World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame).
     coordsys : str, optional
@@ -71,13 +75,17 @@ class WCS:
 
         width_px, height_px = fig.get_size_inches() * float(fig.dpi)
 
-        cdelt_x = fov.to_value("deg") / float(width_px)
-        cdelt_y = fov.to_value("deg") / float(height_px)
+        if isinstance(fov, Sequence):
+            cdelt_x = fov[0].to_value("deg") / float(width_px)
+            cdelt_y = fov[1].to_value("deg") / float(height_px)
+            self.w.wcs.cdelt = [-cdelt_x, cdelt_y]
+        else:
+            cdelt_x = fov.to_value("deg") / float(width_px)
+            cdelt_y = fov.to_value("deg") / float(height_px)
+            cdelt = max(cdelt_x, cdelt_y)
+            self.w.wcs.cdelt = [-cdelt, cdelt]
 
-        cdelt = max(cdelt_x, cdelt_y)
-
-        self.w.wcs.crpix = [width_px / 2.0, height_px / 2.0]
-        self.w.wcs.cdelt = [-cdelt, cdelt]
+        self.w.wcs.crpix = [width_px / 2.0 + 0.5, height_px / 2.0 + 0.5]
 
         if coordsys == "icrs":
             self.w.wcs.crval = [center.icrs.ra.deg, center.icrs.dec.deg]

@@ -1,15 +1,15 @@
-import numpy as np
+import warnings
 
+import numpy as np
 from astropy.wcs.utils import pixel_to_skycoord
 
-import warnings
 
 def _set_wcs(ax, wcs):
     """Get the plot dimension the same way as in WCS constructor.
-    
+
     This allows to pass an astropy wcs instead of a WCS when plotting.
     """
-    #Inspired from issue: https://github.com/cds-astro/mocpy/issues/69 
+    # Inspired from issue: https://github.com/cds-astro/mocpy/issues/69
     width_px = wcs.wcs.crpix[0] * 2.0
     height_px = wcs.wcs.crpix[1] * 2.0
 

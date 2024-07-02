@@ -4,7 +4,6 @@ import numpy as np
 from astropy.coordinates import Angle, SkyCoord
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
-
 from mocpy import MOC, WCS
 
 moc = MOC.from_fits("polygon_moc.fits")

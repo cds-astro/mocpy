@@ -398,7 +398,7 @@ class STMOC(AbstractMOC):
             index = mocpy.coverage_2d_from_json_file(path)
             return cls(index)
         formats = ("fits", "ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -428,4 +428,4 @@ class STMOC(AbstractMOC):
             index = mocpy.coverage_2d_from_json_str(value)
             return cls(index)
         formats = ("ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")

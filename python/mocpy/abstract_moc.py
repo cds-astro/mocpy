@@ -603,7 +603,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
                 return mocpy.to_json_str_with_fold(self.store_index, fold)
             return mocpy.to_json_str(self.store_index)
         formats = ("ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")
 
     def save(
         self,

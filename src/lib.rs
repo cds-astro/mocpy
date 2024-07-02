@@ -601,11 +601,14 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
   /// # Params
   /// * `lon_lat_deg` list of polygons vertices coordinates, of the form
   ///   `lon_array_1, lat_array_1, lon_array_2, lat_array_2, ..., lon_array_b, lat_array_n`
+  /// * `is_complement` should the method return the complement of the polygon (false returns
+  ///   the smallest polygon)
   /// * `depth`: MOC depth
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
   pub fn from_polygons(
     lon_lat_deg: Vec<PyReadonlyArrayDyn<f64>>,
+    complement: bool,
     depth: u8,
     n_threads: Option<u16>,
   ) -> PyResult<Vec<usize>> {
@@ -640,7 +643,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
             .map(|(lon, lat)| {
               U64MocStore::get_global_store().from_polygon(
                 lon.iter().cloned().zip(lat.iter().cloned()),
-                false,
+                complement,
                 depth,
                 CellSelection::All,
               )
@@ -656,7 +659,7 @@ fn mocpy(_py: Python, m: &PyModule) -> PyResult<()> {
         .map(|(lon, lat)| {
           U64MocStore::get_global_store().from_polygon(
             lon.iter().cloned().zip(lat.iter().cloned()),
-            false,
+            complement,
             depth,
             CellSelection::All,
           )

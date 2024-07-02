@@ -8,11 +8,10 @@ An experimental support for TMOC (temporal MOC) has been added since version 0.4
 It allows creation, parsing and comparison of TMOCs.
 """
 
-from .moc import MOC, WCS
-from .tmoc import TimeMOC
 from .fmoc import FrequencyMOC
+from .moc import MOC, WCS
 from .stmoc import STMOC
-
+from .tmoc import TimeMOC
 from .version import __version__
 
 __all__ = [

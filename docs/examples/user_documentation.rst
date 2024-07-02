@@ -11,12 +11,12 @@ Gallery of notebooks examples using SMOCs
 
 .. nbgallery::
     ../_collections/notebooks/00-MOCpy_introduction
-    ../_collections/notebooks/compute_moc_borders.ipynb
+    ../_collections/notebooks/compute_moc_borders
     ../_collections/notebooks/filtering_astropy_table
     ../_collections/notebooks/FITS-image-pixels-intersecting-MOC
     ../_collections/notebooks/from_astropy_table.ipynb
-    ../_collections/notebooks/from-astropy-regions
-    ../_collections/notebooks/from_polygon
+    ../_collections/notebooks/01-Creating_MOCs_from_shapes
+    ../_collections/notebooks/02-Creating_MOCs_from_astropy_regions
     ../_collections/notebooks/from_fits_and_intersection
     ../_collections/notebooks/from_image_with_mask
     ../_collections/notebooks/from_vizier_table
@@ -59,13 +59,17 @@ This example:
 .. plot:: examples/logical_operations.py
     :include-source:
 
-Create a MOC from a concave polygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a MOC from a polygon
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to call :py:meth:`mocpy.moc.MOC.from_polygon` or :py:meth:`mocpy.moc.MOC.from_polygon_skycoord`.
 
 .. plot:: examples/polygon_coverage.py
     :include-source:
+
+For a more extended description on how to create MOCs from shapes, you can check the example notebooks
+:doc:`../_collections/notebooks/01-Creating_MOCs_from_shapes` and
+:doc:`../_collections/notebooks/02-Creating_MOCs_from_astropy_regions`.
 
 Get the border(s) of a MOC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

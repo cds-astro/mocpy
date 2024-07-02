@@ -30,10 +30,7 @@ vertices = np.array(
     ],
 )
 skycoord = SkyCoord(vertices, unit="deg", frame="icrs")
-# A point that we say it belongs to the inside of the MOC
-inside = SkyCoord(ra=10, dec=5, unit="deg", frame="icrs")
-moc = MOC.from_polygon_skycoord(skycoord, max_depth=9)
-moc.save("polygon_moc.fits", format="fits", overwrite=True)
+moc = MOC.from_polygon_skycoord(skycoord, complement=False, max_depth=9)
 
 # Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(10, 10))

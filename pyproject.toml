@@ -30,7 +30,6 @@ astropy_regions = ["regions"]
 docs = [
     "astropy-sphinx-theme",
     "astropy_healpix",
-    "healpy",
     "nbsphinx",
     "numpydoc",
     "sphinx-astropy",
@@ -47,13 +46,13 @@ dev = [
     "pytest-mock",
     "pytest-cov",
     "requests",
-    "regions"
+    "regions",
+    "ruff >= 0.5.0"
 ]
 # to run the notebooks
 notebooks = [
     "astroquery",
     "ipyaladin",
-    "maser-data",
     "regions",
     "nbmake" # to test the notebooks
 ]
@@ -83,17 +82,6 @@ frozen = false
 # Require Cargo.lock is up to date
 locked = false
 
-[tool.ruff.per-file-ignores]
-# D104: Missing docstring in public package
-# D103: Missing docstring in public function
-# D100: Missing docstring in public module
-# B008: Do not perforn function call in argument defaults
-"__init__.py" = ["D104"]
-"python/mocpy/moc/plot/wcs.py" = ["B008"]
-"python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
-"python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
-"notebooks/*.ipynb" = ["T201"] # print is okish in notebooks
-
 [tool.nbqa.addopts]
 ruff = ["--ignore=B018,FBT003,T201"]
 
@@ -103,10 +91,10 @@ show-fixes = true
 force-exclude = true
 exclude = ["docs/conf.py"]
 extend-include = ["*.ipynb"]
-output-format = "grouped"
-show-source = true
+target-version = "py38"
+
+[tool.ruff.lint]
 ignore-init-module-imports = true
-target-version = "py37"
 extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "C4", "ICN", "RET", "ARG", "PD", "PGH",
                  "RUF", "YTT", "BLE", "COM", "DTZ", "EXE",
@@ -118,8 +106,18 @@ extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803",
 # D203: 1 blank line required before class docstring (not compatible with numpy docstyle)
 # FBT002: Boolean default in function definition (would require to change all API)
 
+[tool.ruff.lint.per-file-ignores]
+# D104: Missing docstring in public package
+# D103: Missing docstring in public function
+# D100: Missing docstring in public module
+# B008: Do not perforn function call in argument defaults
+"__init__.py" = ["D104"]
+"python/mocpy/moc/plot/wcs.py" = ["B008"]
+"python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
+"python/mocpy/serializer.py" = ["A002"] # Argument "format" is shadowing a python builtin
+"notebooks/*.ipynb" = ["T201"] # print is okish in notebooks
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"  # Accepts: "google", "numpy", or "pep257"
 
 [tool.pytest.ini_options]
