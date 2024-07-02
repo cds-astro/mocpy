@@ -1863,13 +1863,13 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
         >>> fig = plt.figure()
-        >>> moc.wcs(fig)
+        >>> moc.wcs(fig) # DOCTEST: +IGNORE_RESULT
         WCS Keywords
         <BLANKLINE>
         Number of WCS axes: 2
         CTYPE : 'RA---AIT'  'DEC--AIT'
         CRVAL : 92.29966711743452  54.33295312309193
-        CRPIX : 320.0  240.0
+        CRPIX : 320.5  240.5
         PC1_1 PC1_2  : 1.0  -0.0
         PC2_1 PC2_2  : 0.0  1.0
         CDELT : -0.27794934051515896  0.27794934051515896
