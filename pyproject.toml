@@ -54,7 +54,6 @@ dev = [
 notebooks = [
     "astroquery",
     "ipyaladin",
-    "maser-data",
     "regions",
     "nbmake" # to test the notebooks
 ]
