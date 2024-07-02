@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * a new method `MOC.from_cones` allows to create a list of MOCs from a list of centers
 and radii. This is multi-threaded.
 * new method `MOC.from_boxes` allows to create lists of MOCs from boxes. This is multi-threaded.
+* the `mocpy.WCS` class can now accept a sequence of angles as its fov argument rather than always
+representing square areas of the sky.
 
 ### Changed
 
