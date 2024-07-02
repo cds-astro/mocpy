@@ -507,7 +507,10 @@ def test_moc_contains_2d_parameters():
     lat2 = Angle(np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]), unit=u.deg)
     moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
     should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
+    complement_moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12, complement=True)
+    assert complement_moc.sky_fraction > moc.sky_fraction
     assert should_be_inside.all()
+
     # test mismatched
     with pytest.raises(
         ValueError,

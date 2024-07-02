@@ -1,5 +1,5 @@
-API
-===
+Detailed list of all methods
+============================
 
 Auto-generated API documentation for MOCpy.
 

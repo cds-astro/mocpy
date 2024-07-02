@@ -25,6 +25,8 @@ and radii. This is multi-threaded.
 * new method `MOC.from_boxes` allows to create lists of MOCs from boxes. This is multi-threaded.
 * the `mocpy.WCS` class can now accept a sequence of angles as its fov argument rather than always
 representing square areas of the sky.
+* `MOC.from_polygons` and `MOC.from_polygons` now accept a boolean `complement` that allows to chose
+between the small MOC described by the polygon or the bigger one (its complement)
 
 ### Changed
 
