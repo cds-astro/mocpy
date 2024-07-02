@@ -1368,8 +1368,7 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         skycoord : `astropy.coordinates.SkyCoord`
-            The sky coordinates defining the vertices of a polygon. It can describe a convex or
-            concave polygon but not a self-intersecting one.
+            The sky coordinates defining the vertices of a polygon.
         max_depth : int, optional
             The resolution of the MOC. Set to 10 by default.
 
@@ -1377,6 +1376,20 @@ class MOC(AbstractMOC):
         -------
         result : `~mocpy.moc.MOC`
             The resulting MOC
+
+        Examples
+        --------
+        >>> from astropy.coordinates import SkyCoord
+        >>> from mocpy import MOC
+        >>> MOC.from_polygon_skycoord(SkyCoord([80, 82, 76], [36, 33, 33], unit="deg")) # doctest: +ELLIPSIS
+        6/1293
+        7/5149-5151 5165 5169-5171 5176-5177 5180-5181 5186 5192 5194 5216 5218-5219
+        ...
+
+        See Also
+        --------
+        from_polygon
+        from_polygons
         """
         return cls.from_polygon(
             lon=skycoord.icrs.ra,
@@ -1424,6 +1437,11 @@ class MOC(AbstractMOC):
         >>> list_mocs == list_mocs_no_check_no_wrap
         True
 
+        See Also
+        --------
+        from_polygon
+        from_polygon_skycoord
+
         """
         if isinstance(list_vertices[0], SkyCoord):
             lon_lat_list = [
@@ -1454,8 +1472,7 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
-            The longitudes defining the polygon. Can describe convex and
-            concave polygons but not self-intersecting ones.
+            The longitudes defining the polygon.
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             The latitudes defining the polygon. Can describe convex and concave
             polygons but not self-intersecting ones.
@@ -1467,6 +1484,11 @@ class MOC(AbstractMOC):
         -------
         result : `~mocpy.moc.MOC`
             The resulting MOC
+
+        See Also
+        --------
+        from_polygons
+        from_polygons_skycoord
         """
         index = mocpy.from_polygon(
             lon,
