@@ -1,6 +1,6 @@
-from ..moc import MOC
-
 from astropy import units as u
+
+from ..moc import MOC
 
 
 def test_create_from_polygon():
@@ -168,6 +168,7 @@ def test_create_from_polygon():
 
 def test_polygon2_issue_44():
     from astropy import units as u
+
     from mocpy import MOC
 
     ra = [174.75937396073138, 185.24062603926856, 184.63292896369916, 175.3670710363009]
@@ -185,9 +186,10 @@ def test_polygon2_issue_44():
 
 # Test from https://github.com/cds-astro/mocpy/issues/50
 def test_polygon_issue_50():
-    from mocpy import MOC
-    from astropy.coordinates import SkyCoord
     from astropy import units as u
+    from astropy.coordinates import SkyCoord
+
+    from mocpy import MOC
 
     coords = SkyCoord(
         [

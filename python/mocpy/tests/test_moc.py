@@ -507,7 +507,10 @@ def test_moc_contains_2d_parameters():
     lat2 = Angle(np.array([[20, 25, 10, 22], [-60, 80, 0, 10]]), unit=u.deg)
     moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
     should_be_inside = moc.contains_lonlat(lon=lon, lat=lat)
+    complement_moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12, complement=True)
+    assert complement_moc.sky_fraction > moc.sky_fraction
     assert should_be_inside.all()
+
     # test mismatched
     with pytest.raises(
         ValueError,
@@ -839,10 +842,9 @@ def test_from_valued_healpix_cells_bayestar():
     probdensity = data["PROBDENSITY"]
 
     import astropy.units as u
-    import astropy_healpix as ah
 
-    level, _ = ah.uniq_to_level_ipix(uniq)
-    area = ah.nside_to_pixel_area(ah.level_to_nside(level)).to_value(u.steradian)
+    orders = (np.log2(uniq // 4)) // 2
+    area = 4 * np.pi / np.array([MOC.n_cells(int(order)) for order in orders]) * u.sr
 
     prob = probdensity * area
 

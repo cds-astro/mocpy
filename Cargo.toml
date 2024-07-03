@@ -14,6 +14,7 @@ categories = ["algorithms", "science"]
 repository = "https://github.com/cds-astro/mocpy"
 description = "MOC parsing and manipulation in Python"
 documentation = "https://cds-astro.github.io/mocpy"
+exclude = [".*", "binder/", "docs/", "notebooks/", "resources/"]
 
 [badges]
 maintenance = { status = "actively-developed" }

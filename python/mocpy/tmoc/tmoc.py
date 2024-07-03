@@ -329,9 +329,7 @@ class TimeMOC(AbstractMOC):
         if order_op > max_order:
             message = (
                 "Requested time resolution for the operation cannot be applied.\n"
-                "The TimeMoc object resulting from the operation is of time resolution {} sec.".format(
-                    TimeMOC.order_to_time_resolution(max_order).sec,
-                )
+                f"The TimeMoc object resulting from the operation is of time resolution {TimeMOC.order_to_time_resolution(max_order).sec} sec."
             )
             warnings.warn(message, UserWarning, stacklevel=2)
 
@@ -549,9 +547,7 @@ class TimeMOC(AbstractMOC):
         if new_max_order > current_max_order:
             message = (
                 "Requested time resolution filtering cannot be applied.\n"
-                "Filtering is applied with a time resolution of {} sec.".format(
-                    TimeMOC.order_to_time_resolution(current_max_order).sec,
-                )
+                f"Filtering is applied with a time resolution of {TimeMOC.order_to_time_resolution(current_max_order).sec} sec."
             )
             warnings.warn(message, UserWarning, stacklevel=2)
 
@@ -713,7 +709,7 @@ class TimeMOC(AbstractMOC):
             index = mocpy.time_moc_from_json_file(path)
             return cls(index)
         formats = ("fits", "ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")
 
     @classmethod
     def _from_fits_raw_bytes(cls, raw_bytes):
@@ -744,4 +740,4 @@ class TimeMOC(AbstractMOC):
             index = mocpy.time_moc_from_json_str(value)
             return cls(index)
         formats = ("ascii", "json")
-        raise ValueError("format should be one of %s" % (str(formats)))
+        raise ValueError(f"format should be one of {formats}")

@@ -1,15 +1,13 @@
-import numpy as np
-
-# A python module handling graph manipulations
 import networkx as nx
+import numpy as np
 
 try:  # noqa: SIM105
     from astropy_healpix import HEALPix
 except ImportError:
     pass
 
-from astropy.coordinates import ICRS, SkyCoord
 import astropy.units as u
+from astropy.coordinates import ICRS, SkyCoord
 
 
 class Boundaries:  # noqa: D101
