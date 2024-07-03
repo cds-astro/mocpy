@@ -1,7 +1,9 @@
 import contextlib
 import functools
 from io import BytesIO
+from math import log2
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 
 import numpy as np
@@ -542,56 +544,145 @@ class MOC(AbstractMOC):
         return moc
 
     @classmethod
-    def from_vizier_table(cls, table_id, nside=256):
-        """
-        Create a `~mocpy.moc.MOC` object from a VizieR table.
-
-        **Info**: This method is already implemented in `astroquery.cds <https://astroquery.readthedocs.io/en/latest/cds/cds.html>`__. You can ask to get a `mocpy.moc.MOC` object
-        from a vizier catalog ID.
+    def from_vizier_table(cls, table_id, max_depth=None, nside=None):
+        """Create a `~mocpy.moc.MOC` object from a VizieR table or catalog.
 
         Parameters
         ----------
         table_id : str
-            table index
-        nside : int, optional
-            256 by default
+            Table or catalog identifier
+        max_depth : int, optional
+            The depth at which the MOC should be retrieved. The default (which is also the
+            most precise available on the server) is order 11 for tables and order 10 for
+            catalogs.
+        nside : int, optional and deprecated
+            It is deprecated in favor of max_depth since version 0.6.0
+            You can switch to maw_depth by calculating max_depht = log2(nside).
 
         Returns
         -------
         result : `~mocpy.moc.MOC`
             The resulting MOC.
-        """
-        nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
-        if nside not in nside_possible_values:
-            raise ValueError(
-                f"Bad value for nside. Must be in {nside_possible_values}",
-            )
-        return cls.from_ivorn("ivo://CDS/" + table_id, nside)
 
-    MOC_SERVER_ROOT_URL = "http://alasky.unistra.fr/MocServer/query"
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_vizier_table("J/A+A/675/A154/tableb1") # download the MOC
+        >>> round(moc.sky_fraction, 6) # let's print the sky fraction of the MOC
+        4e-06
+
+        Notes
+        -----
+        VizieR is organized by catalogs that correspond to published articles or to data
+        releases. These catalogs contain one or more tables.
+
+        Here are two webpages where you can read the
+        `list of catalogs https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html`_
+        and the `list of tables https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&list=tables`_
+        currently available.
+        """
+        if nside:
+            import warnings
+
+            warnings.warn(
+                "'nside' is deprecated in favor of 'max_depth'. We use the nside"
+                "value for this request. You can switch to max_depth with "
+                "max_depth = log2(nside).",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
+            if nside not in nside_possible_values:
+                raise ValueError(
+                    f"Bad value for nside. Must be in {nside_possible_values}",
+                )
+            max_depth = log2(nside)
+
+        url = f"https://cdsarc.cds.unistra.fr/viz-bin/moc/{table_id}"
+
+        if max_depth:
+            url += f"?order={int(max_depth)}"
+
+        try:
+            moc = cls.from_url(url)
+        except HTTPError as error:
+            if error.code == 400:
+                # we provide a clearer error for code 400 bad request
+                raise ValueError(
+                    f"No catalog/table was found for '{table_id}'. You can see the list of "
+                    "catalogs at https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html "
+                    "and the list of tables at "
+                    "https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&list=tables .",
+                ) from None
+            raise error
+        return moc
 
     @classmethod
-    def from_ivorn(cls, ivorn, nside=256):
-        """
-        Create a `~mocpy.moc.MOC` object from a given ivorn.
+    def from_ivorn(cls, ivorn, max_depth: int = 8, nside=None):
+        """Create a `~mocpy.moc.MOC` object from a given IVORN.
+
+        IVORNs are standardized unique identifiers used within the virtual observatory.
+        This method queries the MOCServer, a CDS service that can also be found through
+        its webpages https://alasky.cds.unistra.fr/MocServer/query
 
         Parameters
         ----------
         ivorn : str
-        nside : int, optional
-            256 by default
+            A valid Virtual Observatory IVORN
+        max_depth : int, defaults to 8
+            The depth at which the MOC should be retrieved.
+        nside : int, optional and deprecated
+            It is deprecated in favor of max_depth since version 0.6.0
 
         Returns
         -------
         result : `~mocpy.moc.MOC`
             The resulting MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.from_ivorn("ivo://CDS/J/A+AS/133/387/table5")
+        7/96462 96481 96484-96486
+        8/385839 385852 385854-385855 385933 385948-385950 385969 385984 385986
+
+        Notes
+        -----
+        This is a rudimentary way to retrieve MOCs from the MOCServer. For a more
+        complete implementation, see the MOCServer module in the astroquery library.
         """
-        return cls.from_url(
-            "{}?{}".format(
-                MOC.MOC_SERVER_ROOT_URL,
-                urlencode({"ivorn": ivorn, "get": "moc", "order": int(np.log2(nside))}),
-            ),
+        if nside:
+            import warnings
+
+            warnings.warn(
+                "'nside' is deprecated in favor of 'max_depth'. We use the nside"
+                "value for this request. You can switch to max_depth with "
+                "max_depth = log2(nside).",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            nside_possible_values = (8, 16, 32, 64, 128, 256, 512)
+            if nside not in nside_possible_values:
+                raise ValueError(
+                    f"Bad value for nside. Must be in {nside_possible_values}",
+                )
+            max_depth = log2(nside)
+
+        moc = cls.from_url(
+            "http://alasky.unistra.fr/MocServer/query?"
+            + urlencode({"ivorn": ivorn, "get": "moc", "order": int(max_depth)}),
         )
+
+        if moc.empty():
+            import warnings
+
+            warnings.warn(
+                "This MOC is empty. Possible causes are that this IVORN has no "
+                "positions or this is not a valid IVORN.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return moc
 
     @classmethod
     def from_url(cls, url):

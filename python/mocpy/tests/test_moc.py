@@ -266,6 +266,41 @@ def test_from_polygons():
     assert list_mocs == list_mocs_no_skycoord
 
 
+def test_from_vizier():
+    # deprecated nside should still work (nside=8 means order=3)
+    with pytest.warns(
+        DeprecationWarning,
+        match="'nside' is deprecated in favor of 'max_depth'.*",
+    ):
+        moc = MOC.from_vizier_table("I/355", nside=8)
+    assert moc.max_order == 3
+    # gaia is the whole sky at order 3
+    assert moc.sky_fraction == 1
+    with pytest.warns(
+        DeprecationWarning,
+        match="'nside' is deprecated in favor of 'max_depth'.*",
+    ), pytest.raises(ValueError, match="Bad value for nside.*"):
+        moc = MOC.from_vizier_table("I/355", nside=1)
+    moc = MOC.from_vizier_table("I/355")
+    # default order is 10 for catalogs
+    assert moc.max_order == 10
+    # non valid table or catalog
+    with pytest.raises(ValueError, match="No catalog/table was found for 'abc'*"):
+        moc = MOC.from_vizier_table("abc")
+
+
+def test_from_ivorn():
+    with pytest.warns(
+        DeprecationWarning,
+        match="'nside' is deprecated in favor of 'max_depth'.*",
+    ):
+        moc = MOC.from_ivorn("ivo://CDS/J/A+AS/133/387/table5", nside=8)
+    assert moc.max_order == 3
+
+    with pytest.warns(UserWarning, match="This MOC is empty.*"):
+        MOC.from_ivorn("abc")
+
+
 def test_moc_from_fits():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
     MOC.load(fits_path, "fits")
