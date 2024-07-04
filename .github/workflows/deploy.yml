@@ -39,6 +39,7 @@ jobs:
     # See https://github.com/pypa/manylinux for this particular container:
     # * CPython 3.8, 3.9, 3.10, 3.11 and 3.12 installed in /opt/python/<python tag>-<abi tag>
     container: quay.io/pypa/manylinux2014_x86_64:latest
+    env: {ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true} # Allow using Node16 actions required for CentOS7
     steps:
      - name: "Checkout the full project"
        uses: actions/checkout@v3
