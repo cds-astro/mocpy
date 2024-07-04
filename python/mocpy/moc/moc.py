@@ -1,5 +1,6 @@
 import contextlib
 import functools
+import warnings
 from io import BytesIO
 from math import log2
 from pathlib import Path
@@ -264,8 +265,6 @@ class MOC(AbstractMOC):
         --------
         contains_skycoords
         """
-        import warnings
-
         warnings.warn(
             "This method is deprecated and has been replaced by contains_lonlat",
             DeprecationWarning,
@@ -429,8 +428,6 @@ class MOC(AbstractMOC):
         coords: [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
-        import warnings
-
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
             DeprecationWarning,
@@ -582,8 +579,6 @@ class MOC(AbstractMOC):
         currently available.
         """
         if nside:
-            import warnings
-
             warnings.warn(
                 "'nside' is deprecated in favor of 'max_depth'. We use the nside"
                 "value for this request. You can switch to max_depth with "
@@ -652,8 +647,6 @@ class MOC(AbstractMOC):
         complete implementation, see the MOCServer module in the astroquery library.
         """
         if nside:
-            import warnings
-
             warnings.warn(
                 "'nside' is deprecated in favor of 'max_depth'. We use the nside"
                 "value for this request. You can switch to max_depth with "
@@ -674,8 +667,6 @@ class MOC(AbstractMOC):
         )
 
         if moc.empty():
-            import warnings
-
             warnings.warn(
                 "This MOC is empty. Possible causes are that this IVORN has no "
                 "positions or this is not a valid IVORN.",
@@ -1045,8 +1036,6 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         if max_depth is None:
-            import warnings
-
             warnings.warn(
                 "To avoid an extra loop, it is preferable to provide the max_depth parameter."
                 "It will probably become mandatory in future releases.",
@@ -2035,8 +2024,6 @@ class MOC(AbstractMOC):
         frame : `astropy.coordinates.BaseCoordinateFrame`, optional
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
-        import warnings
-
         warnings.warn(
             "This method is deprecated and is no longer tested."
             "Please refer to `MOC.fill` and `MOC.border` methods",
