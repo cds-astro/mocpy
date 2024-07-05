@@ -25,10 +25,17 @@ between the small MOC described by the polygon or the bigger one (its complement
 
 ### Changed
 
+* `MOC.from_healpix_cells` also accepts an int as depth if all the cells are at the same level
 * `MOC.from_vizier_table()` does not call the MOCServer anymore. It now raises an error if the
 catalog of table name is invalid (see #143). It also accepts `max_depth` as an argument. This
 should replace `nside` in a future version.
 * `MOC.from_ivorn()` now accepts `max_depth` as an argument. This should reb=place `nside` later.
+
+### Fixed
+
+* `ranges` in `from_depth29_ranges` is now optional, to be consistent with the existing docstring
+* `from_healpix_cells` and `from_velued_healpix_cells` now filter out invalid cells and raise a
+warning when they do so
 
 ## [0.15.0]
 

@@ -230,24 +230,34 @@ def lonlat_gen_f():
     return gen_f
 
 
-@pytest.mark.parametrize("size", [1000, 10000, 50000])
-def test_moc_from_skycoords(skycoords_gen_f, size):
-    skycoords = skycoords_gen_f(size)
-    MOC.from_skycoords(skycoords, max_norder=7)
+def test_moc_from_skycoords(skycoords_gen_f):
+    skycoords = skycoords_gen_f(10)
+    moc = MOC.from_skycoords(skycoords, max_norder=7)
+    assert all(moc.contains_skycoords(skycoords))
 
 
-@pytest.mark.parametrize("size", [1000, 10000, 50000])
-def test_moc_from_lonlat(lonlat_gen_f, size):
-    lon, lat = lonlat_gen_f(size)
-    MOC.from_lonlat(lon=lon, lat=lat, max_norder=6)
+def test_moc_from_lonlat(lonlat_gen_f):
+    lon, lat = lonlat_gen_f(10)
+    moc_lon_lat = MOC.from_lonlat(lon=lon, lat=lat, max_norder=6)
+    moc_skycoo = MOC.from_skycoords(SkyCoord(lon, lat), max_norder=6)
+    assert moc_lon_lat == moc_skycoo
 
 
 def test_from_healpix_cells():
     ipix = np.array([40, 87, 65])
     depth = np.array([3, 3, 3])
-    np.array([True, True, True])
-
-    MOC.from_healpix_cells(max_depth=29, ipix=ipix, depth=depth)
+    moc = MOC.from_healpix_cells(max_depth=3, ipix=ipix, depth=depth)
+    # the MOC is correct
+    assert moc == MOC.from_str("3/40 87 65")
+    # we can also give depth as an integer if the cells have only one order
+    assert moc == MOC.from_healpix_cells(ipix=ipix, depth=3, max_depth=3)
+    # negative indices are ignored
+    with pytest.warns(
+        UserWarning,
+        match="The list of indices contain negative values*",
+    ):
+        moc = MOC.from_healpix_cells(ipix=[40, -1, 65], depth=depth, max_depth=3)
+    assert moc == MOC.from_str("3/40 65")
 
 
 def test_from_polygons():
@@ -822,30 +832,50 @@ def test_spatial_res_to_order():
     assert (order == output).all()
 
 
-def test_from_valued_healpix_cells_empty():
-    uniq = np.array([])
-    values = np.array([])
+def test_from_valued_healpix_cells():
+    uniq = np.array([8, 12])
+    values = np.array([0.4, 0.6])
+    moc_1 = MOC.from_valued_healpix_cells(
+        uniq,
+        values,
+        cumul_from=0,
+        cumul_to=1,
+        max_depth=12,
+    )
+    assert moc_1 == MOC.from_string("0/4 8\n12/")
+    moc_0p7 = MOC.from_valued_healpix_cells(
+        uniq,
+        values,
+        cumul_from=0,
+        cumul_to=0.7,
+        max_depth=12,
+    )
+    assert moc_0p7 == MOC.from_string("0/8\n12/")
 
-    MOC.from_valued_healpix_cells(uniq, values, 12)
-
-
-def test_from_valued_healpix_cells_different_sizes():
+    # different sizes
     uniq = np.array([500])
     values = np.array([])
-
     with pytest.raises(
         ValueError,
         match="`uniq` and values do not have the same size.",
     ):
         MOC.from_valued_healpix_cells(uniq, values, 12)
-
-
-def test_from_valued_healpix_cells_cumul_from_sup_cumul_to():
-    uniq = np.array([500])
+    # failed comparison between cumul_from and cumul_to
     values = np.array([1.0])
-
     with pytest.raises(ValueError, match="`cumul_from` has to be < to `cumul_to`."):
         MOC.from_valued_healpix_cells(uniq, values, 12, cumul_from=0.8, cumul_to=-5.0)
+    # negative uniq
+    uniq = [-2, 270]
+    values = [0.2, 0.2]
+    with pytest.warns(
+        UserWarning,
+        match="The list of indices contain negative values*",
+    ):
+        assert MOC.from_valued_healpix_cells(
+            uniq,
+            values,
+            max_depth=3,
+        ) == MOC.from_string("3/14")
 
 
 @pytest.mark.parametrize(
