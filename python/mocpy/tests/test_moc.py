@@ -199,6 +199,12 @@ def test_complement():
 # --- TESTING MOC creation ---#
 
 
+def test_new_empty_serialization():
+    # regression test for https://github.com/cds-astro/mocpy/issues/146
+    empty = MOC.new_empty(max_depth=0)
+    assert empty.serialize("json") == {"0": []}
+
+
 def get_random_skycoords(size):
     return SkyCoord(
         ra=np.random.uniform(0, 360, size),
