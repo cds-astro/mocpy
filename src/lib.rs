@@ -2064,6 +2064,30 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
   }
 
+  /// Set to 'false' the booleans associated to the UNIQ HEALPix cells
+  /// intersecting (or fully covered) by the MOC of given index.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``uniq`` - UNIQ HEALPix values.
+  /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
+  /// * `fully_covered_only`: set the boolean to false only if the cell is fully covered (else if it intersects)
+  #[pyfn(m)]
+  fn multiorder_filter_mask_in_smoc<'a>(
+    index: usize,
+    uniq: PyReadonlyArrayDyn<'a, u64>,
+    uniq_mask: &Bound<'a, PyArrayDyn<bool>>,
+    fully_covered_only: bool,
+  ) -> PyResult<()> {
+    let uniq = uniq.as_array();
+    let mut flags = unsafe { uniq_mask.as_array_mut() };
+    let it = uniq.into_iter().cloned().zip(flags.iter_mut());
+    U64MocStore::get_global_store()
+      .multiordermap_filter_mask_moc(index, it, fully_covered_only)
+      .map_err(PyIOError::new_err)
+  }
+
   /// Deserialize a spatial MOC from a FITS file.
   ///
   /// # Arguments
