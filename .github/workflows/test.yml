@@ -106,7 +106,8 @@ jobs:
           virtualenv mocpy-env
           .\mocpy-env\Scripts\activate
           # Install and use maturin
-          pip install maturin
+          pip install maturin==1.6
+          maturin develop --release
           # Install dependencies
           pip install .[dev]
           # Run tests
