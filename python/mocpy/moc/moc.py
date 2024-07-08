@@ -1,5 +1,7 @@
 import contextlib
 import functools
+import warnings
+from collections.abc import Iterable
 from io import BytesIO
 from math import log2
 from pathlib import Path
@@ -79,6 +81,28 @@ def validate_lonlat(function):
     return _validate_lonlat_wrap
 
 
+def _mask_unsigned_before_casting(indices):
+    """Return a mask for an array of integers if there are negative values.
+
+    This is useful before casting indices into unsigned integers.
+
+    Parameters
+    ----------
+    indices : `numpy.ndarray` or Iterable
+    """
+    if np.issubdtype(np.asarray(indices).dtype, np.unsignedinteger) or all(
+        np.asarray(indices) > 0,
+    ):
+        return None
+    warnings.warn(
+        "The list of indices contain negative values. They are filtered "
+        "out to generate the MOC",
+        UserWarning,
+        stacklevel=2,
+    )
+    return np.array(indices) > 0
+
+
 class MOC(AbstractMOC):
     """
     Multi-order spatial coverage class.
@@ -131,8 +155,7 @@ class MOC(AbstractMOC):
     @property
     def max_order(self):
         """Depth/order of the S-MOC."""
-        depth = mocpy.get_smoc_depth(self.store_index)
-        return np.uint8(depth)
+        return mocpy.get_smoc_depth(self.store_index)
 
     @classmethod
     def n_cells(cls, depth):
@@ -264,8 +287,6 @@ class MOC(AbstractMOC):
         --------
         contains_skycoords
         """
-        import warnings
-
         warnings.warn(
             "This method is deprecated and has been replaced by contains_lonlat",
             DeprecationWarning,
@@ -429,8 +450,6 @@ class MOC(AbstractMOC):
         coords: [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
-        import warnings
-
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
             DeprecationWarning,
@@ -582,8 +601,6 @@ class MOC(AbstractMOC):
         currently available.
         """
         if nside:
-            import warnings
-
             warnings.warn(
                 "'nside' is deprecated in favor of 'max_depth'. We use the nside"
                 "value for this request. You can switch to max_depth with "
@@ -652,8 +669,6 @@ class MOC(AbstractMOC):
         complete implementation, see the MOCServer module in the astroquery library.
         """
         if nside:
-            import warnings
-
             warnings.warn(
                 "'nside' is deprecated in favor of 'max_depth'. We use the nside"
                 "value for this request. You can switch to max_depth with "
@@ -674,8 +689,6 @@ class MOC(AbstractMOC):
         )
 
         if moc.empty():
-            import warnings
-
             warnings.warn(
                 "This MOC is empty. Possible causes are that this IVORN has no "
                 "positions or this is not a valid IVORN.",
@@ -1045,8 +1058,6 @@ class MOC(AbstractMOC):
             The resulting MOC
         """
         if max_depth is None:
-            import warnings
-
             warnings.warn(
                 "To avoid an extra loop, it is preferable to provide the max_depth parameter."
                 "It will probably become mandatory in future releases.",
@@ -1059,6 +1070,12 @@ class MOC(AbstractMOC):
                 raise ValueError(
                     "Invalid uniq numbers. Too big uniq or negative uniq numbers might be the cause.",
                 )
+
+        mask = _mask_unsigned_before_casting(uniq)
+        # if any of the values in uniq are negative
+        if mask is not None:
+            uniq = np.array(uniq)[mask]
+            values = np.array(values)[mask]
 
         index = mocpy.from_valued_hpx_cells(
             np.uint8(max_depth),
@@ -1766,7 +1783,7 @@ class MOC(AbstractMOC):
         ----------
         ipix : `numpy.ndarray`
             HEALPix cell indices in the NESTED notation. dtype must be np.uint64
-        depth : `numpy.ndarray`
+        depth : `numpy.ndarray` or int
             Depth of the HEALPix cells. Must be of the same size of `ipix`.
             dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.
         max_depth : int, The resolution of the MOC (degrades on the fly input cells if necessary)
@@ -1778,18 +1795,26 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `~mocpy.moc.MOC`
             The MOC
         """
+        if not isinstance(depth, Iterable):
+            depth = np.full(len(ipix), depth, dtype=np.uint8)
+
+        mask = _mask_unsigned_before_casting(ipix)
+        if mask is not None:
+            ipix = np.array(ipix)[mask]
+            depth = np.array(depth)[mask]
+
         index = mocpy.from_healpix_cells(
             np.uint8(max_depth),
-            depth.astype(np.uint8),
-            ipix.astype(np.uint64),
+            np.array(depth, dtype=np.uint8),
+            np.array(ipix, dtype=np.uint64),
         )
         return cls(index)
 
     @classmethod
-    def from_depth29_ranges(cls, max_depth, ranges):
+    def from_depth29_ranges(cls, max_depth, ranges=None):
         """
         Create a MOC from a set of ranges of HEALPix Nested indices at order 29.
 
@@ -2035,8 +2060,6 @@ class MOC(AbstractMOC):
         frame : `astropy.coordinates.BaseCoordinateFrame`, optional
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
-        import warnings
-
         warnings.warn(
             "This method is deprecated and is no longer tested."
             "Please refer to `MOC.fill` and `MOC.border` methods",
