@@ -1004,6 +1004,21 @@ def test_values_and_weights_in_multiordermap():
     assert all(np.isclose(weights, one_cell.sky_fraction * 4 * math.pi))
 
 
+def test_mask_uniq():
+    uniq = [4 * 4**3 + x for x in range(8)]
+    moc = MOC.from_str("3/4-20")
+    assert all(
+        moc.mask_uniq(uniq) == [False, False, False, False, True, True, True, True],
+    )
+
+    # fully covered should have less matches
+    cone1 = MOC.from_cone(20 * u.deg, 20 * u.deg, radius=2 * u.deg, max_depth=10)
+    cone2 = MOC.from_cone(21 * u.deg, 21 * u.deg, radius=2 * u.deg, max_depth=10)
+    assert sum(cone1.mask_uniq(cone2.uniq_hpx)) > sum(
+        cone1.mask_uniq(cone2.uniq_hpx, fully_covered_only=True),
+    )
+
+
 def test_from_stcs():
     moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", 14, 2)
     moc2 = MOC.from_cone(

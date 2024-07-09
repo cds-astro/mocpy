@@ -1018,6 +1018,50 @@ class MOC(AbstractMOC):
             *_extract_mask_and_values_multiordermap(multiordermap, column),
         )
 
+    def mask_uniq(self, uniq, uniq_mask=None, fully_covered_only=False):
+        """Get a mask for an array of uniq cells intersecting the MOC.
+
+        Parameters
+        ----------
+        uniq : `~np.array`
+            An array on integers corresponding to HEALPix cells in the uniq notation.
+        uniq_mask : `~np.array`, optional
+            An optional array to mask the uniq array. Set to True where the values of the
+            uniq array should be ignored (following the numpy `~np.ma.masked_array`
+            convention).
+        fully_covered_only : bool, optional
+            If True, keep only uniq cells that are fully covered by the MOC.
+            Otherwise, also keep cells that intersect the MOC.
+            By default False.
+
+        Returns
+        -------
+        `~np.array`
+            A mask that is True where the uniq cell is comprised (or at least intersects
+            depending on 'fully_covered_only') in the MOC and False otherwise
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> uniq = [4 * 4**3 + x for x in range(8)] # corresponds to 3/0-7
+        >>> moc = MOC.from_str("3/4-20")
+        >>> moc.mask_uniq(uniq) # the first four cells are NOT intersecting
+        array([False, False, False, False,  True,  True,  True,  True])
+
+        """
+        index = self.store_index
+        if uniq_mask is None:
+            uniq_mask = np.array(np.zeros(len(uniq)), dtype=bool)
+        else:
+            uniq_mask = np.array(uniq_mask, dtype=bool)
+        mocpy.multiorder_filter_mask_in_smoc(
+            index,
+            np.array(uniq, dtype="uint64"),
+            uniq_mask,
+            fully_covered_only,
+        )
+        return np.logical_not(uniq_mask)
+
     @classmethod
     def from_valued_healpix_cells(
         cls,

@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `MOC.mask_uniq` allows to mas an array of uniq cells with a MOC
+* `MOC.values_and_weights_in_multiorder_map` allows to filter a multiordermap by a MOC with
+weights corresponding to the area of the cells intersecting the MOC and the multiordermap
 * the `mocpy.WCS` class can now accept a sequence of angles as its fov argument rather than always
 representing square areas of the sky.
 * `MOC.from_polygons` and `MOC.from_polygons` now accept a boolean `complement` that allows to chose
