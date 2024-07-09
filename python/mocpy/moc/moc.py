@@ -103,6 +103,40 @@ def _mask_unsigned_before_casting(indices):
     return np.array(indices) > 0
 
 
+def _extract_mask_and_values_multiordermap(multiordermap, column):
+    """Extract uniq and values with their masks.
+
+    Parameters
+    ----------
+    multiordermap : astropy.table.Table
+        The table should have a column named ``UNIQ`` that corresponds to HEALPix
+        cells in the uniq notation.
+    column : str
+        The name of the column to retrieve. It should contain float-compatible values.
+
+    Returns
+    -------
+    (uniq, uniq_mask, values, values_mask)
+    """
+    uniq = multiordermap["UNIQ"]
+    values = multiordermap[column]
+    try:
+        uniq_mask = uniq.data.mask
+    except AttributeError:
+        uniq_mask = np.zeros(uniq.shape)
+    try:
+        values_mask = values.data.mask
+    except AttributeError:
+        values_mask = np.zeros(uniq.shape)
+
+    return (
+        np.array(uniq.data, dtype="uint64"),
+        np.array(uniq_mask, dtype="bool"),
+        np.array(values.data, dtype="float"),
+        np.array(values_mask, dtype="bool"),
+    )
+
+
 class MOC(AbstractMOC):
     """
     Multi-order spatial coverage class.
@@ -862,22 +896,9 @@ class MOC(AbstractMOC):
             dtype=cls._store_index_dtype(),
         )
 
-        uniq = multiordermap["UNIQ"]
-        probdensity = multiordermap["PROBDENSITY"]
-
-        try:
-            uniq_mask = uniq.data.mask
-            probdensity_mask = probdensity.data.mask
-        except AttributeError:
-            uniq_mask = np.zeros(uniq.shape)
-            probdensity_mask = np.zeros(probdensity.shape)
-
         return mocpy.multi_multiorder_probdens_map_sum_in_smoc(
             indices,
-            np.array(uniq.data, dtype="uint64"),
-            np.array(uniq_mask, dtype="bool"),
-            np.array(probdensity.data, dtype="float"),
-            np.array(probdensity_mask, dtype="bool"),
+            *_extract_mask_and_values_multiordermap(multiordermap, "PROBDENSITY"),
             n_threads,
         )
 
@@ -925,21 +946,9 @@ class MOC(AbstractMOC):
         index = self.store_index
 
         if isinstance(multiordermap, Table):
-            uniq = multiordermap["UNIQ"]
-            probdensity = multiordermap["PROBDENSITY"]
-            try:
-                uniq_mask = uniq.data.mask
-                probdensity_mask = probdensity.data.mask
-            except AttributeError:
-                uniq_mask = np.zeros(uniq.shape)
-                probdensity_mask = np.zeros(probdensity.shape)
-
             return mocpy.multiorder_probdens_map_sum_in_smoc(
                 index,
-                np.array(uniq.data, dtype="uint64"),
-                np.array(uniq_mask, dtype="bool"),
-                np.array(probdensity.data, dtype="float"),
-                np.array(probdensity_mask, dtype="bool"),
+                *_extract_mask_and_values_multiordermap(multiordermap, "PROBDENSITY"),
             )
         if isinstance(multiordermap, (Path, str)):
             return mocpy.multiordermap_sum_in_smoc_from_file(index, str(multiordermap))
@@ -955,10 +964,10 @@ class MOC(AbstractMOC):
         Parameters
         ----------
         multiordermap : astropy.table.Table
-            The table should have a ``UNIQ`` that corresponds to HEALPix cells in the uniq
-            notation.
+            The table should have a column ``UNIQ`` that corresponds to HEALPix cells
+            in the uniq notation.
         column : str
-            The name of the column to sum.
+            The name of the column to sum. It should be compatible with a float conversion.
 
         Returns
         -------
@@ -982,21 +991,31 @@ class MOC(AbstractMOC):
 
         """
         index = self.store_index
-        uniq = multiordermap["UNIQ"]
-        values_to_sum = multiordermap[column]
-        try:
-            uniq_mask = uniq.data.mask
-            values_to_sum_mask = values_to_sum.data.mask
-        except AttributeError:
-            uniq_mask = np.zeros(uniq.shape)
-            values_to_sum_mask = uniq_mask
-
         return mocpy.multiordermap_sum_in_smoc(
             index,
-            np.array(uniq.data, dtype="uint64"),
-            np.array(uniq_mask, dtype="bool"),
-            np.array(values_to_sum.data, dtype="float"),
-            np.array(values_to_sum_mask, dtype="bool"),
+            *_extract_mask_and_values_multiordermap(multiordermap, column),
+        )
+
+    def values_and_weights_in_multiordermap(self, multiordermap: Table, column: str):
+        """Calculate the sum of a column from a multiordermap in the intersection with the MOC.
+
+        Parameters
+        ----------
+        multiordermap : astropy.table.Table
+            The table should have a column ``UNIQ`` that corresponds to HEALPix cells
+            in the uniq notation.
+        column : str
+            The name of the column to return. It should be compatible with a float conversion.
+
+        Returns
+        -------
+        Tuple(np.ndarray, np.ndarray)
+
+        """
+        index = self.store_index
+        return mocpy.multiorder_values_and_weights_in_smoc(
+            index,
+            *_extract_mask_and_values_multiordermap(multiordermap, column),
         )
 
     @classmethod

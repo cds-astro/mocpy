@@ -984,6 +984,26 @@ def test_sum_in_multiordermap():
     assert all_sky.sum_in_multiordermap(mom, "TO_SUM") == sum(range_20)
 
 
+def test_values_and_weights_in_multiordermap():
+    all_sky = MOC.from_str("0/0-11")
+    mom = QTable()
+    range_20 = range(20)
+    uniq = np.array([4 * 4**3 + x for x in range_20])
+    mom["UNIQ"] = uniq
+    mom["values"] = range_20
+    values, weights = all_sky.values_and_weights_in_multiordermap(mom, "values")
+    assert all(values == mom["values"])
+    assert all(np.isclose(weight, 4 * math.pi / (12 * 4**3)) for weight in weights)
+
+    one_cell = MOC.from_str("3/0")
+    mom = QTable()
+    mom["values"] = [0, 1, 2, 3]
+    mom["UNIQ"] = [4 * 4**2 + x for x in [0, 1, 2, 3]]  # corresponds to "1/0"
+    values, weights = one_cell.values_and_weights_in_multiordermap(mom, "values")
+    assert all(values == np.array([0]))
+    assert all(np.isclose(weights, one_cell.sky_fraction * 4 * math.pi))
+
+
 def test_from_stcs():
     moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", 14, 2)
     moc2 = MOC.from_cone(
