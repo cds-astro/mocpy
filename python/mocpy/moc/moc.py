@@ -333,6 +333,9 @@ class MOC(AbstractMOC):
     def contains_lonlat(self, lon, lat, keep_inside=True):
         """Test wether a MOC contains (or not) the given points. Returns a boolean mask array.
 
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
+
         Parameters
         ----------
         lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
@@ -779,6 +782,9 @@ class MOC(AbstractMOC):
         """
         Create a MOC from astropy lon, lat `astropy.units.Quantity`.
 
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
+
         Parameters
         ----------
         lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`
@@ -1163,6 +1169,8 @@ class MOC(AbstractMOC):
         The ellipse is centered around the (`lon`, `lat`) position. `a` (resp. `b`) corresponds
         to the semi-major axis magnitude (resp. semi-minor axis magnitude). `pa` is expressed as a
         `~astropy.coordinates.Angle` and defines the position angle of the elliptical cone.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the convention for Space MOCs.
 
         Parameters
         ----------
@@ -1222,6 +1230,8 @@ class MOC(AbstractMOC):
 
         The cone is centered around the (`lon`, `lat`) position with a radius expressed by
         `radius`.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
@@ -1272,7 +1282,9 @@ class MOC(AbstractMOC):
         Create a list of MOCs from cones.
 
         Each cone is centered around the (`lon`, `lat`) position with a radius expressed by
-        `radius`. Coordinates should be in the ICRS frame, as stipulated in the MOC standard.
+        `radius`.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
@@ -1336,6 +1348,8 @@ class MOC(AbstractMOC):
         Create a MOC from a box/rectangle.
 
         The box is centered around the (`lon`, `lat`) position.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
@@ -1386,7 +1400,9 @@ class MOC(AbstractMOC):
         """
         Create a MOC from a box/rectangle.
 
-        The box is centered around the (`lon`, `lat`) position.
+        The boxes are centered around the (`lon`, `lat`) positions.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
@@ -1480,6 +1496,8 @@ class MOC(AbstractMOC):
 
         The cone is centered around the (`lon`, `lat`) position with an internal radius expressed by
         `internal_radius` and an external radius expressed by `external_radius`.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
@@ -1655,6 +1673,8 @@ class MOC(AbstractMOC):
 
         The polygon is given as lon and lat `astropy.units.Quantity` that define the
         vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.
+        The coordinates should be expressed in equatorial coordinates using the
+        ICRS reference. We follow the Space MOC standard.
 
         Parameters
         ----------
