@@ -28,15 +28,15 @@ bench = true
 crate-type = ["cdylib"]
 
 [dependencies]
-moc = { version = "0.14", features = ["storage"] }
-# moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
+# moc = { version = "0.15", features = ["storage"] }
+moc = { git = 'https://github.com/cds-astro/cds-moc-rust', rev = 'f4bbcab15ce705d4af8aace03286b947a51deea6', features = ["storage"] }
 healpix = { package = "cdshealpix", version = "0.6" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
 rayon = "1.10"
 num_threads = "0.1"
 
 [dependencies.numpy]
-version = "0.20"
+version = "0.21"
 
 [dependencies.ndarray]
 version = "0.15"
@@ -45,7 +45,7 @@ default-features = false # do not include the default features, and optionally
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.20"
+version = "0.21"
 features = ["extension-module"]
 
 [profile.release]
