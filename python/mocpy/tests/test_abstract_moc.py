@@ -129,3 +129,32 @@ def test_write(moc, path, mocker):
             False,  # noqa: FBT003
             fits_keywords=None,
         )
+
+
+# --------------------------------------------------------operations
+
+
+def test_operations(all_moc_types):
+    # nothing too fancy here, we just check that the operations can be called
+    for moc in all_moc_types:
+        # intersection
+        assert moc.intersection(moc) == moc
+        assert moc.intersection(moc, moc) == moc
+        # union
+        assert moc.union(moc) == moc
+        assert moc.union(moc, moc) == moc
+        # symmetric difference
+        if isinstance(moc, STMOC):
+            with pytest.raises(
+                NotImplementedError,
+                match=(
+                    "Symmetric difference is not implemented yet for Space-Time MOCs"
+                ),
+            ):
+                moc.symmetric_difference(moc)
+        else:
+            assert moc.symmetric_difference(moc).empty()
+            assert moc.symmetric_difference(moc, moc) == moc
+        # difference
+        assert moc.difference(moc).empty()
+        assert moc.difference(moc, moc).empty()

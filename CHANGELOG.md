@@ -25,6 +25,8 @@ weights corresponding to the area of the cells intersecting the MOC and the mult
 representing square areas of the sky.
 * `MOC.from_polygons` and `MOC.from_polygons` now accept a boolean `complement` that allows to chose
 between the small MOC described by the polygon or the bigger one (its complement)
+* implement multi-moc operations on STMOCs (ex: stmoc1.union(stmoc2, stmoc3, ...)) for `union`,
+`intersection`, and `difference`
 
 ### Changed
 
@@ -39,6 +41,7 @@ should replace `nside` in a future version.
 * `ranges` in `from_depth29_ranges` is now optional, to be consistent with the existing docstring
 * `from_healpix_cells` and `from_velued_healpix_cells` now filter out invalid cells and raise a
 warning when they do so
+* fix multimoc operations (were all failing with a TypeError) [#153]
 
 ## [0.15.0]
 
