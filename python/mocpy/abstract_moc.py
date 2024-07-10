@@ -14,7 +14,7 @@ __email__ = "matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, ma
 
 
 class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
-    """Is an abstract coverage MOC.."""
+    """Is an abstract coverage MOC."""
 
     def __repr__(self):
         return self.to_string(format="ascii", fold=80)
@@ -29,13 +29,13 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        another_moc : `~mocpy.moc.MOC`, `~mocpy.tmoc.TMOC`, `~mocpy.stmoc.STMOC`
+        other : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The moc object to test the equality with
 
         Returns
         -------
-        result : bool
-            True if the self and ``another_moc`` are equal.
+        bool
+            True if the self and ``other`` are equal.
         """
         if not isinstance(other, AbstractMOC):
             raise TypeError(
@@ -80,37 +80,35 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         raise ValueError("Unsupported store index usize type!")
 
     def __add__(self, moc):
-        """
-        Operator + definition.
+        """Compute the union of self with another MOC.
 
-        Computes the union of self with another MOC
+        Operator +
 
         Parameters
         ----------
-        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        moc :  `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Another MOC to compute the union with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The union of self and moc.
         """
         return self.union(moc)
 
     def __radd__(self, moc):
-        """
-        Operator + definition.
+        """Compute the union of self with another MOC.
 
-        Computes the union of self with another MOC
+        Operator + (right side, here commutative operation)
 
         Parameters
         ----------
-        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        moc :  `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Another MOC to compute the union with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The union of self and moc.
         """
         if moc == 0:
@@ -119,19 +117,18 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         return self.union(moc)
 
     def __or__(self, moc):
-        """
-        Operator | definition.
+        """Compute the union of self with another MOC.
 
-        Computes the union of self with another MOC
+        Operator | (bitwise or)
 
         Parameters
         ----------
-        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        moc :  `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Another MOC to compute the union with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The union of self and moc.
         """
         return self.union(moc)
@@ -144,12 +141,12 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        moc :  `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Another MOC to compute the difference with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The difference of self with moc.
         """
         return self.difference(moc)
@@ -162,12 +159,12 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        moc : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        moc :  `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Another MOC to compute the intersection with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The intersection of self and moc.
         """
         return self.intersection(moc)
@@ -180,7 +177,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The complement MOC of self.
         """
         return self.complement()
@@ -190,7 +187,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        result: bool
+        bool
             True if the MOC instance is empty.
         """
         return mocpy.is_empty(self.store_index)
@@ -392,44 +389,41 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         return self.__class__(index)
 
     def extended(self):
-        """
-        Return the MOC extended by the external border made of cells at the MOC maximum depth.
+        """Return the MOC extended by the external border made of cells at the MOC maximum depth.
 
         The only difference with respect to `add_neighbours` is that `extended` returns a new MOC
         instead of modifying the existing one.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The extended MOC
         """
         index = mocpy.extend(self.store_index)
         return self.__class__(index)
 
     def contracted(self):
-        """
-        Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
+        """Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.
 
         The only difference with respect to `remove_neighbours` is that `contracted` returns a new MOC
         instead of modifying the existing one.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The extended MOC
         """
         index = mocpy.contract(self.store_index)
         return self.__class__(index)
 
     def add_neighbours(self):
-        """
-        Extend the MOC instance so that it includes the HEALPix cells touching its border.
+        """Extend the MOC instance so that it includes the HEALPix cells touching its border.
 
         The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             self extended by one degree of neighbours.
         """
         prevstore_index = self.store_index
@@ -437,14 +431,13 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         return self
 
     def remove_neighbours(self):
-        """
-        Remove from the MOC instance the HEALPix cells located at its border.
+        """Remove from the MOC instance the HEALPix cells located at its border.
 
         The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             self minus its HEALPix cells located at its border.
         """
         prevstore_index = self.store_index
@@ -457,8 +450,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
     @classmethod
     def from_json(cls, json_moc):
-        """
-        Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
+        """Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.
 
         Parameters
         ----------
@@ -467,7 +459,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             the MOC.
         """
         import json
@@ -479,8 +471,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
     @classmethod
     def from_fits(cls, path_or_url, timeout=1000):
-        """
-        Load a MOC from a FITS file.
+        """Load a MOC from a FITS file.
 
         The specified FITS file must store the MOC
         (i.e. the list of HEALPix cells it contains)
@@ -495,7 +486,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
 
         """
@@ -532,8 +523,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
     @classmethod
     def from_str(cls, value):
-        """
-        Create a MOC from a str.
+        """Create a MOC from a string.
 
         This grammar is expressed is the `MOC IVOA <http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf>`__
         specification at section 2.3.2.
@@ -545,7 +535,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC
 
         Examples
@@ -561,8 +551,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         return cls.from_string(value, format="ascii")
 
     def degrade_to_order(self, new_order):
-        """
-        Degrade the MOC instance to a new, less precise, MOC.
+        """Degrade the MOC instance to a new, less precise, MOC.
 
         The maximum depth (i.e. the depth of the smallest cells that can be found in the MOC) of the
         degraded MOC is set to ``new_order``.
@@ -574,14 +563,13 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The degraded MOC.
         """
         raise NotImplementedError("Method degrade_to_order not implemented")
 
     def to_string(self, format="ascii", fold=0):  # noqa: A002
-        """
-        Write the MOC into a string.
+        """Write the MOC into a string.
 
         Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
 
@@ -614,8 +602,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         fold=0,
         fits_keywords=None,
     ):
-        """
-        Write the MOC to a file.
+        """Write the MOC to a file.
 
         Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
 
