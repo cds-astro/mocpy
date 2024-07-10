@@ -1,4 +1,6 @@
 import abc
+from collections.abc import Iterable
+from functools import reduce
 from io import BytesIO
 from pathlib import Path
 
@@ -251,136 +253,185 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         return mocpy.flatten_to_moc_depth(self.store_index)
 
     def complement(self):
-        """
-        Return the complement of the MOC instance.
+        """Return the complement of the MOC instance.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
         """
         index = mocpy.complement(self.store_index)
 
         return self.__class__(index)
 
-    def intersection(self, another_moc, *args):
-        """
-        Intersection between the MOC instance and other MOCs.
+    def intersection(self, another_moc, *mocs):
+        """Intersection between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        another_moc : `~mocpy.moc.MOC`
-            The MOC used for performing the intersection with self.
-        args : `~mocpy.moc.MOC`
+        another_moc : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
+            The MOC to do the intersection with.
+        mocs : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Other additional MOCs to perform the intersection with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> import astropy.units as u
+        >>> fmoc_large_band = FrequencyMOC.from_frequency_ranges(order=42,
+        ...                                                      min_freq=0.1*u.Hz,
+        ...                                                      max_freq=100*u.Hz)
+        >>> fmoc_sharp_band = FrequencyMOC.from_frequency_ranges(order=42,
+        ...                                                      min_freq=10*u.Hz,
+        ...                                                      max_freq=20*u.Hz)
+        >>> fmoc_sharp_band.intersection(fmoc_large_band) == fmoc_sharp_band
+        True
         """
-        if args:
-            store_indices = np.append(
-                [self.store_index, another_moc.store_index],
-                np.fromiter(
-                    (arg.store_index for arg in args),
-                    dtype=AbstractMOC._store_index_dtype(),
-                ),
+        if mocs:
+            store_indices = np.array(
+                [self.store_index, another_moc.store_index]
+                + [moc.store_index for moc in mocs],
+                dtype=AbstractMOC._store_index_dtype(),
             )
-            index = mocpy.multi_intersection(store_indices)
-        else:
+            if isinstance(self.max_order, Iterable):  # is a composite MOC, ex: STMOCs
+                # https://github.com/cds-astro/cds-moc-rust/blob/main/src/storage/u64idx/opn.rs#L96
+                index = reduce(mocpy.intersection, store_indices)
+            else:
+                index = mocpy.multi_intersection(store_indices)
+        else:  # case with only two mocs
             index = mocpy.intersection(self.store_index, another_moc.store_index)
 
         return self.__class__(index)
 
-    def union(self, another_moc, *args):
-        """
-        Union between the MOC instance and other MOCs.
+    def union(self, another_moc, *mocs):
+        """Union between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        another_moc : `~mocpy.moc.MOC`
-            The MOC used for performing the union with self.
-        args : `~mocpy.moc.MOC`
+        another_moc : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
+            The MOC to do the union with.
+        mocs : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Other additional MOCs to perform the union with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`/`~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time, TimeDelta
+        >>> older = TimeMOC.from_time_ranges(min_times=Time('1999-01-01T00:00:00.123456789'),
+        ...                                  max_times=Time('2005-01-01T00:00:00'),
+        ...                                  delta_t = TimeDelta(1, format='jd')
+        ...                                 )
+        >>> newer = TimeMOC.from_time_ranges(min_times=Time('2000-01-01T00:00:00'),
+        ...                                  max_times=Time('2010-01-01T00:00:00'),
+        ...                                  delta_t = TimeDelta(1, format='jd')
+        ...                                 )
+        >>> union = older.union(newer) # == older + newer
+        >>> print(union.min_time.jyear, union.max_time.jyear)
+        [1998.99847987] [2010.00183614]
         """
-        if args:
-            store_indices = np.append(
-                [self.store_index, another_moc.store_index],
-                np.fromiter(
-                    (arg.store_index for arg in args),
-                    dtype=AbstractMOC._store_index_dtype(),
-                ),
+        if mocs:
+            store_indices = np.array(
+                [self.store_index, another_moc.store_index]
+                + [moc.store_index for moc in mocs],
+                dtype=AbstractMOC._store_index_dtype(),
             )
-            index = mocpy.multi_union(store_indices)
-        else:
+            if isinstance(self.max_order, Iterable):  # is a composite MOC, ex: STMOCs
+                index = reduce(mocpy.union, store_indices)
+            else:
+                index = mocpy.multi_union(store_indices)
+        else:  # case with only two mocs
             index = mocpy.union(self.store_index, another_moc.store_index)
 
         return self.__class__(index)
 
-    def symmetric_difference(self, another_moc, *args):
-        """
-        Symmetric difference (XOR) between the MOC instance and other MOCs.
+    def symmetric_difference(self, another_moc, *mocs):
+        """Symmetric difference (XOR) between the MOC instance and other MOCs.
+
+        a XOR b == (a and not b) or (not a and b)
+        It is not implemented yet for STMOCs
 
         Parameters
         ----------
-        another_moc : `~mocpy.moc.MOC`
-            The MOC used that will be substracted to self.
-        args : `~mocpy.moc.MOC`
+        another_moc : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
+            The MOC used that will be subtracted to self.
+        mocs : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Other additional MOCs to perform the difference with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc1 = MOC.from_string("3/0-1 362-363")
+        >>> moc2 = MOC.from_string("3/0 2 277 279")
+        >>> moc1.symmetric_difference(moc2)
+        3/1-2 277 279 362-363
         """
-        if args:
-            store_indices = np.append(
-                [self.store_index, another_moc.store_index],
-                np.fromiter(
-                    (arg.store_index for arg in args),
-                    dtype=AbstractMOC._store_index_dtype(),
-                ),
+        if isinstance(self.max_order, Iterable):  # is a composite MOC, ex: STMOCs
+            raise NotImplementedError(
+                "Symmetric difference is not implemented yet for Space-Time MOCs",
+            )
+        if mocs:
+            store_indices = np.array(
+                [self.store_index, another_moc.store_index]
+                + [moc.store_index for moc in mocs],
+                dtype=AbstractMOC._store_index_dtype(),
             )
             index = mocpy.multi_symmetric_difference(store_indices)
-        else:
+        else:  # case with only two mocs
             index = mocpy.symmetric_difference(
                 self.store_index,
                 another_moc.store_index,
             )
-
         return self.__class__(index)
 
-    def difference(self, another_moc, *args):
-        """
-        Difference between the MOC instance and other MOCs.
+    def difference(self, another_moc, *mocs):
+        """Difference between the MOC instance and other MOCs.
 
         Parameters
         ----------
-        another_moc : `~mocpy.moc.MOC`
-            The MOC used that will be substracted to self.
-        args : `~mocpy.moc.MOC`
+        another_moc : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
+            The MOC used that will be subtracted to self.
+        mocs : `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             Other additional MOCs to perform the difference with.
 
         Returns
         -------
-        result : `~mocpy.moc.MOC` or `~mocpy.tmoc.TimeMOC`
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`, `mocpy.STMOC`
             The resulting MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc1 = MOC.from_string("3/0-7")
+        >>> moc2 = MOC.from_string("3/0-3")
+        >>> moc3 = MOC.from_string("3/4-7")
+        >>> moc1.difference(moc2, moc3) # should the empty MOC of order 3 (3/)
+        3/
         """
-        if args:
-            store_indices = np.append(
-                [another_moc.store_index],
-                np.fromiter(
-                    (arg.store_index for arg in args),
-                    dtype=AbstractMOC._store_index_dtype(),
-                ),
+        if mocs:
+            store_indices = np.array(
+                [self.store_index, another_moc.store_index]
+                + [moc.store_index for moc in mocs],
+                dtype=AbstractMOC._store_index_dtype(),
             )
-            index_union = mocpy.multi_union(store_indices)
+            if isinstance(self.max_order, Iterable):  # is a composite MOC, ex: STMOCs
+                index_union = reduce(mocpy.union, store_indices)
+            else:  # case with only two mocs
+                index_union = mocpy.multi_union(store_indices)
             index = mocpy.difference(self.store_index, index_union)
             mocpy.drop(index_union)
         else:
