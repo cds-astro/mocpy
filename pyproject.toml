@@ -62,7 +62,7 @@ repository = "https://github.com/cds-astro/mocpy"
 
 # Build a mocpy-x.x.x.tar.gz containing sources (from maturin).
 [build-system]
-requires = ["maturin>=0.13, < 1.7"]
+requires = ["maturin>=0.13"]
 build-backend = "maturin"
 
 [tool.maturin]
