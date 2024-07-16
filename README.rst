@@ -79,13 +79,13 @@ Latest stable version
 
 Unreleased latest version
 *************************
+
+To install ``mocpy`` from this repository, make sure you have Python (https://www.python.org/downloads/)
+and Rust (https://www.rust-lang.org/tools/install) on your machine. Then, run
+
 .. code::
 
-   git clone https://github.com/cds-astro/mocpy.git
-   cd mocpy
-   pip install .
-
-Note that the point is important.
+   pip install git+https://github.com/cds-astro/mocpy.git
 
 To run the notebooks
 ********************
