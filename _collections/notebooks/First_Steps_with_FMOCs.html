@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>First steps with Frequency MOCs &#8212; MOCPy 0.15.0 documentation</title>
+    <title>First steps with Frequency MOCs &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     
-    <script src="../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -26,7 +26,7 @@
     <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="API" href="../../api.html" />
+    <link rel="next" title="Detailed list of all methods" href="../../api.html" />
     <link rel="prev" title="# Space &amp; Time coverages" href="Space%20%26%20Time%20coverages.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -55,7 +55,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="../../api.html" title="API">
+	<a href="../../api.html" title="Detailed list of all methods">
 	  next &raquo;
 	</a>
       </li>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -87,154 +87,25 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Standard Library
-from pathlib import Path
-
-import matplotlib.pyplot as plt
-
-# General and astronomy packages
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
 import numpy as np
-from astropy.units import Unit
-from maser.data import Data
-
-# Specific to FMOCs
 from mocpy import FrequencyMOC
 </pre></div>
 </div>
 </div>
-<p>We use a file from the Cassini/RPWS/HFR database. This radio instrument has a configurable spectral sampling. The data file is a level 2 data file, containing the centers and widths of each spectral bin.</p>
-<p>The file (and many others) is available for download here: <a class="reference external" href="https://lesia.obspm.fr/kronos/data/2012_091_180/n2/">https://lesia.obspm.fr/kronos/data/2012_091_180/n2/</a></p>
+<p>We use a fits built from a file from the Cassini/RPWS/HFR database. This radio instrument has a configurable spectral sampling.</p>
+<p>The original observation file (and many others) is available for download here: <a class="reference external" href="https://lesia.obspm.fr/kronos/data/2012_091_180/n2/">https://lesia.obspm.fr/kronos/data/2012_091_180/n2/</a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>file = Path(&quot;../resources/FMOC/P2012180.20&quot;)
-</pre></div>
-</div>
-</div>
-<p>We load the data using the <code class="docutils literal notranslate"><span class="pre">maser.data</span></code> module, which recognizes the file</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n2 = Data(file)
-n2.fields
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-dict_keys([&#39;ydh&#39;, &#39;num&#39;, &#39;t97&#39;, &#39;f&#39;, &#39;dt&#39;, &#39;df&#39;, &#39;autoX&#39;, &#39;autoZ&#39;, &#39;crossR&#39;, &#39;crossI&#39;, &#39;ant&#39;])
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n2.dataset
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&#39;co_rpws_hfr_kronos_n2&#39;
-</pre></div></div>
-</div>
-<p>Spectral sweeps are available as a generator using the <code class="docutils literal notranslate"><span class="pre">.sweeps</span></code> property.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sweep = next(n2.sweeps)
-print(f&quot;This sweep has {len(sweep.data)} spectral steps&quot;)
-sweep.data.dtype
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-This sweep has 359 spectral steps
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-dtype([(&#39;ydh&#39;, &#39;&lt;u4&#39;), (&#39;num&#39;, &#39;&lt;u4&#39;), (&#39;t97&#39;, &#39;&lt;f8&#39;), (&#39;f&#39;, &#39;&lt;f4&#39;), (&#39;dt&#39;, &#39;&lt;f4&#39;), (&#39;df&#39;, &#39;&lt;f4&#39;), (&#39;autoX&#39;, &#39;&lt;f4&#39;), (&#39;autoZ&#39;, &#39;&lt;f4&#39;), (&#39;crossR&#39;, &#39;&lt;f4&#39;), (&#39;crossI&#39;, &#39;&lt;f4&#39;), (&#39;ant&#39;, &#39;i1&#39;)])
-</pre></div></div>
-</div>
-<p>Then we get the central frequency and widths for each channel and we can infer the minimumm and maximum frequencyes for each sweep.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Central frequency
-freqs = np.float64(sweep.data[&quot;f&quot;]) * Unit(&quot;kHz&quot;)
-# Width of each channel
-dfreq = np.float64(sweep.data[&quot;df&quot;]) * Unit(&quot;kHz&quot;)
-
-fmin = freqs - dfreq / 2
-fmax = freqs + dfreq / 2
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fmin
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="math notranslate nohighlight">
-$[3.59346,~3.7664249,~3.9476776,~\dots,~15812.5,~15912.5,~16012.5] \; \mathrm{kHz}$</div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fmax
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="math notranslate nohighlight">
-$[3.77774,~3.9595749,~4.1501226,~\dots,~15837.5,~15937.5,~16037.5] \; \mathrm{kHz}$</div></div>
-</div>
-<p>Now let’s start playing with this F-MOCs.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fmoc = FrequencyMOC.from_frequency_ranges(order=50, min_freq=fmin, max_freq=fmax)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fmoc = FrequencyMOC.from_fits(&quot;../resources/FMOC/P2012180.fits&quot;)
 </pre></div>
 </div>
 </div>
 <p>We can plot it in frequency or wavelength</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(15, 1))
@@ -251,11 +122,11 @@ ax.spines[[&quot;left&quot;, &quot;top&quot;, &quot;right&quot;]].set_visible(Fa
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_16_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_16_0.png" />
+<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_5_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_5_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(15, 1))
@@ -267,12 +138,12 @@ fmoc.plot_wavelengths(ax, color=&quot;g&quot;, length_unit=&quot;km&quot;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_17_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_17_0.png" />
+<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_6_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_6_0.png" />
 </div>
 </div>
 <p>We create a dictionnary of FMOCs with less and less precise order ranging from 50 to 10.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(
@@ -292,7 +163,7 @@ we first create an initial FMOC at order 50 and then generate the dictionnary
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for order in fmocs:
@@ -316,7 +187,7 @@ At order 10, this F-MOC has 1 non overlapping spectral intervals
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for order in fmocs:
@@ -350,7 +221,7 @@ At order 10, the spectrum covers 3584 Hz to {round(fmocs[order].to_hz_ranges()[-
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">First steps with Frequency MOCs</a></li>
@@ -368,7 +239,7 @@ At order 10, the spectrum covers 3584 Hz to {round(fmocs[order].to_hz_ranges()[-
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>

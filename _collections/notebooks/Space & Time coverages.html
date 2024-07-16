@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title># Space &amp; Time coverages &#8212; MOCPy 0.15.0 documentation</title>
+    <title># Space &amp; Time coverages &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     
-    <script src="../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -97,18 +97,15 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import WCS, STMOC, TimeMOC
-from astropy.coordinates import ICRS
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import ipywidgets as widgets
+import matplotlib.pyplot as plt
 import numpy as np
 from astropy import units as u
+from astropy.coordinates import ICRS, Angle, SkyCoord
 from astropy.table import Table
-from astropy.coordinates import Angle, SkyCoord
 from astropy.time import Time, TimeDelta
-import ipywidgets as widgets
-
 from astroquery.vizier import Vizier
-
-import matplotlib.pyplot as plt
+from mocpy import STMOC, WCS, TimeMOC
 </pre></div>
 </div>
 </div>
@@ -234,7 +231,7 @@ with WCS(
     rotation=Angle(0, u.degree),
     projection=&quot;AIT&quot;,
 ) as wcs:
-    for i in range(0, 4):
+    for i in range(4):
         tmoc = TimeMOC.from_time_ranges(
             min_times=time_ranges[i][0, 0],
             max_times=time_ranges[i][0, 1],
@@ -242,10 +239,7 @@ with WCS(
         )
 
         moc_2mass = two_mass.query_by_time(tmoc)
-        title = &quot;2MASS observations between \n{} and {}&quot;.format(
-            time_ranges[i][0, 0].iso,
-            time_ranges[i][0, 1].iso,
-        )
+        title = f&quot;2MASS observations between \n{time_ranges[i][0, 0].iso} and {time_ranges[i][0, 1].iso}&quot;
         id_subplot = int(&quot;22&quot; + str(i + 1))
         add_to_plot(fig, id_subplot, wcs, title, moc_2mass)
 
@@ -576,7 +570,7 @@ widgets.VBox([time_slider, output])
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#"># Space &amp; Time coverages</a><ul>
@@ -603,7 +597,7 @@ widgets.VBox([time_slider, output])
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>

@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.plot.wcs &#8212; MOCPy 0.15.0 documentation</title>
+    <title>mocpy.moc.plot.wcs &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../../../../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -65,26 +65,30 @@
           <div class="body" role="main">
             
   <h1>Source code for mocpy.moc.plot.wcs</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">coordinates</span>
-<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">wcs</span>
+<span></span><span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">wcs</span>
 
 
 <div class="viewcode-block" id="WCS">
 <a class="viewcode-back" href="../../../../stubs/mocpy.WCS.html#mocpy.WCS">[docs]</a>
 <span class="k">class</span> <span class="nc">WCS</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a WCS for vizualizing a MOC in a matplotlib axis.</span>
+<span class="sd">    Create a WCS for visualizing a MOC in a matplotlib axis.</span>
+
+<span class="sd">    This method is a quick astropy WCS instantiation and does not fit every use case.</span>
+<span class="sd">    It is especially not designed for all-sky plots.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    fig : `~matplotlib.pyplot.figure`</span>
 <span class="sd">        The matplotlib figure used for plotting the MOC.</span>
-<span class="sd">    fov : `~astropy.units.Quantity`</span>
+<span class="sd">    fov : `~astropy.units.Quantity` or Sequence[`~astropy.units.Quantity`, `~astropy.units.Quantity`]</span>
 <span class="sd">        Size of the field of view.</span>
+<span class="sd">        If it is a sequence, it must be of length 2 and represent the longitudinal and latitudinal</span>
+<span class="sd">        field of views.</span>
 <span class="sd">    center : `~astropy.coordinates.SkyCoord`, optional</span>
 <span class="sd">        World coordinates matching with the center of the plot. Default to (0 deg, 0 deg) (in ICRS frame).</span>
 <span class="sd">    coordsys : str, optional</span>
@@ -140,13 +144,17 @@
 
         <span class="n">width_px</span><span class="p">,</span> <span class="n">height_px</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_size_inches</span><span class="p">()</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi</span><span class="p">)</span>
 
-        <span class="n">cdelt_x</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">width_px</span><span class="p">)</span>
-        <span class="n">cdelt_y</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">height_px</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fov</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
+            <span class="n">cdelt_x</span> <span class="o">=</span> <span class="n">fov</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">width_px</span><span class="p">)</span>
+            <span class="n">cdelt_y</span> <span class="o">=</span> <span class="n">fov</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">height_px</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">cdelt_x</span><span class="p">,</span> <span class="n">cdelt_y</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cdelt_x</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">width_px</span><span class="p">)</span>
+            <span class="n">cdelt_y</span> <span class="o">=</span> <span class="n">fov</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">height_px</span><span class="p">)</span>
+            <span class="n">cdelt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cdelt_x</span><span class="p">,</span> <span class="n">cdelt_y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">cdelt</span><span class="p">,</span> <span class="n">cdelt</span><span class="p">]</span>
 
-        <span class="n">cdelt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cdelt_x</span><span class="p">,</span> <span class="n">cdelt_y</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crpix</span> <span class="o">=</span> <span class="p">[</span><span class="n">width_px</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">height_px</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">cdelt</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">cdelt</span><span class="p">,</span> <span class="n">cdelt</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crpix</span> <span class="o">=</span> <span class="p">[</span><span class="n">width_px</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">height_px</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">coordsys</span> <span class="o">==</span> <span class="s2">&quot;icrs&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">crval</span> <span class="o">=</span> <span class="p">[</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">center</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
@@ -173,7 +181,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 
 
@@ -186,7 +194,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>

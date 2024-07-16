@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.TimeMOC &#8212; MOCPy 0.15.0 documentation</title>
+    <title>mocpy.TimeMOC &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,10 +63,10 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
-      <li><a href="../api.html" accesskey="U">API</a> &#187;</li>
+      <li><a href="../api.html" accesskey="U">Detailed list of all methods</a> &#187;</li>
       
       <li>mocpy.TimeMOC</li> 
     </ul>
@@ -94,10 +94,10 @@
 <span class="sig-name descname"><span class="pre">add_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.add_neighbours" title="Link to this definition">¶</a></dt>
 <dd><p>Extend the MOC instance so that it includes the HEALPix cells touching its border.</p>
 <p>The depth of the HEALPix cells added at the border is equal to the maximum depth of the MOC instance.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>self extended by one degree of neighbours.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>self extended by one degree of neighbours.</p>
 </dd>
 </dl>
 </dd>
@@ -108,10 +108,10 @@
 <dt class="sig sig-object py" id="mocpy.TimeMOC.complement">
 <span class="sig-name descname"><span class="pre">complement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.complement" title="Link to this definition">¶</a></dt>
 <dd><p>Return the complement of the MOC instance.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
@@ -191,10 +191,10 @@ is able to discriminate two observations separated by <code class="docutils lite
 <dd><p>Return the MOC contracted by removing the internal border made of cells at the MOC maximum depth.</p>
 <p>The only difference with respect to <a class="reference internal" href="#mocpy.TimeMOC.remove_neighbours" title="mocpy.TimeMOC.remove_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.TimeMOC.contracted" title="mocpy.TimeMOC.contracted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contracted</span></code></a> returns a new MOC
 instead of modifying the existing one.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The extended MOC</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The extended MOC</p>
 </dd>
 </dl>
 </dd>
@@ -225,24 +225,33 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.difference">
-<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.difference" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">mocs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.difference" title="Link to this definition">¶</a></dt>
 <dd><p>Difference between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used that will be substracted to self.</p>
+<dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The MOC used that will be subtracted to self.</p>
 </dd>
-<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
+<dt><strong>mocs</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-7&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-3&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/4-7&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">,</span> <span class="n">moc3</span><span class="p">)</span> <span class="c1"># should the empty MOC of order 3 (3/)</span>
+<span class="go">3/</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -278,7 +287,7 @@ is able to discriminate two observations separated by <code class="docutils lite
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>result: bool</dt><dd><p>True if the MOC instance is empty.</p>
+<dt>bool</dt><dd><p>True if the MOC instance is empty.</p>
 </dd>
 </dl>
 </dd>
@@ -291,10 +300,10 @@ is able to discriminate two observations separated by <code class="docutils lite
 <dd><p>Return the MOC extended by the external border made of cells at the MOC maximum depth.</p>
 <p>The only difference with respect to <a class="reference internal" href="#mocpy.TimeMOC.add_neighbours" title="mocpy.TimeMOC.add_neighbours"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_neighbours</span></code></a> is that <a class="reference internal" href="#mocpy.TimeMOC.extended" title="mocpy.TimeMOC.extended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extended</span></code></a> returns a new MOC
 instead of modifying the existing one.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The extended MOC</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The extended MOC</p>
 </dd>
 </dl>
 </dd>
@@ -335,7 +344,7 @@ instead of modifying the existing one.</p>
 <p>The specified FITS file must store the MOC
 (i.e. the list of HEALPix cells it contains)
 in a binary HDU table.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
@@ -345,8 +354,8 @@ in a binary HDU table.</p>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
@@ -357,7 +366,7 @@ in a binary HDU table.</p>
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_json">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_moc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.from_json" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MOC from a dictionary of HEALPix cell arrays indexed by their depth.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>json_moc</strong><span class="classifier">dict(str</span><span class="classifier">[int]</span></dt><dd><p>A dictionary of HEALPix cell arrays indexed by their depth.</p>
@@ -365,8 +374,8 @@ in a binary HDU table.</p>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>the MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>the MOC.</p>
 </dd>
 </dl>
 </dd>
@@ -390,10 +399,10 @@ in a binary HDU table.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_str">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.from_str" title="Link to this definition">¶</a></dt>
-<dd><p>Create a MOC from a str.</p>
+<dd><p>Create a MOC from a string.</p>
 <p>This grammar is expressed is the <a class="reference external" href="http://ivoa.net/documents/MOC/20190215/WD-MOC-1.1-20190215.pdf">MOC IVOA</a>
 specification at section 2.3.2.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>value</strong><span class="classifier">str</span></dt><dd><p>The MOC as a string following the grammar rules.</p>
@@ -401,8 +410,8 @@ specification at section 2.3.2.</p>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC</p>
 </dd>
 </dl>
 </dd>
@@ -515,24 +524,37 @@ is able to discriminate two observations separated by <code class="docutils lite
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.intersection">
-<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.intersection" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">mocs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.intersection" title="Link to this definition">¶</a></dt>
 <dd><p>Intersection between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the intersection with self.</p>
+<dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The MOC to do the intersection with.</p>
 </dd>
-<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the intersection with.</p>
+<dt><strong>mocs</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>Other additional MOCs to perform the intersection with.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc_large_band</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="gp">... </span>                                                     <span class="n">min_freq</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>                                                     <span class="n">max_freq</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc_sharp_band</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="gp">... </span>                                                     <span class="n">min_freq</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>                                                     <span class="n">max_freq</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc_sharp_band</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fmoc_large_band</span><span class="p">)</span> <span class="o">==</span> <span class="n">fmoc_sharp_band</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -715,10 +737,10 @@ all the observation time window is rendered).</p>
 <span class="sig-name descname"><span class="pre">remove_neighbours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.remove_neighbours" title="Link to this definition">¶</a></dt>
 <dd><p>Remove from the MOC instance the HEALPix cells located at its border.</p>
 <p>The depth of the HEALPix cells removed is equal to the maximum depth of the MOC instance.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>self minus its HEALPix cells located at its border.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>self minus its HEALPix cells located at its border.</p>
 </dd>
 </dl>
 </dd>
@@ -776,24 +798,34 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.symmetric_difference">
-<span class="sig-name descname"><span class="pre">symmetric_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.symmetric_difference" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">symmetric_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">mocs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.symmetric_difference" title="Link to this definition">¶</a></dt>
 <dd><p>Symmetric difference (XOR) between the MOC instance and other MOCs.</p>
+<p>a XOR b == (a and not b) or (not a and b)
+It is not implemented yet for STMOCs</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used that will be substracted to self.</p>
+<dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The MOC used that will be subtracted to self.</p>
 </dd>
-<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
+<dt><strong>mocs</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>Other additional MOCs to perform the difference with.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-1 362-363&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0 2 277 279&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
+<span class="go">3/1-2 277 279 362-363</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -864,24 +896,40 @@ total duration of all the observation times of the tmoc</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.union">
-<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.union" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">another_moc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">mocs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.union" title="Link to this definition">¶</a></dt>
 <dd><p>Union between the MOC instance and other MOCs.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>another_moc</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The MOC used for performing the union with self.</p>
+<dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>The MOC to do the union with.</p>
 </dd>
-<dt><strong>args</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>Other additional MOCs to perform the union with.</p>
+<dt><strong>mocs</strong><span class="classifier"><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></span></dt><dd><p>Other additional MOCs to perform the union with.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The resulting MOC.</p>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a>, <a class="reference internal" href="mocpy.STMOC.html#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.STMOC</span></code></a></dt><dd><p>The resulting MOC.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;1999-01-01T00:00:00.123456789&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2005-01-01T00:00:00&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">... </span>                                <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newer</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2000-01-01T00:00:00&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2010-01-01T00:00:00&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">... </span>                                <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">union</span> <span class="o">=</span> <span class="n">older</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">newer</span><span class="p">)</span> <span class="c1"># == older + newer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="n">union</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">)</span>
+<span class="go">[1998.99847987] [2010.00183614]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -975,7 +1023,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">mocpy.TimeMOC</a><ul>
@@ -1045,7 +1093,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>

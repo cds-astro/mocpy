@@ -4,7 +4,6 @@ import numpy as np
 from astropy.io import fits
 from astropy.visualization import simple_norm
 from astropy.wcs import WCS as WCS
-
 from mocpy import MOC
 
 # load 2MASS cutout covering the galactic plane

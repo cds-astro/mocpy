@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MOCPy introduction &#8212; MOCPy 0.15.0 documentation</title>
+    <title>MOCPy introduction &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     
-    <script src="../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -100,11 +100,11 @@ import matplotlib.pyplot as plt
 import mocpy
 from astropy.coordinates import Angle, SkyCoord
 from astropy.visualization.wcsaxes.frame import EllipticalFrame
+from astropy.wcs import WCS
 from astroquery.mocserver import MOCServer
 from astroquery.vizier import Vizier
 from ipyaladin import Aladin
 from matplotlib import patheffects
-from mocpy import WCS
 from regions import CircleSkyRegion
 
 mocpy.__version__
@@ -117,7 +117,7 @@ mocpy.__version__
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&#39;0.14.0&#39;
+&#39;0.15.0&#39;
 </pre></div></div>
 </div>
 </section>
@@ -201,8 +201,8 @@ sdss_moc.save(&quot;sdss_moc.fits&quot;, format=&quot;fits&quot;, overwrite=True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 10.4 ms, sys: 3.53 ms, total: 13.9 ms
-Wall time: 13.3 ms
+CPU times: user 12.1 ms, sys: 0 ns, total: 12.1 ms
+Wall time: 11.6 ms
 </pre></div></div>
 </div>
 </section>
@@ -229,58 +229,70 @@ Wall time: 13.3 ms
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(figsize=(20, 10))
 
-with WCS(
-    fig,
-    fov=160 * u.deg,
-    center=SkyCoord(0, 0, unit=&quot;deg&quot;, frame=&quot;icrs&quot;),
-    coordsys=&quot;icrs&quot;,
-    rotation=Angle(0, u.degree),
-    projection=&quot;AIT&quot;,
-) as wcs:
-    # Create a matplotlib axe and give it a astropy.wcs.WCS-like object
-    ax = fig.add_subplot(1, 1, 1, projection=wcs, frame_class=EllipticalFrame)
+wcs = WCS(
+    {
+        &quot;naxis&quot;: 2,
+        &quot;naxis1&quot;: 1620,
+        &quot;naxis2&quot;: 810,
+        &quot;crpix1&quot;: 810.5,
+        &quot;crpix2&quot;: 405.5,
+        &quot;cdelt1&quot;: -0.2,
+        &quot;cdelt2&quot;: 0.2,
+        &quot;ctype1&quot;: &quot;RA---AIT&quot;,
+        &quot;ctype2&quot;: &quot;DEC--AIT&quot;,
+    },
+)
 
-    # Fill the SDSS MOC in red with an opacity of 70%
-    sdss_moc.fill(
-        ax=ax,
-        wcs=wcs,
-        edgecolor=&quot;r&quot;,
-        facecolor=&quot;r&quot;,
-        linewidth=0,
-        fill=True,
-        alpha=0.7,
-        label=&quot;sdss9 footprint&quot;,
-    )
-    # Draw its perimeter in black
-    sdss_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+# Create a matplotlib axe and give it a astropy.wcs.WCS object
+ax = fig.add_subplot(1, 1, 1, projection=wcs, frame_class=EllipticalFrame)
 
-    # Fill the HST surveys MOC in green with an opacity of 70%
-    hst_moc.fill(
-        ax=ax,
-        wcs=wcs,
-        edgecolor=&quot;g&quot;,
-        facecolor=&quot;g&quot;,
-        linewidth=0,
-        fill=True,
-        alpha=0.7,
-        label=&quot;hst all surveys footprint&quot;,
-    )
-    # Draw its perimeter in black
-    hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+# Fill the SDSS MOC in red with an opacity of 70%
+sdss_moc.fill(
+    ax=ax,
+    wcs=wcs,
+    edgecolor=&quot;r&quot;,
+    facecolor=&quot;r&quot;,
+    linewidth=0,
+    fill=True,
+    alpha=0.7,
+    label=&quot;sdss9 footprint&quot;,
+)
+# Draw its perimeter in black
+sdss_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
 
-    # Fill the intersection MOC in blue
-    sdss_and_hst_moc.fill(
-        ax=ax,
-        wcs=wcs,
-        edgecolor=&quot;b&quot;,
-        facecolor=&quot;b&quot;,
-        linewidth=0,
-        fill=True,
-        alpha=0.7,
-        label=&quot;intersection&quot;,
-    )
-    # Draw its perimeter in black
-    sdss_and_hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+# Fill the HST surveys MOC in green with an opacity of 70%
+hst_moc.fill(
+    ax=ax,
+    wcs=wcs,
+    edgecolor=&quot;g&quot;,
+    facecolor=&quot;g&quot;,
+    linewidth=0,
+    fill=True,
+    alpha=0.7,
+    label=&quot;hst all surveys footprint&quot;,
+)
+# Draw its perimeter in black
+hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+
+# Fill the intersection MOC in blue
+sdss_and_hst_moc.fill(
+    ax=ax,
+    wcs=wcs,
+    edgecolor=&quot;b&quot;,
+    facecolor=&quot;b&quot;,
+    linewidth=0,
+    fill=True,
+    alpha=0.7,
+    label=&quot;intersection&quot;,
+)
+# Draw its perimeter in black
+sdss_and_hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+
+# we set the axis off by half a pixel otherwise they are slightly outside the sphere
+# see astropy issue for the half-pixel trick https://github.com/astropy/astropy/issues/10201
+ax.set_xlim(-0.5, 1620 - 0.5)
+ax.set_ylim(-0.5, 810 - 0.5)
+ax.set_aspect(1.0)
 
 # Usual matplotlib calls
 plt.title(&quot;Using matplotlib to vizualize MOCs&quot;)
@@ -309,8 +321,8 @@ plt.close()
 <li><p>Retrieve a catalog table from Vizier (e.g. II/50). Add the columns ‘_RAJ2000’ and ‘_DEJ2000’ to the outputs. MOCPy needs the positions for filtering the table.</p></li>
 <li><p>Filter the table to get only the sources that lie into intersection MOC.</p></li>
 </ol>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>viz = Vizier(columns=[&quot;*&quot;, &quot;_RAJ2000&quot;, &quot;_DEJ2000&quot;])
@@ -321,18 +333,8 @@ tables
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-TableList with 1 tables:
-        &#39;0:II/50/ubv&#39; with 20 column(s) and 2036 row(s)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>table_II50 = tables[0]
@@ -340,39 +342,8 @@ table_II50
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div><i>Table length=2036</i>
-<table id="table139741012106192" class="table-striped table-bordered table-condensed">
-<thead><tr><th>_RAJ2000</th><th>_DEJ2000</th><th>HD</th><th>m_HD</th><th>Vmag</th><th>u_Vmag</th><th>e_Vmag</th><th>w_Vmag</th><th>B-V</th><th>u_B-V</th><th>e_B-V</th><th>w_B-V</th><th>U-B</th><th>u_U-B</th><th>w_U-B</th><th>S</th><th>Notes</th><th>Simbad</th><th>_RA</th><th>_DE</th></tr></thead>
-<thead><tr><th>deg</th><th>deg</th><th></th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th></th><th></th><th></th><th></th><th>deg</th><th>deg</th></tr></thead>
-<thead><tr><th>float64</th><th>float64</th><th>int32</th><th>str1</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>str1</th><th>str23</th><th>str6</th><th>float64</th><th>float64</th></tr></thead>
-<tr><td>1.3339206</td><td>-5.7076183</td><td>28</td><td></td><td>4.615</td><td></td><td>0.007</td><td>5.20</td><td>1.040</td><td></td><td>0.007</td><td>5.50</td><td>0.89</td><td></td><td>2.50</td><td></td><td></td><td>Simbad</td><td>1.33392</td><td>-5.70762</td></tr>
-<tr><td>2.3526750</td><td>-45.7474261</td><td>496</td><td></td><td>3.875</td><td></td><td>0.005</td><td>2.50</td><td>1.020</td><td></td><td>0.010</td><td>2.70</td><td>0.86</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>2.35267</td><td>-45.74743</td></tr>
-<tr><td>3.6600664</td><td>-18.9328656</td><td>1038</td><td></td><td>4.430</td><td>)</td><td>0.018</td><td>3.50</td><td>1.655</td><td></td><td>0.006</td><td>3.70</td><td>2.00</td><td>:</td><td>3.00</td><td>*</td><td></td><td>Simbad</td><td>3.66007</td><td>-18.93287</td></tr>
-<tr><td>4.8569769</td><td>-8.8239214</td><td>1522</td><td></td><td>3.550</td><td>)</td><td>0.016</td><td>6.20</td><td>1.220</td><td>)</td><td>0.014</td><td>6.20</td><td>1.20</td><td>:</td><td>4.50</td><td>*</td><td></td><td>Simbad</td><td>4.85698</td><td>-8.82392</td></tr>
-<tr><td>5.0177506</td><td>-64.8747906</td><td>1581</td><td></td><td>4.220</td><td></td><td>--</td><td>1.50</td><td>0.575</td><td></td><td>--</td><td>1.50</td><td>0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>5.01775</td><td>-64.87479</td></tr>
-<tr><td>6.4377994</td><td>-77.2542456</td><td>2151</td><td></td><td>2.800</td><td></td><td>0.006</td><td>2.50</td><td>0.625</td><td></td><td>0.005</td><td>1.70</td><td>0.10</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>6.43780</td><td>-77.25425</td></tr>
-<tr><td>6.5710456</td><td>-42.3059814</td><td>2261</td><td></td><td>2.395</td><td></td><td>0.013</td><td>3.50</td><td>1.085</td><td></td><td>0.004</td><td>3.20</td><td>0.89</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>6.57105</td><td>-42.30598</td></tr>
-<tr><td>6.5508408</td><td>-43.6798294</td><td>2262</td><td></td><td>3.940</td><td></td><td>0.013</td><td>2.50</td><td>0.170</td><td></td><td>0.008</td><td>2.70</td><td>0.11</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>6.55084</td><td>-43.67983</td></tr>
-<tr><td>6.9820767</td><td>-33.0071669</td><td>2429</td><td></td><td>4.860</td><td>)</td><td>--</td><td>2.70</td><td>1.635</td><td></td><td>0.009</td><td>2.50</td><td>1.80</td><td></td><td>1.50</td><td>C</td><td></td><td>Simbad</td><td>6.98208</td><td>-33.00717</td></tr>
-<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
-<tr><td>358.2105364</td><td>-8.9967558</td><td>223807</td><td></td><td>5.740</td><td></td><td>--</td><td>1.00</td><td>1.170</td><td></td><td>--</td><td>1.00</td><td>1.15</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>358.21054</td><td>-8.99676</td></tr>
-<tr><td>358.2315225</td><td>-3.1554817</td><td>223825</td><td></td><td>5.920</td><td></td><td>--</td><td>1.00</td><td>1.075</td><td></td><td>--</td><td>1.00</td><td>0.97</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>358.23152</td><td>-3.15548</td></tr>
-<tr><td>358.2698214</td><td>2.0906250</td><td>223855</td><td></td><td>6.280</td><td></td><td>--</td><td>1.00</td><td>-0.005</td><td></td><td>--</td><td>1.00</td><td>-0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>358.26982</td><td>2.09062</td></tr>
-<tr><td>358.6942639</td><td>0.1093086</td><td>224062</td><td></td><td>5.600</td><td>)</td><td>--</td><td>1.50</td><td>1.575</td><td></td><td>--</td><td>1.50</td><td>1.49</td><td></td><td>1.00</td><td>*</td><td></td><td>Simbad</td><td>358.69426</td><td>0.10931</td></tr>
-<tr><td>358.7824667</td><td>7.0709719</td><td>224103</td><td></td><td>6.210</td><td></td><td>--</td><td>1.00</td><td>-0.060</td><td></td><td>--</td><td>1.20</td><td>-0.18</td><td></td><td>1.20</td><td></td><td></td><td>Simbad</td><td>358.78247</td><td>7.07097</td></tr>
-<tr><td>359.6682394</td><td>-3.5559833</td><td>224533</td><td></td><td>4.860</td><td></td><td>--</td><td>1.50</td><td>0.935</td><td></td><td>--</td><td>1.50</td><td>0.70</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>359.66824</td><td>-3.55598</td></tr>
-<tr><td>0.4560350</td><td>-3.0275039</td><td>224926</td><td></td><td>5.100</td><td></td><td>--</td><td>1.20</td><td>-0.125</td><td></td><td>--</td><td>1.50</td><td>-0.51</td><td></td><td>1.20</td><td>*</td><td></td><td>Simbad</td><td>0.45603</td><td>-3.02750</td></tr>
-<tr><td>0.6006958</td><td>8.9568236</td><td>224995</td><td></td><td>6.320</td><td></td><td>--</td><td>1.00</td><td>0.180</td><td></td><td>--</td><td>1.00</td><td>0.14</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>0.60070</td><td>8.95682</td></tr>
-<tr><td>0.6237594</td><td>8.4854631</td><td>225003</td><td></td><td>5.690</td><td></td><td>--</td><td>1.00</td><td>0.320</td><td></td><td>--</td><td>1.00</td><td>-0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>0.62376</td><td>8.48546</td></tr>
-</table></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>idx_inside = sdss_and_hst_moc.contains_lonlat(
@@ -385,43 +356,12 @@ sources_inside
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div><i>Table length=31</i>
-<table id="table139741011072912" class="table-striped table-bordered table-condensed">
-<thead><tr><th>_RAJ2000</th><th>_DEJ2000</th><th>HD</th><th>m_HD</th><th>Vmag</th><th>u_Vmag</th><th>e_Vmag</th><th>w_Vmag</th><th>B-V</th><th>u_B-V</th><th>e_B-V</th><th>w_B-V</th><th>U-B</th><th>u_U-B</th><th>w_U-B</th><th>S</th><th>Notes</th><th>Simbad</th><th>_RA</th><th>_DE</th></tr></thead>
-<thead><tr><th>deg</th><th>deg</th><th></th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th></th><th></th><th></th><th></th><th>deg</th><th>deg</th></tr></thead>
-<thead><tr><th>float64</th><th>float64</th><th>int32</th><th>str1</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>str1</th><th>str23</th><th>str6</th><th>float64</th><th>float64</th></tr></thead>
-<tr><td>34.8366364</td><td>-2.9776425</td><td>14386</td><td></td><td>--</td><td>)</td><td>--</td><td>--</td><td>1.600</td><td></td><td>--</td><td>0.70</td><td>--</td><td></td><td>--</td><td></td><td></td><td>Simbad</td><td>34.83664</td><td>-2.97764</td></tr>
-<tr><td>49.8404000</td><td>3.3701978</td><td>20630</td><td></td><td>4.845</td><td></td><td>0.011</td><td>9.70</td><td>0.680</td><td></td><td>0.006</td><td>9.20</td><td>0.20</td><td></td><td>5.75</td><td></td><td></td><td>Simbad</td><td>49.84040</td><td>3.37020</td></tr>
-<tr><td>83.8465175</td><td>-4.8383578</td><td>37018</td><td></td><td>4.590</td><td></td><td>0.009</td><td>4.00</td><td>-0.200</td><td></td><td>0.004</td><td>4.00</td><td>-0.93</td><td></td><td>3.50</td><td></td><td></td><td>Simbad</td><td>83.84652</td><td>-4.83836</td></tr>
-<tr><td>83.8159267</td><td>-5.3873150</td><td>37020</td><td>/</td><td>4.580</td><td>:</td><td>--</td><td>--</td><td>0.050</td><td>:</td><td>--</td><td>--</td><td>-0.86</td><td>:</td><td>--</td><td></td><td>the1 Ori</td><td>Simbad</td><td>83.81593</td><td>-5.38731</td></tr>
-<tr><td>100.2444194</td><td>9.8957542</td><td>47839</td><td></td><td>4.655</td><td></td><td>0.008</td><td>5.00</td><td>-0.245</td><td></td><td>0.005</td><td>4.00</td><td>-1.07</td><td></td><td>4.00</td><td></td><td></td><td>Simbad</td><td>100.24442</td><td>9.89575</td></tr>
-<tr><td>126.4151344</td><td>-3.9064236</td><td>71155</td><td></td><td>3.900</td><td></td><td>0.007</td><td>6.50</td><td>-0.015</td><td></td><td>0.006</td><td>6.00</td><td>-0.02</td><td></td><td>4.50</td><td></td><td></td><td>Simbad</td><td>126.41513</td><td>-3.90642</td></tr>
-<tr><td>158.2027994</td><td>9.3065856</td><td>91316</td><td></td><td>3.855</td><td></td><td>0.007</td><td>7.50</td><td>-0.140</td><td></td><td>0.010</td><td>6.50</td><td>-0.96</td><td></td><td>4.50</td><td></td><td></td><td>Simbad</td><td>158.20280</td><td>9.30659</td></tr>
-<tr><td>169.1654206</td><td>-3.6516011</td><td>98058</td><td></td><td>4.465</td><td></td><td>0.004</td><td>3.00</td><td>0.210</td><td></td><td>0.005</td><td>3.00</td><td>0.13</td><td></td><td>3.50</td><td>*</td><td></td><td>Simbad</td><td>169.16542</td><td>-3.65160</td></tr>
-<tr><td>221.5621839</td><td>1.8928856</td><td>130109</td><td></td><td>3.735</td><td></td><td>0.008</td><td>7.00</td><td>-0.005</td><td></td><td>0.005</td><td>7.50</td><td>-0.03</td><td></td><td>3.50</td><td></td><td></td><td>Simbad</td><td>221.56218</td><td>1.89289</td></tr>
-<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
-<tr><td>129.3632217</td><td>-4.9339989</td><td>73281</td><td></td><td>6.180</td><td></td><td>--</td><td>2.00</td><td>1.055</td><td></td><td>--</td><td>2.00</td><td>0.90</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>129.36322</td><td>-4.93400</td></tr>
-<tr><td>173.5914581</td><td>3.0601656</td><td>100563</td><td></td><td>5.760</td><td></td><td>--</td><td>1.00</td><td>0.465</td><td></td><td>--</td><td>1.00</td><td>0.00</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>173.59146</td><td>3.06017</td></tr>
-<tr><td>206.7380094</td><td>6.3503750</td><td>120066</td><td></td><td>6.340</td><td></td><td>--</td><td>1.20</td><td>0.625</td><td></td><td>--</td><td>1.50</td><td>0.16</td><td></td><td>1.50</td><td></td><td></td><td>Simbad</td><td>206.73801</td><td>6.35037</td></tr>
-<tr><td>220.4114606</td><td>8.1617639</td><td>129312</td><td></td><td>4.860</td><td></td><td>0.004</td><td>3.00</td><td>1.005</td><td></td><td>0.009</td><td>3.00</td><td>0.77</td><td></td><td>2.00</td><td>*</td><td></td><td>Simbad</td><td>220.41146</td><td>8.16176</td></tr>
-<tr><td>236.3478492</td><td>5.4473147</td><td>140775</td><td></td><td>5.580</td><td></td><td>--</td><td>1.50</td><td>0.035</td><td></td><td>--</td><td>1.50</td><td>0.04</td><td></td><td>1.50</td><td></td><td></td><td>Simbad</td><td>236.34785</td><td>5.44731</td></tr>
-<tr><td>238.6678139</td><td>8.5803372</td><td>142500</td><td></td><td>6.280</td><td></td><td>--</td><td>1.00</td><td>0.170</td><td></td><td>--</td><td>1.00</td><td>0.09</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>238.66781</td><td>8.58034</td></tr>
-<tr><td>249.0893719</td><td>-2.3245836</td><td>149661</td><td></td><td>5.750</td><td></td><td>--</td><td>1.50</td><td>0.820</td><td></td><td>--</td><td>1.50</td><td>--</td><td></td><td>2.00</td><td>*</td><td></td><td>Simbad</td><td>249.08937</td><td>-2.32458</td></tr>
-<tr><td>268.3091039</td><td>6.1014242</td><td>162917</td><td></td><td>5.770</td><td></td><td>--</td><td>1.00</td><td>0.420</td><td></td><td>--</td><td>1.00</td><td>-0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>268.30910</td><td>6.10142</td></tr>
-<tr><td>292.3390033</td><td>-7.0440864</td><td>183344</td><td></td><td>6.600</td><td>)</td><td>--</td><td>1.00</td><td>1.100</td><td>)</td><td>--</td><td>1.00</td><td>0.70</td><td>)</td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>292.33900</td><td>-7.04409</td></tr>
-</table></div></div>
-</div>
 </section>
 <section id="##-Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin">
 <h1>## Run Aladin-Lite inside a jupyter notebook: ipyaladin<a class="headerlink" href="###-Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin" title="Link to this heading">¶</a></h1>
 <p>Aladin-Lite can be embedded into a jupyter notebook: Follow the readme on GitHub for installing it: <a class="reference external" href="https://github.com/cds-astro/ipyaladin">https://github.com/cds-astro/ipyaladin</a></p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin = Aladin()
@@ -430,7 +370,7 @@ aladin
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.target = &quot;messier 51&quot;
@@ -440,7 +380,7 @@ aladin.height = 600
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.coo_frame = &quot;icrs&quot;
@@ -449,7 +389,7 @@ aladin.height = 600
 </div>
 <p>Change the image survey, go to <a class="reference external" href="https://aladin.unistra.fr/hips/list">https://aladin.unistra.fr/hips/list</a> (Part 1. HiPS sky maps) to test with different image surveys! A list of good HiPS I like for testing: - P/2MASS/color - P/PanSTARRS/DR1/color-z-zg-g - P/SPITZER/color - P/SDSS9/color - P/GALEXGR6/AIS/color - P/Mellinger/color</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.survey = &quot;P/SDSS9/color&quot;
@@ -458,7 +398,7 @@ aladin.height = 600
 </div>
 <p>Add a MOC in the aladin-lite view!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.add_moc(
@@ -473,7 +413,7 @@ aladin.height = 600
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Add astropy source tables to the aladin lite viewer
@@ -483,7 +423,7 @@ aladin.add_table(sources_outside, color=&quot;red&quot;, shape=&quot;cross&quot;
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># change the fov and target
@@ -516,7 +456,7 @@ aladin.fov = 11
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">MOCPy introduction</a></li>
@@ -540,7 +480,7 @@ aladin.fov = 11
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>

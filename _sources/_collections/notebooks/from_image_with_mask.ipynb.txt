@@ -21,15 +21,12 @@
     }
    ],
    "source": [
-    "from mocpy import MOC, WCS\n",
-    "import mocpy\n",
-    "\n",
-    "from astropy.io import fits\n",
-    "\n",
     "import astropy.units as u\n",
-    "from astropy.coordinates import SkyCoord, Angle\n",
-    "\n",
     "import matplotlib.pyplot as plt\n",
+    "import mocpy\n",
+    "from astropy.coordinates import Angle, SkyCoord\n",
+    "from astropy.io import fits\n",
+    "from mocpy import MOC, WCS\n",
     "\n",
     "print(mocpy.__version__)"
    ]
@@ -101,7 +98,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.10"
+   "version": "3.11.7"
   },
   "mimetype": "text/x-python",
   "name": "python",

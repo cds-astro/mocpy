@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; MOCPy 0.15.0 documentation</title>
+    <title>mocpy.moc.moc &#8212; MOCPy 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     
-    <script src="../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.15.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.16.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -67,8 +67,12 @@
   <h1>Source code for mocpy.moc.moc</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log2</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">urllib.error</span> <span class="kn">import</span> <span class="n">HTTPError</span>
 <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -144,6 +148,62 @@
     <span class="k">return</span> <span class="n">_validate_lonlat_wrap</span>
 
 
+<span class="k">def</span> <span class="nf">_mask_unsigned_before_casting</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a mask for an array of integers if there are negative values.</span>
+
+<span class="sd">    This is useful before casting indices into unsigned integers.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    indices : `numpy.ndarray` or Iterable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unsignedinteger</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;The list of indices contain negative values. They are filtered &quot;</span>
+        <span class="s2">&quot;out to generate the MOC&quot;</span><span class="p">,</span>
+        <span class="ne">UserWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_mask_and_values_multiordermap</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract uniq and values with their masks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    multiordermap : astropy.table.Table</span>
+<span class="sd">        The table should have a column named ``UNIQ`` that corresponds to HEALPix</span>
+<span class="sd">        cells in the uniq notation.</span>
+<span class="sd">    column : str</span>
+<span class="sd">        The name of the column to retrieve. It should contain float-compatible values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (uniq, uniq_mask, values, values_mask)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">values_mask</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">values_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="MOC">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC">[docs]</a>
 <span class="k">class</span> <span class="nc">MOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
@@ -198,8 +258,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Depth/order of the S-MOC.&quot;&quot;&quot;</span>
-        <span class="n">depth</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_smoc_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">get_smoc_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MOC.n_cells">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.n_cells">[docs]</a>
@@ -348,8 +407,6 @@
 <span class="sd">        --------</span>
 <span class="sd">        contains_skycoords</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">warnings</span>
-
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is deprecated and has been replaced by contains_lonlat&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
@@ -364,6 +421,9 @@
     <span class="nd">@validate_lonlat</span>
     <span class="k">def</span> <span class="nf">contains_lonlat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test wether a MOC contains (or not) the given points. Returns a boolean mask array.</span>
+
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -525,8 +585,6 @@
 <span class="sd">        coords: [`~astropy.coordinates.SkyCoord`]</span>
 <span class="sd">            A list of `~astropy.coordinates.SkyCoord` each describing one border.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">warnings</span>
-
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is not stable. A future more stable algorithm will be implemented!&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
@@ -649,59 +707,142 @@
 <div class="viewcode-block" id="MOC.from_vizier_table">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_vizier_table">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_vizier_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">table_id</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a `~mocpy.moc.MOC` object from a VizieR table.</span>
-
-<span class="sd">        **Info**: This method is already implemented in `astroquery.cds &lt;https://astroquery.readthedocs.io/en/latest/cds/cds.html&gt;`__. You can ask to get a `mocpy.moc.MOC` object</span>
-<span class="sd">        from a vizier catalog ID.</span>
+    <span class="k">def</span> <span class="nf">from_vizier_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">table_id</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `~mocpy.moc.MOC` object from a VizieR table or catalog.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        table_id : str</span>
-<span class="sd">            table index</span>
-<span class="sd">        nside : int, optional</span>
-<span class="sd">            256 by default</span>
+<span class="sd">            Table or catalog identifier</span>
+<span class="sd">        max_depth : int, optional</span>
+<span class="sd">            The depth at which the MOC should be retrieved. The default (which is also the</span>
+<span class="sd">            most precise available on the server) is order 11 for tables and order 10 for</span>
+<span class="sd">            catalogs.</span>
+<span class="sd">        nside : int, optional and deprecated</span>
+<span class="sd">            It is deprecated in favor of max_depth since version 0.6.0</span>
+<span class="sd">            You can switch to maw_depth by calculating max_depht = log2(nside).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        result : `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_vizier_table(&quot;J/A+A/675/A154/tableb1&quot;) # download the MOC</span>
+<span class="sd">        &gt;&gt;&gt; round(moc.sky_fraction, 6) # let&#39;s print the sky fraction of the MOC</span>
+<span class="sd">        4e-06</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        VizieR is organized by catalogs that correspond to published articles or to data</span>
+<span class="sd">        releases. These catalogs contain one or more tables.</span>
+
+<span class="sd">        Here are two webpages where you can read the</span>
+<span class="sd">        `list of catalogs https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html`_</span>
+<span class="sd">        and the `list of tables https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&amp;list=tables`_</span>
+<span class="sd">        currently available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">nside_possible_values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nside</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nside_possible_values</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Bad value for nside. Must be in </span><span class="si">{</span><span class="n">nside_possible_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">nside</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;nside&#39; is deprecated in favor of &#39;max_depth&#39;. We use the nside&quot;</span>
+                <span class="s2">&quot;value for this request. You can switch to max_depth with &quot;</span>
+                <span class="s2">&quot;max_depth = log2(nside).&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_ivorn</span><span class="p">(</span><span class="s2">&quot;ivo://CDS/&quot;</span> <span class="o">+</span> <span class="n">table_id</span><span class="p">,</span> <span class="n">nside</span><span class="p">)</span></div>
+            <span class="n">nside_possible_values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nside</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nside_possible_values</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Bad value for nside. Must be in </span><span class="si">{</span><span class="n">nside_possible_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">max_depth</span> <span class="o">=</span> <span class="n">log2</span><span class="p">(</span><span class="n">nside</span><span class="p">)</span>
 
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://cdsarc.cds.unistra.fr/viz-bin/moc/</span><span class="si">{</span><span class="n">table_id</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="n">MOC_SERVER_ROOT_URL</span> <span class="o">=</span> <span class="s2">&quot;http://alasky.unistra.fr/MocServer/query&quot;</span>
+        <span class="k">if</span> <span class="n">max_depth</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;?order=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">max_depth</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">moc</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="c1"># we provide a clearer error for code 400 bad request</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No catalog/table was found for &#39;</span><span class="si">{</span><span class="n">table_id</span><span class="si">}</span><span class="s2">&#39;. You can see the list of &quot;</span>
+                    <span class="s2">&quot;catalogs at https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html &quot;</span>
+                    <span class="s2">&quot;and the list of tables at &quot;</span>
+                    <span class="s2">&quot;https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&amp;list=tables .&quot;</span><span class="p">,</span>
+                <span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+            <span class="k">raise</span> <span class="n">error</span>
+        <span class="k">return</span> <span class="n">moc</span></div>
+
 
 <div class="viewcode-block" id="MOC.from_ivorn">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_ivorn">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_ivorn</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ivorn</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a `~mocpy.moc.MOC` object from a given ivorn.</span>
+    <span class="k">def</span> <span class="nf">from_ivorn</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ivorn</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `~mocpy.moc.MOC` object from a given IVORN.</span>
+
+<span class="sd">        IVORNs are standardized unique identifiers used within the virtual observatory.</span>
+<span class="sd">        This method queries the MOCServer, a CDS service that can also be found through</span>
+<span class="sd">        its webpages https://alasky.cds.unistra.fr/MocServer/query</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ivorn : str</span>
-<span class="sd">        nside : int, optional</span>
-<span class="sd">            256 by default</span>
+<span class="sd">            A valid Virtual Observatory IVORN</span>
+<span class="sd">        max_depth : int, defaults to 8</span>
+<span class="sd">            The depth at which the MOC should be retrieved.</span>
+<span class="sd">        nside : int, optional and deprecated</span>
+<span class="sd">            It is deprecated in favor of max_depth since version 0.6.0</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        result : `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; MOC.from_ivorn(&quot;ivo://CDS/J/A+AS/133/387/table5&quot;)</span>
+<span class="sd">        7/96462 96481 96484-96486</span>
+<span class="sd">        8/385839 385852 385854-385855 385933 385948-385950 385969 385984 385986</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This is a rudimentary way to retrieve MOCs from the MOCServer. For a more</span>
+<span class="sd">        complete implementation, see the MOCServer module in the astroquery library.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">?</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">MOC</span><span class="o">.</span><span class="n">MOC_SERVER_ROOT_URL</span><span class="p">,</span>
-                <span class="n">urlencode</span><span class="p">({</span><span class="s2">&quot;ivorn&quot;</span><span class="p">:</span> <span class="n">ivorn</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;moc&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">nside</span><span class="p">))}),</span>
-            <span class="p">),</span>
-        <span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">nside</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;nside&#39; is deprecated in favor of &#39;max_depth&#39;. We use the nside&quot;</span>
+                <span class="s2">&quot;value for this request. You can switch to max_depth with &quot;</span>
+                <span class="s2">&quot;max_depth = log2(nside).&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">nside_possible_values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nside</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nside_possible_values</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Bad value for nside. Must be in </span><span class="si">{</span><span class="n">nside_possible_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">max_depth</span> <span class="o">=</span> <span class="n">log2</span><span class="p">(</span><span class="n">nside</span><span class="p">)</span>
+
+        <span class="n">moc</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span>
+            <span class="s2">&quot;http://alasky.unistra.fr/MocServer/query?&quot;</span>
+            <span class="o">+</span> <span class="n">urlencode</span><span class="p">({</span><span class="s2">&quot;ivorn&quot;</span><span class="p">:</span> <span class="n">ivorn</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;moc&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_depth</span><span class="p">)}),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">moc</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This MOC is empty. Possible causes are that this IVORN has no &quot;</span>
+                <span class="s2">&quot;positions or this is not a valid IVORN.&quot;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">moc</span></div>
 
 
 <div class="viewcode-block" id="MOC.from_url">
@@ -759,6 +900,9 @@
     <span class="k">def</span> <span class="nf">from_lonlat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from astropy lon, lat `astropy.units.Quantity`.</span>
+
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -883,26 +1027,15 @@
             <span class="n">dtype</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">_store_index_dtype</span><span class="p">(),</span>
         <span class="p">)</span>
 
-        <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
-        <span class="n">probdensity</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">]</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-            <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multi_multiorder_probdens_map_sum_in_smoc</span><span class="p">(</span>
             <span class="n">indices</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="o">*</span><span class="n">_extract_mask_and_values_multiordermap</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">),</span>
             <span class="n">n_threads</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="MOC.probability_in_multiordermap">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.probability_in_multiordermap">[docs]</a>
     <span class="k">def</span> <span class="nf">probability_in_multiordermap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiordermap</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the probability in the intersection between the multiordermap and the MOC.</span>
 
@@ -941,28 +1074,15 @@
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
-<span class="sd">        probabilities_in_multiordermap: makes this calculation for a list of MOCs in a</span>
-<span class="sd">        parallelized way.</span>
+<span class="sd">        probabilities_in_multiordermap: makes this calculation for a list of MOCs</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
-            <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
-            <span class="n">probdensity</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">]</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-                <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-                <span class="n">probdensity_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
             <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiorder_probdens_map_sum_in_smoc</span><span class="p">(</span>
                 <span class="n">index</span><span class="p">,</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probdensity_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">_extract_mask_and_values_multiordermap</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="s2">&quot;PROBDENSITY&quot;</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiordermap_sum_in_smoc_from_file</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">))</span>
@@ -970,7 +1090,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;An argument of type &#39;str&#39;, &#39;pathlib.Path&#39;, or &#39;astropy.table.Table&#39;&quot;</span>
             <span class="sa">f</span><span class="s2">&quot; is expected. Got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="MOC.sum_in_multiordermap">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.sum_in_multiordermap">[docs]</a>
@@ -980,10 +1101,10 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        multiordermap : astropy.table.Table</span>
-<span class="sd">            The table should have a ``UNIQ`` that corresponds to HEALPix cells in the uniq</span>
-<span class="sd">            notation.</span>
+<span class="sd">            The table should have a column ``UNIQ`` that corresponds to HEALPix cells</span>
+<span class="sd">            in the uniq notation.</span>
 <span class="sd">        column : str</span>
-<span class="sd">            The name of the column to sum.</span>
+<span class="sd">            The name of the column to sum. It should be compatible with a float conversion.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1007,22 +1128,82 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
-        <span class="n">uniq</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="s2">&quot;UNIQ&quot;</span><span class="p">]</span>
-        <span class="n">values_to_sum</span> <span class="o">=</span> <span class="n">multiordermap</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-            <span class="n">values_to_sum_mask</span> <span class="o">=</span> <span class="n">values_to_sum</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="n">values_to_sum_mask</span> <span class="o">=</span> <span class="n">uniq_mask</span>
-
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiordermap_sum_in_smoc</span><span class="p">(</span>
             <span class="n">index</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values_to_sum</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values_to_sum_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span>
+            <span class="o">*</span><span class="n">_extract_mask_and_values_multiordermap</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">column</span><span class="p">),</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.values_and_weights_in_multiordermap">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.values_and_weights_in_multiordermap">[docs]</a>
+    <span class="k">def</span> <span class="nf">values_and_weights_in_multiordermap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiordermap</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the sum of a column from a multiordermap in the intersection with the MOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        multiordermap : astropy.table.Table</span>
+<span class="sd">            The table should have a column ``UNIQ`` that corresponds to HEALPix cells</span>
+<span class="sd">            in the uniq notation.</span>
+<span class="sd">        column : str</span>
+<span class="sd">            The name of the column to return. It should be compatible with a float conversion.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple(np.ndarray, np.ndarray)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">multiorder_values_and_weights_in_smoc</span><span class="p">(</span>
+            <span class="n">index</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">_extract_mask_and_values_multiordermap</span><span class="p">(</span><span class="n">multiordermap</span><span class="p">,</span> <span class="n">column</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MOC.mask_uniq">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.mask_uniq">[docs]</a>
+    <span class="k">def</span> <span class="nf">mask_uniq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uniq</span><span class="p">,</span> <span class="n">uniq_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fully_covered_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a mask for an array of uniq cells intersecting the MOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uniq : `~np.array`</span>
+<span class="sd">            An array on integers corresponding to HEALPix cells in the uniq notation.</span>
+<span class="sd">        uniq_mask : `~np.array`, optional</span>
+<span class="sd">            An optional array to mask the uniq array. Set to True where the values of the</span>
+<span class="sd">            uniq array should be ignored (following the numpy `~np.ma.masked_array`</span>
+<span class="sd">            convention).</span>
+<span class="sd">        fully_covered_only : bool, optional</span>
+<span class="sd">            If True, keep only uniq cells that are fully covered by the MOC.</span>
+<span class="sd">            Otherwise, also keep cells that intersect the MOC.</span>
+<span class="sd">            By default False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~np.array`</span>
+<span class="sd">            A mask that is True where the uniq cell is comprised (or at least intersects</span>
+<span class="sd">            depending on &#39;fully_covered_only&#39;) in the MOC and False otherwise</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; uniq = [4 * 4**3 + x for x in range(8)] # corresponds to 3/0-7</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;3/4-20&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; moc.mask_uniq(uniq) # the first four cells are NOT intersecting</span>
+<span class="sd">        array([False, False, False, False,  True,  True,  True,  True])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span>
+        <span class="k">if</span> <span class="n">uniq_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uniq</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">uniq_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">mocpy</span><span class="o">.</span><span class="n">multiorder_filter_mask_in_smoc</span><span class="p">(</span>
+            <span class="n">index</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">),</span>
+            <span class="n">uniq_mask</span><span class="p">,</span>
+            <span class="n">fully_covered_only</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">uniq_mask</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MOC.from_valued_healpix_cells">
@@ -1086,8 +1267,6 @@
 <span class="sd">            The resulting MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">max_depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">warnings</span>
-
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;To avoid an extra loop, it is preferable to provide the max_depth parameter.&quot;</span>
                 <span class="s2">&quot;It will probably become mandatory in future releases.&quot;</span><span class="p">,</span>
@@ -1100,6 +1279,12 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Invalid uniq numbers. Too big uniq or negative uniq numbers might be the cause.&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">_mask_unsigned_before_casting</span><span class="p">(</span><span class="n">uniq</span><span class="p">)</span>
+        <span class="c1"># if any of the values in uniq are negative</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">uniq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uniq</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_valued_hpx_cells</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
@@ -1127,6 +1312,8 @@
 <span class="sd">        The ellipse is centered around the (`lon`, `lat`) position. `a` (resp. `b`) corresponds</span>
 <span class="sd">        to the semi-major axis magnitude (resp. semi-minor axis magnitude). `pa` is expressed as a</span>
 <span class="sd">        `~astropy.coordinates.Angle` and defines the position angle of the elliptical cone.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the convention for Space MOCs.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1189,6 +1376,8 @@
 
 <span class="sd">        The cone is centered around the (`lon`, `lat`) position with a radius expressed by</span>
 <span class="sd">        `radius`.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1242,7 +1431,9 @@
 <span class="sd">        Create a list of MOCs from cones.</span>
 
 <span class="sd">        Each cone is centered around the (`lon`, `lat`) position with a radius expressed by</span>
-<span class="sd">        `radius`. Coordinates should be in the ICRS frame, as stipulated in the MOC standard.</span>
+<span class="sd">        `radius`.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1309,6 +1500,8 @@
 <span class="sd">        Create a MOC from a box/rectangle.</span>
 
 <span class="sd">        The box is centered around the (`lon`, `lat`) position.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1362,7 +1555,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a box/rectangle.</span>
 
-<span class="sd">        The box is centered around the (`lon`, `lat`) position.</span>
+<span class="sd">        The boxes are centered around the (`lon`, `lat`) positions.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1459,6 +1654,8 @@
 
 <span class="sd">        The cone is centered around the (`lon`, `lat`) position with an internal radius expressed by</span>
 <span class="sd">        `internal_radius` and an external radius expressed by `external_radius`.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1510,7 +1707,7 @@
 <div class="viewcode-block" id="MOC.from_polygon_skycoord">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygon_skycoord">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_polygon_skycoord</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoord</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_polygon_skycoord</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">skycoord</span><span class="p">,</span> <span class="n">complement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a polygon.</span>
 
@@ -1520,8 +1717,9 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        skycoord : `astropy.coordinates.SkyCoord`</span>
-<span class="sd">            The sky coordinates defining the vertices of a polygon. It can describe a convex or</span>
-<span class="sd">            concave polygon but not a self-intersecting one.</span>
+<span class="sd">            The sky coordinates defining the vertices of a polygon.</span>
+<span class="sd">        complement : return the complement of the polygon. Set to False by default.</span>
+<span class="sd">            The default polygon is the smallest one.</span>
 <span class="sd">        max_depth : int, optional</span>
 <span class="sd">            The resolution of the MOC. Set to 10 by default.</span>
 
@@ -1529,10 +1727,25 @@
 <span class="sd">        -------</span>
 <span class="sd">        result : `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; MOC.from_polygon_skycoord(SkyCoord([80, 82, 76], [36, 33, 33], unit=&quot;deg&quot;)) # doctest: +ELLIPSIS</span>
+<span class="sd">        6/1293</span>
+<span class="sd">        7/5149-5151 5165 5169-5171 5176-5177 5180-5181 5186 5192 5194 5216 5218-5219</span>
+<span class="sd">        ...</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        from_polygon</span>
+<span class="sd">        from_polygons</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_polygon</span><span class="p">(</span>
             <span class="n">lon</span><span class="o">=</span><span class="n">skycoord</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
             <span class="n">lat</span><span class="o">=</span><span class="n">skycoord</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+            <span class="n">complement</span><span class="o">=</span><span class="n">complement</span><span class="p">,</span>
             <span class="n">max_depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -1540,20 +1753,28 @@
 <div class="viewcode-block" id="MOC.from_polygons">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_polygons">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_polygons</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">list_vertices</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_polygons</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">list_vertices</span><span class="p">,</span>
+        <span class="n">complement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a list of MOCs list from a list of polygons.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        list_vertices : list[`~astropy.coordinates.SkyCoord`] OR numpy.ndarray</span>
-<span class="sd">            - If list_vertices is a list of `~astropy.coordinates.SkyCoord` objects, each</span>
+<span class="sd">            If list_vertices is a list of `~astropy.coordinates.SkyCoord` objects, each</span>
 <span class="sd">            SkyCoord object should contain more than three vertices and they should each</span>
 <span class="sd">            describe a polygon.</span>
-<span class="sd">            - If list_vertices is a numpy.ndarray, it should be in the form</span>
+<span class="sd">            If list_vertices is a numpy.ndarray, it should be in the form</span>
 <span class="sd">            [lon_array1, lat_array1, lon_array2, lat_array2, lon_array3, lat_array3, ...].</span>
 <span class="sd">            They should be valid longitudes and latitudes in degrees in ICRS.</span>
-<span class="sd">         max_depth : int, optional</span>
+<span class="sd">        complement : return the complement of the polygon. Set to False by default.</span>
+<span class="sd">            The default polygon is the smallest one.</span>
+<span class="sd">        max_depth : int, optional</span>
 <span class="sd">            The resolution of the MOC. Set to 10 by default.</span>
 <span class="sd">        n_threads : int, optional</span>
 <span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
@@ -1579,6 +1800,11 @@
 <span class="sd">        &gt;&gt;&gt; list_mocs == list_mocs_no_check_no_wrap</span>
 <span class="sd">        True</span>
 
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        from_polygon</span>
+<span class="sd">        from_polygon_skycoord</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SkyCoord</span><span class="p">):</span>
             <span class="n">lon_lat_list</span> <span class="o">=</span> <span class="p">[</span>
@@ -1586,12 +1812,18 @@
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_vertices</span>
                 <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
             <span class="p">]</span>
-            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span><span class="n">lon_lat_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span> <span class="n">n_threads</span><span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span>
+                <span class="n">lon_lat_list</span><span class="p">,</span>
+                <span class="n">complement</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># This is the unsafe version where the users should provide correct coordinates</span>
             <span class="c1"># without checks on our side</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygons</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+                <span class="n">complement</span><span class="p">,</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
                 <span class="n">n_threads</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1608,16 +1840,18 @@
 
 <span class="sd">        The polygon is given as lon and lat `astropy.units.Quantity` that define the</span>
 <span class="sd">        vertices of the polygon. Concave, convex and self-intersecting polygons are accepted.</span>
+<span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
+<span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        lon : `astropy.coordinates.Longitude` or its supertype `astropy.units.Quantity`</span>
-<span class="sd">            The longitudes defining the polygon. Can describe convex and</span>
-<span class="sd">            concave polygons but not self-intersecting ones.</span>
+<span class="sd">            The longitudes defining the polygon.</span>
 <span class="sd">        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`</span>
 <span class="sd">            The latitudes defining the polygon. Can describe convex and concave</span>
 <span class="sd">            polygons but not self-intersecting ones.</span>
 <span class="sd">        complement : return the complement of the polygon. Set to False by default.</span>
+<span class="sd">            The default polygon is the smallest one.</span>
 <span class="sd">        max_depth : int, optional</span>
 <span class="sd">            The resolution of the MOC. Set to 10 by default.</span>
 
@@ -1625,6 +1859,11 @@
 <span class="sd">        -------</span>
 <span class="sd">        result : `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        from_polygons</span>
+<span class="sd">        from_polygons_skycoord</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_polygon</span><span class="p">(</span>
             <span class="n">lon</span><span class="p">,</span>
@@ -1806,7 +2045,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        ipix : `numpy.ndarray`</span>
 <span class="sd">            HEALPix cell indices in the NESTED notation. dtype must be np.uint64</span>
-<span class="sd">        depth : `numpy.ndarray`</span>
+<span class="sd">        depth : `numpy.ndarray` or int</span>
 <span class="sd">            Depth of the HEALPix cells. Must be of the same size of `ipix`.</span>
 <span class="sd">            dtype must be np.uint8. Corresponds to the `level` of an HEALPix cell in astropy.healpix.</span>
 <span class="sd">        max_depth : int, The resolution of the MOC (degrades on the fly input cells if necessary)</span>
@@ -1818,13 +2057,21 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        moc : `~mocpy.moc.MOC`</span>
+<span class="sd">        `~mocpy.moc.MOC`</span>
 <span class="sd">            The MOC</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ipix</span><span class="p">),</span> <span class="n">depth</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">_mask_unsigned_before_casting</span><span class="p">(</span><span class="n">ipix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ipix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ipix</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">depth</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_healpix_cells</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
-            <span class="n">depth</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
-            <span class="n">ipix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ipix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
@@ -1832,7 +2079,7 @@
 <div class="viewcode-block" id="MOC.from_depth29_ranges">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_depth29_ranges">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_depth29_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_depth29_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a set of ranges of HEALPix Nested indices at order 29.</span>
 
@@ -2054,13 +2301,13 @@
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;2/2-25 28 29 4/0 6/&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; fig = plt.figure()</span>
-<span class="sd">        &gt;&gt;&gt; moc.wcs(fig)</span>
+<span class="sd">        &gt;&gt;&gt; moc.wcs(fig) # DOCTEST: +IGNORE_RESULT</span>
 <span class="sd">        WCS Keywords</span>
 <span class="sd">        &lt;BLANKLINE&gt;</span>
 <span class="sd">        Number of WCS axes: 2</span>
 <span class="sd">        CTYPE : &#39;RA---AIT&#39;  &#39;DEC--AIT&#39;</span>
 <span class="sd">        CRVAL : 92.29966711743452  54.33295312309193</span>
-<span class="sd">        CRPIX : 320.0  240.0</span>
+<span class="sd">        CRPIX : 320.5  240.5</span>
 <span class="sd">        PC1_1 PC1_2  : 1.0  -0.0</span>
 <span class="sd">        PC2_1 PC2_2  : 0.0  1.0</span>
 <span class="sd">        CDELT : -0.27794934051515896  0.27794934051515896</span>
@@ -2099,8 +2346,6 @@
 <span class="sd">        frame : `astropy.coordinates.BaseCoordinateFrame`, optional</span>
 <span class="sd">            Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">warnings</span>
-
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is deprecated and is no longer tested.&quot;</span>
             <span class="s2">&quot;Please refer to `MOC.fill` and `MOC.border` methods&quot;</span><span class="p">,</span>
@@ -2208,7 +2453,7 @@
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">spatial_moc_from_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format should be one of </span><span class="si">{</span><span class="n">formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@classmethod</span>
@@ -2242,7 +2487,7 @@
             <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">spatial_moc_from_json_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;format should be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formats</span><span class="p">)))</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format should be one of </span><span class="si">{</span><span class="n">formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
@@ -2323,7 +2568,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 
 
@@ -2336,7 +2581,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jun 2024. <br/>
+    Last built 16 Jul 2024. <br/>
   </p>
 </footer>
   </body>
