@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.16.0]
+
 ### Added
 
 * `MOC.mask_uniq` allows to mas an array of uniq cells with a MOC
@@ -39,7 +41,7 @@ should replace `nside` in a future version.
 ### Fixed
 
 * `ranges` in `from_depth29_ranges` is now optional, to be consistent with the existing docstring
-* `from_healpix_cells` and `from_velued_healpix_cells` now filter out invalid cells and raise a
+* `from_healpix_cells` and `from_valued_healpix_cells` now filter out invalid cells and raise a
 warning when they do so
 * fix multimoc operations (were all failing with a TypeError) [#153]
 
