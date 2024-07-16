@@ -47,24 +47,6 @@ For more information about the MOCPy Rust core, see the `moc crate <https://crat
 .. |Doc| image:: https://img.shields.io/badge/Documentation-link-green.svg
     :target: https://cds-astro.github.io/mocpy/
 
-Migrating to version 0.12
--------------------------
-
-Since 0.12.3
-************
-
-- ``MOC.MAX_ORDER` and `TimeMOC.MAX_ORDER`` replace the former ``IntervalSet.HPX_MAX_ORDER`` and ``IntervalSet.TIME_MAX_ORDER``
-- ``MOC.to_depth29_ranges`` is now a public method replacing the former private ``IntervalSet.nested`` and addition of ``TimeMOC.to_depth61_ranges`` for a time counterpart
-
-Since v0.12.0
-*************
-
-- ``MOC.contains_skycoords`` and ``MOC.contains_lonlat`` replace ``MOC.contains`` (``contains`` will be removed in v1.0.0)
-- ``TimeMOC.contains_with_timeresolution`` has been added with the previous behaviour of  ``TimeMOC.contains``
-- ``from_uniq` removed from `IntervalSet`` and added to ``MOC``
-- ``MOC.from_healpix_cells`` now requires the ``max_depth`` argument, the depth of the MOC we want to create
-- ``World2ScreenMPL`` has been renamed ``WCS``
-
 Installation
 ------------
 
