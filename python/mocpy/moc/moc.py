@@ -1811,22 +1811,38 @@ class MOC(AbstractMOC):
             )
         if isinstance(region, regions.EllipseSkyRegion):
             center = region.center.icrs
+            if region.width < region.height:
+                a = region.height / 2.0
+                b = region.width / 2.0
+                angle = region.angle
+            else:
+                a = region.width / 2.0
+                b = region.height / 2.0
+                angle = region.angle + Angle("90d")
             return cls.from_elliptical_cone(
                 center.ra,
                 center.dec,
-                a=region.height / 2,
-                b=region.width / 2,
-                pa=region.angle,
+                a=a,
+                b=b,
+                pa=angle,
                 max_depth=max_depth,
             )
         if isinstance(region, regions.RectangleSkyRegion):
             center = region.center.icrs
+            if region.width < region.height:
+                a = region.height / 2.0
+                b = region.width / 2.0
+                angle = region.angle
+            else:
+                a = region.width / 2.0
+                b = region.height / 2.0
+                angle = region.angle + Angle("90d")
             return cls.from_box(
                 center.ra,
                 center.dec,
-                a=region.width / 2,
-                b=region.height / 2,
-                angle=region.angle + Angle("90d"),
+                a=a,
+                b=b,
+                angle=angle,
                 max_depth=max_depth,
             )
         if isinstance(region, regions.PolygonSkyRegion):
