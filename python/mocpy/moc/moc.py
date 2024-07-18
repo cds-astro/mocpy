@@ -91,7 +91,7 @@ def _mask_unsigned_before_casting(indices):
     indices : `numpy.ndarray` or Iterable
     """
     if np.issubdtype(np.asarray(indices).dtype, np.unsignedinteger) or all(
-        np.asarray(indices) > 0,
+        np.asarray(indices) >= 0,
     ):
         return None
     warnings.warn(
@@ -100,7 +100,7 @@ def _mask_unsigned_before_casting(indices):
         UserWarning,
         stacklevel=2,
     )
-    return np.array(indices) > 0
+    return np.array(indices) >= 0
 
 
 def _extract_mask_and_values_multiordermap(multiordermap, column):

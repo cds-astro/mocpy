@@ -264,6 +264,8 @@ def test_from_healpix_cells():
     ):
         moc = MOC.from_healpix_cells(ipix=[40, -1, 65], depth=depth, max_depth=3)
     assert moc == MOC.from_str("3/40 65")
+    # also allow order zero (regression for issue #157)
+    assert MOC.from_healpix_cells(np.array([0]), 0, 0) == MOC.from_str("0/0")
 
 
 def test_from_polygons():
