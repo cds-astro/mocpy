@@ -264,6 +264,8 @@ def test_from_healpix_cells():
     ):
         moc = MOC.from_healpix_cells(ipix=[40, -1, 65], depth=depth, max_depth=3)
     assert moc == MOC.from_str("3/40 65")
+    # also allow order zero (regression for issue #157)
+    assert MOC.from_healpix_cells(np.array([0]), 0, 0) == MOC.from_str("0/0")
 
 
 def test_from_polygons():
@@ -662,6 +664,15 @@ def test_from_astropy_regions():
     moc = MOC.from_astropy_regions(ellipse, max_depth=9)
     assert moc.contains_skycoords(center)
     assert round(moc.largest_distance_from_coo_to_vertices(center).to("deg").value) == 3
+    # invert axes in the ellipse
+    ellipse_swapped = regions.EllipseSkyRegion(
+        center,
+        6 * u.deg,
+        3 * u.deg,
+        (-90 + 10) * u.deg,
+    )
+    moc_swapped = MOC.from_astropy_regions(ellipse_swapped, max_depth=9)
+    assert moc_swapped == moc
     # rectangle
     box = regions.RectangleSkyRegion(center, 12 * u.deg, 6 * u.deg, 10 * u.deg)
     moc = MOC.from_astropy_regions(box, max_depth=8)

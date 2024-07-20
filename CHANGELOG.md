@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## Fixed
+
+* `MOC.from_astropy_regions` now accepts `EllipseSkyRegion` and `RectangleSkyRegion` where
+  width > height.
+
+## [0.16.1]
+
+### Fixed
+
+* `from_healpix_cells` and `from_valued_healpix_cells` accept order zero cells again
+
 ## [0.16.0]
 
 ### Added

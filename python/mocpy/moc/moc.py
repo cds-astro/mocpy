@@ -91,7 +91,7 @@ def _mask_unsigned_before_casting(indices):
     indices : `numpy.ndarray` or Iterable
     """
     if np.issubdtype(np.asarray(indices).dtype, np.unsignedinteger) or all(
-        np.asarray(indices) > 0,
+        np.asarray(indices) >= 0,
     ):
         return None
     warnings.warn(
@@ -100,7 +100,7 @@ def _mask_unsigned_before_casting(indices):
         UserWarning,
         stacklevel=2,
     )
-    return np.array(indices) > 0
+    return np.array(indices) >= 0
 
 
 def _extract_mask_and_values_multiordermap(multiordermap, column):
@@ -1811,22 +1811,38 @@ class MOC(AbstractMOC):
             )
         if isinstance(region, regions.EllipseSkyRegion):
             center = region.center.icrs
+            if region.width < region.height:
+                a = region.height / 2.0
+                b = region.width / 2.0
+                angle = region.angle
+            else:
+                a = region.width / 2.0
+                b = region.height / 2.0
+                angle = region.angle + Angle("90d")
             return cls.from_elliptical_cone(
                 center.ra,
                 center.dec,
-                a=region.height / 2,
-                b=region.width / 2,
-                pa=region.angle,
+                a=a,
+                b=b,
+                pa=angle,
                 max_depth=max_depth,
             )
         if isinstance(region, regions.RectangleSkyRegion):
             center = region.center.icrs
+            if region.width < region.height:
+                a = region.height / 2.0
+                b = region.width / 2.0
+                angle = region.angle
+            else:
+                a = region.width / 2.0
+                b = region.height / 2.0
+                angle = region.angle + Angle("90d")
             return cls.from_box(
                 center.ra,
                 center.dec,
-                a=region.width / 2,
-                b=region.height / 2,
-                angle=region.angle + Angle("90d"),
+                a=a,
+                b=b,
+                angle=angle,
                 max_depth=max_depth,
             )
         if isinstance(region, regions.PolygonSkyRegion):
