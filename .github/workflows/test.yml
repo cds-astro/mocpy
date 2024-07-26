@@ -57,7 +57,7 @@ jobs:
        uses: actions/checkout@v4
      # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: "Set up Python ${{ matrix.python-version }} on MacOS"
-       uses: actions/setup-python@v4
+       uses: actions/setup-python@v5
        with:
          python-version: ${{ matrix.python-version }}
      # Test python code
@@ -94,7 +94,7 @@ jobs:
         uses: actions/checkout@v4
       # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
       - name: "Set up Python ${{ matrix.python-version }} on Windows"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       # Test python code
