@@ -130,7 +130,7 @@ jobs:
      - uses: actions/checkout@v4
      #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
-       uses: actions/setup-python@v4
+       uses: actions/setup-python@v5
        with:
          python-version: ${{ matrix.python-version }}
      # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
@@ -164,7 +164,7 @@ jobs:
      - uses: actions/checkout@v4
      #  Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
-       uses: actions/setup-python@v4
+       uses: actions/setup-python@v5
        with:
          python-version: ${{ matrix.python-version }}
      # For secrets, see https://docs.github.com/en/actions/reference/encrypted-secrets
