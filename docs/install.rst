@@ -1,6 +1,9 @@
 Install
 =======
 
+Stable versions
+---------------
+
 MOCPy relies on the following mandatory external dependencies :
 
 - `cdshealpix <https://cds-astro.github.io/cds-healpix-python/>`__
@@ -19,3 +22,18 @@ To upgrade the ``mocpy`` package to the latest version::
 To install ``mocpy`` type::
 
     pip install mocpy
+
+From source
+-----------
+
+To install MOCPy from source, you'll need `Rust <https://www.rust-lang.org/tools/install>`_.
+
+Then you can download the source code from `this link https://github.com/cds-astro/mocpy/archive/refs/heads/master.zip`_
+or directly from the GitHub repository. Once in the source code folder, you'll have to do
+
+::
+    > pip install maturin
+    > maturin develop --release
+    > pip install .
+
+And you'll have the very last changes running on your machine.
