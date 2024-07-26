@@ -633,8 +633,8 @@ class MOC(AbstractMOC):
         releases. These catalogs contain one or more tables.
 
         Here are two webpages where you can read the
-        `list of catalogs https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html`_
-        and the `list of tables https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&list=tables`_
+        `list of catalogs <https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html>`_
+        and the `list of tables <https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&list=tables>`_
         currently available.
         """
         if nside:
