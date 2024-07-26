@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; MOCPy 0.16.1 documentation</title>
+    <title>mocpy.moc.moc &#8212; MOCPy 0.16.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=d9901acd"></script>
+    <script src="../../../_static/documentation_options.js?v=ee6890a7"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.16.1 documentation</a>
+	<a href="../../../index.html">MOCPy 0.16.2 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -740,8 +740,8 @@
 <span class="sd">        releases. These catalogs contain one or more tables.</span>
 
 <span class="sd">        Here are two webpages where you can read the</span>
-<span class="sd">        `list of catalogs https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html`_</span>
-<span class="sd">        and the `list of tables https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&amp;list=tables`_</span>
+<span class="sd">        `list of catalogs &lt;https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&gt;`_</span>
+<span class="sd">        and the `list of tables &lt;https://cdsarc.cds.unistra.fr/viz-bin/moc/?format=html&amp;list=tables&gt;`_</span>
 <span class="sd">        currently available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">nside</span><span class="p">:</span>
@@ -1984,22 +1984,38 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">EllipseSkyRegion</span><span class="p">):</span>
             <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">angle</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;90d&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_elliptical_cone</span><span class="p">(</span>
                 <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
                 <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
-                <span class="n">a</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">b</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">pa</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span>
+                <span class="n">pa</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
                 <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">RectangleSkyRegion</span><span class="p">):</span>
             <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
+            <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">angle</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mf">2.0</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;90d&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_box</span><span class="p">(</span>
                 <span class="n">center</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
                 <span class="n">center</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
-                <span class="n">a</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">b</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">angle</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="n">Angle</span><span class="p">(</span><span class="s2">&quot;90d&quot;</span><span class="p">),</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span>
+                <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
                 <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">PolygonSkyRegion</span><span class="p">):</span>
@@ -2581,7 +2597,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 18 Jul 2024. <br/>
+    Last built 26 Jul 2024. <br/>
   </p>
 </footer>
   </body>
