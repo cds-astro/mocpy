@@ -14,8 +14,9 @@ MOC is an IVOA standard  enabling description of arbitrary sky regions.
 Based on the HEALPix sky tessellation, it maps regions on the sky
 into hierarchically grouped predefined cells.
 
-An experimental support for TMOC (temporal MOC) has been added since version 0.4.0.
+A support for TMOC (temporal MOC) has been added since version 0.4.0.
 It allows creation, parsing and comparison of TMOCs.
+The support for Frequency MOCs has been added since version 0.13.0
 
 Space & Time coverages (STMOC) are an extension of MOC to add time information.
 It is possible to get a TMOC by querying a STMOC with a MOC and/or get a MOC
@@ -31,7 +32,7 @@ For more information about the MOCPy Rust core, see the `moc crate <https://crat
 .. figure:: ./resources/readme.png
    :scale: 50 %
    :align: center
-   :alt: map to buried treasure
+   :alt: a moc plotted with mocpy
 
    *Rendered with MOCpy!*
 
