@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.16.2]
+
 ## Fixed
 
 * `MOC.from_astropy_regions` now accepts `EllipseSkyRegion` and `RectangleSkyRegion` where
