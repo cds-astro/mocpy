@@ -1,7 +1,7 @@
 repos:
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: detect-private-key
         description: "Check accidental private keys in code"
@@ -13,18 +13,18 @@ repos:
         description: "Remove trailing whitespaces"
   # Run Black on files
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 24.4.2
     hooks:
     - id: black
   # Fast linter to replace flake8
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.1.6'
+    rev: 'v0.5.5'
     hooks:
      - id: ruff
        fail_fast: true
   # Same tools but for Jupyter notebooks
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.1
+    rev: 1.8.5
     hooks:
       - id: nbqa-black
         name: nbqa-black
