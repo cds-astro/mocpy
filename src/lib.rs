@@ -256,15 +256,6 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     delta_depth: u8,
     n_threads: Option<u16>,
   ) -> PyResult<Vec<usize>> {
-    #[cfg(not(target_arch = "wasm32"))]
-    let n_threads = n_threads
-      .map(|v| v as usize)
-      .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
-    #[cfg(not(target_arch = "wasm32"))]
-    let pool = rayon::ThreadPoolBuilder::new()
-      .num_threads(n_threads)
-      .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
     // We zip before multi-threading in case `lon_deg.as_slice()` or ``lon_deg.as_slice`` fail
     // (due to non-contiguous arrays).
     let (lon, lat, r) = match (
@@ -280,6 +271,13 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     .map_err(PyIOError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
+      let n_threads = n_threads
+        .map(|v| v as usize)
+        .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+      let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(n_threads)
+        .build()
+        .map_err(|e| PyIOError::new_err(e.to_string()))?;
       pool
         .install(|| {
           lon
@@ -320,6 +318,88 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         .map_err(PyIOError::new_err)
     }
   }
+
+
+  /// Creates a single MOC from a list of cone centers and radius.
+  /// # Params
+  /// * `lon_deg`: cone centers longitude
+  /// * `lat_deg`: cone centers latitude
+  /// * `radius_deg`: cones radii
+  /// * `depth`: MOCs depth
+  /// * `delta_depth`: precision parameter
+  /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
+  #[pyfn(m)]
+  fn from_small_cones(
+    lon_deg: PyReadonlyArrayDyn<f64>,
+    lat_deg: PyReadonlyArrayDyn<f64>,
+    radius_deg: PyReadonlyArrayDyn<f64>,
+    depth: u8,
+    delta_depth: u8,
+    n_threads: Option<u16>,
+  ) -> PyResult<usize> {
+    // We zip before multi-threading in case `lon_deg.as_slice()` or ``lon_deg.as_slice`` fail
+    // (due to non-contiguous arrays).
+    let (lon, lat, r) = match (
+      lon_deg.as_slice(),
+      lat_deg.as_slice(),
+      radius_deg.as_slice(),
+    ) {
+      (Ok(lon), Ok(lat), Ok(r)) => Ok((lon, lat, r)),
+      _ => Err(String::from(
+        "Cone centers coordinates and radii must be contiguous and in standard order.",
+      )),
+    }
+      .map_err(PyIOError::new_err)?;
+    #[cfg(target_arch = "wasm32")]
+    {
+      // Ignore multi-threading in wasm32
+      let cone_it = lon
+        .iter().cloned()
+        .zip(lat.iter().cloned())
+        .zip(r.iter().cloned());
+      U64MocStore::get_global_store().from_small_cones(
+        depth,
+        delta_depth,
+        cone_it,
+      ).map_err(PyIOError::new_err)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+      let n_threads = n_threads
+        .map(|v| v as usize)
+        .unwrap_or_else(|| num_threads().map(|v| v.get()).unwrap_or(8));
+      if n_threads == 1 {
+        let cone_it = lon
+          .iter().cloned()
+          .zip(lat.iter().cloned())
+          .zip(r.iter().cloned());
+        U64MocStore::get_global_store().from_small_cones(
+          depth,
+          delta_depth,
+          cone_it,
+        ).map_err(PyIOError::new_err)
+      } else {
+        let pool = rayon::ThreadPoolBuilder::new()
+          .num_threads(n_threads)
+          .build()
+          .map_err(|e| PyIOError::new_err(e.to_string()))?;
+        pool
+          .install(|| {
+            let cone_it = lon
+              .par_iter().cloned()
+              .zip(lat.par_iter().cloned())
+              .zip(r.par_iter().cloned());
+            U64MocStore::get_global_store().from_small_cones_par(
+              depth,
+              delta_depth,
+              cone_it,
+            )
+          })
+          .map_err(PyIOError::new_err)
+      }
+    }
+  }
+
 
   /// Create and store a MOC from the given box.
   ///
