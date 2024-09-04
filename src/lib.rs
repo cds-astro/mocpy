@@ -517,6 +517,25 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     }
   }
 
+  /// Create and store a MOC from the given zone.
+  ///
+  /// # Input
+  /// * `lon_min` the longitude of the bottom left corner, in degrees
+  /// * `lat_min` the latitude of the bottom left corner, in degrees
+  /// * `lon_max` the longitude of the upper left corner, in degrees
+  /// * `lat_max` the latitude of the upper left corner, in degrees
+  /// * `depth`: the MOC depth
+  ///
+  /// # Output
+  /// - The index in the storage
+  #[pyfn(m)]
+  pub fn from_zone(lon_min: f64, lat_min: f64, lon_max: f64, lat_max: f64, depth: u8) -> PyResult<usize> {
+    U64MocStore::get_global_store()
+      .from_zone(lon_min, lat_min, lon_max, lat_max, depth, CellSelection::All)
+      .map_err(PyValueError::new_err)
+  }
+
+
   /// Create a spatial coverage from a given ring.
   ///
   /// # Arguments
