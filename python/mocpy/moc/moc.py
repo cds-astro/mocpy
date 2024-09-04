@@ -503,6 +503,12 @@ class MOC(AbstractMOC):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
+        Info
+        ----
+        When giving a mask the MOC computed will only take into account the center
+        of the image pixels and not the whole pixel borders.
+        This leads to an approximate resulting MOC.
+
         Parameters
         ----------
         hdu : HDU object
@@ -510,8 +516,8 @@ class MOC(AbstractMOC):
         max_norder : int
             The moc resolution.
         mask : `numpy.ndarray`, optional
-            A boolean array of the same size of the image where pixels having the value 1 are part of
-            the final MOC and pixels having the value 0 are not.
+            A boolean array of the same shape of the image where True valued pixels are part of
+            the final MOC and False valued pixels are not.
 
         Returns
         -------
@@ -520,6 +526,7 @@ class MOC(AbstractMOC):
         """
         # Only take the first HDU
         header = hdu.header
+        max_norder = np.uint8(max_norder)
 
         # Compute a WCS from the header of the image
         w = wcs.WCS(header)
@@ -553,15 +560,42 @@ class MOC(AbstractMOC):
         frame = wcs.utils.wcs_to_celestial_frame(w)
         skycrd = SkyCoord(world, unit="deg", frame=frame)
 
-        # Compute the order based on the CDELT
-        # Should work even if the fits is defined using cd_ij or crota, see:
-        # https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt
-        [c1, c2] = w.wcs.get_cdelt()
+        # Compute the deepest HEALPix order containing at least one 1 pixel of the image
+        # We want the order so that area_hpx_cell >= area_img_pixel
+        # <=> 4pi / (12 * 2^(2*order)) in [steradians] >= area_img_pixel in [steradians]
+        corners = w.calc_footprint(header)
 
-        max_res_px = np.sqrt(c1 * c1 + c2 * c2) * np.pi / 180.0
-        max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
+        healpix_order_computed = True
+        if np.isfinite(corners).all():
+            sky_corners = SkyCoord(corners[:, 0], corners[:, 1], unit=u.deg)
 
-        max_norder = min(max_norder, max_depth_px)
+            [w_img_px, h_img_px] = hdu.data.shape
+            # take angular distances between the corners in x and y image space directions
+            px_ang_size_x = sky_corners[3].separation(sky_corners[0]) / w_img_px
+            px_ang_size_y = sky_corners[0].separation(sky_corners[1]) / h_img_px
+
+            px_sky_area = px_ang_size_x.to_value(u.rad) * px_ang_size_y.to_value(
+                u.rad,
+            )  # in steradians
+
+            # Division by 0 case
+            if px_sky_area == 0.0:
+                healpix_order_computed = False
+            else:
+                depth_px = np.uint8(
+                    np.floor(np.log2(np.pi / (3.0 * px_sky_area)) / 2.0),
+                )
+                max_norder = min(max_norder, depth_px)
+        else:
+            healpix_order_computed = False
+
+        if not healpix_order_computed:
+            warnings.warn(
+                "MOC precision HEALPix order could not be determined because sky coordinates from the corners of the image has not have been correctly retrieved. "
+                "Therefore MOC precision will be set to max_norder",
+                UserWarning,
+                stacklevel=2,
+            )
 
         moc = MOC.from_lonlat(
             lon=skycrd.icrs.ra,
