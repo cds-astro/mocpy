@@ -27,11 +27,15 @@ way more precise than the given WCS [#166]
 'small_cones'/'small_boxes' or 'large_cones'/'large_boxes'.
 Small cones/boxes is faster for non-overlapping cones/boxes.
 * `MOC.from_fits_images` can now loop through the HDUList to only keep images with the
-parameter `hdu_index` set to -1.
+parameter `hdu_index` set to -1 [#110]
+
+### Fixed
+
+* fix healpix order corresponding to 1 pixel on the image calculation in `from_fits_image` [#169]
 
 ## [0.16.2]
 
-## Fixed
+### Fixed
 
 * `MOC.from_astropy_regions` now accepts `EllipseSkyRegion` and `RectangleSkyRegion` where
   width > height.
