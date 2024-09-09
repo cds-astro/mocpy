@@ -1342,12 +1342,53 @@ class MOC(AbstractMOC):
         return [cls(index) for index in indices]
 
     @classmethod
+    def from_zone(cls, coordinates, max_depth):
+        """
+        Create a MOC from a zone.
+
+        The zone is defined by a range of longitudes and latitudes. Its sides follow great
+        circles in longitudes and small circles for latitudes.
+
+        Parameters
+        ----------
+        coordinates : `~astropy.coordinates.SkyCoord`
+            A couple of coordinates for the bottom left and the upper right corner of the
+            zone.
+        max_depth : int
+            Maximum HEALPix cell resolution.
+
+        Returns
+        -------
+        `~mocpy.moc.MOC`
+            The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import SkyCoord
+        >>> moc = MOC.from_zone(
+        ...  SkyCoord([[0, 0], [20, 20]], unit="deg"),
+        ...  max_depth=5
+        ... )
+        """
+        index = mocpy.from_zone(
+            coordinates[0].icrs.ra.deg,
+            coordinates[0].icrs.dec.deg,
+            coordinates[1].icrs.ra.deg,
+            coordinates[1].icrs.dec.deg,
+            np.uint8(max_depth),
+        )
+        return cls(index)
+
+    @classmethod
     @validate_lonlat
     def from_box(cls, lon, lat, a, b, angle, max_depth):
         """
         Create a MOC from a box/rectangle.
 
-        The box is centered around the (`lon`, `lat`) position.
+        The box is centered around the (`lon`, `lat`) position. The sides and cross from
+        the center follow great circles. As such, the box is the intersection between
+        two orthogonal spherical wedges having the same center.
         The coordinates should be expressed in equatorial coordinates using the
         ICRS reference. We follow the Space MOC standard.
 

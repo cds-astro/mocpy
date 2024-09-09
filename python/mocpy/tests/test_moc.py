@@ -595,6 +595,13 @@ def test_from_ring():
     )
 
 
+def test_from_zone():
+    moc = MOC.from_zone(SkyCoord([[-50, -50], [50, 50]], unit="deg"), max_depth=5)
+    # test the diagonal
+    for coordinate in range(-50, 60, 10):
+        assert moc.contains_skycoords(SkyCoord(coordinate, coordinate, unit="deg"))
+
+
 def test_from_box():
     a = Angle("10d")
     b = Angle("2d")
