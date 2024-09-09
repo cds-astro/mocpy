@@ -720,6 +720,11 @@ def test_from_elliptical_cone():
     )
 
 
+def test_from_cone():
+    with pytest.raises(ValueError, match="'MOC.from_cone' only works with one cone.*"):
+        MOC.from_cone([2, 4] * u.deg, [5, 6] * u.deg, radius=2 * u.arcmin, max_depth=2)
+
+
 def test_from_cones():
     # same radius
     radius = 2 * u.arcmin
@@ -734,6 +739,14 @@ def test_from_cones():
             barycenter.ra,
             barycenter.dec,
         ) < Angle(1 * u.arcsec)
+    moc = MOC.from_cones(
+        lon,
+        lat,
+        radius=radius,
+        max_depth=14,
+        union_strategy="small_cones",
+    )
+    assert isinstance(moc, MOC)
     # different radii
     radii = [5, 6] * u.arcmin
     cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
@@ -743,6 +756,17 @@ def test_from_cones():
             cone.sky_fraction
             > (((radius) ** 2).to(u.steradian) / 4 * u.steradian).value
         )
+    moc = MOC.from_cones(
+        lon,
+        lat,
+        radius=radii,
+        max_depth=14,
+        union_strategy="small_cones",
+    )
+    assert isinstance(moc, MOC)
+    # test error
+    with pytest.raises(ValueError, match="'union_strategy'*"):
+        MOC.from_cones(lon, lat, radius=radii, max_depth=14, union_strategy="big_cones")
 
 
 @pytest.fixture()
