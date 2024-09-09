@@ -1186,9 +1186,9 @@ class MOC(AbstractMOC):
             Maximum HEALPix cell resolution.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
-            depth using the `depth_delta` parameter.
+            depth using the `delta_depth` parameter.
             The depth at which the computations will be made will therefore be equal to
-            `depth` + `depth_delta`.
+            `depth` + `delta_depth`.
 
         Returns
         -------
@@ -1243,9 +1243,9 @@ class MOC(AbstractMOC):
             Maximum HEALPix cell resolution.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
-            depth using the `depth_delta` parameter.
+            depth using the `delta_depth` parameter.
             The depth at which the computations will be made will therefore be equal to
-            `max_depth` + `depth_delta`.
+            `max_depth` + `delta_depth`.
 
         Returns
         -------
@@ -1264,6 +1264,11 @@ class MOC(AbstractMOC):
         ...  max_depth=10
         ... )
         """
+        if len(lon) != 1:
+            raise ValueError(
+                "'MOC.from_cone' only works with one cone. To create MOCs "
+                "from multiple cones, use 'MOC.from_cones'.",
+            )
         index = mocpy.from_cone(
             lon[0],
             lat[0],
@@ -1275,7 +1280,17 @@ class MOC(AbstractMOC):
 
     @classmethod
     @validate_lonlat
-    def from_cones(cls, lon, lat, radius, max_depth, *, delta_depth=2, n_threads=None):
+    def from_cones(
+        cls,
+        lon,
+        lat,
+        radius,
+        max_depth,
+        *,
+        union_strategy=None,
+        delta_depth=2,
+        n_threads=None,
+    ):
         """
         Create a list of MOCs from cones.
 
@@ -1294,31 +1309,55 @@ class MOC(AbstractMOC):
             The radius angle of the cone. Can be scalar or a list of radii.
         max_depth : int
             Maximum HEALPix cell resolution.
+        union_strategy : str, optional
+            Return the union of all the cones instead of the list of MOCs. For now, the
+            "small_cones" strategy is implemented. It works better if the cones don't overlap
+            a lot.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
-            depth using the `depth_delta` parameter.
+            depth using the `delta_depth` parameter.
             The depth at which the computations will be made will therefore be equal to
-            `max_depth` + `depth_delta`.
+            `max_depth` + `delta_depth`.
         n_threads : int, optional
             The number of threads to be used. If this is set to None (default value),
             all available threads will be used.
 
         Returns
         -------
-        List[`~mocpy.moc.MOC`]
-            The resulting list of MOCs
+        List[`~mocpy.moc.MOC`] or `~mocpy.MOC`
+            The resulting list of MOCs, or if 'union_strategy' is not None, the MOC of the
+            union of all the cones.
 
         Examples
         --------
         >>> from mocpy import MOC
         >>> import astropy.units as u
-        >>> moc = MOC.from_cone(
+        >>> moc = MOC.from_cones(
         ...  lon=[1, 4] * u.deg,
         ...  lat=[2, 5] * u.deg,
-        ...  radius=10 * u.deg,
-        ...  max_depth=10
+        ...  radius=1 * u.arcmin,
+        ...  max_depth=12,
+        ...  union_strategy="small_cones"
         ... )
         """
+        if union_strategy == "small_cones":
+            if radius.isscalar:
+                radii = np.full(len(lon), Angle(radius).to_value(u.deg))
+            else:
+                radii = Angle(radius).to_value(u.deg)
+            index = mocpy.from_small_cones(
+                lon,
+                lat,
+                radii,
+                np.uint8(max_depth),
+                np.uint8(delta_depth),
+                n_threads,
+            )
+            return cls(index)
+
+        if union_strategy is not None:
+            raise ValueError("'union_strategy' can only be None or 'small_cones'.")
+
         if radius.isscalar:
             indices = mocpy.from_same_cones(
                 lon,
@@ -1552,9 +1591,9 @@ class MOC(AbstractMOC):
             Maximum HEALPix cell resolution.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
-            depth using the `depth_delta` parameter.
+            depth using the `delta_depth` parameter.
             The depth at which the computations will be made will therefore be equal to
-            `max_depth` + `depth_delta`.
+            `max_depth` + `delta_depth`.
 
         Returns
         -------
@@ -1772,9 +1811,9 @@ class MOC(AbstractMOC):
             Maximum HEALPix cell resolution.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
-            depth using the `depth_delta` parameter.
+            depth using the `delta_depth` parameter.
             The depth at which the computations will be made will therefore be equal to
-            `max_depth` + `depth_delta`.
+            `max_depth` + `delta_depth`.
 
         Returns
         -------
