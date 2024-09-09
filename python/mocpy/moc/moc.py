@@ -505,7 +505,7 @@ class MOC(AbstractMOC):
 
         Info
         ----
-        When giving a mask the MOC computed will only take into account the center
+        When giving a mask, the MOC computed will only take into account the center
         of the image pixels and not the whole pixel borders.
         This leads to an approximate resulting MOC.
 
@@ -516,12 +516,12 @@ class MOC(AbstractMOC):
         max_norder : int
             The moc resolution.
         mask : `numpy.ndarray`, optional
-            A boolean array of the same shape of the image where True valued pixels are part of
+            A boolean array of the same shape than the image where True valued pixels are part of
             the final MOC and False valued pixels are not.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `~mocpy.moc.MOC`
             The resulting MOC.
         """
         # Only take the first HDU
@@ -579,7 +579,7 @@ class MOC(AbstractMOC):
             )  # in steradians
 
             # Division by 0 case
-            if px_sky_area == 0.0:
+            if px_sky_area == 0:
                 healpix_order_computed = False
             else:
                 depth_px = np.uint8(
@@ -591,7 +591,8 @@ class MOC(AbstractMOC):
 
         if not healpix_order_computed:
             warnings.warn(
-                "MOC precision HEALPix order could not be determined because sky coordinates from the corners of the image has not have been correctly retrieved. "
+                "MOC precision HEALPix order could not be determined because sky coordinates "
+                "from the corners of the image has not have been correctly retrieved. "
                 "Therefore MOC precision will be set to max_norder",
                 UserWarning,
                 stacklevel=2,
@@ -609,33 +610,46 @@ class MOC(AbstractMOC):
         """
         Load a MOC from a set of FITS file images.
 
-        Assumes the data of the image is stored in the first HDU of the FITS file.
-        Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.
-
         Parameters
         ----------
         path_l : [str]
-            A list of path where the fits image are located.
+            A list of path where the fits images are located.
         max_norder : int
             The MOC resolution.
-        hdu_index : int
-            Index of the the HDU containing the image in each FITS file (default = 0)
+        hdu_index : int, optional
+            Index of the the HDUs containing the image in each FITS file (default = 0)
+            If set to -1, all the HUD will be taken in account, and only the ones
+            corresponding to images will be kept.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = MOC.new_empty(max_norder)
-        for filename in path_l:
-            with fits.open(filename) as hdul:
-                current_moc = MOC.from_fits_image(
-                    hdu=hdul[hdu_index],
-                    max_norder=max_norder,
-                )
-                moc = moc.union(current_moc)
+        if not isinstance(path_l, list):
+            path_l = [path_l]
 
-        return moc
+        mocs = []
+        if hdu_index == -1:
+            for filename in path_l:
+                with fits.open(filename) as hdul:
+                    for hdu in hdul:
+                        if (
+                            isinstance(hdu, (fits.ImageHDU, fits.PrimaryHDU))
+                            and len(hdu.data.shape) == 2
+                        ):
+                            mocs.append(MOC.from_fits_image(hdu, max_norder))
+
+        else:
+            for filename in path_l:
+                with fits.open(filename) as hdul:
+                    mocs.append(MOC.from_fits_image(hdu=hdul[hdu_index],
+                                                    max_norder=max_norder,))
+
+        if len(mocs) == 1:
+            return mocs[0]
+        return mocs[0].union(*mocs[1:]) # this is the fastest way to do multi union
+
 
     @classmethod
     def from_vizier_table(cls, table_id, max_depth=None, nside=None):

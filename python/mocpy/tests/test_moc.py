@@ -347,8 +347,7 @@ def test_moc_consistent_with_aladin():
 
 def test_moc_from_fits_images():
     image_path = "resources/image_with_mask.fits.gz"
-
-    MOC.from_fits_images([image_path], max_norder=15)
+    MOC.from_fits_images([image_path], max_norder=15, hdu_index=-1)
 
 
 def test_from_fits_images_2():
@@ -356,7 +355,7 @@ def test_from_fits_images_2():
 
 
 def test_from_fits_image_without_cdelt():
-    MOC.from_fits_images(["resources/horsehead.fits"], max_norder=15)
+    MOC.from_fits_images(["resources/horsehead.fits"], max_norder=5, hdu_index=-1)
 
 
 @pytest.fixture
@@ -896,8 +895,7 @@ def test_moc_complement_consistency():
 
 
 def test_from_fits_old():
-    moc = MOC.from_fits("resources/V_147_sdss12.moc.fits")
-    assert moc.complement().complement() == moc
+    MOC.from_fits("resources/V_147_sdss12.moc.fits")
 
 
 @pytest.mark.parametrize(

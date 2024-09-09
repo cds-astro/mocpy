@@ -26,6 +26,8 @@ way more precise than the given WCS [#166]
 `MOC.from_cones`/`MOC.from_boxes`: the keyword 'union_strategy' can now take the value
 'small_cones'/'small_boxes' or 'large_cones'/'large_boxes'.
 Small cones/boxes is faster for non-overlapping cones/boxes.
+* `MOC.from_fits_images` can now loop through the HDUList to only keep images with the
+parameter `hdu_index` set to -1.
 
 ## [0.16.2]
 
