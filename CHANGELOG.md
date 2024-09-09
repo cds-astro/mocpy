@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+* Creation of a MOC from a zone (defined by min/max ra and dec)`MOC.from_zone`
+
 ## [0.16.2]
 
 ## Fixed

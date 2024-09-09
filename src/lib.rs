@@ -602,8 +602,8 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Input
   /// * `lon_min` the longitude of the bottom left corner, in degrees
   /// * `lat_min` the latitude of the bottom left corner, in degrees
-  /// * `lon_max` the longitude of the upper left corner, in degrees
-  /// * `lat_max` the latitude of the upper left corner, in degrees
+  /// * `lon_max` the longitude of the upper right corner, in degrees
+  /// * `lat_max` the latitude of the upper right corner, in degrees
   /// * `depth`: the MOC depth
   ///
   /// # Output
