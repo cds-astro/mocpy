@@ -343,8 +343,9 @@ class MOC(AbstractMOC):
         lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`
             Declination array in deg
         keep_inside : bool, optional
-            True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``
-            is false, contains will return the mask of the coordinates lying outside the MOC.
+            True by default. If so the mask describes coordinates lying inside the MOC.
+            If ``keep_inside`` is false, contains will return the mask of the coordinates
+            lying outside the MOC.
 
         Raises
         ------
@@ -358,17 +359,14 @@ class MOC(AbstractMOC):
         Examples
         --------
         >>> from mocpy import MOC
-        >>> import numpy as np
         >>> from astropy.coordinates import Angle
-        >>> import astropy.units as u
         >>> # create lists of coordinates
-        >>> lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)
-        >>> lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)
+        >>> lon = Angle([1, 2, 3, -2, -40, -5], unit="deg")
+        >>> lat = Angle([20, 25, 10, -60, 80, 0], unit="deg")
         >>> # create a polygonal moc from these
         >>> moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)
         >>> moc.contains_lonlat(lon=lon, lat=lat) # returns all true
-        array([[ True,  True,  True],
-               [ True,  True,  True]])
+        array([ True,  True,  True, True,  True,  True])
 
         See Also
         --------
@@ -1307,7 +1305,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : List[`~mocpy.moc.MOC`]
+        List[`~mocpy.moc.MOC`]
             The resulting list of MOCs
 
         Examples
