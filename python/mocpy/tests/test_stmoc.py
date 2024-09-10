@@ -10,7 +10,7 @@ from ..stmoc import STMOC
 from ..tmoc import TimeMOC
 
 
-@pytest.fixture()
+@pytest.fixture
 def stmoc_2mass():
     two_mass_data = Table.read(
         "resources/STMOC/2MASS-list-images.fits.gz",
@@ -33,7 +33,7 @@ def stmoc_2mass():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def stmoc_xmm_dr8():
     xmm_dr8_data = Table.read("resources/STMOC/vizier_votable.b64")
     times_xmm = Time(xmm_dr8_data["MJD0"].data, format="mjd", scale="tdb")

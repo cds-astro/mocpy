@@ -58,6 +58,10 @@ def test_n_cells():
         match=f"The depth should be comprised between 0 and {TimeMOC.MAX_ORDER}*",
     ):
         TimeMOC.n_cells(-1)
+    with pytest.raises(
+        ValueError,
+        match=f"The depth should be comprised between 0 and {TimeMOC.MAX_ORDER}*",
+    ):
         TimeMOC.n_cells(TimeMOC.MAX_ORDER + 1)
     assert TimeMOC.n_cells(10) == 2 * TimeMOC.n_cells(9)
 
@@ -134,7 +138,10 @@ def test_tmoc_from_time_ranges():
     assert tmoc.max_time == tmoc2.max_time
     assert tmoc == tmoc2
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"Mismatch between min\_times and max\_times of shapes \(0,\) and \(1,\)",
+    ):
         TimeMOC.from_time_ranges(
             Time([], format="jd", scale="tdb"),
             Time([3], format="jd", scale="tdb"),
@@ -234,7 +241,7 @@ def test_contains():
 
 
 @pytest.mark.parametrize(
-    "a, b, expect",
+    ("a", "b", "expect"),
     [
         (
             TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tdb")),
@@ -260,7 +267,7 @@ def test_union(a, b, expect):
 
 
 @pytest.mark.parametrize(
-    "a, b, expect",
+    ("a", "b", "expect"),
     [
         (
             TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tdb")),
@@ -286,7 +293,7 @@ def test_difference(a, b, expect):
 
 
 @pytest.mark.parametrize(
-    "a, b, expect",
+    ("a", "b", "expect"),
     [
         (
             TimeMOC.from_times(Time(np.array([0, 1, 2]), format="jd", scale="tdb")),
