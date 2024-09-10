@@ -499,7 +499,7 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_fits_image(cls, hdu, max_norder, mask=None):
+    def from_fits_image(cls, hdu, max_norder, mask=None, approximate=False):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a FITS file.
 
@@ -530,6 +530,17 @@ class MOC(AbstractMOC):
 
         # Compute a WCS from the header of the image
         w = wcs.WCS(header)
+        corners = w.calc_footprint(header)
+
+        if approximate:
+            if np.isfinite(corners).all():
+                sky_corners = SkyCoord(corners[:, 0], corners[:, 1], unit=u.deg)
+                return MOC.from_polygon_skycoord(sky_corners, max_depth=max_norder)
+            raise ValueError(
+                "Corners of at least one of the images cannot be "
+                "calculated with its WCS, the 'approximate' method "
+                "cannot be used for this image."
+            )
 
         if mask is None:
             data = hdu.data
@@ -563,8 +574,6 @@ class MOC(AbstractMOC):
         # Compute the deepest HEALPix order containing at least one 1 pixel of the image
         # We want the order so that area_hpx_cell >= area_img_pixel
         # <=> 4pi / (12 * 2^(2*order)) in [steradians] >= area_img_pixel in [steradians]
-        corners = w.calc_footprint(header)
-
         healpix_order_computed = True
         if np.isfinite(corners).all():
             sky_corners = SkyCoord(corners[:, 0], corners[:, 1], unit=u.deg)
@@ -606,7 +615,7 @@ class MOC(AbstractMOC):
         return moc  # noqa: RET504
 
     @classmethod
-    def from_fits_images(cls, path_l, max_norder, hdu_index=0):
+    def from_fits_images(cls, path_l, max_norder, hdu_index=0, approximate=False):
         """
         Load a MOC from a set of FITS file images.
 
@@ -620,6 +629,10 @@ class MOC(AbstractMOC):
             Index of the the HDUs containing the image in each FITS file (default = 0)
             If set to -1, all the HUD will be taken in account, and only the ones
             corresponding to images will be kept.
+        approximate : bool, optional
+            A faster but less precise way to build the MOC out of the images. This does
+            not mask the boolean values, and will approximate each image as a polygon
+            defined by the footprint deduced from the WCS. Default is False.
 
         Returns
         -------
@@ -635,21 +648,37 @@ class MOC(AbstractMOC):
                 with fits.open(filename) as hdul:
                     for hdu in hdul:
                         if (
-                            isinstance(hdu, (fits.ImageHDU, fits.PrimaryHDU))
-                            and len(hdu.data.shape) == 2
+                            isinstance(
+                                hdu, (fits.ImageHDU, fits.PrimaryHDU, fits.CompImageHDU)
+                            )
+                            and hdu.header
+                            and hdu.header["NAXIS"] == 2
                         ):
-                            mocs.append(MOC.from_fits_image(hdu, max_norder))
+                            mocs.append(  # noqa: PERF401
+                                MOC.from_fits_image(
+                                    hdu,
+                                    max_norder,
+                                    approximate=approximate,
+                                )
+                            )
 
         else:
             for filename in path_l:
                 with fits.open(filename) as hdul:
-                    mocs.append(MOC.from_fits_image(hdu=hdul[hdu_index],
-                                                    max_norder=max_norder,))
+                    mocs.append(
+                        MOC.from_fits_image(
+                            hdul[hdu_index], max_norder, approximate=approximate
+                        )
+                    )
 
+        if len(mocs) == 0:
+            warnings.warn(
+                "No image HDU found, returning an empty MOC.", UserWarning, stacklevel=2
+            )
+            return MOC.new_empty(max_depth=max_norder)
         if len(mocs) == 1:
             return mocs[0]
-        return mocs[0].union(*mocs[1:]) # this is the fastest way to do multi union
-
+        return mocs[0].union(*mocs[1:])  # this is the fastest way to do multi union
 
     @classmethod
     def from_vizier_table(cls, table_id, max_depth=None, nside=None):

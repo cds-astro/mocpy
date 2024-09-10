@@ -28,10 +28,15 @@ way more precise than the given WCS [#166]
 Small cones/boxes is faster for non-overlapping cones/boxes.
 * `MOC.from_fits_images` can now loop through the HDUList to only keep images with the
 parameter `hdu_index` set to -1 [#110]
+* `MOC.from_fits_image` now has an 'approximate' option that returns a rough approximation
+of the footprint of the image data from the corners of a square deduced from its WCS and
+does not apply any mask.
 
 ### Fixed
 
-* fix healpix order corresponding to 1 pixel on the image calculation in `from_fits_image` [#169]
+* fix healpix order corresponding to 1 pixel on the image calculation in `MOC.from_fits_image` [#169]
+* `MOC.from_fits_images` will return an empty MOC and emit a warning if there are no images in the
+FITS file instead of returning an error.
 
 ## [0.16.2]
 
