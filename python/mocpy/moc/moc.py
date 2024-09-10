@@ -1844,7 +1844,7 @@ class MOC(AbstractMOC):
             The supported sky regions are `~regions.CircleSkyRegion`,
             `~regions.CircleAnnulusSkyRegion`, `~regions.EllipseSkyRegion`,
             `~regions.RectangleSkyRegion`, `~regions.PolygonSkyRegion`,
-            `~regions.PointSkyRegion`.
+            `~regions.PointSkyRegion`, `~regions.Regions`.
         max_depth : int
             The maximum HEALPix cell resolution of the MOC. Should be comprised between
             0 and 29.
@@ -1852,6 +1852,14 @@ class MOC(AbstractMOC):
         Returns
         -------
         `~mocpy.moc.MOC`
+
+        Notes
+        -----
+        - For the `~regions.Regions`, the returned MOC will be the union of all the regions.
+        - For the `~regions.PolygonSkyRegion` and the `~regions.RectangleSkyRegion`, the MOC
+        will consider the sides to follow great circles on the sky sphere while in
+        astropy-regions the sides follow straight lines in the projected space (depending on
+        a given WCS, see issue https://github.com/astropy/regions/issues/564).
 
         Examples
         --------
@@ -1869,6 +1877,7 @@ class MOC(AbstractMOC):
             regions.RectangleSkyRegion,
             regions.PolygonSkyRegion,
             regions.PointSkyRegion,
+            regions.Regions,
         )
         if isinstance(region, regions.CircleSkyRegion):
             center = region.center.icrs
@@ -1927,6 +1936,13 @@ class MOC(AbstractMOC):
             return cls.from_polygon_skycoord(region.vertices, max_depth=max_depth)
         if isinstance(region, regions.PointSkyRegion):
             return cls.from_skycoords(region.center, max_norder=max_depth)
+        if isinstance(region, regions.Regions):
+            mocs = [
+                cls.from_astropy_regions(reg, max_depth=max_depth) for reg in region
+            ]
+            if len(mocs) == 1:
+                return mocs[0]
+            return mocs[0].union(*mocs[1:])  # fastest multi-union
 
         raise ValueError(
             "'from_astropy_regions' does not support this region type."

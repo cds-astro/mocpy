@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* Add support of `regions.Regions` [#163]
 * Creation of a MOC from a zone (defined by min/max ra and dec)`MOC.from_zone`
 * Creation of a single MOC from a lot of small cones is faster with the new option in
 `MOC.from_cones`: the keyword 'union_strategy' can now take the value 'small_cones'.

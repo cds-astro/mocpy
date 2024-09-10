@@ -689,14 +689,18 @@ def test_from_astropy_regions():
     # polygons
     vertices = SkyCoord([1, 2, 2], [1, 1, 2], unit="deg", frame="fk5")
     polygon = regions.PolygonSkyRegion(vertices)
-    moc = MOC.from_astropy_regions(polygon, max_depth=10)
-    assert all(moc.contains_skycoords(vertices))
+    moc_polygon = MOC.from_astropy_regions(polygon, max_depth=10)
+    assert all(moc_polygon.contains_skycoords(vertices))
     # points
     point = SkyCoord("+23h20m48.3s +61d12m06s")
     region_point = regions.PointSkyRegion(point)
-    moc = MOC.from_astropy_regions(region_point, max_depth=10)
-    assert moc.max_order == 10
-    assert moc.contains_skycoords(point)
+    moc_point = MOC.from_astropy_regions(region_point, max_depth=10)
+    assert moc_point.max_order == 10
+    assert moc_point.contains_skycoords(point)
+    # multi regions
+    multi_region = regions.Regions([region_point, polygon])
+    moc = MOC.from_astropy_regions(multi_region, max_depth=10)
+    assert moc == moc_polygon + moc_point
 
 
 # TODO: IMPROVE THE ALGO
