@@ -14,8 +14,10 @@ from astropy.table import QTable
 
 from ..moc import MOC, WCS
 
+rng = np.random.default_rng()
 
-@pytest.fixture()
+
+@pytest.fixture
 def isets():
     a = MOC.from_depth29_ranges(
         29,
@@ -106,6 +108,10 @@ def test_n_cells():
         match=f"The depth should be comprised between 0 and {MOC.MAX_ORDER}*",
     ):
         MOC.n_cells(-2)
+    with pytest.raises(
+        ValueError,
+        match=f"The depth should be comprised between 0 and {MOC.MAX_ORDER}*",
+    ):
         MOC.n_cells(MOC.MAX_ORDER + 1)
     assert MOC.n_cells(6) == 4 * MOC.n_cells(5)
 
@@ -207,31 +213,28 @@ def test_new_empty_serialization():
 
 def get_random_skycoords(size):
     return SkyCoord(
-        ra=np.random.uniform(0, 360, size),
-        dec=np.random.uniform(-90, 90, size),
+        ra=rng.random(size) * 360,
+        dec=rng.random(size) * 180 - 90,
         unit="deg",
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def skycoords_gen_f():
     def gen_f(size):
         return SkyCoord(
-            np.random.uniform(0, 360, size),
-            np.random.uniform(-90, 90, size),
+            ra=rng.random(size) * 360,
+            dec=rng.random(size) * 180 - 90,
             unit="deg",
         )
 
     return gen_f
 
 
-@pytest.fixture()
+@pytest.fixture
 def lonlat_gen_f():
     def gen_f(size):
-        return (
-            np.random.uniform(0, 360, size) * u.deg,
-            np.random.uniform(-90, 90, size) * u.deg,
-        )
+        return ((rng.random(size) * 360) * u.deg, (rng.random(size) * 180 - 90) * u.deg)
 
     return gen_f
 
@@ -356,7 +359,7 @@ def test_from_fits_image_without_cdelt():
     MOC.from_fits_images(["resources/horsehead.fits"], max_norder=15)
 
 
-@pytest.fixture()
+@pytest.fixture
 def moc_from_fits_image():
     image_path = "resources/image_with_mask.fits.gz"
 
@@ -364,7 +367,7 @@ def moc_from_fits_image():
         return MOC.from_fits_image(hdu=hdulist[0], max_norder=7, mask=hdulist[0].data)
 
 
-@pytest.fixture()
+@pytest.fixture
 def moc_from_json():
     return MOC.from_json({"8": [45, 78], "4": [42, 57]})
 
@@ -380,7 +383,7 @@ def test_moc_serialize_and_from_json(moc_from_json):
 
 
 @pytest.mark.parametrize(
-    "expected, moc_str",
+    ("expected", "moc_str"),
     [
         (
             MOC.from_json(
@@ -406,7 +409,7 @@ def test_from_str(expected, moc_str):
 
 
 @pytest.mark.parametrize(
-    "expected, moc_str",
+    ("expected", "moc_str"),
     [
         (
             MOC.from_json(
@@ -458,7 +461,7 @@ def test_moc_serialize_to_json(moc_from_fits_image):
 
 
 @pytest.mark.parametrize(
-    "moc, expected",
+    ("moc", "expected"),
     [
         (
             MOC.from_json(
@@ -526,7 +529,7 @@ def test_mpl_border():
 def test_moc_contains(order):
     # defines 20 random healpix cells of the required order
     size = 20
-    healpix_arr = np.random.randint(0, 12 * 4**order, size, dtype="uint64")
+    healpix_arr = rng.integers(0, 12 * 4**order, size, dtype="uint64", endpoint=True)
     # defines a moc containing the 20 points
     moc = MOC.from_json(json_moc={str(order): np.unique(healpix_arr).tolist()})
     # the complementary should not contain them
@@ -773,7 +776,7 @@ def test_from_cones():
         MOC.from_cones(lon, lat, radius=radii, max_depth=14, union_strategy="big_cones")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocs():
     moc1 = {"1": [0]}
     moc1_increased = {"0": [0], "1": [17, 19, 22, 23, 35]}
@@ -812,7 +815,7 @@ def test_neighbours(mocs):
 
 
 # --- TESTING MOC operations ---#
-@pytest.fixture()
+@pytest.fixture
 def mocs_op():
     moc1 = MOC.from_json({"0": [0, 2, 3, 4, 5]})
     moc2 = MOC.from_json({"0": [0, 1, 7, 4, 3]})
@@ -862,7 +865,7 @@ def test_from_fits_old():
 
 
 @pytest.mark.parametrize(
-    "input_MOC, expected",
+    ("input_MOC", "expected"),
     [
         (
             MOC.from_json({"0": [1, 3]}),
@@ -931,7 +934,7 @@ def test_from_valued_healpix_cells():
 
 
 @pytest.mark.parametrize(
-    "cumul_from, cumul_to",
+    ("cumul_from", "cumul_to"),
     [(-5.0, 1.0), (np.nan, np.inf), (np.nan, np.nan), (np.inf, np.nan), (-10.0, -5.0)],
 )
 def test_from_valued_healpix_cells_weird_values(cumul_from, cumul_to):

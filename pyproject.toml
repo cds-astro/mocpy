@@ -82,9 +82,6 @@ frozen = false
 # Require Cargo.lock is up to date
 locked = false
 
-[tool.nbqa.addopts]
-ruff = ["--ignore=B018,FBT003,T201"]
-
 [tool.ruff]
 fix = true
 show-fixes = true
@@ -94,14 +91,14 @@ extend-include = ["*.ipynb"]
 target-version = "py38"
 
 [tool.ruff.lint]
-ignore-init-module-imports = true
 extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "C4", "ICN", "RET", "ARG", "PD", "PGH",
                  "RUF", "YTT", "BLE", "COM", "DTZ", "EXE",
-                 "ISC", "ICN001", "PIE", "PTH", "W", "I", "T20"
+                 "ISC", "ICN001", "PIE", "PTH", "W", "I", "T20",
+                 "PYI", "PT", "SIM", "NPY", "PERF", "FURB"
                 ]
-extend-ignore = ["E501", "D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002", "N802"]
-# E501: line length (done by black in our case)
+extend-ignore = ["D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002",
+                 "N802", "COM812", "ISC001"]
 # N806, N816: variables names should be lowercase (would require to change all API)
 # D203: 1 blank line required before class docstring (not compatible with numpy docstyle)
 # FBT002: Boolean default in function definition (would require to change all API)

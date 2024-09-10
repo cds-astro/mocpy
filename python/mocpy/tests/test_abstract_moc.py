@@ -29,7 +29,7 @@ def moc():
     return MOC.from_str("0/0-11")
 
 
-@pytest.fixture()
+@pytest.fixture
 def path(tmp_path):
     return tmp_path / "path"
 
@@ -50,9 +50,9 @@ def test_failing_instantiation():
 
 def test_failing_save(moc, path):
     """All the pitfalls in the save method."""
+    moc.save(path)
+    assert path.is_file()
     with pytest.raises(OSError, match=r"File *"):
-        moc.save(path)
-        assert path.is_file()
         moc.save(path)
     with pytest.raises(ValueError, match=r"The ``fold`` argument*"):
         moc.save(path, format="fits", overwrite=True, fold=80)
