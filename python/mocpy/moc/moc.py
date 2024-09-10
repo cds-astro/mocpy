@@ -1310,9 +1310,9 @@ class MOC(AbstractMOC):
         max_depth : int
             Maximum HEALPix cell resolution.
         union_strategy : str, optional
-            Return the union of all the cones instead of the list of MOCs. For now, the
-            "small_cones" strategy is implemented. It works better if the cones don't overlap
-            a lot.
+            Return the union of all the cones instead of the list of MOCs. Can be either
+            "small_cones" or "large_cones". The "small_cone" strategy will be faster for
+            non-overlapping cones and the "large_cones" for the other case.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
             depth using the `delta_depth` parameter.
@@ -1355,8 +1355,25 @@ class MOC(AbstractMOC):
             )
             return cls(index)
 
+        if union_strategy == "large_cones":
+            if radius.isscalar:
+                radii = np.full(len(lon), Angle(radius).to_value(u.deg))
+            else:
+                radii = Angle(radius).to_value(u.deg)
+            index = mocpy.from_large_cones(
+                lon,
+                lat,
+                radii,
+                np.uint8(max_depth),
+                np.uint8(delta_depth),
+                n_threads,
+            )
+            return cls(index)
+
         if union_strategy is not None:
-            raise ValueError("'union_strategy' can only be None or 'small_cones'.")
+            raise ValueError(
+                "'union_strategy' can only be None, 'large_cones', or " "'small_cones'."
+            )
 
         if radius.isscalar:
             indices = mocpy.from_same_cones(

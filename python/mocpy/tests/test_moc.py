@@ -754,6 +754,14 @@ def test_from_cones():
         union_strategy="small_cones",
     )
     assert isinstance(moc, MOC)
+    moc2 = MOC.from_cones(
+        lon,
+        lat,
+        radius=radius,
+        max_depth=14,
+        union_strategy="large_cones",
+    )
+    assert moc == moc2
     # different radii
     radii = [5, 6] * u.arcmin
     cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
