@@ -529,7 +529,7 @@ def test_mpl_border():
 def test_moc_contains(order):
     # defines 20 random healpix cells of the required order
     size = 20
-    healpix_arr = rng.integers(0, 12 * 4**order, size, dtype="uint64", endpoint=True)
+    healpix_arr = rng.integers(0, 12 * 4**order, size, dtype="uint64", endpoint=False)
     # defines a moc containing the 20 points
     moc = MOC.from_json(json_moc={str(order): np.unique(healpix_arr).tolist()})
     # the complementary should not contain them
