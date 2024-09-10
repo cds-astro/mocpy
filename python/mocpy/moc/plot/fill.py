@@ -112,7 +112,7 @@ def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
     _set_wcs(ax, wcs)
 
 
-def fill(moc, ax, wcs, **kw_mpl_pathpatch):
+def fill(moc, ax, wcs, *, optimize=True, **kw_mpl_pathpatch):
     """Fill the figure's ax with the patches.
 
     Parameters
@@ -122,11 +122,15 @@ def fill(moc, ax, wcs, **kw_mpl_pathpatch):
     ax : matplotlib.pyplot.axes
     wcs : astropy.wcs.WCS
         projection from astropy
+    optimize : bool, optional
+        If this is set to True, the MOC will be degraded so that no HEALPix will be
+        smaller than one pixel as defined by the WCS. It can be useful to deactivate this
+        optimization for svg outputs or if you take an insert of a WCS. Default to True.
     """
     # Simplify the MOC for plotting purposes:
     # 1. Degrade the MOC if the FOV is enough big so that we cannot see the smallest HEALPix cells.
     # 2. For small FOVs, plot the MOC & POLYGONAL_MOC_FROM_FOV.
-    moc_to_plot = build_plotting_moc(moc=moc, wcs=wcs)
+    moc_to_plot = build_plotting_moc(moc=moc, wcs=wcs, optimize=optimize)
 
     # If the FOV contains no cells, then moc_to_plot (i.e. the intersection between the moc
     # and the MOC created from the FOV polygon) will be empty.

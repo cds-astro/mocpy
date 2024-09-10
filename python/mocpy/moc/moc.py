@@ -384,13 +384,15 @@ class MOC(AbstractMOC):
 
     # TODO: implement: def contains_including_surrounding(self, lon, lat, distance)
 
-    def fill(self, ax, wcs, **kw_mpl_pathpatch):
+    def fill(self, ax, wcs, optimize=True, **kw_mpl_pathpatch):
         """
         Draw the MOC on a matplotlib axis.
 
-        This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.
-        You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`
-        (see the `list of valid keywords <https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch>`__).
+        This performs the projection of the cells from the world coordinate system to the
+        pixel image coordinate system. You can provide style keyword arguments as in
+        `matplotlib.patches.PathPatch`
+        (see the `list of valid keywords
+        <https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch>`__).
 
         Parameters
         ----------
@@ -398,6 +400,10 @@ class MOC(AbstractMOC):
             Matplotlib axis.
         wcs : `astropy.wcs.WCS`
             WCS defining the World system <-> Image system projection.
+        optimize : bool, optional
+            If this is set to True, the MOC will be degraded so that no HEALPix will be
+            smaller than one pixel as defined by the WCS. It can be useful to deactivate this
+            optimization for svg outputs or if you take an insert of a WCS. Default is True.
         kw_mpl_pathpatch
             Plotting arguments for `matplotlib.patches.PathPatch`.
 
@@ -418,7 +424,7 @@ class MOC(AbstractMOC):
         >>> ax = fig.add_subplot(projection=wcs)
         >>> moc.fill(ax, wcs, color='blue')
         """
-        fill.fill(self, ax, wcs, **kw_mpl_pathpatch)
+        fill.fill(self, ax, wcs, optimize=optimize, **kw_mpl_pathpatch)
 
     def border(self, ax, wcs, **kw_mpl_pathpatch):
         """
