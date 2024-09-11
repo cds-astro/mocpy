@@ -499,9 +499,15 @@ class MOC(AbstractMOC):
         return Boundaries.get(self, order)
 
     @classmethod
-    def from_fits_image(cls, hdu, max_norder, mask=None):
+    def from_fits_image(cls, hdu, max_norder, mask=None, approximate=False):
         """
         Create a `~mocpy.moc.MOC` from an image stored as a FITS file.
+
+        Info
+        ----
+        When giving a mask, the MOC computed will only take into account the center
+        of the image pixels and not the whole pixel borders.
+        This leads to an approximate resulting MOC.
 
         Parameters
         ----------
@@ -510,19 +516,31 @@ class MOC(AbstractMOC):
         max_norder : int
             The moc resolution.
         mask : `numpy.ndarray`, optional
-            A boolean array of the same size of the image where pixels having the value 1 are part of
-            the final MOC and pixels having the value 0 are not.
+            A boolean array of the same shape than the image where True valued pixels are part of
+            the final MOC and False valued pixels are not.
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `~mocpy.moc.MOC`
             The resulting MOC.
         """
         # Only take the first HDU
         header = hdu.header
+        max_norder = np.uint8(max_norder)
 
         # Compute a WCS from the header of the image
         w = wcs.WCS(header)
+        corners = w.calc_footprint(header)
+
+        if approximate:
+            if np.isfinite(corners).all():
+                sky_corners = SkyCoord(corners[:, 0], corners[:, 1], unit=u.deg)
+                return MOC.from_polygon_skycoord(sky_corners, max_depth=max_norder)
+            raise ValueError(
+                "Corners of at least one of the images cannot be "
+                "calculated with its WCS, the 'approximate' method "
+                "cannot be used for this image."
+            )
 
         if mask is None:
             data = hdu.data
@@ -553,15 +571,41 @@ class MOC(AbstractMOC):
         frame = wcs.utils.wcs_to_celestial_frame(w)
         skycrd = SkyCoord(world, unit="deg", frame=frame)
 
-        # Compute the order based on the CDELT
-        # Should work even if the fits is defined using cd_ij or crota, see:
-        # https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt
-        [c1, c2] = w.wcs.get_cdelt()
+        # Compute the deepest HEALPix order containing at least one 1 pixel of the image
+        # We want the order so that area_hpx_cell >= area_img_pixel
+        # <=> 4pi / (12 * 2^(2*order)) in [steradians] >= area_img_pixel in [steradians]
+        healpix_order_computed = True
+        if np.isfinite(corners).all():
+            sky_corners = SkyCoord(corners[:, 0], corners[:, 1], unit=u.deg)
 
-        max_res_px = np.sqrt(c1 * c1 + c2 * c2) * np.pi / 180.0
-        max_depth_px = int(np.floor(np.log2(np.pi / (3 * max_res_px * max_res_px)) / 2))
+            [w_img_px, h_img_px] = hdu.data.shape
+            # take angular distances between the corners in x and y image space directions
+            px_ang_size_x = sky_corners[3].separation(sky_corners[0]) / w_img_px
+            px_ang_size_y = sky_corners[0].separation(sky_corners[1]) / h_img_px
 
-        max_norder = min(max_norder, max_depth_px)
+            px_sky_area = px_ang_size_x.to_value(u.rad) * px_ang_size_y.to_value(
+                u.rad,
+            )  # in steradians
+
+            # Division by 0 case
+            if px_sky_area == 0:
+                healpix_order_computed = False
+            else:
+                depth_px = np.uint8(
+                    np.floor(np.log2(np.pi / (3.0 * px_sky_area)) / 2.0),
+                )
+                max_norder = min(max_norder, depth_px)
+        else:
+            healpix_order_computed = False
+
+        if not healpix_order_computed:
+            warnings.warn(
+                "MOC precision HEALPix order could not be determined because sky coordinates "
+                "from the corners of the image has not have been correctly retrieved. "
+                "Therefore MOC precision will be set to max_norder",
+                UserWarning,
+                stacklevel=2,
+            )
 
         moc = MOC.from_lonlat(
             lon=skycrd.icrs.ra,
@@ -571,37 +615,70 @@ class MOC(AbstractMOC):
         return moc  # noqa: RET504
 
     @classmethod
-    def from_fits_images(cls, path_l, max_norder, hdu_index=0):
+    def from_fits_images(cls, path_l, max_norder, hdu_index=0, approximate=False):
         """
         Load a MOC from a set of FITS file images.
-
-        Assumes the data of the image is stored in the first HDU of the FITS file.
-        Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.
 
         Parameters
         ----------
         path_l : [str]
-            A list of path where the fits image are located.
+            A list of path where the fits images are located.
         max_norder : int
             The MOC resolution.
-        hdu_index : int
-            Index of the the HDU containing the image in each FITS file (default = 0)
+        hdu_index : int, optional
+            Index of the the HDUs containing the image in each FITS file (default = 0)
+            If set to -1, all the HUD will be taken in account, and only the ones
+            corresponding to images will be kept.
+        approximate : bool, optional
+            A faster but less precise way to build the MOC out of the images. This does
+            not mask the boolean values, and will approximate each image as a polygon
+            defined by the footprint deduced from the WCS. Default is False.
 
         Returns
         -------
         moc : `~mocpy.moc.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
-        moc = MOC.new_empty(max_norder)
-        for filename in path_l:
-            with fits.open(filename) as hdul:
-                current_moc = MOC.from_fits_image(
-                    hdu=hdul[hdu_index],
-                    max_norder=max_norder,
-                )
-                moc = moc.union(current_moc)
+        if not isinstance(path_l, list):
+            path_l = [path_l]
 
-        return moc
+        mocs = []
+        if hdu_index == -1:
+            for filename in path_l:
+                with fits.open(filename) as hdul:
+                    for hdu in hdul:
+                        if (
+                            isinstance(
+                                hdu, (fits.ImageHDU, fits.PrimaryHDU, fits.CompImageHDU)
+                            )
+                            and hdu.header
+                            and hdu.header["NAXIS"] == 2
+                        ):
+                            mocs.append(  # noqa: PERF401
+                                MOC.from_fits_image(
+                                    hdu,
+                                    max_norder,
+                                    approximate=approximate,
+                                )
+                            )
+
+        else:
+            for filename in path_l:
+                with fits.open(filename) as hdul:
+                    mocs.append(
+                        MOC.from_fits_image(
+                            hdul[hdu_index], max_norder, approximate=approximate
+                        )
+                    )
+
+        if len(mocs) == 0:
+            warnings.warn(
+                "No image HDU found, returning an empty MOC.", UserWarning, stacklevel=2
+            )
+            return MOC.new_empty(max_depth=max_norder)
+        if len(mocs) == 1:
+            return mocs[0]
+        return mocs[0].union(*mocs[1:])  # this is the fastest way to do multi union
 
     @classmethod
     def from_vizier_table(cls, table_id, max_depth=None, nside=None):

@@ -26,10 +26,21 @@ way more precise than the given WCS [#166]
 `MOC.from_cones`/`MOC.from_boxes`: the keyword 'union_strategy' can now take the value
 'small_cones'/'small_boxes' or 'large_cones'/'large_boxes'.
 Small cones/boxes is faster for non-overlapping cones/boxes.
+* `MOC.from_fits_images` can now loop through the HDUList to only keep images with the
+parameter `hdu_index` set to -1 [#110]
+* `MOC.from_fits_image` now has an 'approximate' option that returns a rough approximation
+of the footprint of the image data from the corners of a square deduced from its WCS and
+does not apply any mask.
+
+### Fixed
+
+* fix healpix order corresponding to 1 pixel on the image calculation in `MOC.from_fits_image` [#169]
+* `MOC.from_fits_images` will return an empty MOC and emit a warning if there are no images in the
+FITS file instead of returning an error.
 
 ## [0.16.2]
 
-## Fixed
+### Fixed
 
 * `MOC.from_astropy_regions` now accepts `EllipseSkyRegion` and `RectangleSkyRegion` where
   width > height.
