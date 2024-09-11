@@ -6,27 +6,95 @@ User documentation
 SMOC (a.k.a MOC): Spatial coverages
 ***********************************
 
-Gallery of notebooks examples using SMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Introduction to Space-MOCs
+==========================
+
+Space MOCs are an ensemble of HEALPix cells of mixed orders. They represent sky regions
+in an approximate way. They are designed for efficient calculations between sky regions.
+
+The coordinates for Space-MOCs are always in IRCS at epoch J2000 by definition.
+
+Space-MOCs can represent arbitrary shapes. Common examples are an approximated cone, an
+ensemble of approximated cones, or the coverage of a specific survey.
+
+The following notebook is an introduction to manipulation of Space-MOCs with MOCPy:
 
 .. nbgallery::
     ../_collections/notebooks/00-MOCpy_introduction
+
+As you saw, Space-MOCs can be visualized with either astropy+matplotlib or with the
+ipyaladin widget.
+
+Space-MOC creation methods
+==========================
+
+Reading a MOC from a file or from a server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are diverse ways to instantiate a MOC. A first approach is to get a MOC from a
+FITS file on our disk, or from a distant server that already has a pre-calculated MOC.
+
+.. nbgallery::
+    ../_collections/notebooks/from_fits_and_intersection
+    ../_collections/notebooks/from_vizier_table
+
+Calculating a MOC on the fly from a region of the sky
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here is a simple example of the creation of a MOC that fully covers a polygon defined
+by its vertices on the sky. The vertices are linked by great circles.
+
+.. plot:: examples/polygon_coverage.py
+    :include-source:
+
+For a more extended description on how to create MOCs from diverse shapes, you can check
+the example notebooks :doc:`../_collections/notebooks/01-Creating_MOCs_from_shapes` and
+:doc:`../_collections/notebooks/02-Creating_MOCs_from_astropy_regions`.
+
+.. nbgallery::
+    ../_collections/notebooks/01-Creating_MOCs_from_shapes
+    ../_collections/notebooks/02-Creating_MOCs_from_astropy_regions
+    ../_collections/notebooks/from_astropy_table.ipynb
+    ../_collections/notebooks/from_image_with_mask
+
+Instantiating a MOC when we already know its HEALPix cells
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This can be done with methods like :py:meth:`~mocpy.moc.MOC.from_string`,
+:py:meth:`~mocpy.moc.MOC.from_healpix_cells`, :py:meth:`~mocpy.moc.MOC.from_depth29_ranges`.
+A simple MOC that represents the full sky is the MOC of order 0 that contains all the 12
+HEALPix cells of the order 0. Creating it from a string looks like:
+
+.. plot:: examples/all_sky.py
+    :include-source:
+
+We could also take only odd numbered cells of order 1. Let's use
+:py:meth:`~mocpy.moc.MOC.from_json` that takes a dictionary:
+
+.. plot:: examples/odd_cells.py
+    :include-source:
+
+Useful methods
+==============
+
+Calculating a Space-MOC sky area
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to calculate the sky area of a Space-MOC.
+
+.. plot:: examples/calculate_moc_sky_area.py
+    :include-source:
+
+Other examples (operations, use-cases)
+======================================
+
+Here are some other code examples manipulating :py:class:`MOC` objects.
+
+.. nbgallery::
     ../_collections/notebooks/compute_moc_borders
     ../_collections/notebooks/filtering_astropy_table
     ../_collections/notebooks/FITS-image-pixels-intersecting-MOC
-    ../_collections/notebooks/from_astropy_table.ipynb
-    ../_collections/notebooks/01-Creating_MOCs_from_shapes
-    ../_collections/notebooks/02-Creating_MOCs_from_astropy_regions
-    ../_collections/notebooks/from_fits_and_intersection
-    ../_collections/notebooks/from_image_with_mask
-    ../_collections/notebooks/from_vizier_table
     ../_collections/notebooks/query_vizier_table
-
-Here are some code examples manipulating :py:class:`MOC` objects.
-
-Examples use cases
-==================
-
 
 Loading and plotting the MOC of SDSS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,7 +106,7 @@ This example:
 
 1. Defining a matplotlib figure.
 2. Defining an astropy WCS representing the field of view of the plot.
-3. Call the :py:meth:`mocpy.moc.MOC.fill` and :py:meth:`mocpy.moc.MOC.border` so that mocpy plot on a matplotlib axis.
+3. Call the :py:meth:`~mocpy.moc.MOC.fill` and :py:meth:`~mocpy.moc.MOC.border` so that mocpy plot on a matplotlib axis.
 4. Set the axis labels, a title, enable the grid and plot the final figure.
 
 
@@ -59,22 +127,10 @@ This example:
 .. plot:: examples/logical_operations.py
     :include-source:
 
-Create a MOC from a polygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This example shows how to call :py:meth:`mocpy.moc.MOC.from_polygon` or :py:meth:`mocpy.moc.MOC.from_polygon_skycoord`.
-
-.. plot:: examples/polygon_coverage.py
-    :include-source:
-
-For a more extended description on how to create MOCs from shapes, you can check the example notebooks
-:doc:`../_collections/notebooks/01-Creating_MOCs_from_shapes` and
-:doc:`../_collections/notebooks/02-Creating_MOCs_from_astropy_regions`.
-
 Get the border(s) of a MOC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows how to call `mocpy.moc.MOC.get_boundaries`. The borders are returned as a list of `~astropy.coordinates.SkyCoord` each defining one border.
+This example shows how to call `~mocpy.moc.MOC.get_boundaries`. The borders are returned as a list of `~astropy.coordinates.SkyCoord` each defining one border.
 In this example:
 
 1. The sky coordinates defining the border of the MOC are projected to the pixel image system.
@@ -96,14 +152,6 @@ Then, we can create a MOC from which a GW has x% of chance of being localized in
 By definition the MOC which has 100% of chance of containing a GW is the full sky MOC.
 
 .. plot:: examples/bayestar.py
-    :include-source:
-
-Calculate MOC sky area
-~~~~~~~~~~~~~~~~~~~~~~
-
-This example shows how to Calculate the sky area of a MOC instance.
-
-.. plot:: examples/calculate_moc_sky_area.py
     :include-source:
 
 Performing computation on the pixels of an FITS image lying in a MOC
