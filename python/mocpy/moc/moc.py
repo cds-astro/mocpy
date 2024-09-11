@@ -1316,9 +1316,9 @@ class MOC(AbstractMOC):
         max_depth : int
             Maximum HEALPix cell resolution.
         union_strategy : str, optional
-            Return the union of all the cones instead of the list of MOCs. For now, the
-            "small_cones" strategy is implemented. It works better if the cones don't overlap
-            a lot.
+            Return the union of all the cones instead of the list of MOCs. Can be either
+            "small_cones" or "large_cones". The "small_cone" strategy will be faster for
+            non-overlapping cones and the "large_cones" for the other case.
         delta_depth : int, optional
             To control the approximation, you can choose to perform the computations at a deeper
             depth using the `delta_depth` parameter.
@@ -1361,8 +1361,25 @@ class MOC(AbstractMOC):
             )
             return cls(index)
 
+        if union_strategy == "large_cones":
+            if radius.isscalar:
+                radii = np.full(len(lon), Angle(radius).to_value(u.deg))
+            else:
+                radii = Angle(radius).to_value(u.deg)
+            index = mocpy.from_large_cones(
+                lon,
+                lat,
+                radii,
+                np.uint8(max_depth),
+                np.uint8(delta_depth),
+                n_threads,
+            )
+            return cls(index)
+
         if union_strategy is not None:
-            raise ValueError("'union_strategy' can only be None or 'small_cones'.")
+            raise ValueError(
+                "'union_strategy' can only be None, 'large_cones', or 'small_cones'."
+            )
 
         if radius.isscalar:
             indices = mocpy.from_same_cones(
@@ -1480,7 +1497,9 @@ class MOC(AbstractMOC):
 
     @classmethod
     @validate_lonlat
-    def from_boxes(cls, lon, lat, a, b, angle, max_depth, *, n_threads=None):
+    def from_boxes(
+        cls, lon, lat, a, b, angle, max_depth, *, n_threads=None, union_strategy=None
+    ):
         """
         Create a MOC from a box/rectangle.
 
@@ -1505,11 +1524,16 @@ class MOC(AbstractMOC):
         n_threads : int, optional
             The number of threads to be used. If this is set to None (default value),
             all available threads will be used.
+        union_strategy : str, optional
+            Return the union of all the boxes instead of the list of MOCs. Can be either
+            "small_boxes" or "large_boxes". The "small_boxes" strategy will be faster for
+            non-overlapping boxes and the "large_boxes" for the other case.
 
         Returns
         -------
-        result : list[`~mocpy.moc.MOC`]
-            The resulting list of MOCs.
+        result : list[`~mocpy.MOC`] or `~mocpy.MOC`
+            The resulting list of MOCs. If 'union_strategy' is not None, returns the MOC
+            of the union of all boxes instead.
 
         Examples
         --------
@@ -1531,35 +1555,63 @@ class MOC(AbstractMOC):
         ...  a=[10, 20]*u.deg,
         ...  b=[5, 10]*u.deg,
         ...  angle=[30, 10]*u.deg,
-        ...  max_depth=10
+        ...  max_depth=10,
+        ...  union_strategy="small_boxes"
         ... )
         """
         params = [a, b, angle]
+        max_depth = np.uint8(max_depth)
         if any(isinstance(param, u.Quantity) and param.isscalar for param in params):
             if not all(isinstance(param, u.Quantity) for param in params):
                 raise ValueError(
                     "'a', 'b' and 'angle' should either be all astropy angle-equivalent"
-                    "scalar values or they should all be iterable angle-equivalent. "
+                    " scalar values or they should all be iterable angle-equivalent. "
                     "They cannot be a mix of both.",
                 )
-            indices = mocpy.from_same_boxes(
-                lon,
-                lat,
-                np.float64(a.to_value(u.deg)),
-                np.float64(b.to_value(u.deg)),
-                np.float64(angle.to_value(u.deg)),
-                np.uint8(max_depth),
-                n_threads=n_threads,
-            )
-            return [cls(index) for index in indices]
+            if union_strategy is None:
+                indices = mocpy.from_same_boxes(
+                    lon,
+                    lat,
+                    np.float64(a.to_value(u.deg)),
+                    np.float64(b.to_value(u.deg)),
+                    np.float64(angle.to_value(u.deg)),
+                    max_depth,
+                    n_threads=n_threads,
+                )
+                return [cls(index) for index in indices]
+            # no exception for same boxes in the union case
+            a = np.full(len(lon), Angle(a).to_value(u.deg))
+            b = np.full(len(lon), Angle(b).to_value(u.deg))
+            angle = np.full(len(lon), Angle(angle).to_value(u.deg))
+        else:
+            a = Angle(a).to_value(u.deg)
+            b = Angle(b).to_value(u.deg)
+            angle = Angle(angle).to_value(u.deg)
         # different boxes
+        if union_strategy == "small_boxes":
+            return cls(
+                mocpy.from_small_boxes(
+                    lon, lat, a, b, angle, max_depth, n_threads=n_threads
+                )
+            )
+        if union_strategy == "large_boxes":
+            return cls(
+                mocpy.from_large_boxes(
+                    lon, lat, a, b, angle, max_depth, n_threads=n_threads
+                )
+            )
+        if union_strategy is not None:
+            raise ValueError(
+                "'union_strategy' can only be None, 'large_boxes', or 'small_boxes'."
+            )
+
         indices = mocpy.from_boxes(
             lon,
             lat,
-            np.array(Angle(a).to_value(u.deg), dtype=np.float64),
-            np.array(Angle(b).to_value(u.deg), dtype=np.float64),
-            np.array(Angle(angle).to_value(u.deg), dtype=np.float64),
-            np.uint8(max_depth),
+            a,
+            b,
+            angle,
+            max_depth,
             n_threads=n_threads,
         )
         return [cls(index) for index in indices]

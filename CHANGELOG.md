@@ -22,8 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add option to turn off optimization in `fill`. The optimization degrades MOCs that are
 way more precise than the given WCS [#166]
 * Creation of a MOC from a zone (defined by min/max ra and dec)`MOC.from_zone`
-* Creation of a single MOC from a lot of small cones is faster with the new option in
-`MOC.from_cones`: the keyword 'union_strategy' can now take the value 'small_cones'.
+* Creation of a single MOC from a lot of cones/boxes is faster with the new option in
+`MOC.from_cones`/`MOC.from_boxes`: the keyword 'union_strategy' can now take the value
+'small_cones'/'small_boxes' or 'large_cones'/'large_boxes'.
+Small cones/boxes is faster for non-overlapping cones/boxes.
 
 ## [0.16.2]
 
