@@ -41,7 +41,7 @@ ax = fig.add_subplot(1, 1, 1, projection=twomass_wcs)
 im = ax.imshow(
     img_test,
     origin="lower",
-    norm=simple_norm(hdu[0].data, "sqrt", min_cut=-1, max_cut=150),
+    norm=simple_norm(hdu[0].data, "sqrt", vmin=-1, vmax=150),
 )
 plt.show()
 
