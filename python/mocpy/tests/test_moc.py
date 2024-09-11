@@ -632,6 +632,21 @@ def test_from_box():
     )
     assert len(list_boxes_same) == 2
     assert list_boxes_same[0] == moc
+    # union strategies
+    union_boxes_same = MOC.from_boxes(
+        lon=[0, 0] * u.deg,
+        lat=[0, 0] * u.deg,
+        a=a,
+        b=b,
+        angle=30 * u.deg,
+        max_depth=10,
+        union_strategy="large_boxes",
+    )
+    assert union_boxes_same == MOC.from_box(
+        lon=0 * u.deg, lat=0 * u.deg, a=a, b=b, angle=30 * u.deg, max_depth=10
+    )
+
+    # not same boxes
     a = [Angle("10d"), Angle("20d")]
     b = [Angle("2d"), Angle("4d")]
     list_boxes_different = MOC.from_boxes(
@@ -644,7 +659,6 @@ def test_from_box():
     )
     assert len(list_boxes_different) == 2
     assert list_boxes_different[0] == moc
-
     # mixed iterables and scalars raise an error
     with pytest.raises(ValueError, match="'a', 'b' and 'angle' should*"):
         MOC.from_boxes(
@@ -654,6 +668,20 @@ def test_from_box():
             b=b,
             angle=30 * u.deg,
             max_depth=10,
+        )
+    # union strategy possible choices
+    with pytest.raises(
+        ValueError,
+        match="'union_strategy' can only be None, 'large_boxes', or 'small_boxes'.",
+    ):
+        MOC.from_boxes(
+            lon=[0, 0] * u.deg,
+            lat=[0, 0] * u.deg,
+            a=a,
+            b=b,
+            angle=[30, 30] * u.deg,
+            max_depth=10,
+            union_strategy="large_cones",  # voluntary confusion between cones and boxes
         )
 
 
