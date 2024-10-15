@@ -8,7 +8,7 @@ requires-python = ">=3.8"
 dependencies = [
     "astropy<5.3; python_version == '3.8'",
     "astropy; python_version > '3.8'",
-    "numpy<2.0",
+    "numpy",
     "matplotlib",     # Used in fill and border
     "cdshealpix>=0.6.4",     # Used in fill and border
     "networkx>=2.5",         # Used in get_boundaries
@@ -18,8 +18,17 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Rust",
     "License :: OSI Approved :: BSD License",
-    "Topic :: Scientific/Engineering :: Astronomy"
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
+keywords=["astronomy", "astrophysics", "HEALPix"]
 
 [project.optional-dependencies]
 # optional to load FITS from URLs
@@ -58,7 +67,10 @@ notebooks = [
 ]
 
 [project.urls]
-repository = "https://github.com/cds-astro/mocpy"
+Documentation = "https://cds-astro.github.io/mocpy/"
+Repository = "https://github.com/cds-astro/mocpy"
+Issues = "https://github.com/cds-astro/mocpy/issues"
+Changelog = "https://github.com/cds-astro/mocpy/blob/master/CHANGELOG.md"
 
 # Build a mocpy-x.x.x.tar.gz containing sources (from maturin).
 [build-system]
