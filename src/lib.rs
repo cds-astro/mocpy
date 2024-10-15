@@ -172,6 +172,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_same_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -248,6 +249,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -328,6 +330,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_small_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -403,6 +406,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_large_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -507,6 +511,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC indices in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, angle, depth, n_threads=None))]
   pub fn from_same_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -591,6 +596,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC indices in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -685,6 +691,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC index in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_small_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -773,6 +780,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC index in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_large_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -970,6 +978,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOC depth
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_lat_deg, complement, depth, n_threads=None))]
   pub fn from_polygons(
     lon_lat_deg: Vec<PyReadonlyArrayDyn<f64>>,
     complement: bool,
@@ -2304,6 +2313,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
   /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
   #[pyfn(m)]
+  #[pyo3(signature = (indices, uniq, uniq_mask, probdens, probdens_mask, n_threads=None))]
   fn multi_multiorder_probdens_map_sum_in_smoc<'a>(
     py: Python<'a>,
     indices: PyReadonlyArrayDyn<'a, usize>,

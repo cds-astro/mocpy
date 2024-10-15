@@ -36,7 +36,7 @@ rayon = "1.10"
 num_threads = "0.1"
 
 [dependencies.numpy]
-version = "0.21"
+version = "0.22"
 
 [dependencies.ndarray]
 version = "0.15"
@@ -45,7 +45,7 @@ default-features = false # do not include the default features, and optionally
 features = ["rayon"]
 
 [dependencies.pyo3]
-version = "0.21"
+version = "0.22"
 features = ["extension-module"]
 
 [profile.release]
