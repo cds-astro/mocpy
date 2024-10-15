@@ -26,7 +26,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
 ]
 keywords=["astronomy", "astrophysics", "HEALPix"]
 
@@ -38,18 +37,17 @@ astropy_regions = ["regions"]
 # for the documentation
 docs = [
     "astropy-sphinx-theme",
-    "astropy_healpix",
     "nbsphinx",
     "numpydoc",
     "sphinx-astropy",
     "sphinx-collections",
     "sphinx-copybutton",
     "sphinx-gallery",
-    "sphinxcontrib-bibtex"
+    "sphinxcontrib-bibtex",
+    "ipython" # for syntaxic coloration in docs
 ]
 # for developpement
 dev = [
-    "astropy_healpix",
     "pre-commit >= 2.20",
     "pytest > 6.0",
     "pytest-mock",
