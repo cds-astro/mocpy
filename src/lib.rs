@@ -1,12 +1,13 @@
 use std::{f64::consts::FRAC_PI_3, ops::Range};
 
-use ndarray::Array;
 #[cfg(not(target_arch = "wasm32"))]
 use num_threads::num_threads;
 use numpy::{
   IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
   PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
 };
+use numpy::ndarray::Array;
+
 use pyo3::{
   exceptions::{PyIOError, PyValueError},
   prelude::{pymodule, Bound, PyModule, PyResult, Python},
