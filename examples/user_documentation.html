@@ -5,16 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User documentation &#8212; MOCPy 0.16.2 documentation</title>
+    <title>User documentation &#8212; MOCPy 0.17.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
-    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-gallery.css?v=26227f6e" />
     
-    <script src="../_static/documentation_options.js?v=ee6890a7"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.16.2 documentation</a>
+	<a href="../index.html">MOCPy 0.17.0 documentation</a>
 	 &#187;
       </li>
       
@@ -84,14 +84,187 @@
 <h1>User documentation<a class="headerlink" href="#user-documentation" title="Link to this heading">¶</a></h1>
 <section id="smoc-a-k-a-moc-spatial-coverages">
 <h2>SMOC (a.k.a MOC): Spatial coverages<a class="headerlink" href="#smoc-a-k-a-moc-spatial-coverages" title="Link to this heading">¶</a></h2>
-<section id="gallery-of-notebooks-examples-using-smocs">
-<h3>Gallery of notebooks examples using SMOCs<a class="headerlink" href="#gallery-of-notebooks-examples-using-smocs" title="Link to this heading">¶</a></h3>
+<section id="introduction-to-space-mocs">
+<h3>Introduction to Space-MOCs<a class="headerlink" href="#introduction-to-space-mocs" title="Link to this heading">¶</a></h3>
+<p>Space MOCs are an ensemble of HEALPix cells of mixed orders. They represent sky regions
+in an approximate way. They are designed for efficient calculations between sky regions.</p>
+<p>The coordinates for Space-MOCs are always in IRCS at epoch J2000 by definition.</p>
+<p>Space-MOCs can represent arbitrary shapes. Common examples are an approximated cone, an
+ensemble of approximated cones, or the coverage of a specific survey.</p>
+<p>The following notebook is an introduction to manipulation of Space-MOCs with MOCPy:</p>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/00-MOCpy_introduction.html">
   <div><img alt="" src="../_images/_collections_notebooks_00-MOCpy_introduction_11_0.png"></div>
   <div>MOCPy introduction</div>
 </a>
+</div>
+</div>
+<p>As you saw, Space-MOCs can be visualized with either astropy+matplotlib or with the
+ipyaladin widget.</p>
+</section>
+<section id="space-moc-creation-methods">
+<h3>Space-MOC creation methods<a class="headerlink" href="#space-moc-creation-methods" title="Link to this heading">¶</a></h3>
+<section id="reading-a-moc-from-a-file-or-from-a-server">
+<h4>Reading a MOC from a file or from a server<a class="headerlink" href="#reading-a-moc-from-a-file-or-from-a-server" title="Link to this heading">¶</a></h4>
+<p>There are diverse ways to instantiate a MOC. A first approach is to get a MOC from a
+FITS file on our disk, or from a distant server that already has a pre-calculated MOC.</p>
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
+<a class="reference internal" href="../_collections/notebooks/from_fits_and_intersection.html">
+  <div><img alt="" src="../_images/_collections_notebooks_from_fits_and_intersection_9_1.png"></div>
+  <div>Intersection between MOCs</div>
+</a>
+<a class="reference internal" href="../_collections/notebooks/from_vizier_table.html">
+  <div><img alt="" src="../_images/_collections_notebooks_from_vizier_table_4_1.png"></div>
+  <div>Get the MOC corresponding to a table</div>
+</a>
+</div>
+</div>
+</section>
+<section id="calculating-a-moc-on-the-fly-from-a-region-of-the-sky">
+<h4>Calculating a MOC on the fly from a region of the sky<a class="headerlink" href="#calculating-a-moc-on-the-fly-from-a-region-of-the-sky" title="Link to this heading">¶</a></h4>
+<p>Here is a simple example of the creation of a MOC that fully covers a polygon defined
+by its vertices on the sky. The vertices are linked by great circles.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+
+<span class="c1"># The set of points delimiting the polygon in deg</span>
+<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mf">18.36490956</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">15.7446692</span><span class="p">,</span> <span class="mf">6.97214743</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">16.80755056</span><span class="p">,</span> <span class="mf">10.29852928</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">13.36215502</span><span class="p">,</span> <span class="mf">10.14616136</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">12.05298691</span><span class="p">,</span> <span class="mf">13.10706197</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.54793022</span><span class="p">,</span> <span class="mf">10.4556709</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">8.7677627</span><span class="p">,</span> <span class="mf">7.80921809</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.71595962</span><span class="p">,</span> <span class="mf">5.30855011</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">7.32238541</span><span class="p">,</span> <span class="mf">6.44905255</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.807265</span><span class="p">,</span> <span class="mf">6.53399616</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.08855146</span><span class="p">,</span> <span class="mf">3.51294225</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">2.07615384</span><span class="p">,</span> <span class="mf">0.7118289</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">3.90690158</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61886929</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.03727956</span><span class="p">,</span> <span class="mf">2.80521847</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">9.22274427</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38008174</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">10.23563378</span><span class="p">,</span> <span class="mf">4.06950324</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">10.79931601</span><span class="p">,</span> <span class="mf">3.77655576</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">14.16533992</span><span class="p">,</span> <span class="mf">1.7579858</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.36243491</span><span class="p">,</span> <span class="mf">1.78587203</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">15.31732084</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="n">skycoord</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">skycoord</span><span class="p">,</span> <span class="n">complement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+<span class="c1"># Plot the MOC using matplotlib</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="c1"># Define a astropy WCS easily</span>
+<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
+    <span class="c1"># The gnomonic projection transforms great circles into straight lines.</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
+    <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
+    <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;MOC from a polygon&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/85a8db90f2b029350ee435ba55aff707/polygon_coverage.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/74b562735283d008d5432b0e980058eb/polygon_coverage.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/249560a793c7d6ff8ab1cf605fc9c310/polygon_coverage.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/d5f4aa2bf7ba0b56b649635d8a207577/polygon_coverage.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="../_images/polygon_coverage.png" class="plot-directive" src="../_images/polygon_coverage.png" />
+</figure>
+<p>For a more extended description on how to create MOCs from diverse shapes, you can check
+the example notebooks <a class="reference internal" href="../_collections/notebooks/01-Creating_MOCs_from_shapes.html"><span class="doc">Creating Space-MOCs from shapes</span></a> and
+<a class="reference internal" href="../_collections/notebooks/02-Creating_MOCs_from_astropy_regions.html"><span class="doc">Creating MOCs out of astropy-regions.</span></a>.</p>
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
+<a class="reference internal" href="../_collections/notebooks/01-Creating_MOCs_from_shapes.html">
+  <div><img alt="" src="../_images/_collections_notebooks_01-Creating_MOCs_from_shapes_26_0.png"></div>
+  <div>Creating Space-MOCs from shapes</div>
+</a>
+<a class="reference internal" href="../_collections/notebooks/02-Creating_MOCs_from_astropy_regions.html">
+  <div><img alt="" src="../_images/_collections_notebooks_02-Creating_MOCs_from_astropy_regions_13_0.png"></div>
+  <div>Creating MOCs out of astropy-regions.</div>
+</a>
+<a class="reference internal" href="../_collections/notebooks/from_astropy_table.html">
+  <div><img alt="" src="../_images/_collections_notebooks_from_astropy_table_6_0.png"></div>
+  <div>Create a MOC from an astropy Table</div>
+</a>
+<a class="reference internal" href="../_collections/notebooks/from_image_with_mask.html">
+  <div><img alt="" src="../_images/_collections_notebooks_from_image_with_mask_5_0.png"></div>
+  <div>Construct a MOC from an image with a mask</div>
+</a>
+</div>
+</div>
+</section>
+<section id="instantiating-a-moc-when-we-already-know-its-healpix-cells">
+<h4>Instantiating a MOC when we already know its HEALPix cells<a class="headerlink" href="#instantiating-a-moc-when-we-already-know-its-healpix-cells" title="Link to this heading">¶</a></h4>
+<p>This can be done with methods like <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_string()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">from_healpix_cells()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_depth29_ranges()</span></code>.
+A simple MOC that represents the full sky is the MOC of order 0 that contains all the 12
+HEALPix cells of the order 0. Creating it from a string looks like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+
+<span class="n">all_sky</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>  <span class="c1"># the 12 cells of HEALPix at order 0</span>
+<span class="n">all_sky</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>  <span class="c1"># the inside of the MOC is represented in red with display_preview</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/2754258e750aa125b0015156b0b712b5/all_sky.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/f3d9b623bd2c8a984ec8fb5de2a95592/all_sky.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/b6f6dcdab8bc5e8bf554f76d5f6cd908/all_sky.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/70dc18f95d73ce1d78dcb71b2629c931/all_sky.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="../_images/all_sky.png" class="plot-directive" src="../_images/all_sky.png" />
+</figure>
+<p>We could also take only odd numbered cells of order 1. Let’s use
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">from_json()</span></code> that takes a dictionary:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_json</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]})</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/0c9ba2bd897be43b1ebfb4543426c060/odd_cells.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/46762b080896bae48c7062293363cd7e/odd_cells.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/2f8b39c336ff72aa4d6fd01b51d34a4f/odd_cells.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/b5c5e90e0be5b1ca61b7da93d8b4fd81/odd_cells.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="../_images/odd_cells.png" class="plot-directive" src="../_images/odd_cells.png" />
+</figure>
+</section>
+</section>
+<section id="useful-methods">
+<h3>Useful methods<a class="headerlink" href="#useful-methods" title="Link to this heading">¶</a></h3>
+<section id="calculating-a-space-moc-sky-area">
+<h4>Calculating a Space-MOC sky area<a class="headerlink" href="#calculating-a-space-moc-sky-area" title="Link to this heading">¶</a></h4>
+<p>This example shows how to calculate the sky area of a Space-MOC.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+
+<span class="n">ALL_SKY</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">steradian</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>  <span class="c1"># any other MOC instance will work</span>
+<span class="n">area</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">sky_fraction</span> <span class="o">*</span> <span class="n">ALL_SKY</span>
+<span class="n">area</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/b7c26a850c40e6d92234396ac4ff0706/calculate_moc_sky_area.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+</section>
+</section>
+<section id="other-examples-operations-use-cases">
+<h3>Other examples (operations, use-cases)<a class="headerlink" href="#other-examples-operations-use-cases" title="Link to this heading">¶</a></h3>
+<p>Here are some other code examples manipulating <code class="xref py py-class docutils literal notranslate"><span class="pre">MOC</span></code> objects.</p>
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/compute_moc_borders.html">
   <div><img alt="" src="../_images/_collections_notebooks_compute_moc_borders_5_0.png"></div>
   <div>Compute the borders of a MOC</div>
@@ -104,43 +277,14 @@
   <div><img alt="" src="../_images/_collections_notebooks_FITS-image-pixels-intersecting-MOC_10_0.png"></div>
   <div>Overlay the MOC of Spitzer on a 2MASS cutout</div>
 </a>
-<a class="reference internal" href="../_collections/notebooks/from_astropy_table.html">
-  <div><img alt="" src="../_images/_collections_notebooks_from_astropy_table_6_0.png"></div>
-  <div>Create a MOC from an astropy Table</div>
-</a>
-<a class="reference internal" href="../_collections/notebooks/01-Creating_MOCs_from_shapes.html">
-  <div><img alt="" src="../_images/_collections_notebooks_01-Creating_MOCs_from_shapes_19_0.png"></div>
-  <div>Creating Space-MOCs from shapes</div>
-</a>
-<a class="reference internal" href="../_collections/notebooks/02-Creating_MOCs_from_astropy_regions.html">
-  <div><img alt="" src="../_images/_collections_notebooks_02-Creating_MOCs_from_astropy_regions_13_0.png"></div>
-  <div>Creating MOCs out of astropy-regions.</div>
-</a>
-<a class="reference internal" href="../_collections/notebooks/from_fits_and_intersection.html">
-  <div><img alt="" src="../_images/_collections_notebooks_from_fits_and_intersection_9_1.png"></div>
-  <div>Intersection between MOCs</div>
-</a>
-<a class="reference internal" href="../_collections/notebooks/from_image_with_mask.html">
-  <div><img alt="" src="../_images/_collections_notebooks_from_image_with_mask_3_0.png"></div>
-  <div>Construct a MOC from an image with a mask</div>
-</a>
-<a class="reference internal" href="../_collections/notebooks/from_vizier_table.html">
-  <div><img alt="" src="../_images/_collections_notebooks_from_vizier_table_4_1.png"></div>
-  <div>Get the MOC corresponding to a table</div>
-</a>
 <a class="reference internal" href="../_collections/notebooks/query_vizier_table.html">
   <div><img alt="" src="../_images/_collections_notebooks_query_vizier_table_8_0.png"></div>
   <div>Query the sources of a VizieR table that are in a sky region</div>
 </a>
 </div>
 </div>
-<p>Here are some code examples manipulating <code class="xref py py-class docutils literal notranslate"><span class="pre">MOC</span></code> objects.</p>
-<section id="examples-use-cases">
-<h4>Examples use cases<a class="headerlink" href="#examples-use-cases" title="Link to this heading">¶</a></h4>
-</section>
-</section>
 <section id="loading-and-plotting-the-moc-of-sdss">
-<h3>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Link to this heading">¶</a></h3>
+<h4>Loading and plotting the MOC of SDSS<a class="headerlink" href="#loading-and-plotting-the-moc-of-sdss" title="Link to this heading">¶</a></h4>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverage of SDSS from a FITS file.</p></li>
@@ -149,7 +293,7 @@
 <ol class="arabic simple">
 <li><p>Defining a matplotlib figure.</p></li>
 <li><p>Defining an astropy WCS representing the field of view of the plot.</p></li>
-<li><p>Call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.fill()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.border()</span></code> so that mocpy plot on a matplotlib axis.</p></li>
+<li><p>Call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fill()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">border()</span></code> so that mocpy plot on a matplotlib axis.</p></li>
 <li><p>Set the axis labels, a title, enable the grid and plot the final figure.</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -194,7 +338,7 @@
 </figure>
 </section>
 <section id="intersection-between-galex-and-sdss">
-<h3>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Link to this heading">¶</a></h3>
+<h4>Intersection between GALEX and SDSS<a class="headerlink" href="#intersection-between-galex-and-sdss" title="Link to this heading">¶</a></h4>
 <p>This example:</p>
 <ul class="simple">
 <li><p>Load the coverages of SDSS and GALEX from FITS files.</p></li>
@@ -266,78 +410,9 @@
 <img alt="../_images/logical_operations.png" class="plot-directive" src="../_images/logical_operations.png" />
 </figure>
 </section>
-<section id="create-a-moc-from-a-polygon">
-<h3>Create a MOC from a polygon<a class="headerlink" href="#create-a-moc-from-a-polygon" title="Link to this heading">¶</a></h3>
-<p>This example shows how to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">mocpy.moc.MOC.from_polygon_skycoord()</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
-
-<span class="c1"># The set of points delimiting the polygon in deg</span>
-<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="p">[</span><span class="mf">18.36490956</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">15.7446692</span><span class="p">,</span> <span class="mf">6.97214743</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">16.80755056</span><span class="p">,</span> <span class="mf">10.29852928</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">13.36215502</span><span class="p">,</span> <span class="mf">10.14616136</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">12.05298691</span><span class="p">,</span> <span class="mf">13.10706197</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">9.54793022</span><span class="p">,</span> <span class="mf">10.4556709</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">8.7677627</span><span class="p">,</span> <span class="mf">7.80921809</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">9.71595962</span><span class="p">,</span> <span class="mf">5.30855011</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">7.32238541</span><span class="p">,</span> <span class="mf">6.44905255</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">0.807265</span><span class="p">,</span> <span class="mf">6.53399616</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">1.08855146</span><span class="p">,</span> <span class="mf">3.51294225</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">2.07615384</span><span class="p">,</span> <span class="mf">0.7118289</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">3.90690158</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.61886929</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">9.03727956</span><span class="p">,</span> <span class="mf">2.80521847</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">9.22274427</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38008174</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">10.23563378</span><span class="p">,</span> <span class="mf">4.06950324</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">10.79931601</span><span class="p">,</span> <span class="mf">3.77655576</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">14.16533992</span><span class="p">,</span> <span class="mf">1.7579858</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">19.36243491</span><span class="p">,</span> <span class="mf">1.78587203</span><span class="p">],</span>
-        <span class="p">[</span><span class="mf">15.31732084</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
-    <span class="p">],</span>
-<span class="p">)</span>
-<span class="n">skycoord</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
-<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">skycoord</span><span class="p">,</span> <span class="n">complement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
-
-<span class="c1"># Plot the MOC using matplotlib</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-<span class="c1"># Define a astropy WCS easily</span>
-<span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
-    <span class="n">fig</span><span class="p">,</span>
-    <span class="n">fov</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">),</span>
-    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
-    <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-    <span class="c1"># The gnomonic projection transforms great circles into straight lines.</span>
-    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;TAN&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
-    <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
-    <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;MOC from a polygon&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>(<a class="reference download internal" download="" href="../_downloads/85a8db90f2b029350ee435ba55aff707/polygon_coverage.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/74b562735283d008d5432b0e980058eb/polygon_coverage.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/249560a793c7d6ff8ab1cf605fc9c310/polygon_coverage.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/d5f4aa2bf7ba0b56b649635d8a207577/polygon_coverage.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default">
-<img alt="../_images/polygon_coverage.png" class="plot-directive" src="../_images/polygon_coverage.png" />
-</figure>
-<p>For a more extended description on how to create MOCs from shapes, you can check the example notebooks
-<a class="reference internal" href="../_collections/notebooks/01-Creating_MOCs_from_shapes.html"><span class="doc">Creating Space-MOCs from shapes</span></a> and
-<a class="reference internal" href="../_collections/notebooks/02-Creating_MOCs_from_astropy_regions.html"><span class="doc">Creating MOCs out of astropy-regions.</span></a>.</p>
-</section>
 <section id="get-the-border-s-of-a-moc">
-<h3>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Link to this heading">¶</a></h3>
-<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.moc.MOC.get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<h4>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Link to this heading">¶</a></h4>
+<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
@@ -387,13 +462,10 @@ In this example:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>(<a class="reference download internal" download="" href="../_downloads/25332318407f1ac46a62bba334e523f2/compute_borders.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/3cc924411c768b0cbcd77fd064f3c36c/compute_borders.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/f1541ec3e2176371cc6390b2e35aecf8/compute_borders.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/250b9da8949b1f09de942bc32a9960e4/compute_borders.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default">
-<img alt="../_images/compute_borders.png" class="plot-directive" src="../_images/compute_borders.png" />
-</figure>
+<p>(<a class="reference download internal" download="" href="../_downloads/25332318407f1ac46a62bba334e523f2/compute_borders.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
 </section>
 <section id="gravitational-waves-mocs">
-<h3>Gravitational Waves MOCs<a class="headerlink" href="#gravitational-waves-mocs" title="Link to this heading">¶</a></h3>
+<h4>Gravitational Waves MOCs<a class="headerlink" href="#gravitational-waves-mocs" title="Link to this heading">¶</a></h4>
 <p>This example shows the probability confidence regions of gravitational waves.
 HEALPix cells are given under the
 <a class="reference external" href="http://www.ivoa.net/documents/Notes/MOC/20120412/NOTE-MOC-1.0-20120412.pdf">uniq pixel notation</a>.
@@ -479,23 +551,8 @@ By definition the MOC which has 100% of chance of containing a GW is the full sk
 <img alt="../_images/bayestar.png" class="plot-directive" src="../_images/bayestar.png" />
 </figure>
 </section>
-<section id="calculate-moc-sky-area">
-<h3>Calculate MOC sky area<a class="headerlink" href="#calculate-moc-sky-area" title="Link to this heading">¶</a></h3>
-<p>This example shows how to Calculate the sky area of a MOC instance.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
-
-<span class="n">ALL_SKY</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">steradian</span>
-<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>  <span class="c1"># any other MOC instance will work</span>
-<span class="n">area</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">sky_fraction</span> <span class="o">*</span> <span class="n">ALL_SKY</span>
-<span class="n">area</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-</pre></div>
-</div>
-<p>(<a class="reference download internal" download="" href="../_downloads/b7c26a850c40e6d92234396ac4ff0706/calculate_moc_sky_area.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
-</section>
 <section id="performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc">
-<h3>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Link to this heading">¶</a></h3>
+<h4>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Link to this heading">¶</a></h4>
 <p>This example shows how a MOC can filter pixels from a specific FITS image (i.e. associated with a WCS). These pixels can
 then be retrieved from the image for performing some computations on them: e.g. mean, variance analysis thanks to numpy/scikit-learn…</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
@@ -541,7 +598,7 @@ then be retrieved from the image for performing some computations on them: e.g. 
 <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
     <span class="n">img_test</span><span class="p">,</span>
     <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
-    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="n">min_cut</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -559,11 +616,10 @@ then be retrieved from the image for performing some computations on them: e.g. 
 </div>
 </section>
 </section>
+</section>
 <section id="tmoc-temporal-coverages">
 <h2>TMOC: Temporal coverages<a class="headerlink" href="#tmoc-temporal-coverages" title="Link to this heading">¶</a></h2>
 <p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeMOC</span></code> class represents a temporal coverage.</p>
-<section id="gallery-of-notebooks-examples-using-tmocs">
-<h3>Gallery of notebooks examples using TMOCs<a class="headerlink" href="#gallery-of-notebooks-examples-using-tmocs" title="Link to this heading">¶</a></h3>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/tmoc.html">
@@ -572,7 +628,6 @@ then be retrieved from the image for performing some computations on them: e.g. 
 </a>
 </div>
 </div>
-</section>
 </section>
 <section id="stmoc-space-time-coverages">
 <h2>STMOC: Space &amp; Time coverages<a class="headerlink" href="#stmoc-space-time-coverages" title="Link to this heading">¶</a></h2>
@@ -584,8 +639,6 @@ The standard description is published by the IVOA <a class="reference external" 
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
-<section id="gallery-of-notebooks-examples-using-stmocs">
-<h3>Gallery of notebooks examples using STMOCs<a class="headerlink" href="#gallery-of-notebooks-examples-using-stmocs" title="Link to this heading">¶</a></h3>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/STMOC%20from%20time%20ranges.html">
@@ -599,11 +652,8 @@ The standard description is published by the IVOA <a class="reference external" 
 </div>
 </div>
 </section>
-</section>
 <section id="fmoc-frequency-coverages">
 <h2>FMOC: Frequency coverages<a class="headerlink" href="#fmoc-frequency-coverages" title="Link to this heading">¶</a></h2>
-<section id="gallery-of-notebooks-examples-using-fmocs">
-<h3>Gallery of notebooks examples using FMOCs<a class="headerlink" href="#gallery-of-notebooks-examples-using-fmocs" title="Link to this heading">¶</a></h3>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/First_Steps_with_FMOCs.html">
@@ -612,7 +662,6 @@ The standard description is published by the IVOA <a class="reference external" 
 </a>
 </div>
 </div>
-</section>
 </section>
 </section>
 
@@ -626,31 +675,30 @@ The standard description is published by the IVOA <a class="reference external" 
 <ul>
 <li><a class="reference internal" href="#">User documentation</a><ul>
 <li><a class="reference internal" href="#smoc-a-k-a-moc-spatial-coverages">SMOC (a.k.a MOC): Spatial coverages</a><ul>
-<li><a class="reference internal" href="#gallery-of-notebooks-examples-using-smocs">Gallery of notebooks examples using SMOCs</a><ul>
-<li><a class="reference internal" href="#examples-use-cases">Examples use cases</a></li>
+<li><a class="reference internal" href="#introduction-to-space-mocs">Introduction to Space-MOCs</a></li>
+<li><a class="reference internal" href="#space-moc-creation-methods">Space-MOC creation methods</a><ul>
+<li><a class="reference internal" href="#reading-a-moc-from-a-file-or-from-a-server">Reading a MOC from a file or from a server</a></li>
+<li><a class="reference internal" href="#calculating-a-moc-on-the-fly-from-a-region-of-the-sky">Calculating a MOC on the fly from a region of the sky</a></li>
+<li><a class="reference internal" href="#instantiating-a-moc-when-we-already-know-its-healpix-cells">Instantiating a MOC when we already know its HEALPix cells</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#useful-methods">Useful methods</a><ul>
+<li><a class="reference internal" href="#calculating-a-space-moc-sky-area">Calculating a Space-MOC sky area</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-examples-operations-use-cases">Other examples (operations, use-cases)</a><ul>
 <li><a class="reference internal" href="#loading-and-plotting-the-moc-of-sdss">Loading and plotting the MOC of SDSS</a></li>
 <li><a class="reference internal" href="#intersection-between-galex-and-sdss">Intersection between GALEX and SDSS</a></li>
-<li><a class="reference internal" href="#create-a-moc-from-a-polygon">Create a MOC from a polygon</a></li>
 <li><a class="reference internal" href="#get-the-border-s-of-a-moc">Get the border(s) of a MOC</a></li>
 <li><a class="reference internal" href="#gravitational-waves-mocs">Gravitational Waves MOCs</a></li>
-<li><a class="reference internal" href="#calculate-moc-sky-area">Calculate MOC sky area</a></li>
 <li><a class="reference internal" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc">Performing computation on the pixels of an FITS image lying in a MOC</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tmoc-temporal-coverages">TMOC: Temporal coverages</a><ul>
-<li><a class="reference internal" href="#gallery-of-notebooks-examples-using-tmocs">Gallery of notebooks examples using TMOCs</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#stmoc-space-time-coverages">STMOC: Space &amp; Time coverages</a><ul>
-<li><a class="reference internal" href="#gallery-of-notebooks-examples-using-stmocs">Gallery of notebooks examples using STMOCs</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#fmoc-frequency-coverages">FMOC: Frequency coverages</a><ul>
-<li><a class="reference internal" href="#gallery-of-notebooks-examples-using-fmocs">Gallery of notebooks examples using FMOCs</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#tmoc-temporal-coverages">TMOC: Temporal coverages</a></li>
+<li><a class="reference internal" href="#stmoc-space-time-coverages">STMOC: Space &amp; Time coverages</a></li>
+<li><a class="reference internal" href="#fmoc-frequency-coverages">FMOC: Frequency coverages</a></li>
 </ul>
 </li>
 </ul>
@@ -667,7 +715,7 @@ The standard description is published by the IVOA <a class="reference external" 
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jul 2024. <br/>
+    Last built 17 Oct 2024. <br/>
   </p>
 </footer>
   </body>

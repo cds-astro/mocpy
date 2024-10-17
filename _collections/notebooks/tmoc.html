@@ -5,16 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Loading a TimeMoc from a fits file &#8212; MOCPy 0.16.2 documentation</title>
+    <title>Loading a TimeMoc from a fits file &#8212; MOCPy 0.17.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
-    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=ee6890a7"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.16.2 documentation</a>
+	<a href="../../index.html">MOCPy 0.17.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -85,7 +85,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># TimeMOC usage
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># TimeMOC usage</span>
 </pre></div>
 </div>
 </div>
@@ -93,9 +93,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from mocpy import TimeMOC
-from astropy.time import Time, TimeDelta
-from astroquery.vizier import Vizier
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<span class="kn">from</span> <span class="nn">astroquery.vizier</span> <span class="kn">import</span> <span class="n">Vizier</span>
+<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">TimeMOC</span>
 </pre></div>
 </div>
 </div>
@@ -105,10 +105,10 @@ from astroquery.vizier import Vizier
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>time_moc = TimeMOC.from_fits(
-    &quot;http://alasky.u-strasbg.fr/HST-hips/filter_SDSSr_hips/TMoc.fits&quot;,
-)
-time_moc.plot(title=&quot;HST_SDSSr tmoc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span>
+    <span class="s2">&quot;http://alasky.u-strasbg.fr/HST-hips/filter_SDSSr_hips/TMoc.fits&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -126,11 +126,11 @@ time_moc.plot(title=&quot;HST_SDSSr tmoc&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>viz = Vizier(columns=[&quot;*&quot;, &quot;_RAJ2000&quot;, &quot;_DEJ2000&quot;])
-viz.ROW_LIMIT = -1
-table = viz.get_catalogs(&quot;II/285&quot;)[1]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;II/285&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
-print(table)
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -170,17 +170,17 @@ Length = 70031 rows
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
-table_moc = TimeMOC.from_times(Time(table[&quot;JD&quot;], format=&quot;jd&quot;, scale=&quot;tdb&quot;))
-table_moc.plot(title=&quot;2nd table of II/285 tmoc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">table_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_times</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">))</span>
+<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2nd table of II/285 tmoc&quot;</span><span class="p">)</span>
 
-# print characteristics such as the time of the first/last observations
-print(&quot;Time of the first observation:&quot;, table_moc.min_time.iso)
-print(&quot;Time of the last observation:&quot;, table_moc.max_time.iso)
-# the total duration of the observation times
-print(f&quot;Total duration: {table_moc.total_duration.jd} jd&quot;)
-# the order of the TimeMoc
-print(&quot;max order:&quot;, table_moc.max_order)
+<span class="c1"># print characteristics such as the time of the first/last observations</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the last observation:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="c1"># the total duration of the observation times</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total duration: </span><span class="si">{</span><span class="n">table_moc</span><span class="o">.</span><span class="n">total_duration</span><span class="o">.</span><span class="n">jd</span><span class="si">}</span><span class="s2"> jd&quot;</span><span class="p">)</span>
+<span class="c1"># the order of the TimeMoc</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max order:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1194,13 +1194,13 @@ Wall time: 254 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># filtering the table through the tmoc created from the HST_SDSSr fits file
-rows = time_moc.contains_with_timeresolution(
-    times=Time(table[&quot;JD&quot;], format=&quot;jd&quot;, scale=&quot;tdb&quot;),
-    keep_inside=True,
-    delta_t=TimeDelta(3600, format=&quot;sec&quot;, scale=&quot;tdb&quot;),
-)
-print(table[&quot;JD&quot;][rows])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># filtering the table through the tmoc created from the HST_SDSSr fits file</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">contains_with_timeresolution</span><span class="p">(</span>
+    <span class="n">times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
+    <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mi">3600</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">][</span><span class="n">rows</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1247,19 +1247,19 @@ Length = 233 rows
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>result = table_moc.intersection_with_timeresolution(
-    time_moc,
-    delta_t=TimeMOC.order_to_time_resolution(9),
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">intersection_with_timeresolution</span><span class="p">(</span>
+    <span class="n">time_moc</span><span class="p">,</span>
+    <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="mi">9</span><span class="p">),</span>
+<span class="p">)</span>
 
-time_moc.plot(title=&quot;HST_SDSSr tmoc&quot;)
-table_moc.plot(title=&quot;2nd table of II/285 tmoc&quot;)
-result.plot(title=&quot;(HST_SDSSr) INTER (2nd table of II/285) tmoc&quot;)
+<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
+<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2nd table of II/285 tmoc&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) tmoc&quot;</span><span class="p">)</span>
 
-# print the max order of all the tmocs. Result tmoc must be of order 9
-print(&quot;HST_SDSSr max order : &quot;, time_moc.max_order)
-print(&quot;2nd table of II/285 max order : &quot;, table_moc.max_order)
-print(&quot;(HST_SDSSr) INTER (2nd table of II/285) max order : &quot;, result.max_order)
+<span class="c1"># print the max order of all the tmocs. Result tmoc must be of order 9</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HST_SDSSr max order : &quot;</span><span class="p">,</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;2nd table of II/285 max order : &quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) max order : &quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -4251,11 +4251,11 @@ HST_SDSSr max order :  41
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>result.add_neighbours()
-result.plot(title=&quot;(HST_SDSSr) INTER (2nd table of II/285) augmented tmoc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">add_neighbours</span><span class="p">()</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) augmented tmoc&quot;</span><span class="p">)</span>
 
-result.remove_neighbours()
-result.plot(title=&quot;(HST_SDSSr) INTER (2nd table of II/285) diminished tmoc&quot;)
+<span class="n">result</span><span class="o">.</span><span class="n">remove_neighbours</span><span class="p">()</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) diminished tmoc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -6247,11 +6247,11 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>complemented_tmoc = result.complement()
-complemented_tmoc.plot(
-    title=&quot;Complement of (HST_SDSSr) INTER (2nd table of II/285)&quot;,
-    view=(result.min_time, result.max_time),
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">complemented_tmoc</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">complement</span><span class="p">()</span>
+<span class="n">complemented_tmoc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Complement of (HST_SDSSr) INTER (2nd table of II/285)&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">min_time</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_time</span><span class="p">),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -6283,7 +6283,7 @@ complemented_tmoc.plot(
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jul 2024. <br/>
+    Last built 17 Oct 2024. <br/>
   </p>
 </footer>
   </body>

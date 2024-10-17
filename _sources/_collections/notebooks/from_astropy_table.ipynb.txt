@@ -139,7 +139,7 @@
     ")\n",
     "moc.border(ax=ax, wcs=galactic_wcs, color=\"k\")\n",
     "\n",
-    "ax.grid(True)"
+    "ax.grid(visible=True)"
    ]
   }
  ],

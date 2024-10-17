@@ -5,16 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MOCPy introduction &#8212; MOCPy 0.16.2 documentation</title>
+    <title>MOCPy introduction &#8212; MOCPy 0.17.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
-    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=ee6890a7"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -26,7 +26,7 @@
     <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Compute the borders of a MOC" href="compute_moc_borders.html" />
+    <link rel="next" title="Intersection between MOCs" href="from_fits_and_intersection.html" />
     <link rel="prev" title="User documentation" href="../../examples/user_documentation.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -55,7 +55,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="compute_moc_borders.html" title="Compute the borders of a MOC">
+	<a href="from_fits_and_intersection.html" title="Intersection between MOCs">
 	  next &raquo;
 	</a>
       </li>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.16.2 documentation</a>
+	<a href="../../index.html">MOCPy 0.17.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -95,19 +95,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import astropy.units as u
-import matplotlib.pyplot as plt
-import mocpy
-from astropy.coordinates import Angle, SkyCoord
-from astropy.visualization.wcsaxes.frame import EllipticalFrame
-from astropy.wcs import WCS
-from astroquery.mocserver import MOCServer
-from astroquery.vizier import Vizier
-from ipyaladin import Aladin
-from matplotlib import patheffects
-from regions import CircleSkyRegion
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">mocpy</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">from</span> <span class="nn">astroquery.mocserver</span> <span class="kn">import</span> <span class="n">MOCServer</span>
+<span class="kn">from</span> <span class="nn">astroquery.vizier</span> <span class="kn">import</span> <span class="n">Vizier</span>
+<span class="kn">from</span> <span class="nn">ipyaladin</span> <span class="kn">import</span> <span class="n">Aladin</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patheffects</span>
+<span class="kn">from</span> <span class="nn">regions</span> <span class="kn">import</span> <span class="n">CircleSkyRegion</span>
 
-mocpy.__version__
+<span class="n">mocpy</span><span class="o">.</span><span class="n">__version__</span>
 </pre></div>
 </div>
 </div>
@@ -135,27 +135,27 @@ mocpy.__version__
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># HST MOC footprint
-# -----------------
-# We want to retrieve all the HST surveys i.e. the HST surveys covering any region of the sky.
-allsky = CircleSkyRegion(SkyCoord(0, 0, unit=&quot;deg&quot;), Angle(180, unit=&quot;deg&quot;))
-hst_moc = MOCServer.query_region(
-    region=allsky,
-    # We want a MOCpy object instead of an astropy table
-    return_moc=True,
-    # The order of the MOC
-    max_norder=11,
-    # Expression on the ID meta-data
-    meta_data=&quot;ID=*HST*&quot;,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HST MOC footprint</span>
+<span class="c1"># -----------------</span>
+<span class="c1"># We want to retrieve all the HST surveys i.e. the HST surveys covering any region of the sky.</span>
+<span class="n">allsky</span> <span class="o">=</span> <span class="n">CircleSkyRegion</span><span class="p">(</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">))</span>
+<span class="n">hst_moc</span> <span class="o">=</span> <span class="n">MOCServer</span><span class="o">.</span><span class="n">query_region</span><span class="p">(</span>
+    <span class="n">region</span><span class="o">=</span><span class="n">allsky</span><span class="p">,</span>
+    <span class="c1"># We want a MOCpy object instead of an astropy table</span>
+    <span class="n">return_moc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="c1"># The order of the MOC</span>
+    <span class="n">max_norder</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+    <span class="c1"># Expression on the ID meta-data</span>
+    <span class="n">meta_data</span><span class="o">=</span><span class="s2">&quot;ID=*HST*&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
-# SDSS9
-# -----
-sdss_moc = MOCServer.find_datasets(
-    meta_data=&quot;ID=CDS/P/SDSS9/color&quot;,
-    return_moc=True,
-    max_norder=11,
-)
+<span class="c1"># SDSS9</span>
+<span class="c1"># -----</span>
+<span class="n">sdss_moc</span> <span class="o">=</span> <span class="n">MOCServer</span><span class="o">.</span><span class="n">find_datasets</span><span class="p">(</span>
+    <span class="n">meta_data</span><span class="o">=</span><span class="s2">&quot;ID=CDS/P/SDSS9/color&quot;</span><span class="p">,</span>
+    <span class="n">return_moc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_norder</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -163,7 +163,7 @@ sdss_moc = MOCServer.find_datasets(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>type(sdss_moc)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">sdss_moc</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -189,10 +189,10 @@ mocpy.moc.moc.MOC
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%time
-sdss_and_hst_moc = sdss_moc.intersection(hst_moc)
-sdss_moc.serialize(format=&quot;fits&quot;)
-sdss_moc.save(&quot;sdss_moc.fits&quot;, format=&quot;fits&quot;, overwrite=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">sdss_and_hst_moc</span> <span class="o">=</span> <span class="n">sdss_moc</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">hst_moc</span><span class="p">)</span>
+<span class="n">sdss_moc</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">)</span>
+<span class="n">sdss_moc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;sdss_moc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -227,83 +227,83 @@ Wall time: 11.6 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig = plt.figure(figsize=(20, 10))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 
-wcs = WCS(
-    {
-        &quot;naxis&quot;: 2,
-        &quot;naxis1&quot;: 1620,
-        &quot;naxis2&quot;: 810,
-        &quot;crpix1&quot;: 810.5,
-        &quot;crpix2&quot;: 405.5,
-        &quot;cdelt1&quot;: -0.2,
-        &quot;cdelt2&quot;: 0.2,
-        &quot;ctype1&quot;: &quot;RA---AIT&quot;,
-        &quot;ctype2&quot;: &quot;DEC--AIT&quot;,
-    },
-)
+<span class="n">wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;naxis&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;naxis1&quot;</span><span class="p">:</span> <span class="mi">1620</span><span class="p">,</span>
+        <span class="s2">&quot;naxis2&quot;</span><span class="p">:</span> <span class="mi">810</span><span class="p">,</span>
+        <span class="s2">&quot;crpix1&quot;</span><span class="p">:</span> <span class="mf">810.5</span><span class="p">,</span>
+        <span class="s2">&quot;crpix2&quot;</span><span class="p">:</span> <span class="mf">405.5</span><span class="p">,</span>
+        <span class="s2">&quot;cdelt1&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="s2">&quot;cdelt2&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="s2">&quot;ctype1&quot;</span><span class="p">:</span> <span class="s2">&quot;RA---AIT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ctype2&quot;</span><span class="p">:</span> <span class="s2">&quot;DEC--AIT&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
 
-# Create a matplotlib axe and give it a astropy.wcs.WCS object
-ax = fig.add_subplot(1, 1, 1, projection=wcs, frame_class=EllipticalFrame)
+<span class="c1"># Create a matplotlib axe and give it a astropy.wcs.WCS object</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">frame_class</span><span class="o">=</span><span class="n">EllipticalFrame</span><span class="p">)</span>
 
-# Fill the SDSS MOC in red with an opacity of 70%
-sdss_moc.fill(
-    ax=ax,
-    wcs=wcs,
-    edgecolor=&quot;r&quot;,
-    facecolor=&quot;r&quot;,
-    linewidth=0,
-    fill=True,
-    alpha=0.7,
-    label=&quot;sdss9 footprint&quot;,
-)
-# Draw its perimeter in black
-sdss_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+<span class="c1"># Fill the SDSS MOC in red with an opacity of 70%</span>
+<span class="n">sdss_moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sdss9 footprint&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Draw its perimeter in black</span>
+<span class="n">sdss_moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-# Fill the HST surveys MOC in green with an opacity of 70%
-hst_moc.fill(
-    ax=ax,
-    wcs=wcs,
-    edgecolor=&quot;g&quot;,
-    facecolor=&quot;g&quot;,
-    linewidth=0,
-    fill=True,
-    alpha=0.7,
-    label=&quot;hst all surveys footprint&quot;,
-)
-# Draw its perimeter in black
-hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+<span class="c1"># Fill the HST surveys MOC in green with an opacity of 70%</span>
+<span class="n">hst_moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hst all surveys footprint&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Draw its perimeter in black</span>
+<span class="n">hst_moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-# Fill the intersection MOC in blue
-sdss_and_hst_moc.fill(
-    ax=ax,
-    wcs=wcs,
-    edgecolor=&quot;b&quot;,
-    facecolor=&quot;b&quot;,
-    linewidth=0,
-    fill=True,
-    alpha=0.7,
-    label=&quot;intersection&quot;,
-)
-# Draw its perimeter in black
-sdss_and_hst_moc.border(ax=ax, wcs=wcs, color=&quot;black&quot;, alpha=0.5)
+<span class="c1"># Fill the intersection MOC in blue</span>
+<span class="n">sdss_and_hst_moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intersection&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Draw its perimeter in black</span>
+<span class="n">sdss_and_hst_moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-# we set the axis off by half a pixel otherwise they are slightly outside the sphere
-# see astropy issue for the half-pixel trick https://github.com/astropy/astropy/issues/10201
-ax.set_xlim(-0.5, 1620 - 0.5)
-ax.set_ylim(-0.5, 810 - 0.5)
-ax.set_aspect(1.0)
+<span class="c1"># we set the axis off by half a pixel otherwise they are slightly outside the sphere</span>
+<span class="c1"># see astropy issue for the half-pixel trick https://github.com/astropy/astropy/issues/10201</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1620</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">810</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
-# Usual matplotlib calls
-plt.title(&quot;Using matplotlib to vizualize MOCs&quot;)
-plt.xlabel(&quot;ra&quot;)
-plt.ylabel(&quot;dec&quot;)
-plt.legend()
-plt.grid(color=&quot;black&quot;, linestyle=&quot;dotted&quot;)
-path_effects = [patheffects.withStroke(linewidth=3, foreground=&quot;black&quot;)]
-ax.coords[0].set_ticklabel(color=&quot;white&quot;, path_effects=path_effects)
-plt.show()
-plt.close()
+<span class="c1"># Usual matplotlib calls</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Using matplotlib to vizualize MOCs&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;ra&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;dec&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+<span class="n">path_effects</span> <span class="o">=</span> <span class="p">[</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ticklabel</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">path_effects</span><span class="o">=</span><span class="n">path_effects</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -325,11 +325,11 @@ plt.close()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>viz = Vizier(columns=[&quot;*&quot;, &quot;_RAJ2000&quot;, &quot;_DEJ2000&quot;])
-viz.ROW_LIMIT = -1
-# Photometric standard stars (tables II and IV of paper)
-tables = viz.get_catalogs(&quot;II/50&quot;)
-tables
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="c1"># Photometric standard stars (tables II and IV of paper)</span>
+<span class="n">tables</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;II/50&quot;</span><span class="p">)</span>
+<span class="n">tables</span>
 </pre></div>
 </div>
 </div>
@@ -337,8 +337,8 @@ tables
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>table_II50 = tables[0]
-table_II50
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table_II50</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">table_II50</span>
 </pre></div>
 </div>
 </div>
@@ -346,13 +346,13 @@ table_II50
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>idx_inside = sdss_and_hst_moc.contains_lonlat(
-    table_II50[&quot;_RAJ2000&quot;].T * u.deg,
-    table_II50[&quot;_DEJ2000&quot;].T * u.deg,
-)
-sources_inside = table_II50[idx_inside]
-sources_outside = table_II50[~idx_inside]
-sources_inside
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">idx_inside</span> <span class="o">=</span> <span class="n">sdss_and_hst_moc</span><span class="o">.</span><span class="n">contains_lonlat</span><span class="p">(</span>
+    <span class="n">table_II50</span><span class="p">[</span><span class="s2">&quot;_RAJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">table_II50</span><span class="p">[</span><span class="s2">&quot;_DEJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">sources_inside</span> <span class="o">=</span> <span class="n">table_II50</span><span class="p">[</span><span class="n">idx_inside</span><span class="p">]</span>
+<span class="n">sources_outside</span> <span class="o">=</span> <span class="n">table_II50</span><span class="p">[</span><span class="o">~</span><span class="n">idx_inside</span><span class="p">]</span>
+<span class="n">sources_inside</span>
 </pre></div>
 </div>
 </div>
@@ -364,8 +364,8 @@ sources_inside
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin = Aladin()
-aladin
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span> <span class="o">=</span> <span class="n">Aladin</span><span class="p">()</span>
+<span class="n">aladin</span>
 </pre></div>
 </div>
 </div>
@@ -373,9 +373,9 @@ aladin
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.target = &quot;messier 51&quot;
-aladin.fov = 1
-aladin.height = 600
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;messier 51&quot;</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">fov</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">600</span>
 </pre></div>
 </div>
 </div>
@@ -383,7 +383,7 @@ aladin.height = 600
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.coo_frame = &quot;icrs&quot;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">coo_frame</span> <span class="o">=</span> <span class="s2">&quot;icrs&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -392,7 +392,7 @@ aladin.height = 600
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.survey = &quot;P/SDSS9/color&quot;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="s2">&quot;P/SDSS9/color&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -401,14 +401,14 @@ aladin.height = 600
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>aladin.add_moc(
-    sdss_and_hst_moc,
-    color=&quot;blue&quot;,
-    opacity=0.3,
-    fill=True,
-    edge=False,
-    perimeter=True,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">add_moc</span><span class="p">(</span>
+    <span class="n">sdss_and_hst_moc</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+    <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">perimeter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -416,9 +416,9 @@ aladin.height = 600
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Add astropy source tables to the aladin lite viewer
-aladin.add_table(sources_inside, color=&quot;green&quot;, shape=&quot;rhomb&quot;)
-aladin.add_table(sources_outside, color=&quot;red&quot;, shape=&quot;cross&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add astropy source tables to the aladin lite viewer</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">sources_inside</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;rhomb&quot;</span><span class="p">)</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">sources_outside</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;cross&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -426,9 +426,9 @@ aladin.add_table(sources_outside, color=&quot;red&quot;, shape=&quot;cross&quot;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># change the fov and target
-aladin.target = &quot;13 04 4.193 -03 34 13.54&quot;
-aladin.fov = 11
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># change the fov and target</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;13 04 4.193 -03 34 13.54&quot;</span>
+<span class="n">aladin</span><span class="o">.</span><span class="n">fov</span> <span class="o">=</span> <span class="mi">11</span>
 </pre></div>
 </div>
 </div>
@@ -480,7 +480,7 @@ aladin.fov = 11
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jul 2024. <br/>
+    Last built 17 Oct 2024. <br/>
   </p>
 </footer>
   </body>

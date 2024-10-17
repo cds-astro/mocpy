@@ -4,15 +4,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; MOCPy 0.16.2 documentation</title>
+    <title>mocpy.moc.moc &#8212; MOCPy 0.17.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=ee6890a7"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.16.2 documentation</a>
+	<a href="../../../index.html">MOCPy 0.17.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -432,8 +432,9 @@
 <span class="sd">        lat : `astropy.coordinates.Latitude` or its supertype `astropy.units.Quantity`</span>
 <span class="sd">            Declination array in deg</span>
 <span class="sd">        keep_inside : bool, optional</span>
-<span class="sd">            True by default. If so the mask describes coordinates lying inside the MOC. If ``keep_inside``</span>
-<span class="sd">            is false, contains will return the mask of the coordinates lying outside the MOC.</span>
+<span class="sd">            True by default. If so the mask describes coordinates lying inside the MOC.</span>
+<span class="sd">            If ``keep_inside`` is false, contains will return the mask of the coordinates</span>
+<span class="sd">            lying outside the MOC.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -447,17 +448,14 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from astropy.coordinates import Angle</span>
-<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; # create lists of coordinates</span>
-<span class="sd">        &gt;&gt;&gt; lon = Angle(np.array([[1, 2, 3], [-2, -40, -5]]), unit=u.deg)</span>
-<span class="sd">        &gt;&gt;&gt; lat = Angle(np.array([[20, 25, 10], [-60, 80, 0]]), unit=u.deg)</span>
+<span class="sd">        &gt;&gt;&gt; lon = Angle([1, 2, 3, -2, -40, -5], unit=&quot;deg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; lat = Angle([20, 25, 10, -60, 80, 0], unit=&quot;deg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; # create a polygonal moc from these</span>
 <span class="sd">        &gt;&gt;&gt; moc = MOC.from_polygon(lon=lon, lat=lat, max_depth=12)</span>
 <span class="sd">        &gt;&gt;&gt; moc.contains_lonlat(lon=lon, lat=lat) # returns all true</span>
-<span class="sd">        array([[ True,  True,  True],</span>
-<span class="sd">               [ True,  True,  True]])</span>
+<span class="sd">        array([ True,  True,  True, True,  True,  True])</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
@@ -478,13 +476,15 @@
 
 <div class="viewcode-block" id="MOC.fill">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.fill">[docs]</a>
-    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Draw the MOC on a matplotlib axis.</span>
 
-<span class="sd">        This performs the projection of the cells from the world coordinate system to the pixel image coordinate system.</span>
-<span class="sd">        You are able to specify various styling kwargs for `matplotlib.patches.PathPatch`</span>
-<span class="sd">        (see the `list of valid keywords &lt;https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch&gt;`__).</span>
+<span class="sd">        This performs the projection of the cells from the world coordinate system to the</span>
+<span class="sd">        pixel image coordinate system. You can provide style keyword arguments as in</span>
+<span class="sd">        `matplotlib.patches.PathPatch`</span>
+<span class="sd">        (see the `list of valid keywords</span>
+<span class="sd">        &lt;https://matplotlib.org/api/_as_gen/matplotlib.patches.PathPatch.html#matplotlib.patches.PathPatch&gt;`__).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -492,6 +492,10 @@
 <span class="sd">            Matplotlib axis.</span>
 <span class="sd">        wcs : `astropy.wcs.WCS`</span>
 <span class="sd">            WCS defining the World system &lt;-&gt; Image system projection.</span>
+<span class="sd">        optimize : bool, optional</span>
+<span class="sd">            If this is set to True, the MOC will be degraded so that no HEALPix will be</span>
+<span class="sd">            smaller than one pixel as defined by the WCS. It can be useful to deactivate this</span>
+<span class="sd">            optimization for svg outputs or if you take an insert of a WCS. Default is True.</span>
 <span class="sd">        kw_mpl_pathpatch</span>
 <span class="sd">            Plotting arguments for `matplotlib.patches.PathPatch`.</span>
 
@@ -512,7 +516,7 @@
 <span class="sd">        &gt;&gt;&gt; ax = fig.add_subplot(projection=wcs)</span>
 <span class="sd">        &gt;&gt;&gt; moc.fill(ax, wcs, color=&#39;blue&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fill</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">)</span></div>
+        <span class="n">fill</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="n">optimize</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MOC.border">
@@ -596,9 +600,15 @@
 <div class="viewcode-block" id="MOC.from_fits_image">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_image">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_fits_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdu</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_fits_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hdu</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">approximate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `~mocpy.moc.MOC` from an image stored as a FITS file.</span>
+
+<span class="sd">        Info</span>
+<span class="sd">        ----</span>
+<span class="sd">        When giving a mask, the MOC computed will only take into account the center</span>
+<span class="sd">        of the image pixels and not the whole pixel borders.</span>
+<span class="sd">        This leads to an approximate resulting MOC.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -607,19 +617,31 @@
 <span class="sd">        max_norder : int</span>
 <span class="sd">            The moc resolution.</span>
 <span class="sd">        mask : `numpy.ndarray`, optional</span>
-<span class="sd">            A boolean array of the same size of the image where pixels having the value 1 are part of</span>
-<span class="sd">            the final MOC and pixels having the value 0 are not.</span>
+<span class="sd">            A boolean array of the same shape than the image where True valued pixels are part of</span>
+<span class="sd">            the final MOC and False valued pixels are not.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        moc : `~mocpy.moc.MOC`</span>
+<span class="sd">        `~mocpy.moc.MOC`</span>
 <span class="sd">            The resulting MOC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Only take the first HDU</span>
         <span class="n">header</span> <span class="o">=</span> <span class="n">hdu</span><span class="o">.</span><span class="n">header</span>
+        <span class="n">max_norder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_norder</span><span class="p">)</span>
 
         <span class="c1"># Compute a WCS from the header of the image</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">wcs</span><span class="o">.</span><span class="n">WCS</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">calc_footprint</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">approximate</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">sky_corners</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">corners</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">corners</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">sky_corners</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="n">max_norder</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Corners of at least one of the images cannot be &quot;</span>
+                <span class="s2">&quot;calculated with its WCS, the &#39;approximate&#39; method &quot;</span>
+                <span class="s2">&quot;cannot be used for this image.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">hdu</span><span class="o">.</span><span class="n">data</span>
@@ -650,15 +672,41 @@
         <span class="n">frame</span> <span class="o">=</span> <span class="n">wcs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">wcs_to_celestial_frame</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
         <span class="n">skycrd</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span>
 
-        <span class="c1"># Compute the order based on the CDELT</span>
-        <span class="c1"># Should work even if the fits is defined using cd_ij or crota, see:</span>
-        <span class="c1"># https://docs.astropy.org/en/stable/api/astropy.wcs.Wcsprm.html#astropy.wcs.Wcsprm.get_cdelt</span>
-        <span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">get_cdelt</span><span class="p">()</span>
+        <span class="c1"># Compute the deepest HEALPix order containing at least one 1 pixel of the image</span>
+        <span class="c1"># We want the order so that area_hpx_cell &gt;= area_img_pixel</span>
+        <span class="c1"># &lt;=&gt; 4pi / (12 * 2^(2*order)) in [steradians] &gt;= area_img_pixel in [steradians]</span>
+        <span class="n">healpix_order_computed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">sky_corners</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">corners</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">corners</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
 
-        <span class="n">max_res_px</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">c1</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">+</span> <span class="n">c2</span> <span class="o">*</span> <span class="n">c2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-        <span class="n">max_depth_px</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">max_res_px</span> <span class="o">*</span> <span class="n">max_res_px</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="p">[</span><span class="n">w_img_px</span><span class="p">,</span> <span class="n">h_img_px</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdu</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="c1"># take angular distances between the corners in x and y image space directions</span>
+            <span class="n">px_ang_size_x</span> <span class="o">=</span> <span class="n">sky_corners</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">separation</span><span class="p">(</span><span class="n">sky_corners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">w_img_px</span>
+            <span class="n">px_ang_size_y</span> <span class="o">=</span> <span class="n">sky_corners</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">separation</span><span class="p">(</span><span class="n">sky_corners</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">h_img_px</span>
 
-        <span class="n">max_norder</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_norder</span><span class="p">,</span> <span class="n">max_depth_px</span><span class="p">)</span>
+            <span class="n">px_sky_area</span> <span class="o">=</span> <span class="n">px_ang_size_x</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">px_ang_size_y</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span>
+                <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># in steradians</span>
+
+            <span class="c1"># Division by 0 case</span>
+            <span class="k">if</span> <span class="n">px_sky_area</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">healpix_order_computed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">depth_px</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">px_sky_area</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">max_norder</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_norder</span><span class="p">,</span> <span class="n">depth_px</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">healpix_order_computed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">healpix_order_computed</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;MOC precision HEALPix order could not be determined because sky coordinates &quot;</span>
+                <span class="s2">&quot;from the corners of the image has not have been correctly retrieved. &quot;</span>
+                <span class="s2">&quot;Therefore MOC precision will be set to max_norder&quot;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span>
             <span class="n">lon</span><span class="o">=</span><span class="n">skycrd</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
@@ -671,37 +719,70 @@
 <div class="viewcode-block" id="MOC.from_fits_images">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_fits_images">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_fits_images</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path_l</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">hdu_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_fits_images</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path_l</span><span class="p">,</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">hdu_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">approximate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a MOC from a set of FITS file images.</span>
-
-<span class="sd">        Assumes the data of the image is stored in the first HDU of the FITS file.</span>
-<span class="sd">        Please call `~mocpy.moc.MOC.from_fits_image` for passing another hdu than the first one.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        path_l : [str]</span>
-<span class="sd">            A list of path where the fits image are located.</span>
+<span class="sd">            A list of path where the fits images are located.</span>
 <span class="sd">        max_norder : int</span>
 <span class="sd">            The MOC resolution.</span>
-<span class="sd">        hdu_index : int</span>
-<span class="sd">            Index of the the HDU containing the image in each FITS file (default = 0)</span>
+<span class="sd">        hdu_index : int, optional</span>
+<span class="sd">            Index of the the HDUs containing the image in each FITS file (default = 0)</span>
+<span class="sd">            If set to -1, all the HUD will be taken in account, and only the ones</span>
+<span class="sd">            corresponding to images will be kept.</span>
+<span class="sd">        approximate : bool, optional</span>
+<span class="sd">            A faster but less precise way to build the MOC out of the images. This does</span>
+<span class="sd">            not mask the boolean values, and will approximate each image as a polygon</span>
+<span class="sd">            defined by the footprint deduced from the WCS. Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        moc : `~mocpy.moc.MOC`</span>
 <span class="sd">            The union of all the MOCs created from the paths found in ``path_l``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="n">max_norder</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">path_l</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdul</span><span class="p">:</span>
-                <span class="n">current_moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits_image</span><span class="p">(</span>
-                    <span class="n">hdu</span><span class="o">=</span><span class="n">hdul</span><span class="p">[</span><span class="n">hdu_index</span><span class="p">],</span>
-                    <span class="n">max_norder</span><span class="o">=</span><span class="n">max_norder</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">moc</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">current_moc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path_l</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">path_l</span> <span class="o">=</span> <span class="p">[</span><span class="n">path_l</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">moc</span></div>
+        <span class="n">mocs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">hdu_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">path_l</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdul</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">hdu</span> <span class="ow">in</span> <span class="n">hdul</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="nb">isinstance</span><span class="p">(</span>
+                                <span class="n">hdu</span><span class="p">,</span> <span class="p">(</span><span class="n">fits</span><span class="o">.</span><span class="n">ImageHDU</span><span class="p">,</span> <span class="n">fits</span><span class="o">.</span><span class="n">PrimaryHDU</span><span class="p">,</span> <span class="n">fits</span><span class="o">.</span><span class="n">CompImageHDU</span><span class="p">)</span>
+                            <span class="p">)</span>
+                            <span class="ow">and</span> <span class="n">hdu</span><span class="o">.</span><span class="n">header</span>
+                            <span class="ow">and</span> <span class="n">hdu</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;NAXIS&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+                        <span class="p">):</span>
+                            <span class="n">mocs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>  <span class="c1"># noqa: PERF401</span>
+                                <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits_image</span><span class="p">(</span>
+                                    <span class="n">hdu</span><span class="p">,</span>
+                                    <span class="n">max_norder</span><span class="p">,</span>
+                                    <span class="n">approximate</span><span class="o">=</span><span class="n">approximate</span><span class="p">,</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">path_l</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdul</span><span class="p">:</span>
+                    <span class="n">mocs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits_image</span><span class="p">(</span>
+                            <span class="n">hdul</span><span class="p">[</span><span class="n">hdu_index</span><span class="p">],</span> <span class="n">max_norder</span><span class="p">,</span> <span class="n">approximate</span><span class="o">=</span><span class="n">approximate</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mocs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;No image HDU found, returning an empty MOC.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">max_norder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mocs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mocs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">mocs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">mocs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># this is the fastest way to do multi union</span></div>
 
 
 <div class="viewcode-block" id="MOC.from_vizier_table">
@@ -1331,9 +1412,9 @@
 <span class="sd">            Maximum HEALPix cell resolution.</span>
 <span class="sd">        delta_depth : int, optional</span>
 <span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
-<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            depth using the `delta_depth` parameter.</span>
 <span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
-<span class="sd">            `depth` + `depth_delta`.</span>
+<span class="sd">            `depth` + `delta_depth`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1391,9 +1472,9 @@
 <span class="sd">            Maximum HEALPix cell resolution.</span>
 <span class="sd">        delta_depth : int, optional</span>
 <span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
-<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            depth using the `delta_depth` parameter.</span>
 <span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
-<span class="sd">            `max_depth` + `depth_delta`.</span>
+<span class="sd">            `max_depth` + `delta_depth`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1412,6 +1493,11 @@
 <span class="sd">        ...  max_depth=10</span>
 <span class="sd">        ... )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;MOC.from_cone&#39; only works with one cone. To create MOCs &quot;</span>
+                <span class="s2">&quot;from multiple cones, use &#39;MOC.from_cones&#39;.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span>
             <span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -1426,7 +1512,17 @@
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_cones">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@validate_lonlat</span>
-    <span class="k">def</span> <span class="nf">from_cones</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_cones</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">lon</span><span class="p">,</span>
+        <span class="n">lat</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">union_strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">delta_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a list of MOCs from cones.</span>
 
@@ -1445,31 +1541,72 @@
 <span class="sd">            The radius angle of the cone. Can be scalar or a list of radii.</span>
 <span class="sd">        max_depth : int</span>
 <span class="sd">            Maximum HEALPix cell resolution.</span>
+<span class="sd">        union_strategy : str, optional</span>
+<span class="sd">            Return the union of all the cones instead of the list of MOCs. Can be either</span>
+<span class="sd">            &quot;small_cones&quot; or &quot;large_cones&quot;. The &quot;small_cone&quot; strategy will be faster for</span>
+<span class="sd">            non-overlapping cones and the &quot;large_cones&quot; for the other case.</span>
 <span class="sd">        delta_depth : int, optional</span>
 <span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
-<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            depth using the `delta_depth` parameter.</span>
 <span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
-<span class="sd">            `max_depth` + `depth_delta`.</span>
+<span class="sd">            `max_depth` + `delta_depth`.</span>
 <span class="sd">        n_threads : int, optional</span>
 <span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
 <span class="sd">            all available threads will be used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        result : List[`~mocpy.moc.MOC`]</span>
-<span class="sd">            The resulting list of MOCs</span>
+<span class="sd">        List[`~mocpy.moc.MOC`] or `~mocpy.MOC`</span>
+<span class="sd">            The resulting list of MOCs, or if &#39;union_strategy&#39; is not None, the MOC of the</span>
+<span class="sd">            union of all the cones.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">        &gt;&gt;&gt; moc = MOC.from_cone(</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_cones(</span>
 <span class="sd">        ...  lon=[1, 4] * u.deg,</span>
 <span class="sd">        ...  lat=[2, 5] * u.deg,</span>
-<span class="sd">        ...  radius=10 * u.deg,</span>
-<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ...  radius=1 * u.arcmin,</span>
+<span class="sd">        ...  max_depth=12,</span>
+<span class="sd">        ...  union_strategy=&quot;small_cones&quot;</span>
 <span class="sd">        ... )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="o">==</span> <span class="s2">&quot;small_cones&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">radius</span><span class="o">.</span><span class="n">isscalar</span><span class="p">:</span>
+                <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">radii</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_small_cones</span><span class="p">(</span>
+                <span class="n">lon</span><span class="p">,</span>
+                <span class="n">lat</span><span class="p">,</span>
+                <span class="n">radii</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="o">==</span> <span class="s2">&quot;large_cones&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">radius</span><span class="o">.</span><span class="n">isscalar</span><span class="p">:</span>
+                <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">radii</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_large_cones</span><span class="p">(</span>
+                <span class="n">lon</span><span class="p">,</span>
+                <span class="n">lat</span><span class="p">,</span>
+                <span class="n">radii</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">delta_depth</span><span class="p">),</span>
+                <span class="n">n_threads</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;union_strategy&#39; can only be None, &#39;large_cones&#39;, or &#39;small_cones&#39;.&quot;</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">radius</span><span class="o">.</span><span class="n">isscalar</span><span class="p">:</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_same_cones</span><span class="p">(</span>
                 <span class="n">lon</span><span class="p">,</span>
@@ -1491,6 +1628,48 @@
         <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="MOC.from_zone">
+<a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_zone">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_zone</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a MOC from a zone.</span>
+
+<span class="sd">        The zone is defined by a range of longitudes and latitudes. Its sides follow great</span>
+<span class="sd">        circles in longitudes and small circles for latitudes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates : `~astropy.coordinates.SkyCoord`</span>
+<span class="sd">            A couple of coordinates for the bottom left and the upper right corner of the</span>
+<span class="sd">            zone.</span>
+<span class="sd">        max_depth : int</span>
+<span class="sd">            Maximum HEALPix cell resolution.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.moc.MOC`</span>
+<span class="sd">            The resulting MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC</span>
+<span class="sd">        &gt;&gt;&gt; from astropy.coordinates import SkyCoord</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_zone(</span>
+<span class="sd">        ...  SkyCoord([[0, 0], [20, 20]], unit=&quot;deg&quot;),</span>
+<span class="sd">        ...  max_depth=5</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_zone</span><span class="p">(</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">ra</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">icrs</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MOC.from_box">
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_box">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1499,7 +1678,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a box/rectangle.</span>
 
-<span class="sd">        The box is centered around the (`lon`, `lat`) position.</span>
+<span class="sd">        The box is centered around the (`lon`, `lat`) position. The sides and cross from</span>
+<span class="sd">        the center follow great circles. As such, the box is the intersection between</span>
+<span class="sd">        two orthogonal spherical wedges having the same center.</span>
 <span class="sd">        The coordinates should be expressed in equatorial coordinates using the</span>
 <span class="sd">        ICRS reference. We follow the Space MOC standard.</span>
 
@@ -1551,7 +1732,9 @@
 <a class="viewcode-back" href="../../../stubs/mocpy.MOC.html#mocpy.MOC.from_boxes">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@validate_lonlat</span>
-    <span class="k">def</span> <span class="nf">from_boxes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_boxes</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">union_strategy</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MOC from a box/rectangle.</span>
 
@@ -1576,11 +1759,16 @@
 <span class="sd">        n_threads : int, optional</span>
 <span class="sd">            The number of threads to be used. If this is set to None (default value),</span>
 <span class="sd">            all available threads will be used.</span>
+<span class="sd">        union_strategy : str, optional</span>
+<span class="sd">            Return the union of all the boxes instead of the list of MOCs. Can be either</span>
+<span class="sd">            &quot;small_boxes&quot; or &quot;large_boxes&quot;. The &quot;small_boxes&quot; strategy will be faster for</span>
+<span class="sd">            non-overlapping boxes and the &quot;large_boxes&quot; for the other case.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        result : list[`~mocpy.moc.MOC`]</span>
-<span class="sd">            The resulting list of MOCs.</span>
+<span class="sd">        result : list[`~mocpy.MOC`] or `~mocpy.MOC`</span>
+<span class="sd">            The resulting list of MOCs. If &#39;union_strategy&#39; is not None, returns the MOC</span>
+<span class="sd">            of the union of all boxes instead.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -1602,35 +1790,63 @@
 <span class="sd">        ...  a=[10, 20]*u.deg,</span>
 <span class="sd">        ...  b=[5, 10]*u.deg,</span>
 <span class="sd">        ...  angle=[30, 10]*u.deg,</span>
-<span class="sd">        ...  max_depth=10</span>
+<span class="sd">        ...  max_depth=10,</span>
+<span class="sd">        ...  union_strategy=&quot;small_boxes&quot;</span>
 <span class="sd">        ... )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">]</span>
+        <span class="n">max_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">)</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">isscalar</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;&#39;a&#39;, &#39;b&#39; and &#39;angle&#39; should either be all astropy angle-equivalent&quot;</span>
-                    <span class="s2">&quot;scalar values or they should all be iterable angle-equivalent. &quot;</span>
+                    <span class="s2">&quot; scalar values or they should all be iterable angle-equivalent. &quot;</span>
                     <span class="s2">&quot;They cannot be a mix of both.&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_same_boxes</span><span class="p">(</span>
-                <span class="n">lon</span><span class="p">,</span>
-                <span class="n">lat</span><span class="p">,</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">angle</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
-                <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">union_strategy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_same_boxes</span><span class="p">(</span>
+                    <span class="n">lon</span><span class="p">,</span>
+                    <span class="n">lat</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">angle</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)),</span>
+                    <span class="n">max_depth</span><span class="p">,</span>
+                    <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="c1"># no exception for same boxes in the union case</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
         <span class="c1"># different boxes</span>
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="o">==</span> <span class="s2">&quot;small_boxes&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">mocpy</span><span class="o">.</span><span class="n">from_small_boxes</span><span class="p">(</span>
+                    <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="o">==</span> <span class="s2">&quot;large_boxes&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">mocpy</span><span class="o">.</span><span class="n">from_large_boxes</span><span class="p">(</span>
+                    <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">union_strategy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;union_strategy&#39; can only be None, &#39;large_boxes&#39;, or &#39;small_boxes&#39;.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">indices</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_boxes</span><span class="p">(</span>
             <span class="n">lon</span><span class="p">,</span>
             <span class="n">lat</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Angle</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_depth</span><span class="p">),</span>
+            <span class="n">a</span><span class="p">,</span>
+            <span class="n">b</span><span class="p">,</span>
+            <span class="n">angle</span><span class="p">,</span>
+            <span class="n">max_depth</span><span class="p">,</span>
             <span class="n">n_threads</span><span class="o">=</span><span class="n">n_threads</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span></div>
@@ -1671,9 +1887,9 @@
 <span class="sd">            Maximum HEALPix cell resolution.</span>
 <span class="sd">        delta_depth : int, optional</span>
 <span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
-<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            depth using the `delta_depth` parameter.</span>
 <span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
-<span class="sd">            `max_depth` + `depth_delta`.</span>
+<span class="sd">            `max_depth` + `delta_depth`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1903,9 +2119,9 @@
 <span class="sd">            Maximum HEALPix cell resolution.</span>
 <span class="sd">        delta_depth : int, optional</span>
 <span class="sd">            To control the approximation, you can choose to perform the computations at a deeper</span>
-<span class="sd">            depth using the `depth_delta` parameter.</span>
+<span class="sd">            depth using the `delta_depth` parameter.</span>
 <span class="sd">            The depth at which the computations will be made will therefore be equal to</span>
-<span class="sd">            `max_depth` + `depth_delta`.</span>
+<span class="sd">            `max_depth` + `delta_depth`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1939,7 +2155,7 @@
 <span class="sd">            The supported sky regions are `~regions.CircleSkyRegion`,</span>
 <span class="sd">            `~regions.CircleAnnulusSkyRegion`, `~regions.EllipseSkyRegion`,</span>
 <span class="sd">            `~regions.RectangleSkyRegion`, `~regions.PolygonSkyRegion`,</span>
-<span class="sd">            `~regions.PointSkyRegion`.</span>
+<span class="sd">            `~regions.PointSkyRegion`, `~regions.Regions`.</span>
 <span class="sd">        max_depth : int</span>
 <span class="sd">            The maximum HEALPix cell resolution of the MOC. Should be comprised between</span>
 <span class="sd">            0 and 29.</span>
@@ -1947,6 +2163,14 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        `~mocpy.moc.MOC`</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - For the `~regions.Regions`, the returned MOC will be the union of all the regions.</span>
+<span class="sd">        - For the `~regions.PolygonSkyRegion` and the `~regions.RectangleSkyRegion`, the MOC</span>
+<span class="sd">        will consider the sides to follow great circles on the sky sphere while in</span>
+<span class="sd">        astropy-regions the sides follow straight lines in the projected space (depending on</span>
+<span class="sd">        a given WCS, see issue https://github.com/astropy/regions/issues/564).</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -1964,6 +2188,7 @@
             <span class="n">regions</span><span class="o">.</span><span class="n">RectangleSkyRegion</span><span class="p">,</span>
             <span class="n">regions</span><span class="o">.</span><span class="n">PolygonSkyRegion</span><span class="p">,</span>
             <span class="n">regions</span><span class="o">.</span><span class="n">PointSkyRegion</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">Regions</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">CircleSkyRegion</span><span class="p">):</span>
             <span class="n">center</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">icrs</span>
@@ -2022,6 +2247,13 @@
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_polygon_skycoord</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">PointSkyRegion</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_skycoords</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">max_norder</span><span class="o">=</span><span class="n">max_depth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">regions</span><span class="o">.</span><span class="n">Regions</span><span class="p">):</span>
+            <span class="n">mocs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">from_astropy_regions</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">)</span> <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">region</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mocs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">mocs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">mocs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">mocs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># fastest multi-union</span>
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;&#39;from_astropy_regions&#39; does not support this region type.&quot;</span>
@@ -2317,7 +2549,7 @@
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; moc = MOC.from_str(&quot;2/2-25 28 29 4/0 6/&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; fig = plt.figure()</span>
-<span class="sd">        &gt;&gt;&gt; moc.wcs(fig) # DOCTEST: +IGNORE_RESULT</span>
+<span class="sd">        &gt;&gt;&gt; moc.wcs(fig) # doctest: +SKIP</span>
 <span class="sd">        WCS Keywords</span>
 <span class="sd">        &lt;BLANKLINE&gt;</span>
 <span class="sd">        Number of WCS axes: 2</span>
@@ -2597,7 +2829,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 Jul 2024. <br/>
+    Last built 17 Oct 2024. <br/>
   </p>
 </footer>
   </body>
