@@ -30,7 +30,7 @@ For a command line tool, see the `moc-cli <https://github.com/cds-astro/cds-moc-
 For more information about the MOCPy Rust core, see the `moc crate <https://crates.io/crates/moc>`__.
 
 .. figure:: ./resources/readme.png
-   :scale: 50 %
+   :width: 500 px
    :align: center
    :alt: a moc plotted with mocpy
 
