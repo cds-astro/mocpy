@@ -2346,7 +2346,7 @@ class MOC(AbstractMOC):
         >>> import matplotlib.pyplot as plt
         >>> moc = MOC.from_str("2/2-25 28 29 4/0 6/")
         >>> fig = plt.figure()
-        >>> moc.wcs(fig) # DOCTEST: +IGNORE_RESULT
+        >>> moc.wcs(fig) # doctest: +SKIP
         WCS Keywords
         <BLANKLINE>
         Number of WCS axes: 2

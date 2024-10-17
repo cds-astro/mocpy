@@ -44,7 +44,7 @@ class FrequencyMOC(AbstractMOC):
         --------
         >>> from mocpy import FrequencyMOC
         >>> fmoc = FrequencyMOC.from_json({8: [12, 14, 16], 22: [120, 121, 122]})
-        >>> fmoc.max_order
+        >>> print(fmoc.max_order)
         22
         """
         depth = mocpy.get_fmoc_depth(self.store_index)

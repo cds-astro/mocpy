@@ -1,12 +1,13 @@
 use std::{f64::consts::FRAC_PI_3, ops::Range};
 
-use ndarray::Array;
 #[cfg(not(target_arch = "wasm32"))]
 use num_threads::num_threads;
 use numpy::{
   IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
   PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
 };
+use numpy::ndarray::Array;
+
 use pyo3::{
   exceptions::{PyIOError, PyValueError},
   prelude::{pymodule, Bound, PyModule, PyResult, Python},
@@ -172,6 +173,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_same_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -248,6 +250,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -328,6 +331,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_small_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -403,6 +407,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_large_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -507,6 +512,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC indices in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, angle, depth, n_threads=None))]
   pub fn from_same_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -591,6 +597,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC indices in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -685,6 +692,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC index in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_small_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -773,6 +781,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Output
   /// - The MOC index in the storage
   #[pyfn(m)]
+  #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_large_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -970,6 +979,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOC depth
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
   #[pyfn(m)]
+  #[pyo3(signature = (lon_lat_deg, complement, depth, n_threads=None))]
   pub fn from_polygons(
     lon_lat_deg: Vec<PyReadonlyArrayDyn<f64>>,
     complement: bool,
@@ -1129,9 +1139,9 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times = times.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times = times.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_times_positions_approx(times, lon, lat, d1, d2)
@@ -1167,9 +1177,9 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times = times.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times = times.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_times_positions(times, lon, lat, d1, d2)
@@ -1214,10 +1224,10 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_time_ranges_positions_approx(times_min, times_max, d1, lon, lat, d2)
@@ -1256,10 +1266,10 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)
@@ -1303,14 +1313,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     d1: u8,
     spatial_coverages: PyReadonlyArrayDyn<usize>,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != times_max.len() {
       return Err(PyValueError::new_err(
         "`times_min` and `times_max` do not have the same size.",
       ));
     }
-    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    let spatial_coverage_indices = spatial_coverages.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != spatial_coverage_indices.len() {
       return Err(PyValueError::new_err(
         "`times` and `spatial indices` do not have the same size.",
@@ -1357,14 +1367,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     d1: u8,
     spatial_coverages: PyReadonlyArrayDyn<usize>,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != times_max.len() {
       return Err(PyValueError::new_err(
         "`times_min` and `times_max` do not have the same size.",
       ));
     }
-    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    let spatial_coverage_indices = spatial_coverages.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != spatial_coverage_indices.len() {
       return Err(PyValueError::new_err(
         "`times` and `spatial indices` do not have the same size.",
@@ -2304,6 +2314,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
   /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
   #[pyfn(m)]
+  #[pyo3(signature = (indices, uniq, uniq_mask, probdens, probdens_mask, n_threads=None))]
   fn multi_multiorder_probdens_map_sum_in_smoc<'a>(
     py: Python<'a>,
     indices: PyReadonlyArrayDyn<'a, usize>,
