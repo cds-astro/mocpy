@@ -1139,9 +1139,9 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times = times.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times = times.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_times_positions_approx(times, lon, lat, d1, d2)
@@ -1177,9 +1177,9 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times = times.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times = times.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_times_positions(times, lon, lat, d1, d2)
@@ -1224,10 +1224,10 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_time_ranges_positions_approx(times_min, times_max, d1, lon, lat, d2)
@@ -1266,10 +1266,10 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     lat: PyReadonlyArrayDyn<f64>,
     d2: u8,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
-    let lon = lon.as_array().to_owned().into_raw_vec();
-    let lat = lat.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
+    let lon = lon.to_vec().map_err(PyValueError::new_err)?;
+    let lat = lat.to_vec().map_err(PyValueError::new_err)?;
 
     U64MocStore::get_global_store()
       .create_from_time_ranges_positions(times_min, times_max, d1, lon, lat, d2)
@@ -1313,14 +1313,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     d1: u8,
     spatial_coverages: PyReadonlyArrayDyn<usize>,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != times_max.len() {
       return Err(PyValueError::new_err(
         "`times_min` and `times_max` do not have the same size.",
       ));
     }
-    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    let spatial_coverage_indices = spatial_coverages.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != spatial_coverage_indices.len() {
       return Err(PyValueError::new_err(
         "`times` and `spatial indices` do not have the same size.",
@@ -1367,14 +1367,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     d1: u8,
     spatial_coverages: PyReadonlyArrayDyn<usize>,
   ) -> PyResult<usize> {
-    let times_min = times_min.as_array().to_owned().into_raw_vec();
-    let times_max = times_max.as_array().to_owned().into_raw_vec();
+    let times_min = times_min.to_vec().map_err(PyValueError::new_err)?;
+    let times_max = times_max.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != times_max.len() {
       return Err(PyValueError::new_err(
         "`times_min` and `times_max` do not have the same size.",
       ));
     }
-    let spatial_coverage_indices = spatial_coverages.as_array().to_owned().into_raw_vec();
+    let spatial_coverage_indices = spatial_coverages.to_vec().map_err(PyValueError::new_err)?;
     if times_min.len() != spatial_coverage_indices.len() {
       return Err(PyValueError::new_err(
         "`times` and `spatial indices` do not have the same size.",
