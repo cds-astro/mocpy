@@ -1483,8 +1483,10 @@ class MOC(AbstractMOC):
         """
         Create a MOC from a zone.
 
-        The zone is defined by a range of longitudes and latitudes. Its sides follow great
-        circles in longitudes and small circles for latitudes.
+        The zone is defined by a range of longitudes and latitudes. Its sides follow
+        great circles in longitudes and small circles for latitudes.
+        The bottom and left sides are included in the MOC, while the top and right sides
+        are not.
 
         Parameters
         ----------
@@ -1508,10 +1510,16 @@ class MOC(AbstractMOC):
         ...  max_depth=5
         ... )
         """
+        # workaround astropy.SkyCoord that wraps longitudes between [0:360[
+        # where we want ]0:360] for lon_max. There is no issue for lon_min that is
+        # expected in [0:360[.
+        lon_max = coordinates[1].icrs.ra.deg
+        if lon_max == 0:
+            lon_max = 360
         index = mocpy.from_zone(
             coordinates[0].icrs.ra.deg,
             coordinates[0].icrs.dec.deg,
-            coordinates[1].icrs.ra.deg,
+            lon_max,
             coordinates[1].icrs.dec.deg,
             np.uint8(max_depth),
         )

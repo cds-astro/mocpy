@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* in space MOCs: upper right corner of a zone can now have a longitude of 360° [#180]
+
 ## [0.17.0]
 
 ### Added
