@@ -600,8 +600,10 @@ def test_from_ring():
 def test_from_zone():
     moc = MOC.from_zone(SkyCoord([[-50, -50], [50, 50]], unit="deg"), max_depth=5)
     # test the diagonal
-    for coordinate in range(-50, 60, 10):
+    for coordinate in range(-50, 40, 10):  ## (50,50) not included
         assert moc.contains_skycoords(SkyCoord(coordinate, coordinate, unit="deg"))
+    # regression for #180
+    MOC.from_zone(SkyCoord([(180, 30), (360, 50)], unit="deg"), max_depth=3)
 
 
 def test_from_box():
