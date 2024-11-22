@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.17.1]
+
+### Added
+
+* build wheels for python 3.13
+
 ### Fixed
 
 * in space MOCs: upper right corner of a zone can now have a longitude of 360° [#180]
