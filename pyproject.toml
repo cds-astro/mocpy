@@ -1,6 +1,7 @@
 # Enrich using https://www.maturin.rs/metadata.html
 [project]
 name = "mocpy"
+dynamic = ["version"]
 # 3.6 is no longer maintained and no more supported by maturin
 requires-python = ">=3.8"
 # https://numpy.org/neps/nep-0029-deprecation_policy.html
