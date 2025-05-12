@@ -194,7 +194,8 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         """
         return mocpy.is_empty(self.store_index)
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def max_order(self):
         """Depth of the MOC instance."""
 
@@ -225,7 +226,8 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         """
         return mocpy.to_uniq_gen(self.store_index)
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def n_cells(cls, depth, dimension=None):
         """Give the number of cells for the given depth. This is defined in children classes."""
 
@@ -495,7 +497,8 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         self.store_index = mocpy.contract(prevstore_index)
         return self
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def load(cls):
         """Load a MOC, has to be defined in children classes."""
 
