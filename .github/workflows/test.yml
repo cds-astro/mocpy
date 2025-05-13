@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux64-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.7, 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
-    container: quay.io/pypa/manylinux2014_x86_64
+    # * CPython 3.8, 3.9, 3.10 and 3.11 installed in /opt/python/<python tag>-<abi tag>
+    container: quay.io/pypa/manylinux_2_34_x86_64:latest
     env: {ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true} # Allow using Node16 actions required for CentOS7
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
@@ -36,7 +36,6 @@ jobs:
            source mocpy-env/bin/activate
            pip install --upgrade pip
            pip install maturin
-           maturin build --release --compatibility manylinux2014
            maturin develop --release
            pip install .[dev]
            python -m pytest -v -s python/mocpy
