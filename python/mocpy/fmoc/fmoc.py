@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from astropy import units as u
 
@@ -138,6 +140,41 @@ class FrequencyMOC(AbstractMOC):
         """
         index = mocpy.degrade(self.store_index, new_order)
         return FrequencyMOC(index)
+
+    def refine_to_order(self, new_order):
+        """Refine the order of the F-MOC instance to a more precise order.
+
+        This is an in-place operation.
+
+        Parameters
+        ----------
+        new_order : int
+            New maximum order for this F-MOC.
+
+        Returns
+        -------
+        `mocpy.FrequencyMOC`
+            Returns itself, after in-place modification.
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> import astropy.units as u
+        >>> fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)
+        >>> fmoc
+        40/807453851648
+        >>> fmoc.refine_to_order(50)
+        40/807453851648
+        50/
+        """
+        if new_order <= self.max_order:
+            warnings.warn(
+                "'new_order' is less precise than the current max order. "
+                "Nothing done.",
+                stacklevel=2,
+            )
+        mocpy.refine(self.store_index, new_order)
+        return self
 
     @classmethod
     def new_empty(cls, max_depth):

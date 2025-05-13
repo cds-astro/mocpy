@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+* added method `refine_to_order` that modifies one-dimensional MOCs in place to increase
+  their maximum order [#187]
+
 ## [0.17.1]
 
 ### Added

@@ -2,11 +2,11 @@ use std::{f64::consts::FRAC_PI_3, ops::Range};
 
 #[cfg(not(target_arch = "wasm32"))]
 use num_threads::num_threads;
+use numpy::ndarray::Array;
 use numpy::{
   IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
   PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
 };
-use numpy::ndarray::Array;
 
 use pyo3::{
   exceptions::{PyIOError, PyValueError},
@@ -2741,12 +2741,26 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - The index of the coverage in the store.
-  /// * ``depth`` - The depth to degrade the time coverage to.
+  /// * ``depth`` - The depth to degrade the coverage to.
   ///
   #[pyfn(m)]
   fn degrade(index: usize, depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .degrade(index, depth)
+      .map_err(PyValueError::new_err)
+  }
+
+  /// Refine a (1D) coverage to a specific depth.
+  ///
+  /// # Arguments
+  ///
+  /// * ``index`` - The index of the coverage in the store.
+  /// * ``depth`` - The depth to refine the coverage to.
+  ///
+  #[pyfn(m)]
+  fn refine(index: usize, depth: u8) -> PyResult<()> {
+    U64MocStore::get_global_store()
+      .refine(index, depth)
       .map_err(PyValueError::new_err)
   }
 
