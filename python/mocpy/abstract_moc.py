@@ -622,6 +622,24 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError("Method degrade_to_order not implemented")
 
+    def refine_to_order(self, new_order):
+        """Refine the MOC instance to a more precise order.
+
+        This is an in-place operation.
+
+        Parameters
+        ----------
+        new_order : int
+            New maximum order for the MOC.
+
+        Returns
+        -------
+        `mocpy.MOC`, `mocpy.TimeMOC`, `mocpy.FrequencyMOC`
+            Returns itself, after in-place modification.
+        """
+        # error needed because it does not exist for 2D MOCs
+        raise NotImplementedError("Method refine_to_order not implemented")
+
     def to_string(self, format="ascii", fold=0):  # noqa: A002
         """Write the MOC into a string.
 

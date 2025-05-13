@@ -587,6 +587,15 @@ def test_degrade_to_order():
         assert hst_moc.sky_fraction <= 1.0
 
 
+def test_refine_to_order():
+    moc = MOC.from_str("5/1")
+    moc.refine_to_order(6)
+    assert moc.max_order == 6
+
+    with pytest.warns(UserWarning, match="'new_order' is less precise*"):
+        moc.refine_to_order(0)
+
+
 def test_from_ring():
     MOC.from_ring(
         lon=0 * u.deg,

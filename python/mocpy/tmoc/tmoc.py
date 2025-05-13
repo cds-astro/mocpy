@@ -140,6 +140,40 @@ class TimeMOC(AbstractMOC):
         index = mocpy.degrade(self.store_index, new_order)
         return TimeMOC(index)
 
+    def refine_to_order(self, new_order):
+        """Refine the order of the T-MOC instance to a more precise order.
+
+        This is an in-place operation.
+
+        Parameters
+        ----------
+        new_order : int
+            New maximum order for this MOC.
+
+        Returns
+        -------
+        `mocpy.TimeMOC`
+            Returns itself, after in-place modification.
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.from_str("2/0")
+        >>> tmoc
+        2/0
+        >>> tmoc.refine_to_order(3)
+        2/0
+        3/
+        """
+        if new_order <= self.max_order:
+            warnings.warn(
+                "'new_order' is less precise than the current max order. "
+                "Nothing done.",
+                stacklevel=2,
+            )
+        mocpy.refine(self.store_index, new_order)
+        return self
+
     @classmethod
     def new_empty(cls, max_depth):
         """

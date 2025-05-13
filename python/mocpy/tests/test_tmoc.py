@@ -51,6 +51,15 @@ def test_to_depth61_ranges():
     ).all()
 
 
+def test_refine_to_order():
+    moc = TimeMOC.from_str("5/1")
+    moc.refine_to_order(6)
+    assert moc.max_order == 6
+
+    with pytest.warns(UserWarning, match="'new_order' is less precise*"):
+        moc.refine_to_order(0)
+
+
 def test_n_cells():
     assert TimeMOC.n_cells(0) == 2
     with pytest.raises(

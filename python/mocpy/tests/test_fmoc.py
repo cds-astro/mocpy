@@ -61,6 +61,15 @@ def test_degrade_to_order():
     ).all()
 
 
+def test_refine_to_order():
+    moc = FrequencyMOC.from_str("5/1")
+    moc.refine_to_order(6)
+    assert moc.max_order == 6
+
+    with pytest.warns(UserWarning, match="'new_order' is less precise*"):
+        moc.refine_to_order(0)
+
+
 def test_from_depth59_ranges():
     ranges = np.array([[0, FrequencyMOC.MAX_INDEX_EXCLUSIVE]], dtype=np.uint64)
     fmoc = FrequencyMOC.from_depth59_ranges(FrequencyMOC.MAX_ORDER, ranges)

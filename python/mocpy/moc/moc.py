@@ -267,6 +267,40 @@ class MOC(AbstractMOC):
         index = mocpy.degrade(self.store_index, new_order)
         return MOC(index)
 
+    def refine_to_order(self, new_order):
+        """Refine the order of the MOC instance to a more precise order.
+
+        This is an in-place operation.
+
+        Parameters
+        ----------
+        new_order : int
+            New maximum order for this MOC.
+
+        Returns
+        -------
+        `mocpy.MOC`
+            Returns itself, after in-place modification.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_str("3/10")
+        >>> moc
+        3/10
+        >>> moc.refine_to_order(5)
+        3/10
+        5/
+        """
+        if new_order <= self.max_order:
+            warnings.warn(
+                "'new_order' is less precise than the current max order. "
+                "Nothing done.",
+                stacklevel=2,
+            )
+        mocpy.refine(self.store_index, new_order)
+        return self
+
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
         Return a boolean mask array of the positions lying inside (or outside) the MOC instance.
