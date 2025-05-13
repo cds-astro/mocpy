@@ -20,3 +20,10 @@ repos:
        fail_fast: true
      # formatter
      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: cargofmt
+        name: cargofmt
+        entry: rustfmt
+        files: \.rs$
+        language: system
