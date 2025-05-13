@@ -22,6 +22,10 @@ def test_n_cells():
         match=f"The depth should be comprised between 0 and {FrequencyMOC.MAX_ORDER}*",
     ):
         FrequencyMOC.n_cells(-1)
+    with pytest.raises(
+        ValueError,
+        match=f"The depth should be comprised between 0 and {FrequencyMOC.MAX_ORDER}*",
+    ):
         FrequencyMOC.n_cells(FrequencyMOC.MAX_ORDER + 1)
     assert FrequencyMOC.n_cells(5) == 2 * FrequencyMOC.n_cells(4)
 
