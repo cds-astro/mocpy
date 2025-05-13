@@ -11,7 +11,9 @@ use numpy::{
 use pyo3::{
   exceptions::{PyIOError, PyValueError},
   prelude::{pymodule, Bound, PyModule, PyResult, Python},
+  types::PyModuleMethods,
   types::{PyBytes, PyTuple},
+  wrap_pyfunction,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use rayon::prelude::*;
@@ -23,6 +25,8 @@ use moc::{
   utils,
 };
 use ndarray::parallel::prelude::IntoParallelRefIterator;
+
+mod sfmoc;
 
 #[pymodule]
 fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -1391,8 +1395,9 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
+  /// Returns the index of a T-MOC
   #[pyfn(m)]
-  fn project_on_first_dim(smoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
+  fn project_on_stmoc_time_dim(smoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .space_fold(smoc_index, stmoc_index)
       .map_err(PyValueError::new_err)
@@ -1420,7 +1425,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This **should** not panic as this code is wrapped around MOCPy
   #[pyfn(m)]
-  fn project_on_second_dim(tmoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
+  fn project_on_stmoc_space_dim(tmoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .time_fold(tmoc_index, stmoc_index)
       .map_err(PyValueError::new_err)
@@ -1441,7 +1446,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
-  fn coverage_2d_from_fits_file(path: String) -> PyResult<usize> {
+  fn coverage_st_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_file(path)
       .map_err(PyIOError::new_err)
@@ -1465,7 +1470,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
-  fn coverage_2d_from_ascii_file(path: String) -> PyResult<usize> {
+  fn coverage_st_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii_file(path)
       .map_err(PyIOError::new_err)
@@ -1482,7 +1487,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
-  fn coverage_2d_from_json_file(path: String) -> PyResult<usize> {
+  fn coverage_st_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json_file(path)
       .map_err(PyIOError::new_err)
@@ -1499,7 +1504,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
-  fn coverage_2d_from_ascii_str(_py: Python, ascii: String) -> PyResult<usize> {
+  fn coverage_st_from_ascii_str(_py: Python, ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii(&ascii)
       .map_err(PyIOError::new_err)
@@ -1516,7 +1521,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
-  fn coverage_2d_from_json_str(_py: Python, json: String) -> PyResult<usize> {
+  fn coverage_st_from_json_str(_py: Python, json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json(&json)
       .map_err(PyIOError::new_err)
@@ -3244,6 +3249,28 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       )
       .map_err(PyValueError::new_err)
   }
+
+  // add sfmoc pyfunctions here
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_fits_file, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::sfmoc_from_fits_raw_bytes, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_ascii_file, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_json_file, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_ascii_str, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_json_str, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::from_freq_lonlat, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::from_freq_ranges_lonlat, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::project_on_sfmoc_freq_dim, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::project_on_sfmoc_space_dim, m)?)
+    .unwrap();
 
   Ok(())
 }
