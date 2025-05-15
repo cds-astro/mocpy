@@ -146,7 +146,7 @@ class MOC(AbstractMOC):
     A MOC corresponds to a list of `HEALPix <https://healpix.sourceforge.io/>`__ cells at different depths.
     This class gives you the possibility to:
 
-    1. Define `~mocpy.moc.MOC` objects:
+    1. Define `~mocpy.MOC` objects:
 
     - From a FITS file that stores HEALPix cells (see `load(path, 'fits')`).
     - Directly from a list of HEALPix cells expressed either as a numpy structural array (see `from_healpix_cells`) or a simple
@@ -155,7 +155,7 @@ class MOC(AbstractMOC):
     - From a convex/concave polygon (see `from_polygon`).
     - From a cone (will be implemented in a next version).
 
-    2. Perform fast logical operations between `~mocpy.moc.MOC` objects:
+    2. Perform fast logical operations between `~mocpy.MOC` objects:
 
     - The `intersection`
     - The `union`
@@ -163,14 +163,14 @@ class MOC(AbstractMOC):
     - The `complement`
 
 
-    3. Plot the `~mocpy.moc.MOC` objects:
+    3. Plot the `~mocpy.MOC` objects:
 
     - Draw the MOC with its HEALPix cells (see `fill`)
     - Draw the perimeter of a MOC (see `border`)
 
-    4. Get the sky coordinates defining the border(s) of `~mocpy.moc.MOC` objects (see `get_boundaries`).
+    4. Get the sky coordinates defining the border(s) of `~mocpy.MOC` objects (see `get_boundaries`).
 
-    5. Serialize `~mocpy.moc.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
+    5. Serialize `~mocpy.MOC` objects to `astropy.io.fits.HDUList` or JSON dictionary and save it to a file.
     """
 
     # Maximum order (or depth) of a MOC
@@ -227,6 +227,10 @@ class MOC(AbstractMOC):
         include_indirect_neighbours : bool
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
+
+        Returns
+        -------
+        int
         """
         return mocpy.split_count(self.store_index, include_indirect_neighbours)
 
@@ -240,9 +244,13 @@ class MOC(AbstractMOC):
             if `false`, only consider  cells having a common edge as been part of a same MOC
             if `true`, also consider cells having a common vertex as been part of the same MOC
 
-        Warning
+        Returns
         -------
-        Please use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
+        `~mocpy.MOC`
+
+        Notes
+        -----
+        Use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
         """
         indices = mocpy.split(self.store_index, include_indirect_neighbours)
         return [MOC(index) for index in indices]
@@ -261,7 +269,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The degraded MOC.
         """
         index = mocpy.degrade(self.store_index, new_order)
@@ -315,7 +323,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        array : `~np.ndarray`
+        `~np.ndarray`
             A mask boolean array
 
         See Also
@@ -387,7 +395,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        array : `~np.ndarray`
+        `~np.ndarray`
             A mask boolean array
 
         Examples
@@ -522,7 +530,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        coords: [`~astropy.coordinates.SkyCoord`]
+        [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
         warnings.warn(
@@ -535,13 +543,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_fits_image(cls, hdu, max_norder, mask=None, approximate=False):
         """
-        Create a `~mocpy.moc.MOC` from an image stored as a FITS file.
-
-        Info
-        ----
-        When giving a mask, the MOC computed will only take into account the center
-        of the image pixels and not the whole pixel borders.
-        This leads to an approximate resulting MOC.
+        Create a `~mocpy.MOC` from an image stored as a FITS file.
 
         Parameters
         ----------
@@ -555,8 +557,14 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC.
+
+        Notes
+        -----
+        When giving a mask, the MOC computed will only take into account the center
+        of the image pixels and not the whole pixel borders.
+        This leads to an approximate resulting MOC.
         """
         # Only take the first HDU
         header = hdu.header
@@ -670,7 +678,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        moc : `~mocpy.MOC`
             The union of all the MOCs created from the paths found in ``path_l``.
         """
         if not isinstance(path_l, list):
@@ -716,7 +724,7 @@ class MOC(AbstractMOC):
 
     @classmethod
     def from_vizier_table(cls, table_id, max_depth=None, nside=None):
-        """Create a `~mocpy.moc.MOC` object from a VizieR table or catalog.
+        """Create a `~mocpy.MOC` object from a VizieR table or catalog.
 
         Parameters
         ----------
@@ -732,7 +740,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC.
 
         Examples
@@ -788,7 +796,7 @@ class MOC(AbstractMOC):
 
     @classmethod
     def from_ivorn(cls, ivorn, max_depth: int = 8, nside=None):
-        """Create a `~mocpy.moc.MOC` object from a given IVORN.
+        """Create a `~mocpy.MOC` object from a given IVORN.
 
         IVORNs are standardized unique identifiers used within the virtual observatory.
         This method queries the MOCServer, a CDS service that can also be found through
@@ -805,7 +813,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC.
 
         Examples
@@ -852,7 +860,7 @@ class MOC(AbstractMOC):
     @classmethod
     def from_url(cls, url):
         """
-        Create a `~mocpy.moc.MOC` object from a given url.
+        Create a `~mocpy.MOC` object from a given url.
 
         Parameters
         ----------
@@ -861,7 +869,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC.
         """
         # TODO: as is, this is a duplicate of abstract class `from_fits` called with an url
@@ -882,7 +890,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
         """
         return cls.from_lonlat(
@@ -911,7 +919,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
         """
         index = mocpy.from_lonlat(
@@ -957,15 +965,15 @@ class MOC(AbstractMOC):
         asc: boolean
             the cumulative value is computed from lower to highest densities instead of from highest to lowest
         strict: boolean
-            (sub-)cells overlapping the `cumul_from` or `cumul_to` values are not added
+            (sub-)cells overlapping the ``cumul_from`` or ``cumul_to`` values are not added
         no_split: boolean
-            cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
+            cells overlapping the ``cumul_from`` or ``cumul_to`` values are not recursively split
         reverse_decent: boolean
             perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
         """
         index = mocpy.spatial_moc_from_multiordermap_fits_file(
@@ -1238,7 +1246,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
         """
         if max_depth is None:
@@ -1309,7 +1317,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1366,7 +1374,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1441,7 +1449,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        List[`~mocpy.moc.MOC`] or `~mocpy.MOC`
+        List[`~mocpy.MOC`] or `~mocpy.MOC`
             The resulting list of MOCs, or if 'union_strategy' is not None, the MOC of the
             union of all the cones.
 
@@ -1532,7 +1540,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1588,7 +1596,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1650,7 +1658,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : list[`~mocpy.MOC`] or `~mocpy.MOC`
+        list[`~mocpy.MOC`] or `~mocpy.MOC`
             The resulting list of MOCs. If 'union_strategy' is not None, returns the MOC
             of the union of all boxes instead.
 
@@ -1774,7 +1782,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1819,7 +1827,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
@@ -1945,7 +1953,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         See Also
@@ -1966,19 +1974,7 @@ class MOC(AbstractMOC):
         """
         Create a MOC from a STC-S.
 
-        Info
-        ----
         Time, Spectral and Redshift sub-phrases are ignored.
-
-        Warning
-        -------
-        There is so far no implicit conversion, so the STC-S string will be rejected if:
-        * the frame is different from `ICRS`
-        * the flavor is different from `Spher2`
-        * the units are different from `degrees`
-        The implementation is not (yet?) fully compliant with the STC standard (see MOC Lib rust for more details):
-        * DIFFERENCE is so far interpreted as a symmetrical difference (XOR) while it is a MINUS in the STC standard
-        * Self-intersecting Polygons are supported, and the "interior" usually has the smallest area
 
         Parameters
         ----------
@@ -1994,16 +1990,27 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The resulting MOC
 
         Examples
         --------
         >>> from mocpy import MOC
         >>> moc1 = MOC.from_stcs("Circle ICRS 147.6 69.9 0.4", max_depth=14)
-        >>> moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg, radius=Angle(0.4, u.deg), max_depth=14)
+        >>> moc2 = MOC.from_cone(lon=147.6 * u.deg, lat=69.9 * u.deg,
+        ...                      radius=Angle(0.4, u.deg), max_depth=14)
         >>> moc1 == moc2
         True
+
+        Warnings
+        --------
+        There is so far no implicit conversion, so the STC-S string will be rejected if:
+        * the frame is different from `ICRS`
+        * the flavor is different from `Spher2`
+        * the units are different from `degrees`
+        The implementation is not (yet?) fully compliant with the STC standard (see MOC Lib rust for more details):
+        * DIFFERENCE is so far interpreted as a symmetrical difference (XOR) while it is a MINUS in the STC standard
+        * Self-intersecting Polygons are supported, and the "interior" usually has the smallest area
         """
         index = mocpy.from_stcs(stcs, np.uint8(max_depth), np.uint8(delta_depth))
         return cls(index)
@@ -2028,15 +2035,15 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        `~mocpy.moc.MOC`
+        `~mocpy.MOC`
 
         Notes
         -----
         - For the `~regions.Regions`, the returned MOC will be the union of all the regions.
         - For the `~regions.PolygonSkyRegion` and the `~regions.RectangleSkyRegion`, the MOC
-        will consider the sides to follow great circles on the sky sphere while in
-        astropy-regions the sides follow straight lines in the projected space (depending on
-        a given WCS, see issue https://github.com/astropy/regions/issues/564).
+          will consider the sides to follow great circles on the sky sphere while in
+          astropy-regions the sides follow straight lines in the projected space (depending on
+          a given WCS, see issue https://github.com/astropy/regions/issues/564).
 
         Examples
         --------
@@ -2138,7 +2145,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        moc : `~mocpy.MOC`
             The MOC
         """
         index = mocpy.new_empty_smoc(np.uint8(max_depth))
@@ -2165,7 +2172,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        `~mocpy.moc.MOC`
+        `~mocpy.MOC`
             The MOC
         """
         if not isinstance(depth, Iterable):
@@ -2200,7 +2207,7 @@ class MOC(AbstractMOC):
 
         Returns
         -------
-        moc : `~mocpy.moc.MOC`
+        moc : `~mocpy.MOC`
             The MOC
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
@@ -2578,8 +2585,8 @@ class MOC(AbstractMOC):
         """
         Return a `np.array` of the uniq HEALPIx indices of the cell in the MOC.
 
-        Warning
-        -------
+        Notes
+        -----
         The output is not sorted, the order follow the order of HEALPix cells in
         the underlying sorted array of depth29 nested ranges, i.e. the natural order
         of the cells is the underlying z-order curve.
