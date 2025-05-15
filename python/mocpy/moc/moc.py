@@ -2221,10 +2221,16 @@ class MOC(AbstractMOC):
 
         Parameters
         ----------
-        tmoc : `~mocpy.tmoc.TimeMoc`
-        stmoc : `~mocpy.stmoc.STMoc`
+        tmoc : `~mocpy.TimeMOC`
+        stmoc : `~mocpy.STMOC`
+
+        Returns
+        -------
+        `~mocpy.MOC`
         """
-        store_index = mocpy.project_on_second_dim(tmoc.store_index, stmoc.store_index)
+        store_index = mocpy.project_on_stmoc_space_dim(
+            tmoc.store_index, stmoc.store_index
+        )
         return cls(store_index)
 
     @staticmethod

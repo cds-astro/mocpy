@@ -293,19 +293,9 @@ class STMOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.moc.MOC`
             The spatial coverage being observed within the input time ranges
         """
-        # if times.ndim != 2 or times.shape[1] != 2:
-        #    raise ValueError(
-        #        "Times ranges must be provided. The shape of times must be (_, 2)"
-        #    )
-
-        # times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
-        # times = utils.times_to_microseconds(times)
-        # ranges = mocpy.project_on_second_dim(times, self.store_index)
-        # return MOC(IntervalSet(ranges, make_consistent=False))
-        # store_index = from_stmoc_time_fold(cls, tmoc, stmoc):
         return MOC.from_stmoc_time_fold(tmoc, self)
 
     def query_by_space(self, smoc):
@@ -322,7 +312,7 @@ class STMOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.tmoc.TimeMOC`
+        `~mocpy.tmoc.TimeMOC`
             The time ranges observing in the ``spatial_coverage``
         """
         return TimeMOC.from_stmoc_space_fold(smoc, self)
@@ -389,13 +379,13 @@ class STMOC(AbstractMOC):
         """
         path = str(path)
         if format == "fits":
-            index = mocpy.coverage_2d_from_fits_file(path)
+            index = mocpy.coverage_st_from_fits_file(path)
             return cls(index)
         if format == "ascii":
-            index = mocpy.coverage_2d_from_ascii_file(path)
+            index = mocpy.coverage_st_from_ascii_file(path)
             return cls(index)
         if format == "json":
-            index = mocpy.coverage_2d_from_json_file(path)
+            index = mocpy.coverage_st_from_json_file(path)
             return cls(index)
         formats = ("fits", "ascii", "json")
         raise ValueError(f"format should be one of {formats}")
@@ -412,20 +402,26 @@ class STMOC(AbstractMOC):
         """
         Deserialize the Spatial MOC from the given string.
 
-        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+        Format can be 'ascii' or 'json', though the json format is not officially
+        supported by the IVOA.
 
         Parameters
         ----------
         format : str, optional
-            The format in which the MOC will be serialized before being saved.
+            The format in which the MOC is serialized.
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
+
+        Returns
+        -------
+        `~mocpy.STMOC`
+            The ST-MOC build from the given string.
         """
         if format == "ascii":
-            index = mocpy.coverage_2d_from_ascii_str(value)
+            index = mocpy.coverage_st_from_ascii_str(value)
             return cls(index)
         if format == "json":
-            index = mocpy.coverage_2d_from_json_str(value)
+            index = mocpy.coverage_st_from_json_str(value)
             return cls(index)
         formats = ("ascii", "json")
         raise ValueError(f"format should be one of {formats}")

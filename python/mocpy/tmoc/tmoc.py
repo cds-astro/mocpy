@@ -337,10 +337,18 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        smoc : `~mocpy.moc.Moc`
-        stmoc : `~mocpy.stmoc.STMoc`
+        smoc : `~mocpy.MOC`
+            The Space-MOC to fold the ST-MOC with.
+        stmoc : `~mocpy.STMOC`
+            The Space-Time MOC the should be folded.
+
+        Returns
+        -------
+        `~mocpy.TimeMOC`
         """
-        store_index = mocpy.project_on_first_dim(smoc.store_index, stmoc.store_index)
+        store_index = mocpy.project_on_stmoc_time_dim(
+            smoc.store_index, stmoc.store_index
+        )
         return cls(store_index)
 
     def _process_degradation(self, another_moc, order_op):
