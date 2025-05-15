@@ -16,9 +16,9 @@ from .version import __version__
 
 __all__ = [
     "MOC",
-    "TimeMOC",
-    "FrequencyMOC",
     "STMOC",
     "WCS",
+    "FrequencyMOC",
+    "TimeMOC",
     "__version__",
 ]
