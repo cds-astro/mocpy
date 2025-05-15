@@ -27,3 +27,10 @@ repos:
         entry: rustfmt
         files: \.rs$
         language: system
+  - repo: local
+    hooks:
+      - id: clean_notebooks
+        name: clean_notebooks
+        entry: jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --inplace
+        files: \.ipynb$
+        language: system
