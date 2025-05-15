@@ -170,8 +170,7 @@ class TimeMOC(AbstractMOC):
         """
         if new_order <= self.max_order:
             warnings.warn(
-                "'new_order' is less precise than the current max order. "
-                "Nothing done.",
+                "'new_order' is less precise than the current max order. Nothing done.",
                 stacklevel=2,
             )
         mocpy.refine(self.store_index, new_order)
