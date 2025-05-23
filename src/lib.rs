@@ -1827,7 +1827,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray_bound(py))
+          .map(|a| a.into_pyarray(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1859,7 +1859,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
       .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
-      .map(|vec_bool| PyArray1::<bool>::from_vec_bound(py, vec_bool).to_owned())
+      .map(|vec_bool| PyArray1::<bool>::from_vec(py, vec_bool).to_owned())
       .map_err(PyIOError::new_err)
   }
 
@@ -1896,7 +1896,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(lon_shape, vec_bool)
-          .map(|a| a.into_pyarray_bound(py))
+          .map(|a| a.into_pyarray(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1921,7 +1921,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray_bound(py))
+          .map(|a| a.into_pyarray(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1946,7 +1946,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
-          .map(|a| a.into_pyarray_bound(py))
+          .map(|a| a.into_pyarray(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1971,7 +1971,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyIOError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(freq_shape, vec_bool)
-          .map(|a| a.into_pyarray_bound(py))
+          .map(|a| a.into_pyarray(py))
           .map_err(|e| PyValueError::new_err(e.to_string()))
       })
   }
@@ -1986,7 +1986,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_fits_raw<'a>(py: Python<'a>, index: usize, pre_v2: bool) -> PyResult<Bound<'a, PyBytes>> {
     U64MocStore::get_global_store()
       .to_fits_buff(index, Some(pre_v2))
-      .map(move |b| PyBytes::new_bound(py, &b))
+      .map(move |b| PyBytes::new(py, &b))
       .map_err(PyIOError::new_err)
   }
 
@@ -2391,7 +2391,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       }
     }
     .map_err(PyIOError::new_err)
-    .map(|probas| PyArray1::<f64>::from_vec_bound(py, probas))
+    .map(|probas| PyArray1::<f64>::from_vec(py, probas))
   }
 
   /// Get the values and surface area for the UNIQ HEAPix cells which are in
@@ -2435,12 +2435,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       });
     U64MocStore::get_global_store()
       .multiordermap_filter_in_moc(index, it)
-      .map(|(values, weights)| {
-        (
-          values.into_pyarray_bound(py),
-          weights.into_pyarray_bound(py),
-        )
-      })
+      .map(|(values, weights)| (values.into_pyarray(py), weights.into_pyarray(py)))
       .map_err(PyIOError::new_err)
   }
 
@@ -2773,8 +2768,8 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn get_barycenter<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyTuple>> {
     U64MocStore::get_global_store()
       .barycenter(index)
-      .map(|(lon, lat)| PyTuple::new_bound(py, vec![lon, lat]))
-      .map_err(PyValueError::new_err)
+      .map(|(lon, lat)| PyTuple::new(py, vec![lon, lat]))
+      .map_err(PyValueError::new_err)?
   }
 
   #[pyfn(m)]
@@ -2908,7 +2903,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_uniq_hpx<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_hpx(index)
-      .map(|v| v.into_pyarray_bound(py))
+      .map(|v| v.into_pyarray(py))
       .map_err(PyValueError::new_err)
   }
 
@@ -2921,7 +2916,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_uniq_gen<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_gen(index)
-      .map(|v| v.into_pyarray_bound(py))
+      .map(|v| v.into_pyarray(py))
       .map_err(PyValueError::new_err)
   }
 
@@ -2934,7 +2929,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_uniq_zorder<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_zorder(index)
-      .map(|v| v.into_pyarray_bound(py))
+      .map(|v| v.into_pyarray(py))
       .map_err(PyValueError::new_err)
   }
 
@@ -2946,7 +2941,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .and_then(|mut v| {
         let len = v.len();
         // We could have used Array::from_shape_vec; to be checked: no clone in both cases
-        PyArray1::from_vec_bound(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
+        PyArray1::from_vec(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
       })
   }
 
@@ -2956,7 +2951,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .to_image(index, size_y)
       .map_err(PyValueError::new_err)
       .and_then(|box_u8| {
-        PyArray1::from_slice_bound(py, &box_u8).reshape(Ix3(
+        PyArray1::from_slice(py, &box_u8).reshape(Ix3(
           size_y as usize,
           (size_y << 1) as usize,
           4_usize,
@@ -3112,7 +3107,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .and_then(|mut v| {
         let len = v.len();
         // We could have used Array::from_shape_vec; to be checked: no clone in both cases
-        PyArray1::from_vec_bound(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
+        PyArray1::from_vec(py, utils::flatten(&mut v)).reshape(Ix2(len, 2_usize))
       })
   }
 
@@ -3125,7 +3120,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn flatten_to_moc_depth<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .flatten_to_moc_depth(index)
-      .map(move |v| PyArray1::from_vec_bound(py, v))
+      .map(move |v| PyArray1::from_vec(py, v))
       .map_err(PyIOError::new_err)
   }
   //
@@ -3143,7 +3138,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .flatten_to_depth(index, depth)
-      .map(move |v| PyArray1::from_vec_bound(py, v))
+      .map(move |v| PyArray1::from_vec(py, v))
       .map_err(PyIOError::new_err)
   }
 

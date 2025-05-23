@@ -303,7 +303,7 @@ pub fn sfmoc_contains<'a, 'py>(
   let it = it_freq.zip(it_lon.zip(it_lat));
   U64MocStore::get_global_store()
     .filter_freqpos(index, it, |b| b)
-    .map(|vec_bool| PyArray1::<bool>::from_vec_bound(module.py(), vec_bool))
+    .map(|vec_bool| PyArray1::<bool>::from_vec(module.py(), vec_bool))
     .map_err(PyIOError::new_err)
 }
 
