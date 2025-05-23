@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from astropy.io import ascii
+from astropy.io import ascii as astropy_ascii
 from astropy.time import Time
 
 from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
@@ -135,7 +135,7 @@ def test_tmoc_from_time_ranges():
     tmoc = TimeMOC.load("resources/TMOC/HST_SDSSg/TMoc.fits", "fits")
 
     # Load HST_SDSSg from a CSV file
-    data = ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
+    data = astropy_ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
     tmoc2 = TimeMOC.from_time_ranges_approx(
         Time(data["t_min"], format="mjd", scale="tdb"),
         Time(data["t_max"], format="mjd", scale="tdb"),

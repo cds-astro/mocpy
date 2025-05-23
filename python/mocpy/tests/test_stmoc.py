@@ -98,6 +98,17 @@ def test_from_times_lonlat():
     assert not stmoc.is_empty()
 
 
+def test_from_times_ranges_lonlat_multi_coo():
+    times_min = Time(["2020-01-01", "2020-02-01", "2020-03-01"])
+    times_max = Time(["2020-02-01", "2020-03-01", "2020-04-01"])
+    lon = [1, 2, 3] * u.deg
+    lat = [1, 2, 3] * u.deg
+
+    stmoc = STMOC.from_time_ranges_positions(times_min, times_max, lon, lat, 5, 5)
+
+    assert stmoc.contains(times_min, lon, lat).all()
+
+
 def test_max_depth():
     decals = STMOC.from_fits("resources/STMOC/STMoc-DECaLS-g.fits")
     assert decals.max_depth == (28, 9)

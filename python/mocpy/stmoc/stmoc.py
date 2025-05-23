@@ -18,7 +18,6 @@ class STMOC(AbstractMOC):
         """Is a Time-Spatial Coverage (ST-MOC).
 
         Args:
-            create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the ST-MOC in the rust-side storage
         """
         self.store_index = store_index
@@ -34,7 +33,7 @@ class STMOC(AbstractMOC):
     @property
     def max_depth(self):
         """Return max depth of MOC."""
-        return mocpy.coverage_2d_depth(self.store_index)
+        return mocpy.coverage_st_depth(self.store_index)
 
     @property
     def max_order(self):
@@ -293,19 +292,9 @@ class STMOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.moc.MOC`
+        `~mocpy.moc.MOC`
             The spatial coverage being observed within the input time ranges
         """
-        # if times.ndim != 2 or times.shape[1] != 2:
-        #    raise ValueError(
-        #        "Times ranges must be provided. The shape of times must be (_, 2)"
-        #    )
-
-        # times = np.asarray(times.jd * 86400000000, dtype=np.uint64)
-        # times = utils.times_to_microseconds(times)
-        # ranges = mocpy.project_on_second_dim(times, self.store_index)
-        # return MOC(IntervalSet(ranges, make_consistent=False))
-        # store_index = from_stmoc_time_fold(cls, tmoc, stmoc):
         return MOC.from_stmoc_time_fold(tmoc, self)
 
     def query_by_space(self, smoc):
@@ -322,7 +311,7 @@ class STMOC(AbstractMOC):
 
         Returns
         -------
-        result : `~mocpy.tmoc.TimeMOC`
+        `~mocpy.tmoc.TimeMOC`
             The time ranges observing in the ``spatial_coverage``
         """
         return TimeMOC.from_stmoc_space_fold(smoc, self)
@@ -351,6 +340,19 @@ class STMOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> import astropy.units as u
+        >>> from astropy.time import Time
+        >>> moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.deg, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"),
+        ...                                      moc, time_depth=40)
+        >>> # one inside, one outside
+        >>> stmoc.contains(Time(["2005-01-01", "1990-01-01"]),
+        ...                [0.1, 20]*u.deg, [0.1, 20]*u.deg)
+        array([ True, False])
         """
         # times = times.jd.astype(np.float64)
         times = times_to_microseconds(times)
@@ -363,7 +365,7 @@ class STMOC(AbstractMOC):
         if times.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = mocpy.coverage_2d_contains(self.store_index, times, lon, lat)
+        result = mocpy.stmoc_contains(self.store_index, times, lon, lat)
 
         if not inside:
             result = ~result
@@ -374,9 +376,10 @@ class STMOC(AbstractMOC):
     # A002: Argument `format` is shadowing a python function
     def load(cls, path, format="fits"):  # noqa: A002
         """
-        Load the Spatial MOC from a file.
+        Load the Space-Time MOC from a file.
 
-        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+        Format can be 'fits', 'ascii', or 'json', though the json format is not
+        officially supported by the IVOA.
 
         Parameters
         ----------
@@ -386,16 +389,20 @@ class STMOC(AbstractMOC):
             The format from which the MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+
+        Returns
+        -------
+        `~mocpy.STMOC`
         """
         path = str(path)
         if format == "fits":
-            index = mocpy.coverage_2d_from_fits_file(path)
+            index = mocpy.coverage_st_from_fits_file(path)
             return cls(index)
         if format == "ascii":
-            index = mocpy.coverage_2d_from_ascii_file(path)
+            index = mocpy.coverage_st_from_ascii_file(path)
             return cls(index)
         if format == "json":
-            index = mocpy.coverage_2d_from_json_file(path)
+            index = mocpy.coverage_st_from_json_file(path)
             return cls(index)
         formats = ("fits", "ascii", "json")
         raise ValueError(f"format should be one of {formats}")
@@ -412,20 +419,26 @@ class STMOC(AbstractMOC):
         """
         Deserialize the Spatial MOC from the given string.
 
-        Format can be 'ascii' or 'json', though the json format is not officially supported by the IVOA.
+        Format can be 'ascii' or 'json', though the json format is not officially
+        supported by the IVOA.
 
         Parameters
         ----------
         format : str, optional
-            The format in which the MOC will be serialized before being saved.
+            The format in which the MOC is serialized.
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
+
+        Returns
+        -------
+        `~mocpy.STMOC`
+            The ST-MOC build from the given string.
         """
         if format == "ascii":
-            index = mocpy.coverage_2d_from_ascii_str(value)
+            index = mocpy.coverage_st_from_ascii_str(value)
             return cls(index)
         if format == "json":
-            index = mocpy.coverage_2d_from_json_str(value)
+            index = mocpy.coverage_st_from_json_str(value)
             return cls(index)
         formats = ("ascii", "json")
         raise ValueError(f"format should be one of {formats}")
