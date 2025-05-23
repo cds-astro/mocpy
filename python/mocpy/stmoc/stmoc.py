@@ -18,7 +18,6 @@ class STMOC(AbstractMOC):
         """Is a Time-Spatial Coverage (ST-MOC).
 
         Args:
-            create_key: Object ensure __init__ is called by super-class/class-methods only
             store_index: index of the ST-MOC in the rust-side storage
         """
         self.store_index = store_index
@@ -34,7 +33,7 @@ class STMOC(AbstractMOC):
     @property
     def max_depth(self):
         """Return max depth of MOC."""
-        return mocpy.coverage_2d_depth(self.store_index)
+        return mocpy.coverage_st_depth(self.store_index)
 
     @property
     def max_order(self):
@@ -341,6 +340,19 @@ class STMOC(AbstractMOC):
         -------
         array : `~np.ndarray`
             A mask boolean array
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> import astropy.units as u
+        >>> from astropy.time import Time
+        >>> moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.deg, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"),
+        ...                                      moc, time_depth=40)
+        >>> # one inside, one outside
+        >>> stmoc.contains(Time(["2005-01-01", "1990-01-01"]),
+        ...                [0.1, 20]*u.deg, [0.1, 20]*u.deg)
+        array([ True, False])
         """
         # times = times.jd.astype(np.float64)
         times = times_to_microseconds(times)
@@ -353,7 +365,7 @@ class STMOC(AbstractMOC):
         if times.ndim != 1:
             raise ValueError("Times and positions must be 1D arrays.")
 
-        result = mocpy.coverage_2d_contains(self.store_index, times, lon, lat)
+        result = mocpy.stmoc_contains(self.store_index, times, lon, lat)
 
         if not inside:
             result = ~result
@@ -364,9 +376,10 @@ class STMOC(AbstractMOC):
     # A002: Argument `format` is shadowing a python function
     def load(cls, path, format="fits"):  # noqa: A002
         """
-        Load the Spatial MOC from a file.
+        Load the Space-Time MOC from a file.
 
-        Format can be 'fits', 'ascii', or 'json', though the json format is not officially supported by the IVOA.
+        Format can be 'fits', 'ascii', or 'json', though the json format is not
+        officially supported by the IVOA.
 
         Parameters
         ----------
@@ -376,6 +389,10 @@ class STMOC(AbstractMOC):
             The format from which the MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+
+        Returns
+        -------
+        `~mocpy.STMOC`
         """
         path = str(path)
         if format == "fits":

@@ -534,6 +534,41 @@ class FrequencyMOC(AbstractMOC):
         formats = ("ascii", "json")
         raise ValueError(f"format should be one of {formats}")
 
+    @classmethod
+    def from_sfmoc_space_fold(cls, sfmoc, smoc):
+        """Create a new FMOC from the space fold operation on a SFMOC.
+
+        The FrequencyMOC will be the union of all the ranges of frequencies
+        corresponding to the given Space-MOC.
+
+        Parameters
+        ----------
+        sfmoc : `~mocpy.SFMOC`
+            A Space-Frequency MOC.
+        smoc : `~mocpy.MOC`
+            A Space-MOC
+
+        Returns
+        -------
+        `~mocpy.FrequencyMOC`
+
+        Examples
+        --------
+        >>> from mocpy import MOC, SFMOC, FrequencyMOC as FMOC
+        >>> sfmoc = SFMOC.from_string('''f10/0-20
+        ... s12/0-100
+        ... f10/21-40
+        ... s12/101-200
+        ... ''')
+        >>> moc = MOC.from_string("12/0-100")
+        >>> fmoc = FMOC.from_sfmoc_space_fold(sfmoc, moc)
+        >>> fmoc
+        6/0
+        8/4
+        10/20
+        """
+        return cls(mocpy.project_on_sfmoc_freq_dim(smoc.store_index, sfmoc.store_index))
+
     def plot_frequencies(self, ax, color="blue", frequency_unit="Hz"):
         """Plot a frequency moc.
 

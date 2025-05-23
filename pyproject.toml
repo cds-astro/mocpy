@@ -109,8 +109,8 @@ extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "ISC", "ICN001", "PIE", "PTH", "W", "I", "T20",
                  "PYI", "PT", "SIM", "NPY", "PERF", "FURB"
                 ]
-extend-ignore = ["D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002",
-                 "N802", "COM812", "ISC001"]
+extend-ignore = ["D203", "D213", "D100", "N816", "N817", "D105", "N806", "N803",
+                 "FBT002", "N802", "COM812", "ISC001"]
 # N806, N816: variables names should be lowercase (would require to change all API)
 # D203: 1 blank line required before class docstring (not compatible with numpy docstyle)
 # FBT002: Boolean default in function definition (would require to change all API)

@@ -2239,6 +2239,41 @@ class MOC(AbstractMOC):
         )
         return cls(store_index)
 
+    @classmethod
+    def from_sfmoc_frequency_fold(cls, fmoc, sfmoc):
+        """
+        Build a S-MOC from the fold operation of the given SF-MOC by the given F-MOC.
+
+        Parameters
+        ----------
+        fmoc : `~mocpy.FrequencyMOC`
+        sfmoc : `~mocpy.SFMOC`
+
+        Returns
+        -------
+        `~mocpy.MOC`
+
+        Examples
+        --------
+        >>> from mocpy import MOC, FrequencyMOC, SFMOC
+        >>> sfmoc = SFMOC.from_string('''
+        ... f15/0-10
+        ... s12/0-100
+        ... f15/11-20
+        ... s12/101-200
+        ... ''')
+        >>> fmoc = FrequencyMOC.from_string("15/0-2")
+        >>> MOC.from_sfmoc_frequency_fold(fmoc, sfmoc)
+        9/0
+        10/4-5
+        11/24
+        12/100
+        """
+        store_index = mocpy.project_on_sfmoc_space_dim(
+            fmoc.store_index, sfmoc.store_index
+        )
+        return cls(store_index)
+
     @staticmethod
     def order_to_spatial_resolution(order):
         """

@@ -1558,7 +1558,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// If the Time-Space coverage is empty, the returned
   /// depth is `(0, 0)`.
   #[pyfn(m)]
-  fn coverage_2d_depth(_py: Python, index: usize) -> PyResult<(u8, u8)> {
+  fn coverage_st_depth(_py: Python, index: usize) -> PyResult<(u8, u8)> {
     U64MocStore::get_global_store()
       .get_stmoc_depths(index)
       .map_err(PyIOError::new_err)
@@ -1838,14 +1838,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - The index of the Time-Space coverage.
   /// * ``times`` - Times at which the positions have been observed, in microsec since jd=0
-  /// * ``lon`` - The longitudes.
-  /// * ``lat`` - The latitudes.
+  /// * ``lon`` - The longitudes in radians.
+  /// * ``lat`` - The latitudes in radians.
   ///
   /// # Errors
   ///
   /// * If `lon`, `lat` and `times` do not have the same length
   #[pyfn(m)]
-  fn coverage_2d_contains<'a>(
+  fn stmoc_contains<'a>(
     py: Python<'a>,
     index: usize,
     times: PyReadonlyArrayDyn<'a, u64>,
@@ -3251,6 +3251,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   }
 
   // add sfmoc pyfunctions here
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_depth, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::new_empty_sfmoc, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_min_freq, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_max_freq, m)?)
+    .unwrap();
   m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_fits_file, m)?)
     .unwrap();
   m.add_function(wrap_pyfunction!(sfmoc::sfmoc_from_fits_raw_bytes, m)?)
@@ -3266,6 +3274,13 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(sfmoc::from_freq_lonlat, m)?)
     .unwrap();
   m.add_function(wrap_pyfunction!(sfmoc::from_freq_ranges_lonlat, m)?)
+    .unwrap();
+  m.add_function(wrap_pyfunction!(
+    sfmoc::from_frequency_ranges_spatial_coverages,
+    m
+  )?)
+  .unwrap();
+  m.add_function(wrap_pyfunction!(sfmoc::sfmoc_contains, m)?)
     .unwrap();
   m.add_function(wrap_pyfunction!(sfmoc::project_on_sfmoc_freq_dim, m)?)
     .unwrap();

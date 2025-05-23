@@ -14,7 +14,7 @@
     "description": "Python library to easily create and manipulate MOCs (Multi-Order Coverage maps)",
     "applicationCategory": ["Astronomy", "Science"],
     "funding": "ESCAPE 824064, ASTERICS 653477",
-    "readme": "https://github.com/cds-astro/mocpy/blob/master/README.rst",
+    "readme": "https://github.com/cds-astro/mocpy/blob/master/README.md",
 
     "funder": {
         "@type": "Organization",

@@ -13,5 +13,6 @@ Class overview
    mocpy.TimeMOC
    mocpy.STMOC
    mocpy.FrequencyMOC
+   mocpy.SFMOC
    mocpy.WCS
 

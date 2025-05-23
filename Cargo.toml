@@ -9,7 +9,7 @@ authors = [
 ]
 edition = "2021"
 license = "BSD-3-Clause"
-readme = "README.rst"
+readme = "README.md"
 categories = ["algorithms", "science"]
 repository = "https://github.com/cds-astro/mocpy"
 description = "MOC parsing and manipulation in Python"

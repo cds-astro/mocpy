@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* new sub-module to manipulate space-frequency MOC ``SFMOC`` [#189]
 * added method `refine_to_order` that modifies one-dimensional MOCs in place to increase
   their maximum order [#187]
 
