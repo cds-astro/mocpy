@@ -1,4 +1,5 @@
 import warnings
+from copy import deepcopy
 
 import numpy as np
 from astropy import units as u
@@ -179,6 +180,45 @@ class FrequencyMOC(AbstractMOC):
             )
         mocpy.refine(self.store_index, new_order)
         return self
+
+    def to_order(self, new_order):
+        """Create a new F-MOC with the new order.
+
+        This is a convenience method for a quick change of order.
+        Using 'degrade_to_order' and 'refine_to_order' depending on the situation is
+        more efficient and avoids copying the MOC when it is not needed.
+
+        Parameters
+        ----------
+        new_order : int
+            The new order for the F-MOC. Can be either more or less precise than the
+            current max_order of the F-MOC
+
+        Returns
+        -------
+        `~mocpy.FrequencyMOC`
+            A new F-MOC instance with the given max order.
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC as FMOC
+        >>> fmoc = FMOC.from_string("15/0-100")
+        >>> fmoc.to_order(12)
+        9/0
+        10/2
+        12/12
+
+        See Also
+        --------
+        degrade_to_order : to create a new less precise MOC
+        refine_to_order : to change the order to a more precise one in place (no copy)
+        """
+        if new_order > self.max_order:
+            moc_copy = deepcopy(self)
+            return moc_copy.refine_to_order(new_order)
+        if new_order < self.max_order:
+            return self.degrade_to_order(new_order)
+        return deepcopy(self)
 
     @classmethod
     def new_empty(cls, max_depth):

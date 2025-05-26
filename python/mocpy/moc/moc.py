@@ -2,6 +2,7 @@ import contextlib
 import functools
 import warnings
 from collections.abc import Iterable
+from copy import deepcopy
 from io import BytesIO
 from math import log2
 from pathlib import Path
@@ -312,6 +313,46 @@ class MOC(AbstractMOC):
             )
         mocpy.refine(self.store_index, new_order)
         return self
+
+    def to_order(self, new_order):
+        """Create a new S-MOC with the new order.
+
+        This is a convenience method for a quick change of order.
+        Using 'degrade_to_order' and 'refine_to_order' depending on the situation is
+        more efficient and avoids copying the MOC when it is not needed.
+
+        Parameters
+        ----------
+        new_order : int
+            The new order for the S-MOC. Can be either more or less precise than the
+            current max_order of the S-MOC
+
+        Returns
+        -------
+        `~mocpy.MOC`
+            A new S-MOC instance with the given max order.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("15/0-100")
+        >>> moc.to_order(15) # creates a copy
+        12/0
+        13/4-5
+        14/24
+        15/100
+
+        See Also
+        --------
+        degrade_to_order : to create a new less precise MOC
+        refine_to_order : to change the order to a more precise one in place (no copy)
+        """
+        if new_order > self.max_order:
+            moc_copy = deepcopy(self)
+            return moc_copy.refine_to_order(new_order)
+        if new_order < self.max_order:
+            return self.degrade_to_order(new_order)
+        return deepcopy(self)
 
     def contains_skycoords(self, skycoords, keep_inside=True):
         """
