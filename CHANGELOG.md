@@ -16,10 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.18.0]
+
+### Fixed
+
+* fix ``contains`` method in ST-MOCs
+
 ### Added
 
+* new sub-module to manipulate space-frequency MOC ``SFMOC`` [#189]
 * added method `refine_to_order` that modifies one-dimensional MOCs in place to increase
   their maximum order [#187]
+* added `to_order` convenience method to change the order of a 1D MOC regardless on
+  wether the new order is more or less precise than the former one. This new method will
+  always create a copy of the original MOC and is thus less efficient than using
+  `degrade_to_order` or `refine_to_order` depending on the situation
 
 ## [0.17.1]
 

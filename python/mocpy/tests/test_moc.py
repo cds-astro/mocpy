@@ -433,6 +433,20 @@ def test_from_string(expected, moc_str):
     assert MOC.from_string(moc_str, "ascii") == expected
 
 
+def test_from_string_as_json():
+    moc_ascii = MOC.from_string("12/0-100")
+    moc_json = MOC.from_string(
+        """{
+    "9": [0],
+    "10": [4, 5],
+    "11": [24],
+    "12": [100]
+    }""",
+        format="json",
+    )
+    assert moc_ascii == moc_json
+
+
 def test_moc_full_skyfraction():
     moc = MOC.from_json({"0": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]})
     assert moc.sky_fraction == 1.0
@@ -585,6 +599,12 @@ def test_degrade_to_order():
     for order in reversed(range(max_depth)):
         hst_moc = hst_moc.degrade_to_order(order)
         assert hst_moc.sky_fraction <= 1.0
+
+    with pytest.warns(
+        UserWarning,
+        match="The new order is more precise than the current order, nothing done.",
+    ):
+        hst_moc.degrade_to_order(hst_moc.MAX_ORDER)
 
 
 def test_refine_to_order():

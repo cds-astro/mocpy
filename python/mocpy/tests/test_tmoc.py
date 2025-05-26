@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from astropy.io import ascii
+from astropy.io import ascii as astropy_ascii
 from astropy.time import Time
 
 from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
@@ -49,6 +49,18 @@ def test_to_depth61_ranges():
         ).to_depth61_ranges
         == np.array([[1, 2], [5, 8]], dtype=np.uint64)
     ).all()
+
+
+def test_degrade_to_order():
+    tmoc = TimeMOC.from_string("10/0-15")
+    assert tmoc.max_order == 10
+    degraded = tmoc.degrade_to_order(5)
+    assert degraded.max_order == 5
+    with pytest.warns(
+        UserWarning,
+        match="The new order is more precise than the current order, nothing done.",
+    ):
+        tmoc.degrade_to_order(20)
 
 
 def test_refine_to_order():
@@ -135,7 +147,7 @@ def test_tmoc_from_time_ranges():
     tmoc = TimeMOC.load("resources/TMOC/HST_SDSSg/TMoc.fits", "fits")
 
     # Load HST_SDSSg from a CSV file
-    data = ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
+    data = astropy_ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
     tmoc2 = TimeMOC.from_time_ranges_approx(
         Time(data["t_min"], format="mjd", scale="tdb"),
         Time(data["t_max"], format="mjd", scale="tdb"),

@@ -1,4 +1,5 @@
 import warnings
+from copy import deepcopy
 
 import numpy as np
 from astropy import units as u
@@ -138,6 +139,11 @@ class FrequencyMOC(AbstractMOC):
         >>> fmoc.degrade_to_order(10)
         10/752
         """
+        if new_order >= self.max_order:
+            warnings.warn(
+                "The new order is more precise than the current order, nothing done.",
+                stacklevel=2,
+            )
         index = mocpy.degrade(self.store_index, new_order)
         return FrequencyMOC(index)
 
@@ -169,12 +175,50 @@ class FrequencyMOC(AbstractMOC):
         """
         if new_order <= self.max_order:
             warnings.warn(
-                "'new_order' is less precise than the current max order. "
-                "Nothing done.",
+                "'new_order' is less precise than the current max order. Nothing done.",
                 stacklevel=2,
             )
         mocpy.refine(self.store_index, new_order)
         return self
+
+    def to_order(self, new_order):
+        """Create a new F-MOC with the new order.
+
+        This is a convenience method for a quick change of order.
+        Using 'degrade_to_order' and 'refine_to_order' depending on the situation is
+        more efficient and avoids copying the MOC when it is not needed.
+
+        Parameters
+        ----------
+        new_order : int
+            The new order for the F-MOC. Can be either more or less precise than the
+            current max_order of the F-MOC
+
+        Returns
+        -------
+        `~mocpy.FrequencyMOC`
+            A new F-MOC instance with the given max order.
+
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC as FMOC
+        >>> fmoc = FMOC.from_string("15/0-100")
+        >>> fmoc.to_order(12)
+        9/0
+        10/2
+        12/12
+
+        See Also
+        --------
+        degrade_to_order : to create a new less precise MOC
+        refine_to_order : to change the order to a more precise one in place (no copy)
+        """
+        if new_order > self.max_order:
+            moc_copy = deepcopy(self)
+            return moc_copy.refine_to_order(new_order)
+        if new_order < self.max_order:
+            return self.degrade_to_order(new_order)
+        return deepcopy(self)
 
     @classmethod
     def new_empty(cls, max_depth):
@@ -534,6 +578,41 @@ class FrequencyMOC(AbstractMOC):
             return cls(index)
         formats = ("ascii", "json")
         raise ValueError(f"format should be one of {formats}")
+
+    @classmethod
+    def from_sfmoc_space_fold(cls, sfmoc, smoc):
+        """Create a new FMOC from the space fold operation on a SFMOC.
+
+        The FrequencyMOC will be the union of all the ranges of frequencies
+        corresponding to the given Space-MOC.
+
+        Parameters
+        ----------
+        sfmoc : `~mocpy.SFMOC`
+            A Space-Frequency MOC.
+        smoc : `~mocpy.MOC`
+            A Space-MOC
+
+        Returns
+        -------
+        `~mocpy.FrequencyMOC`
+
+        Examples
+        --------
+        >>> from mocpy import MOC, SFMOC, FrequencyMOC as FMOC
+        >>> sfmoc = SFMOC.from_string('''f10/0-20
+        ... s12/0-100
+        ... f10/21-40
+        ... s12/101-200
+        ... ''')
+        >>> moc = MOC.from_string("12/0-100")
+        >>> fmoc = FMOC.from_sfmoc_space_fold(sfmoc, moc)
+        >>> fmoc
+        6/0
+        8/4
+        10/20
+        """
+        return cls(mocpy.project_on_sfmoc_freq_dim(smoc.store_index, sfmoc.store_index))
 
     def plot_frequencies(self, ax, color="blue", frequency_unit="Hz"):
         """Plot a frequency moc.

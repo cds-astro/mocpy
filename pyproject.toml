@@ -60,7 +60,8 @@ dev = [
 ]
 # to run the notebooks
 notebooks = [
-    "astroquery",
+    "astroquery>=0.4.9",
+    "astropy_healpix",
     "ipyaladin",
     "regions",
     "nbmake" # to test the notebooks
@@ -109,8 +110,8 @@ extend-select = ["SIM", "FBT", "D", "UP", "N", "S", "B", "A",
                  "ISC", "ICN001", "PIE", "PTH", "W", "I", "T20",
                  "PYI", "PT", "SIM", "NPY", "PERF", "FURB"
                 ]
-extend-ignore = ["D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002",
-                 "N802", "COM812", "ISC001"]
+extend-ignore = ["D203", "D213", "D100", "N816", "N817", "D105", "N806", "N803",
+                 "FBT002", "N802", "COM812", "ISC001"]
 # N806, N816: variables names should be lowercase (would require to change all API)
 # D203: 1 blank line required before class docstring (not compatible with numpy docstyle)
 # FBT002: Boolean default in function definition (would require to change all API)
@@ -119,7 +120,7 @@ extend-ignore = ["D203", "D213", "D100", "N816", "D105", "N806", "N803", "FBT002
 # D104: Missing docstring in public package
 # D103: Missing docstring in public function
 # D100: Missing docstring in public module
-# B008: Do not perforn function call in argument defaults
+# B008: Do not perform function call in argument defaults
 "__init__.py" = ["D104"]
 "python/mocpy/moc/plot/wcs.py" = ["B008"]
 "python/mocpy/tests/*.py" = ["S101", "D103"] # S101: use of "assert" detected
@@ -132,5 +133,5 @@ convention = "numpy"  # Accepts: "google", "numpy", or "pep257"
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 doctest_optionflags = "NORMALIZE_WHITESPACE"
-testpaths = "python"
+testpaths = ["python", "docs/examples/user_documentation.rst"]
 

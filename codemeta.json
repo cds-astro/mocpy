@@ -9,12 +9,12 @@
     "dateModified": "2023-12-04",
     "issueTracker": "https://github.com/cds-astro/mocpy/issues",
     "name": "MOCpy",
-    "version": "0.17.1",
-    "softwareVersion": "0.17.1",
+    "version": "0.18.0",
+    "softwareVersion": "0.18.0",
     "description": "Python library to easily create and manipulate MOCs (Multi-Order Coverage maps)",
     "applicationCategory": ["Astronomy", "Science"],
     "funding": "ESCAPE 824064, ASTERICS 653477",
-    "readme": "https://github.com/cds-astro/mocpy/blob/master/README.rst",
+    "readme": "https://github.com/cds-astro/mocpy/blob/master/README.md",
 
     "funder": {
         "@type": "Organization",
@@ -105,6 +105,17 @@
             "givenName": "Matthieu",
             "familyName": "Baumann",
             "email": "matthieu.baumann@unistra.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/ 0000-0001-5713-0998",
+            "givenName": "Marchand",
+            "familyName": "Manon",
+            "email": "manon.marchand@astro.unistra.fr",
             "affiliation": {
                 "@type": "Organization",
                 "name": " Université de Strasbourg, CNRS, Observatoire astronomique de Strasbourg, UMR 7550, F-67000 Strasbourg, France."

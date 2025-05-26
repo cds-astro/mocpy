@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import astropy.units as u
 import pytest
 from astropy.io import fits
 from astropy.time import Time
@@ -8,6 +9,7 @@ from astropy.time import Time
 from ..abstract_moc import AbstractMOC
 from ..fmoc import FrequencyMOC
 from ..moc import MOC
+from ..sfmoc import SFMOC
 from ..stmoc import STMOC
 from ..tmoc import TimeMOC
 
@@ -21,7 +23,10 @@ def all_moc_types():
     tmoc = TimeMOC.from_str("0/0-1")
     fmoc = FrequencyMOC.from_str("0/0-1")
     stmoc = STMOC.from_spatial_coverages(Time("2023-11-13"), Time("2023-11-14"), moc)
-    return [moc, tmoc, fmoc, stmoc]
+    sfmoc = SFMOC.from_spatial_coverages(
+        0.001 * u.Hz, 1000 * u.Hz, moc, max_order_frequency=1
+    )
+    return [moc, tmoc, fmoc, stmoc, sfmoc]
 
 
 @pytest.fixture
@@ -88,7 +93,9 @@ def test_passing_save(all_moc_types, path):
         with Path.open(path) as f:
             moc_json = json.load(f)
         # test that it is a valid dictionary
-        indices = moc_json[0]["s"]["0"] if isinstance(moc, STMOC) else moc_json["0"]
+        indices = (
+            moc_json[0]["s"]["0"] if isinstance(moc, (STMOC, SFMOC)) else moc_json["0"]
+        )
         assert {0, 1}.issubset(set(indices))
         # delete the moc we just created
         path.unlink()
@@ -144,7 +151,7 @@ def test_operations(all_moc_types):
         assert moc.union(moc) == moc
         assert moc.union(moc, moc) == moc
         # symmetric difference
-        if isinstance(moc, STMOC):
+        if isinstance(moc, (STMOC, SFMOC)):
             with pytest.raises(
                 NotImplementedError,
                 match=(
