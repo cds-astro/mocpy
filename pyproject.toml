@@ -60,7 +60,8 @@ dev = [
 ]
 # to run the notebooks
 notebooks = [
-    "astroquery",
+    "astroquery>=0.4.9",
+    "astropy_healpix",
     "ipyaladin",
     "regions",
     "nbmake" # to test the notebooks
