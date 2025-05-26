@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mocpy.sfmoc.sfmoc &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    
+    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../../index.html">MOCPy 0.18.0 documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mocpy.sfmoc.sfmoc</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">FrequencyMOC</span><span class="p">,</span> <span class="n">mocpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..abstract_moc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractMOC</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;BSD 3-Clause License&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;matthieu.baumann@astro.unistra.fr, thomas.boch@astro.unistra.fr, &quot;</span>
+    <span class="s2">&quot;manon.marchand@astro.unistra.fr, francois-xavier.pineau@astro.unistra.fr&quot;</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_frequencies_and_positions</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate that the entries are either scalar of 1D array of values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    function : &lt;class &#39;function&#39;&gt;</span>
+<span class="sd">        must have the signature function(self, my_thing_to_test, **kwargs)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_frequencies_and_positions_wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># convert to at least 1D</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;order&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span> <span class="k">else</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">from_keywords_arguments</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;order&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span>
+        <span class="p">]</span>
+        <span class="c1"># test ndim</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span> <span class="o">+</span> <span class="n">from_keywords_arguments</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Frequencies and positions must be scalar quantities or 1D arrays.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># test that they all have the same length</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span> <span class="o">+</span> <span class="n">from_keywords_arguments</span><span class="p">})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Frequencies and positions must have the same lengths.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_validate_frequencies_and_positions_wrap</span>
+
+
+<div class="viewcode-block" id="SFMOC">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SFMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Spatial-Frequency Coverage class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a Spatial-Frequency Coverage (SF-MOC).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            store_index: index of the SF-MOC in the rust-side storage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span> <span class="o">=</span> <span class="n">store_index</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Erase SFMOC.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assert equality between SF-MOCs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum order of the SF-MOC.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (int, int)</span>
+<span class="sd">            (max_order_frequency, max_order_space)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">min_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return SFMOC min frequency.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_min_freq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return SFMOC max frequency.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_max_freq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
+
+<div class="viewcode-block" id="SFMOC.n_cells">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.n_cells">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of cells for a given order.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        order : int</span>
+<span class="sd">            The order. It is comprised between 0 and `~mocpy.moc.MOC.MAX_ORDER` if</span>
+<span class="sd">            dimension=&#39;space&#39; and between 0 and `~mocpy.tmoc.FrequencyMOC.MAX_ORDER` if</span>
+<span class="sd">            dimension=&#39;frequency&#39;.</span>
+
+<span class="sd">        dimension : str</span>
+<span class="sd">            Can be either &#39;frequency&#39; or &#39;space&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of cells at the given order</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; SFMOC.n_cells(0, dimension=&#39;space&#39;)</span>
+<span class="sd">        12</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="s2">&quot;space&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Dimension should be either &#39;time&#39; of &#39;frequency&#39; but &#39;</span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&#39; was provided.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.new_empty">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.new_empty">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">new_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_order_frequency</span><span class="p">,</span> <span class="n">max_order_space</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new empty SFMOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        max_order_frequency : int</span>
+<span class="sd">            The frequency resolution of the SFMOC. Should be comprised between 0 and 59.</span>
+<span class="sd">        max_order_space : int</span>
+<span class="sd">            The space resolution of the SFMOC. Should be comprised between 0 and 29.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; SFMOC.new_empty(20, 12)</span>
+<span class="sd">        f20/ s12/</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">new_empty_sfmoc</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_order_frequency</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">max_order_space</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.is_empty">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.is_empty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the Space-Frequency coverage is empty.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.new_empty(20, 12)</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc.is_empty()</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.from_frequencies_and_positions">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequencies_and_positions">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_frequencies_and_positions</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_frequencies_and_positions</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_order_frequency</span><span class="p">,</span> <span class="n">max_order_space</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a Space-Frequency Coverage from a set of frequencies and positions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies : `astropy.units.Quantity`</span>
+<span class="sd">            An astropy Quantity of physical type &#39;frequency&#39;</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates corresponding to the frequencies.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates corresponding to the frequencies.</span>
+<span class="sd">        max_order_frequency : int</span>
+<span class="sd">            Frequency order. Should be comprised between 0 and 59.</span>
+<span class="sd">        max_order_space : int</span>
+<span class="sd">            Spatial order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; frequencies = [1, 2, 3] * u.Hz</span>
+<span class="sd">        &gt;&gt;&gt; lon = [0, 1, 2] * u.deg</span>
+<span class="sd">        &gt;&gt;&gt; lat = [0, 1, 2] * u.deg</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_frequencies_and_positions(frequencies, lon, lat,</span>
+<span class="sd">        ...                                              max_order_frequency=20,</span>
+<span class="sd">        ...                                              max_order_space=12)</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc</span>
+<span class="sd">        f20/770048</span>
+<span class="sd">        s12/79691776</span>
+<span class="sd">        f20/778240</span>
+<span class="sd">        s12/79697029</span>
+<span class="sd">        f20/782336</span>
+<span class="sd">        s12/79712788</span>
+<span class="sd">        f20/ s12/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">mocpy</span><span class="o">.</span><span class="n">from_freq_lonlat</span><span class="p">(</span>
+                <span class="n">frequencies</span><span class="p">,</span> <span class="n">max_order_frequency</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">max_order_space</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.from_frequency_ranges_and_positions">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequency_ranges_and_positions">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_frequencies_and_positions</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_frequency_ranges_and_positions</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">frequencies_min</span><span class="p">,</span>
+        <span class="n">frequencies_max</span><span class="p">,</span>
+        <span class="n">lon</span><span class="p">,</span>
+        <span class="n">lat</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">max_order_frequency</span><span class="p">,</span>
+        <span class="n">max_order_space</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a SF coverage from a range of frequencies for each position.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies_min : `astropy.units.Quantity`</span>
+<span class="sd">            An astropy Quantity of physical type &#39;frequency&#39;</span>
+<span class="sd">        frequencies_max : `astropy.units.Quantity`</span>
+<span class="sd">            An astropy Quantity of physical type &#39;frequency&#39;</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates observed at a specific time.</span>
+<span class="sd">        max_order_frequency : int</span>
+<span class="sd">            Frequency order.</span>
+<span class="sd">        max_order_space : int</span>
+<span class="sd">            Spatial order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+<span class="sd">            The resulting Space-Frequency Coverage map.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; frequencies_min = [0.01, 0.02, 0.03] * u.Hz</span>
+<span class="sd">        &gt;&gt;&gt; frequencies_max = [0.1, 0.2, 0.3] * u.Hz</span>
+<span class="sd">        &gt;&gt;&gt; lon = [0, 1, 2] * u.deg</span>
+<span class="sd">        &gt;&gt;&gt; lat = [0, 1, 2] * u.deg</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_frequency_ranges_and_positions(frequencies_min,</span>
+<span class="sd">        ...                                                   frequencies_max, lon, lat,</span>
+<span class="sd">        ...                                                   max_order_frequency=10,</span>
+<span class="sd">        ...                                                   max_order_space=12)</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc</span>
+<span class="sd">        f8/175</span>
+<span class="sd">        9/349 352</span>
+<span class="sd">        10/</span>
+<span class="sd">        s12/79691776</span>
+<span class="sd">        f9/353-354</span>
+<span class="sd">        10/710</span>
+<span class="sd">        s12/79691776 79697029</span>
+<span class="sd">        f7/89</span>
+<span class="sd">        8/180</span>
+<span class="sd">        10/711 724</span>
+<span class="sd">        s12/79691776 79697029 79712788</span>
+<span class="sd">        f8/182</span>
+<span class="sd">        9/363</span>
+<span class="sd">        10/725 732</span>
+<span class="sd">        s12/79697029 79712788</span>
+<span class="sd">        f9/367-368</span>
+<span class="sd">        10/733</span>
+<span class="sd">        s12/79712788</span>
+<span class="sd">        f10/ s12/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">frequencies_min</span> <span class="o">=</span> <span class="n">frequencies_min</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">frequencies_max</span> <span class="o">=</span> <span class="n">frequencies_max</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_freq_ranges_lonlat</span><span class="p">(</span>
+            <span class="n">frequencies_min</span><span class="p">,</span>
+            <span class="n">frequencies_max</span><span class="p">,</span>
+            <span class="n">max_order_frequency</span><span class="p">,</span>
+            <span class="n">lon</span><span class="p">,</span>
+            <span class="n">lat</span><span class="p">,</span>
+            <span class="n">max_order_space</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.from_spatial_coverages">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_spatial_coverages">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@validate_frequencies_and_positions</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_spatial_coverages</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">frequencies_min</span><span class="p">,</span>
+        <span class="n">frequencies_max</span><span class="p">,</span>
+        <span class="n">spatial_coverages</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">max_order_frequency</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a ST coverage from frequency ranges associated to spatial coverages.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies_min : `~astropy.units.Quantity`</span>
+<span class="sd">            An astropy Quantity of physical type &#39;frequency&#39;</span>
+<span class="sd">        frequencies_max : `~astropy.units.Quantity`</span>
+<span class="sd">            An astropy Quantity of physical type &#39;frequency&#39;</span>
+<span class="sd">        spatial_coverages : list[`~mocpy.MOC`]</span>
+<span class="sd">            List of spatial coverages.</span>
+<span class="sd">        max_order_frequency : int</span>
+<span class="sd">            Frequency order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_spatial_coverages(</span>
+<span class="sd">        ...             frequencies_min=[0.1]*u.Hz, frequencies_max=[10]*u.Hz,</span>
+<span class="sd">        ...             spatial_coverages=[MOC.from_string(&quot;5/14-21&quot;)],</span>
+<span class="sd">        ...             max_order_frequency=10)</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc</span>
+<span class="sd">        f5/23</span>
+<span class="sd">        7/91 96</span>
+<span class="sd">        8/181</span>
+<span class="sd">        9/388</span>
+<span class="sd">        10/</span>
+<span class="sd">        s4/4</span>
+<span class="sd">        5/14-15 20-21</span>
+<span class="sd">        f10/ s5/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spatial_coverages_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">store_index</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">spatial_coverages</span><span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">AbstractMOC</span><span class="o">.</span><span class="n">_store_index_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">from_frequency_ranges_spatial_coverages</span><span class="p">(</span>
+            <span class="n">frequencies_min</span><span class="p">,</span>
+            <span class="n">frequencies_max</span><span class="p">,</span>
+            <span class="n">max_order_frequency</span><span class="p">,</span>
+            <span class="n">spatial_coverages_indices</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.query_by_frequency">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.query_by_frequency">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_by_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmoc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Query the SF-MOC by frequency F-MOC.</span>
+
+<span class="sd">        This will perform the union of all the spatial coverages lying in a set of time ranges.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fmoc : ~mocpy.FrequencyMOC``</span>
+<span class="sd">            Frequency MOC.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.MOC`</span>
+<span class="sd">            The spatial coverage being observed within the input frequency ranges</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, FrequencyMOC, SFMOC</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_string(&#39;&#39;&#39;</span>
+<span class="sd">        ... f15/0-10</span>
+<span class="sd">        ... s12/0-100</span>
+<span class="sd">        ... f15/11-20</span>
+<span class="sd">        ... s12/101-200</span>
+<span class="sd">        ... &#39;&#39;&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_string(&quot;15/0-2&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; MOC.from_sfmoc_frequency_fold(fmoc, sfmoc)</span>
+<span class="sd">        9/0</span>
+<span class="sd">        10/4-5</span>
+<span class="sd">        11/24</span>
+<span class="sd">        12/100</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_sfmoc_frequency_fold</span><span class="p">(</span><span class="n">fmoc</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.query_by_space">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.query_by_space">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_by_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Query the SF-MOC by space coverage.</span>
+
+<span class="sd">        This will perform the union of all the frequency ranges which associated</span>
+<span class="sd">        spatial coverages fall within the given spatial MOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        smoc : `~mocpy.MOC`</span>
+<span class="sd">            The spatial coverage.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.FrequencyMOC`</span>
+<span class="sd">            The Frequency coverage corresponding to the Spatial MOC</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, SFMOC, FrequencyMOC as FMOC</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_string(&#39;&#39;&#39;f10/0-20</span>
+<span class="sd">        ... s12/0-100</span>
+<span class="sd">        ... f10/21-40</span>
+<span class="sd">        ... s12/101-200</span>
+<span class="sd">        ... &#39;&#39;&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_string(&quot;12/0-100&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FMOC.from_sfmoc_space_fold(sfmoc, moc)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc</span>
+<span class="sd">        6/0</span>
+<span class="sd">        8/4</span>
+<span class="sd">        10/20</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_sfmoc_space_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.contains">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.contains">[docs]</a>
+    <span class="nd">@validate_frequencies_and_positions</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if the Frequency-Space combinations fall within the SFMOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies : `~astropy.units.Quantity`</span>
+<span class="sd">            Astropy quantities of physical type ``frequency``.</span>
+<span class="sd">        lon : `astropy.units.Quantity`</span>
+<span class="sd">            The longitudes of the sky coordinates observed with a specific frequency.</span>
+<span class="sd">        lat : `astropy.units.Quantity`</span>
+<span class="sd">            The latitudes of the sky coordinates observed with a specific frequency.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~np.array`</span>
+<span class="sd">            A boolean array with the same length than the given Frequency-Position</span>
+<span class="sd">            couples. True if the Frequency-Position is within the SFMOC, False</span>
+<span class="sd">            otherwise.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import SFMOC, MOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.deg, max_depth=10)</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_spatial_coverages(0.01*u.Hz, 100*u.Hz,</span>
+<span class="sd">        ...                                      moc, max_order_frequency=40)</span>
+<span class="sd">        &gt;&gt;&gt; # one inside, one outside</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc.contains([10, 10000]*u.Hz, [0.1, 20]*u.deg, [0.1, 20]*u.deg)</span>
+<span class="sd">        array([ True, False])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;rad&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">sfmoc_contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SFMOC.load">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.load">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="c1"># A002: Argument `format` is shadowing a python function</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the Space-Frequency MOC from a file.</span>
+
+<span class="sd">        Format can be &#39;fits&#39;, &#39;ascii&#39;, or &#39;json&#39;, though the json format is not</span>
+<span class="sd">        officially supported by the IVOA.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str or pathlib.Path</span>
+<span class="sd">            The path to the file to load the MOC from.</span>
+<span class="sd">        format : str, optional</span>
+<span class="sd">            The format from which the MOC is loaded.</span>
+<span class="sd">            Possible formats are &quot;fits&quot;, &quot;ascii&quot; or &quot;json&quot;.</span>
+<span class="sd">            By default, ``format`` is set to &quot;fits&quot;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;fits&quot;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_from_fits_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_from_ascii_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_from_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format should be one of </span><span class="si">{</span><span class="n">formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load MOC from raw bytes of a FITS file.&quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">sfmoc_from_fits_raw_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SFMOC.from_string">
+<a class="viewcode-back" href="../../../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="c1"># A002: Argument `format` is shadowing a python function</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deserialize the Spatial MOC from the given string.</span>
+
+<span class="sd">        Format can be &#39;ascii&#39; or &#39;json&#39;, though the json format is not officially</span>
+<span class="sd">        supported by the IVOA.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        format : str, optional</span>
+<span class="sd">            The format in which the MOC is serialized.</span>
+<span class="sd">            Possible formats are &quot;ascii&quot; or &quot;json&quot;.</span>
+<span class="sd">            By default, ``format`` is set to &quot;ascii&quot;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.SFMOC`</span>
+<span class="sd">            The ST-MOC build from the given string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;ascii&quot;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_from_ascii_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">coverage_sf_from_json_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format should be one of </span><span class="si">{</span><span class="n">formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right"> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
+  </p>
+</footer>
+  </body>
+</html>

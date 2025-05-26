@@ -665,13 +665,13 @@ The standard description is published by the IVOA <a class="reference external" 
 <strong>Space-Frequency Multi-Order Coverages</strong> (SF-MOCs).</p>
 <section id="creating-sf-moc-instances">
 <h3>Creating SF-MOC instances<a class="headerlink" href="#creating-sf-moc-instances" title="Link to this heading">¶</a></h3>
-<p>New empty SF-MOC <code class="xref py py-obj docutils literal notranslate"><span class="pre">new_empty</span></code>:</p>
+<p>New empty SF-MOC <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.new_empty" title="mocpy.SFMOC.new_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_empty</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 <span class="go">f40/ s12/</span>
 </pre></div>
 </div>
-<p>Loading an SF-MOC from a FITS, JSON or ASCII file <code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>:</p>
+<p>Loading an SF-MOC from a FITS, JSON or ASCII file <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.load" title="mocpy.SFMOC.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># we generate a fake ASCII file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete_on_close</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
@@ -692,7 +692,7 @@ The standard description is published by the IVOA <a class="reference external" 
 </pre></div>
 </div>
 <p>This illustrated the load method that we use when we have a MOC in a file, but for
-ASCII strings, one can also directly use <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>:</p>
+ASCII strings, one can also directly use <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_string" title="mocpy.SFMOC.from_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;f15/2 s12/1&quot;</span><span class="p">)</span>
 <span class="go">f15/2</span>
 <span class="go">s12/1</span>
@@ -700,7 +700,7 @@ ASCII strings, one can also directly use <code class="xref py py-obj docutils li
 </pre></div>
 </div>
 <p>Creating SF-MOCs from physical parameters:</p>
-<p>In <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_frequencies_and_positions</span></code>, we give a set of frequency-position
+<p>In <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequencies_and_positions" title="mocpy.SFMOC.from_frequencies_and_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_frequencies_and_positions</span></code></a>, we give a set of frequency-position
 “points” and the SF-MOC will be built from the cells containing these punctual data at
 the maximum requested order. Use the utility functions
 <a class="reference internal" href="../stubs/mocpy.MOC.html#mocpy.MOC.spatial_resolution_to_order" title="mocpy.MOC.spatial_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spatial_resolution_to_order</span></code></a> to chose the space resolution and
@@ -724,7 +724,7 @@ the maximum requested order. Use the utility functions
 <span class="go">f25/ s8/</span>
 </pre></div>
 </div>
-<p>With <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.from_frequency_ranges_and_positions</span></code> we do not get a single cell in
+<p>With <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequency_ranges_and_positions" title="mocpy.SFMOC.from_frequency_ranges_and_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.from_frequency_ranges_and_positions</span></code></a> we do not get a single cell in
 frequency, bu the cells covering a given frequency band/range:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
@@ -752,7 +752,7 @@ frequency, bu the cells covering a given frequency band/range:</p>
 <span class="go">f6/ s8/</span>
 </pre></div>
 </div>
-<p>In <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code>, the positions are not punctual anymore. They
+<p>In <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_spatial_coverages" title="mocpy.SFMOC.from_spatial_coverages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code></a>, the positions are not punctual anymore. They
 are represented by S-MOCs, which can be built with the <a class="reference internal" href="../stubs/mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></a> module. Let’s for
 example build an SF-MOC from a square observation in two given frequency bands:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">SFMOC</span>
@@ -771,9 +771,9 @@ example build an SF-MOC from a square observation in two given frequency bands:<
 </section>
 <section id="utilities">
 <h3>Utilities<a class="headerlink" href="#utilities" title="Link to this heading">¶</a></h3>
-<p>To inspect an <code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code> instance, one can read its <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code>,
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">min_frequency</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_frequency</span></code> properties. We can also
-check wether it is empty with <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code>. Let’s use <code class="docutils literal notranslate"><span class="pre">sfmoc_fov</span></code> from the
+<p>To inspect an <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC" title="mocpy.SFMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code></a> instance, one can read its <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.max_order" title="mocpy.SFMOC.max_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></a>,
+<a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.min_frequency" title="mocpy.SFMOC.min_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_frequency</span></code></a> and <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.max_frequency" title="mocpy.SFMOC.max_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_frequency</span></code></a> properties. We can also
+check wether it is empty with <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.is_empty" title="mocpy.SFMOC.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>. Let’s use <code class="docutils literal notranslate"><span class="pre">sfmoc_fov</span></code> from the
 previous example:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">max_order</span>
 <span class="go">(13, 10)</span>
@@ -800,8 +800,8 @@ previous example:</p>
 <span class="go">array([ True, False])</span>
 </pre></div>
 </div>
-<p>Fold operation on one of the SF-MOC dimensions, use <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.query_by_frequency</span></code> or
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></p>
+<p>Fold operation on one of the SF-MOC dimensions, use <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.query_by_frequency" title="mocpy.SFMOC.query_by_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.query_by_frequency</span></code></a> or
+<a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.query_by_space" title="mocpy.SFMOC.query_by_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></a></p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrequencyMOC</span> <span class="k">as</span> <span class="n">FMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">sfmoc_cone</span><span class="o">.</span><span class="n">query_by_frequency</span><span class="p">(</span><span class="n">fmoc</span><span class="p">)</span>
