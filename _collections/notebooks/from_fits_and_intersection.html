@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Intersection between MOCs &#8212; MOCPy 0.17.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <title>Intersection between MOCs &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=a8455094"></script>
+    <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -26,7 +26,7 @@
     <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Get the MOC corresponding to a table" href="from_vizier_table.html" />
+    <link rel="next" title="Creating Space-MOCs from shapes" href="01-Creating_MOCs_from_shapes.html" />
     <link rel="prev" title="MOCPy introduction" href="00-MOCpy_introduction.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -55,7 +55,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="from_vizier_table.html" title="Get the MOC corresponding to a table">
+	<a href="01-Creating_MOCs_from_shapes.html" title="Creating Space-MOCs from shapes">
 	  next &raquo;
 	</a>
       </li>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.17.1 documentation</a>
+	<a href="../../index.html">MOCPy 0.18.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -87,10 +87,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization.wcsaxes.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 </pre></div>
 </div>
 </div>
@@ -98,7 +98,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aitoff</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aitoff</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span>
     <span class="p">{</span>
         <span class="s2">&quot;naxis&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
         <span class="s2">&quot;naxis1&quot;</span><span class="p">:</span> <span class="mi">324</span><span class="p">,</span>
@@ -119,7 +119,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="n">m1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;../resources/P-SDSS9-r.fits&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -146,7 +146,7 @@ WARNING: Wrong depth_max 29. Reset to 13
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="n">m2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;../resources/P-GALEXGR6-AIS-FUV.fits&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -172,12 +172,12 @@ WARNING: Wrong depth_max 29. Reset to 13
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">frame_class</span><span class="o">=</span><span class="n">EllipticalFrame</span><span class="p">)</span>
 
-<span class="o">%</span><span class="k">time</span> m1.fill(ax=ax, wcs=aitoff, alpha=0.5, fill=True, color=&quot;green&quot;)
-<span class="o">%</span><span class="k">time</span> m2.fill(ax=ax, wcs=aitoff, alpha=0.5, fill=True, color=&quot;dodgerblue&quot;)
+<span class="o">%</span><span class="n">time</span> <span class="n">m1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+<span class="o">%</span><span class="n">time</span> <span class="n">m2</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">)</span>
 
 <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
@@ -210,14 +210,14 @@ Wall time: 194 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">frame_class</span><span class="o">=</span><span class="n">EllipticalFrame</span><span class="p">)</span>
 
-<span class="o">%</span><span class="k">time</span> m_intersect.fill(ax=ax, wcs=aitoff, alpha=0.5, fill=True, color=&quot;y&quot;)
-<span class="o">%</span><span class="k">time</span> m_intersect.border(ax=ax, wcs=aitoff, alpha=0.5, fill=True, color=&quot;black&quot;)
+<span class="o">%</span><span class="n">time</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="o">%</span><span class="n">time</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">aitoff</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
 
 <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
@@ -250,7 +250,7 @@ Wall time: 81.1 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> hdulist = m_intersect.serialize(format=&#39;fits&#39;)
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">time</span> <span class="n">hdulist</span> <span class="o">=</span> <span class="n">m_intersect</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -269,7 +269,7 @@ Wall time: 2.07 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m_intersect</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -287,9 +287,7 @@ Wall time: 2.07 ms
 <section id="Or-write-it-directly-to-a-FITS/JSON-file:">
 <h1>Or write it directly to a FITS/JSON file:<a class="headerlink" href="#Or-write-it-directly-to-a-FITS/JSON-file:" title="Link to this heading">¶</a></h1>
 <p>m_intersect.save(path=”/tmp/moc”, write_to_file=True, format=’json’)</p>
-<script type="application/vnd.jupyter.widget-state+json">
-{"state": {}, "version_major": 2, "version_minor": 0}
-</script></section>
+</section>
 
 
             <div class="clearer"></div>
@@ -317,8 +315,8 @@ Wall time: 2.07 ms
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 22 Nov 2024. <br/>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
   </p>
 </footer>
   </body>

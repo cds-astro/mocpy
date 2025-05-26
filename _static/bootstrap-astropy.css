@@ -512,6 +512,7 @@ div.sphinxsidebar p.topless {
 div.sphinxsidebar ul {
     margin: 0px 0px 0px 5px;
     padding: 0;
+    overflow-x: auto;
 }
 
 div.sphinxsidebar ul ul {

@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User documentation &#8212; MOCPy 0.17.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>User documentation &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-gallery.css?v=26227f6e" />
     
-    <script src="../_static/documentation_options.js?v=a8455094"></script>
+    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.17.1 documentation</a>
+	<a href="../index.html">MOCPy 0.18.0 documentation</a>
 	 &#187;
       </li>
       
@@ -115,10 +115,6 @@ FITS file on our disk, or from a distant server that already has a pre-calculate
   <div><img alt="" src="../_images/_collections_notebooks_from_fits_and_intersection_9_1.png"></div>
   <div>Intersection between MOCs</div>
 </a>
-<a class="reference internal" href="../_collections/notebooks/from_vizier_table.html">
-  <div><img alt="" src="../_images/_collections_notebooks_from_vizier_table_4_1.png"></div>
-  <div>Get the MOC corresponding to a table</div>
-</a>
 </div>
 </div>
 </section>
@@ -126,11 +122,11 @@ FITS file on our disk, or from a distant server that already has a pre-calculate
 <h4>Calculating a MOC on the fly from a region of the sky<a class="headerlink" href="#calculating-a-moc-on-the-fly-from-a-region-of-the-sky" title="Link to this heading">¶</a></h4>
 <p>Here is a simple example of the creation of a MOC that fully covers a polygon defined
 by its vertices on the sky. The vertices are linked by great circles.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
 
 <span class="c1"># The set of points delimiting the polygon in deg</span>
 <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -218,7 +214,7 @@ the example notebooks <a class="reference internal" href="../_collections/notebo
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_healpix_cells()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_depth29_ranges()</span></code>.
 A simple MOC that represents the full sky is the MOC of order 0 that contains all the 12
 HEALPix cells of the order 0. Creating it from a string looks like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="n">all_sky</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>  <span class="c1"># the 12 cells of HEALPix at order 0</span>
 <span class="n">all_sky</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>  <span class="c1"># the inside of the MOC is represented in red with display_preview</span>
@@ -230,7 +226,7 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 </figure>
 <p>We could also take only odd numbered cells of order 1. Let’s use
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_json()</span></code> that takes a dictionary:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_json</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]})</span>
 <span class="n">moc</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>
@@ -247,9 +243,9 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 <section id="calculating-a-space-moc-sky-area">
 <h4>Calculating a Space-MOC sky area<a class="headerlink" href="#calculating-a-space-moc-sky-area" title="Link to this heading">¶</a></h4>
 <p>This example shows how to calculate the sky area of a Space-MOC.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="n">ALL_SKY</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">steradian</span>
 <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;0/0-11&quot;</span><span class="p">)</span>  <span class="c1"># any other MOC instance will work</span>
@@ -296,10 +292,10 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 <li><p>Call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">fill()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">border()</span></code> so that mocpy plot on a matplotlib axis.</p></li>
 <li><p>Set the axis labels, a title, enable the grid and plot the final figure.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization.wcsaxes.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="c1"># Load a MOC</span>
 <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;./../../resources/P-SDSS9-r.fits&quot;</span>
@@ -346,10 +342,10 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 <li><p>Compute their union</p></li>
 <li><p>Plot the resulting intersection and union on a same matplotlib axis.</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization.wcsaxes.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="c1"># Load Galex and SDSS</span>
 <span class="n">sdss</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;./../../resources/P-SDSS9-r.fits&quot;</span><span class="p">)</span>
@@ -412,20 +408,20 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 </section>
 <section id="get-the-border-s-of-a-moc">
 <h4>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Link to this heading">¶</a></h4>
-<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
 <li><p>Then, a matplotlib path is defined from the projected vertices.</p></li>
 <li><p>Finally the path is plot on top of the MOC.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">PathPatch</span>
-<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathPatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">WCS</span>
 
 <span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;polygon_moc.fits&quot;</span><span class="p">)</span>
 <span class="n">skycoords</span> <span class="o">=</span> <span class="n">moc</span><span class="o">.</span><span class="n">get_boundaries</span><span class="p">()</span>
@@ -448,7 +444,7 @@ In this example:</p>
     <span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
 
     <span class="c1"># Plot the border</span>
-    <span class="kn">from</span> <span class="nn">astropy.wcs.utils</span> <span class="kn">import</span> <span class="n">skycoord_to_pixel</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">skycoord_to_pixel</span>
 
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">skycoord_to_pixel</span><span class="p">(</span><span class="n">skycoords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">wcs</span><span class="p">)</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -473,13 +469,13 @@ Each pixel is associated with a specific probability density value. We convert t
 a probability by multiplying it with the area of each cell.
 Then, we can create a MOC from which a GW has x% of chance of being localized in it.
 By definition the MOC which has 100% of chance of containing a GW is the full sky MOC.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization.wcsaxes.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="c1"># this can be found in mocpy&#39;s repository</span>
 <span class="c1"># https://github.com/cds-astro/mocpy/blob/master/resources/bayestar.multiorder.fits</span>
@@ -555,13 +551,13 @@ By definition the MOC which has 100% of chance of containing a GW is the full sk
 <h4>Performing computation on the pixels of an FITS image lying in a MOC<a class="headerlink" href="#performing-computation-on-the-pixels-of-an-fits-image-lying-in-a-moc" title="Link to this heading">¶</a></h4>
 <p>This example shows how a MOC can filter pixels from a specific FITS image (i.e. associated with a WCS). These pixels can
 then be retrieved from the image for performing some computations on them: e.g. mean, variance analysis thanks to numpy/scikit-learn…</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">simple_norm</span>
-<span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span> <span class="k">as</span> <span class="n">WCS</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">simple_norm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span> <span class="k">as</span> <span class="n">WCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 
 <span class="c1"># load 2MASS cutout covering the galactic plane</span>
 <span class="n">hdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
@@ -635,7 +631,7 @@ then be retrieved from the image for performing some computations on them: e.g. 
 The standard description is published by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
 <p>Space-Time coverages allow to:</p>
 <ol class="arabic simple">
-<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> ranges).</p></li>
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
@@ -662,6 +658,160 @@ The standard description is published by the IVOA <a class="reference external" 
 </a>
 </div>
 </div>
+</section>
+<section id="sfmoc-space-frequency-coverages">
+<h2>SFMOC: Space-Frequency coverages<a class="headerlink" href="#sfmoc-space-frequency-coverages" title="Link to this heading">¶</a></h2>
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code> class allows manipulation and generation of
+<strong>Space-Frequency Multi-Order Coverages</strong> (SF-MOCs).</p>
+<section id="creating-sf-moc-instances">
+<h3>Creating SF-MOC instances<a class="headerlink" href="#creating-sf-moc-instances" title="Link to this heading">¶</a></h3>
+<p>New empty SF-MOC <code class="xref py py-obj docutils literal notranslate"><span class="pre">new_empty</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="go">f40/ s12/</span>
+</pre></div>
+</div>
+<p>Loading an SF-MOC from a FITS, JSON or ASCII file <code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># we generate a fake ASCII file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete_on_close</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">tf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;f20/0-100 s12/0-100&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="c1"># and we read it</span>
+<span class="gp">... </span>    <span class="n">SFMOC</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+<span class="go">19</span>
+<span class="go">f14/0</span>
+<span class="go">15/2</span>
+<span class="go">18/24</span>
+<span class="go">20/100</span>
+<span class="go">s9/0</span>
+<span class="go">10/4-5</span>
+<span class="go">11/24</span>
+<span class="go">12/100</span>
+<span class="go">f20/ s12/</span>
+</pre></div>
+</div>
+<p>This illustrated the load method that we use when we have a MOC in a file, but for
+ASCII strings, one can also directly use <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_string</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;f15/2 s12/1&quot;</span><span class="p">)</span>
+<span class="go">f15/2</span>
+<span class="go">s12/1</span>
+<span class="go">f15/ s12/</span>
+</pre></div>
+</div>
+<p>Creating SF-MOCs from physical parameters:</p>
+<p>In <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_frequencies_and_positions</span></code>, we give a set of frequency-position
+“points” and the SF-MOC will be built from the cells containing these punctual data at
+the maximum requested order. Use the utility functions
+<a class="reference internal" href="../stubs/mocpy.MOC.html#mocpy.MOC.spatial_resolution_to_order" title="mocpy.MOC.spatial_resolution_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spatial_resolution_to_order</span></code></a> to chose the space resolution and
+<a class="reference internal" href="../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.relative_precision_to_order" title="mocpy.FrequencyMOC.relative_precision_to_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_precision_to_order</span></code></a> to chose the frequency resolution.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">from_frequencies_and_positions</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">lon</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">f25/22879928</span>
+<span class="go">s8/311296</span>
+<span class="go">f25/23750246</span>
+<span class="go">s8/311316</span>
+<span class="go">f25/24641536</span>
+<span class="go">s8/311378</span>
+<span class="go">f25/25493504</span>
+<span class="go">s8/311558</span>
+<span class="go">f25/26361856</span>
+<span class="go">s8/311624</span>
+<span class="go">f25/ s8/</span>
+</pre></div>
+</div>
+<p>With <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.from_frequency_ranges_and_positions</span></code> we do not get a single cell in
+frequency, bu the cells covering a given frequency band/range:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">from_frequency_ranges_and_positions</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">frequencies_min</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">frequencies_max</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">lon</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">f6/43-44</span>
+<span class="go">s8/311296</span>
+<span class="go">f6/45</span>
+<span class="go">s8/311296 311316</span>
+<span class="go">f6/46</span>
+<span class="go">s8/311316</span>
+<span class="go">f6/47</span>
+<span class="go">s8/311378</span>
+<span class="go">f6/48</span>
+<span class="go">s8/311378 311558</span>
+<span class="go">f6/49</span>
+<span class="go">s8/311558</span>
+<span class="go">f6/50</span>
+<span class="go">s8/311558 311624</span>
+<span class="go">f6/51</span>
+<span class="go">s8/311624</span>
+<span class="go">f6/ s8/</span>
+</pre></div>
+</div>
+<p>In <code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code>, the positions are not punctual anymore. They
+are represented by S-MOCs, which can be built with the <a class="reference internal" href="../stubs/mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></a> module. Let’s for
+example build an SF-MOC from a square observation in two given frequency bands:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># a MOC representing a field of view</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_box</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># we use the same moc twice, and give two ranges</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_spatial_coverages</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">frequencies_min</span><span class="o">=</span><span class="p">([</span><span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">nm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="n">equivalencies</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">spectral</span><span class="p">()),</span>
+<span class="gp">... </span>   <span class="n">frequencies_max</span><span class="o">=</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">nm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="n">equivalencies</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">spectral</span><span class="p">()),</span>
+<span class="gp">... </span>   <span class="n">spatial_coverages</span><span class="o">=</span><span class="p">[</span><span class="n">moc</span><span class="p">,</span> <span class="n">moc</span><span class="p">],</span>
+<span class="gp">... </span>   <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="utilities">
+<h3>Utilities<a class="headerlink" href="#utilities" title="Link to this heading">¶</a></h3>
+<p>To inspect an <code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code> instance, one can read its <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">min_frequency</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_frequency</span></code> properties. We can also
+check wether it is empty with <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code>. Let’s use <code class="docutils literal notranslate"><span class="pre">sfmoc_fov</span></code> from the
+previous example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">max_order</span>
+<span class="go">(13, 10)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">min_frequency</span>
+<span class="go">&lt;Quantity 9.93958512e+14 Hz&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">max_frequency</span>
+<span class="go">&lt;Quantity 3.025856e+15 Hz&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="general-manipulation">
+<h3>General manipulation<a class="headerlink" href="#general-manipulation" title="Link to this heading">¶</a></h3>
+<p>Check wether a list of “punctual” position/frequency values fall within an SF-MOC:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span><span class="p">,</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># we generate an SF-MOC from a cone and a range of frequencies</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_cone</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_spatial_coverages</span><span class="p">(</span><span class="mf">0.01</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
+<span class="gp">... </span>                                          <span class="n">moc</span><span class="p">,</span> <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># one inside, one outside</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_cone</span><span class="o">.</span><span class="n">contains</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10000</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+<span class="go">array([ True, False])</span>
+</pre></div>
+</div>
+<p>Fold operation on one of the SF-MOC dimensions, use <code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.query_by_frequency</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">query_by_space</span></code></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrequencyMOC</span> <span class="k">as</span> <span class="n">FMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">sfmoc_cone</span><span class="o">.</span><span class="n">query_by_frequency</span><span class="p">(</span><span class="n">fmoc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">moc</span><span class="p">)</span>
+<span class="go">&lt;class &#39;mocpy.moc.moc.MOC&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Here we recover the Space-MOC corresponding to the parts of the <code class="docutils literal notranslate"><span class="pre">sfmoc_cone</span></code> coverage
+with frequencies within <code class="docutils literal notranslate"><span class="pre">fmoc</span></code>.</p>
+</section>
 </section>
 </section>
 
@@ -699,6 +849,12 @@ The standard description is published by the IVOA <a class="reference external" 
 <li><a class="reference internal" href="#tmoc-temporal-coverages">TMOC: Temporal coverages</a></li>
 <li><a class="reference internal" href="#stmoc-space-time-coverages">STMOC: Space &amp; Time coverages</a></li>
 <li><a class="reference internal" href="#fmoc-frequency-coverages">FMOC: Frequency coverages</a></li>
+<li><a class="reference internal" href="#sfmoc-space-frequency-coverages">SFMOC: Space-Frequency coverages</a><ul>
+<li><a class="reference internal" href="#creating-sf-moc-instances">Creating SF-MOC instances</a></li>
+<li><a class="reference internal" href="#utilities">Utilities</a></li>
+<li><a class="reference internal" href="#general-manipulation">General manipulation</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -714,8 +870,8 @@ The standard description is published by the IVOA <a class="reference external" 
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 22 Nov 2024. <br/>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
   </p>
 </footer>
   </body>

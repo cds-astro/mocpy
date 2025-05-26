@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Space and time MOC &#8212; MOCPy 0.17.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <title>Space and time MOC &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=a8455094"></script>
+    <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.17.1 documentation</a>
+	<a href="../../index.html">MOCPy 0.18.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -87,13 +87,13 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
-<span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
-<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
-<span class="kn">from</span> <span class="nn">astropy.visualization.wcsaxes.frame</span> <span class="kn">import</span> <span class="n">EllipticalFrame</span>
-<span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">STMOC</span><span class="p">,</span> <span class="n">WCS</span><span class="p">,</span> <span class="n">TimeMOC</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization.wcsaxes.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">STMOC</span><span class="p">,</span> <span class="n">WCS</span><span class="p">,</span> <span class="n">TimeMOC</span>
 </pre></div>
 </div>
 </div>
@@ -101,7 +101,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load 2MASS data</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load 2MASS data</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;./../resources/STMOC/2MASS-list-images.fits.gz&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">)</span>
 
 <span class="n">times_start</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">)</span>
@@ -115,7 +115,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="c1"># Create a cone footprint from the first 10000 observations</span>
 <span class="n">num_observations</span> <span class="o">=</span> <span class="mi">10000</span>
 <span class="n">spatial_coverages</span> <span class="o">=</span> <span class="p">[</span>
@@ -146,7 +146,7 @@ Wall time: 3.72 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span>
     <span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="s2">&quot;1998-01-01&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;iso&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
     <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="s2">&quot;1999-01-01&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;iso&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
     <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">),</span>
@@ -159,7 +159,7 @@ Wall time: 3.72 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="c1"># Define a astropy WCS easily</span>
 <span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
     <span class="n">fig</span><span class="p">,</span>
@@ -188,9 +188,7 @@ Wall time: 3.72 s
 <img alt="../../_images/_collections_notebooks_STMOC_from_time_ranges_5_0.png" src="../../_images/_collections_notebooks_STMOC_from_time_ranges_5_0.png" />
 </div>
 </div>
-<script type="application/vnd.jupyter.widget-state+json">
-{"state": {}, "version_major": 2, "version_minor": 0}
-</script></section>
+</section>
 
 
             <div class="clearer"></div>
@@ -214,8 +212,8 @@ Wall time: 3.72 s
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 22 Nov 2024. <br/>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
   </p>
 </footer>
   </body>

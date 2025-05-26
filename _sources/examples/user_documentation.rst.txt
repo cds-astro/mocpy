@@ -207,3 +207,170 @@ Gallery of notebooks examples using FMOCs
 .. nbgallery::
     ../_collections/notebooks/First_Steps_with_FMOCs
 
+********************************
+SFMOC: Space-Frequency coverages
+********************************
+
+The `SFMOC` class allows manipulation and generation of
+**Space-Frequency Multi-Order Coverages** (SF-MOCs).
+
+Creating SF-MOC instances
+=========================
+
+New empty SF-MOC `~mocpy.SFMOC.new_empty`:
+
+    >>> from mocpy import SFMOC
+    >>> SFMOC.new_empty(max_order_frequency=40, max_order_space=12)
+    f40/ s12/
+
+Loading an SF-MOC from a FITS, JSON or ASCII file `~mocpy.SFMOC.load`:
+
+    >>> # we generate a fake ASCII file
+    >>> from tempfile import NamedTemporaryFile
+    >>> with NamedTemporaryFile(delete_on_close=False) as tf:
+    ...     tf.write(b"f20/0-100 s12/0-100")
+    ...     tf.close()
+    ...     # and we read it
+    ...     SFMOC.load(tf.name, format="ascii")
+    19
+    f14/0
+    15/2
+    18/24
+    20/100
+    s9/0
+    10/4-5
+    11/24
+    12/100
+    f20/ s12/
+
+This illustrated the load method that we use when we have a MOC in a file, but for
+ASCII strings, one can also directly use `~mocpy.SFMOC.from_string`:
+
+    >>> SFMOC.from_string("f15/2 s12/1")
+    f15/2
+    s12/1
+    f15/ s12/
+
+Creating SF-MOCs from physical parameters:
+
+1. From frequency-position "points"
+-----------------------------------
+
+In `~mocpy.SFMOC.from_frequencies_and_positions`, we give a set of frequency-position
+"points" and the SF-MOC will be built from the cells containing these punctual data at
+the maximum requested order. Use the utility functions
+`~mocpy.MOC.spatial_resolution_to_order` to chose the space resolution and
+`~mocpy.FrequencyMOC.relative_precision_to_order` to chose the frequency resolution.
+
+    >>> import astropy.units as u
+    >>> from mocpy import SFMOC
+    >>> SFMOC.from_frequencies_and_positions(
+    ...     [0.01, 0.1, 1, 10, 100] * u.Hz,
+    ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
+    ...     max_order_frequency=25, max_order_space=8)
+    f25/22879928
+    s8/311296
+    f25/23750246
+    s8/311316
+    f25/24641536
+    s8/311378
+    f25/25493504
+    s8/311558
+    f25/26361856
+    s8/311624
+    f25/ s8/
+
+2. From frequency ranges associated to punctual positions
+---------------------------------------------------------
+
+With `mocpy.SFMOC.from_frequency_ranges_and_positions` we do not get a single cell in
+frequency, bu the cells covering a given frequency band/range:
+
+    >>> import astropy.units as u
+    >>> from mocpy import SFMOC
+    >>> SFMOC.from_frequency_ranges_and_positions(
+    ...     frequencies_min=[0.01, 0.1, 1, 10, 100] * u.Hz,
+    ...     frequencies_max=[0.1, 1, 10, 100, 1000] * u.Hz,
+    ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
+    ...     max_order_frequency=6, max_order_space=8)
+    f6/43-44
+    s8/311296
+    f6/45
+    s8/311296 311316
+    f6/46
+    s8/311316
+    f6/47
+    s8/311378
+    f6/48
+    s8/311378 311558
+    f6/49
+    s8/311558
+    f6/50
+    s8/311558 311624
+    f6/51
+    s8/311624
+    f6/ s8/
+
+3. From frequency ranges associated to Space-MOCs
+-------------------------------------------------
+
+In `~mocpy.SFMOC.from_spatial_coverages`, the positions are not punctual anymore. They
+are represented by S-MOCs, which can be built with the `~mocpy.MOC` module. Let's for
+example build an SF-MOC from a square observation in two given frequency bands:
+
+    >>> from mocpy import MOC, SFMOC
+    >>> import astropy.units as u
+    >>> # a MOC representing a field of view
+    >>> moc = MOC.from_box(lon=0*u.deg, lat=0*u.deg, a=2*u.deg, b=2*u.deg,
+    ...                    angle=0*u.deg, max_depth=10)
+    >>> # we use the same moc twice, and give two ranges
+    >>> sfmoc_fov = SFMOC.from_spatial_coverages(
+    ...    frequencies_min=([200, 300]*u.nm).to(u.Hz, equivalencies=u.spectral()),
+    ...    frequencies_max=([100, 200]*u.nm).to(u.Hz, equivalencies=u.spectral()),
+    ...    spatial_coverages=[moc, moc],
+    ...    max_order_frequency=13)
+
+Utilities
+=========
+
+To inspect an `~mocpy.SFMOC` instance, one can read its `~mocpy.SFMOC.max_order`,
+`~mocpy.SFMOC.min_frequency` and `~mocpy.SFMOC.max_frequency` properties. We can also
+check wether it is empty with `~mocpy.SFMOC.is_empty`. Let's use ``sfmoc_fov`` from the
+previous example:
+
+    >>> sfmoc_fov.max_order
+    (13, 10)
+    >>> sfmoc_fov.is_empty()
+    False
+    >>> sfmoc_fov.min_frequency
+    <Quantity 9.93958512e+14 Hz>
+    >>> sfmoc_fov.max_frequency
+    <Quantity 3.025856e+15 Hz>
+
+
+General manipulation
+====================
+
+Check wether a list of "punctual" position/frequency values fall within an SF-MOC:
+
+    >>> from mocpy import SFMOC, MOC
+    >>> import astropy.units as u
+    >>> # we generate an SF-MOC from a cone and a range of frequencies
+    >>> moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.deg, max_depth=10)
+    >>> sfmoc_cone = SFMOC.from_spatial_coverages(0.01*u.Hz, 100*u.Hz,
+    ...                                           moc, max_order_frequency=40)
+    >>> # one inside, one outside
+    >>> sfmoc_cone.contains([10, 10000]*u.Hz, [0.1, 20]*u.deg, [0.1, 20]*u.deg)
+    array([ True, False])
+
+Fold operation on one of the SF-MOC dimensions, use `mocpy.SFMOC.query_by_frequency` or
+`~mocpy.SFMOC.query_by_space`
+
+    >>> from mocpy import FrequencyMOC as FMOC
+    >>> fmoc = FMOC.from_frequency_ranges(15, 0.1*u.Hz, 1*u.Hz)
+    >>> moc = sfmoc_cone.query_by_frequency(fmoc)
+    >>> type(moc)
+    <class 'mocpy.moc.moc.MOC'>
+
+Here we recover the Space-MOC corresponding to the parts of the ``sfmoc_cone`` coverage
+with frequencies within ``fmoc``.

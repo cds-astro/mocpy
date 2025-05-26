@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.STMOC &#8212; MOCPy 0.17.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>mocpy.STMOC &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../_static/documentation_options.js?v=a8455094"></script>
+    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.17.1 documentation</a>
+	<a href="../index.html">MOCPy 0.18.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API: Detailed list of all methods</a> &#187;</li>
@@ -86,8 +86,7 @@
 <dd><p>Time-Spatial Coverage class.</p>
 <p>Is a Time-Spatial Coverage (ST-MOC).</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>create_key: Object ensure __init__ is called by super-class/class-methods only
-store_index: index of the ST-MOC in the rust-side storage</p>
+<dt>Args:</dt><dd><p>store_index: index of the ST-MOC in the rust-side storage</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -126,11 +125,11 @@ store_index: index of the ST-MOC in the rust-side storage</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. The returned mask array has true values for (time, position)
 lying inside the Space-Time coverage.</p>
@@ -149,6 +148,19 @@ lying inside the Space-Time coverage.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">STMOC</span><span class="p">,</span> <span class="n">MOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stmoc</span> <span class="o">=</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">from_spatial_coverages</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="s2">&quot;2000-01-01&quot;</span><span class="p">),</span> <span class="n">Time</span><span class="p">(</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">),</span>
+<span class="gp">... </span>                                     <span class="n">moc</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># one inside, one outside</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stmoc</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Time</span><span class="p">([</span><span class="s2">&quot;2005-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;1990-01-01&quot;</span><span class="p">]),</span>
+<span class="gp">... </span>               <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+<span class="go">array([ True, False])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -210,7 +222,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-7&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-3&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/4-7&quot;</span><span class="p">)</span>
@@ -308,9 +320,9 @@ in a binary HDU table.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
+<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
 </dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
+<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
 </dd>
 <dt><strong>spatial_coverages</strong><span class="classifier">list</span></dt><dd><p>List of <a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a> spatial coverage objects.</p>
 </dd>
@@ -355,7 +367,7 @@ specification at section 2.3.2.</p>
 </dl>
 </div>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -365,13 +377,20 @@ specification at section 2.3.2.</p>
 <dt class="sig sig-object py" id="mocpy.STMOC.from_string">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ascii'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Deserialize the Spatial MOC from the given string.</p>
-<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<p>Format can be ‘ascii’ or ‘json’, though the json format is not officially
+supported by the IVOA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC will be serialized before being saved.
+<dt><strong>format</strong><span class="classifier">str, optional</span></dt><dd><p>The format in which the MOC is serialized.
 Possible formats are “ascii” or “json”.
 By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “ascii”.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></a></dt><dd><p>The ST-MOC build from the given string.</p>
 </dd>
 </dl>
 </dd>
@@ -383,19 +402,19 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_time_ranges_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">29</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_time_ranges_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_time_ranges_positions" title="Link to this definition">¶</a></dt>
 <dd><p>Create a 2D Coverage from a set of times and positions associated to each time.</p>
 <ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
+<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
+<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
+<dt><strong>times_start</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The starting times of each observations.</p>
 </dd>
-<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
+<dt><strong>times_end</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The ending times of each observations.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>time_depth</strong><span class="classifier">int, optional</span></dt><dd><p>Time depth. By default, the time resolution chosen is 1µs.</p>
 </dd>
@@ -417,19 +436,19 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_times_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.from_times_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.from_times_positions" title="Link to this definition">¶</a></dt>
 <dd><p>Create a 2D Coverage from a set of times and positions associated to each time.</p>
 <ul class="simple">
-<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
-<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
+<li><p>Its first dimension refers to <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> times.</p></li>
+<li><p>Its second dimension refers to lon, lat <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a> positions.</p></li>
 </ul>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>The times of each sky coordinates.</p>
 </dd>
 <dt><strong>time_depth</strong><span class="classifier">int</span></dt><dd><p>Time depth.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>spatial_depth</strong><span class="classifier">int</span></dt><dd><p>Spatial depth.</p>
 </dd>
@@ -465,8 +484,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">FrequencyMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrequencyMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc_large_band</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_frequency_ranges</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
 <span class="gp">... </span>                                                     <span class="n">min_freq</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
 <span class="gp">... </span>                                                     <span class="n">max_freq</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
@@ -488,8 +507,9 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.STMOC.load">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.load" title="Link to this definition">¶</a></dt>
-<dd><p>Load the Spatial MOC from a file.</p>
-<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
+<dd><p>Load the Space-Time MOC from a file.</p>
+<p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not
+officially supported by the IVOA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -499,6 +519,11 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 Possible formats are “fits”, “ascii” or “json”.
 By default, <code class="docutils literal notranslate"><span class="pre">format</span></code> is set to “fits”.</p>
 </dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="#mocpy.STMOC" title="mocpy.STMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STMOC</span></code></a></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -563,7 +588,7 @@ dimension=’time’.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">STMOC</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">STMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">STMOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="s1">&#39;space&#39;</span><span class="p">)</span>
 <span class="go">12</span>
 </pre></div>
@@ -590,7 +615,7 @@ dimension=’time’.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">STMOC</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">STMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">STMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
 <span class="go">t42/ s12/</span>
 </pre></div>
@@ -611,8 +636,8 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></span></dt><dd><p>The time ranges observing in the <code class="docutils literal notranslate"><span class="pre">spatial_coverage</span></code></p>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></dt><dd><p>The time ranges observing in the <code class="docutils literal notranslate"><span class="pre">spatial_coverage</span></code></p>
 </dd>
 </dl>
 </dd>
@@ -624,7 +649,7 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 <span class="sig-name descname"><span class="pre">query_by_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/stmoc/stmoc.html#STMOC.query_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.STMOC.query_by_time" title="Link to this definition">¶</a></dt>
 <dd><p>Query the ST-MOC by time T-MOC.</p>
 <p>This will perform the union of all the spatial coverages lying in a set of time ranges.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>tmoc</strong><span class="classifier">~mocpy.tmoc.TimeMOC``</span></dt><dd><p>Time ranges. Must be a Nx2 shaped astropy time array.</p>
@@ -632,8 +657,29 @@ spatial coverages lie in <code class="docutils literal notranslate"><span class=
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></span></dt><dd><p>The spatial coverage being observed within the input time ranges</p>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></dt><dd><p>The spatial coverage being observed within the input time ranges</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mocpy.STMOC.refine_to_order">
+<span class="sig-name descname"><span class="pre">refine_to_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.STMOC.refine_to_order" title="Link to this definition">¶</a></dt>
+<dd><p>Refine the MOC instance to a more precise order.</p>
+<p>This is an in-place operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>new_order</strong><span class="classifier">int</span></dt><dd><p>New maximum order for the MOC.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.MOC</span></code></a>, <a class="reference internal" href="mocpy.TimeMOC.html#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.TimeMOC</span></code></a>, <a class="reference internal" href="mocpy.FrequencyMOC.html#mocpy.FrequencyMOC" title="mocpy.FrequencyMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.FrequencyMOC</span></code></a></dt><dd><p>Returns itself, after in-place modification.</p>
 </dd>
 </dl>
 </dd>
@@ -697,7 +743,7 @@ Default to False.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/latest/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -727,7 +773,7 @@ It is not implemented yet for STMOCs</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">MOC</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-1 362-363&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0 2 277 279&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
@@ -776,8 +822,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mocpy</span> <span class="kn">import</span> <span class="n">TimeMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;1999-01-01T00:00:00.123456789&#39;</span><span class="p">),</span>
 <span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2005-01-01T00:00:00&#39;</span><span class="p">),</span>
 <span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
@@ -892,6 +938,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <li><a class="reference internal" href="#mocpy.STMOC.new_empty"><code class="docutils literal notranslate"><span class="pre">STMOC.new_empty()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.STMOC.query_by_space"><code class="docutils literal notranslate"><span class="pre">STMOC.query_by_space()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.STMOC.query_by_time"><code class="docutils literal notranslate"><span class="pre">STMOC.query_by_time()</span></code></a></li>
+<li><a class="reference internal" href="#mocpy.STMOC.refine_to_order"><code class="docutils literal notranslate"><span class="pre">STMOC.refine_to_order()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.STMOC.remove_neighbours"><code class="docutils literal notranslate"><span class="pre">STMOC.remove_neighbours()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.STMOC.save"><code class="docutils literal notranslate"><span class="pre">STMOC.save()</span></code></a></li>
 <li><a class="reference internal" href="#mocpy.STMOC.serialize"><code class="docutils literal notranslate"><span class="pre">STMOC.serialize()</span></code></a></li>
@@ -918,8 +965,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 22 Nov 2024. <br/>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
   </p>
 </footer>
   </body>

@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.17.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.18.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=a8455094"></script>
+    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.17.1 documentation</a>
+	<a href="../../../index.html">MOCPy 0.18.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -65,11 +65,14 @@
           <div class="body" role="main">
             
   <h1>Source code for mocpy.fmoc.fmoc</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mocpy</span>
-<span class="kn">from</span> <span class="nn">..abstract_moc</span> <span class="kn">import</span> <span class="n">AbstractMOC</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">mocpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..abstract_moc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractMOC</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
@@ -80,7 +83,7 @@
 
 <div class="viewcode-block" id="FrequencyMOC">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC">[docs]</a>
-<span class="k">class</span> <span class="nc">FrequencyMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FrequencyMOC</span><span class="p">(</span><span class="n">AbstractMOC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Multi-order frequency coverage class. Experimental.&quot;&quot;&quot;</span>
 
     <span class="c1"># Maximum order of F-MOCs</span>
@@ -92,7 +95,7 @@
     <span class="c1"># Largest value, in Hz, a F-MOC can encode</span>
     <span class="n">FREQ_MAX_HZ</span> <span class="o">=</span> <span class="mf">5.846_006_549_323_611e48</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a Frequency Coverage (F-MOC).</span>
 
 <span class="sd">        Args:</span>
@@ -102,7 +105,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">store_index</span> <span class="o">=</span> <span class="n">store_index</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Depth/order of the F-MOC.</span>
 
 <span class="sd">        Returns</span>
@@ -122,7 +125,7 @@
 <div class="viewcode-block" id="FrequencyMOC.n_cells">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.n_cells">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">n_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_cells</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of cells for a given depth.</span>
 
 <span class="sd">        Parameters</span>
@@ -151,7 +154,7 @@
 
 <div class="viewcode-block" id="FrequencyMOC.to_hz_ranges">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.to_hz_ranges">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_hz_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_hz_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Hertz ranges this `FrequencyMOC` contains, in Hertz.</span>
 
 <span class="sd">        Examples</span>
@@ -171,7 +174,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">to_depth59_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_depth59_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of ranges this `FrequencyMOC` contains, at the maximum precision.</span>
 
 <span class="sd">        Examples</span>
@@ -186,7 +189,7 @@
 
 <div class="viewcode-block" id="FrequencyMOC.degrade_to_order">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.degrade_to_order">[docs]</a>
-    <span class="k">def</span> <span class="nf">degrade_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">degrade_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Degrade the `FrequencyMOC` instance to a new, less precise, `FrequencyMOC`.</span>
 
@@ -213,14 +216,98 @@
 <span class="sd">        &gt;&gt;&gt; fmoc.degrade_to_order(10)</span>
 <span class="sd">        10/752</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_order</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The new order is more precise than the current order, nothing done.&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">degrade</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">new_order</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FrequencyMOC</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FrequencyMOC.refine_to_order">
+<a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.refine_to_order">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refine_to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Refine the order of the F-MOC instance to a more precise order.</span>
+
+<span class="sd">        This is an in-place operation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_order : int</span>
+<span class="sd">            New maximum order for this F-MOC.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `mocpy.FrequencyMOC`</span>
+<span class="sd">            Returns itself, after in-place modification.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC</span>
+<span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc</span>
+<span class="sd">        40/807453851648</span>
+<span class="sd">        &gt;&gt;&gt; fmoc.refine_to_order(50)</span>
+<span class="sd">        40/807453851648</span>
+<span class="sd">        50/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_order</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;new_order&#39; is less precise than the current max order. Nothing done.&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">mocpy</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">new_order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="FrequencyMOC.to_order">
+<a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.to_order">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new F-MOC with the new order.</span>
+
+<span class="sd">        This is a convenience method for a quick change of order.</span>
+<span class="sd">        Using &#39;degrade_to_order&#39; and &#39;refine_to_order&#39; depending on the situation is</span>
+<span class="sd">        more efficient and avoids copying the MOC when it is not needed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_order : int</span>
+<span class="sd">            The new order for the F-MOC. Can be either more or less precise than the</span>
+<span class="sd">            current max_order of the F-MOC</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.FrequencyMOC`</span>
+<span class="sd">            A new F-MOC instance with the given max order.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC as FMOC</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FMOC.from_string(&quot;15/0-100&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc.to_order(12)</span>
+<span class="sd">        9/0</span>
+<span class="sd">        10/2</span>
+<span class="sd">        12/12</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        degrade_to_order : to create a new less precise MOC</span>
+<span class="sd">        refine_to_order : to change the order to a more precise one in place (no copy)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_order</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
+            <span class="n">moc_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">moc_copy</span><span class="o">.</span><span class="n">refine_to_order</span><span class="p">(</span><span class="n">new_order</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_order</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="n">new_order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FrequencyMOC.new_empty">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.new_empty">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">new_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">new_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new empty `FrequencyMOC` of given depth.</span>
 
@@ -247,7 +334,7 @@
 <div class="viewcode-block" id="FrequencyMOC.from_depth59_ranges">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_depth59_ranges">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_depth59_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_depth59_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `FrequencyMOC` from a set of `FrequencyMOC` ranges at order 59.</span>
 
@@ -289,7 +376,7 @@
 <div class="viewcode-block" id="FrequencyMOC.from_frequencies">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_frequencies">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_frequencies</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_frequencies</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `FrequencyMOC` from a `astropy.units.Quantity` that are internally converted in Hertz.</span>
 
@@ -321,7 +408,7 @@
 <div class="viewcode-block" id="FrequencyMOC.from_frequency_ranges">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_frequency_ranges">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_frequency_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">min_freq</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_frequency_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">min_freq</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a `FrequencyMOC` from a range defined by two `astropy.units.Quantity` converted in Hertz.</span>
 
@@ -367,7 +454,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">min_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">min_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the `~astropy.units.Quantity` frequency of the F-MOC smallest frequency.</span>
 
@@ -387,7 +474,7 @@
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">first_fmoc_hz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the `astropy.units.Quantity` largest frequency of the F-MOC.</span>
 
@@ -412,7 +499,7 @@
 
 <div class="viewcode-block" id="FrequencyMOC.contains">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.contains">[docs]</a>
-    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test is a frequency -- or list of frequencies -- is comprised in this `FrequencyMOC`.</span>
 
@@ -455,7 +542,7 @@
 <div class="viewcode-block" id="FrequencyMOC.order_to_relative_precision">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.order_to_relative_precision">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">order_to_relative_precision</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">order_to_relative_precision</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a `FrequencyMOC` order to a **relative** precision range.</span>
 
@@ -508,7 +595,7 @@
 <div class="viewcode-block" id="FrequencyMOC.relative_precision_to_order">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.relative_precision_to_order">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">relative_precision_to_order</span><span class="p">(</span><span class="n">frequency_precision</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">relative_precision_to_order</span><span class="p">(</span><span class="n">frequency_precision</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a relative frequency precision into a `FrequencyMOC` order.</span>
 
@@ -534,7 +621,7 @@
 <div class="viewcode-block" id="FrequencyMOC.load">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.load">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the `FrequencyMOC` from a file.</span>
 
@@ -564,7 +651,7 @@
 
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_from_fits_raw_bytes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_bytes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load FrequencyMOC from raw bytes of a FITS file.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">frequency_moc_from_fits_raw_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -572,7 +659,7 @@
 <div class="viewcode-block" id="FrequencyMOC.from_string">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_string">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">):</span>  <span class="c1"># noqa: A002</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deserialize the `FrequencyMOC` from the given string.</span>
 
@@ -603,9 +690,47 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format should be one of </span><span class="si">{</span><span class="n">formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="FrequencyMOC.from_sfmoc_space_fold">
+<a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_sfmoc_space_fold">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_sfmoc_space_fold</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sfmoc</span><span class="p">,</span> <span class="n">smoc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new FMOC from the space fold operation on a SFMOC.</span>
+
+<span class="sd">        The FrequencyMOC will be the union of all the ranges of frequencies</span>
+<span class="sd">        corresponding to the given Space-MOC.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sfmoc : `~mocpy.SFMOC`</span>
+<span class="sd">            A Space-Frequency MOC.</span>
+<span class="sd">        smoc : `~mocpy.MOC`</span>
+<span class="sd">            A Space-MOC</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `~mocpy.FrequencyMOC`</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from mocpy import MOC, SFMOC, FrequencyMOC as FMOC</span>
+<span class="sd">        &gt;&gt;&gt; sfmoc = SFMOC.from_string(&#39;&#39;&#39;f10/0-20</span>
+<span class="sd">        ... s12/0-100</span>
+<span class="sd">        ... f10/21-40</span>
+<span class="sd">        ... s12/101-200</span>
+<span class="sd">        ... &#39;&#39;&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; moc = MOC.from_string(&quot;12/0-100&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FMOC.from_sfmoc_space_fold(sfmoc, moc)</span>
+<span class="sd">        &gt;&gt;&gt; fmoc</span>
+<span class="sd">        6/0</span>
+<span class="sd">        8/4</span>
+<span class="sd">        10/20</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">mocpy</span><span class="o">.</span><span class="n">project_on_sfmoc_freq_dim</span><span class="p">(</span><span class="n">smoc</span><span class="o">.</span><span class="n">store_index</span><span class="p">,</span> <span class="n">sfmoc</span><span class="o">.</span><span class="n">store_index</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="FrequencyMOC.plot_frequencies">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.plot_frequencies">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">frequency_unit</span><span class="o">=</span><span class="s2">&quot;Hz&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">frequency_unit</span><span class="o">=</span><span class="s2">&quot;Hz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a frequency moc.</span>
 
 <span class="sd">        This method applies a `matplotlib.collections.PatchCollection`</span>
@@ -637,8 +762,8 @@
                 <span class="s2">&quot; instead of &#39;frequency&#39;, see astropy.units for more information&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PatchCollection</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
 
         <span class="n">min_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="n">max_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
@@ -661,7 +786,7 @@
 
 <div class="viewcode-block" id="FrequencyMOC.plot_wavelengths">
 <a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.plot_wavelengths">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_wavelengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">length_unit</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_wavelengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">length_unit</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a `FrequencyMOC` with a conversion to wavelengths.</span>
 
 <span class="sd">        This method applies a `matplotlib.collections.PatchCollection`</span>
@@ -694,8 +819,8 @@
                 <span class="s2">&quot; instead of &#39;length&#39;, see astropy.units for more information&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PatchCollection</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
 
         <span class="c1"># get default bonds</span>
         <span class="n">min_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">length_unit</span><span class="p">,</span> <span class="n">equivalencies</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">spectral</span><span class="p">())</span><span class="o">.</span><span class="n">value</span>
@@ -743,8 +868,8 @@
   <p class="pull-right"> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2024, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 22 Nov 2024. <br/>
+    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 May 2025. <br/>
   </p>
 </footer>
   </body>
