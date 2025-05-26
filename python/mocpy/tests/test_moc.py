@@ -600,6 +600,12 @@ def test_degrade_to_order():
         hst_moc = hst_moc.degrade_to_order(order)
         assert hst_moc.sky_fraction <= 1.0
 
+    with pytest.warns(
+        UserWarning,
+        match="The new order is more precise than the current order, nothing done.",
+    ):
+        hst_moc.degrade_to_order(hst_moc.MAX_ORDER)
+
 
 def test_refine_to_order():
     moc = MOC.from_str("5/1")

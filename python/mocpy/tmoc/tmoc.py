@@ -140,6 +140,11 @@ class TimeMOC(AbstractMOC):
         `~mocpy.TimeMOC`
             The degraded MOC.
         """
+        if new_order >= self.max_order:
+            warnings.warn(
+                "The new order is more precise than the current order, nothing done.",
+                stacklevel=2,
+            )
         index = mocpy.degrade(self.store_index, new_order)
         return TimeMOC(index)
 

@@ -51,6 +51,18 @@ def test_to_depth61_ranges():
     ).all()
 
 
+def test_degrade_to_order():
+    tmoc = TimeMOC.from_string("10/0-15")
+    assert tmoc.max_order == 10
+    degraded = tmoc.degrade_to_order(5)
+    assert degraded.max_order == 5
+    with pytest.warns(
+        UserWarning,
+        match="The new order is more precise than the current order, nothing done.",
+    ):
+        tmoc.degrade_to_order(20)
+
+
 def test_refine_to_order():
     moc = TimeMOC.from_str("5/1")
     moc.refine_to_order(6)

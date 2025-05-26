@@ -59,6 +59,11 @@ def test_degrade_to_order():
         fmoc.to_depth59_ranges
         == np.array([[0, FrequencyMOC.MAX_INDEX_EXCLUSIVE]], dtype=np.uint64)
     ).all()
+    with pytest.warns(
+        UserWarning,
+        match="The new order is more precise than the current order, nothing done.",
+    ):
+        fmoc.degrade_to_order(FrequencyMOC.MAX_ORDER)
 
 
 def test_refine_to_order():
