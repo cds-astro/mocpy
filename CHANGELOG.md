@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* fix ``contains`` method in ST-MOCs
+
 ### Added
 
 * new sub-module to manipulate space-frequency MOC ``SFMOC`` [#189]
