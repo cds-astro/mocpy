@@ -30,7 +30,6 @@ jobs:
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux_2_28
-           # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
          done
 
   build-linux64-wheels-manylinux2014:
@@ -56,39 +55,7 @@ jobs:
            "${PYBIN}/pip" install --upgrade pip
            "${PYBIN}/pip" install maturin
            "${PYBIN}/maturin" publish -i "${PYBIN}/python" --skip-existing --compatibility manylinux2014
-           # "${PYBIN}/maturin" publish -i "${PYBIN}/python" --no-sdist --skip-existing --compatibility musllinux_1_2
          done
-
-  # Linux is specific: because of manylinux, we have to use a docker file
-  build-linux32-wheels:
-    runs-on: ubuntu-latest
-    # CentOS 7 32 bits Docker Hub image that 'build-linux-wheels' executes in.
-    # See https://github.com/pypa/manylinux for this particular container:
-    # * CPython 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 13 installed in /opt/python/<python tag>-<abi tag>
-    env:
-      MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN_FXP }}
-      img: quay.io/pypa/manylinux2014_i686
-    steps:
-     - name: Checkout
-       uses: actions/checkout@v4
-     - name: "Set up QEMU"
-       id: qemu
-       uses: docker/setup-qemu-action@v3
-     - name: Install dependencies
-       run: |
-         docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-         -e MATURIN_PYPI_TOKEN=${{ secrets.PYPI_API_TOKEN_FXP }} \
-         ${{ env.img }} \
-         bash -exc 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-           source $HOME/.cargo/env && \
-           for PYBIN in /opt/python/cp*-cp3{8,9,10,11,12,13}/bin; do
-             echo "Loop on PYBIN: $PYBIN"
-             "${PYBIN}/pip" install --upgrade pip
-             "${PYBIN}/pip" install maturin
-             "${PYBIN}/maturin" -V
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility manylinux2014
-             "${PYBIN}/maturin" publish -i "${PYBIN}/python" -v --no-sdist --skip-existing --compatibility musllinux_1_2
-           done'
 
   build-aarch64-wheels:
     runs-on: ubuntu-latest
