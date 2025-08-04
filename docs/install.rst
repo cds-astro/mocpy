@@ -19,9 +19,15 @@ To upgrade the ``mocpy`` package to the latest version::
 
     pip install mocpy -U
 
-To install ``mocpy`` type::
+To install ``mocpy`` and all mandatory dependencies type::
 
     pip install mocpy
+
+The documentation contains several examples and notebooks that make use of additional
+optional dependencies. If you want to run these notebooks, you can install ``mocpy`` and all
+mandatory and optional dependencies for the notebooks with::
+
+    pip install "mocpy[notebooks]"
 
 From source
 -----------
