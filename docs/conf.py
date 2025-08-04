@@ -242,14 +242,8 @@ texinfo_documents = [
 
 # Include other packages to link against
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/", None),
-    "astropy": ("http://docs.astropy.org/en/latest/", None),
-    "matplotlib": ("https://matplotlib.org/", None),
-    "networkx": ("https://networkx.github.io/documentation/stable/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "regions": ("https://astropy-regions.readthedocs.io/en/stable", None),
-}
+intersphinx_mapping["networkx"] = ("https://networkx.org/documentation/stable/objects.inv", None)
+intersphinx_mapping["regions"] = ("https://astropy-regions.readthedocs.io/en/stable", None)
 
 
 def setup(app):
