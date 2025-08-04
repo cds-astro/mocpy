@@ -29,11 +29,10 @@ From source
 To install MOCPy from source, you'll need `Rust <https://www.rust-lang.org/tools/install>`_.
 
 Then you can download the source code from `this link <https://github.com/cds-astro/mocpy/archive/refs/heads/master.zip>`_
-or directly from the GitHub repository. Once in the source code folder, you'll have to do
+or directly from the GitHub repository. Once in the source code folder, you'll have to do::
 
-::
-    > pip install maturin
-    > maturin develop --release
-    > pip install .
+    pip install maturin
+    maturin develop --release
+    pip install .
 
 And you'll have the very last changes running on your machine.
