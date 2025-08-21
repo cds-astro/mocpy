@@ -791,9 +791,9 @@ class MOC(AbstractMOC):
         Examples
         --------
         >>> from mocpy import MOC
-        >>> moc = MOC.from_vizier_table("J/A+A/675/A154/tableb1") # download the MOC
+        >>> moc = MOC.from_vizier_table("J/A+A/675/A154") # download the MOC
         >>> round(moc.sky_fraction, 6) # let's print the sky fraction of the MOC
-        4e-06
+        1.6e-05
 
         Notes
         -----
