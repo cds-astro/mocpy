@@ -30,10 +30,9 @@ import mocpy
 # -- Project information -----------------------------------------------------
 
 # Get configuration information from setup.cfg
-import tomllib
+import toml
 
-with open("../Cargo.toml", "rb") as config:
-    cargotoml = tomllib.load(config)
+cargotoml = toml.load("../Cargo.toml")
 import datetime
 
 project = cargotoml["package"]["name"]

@@ -46,7 +46,8 @@ docs = [
     "sphinx-copybutton",
     "sphinx-gallery",
     "sphinxcontrib-bibtex",
-    "ipython" # for syntaxic coloration in docs
+    "ipython", # for syntaxic coloration in docs
+    "toml" # to retrieve project information from the Cargo.toml
 ]
 # for developpement
 dev = [
