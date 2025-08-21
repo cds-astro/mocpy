@@ -47,7 +47,8 @@ docs = [
     "sphinx-gallery",
     "sphinxcontrib-bibtex",
     "ipython", # for syntaxic coloration in docs
-    "toml" # to retrieve project information from the Cargo.toml
+    "toml", # to retrieve project information from the Cargo.toml
+    "astropy_healpix" # astropy healpix is needed to run the example compute_borders.py
 ]
 # for developpement
 dev = [
