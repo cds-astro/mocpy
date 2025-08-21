@@ -36,7 +36,6 @@ FITS file on our disk, or from a distant server that already has a pre-calculate
 
 .. nbgallery::
     ../_collections/notebooks/from_fits_and_intersection
-    ../_collections/notebooks/from_vizier_table
 
 Calculating a MOC on the fly from a region of the sky
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,8 +168,8 @@ TMOC: Temporal coverages
 
 The :py:class:`TimeMOC` class represents a temporal coverage.
 
-Gallery of notebooks examples using TMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about time MOCs.
+
 
 .. nbgallery::
     ../_collections/notebooks/tmoc
@@ -190,8 +189,7 @@ Space-Time coverages allow to:
 
 As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.
 
-Gallery of notebooks examples using STMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about space-time MOCs.
 
 .. nbgallery::
     ../_collections/notebooks/STMOC from time ranges
@@ -201,8 +199,8 @@ Gallery of notebooks examples using STMOCs
 FMOC: Frequency coverages
 *************************
 
-Gallery of notebooks examples using FMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about frequency MOCs.
+
 
 .. nbgallery::
     ../_collections/notebooks/First_Steps_with_FMOCs
@@ -211,11 +209,14 @@ Gallery of notebooks examples using FMOCs
 SFMOC: Space-Frequency coverages
 ********************************
 
-The `SFMOC` class allows manipulation and generation of
-**Space-Frequency Multi-Order Coverages** (SF-MOCs).
-
 Creating SF-MOC instances
 =========================
+
+1. From a FITS, ASCII, JSON file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `SFMOC` class allows manipulation and generation of
+**Space-Frequency Multi-Order Coverages** (SF-MOCs).
 
 New empty SF-MOC `~mocpy.SFMOC.new_empty`:
 
@@ -253,8 +254,8 @@ ASCII strings, one can also directly use `~mocpy.SFMOC.from_string`:
 
 Creating SF-MOCs from physical parameters:
 
-1. From frequency-position "points"
------------------------------------
+2. From frequency-position "points"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In `~mocpy.SFMOC.from_frequencies_and_positions`, we give a set of frequency-position
 "points" and the SF-MOC will be built from the cells containing these punctual data at
@@ -280,8 +281,8 @@ the maximum requested order. Use the utility functions
     s8/311624
     f25/ s8/
 
-2. From frequency ranges associated to punctual positions
----------------------------------------------------------
+3. From frequency ranges associated to punctual positions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With `mocpy.SFMOC.from_frequency_ranges_and_positions` we do not get a single cell in
 frequency, bu the cells covering a given frequency band/range:
@@ -311,8 +312,8 @@ frequency, bu the cells covering a given frequency band/range:
     s8/311624
     f6/ s8/
 
-3. From frequency ranges associated to Space-MOCs
--------------------------------------------------
+4. From frequency ranges associated to Space-MOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In `~mocpy.SFMOC.from_spatial_coverages`, the positions are not punctual anymore. They
 are represented by S-MOCs, which can be built with the `~mocpy.MOC` module. Let's for
