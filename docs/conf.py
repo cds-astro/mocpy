@@ -242,7 +242,7 @@ texinfo_documents = [
 
 # Include other packages to link against
 
-intersphinx_mapping["networkx"] = ("https://networkx.org/documentation/stable/objects.inv", None)
+intersphinx_mapping["networkx"] = ("https://networkx.org/documentation/stable", None)
 intersphinx_mapping["regions"] = ("https://astropy-regions.readthedocs.io/en/stable", None)
 
 
