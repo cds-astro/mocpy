@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.18.0]
 
+### Changed
+
+* supported python versions are now from 3.9 [E.O.L.] to 3.14 [just released] [#198]
+
 ### Fixed
 
 * fix ``contains`` method in ST-MOCs
