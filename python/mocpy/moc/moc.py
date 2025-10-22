@@ -2429,7 +2429,7 @@ class MOC(AbstractMOC):
         moc_fits.writeto(moc_file)
 
         r = requests.post(
-            "http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat",
+            "https://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat",
             data={
                 "mode": "mocfile",
                 "catName": resource_id,

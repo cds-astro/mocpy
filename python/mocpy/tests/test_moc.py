@@ -10,7 +10,7 @@ import regions
 from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord, angular_separation
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
-from astropy.table import QTable
+from astropy.table import QTable, Table
 
 from ..moc import MOC, WCS
 
@@ -320,6 +320,17 @@ def test_from_ivorn():
 
     with pytest.warns(UserWarning, match="This MOC is empty.*"):
         MOC.from_ivorn("abc")
+
+
+def test_query_vizier():
+    moc = MOC.from_cone(
+        Longitude(0 * u.deg),
+        Latitude(0 * u.deg),
+        radius=Angle(0.5, "arcmin"),
+        max_depth=8,
+    )
+    catalog = moc.query_vizier_table("I/305/out")
+    assert isinstance(catalog, Table)
 
 
 def test_moc_from_fits():
