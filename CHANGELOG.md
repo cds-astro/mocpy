@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Changed
+
+* Calls to the xmatch service are now done in https [#xxx]
+
 ## [0.18.0]
 
 ### Fixed
