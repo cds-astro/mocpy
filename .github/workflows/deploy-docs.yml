@@ -31,7 +31,7 @@ jobs:
           # - Build and install mocpy
           maturin develop --release
           # - Install dependencies needed to build the docs
-          pip install .[docs]
+          pip install .[docs,plots]
           sudo apt-get install pandoc
           # - Build the doc: once done, it is in docs/_build/html/
           cd ./docs
