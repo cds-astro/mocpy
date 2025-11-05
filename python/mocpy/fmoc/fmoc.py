@@ -18,13 +18,13 @@ class FrequencyMOC(AbstractMOC):
     """Multi-order frequency coverage class. Experimental."""
 
     # Maximum order of F-MOCs
-    MAX_ORDER = np.uint8(59)
-    # Upper limit (exclusive) on a F-MOC index = 2^60
-    MAX_INDEX_EXCLUSIVE = 1152921504606846976
+    MAX_ORDER = np.uint8(51)
+    # Upper limit (exclusive) on a F-MOC index = 2^52
+    MAX_INDEX_EXCLUSIVE = 4503599627370496
     # Smallest value, in Hz, a F-MOC can encode
-    FREQ_MIN_HZ = 5.048_709_793_414_476e-29
+    FREQ_MIN_HZ = 1e-18
     # Largest value, in Hz, a F-MOC can encode
-    FREQ_MAX_HZ = 5.846_006_549_323_611e48
+    FREQ_MAX_HZ = 1e38
 
     def __init__(self, store_index):
         """Is a Frequency Coverage (F-MOC).
@@ -89,9 +89,9 @@ class FrequencyMOC(AbstractMOC):
         >>> import astropy.units as u
         >>> fmoc = FrequencyMOC.from_frequency_ranges(10, [1, 0.1, 0.01] * u.Hz, [1.5, 0.5, 0.05] * u.Hz)
         >>> print(fmoc.to_hz_ranges())
-        [[0.00976562 0.05078125]
-         [0.09375    0.5       ]
-         [1.         1.5       ]]
+        [[0.00991046 0.05093675]
+         [0.09560239 0.52329911]
+         [0.98217189 1.5261378 ]]
         """
         return np.asarray(
             mocpy.to_freq_ranges(self.store_index) * u.Hz,
@@ -99,16 +99,16 @@ class FrequencyMOC(AbstractMOC):
         )
 
     @property
-    def to_depth59_ranges(self):
+    def to_depth51_ranges(self):
         """Return the list of ranges this `FrequencyMOC` contains, at the maximum precision.
 
         Examples
         --------
         >>> from mocpy import FrequencyMOC
         >>> import astropy.units as u
-        >>> fmoc = FrequencyMOC.from_frequency_ranges(59, 1 * u.Hz, 1.4 * u.Hz)
-        >>> print(fmoc.to_depth59_ranges)
-        [[423338364972826624 425139804823774822]]
+        >>> fmoc = FrequencyMOC.from_frequency_ranges(51, 1 * u.Hz, 1.4 * u.Hz)
+        >>> print(fmoc.to_depth51_ranges)
+        [[1447585594511945 1459337418923175]]
         """
         return mocpy.to_ranges(self.store_index)
 
@@ -135,9 +135,9 @@ class FrequencyMOC(AbstractMOC):
         >>> import astropy.units as u
         >>> fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)
         >>> fmoc
-        40/807453851648
+        40/706828903570
         >>> fmoc.degrade_to_order(10)
-        10/752
+        10/658
         """
         if new_order >= self.max_order:
             warnings.warn(
@@ -168,9 +168,9 @@ class FrequencyMOC(AbstractMOC):
         >>> import astropy.units as u
         >>> fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)
         >>> fmoc
-        40/807453851648
+        40/706828903570
         >>> fmoc.refine_to_order(50)
-        40/807453851648
+        40/706828903570
         50/
         """
         if new_order <= self.max_order:
@@ -245,9 +245,9 @@ class FrequencyMOC(AbstractMOC):
         return cls(index)
 
     @classmethod
-    def from_depth59_ranges(cls, order, ranges):
+    def from_depth51_ranges(cls, order, ranges):
         """
-        Create a `FrequencyMOC` from a set of `FrequencyMOC` ranges at order 59.
+        Create a `FrequencyMOC` from a set of `FrequencyMOC` ranges at order 51.
 
         Parameters
         ----------
@@ -263,10 +263,13 @@ class FrequencyMOC(AbstractMOC):
         Examples
         --------
         >>> from mocpy import FrequencyMOC
-        >>> FrequencyMOC.from_depth59_ranges(40, [[0, 10000000]])
-        36/0
-        38/4
-        40/
+        >>> FrequencyMOC.from_depth51_ranges(40, [[0, 10000000]])
+        28/0
+        31/8
+        32/18
+        36/304
+        39/2440
+        40/4882
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
@@ -304,7 +307,7 @@ class FrequencyMOC(AbstractMOC):
         >>> from mocpy import FrequencyMOC
         >>> import astropy.units as u
         >>> FrequencyMOC.from_frequencies(42, [1e-6, 1e-3, 1] * u.Hz)
-        42/2544289697882 2887042656632 3229815406592
+        42/1884877076187 2356096345234 2827315614281
         """
         frequencies = frequencies.to(u.Hz)
         frequencies = np.atleast_1d(frequencies)
@@ -335,9 +338,10 @@ class FrequencyMOC(AbstractMOC):
         >>> from mocpy import FrequencyMOC
         >>> import astropy.units as u
         >>> FrequencyMOC.from_frequency_ranges(10, [10, 40] * u.Hz, [20, 60] * u.Hz)
-        8/195
-        9/389 392 397-398
-        10/798
+        7/87
+        8/179-180
+        9/347 352
+        10/
         """
         min_freq = min_freq.to(u.Hz)
         min_freq = np.atleast_1d(min_freq)
@@ -373,7 +377,7 @@ class FrequencyMOC(AbstractMOC):
         >>> import astropy.units as u
         >>> fmoc = FrequencyMOC.from_frequencies(10, [1, 10] * u.Hz)
         >>> print(fmoc.min_freq)
-        1.0 Hz
+        0.9821718891880409 Hz
         """
         return mocpy.first_fmoc_hz(self.store_index) * u.Hz
 
@@ -396,7 +400,7 @@ class FrequencyMOC(AbstractMOC):
         >>> # corresponds to the high limit of the cell containing 10 Hz
         >>> # at order 10
         >>> print(fmoc.max_freq)
-        11.0 Hz
+        10.090350448414485 Hz
 
         """
         return mocpy.last_fmoc_hz(self.store_index) * u.Hz
@@ -429,7 +433,7 @@ class FrequencyMOC(AbstractMOC):
         >>> # 1Hz and 15Hz.
         >>> fmoc.contains(range(1, 15, 1) * u.Hz)
         array([ True,  True,  True,  True,  True,  True,  True,  True,  True,
-               False, False, False, False, False])
+                True, False, False, False, False])
         """
         freq = frequencies.to(u.Hz)
         freq = np.atleast_1d(freq)

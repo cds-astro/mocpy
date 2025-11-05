@@ -30,11 +30,11 @@ def test_n_cells():
     assert FrequencyMOC.n_cells(5) == 2 * FrequencyMOC.n_cells(4)
 
 
-def test_to_depth59_ranges():
+def test_to_depth51_ranges():
     fmoc = FrequencyMOC.new_empty(FrequencyMOC.MAX_ORDER).complement()
     # 2^60 = 1152921504606846976
     assert (
-        fmoc.to_depth59_ranges
+        fmoc.to_depth51_ranges
         == np.array([[0, FrequencyMOC.MAX_INDEX_EXCLUSIVE]], dtype=np.uint64)
     ).all()
 
@@ -56,7 +56,7 @@ def test_degrade_to_order():
     # No need for more than this since the same degrade code is used for smoc and tmoc
     assert fmoc.max_order == 0
     assert (
-        fmoc.to_depth59_ranges
+        fmoc.to_depth51_ranges
         == np.array([[0, FrequencyMOC.MAX_INDEX_EXCLUSIVE]], dtype=np.uint64)
     ).all()
     with pytest.warns(
@@ -75,14 +75,16 @@ def test_refine_to_order():
         moc.refine_to_order(0)
 
 
-def test_from_depth59_ranges():
+def test_from_depth51_ranges():
     ranges = np.array([[0, FrequencyMOC.MAX_INDEX_EXCLUSIVE]], dtype=np.uint64)
-    fmoc = FrequencyMOC.from_depth59_ranges(FrequencyMOC.MAX_ORDER, ranges)
+    fmoc = FrequencyMOC.from_depth51_ranges(FrequencyMOC.MAX_ORDER, ranges)
     assert fmoc == FrequencyMOC.new_empty(FrequencyMOC.MAX_ORDER).complement()
 
 
 def test_from_frequencies():
-    freq = np.array([FrequencyMOC.FREQ_MIN_HZ, FrequencyMOC.FREQ_MAX_HZ]) * u.Hz
+    freq = (
+        np.array([FrequencyMOC.FREQ_MIN_HZ, FrequencyMOC.FREQ_MAX_HZ - 0.1e38]) * u.Hz
+    )
     fmoc = FrequencyMOC.from_frequencies(0, freq)
     assert fmoc == FrequencyMOC.new_empty(0).complement()
 
@@ -90,8 +92,8 @@ def test_from_frequencies():
 def test_from_frequency_ranges():
     fmin = np.array([FrequencyMOC.FREQ_MIN_HZ]) * u.Hz
     fmax = np.array([FrequencyMOC.FREQ_MAX_HZ]) * u.Hz
-    fmoc = FrequencyMOC.from_frequency_ranges(58, fmin, fmax)
-    assert fmoc == FrequencyMOC.new_empty(58).complement()
+    fmoc = FrequencyMOC.from_frequency_ranges(50, fmin, fmax)
+    assert fmoc == FrequencyMOC.new_empty(50).complement()
 
 
 def test_min_freq():

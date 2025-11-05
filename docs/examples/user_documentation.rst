@@ -269,15 +269,15 @@ the maximum requested order. Use the utility functions
     ...     [0.01, 0.1, 1, 10, 100] * u.Hz,
     ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
     ...     max_order_frequency=25, max_order_space=8)
-    f25/22879928
+    f25/19173961
     s8/311296
-    f25/23750246
+    f25/20372333
     s8/311316
-    f25/24641536
+    f25/21570706
     s8/311378
-    f25/25493504
+    f25/22769078
     s8/311558
-    f25/26361856
+    f25/23967451
     s8/311624
     f25/ s8/
 
@@ -294,21 +294,25 @@ frequency, bu the cells covering a given frequency band/range:
     ...     frequencies_max=[0.1, 1, 10, 100, 1000] * u.Hz,
     ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
     ...     max_order_frequency=6, max_order_space=8)
-    f6/43-44
+    f5/18
+    6/
     s8/311296
-    f6/45
+    f6/38
     s8/311296 311316
-    f6/46
+    f6/39-40
     s8/311316
-    f6/47
+    f6/41
+    s8/311316 311378
+    f6/42
     s8/311378
-    f6/48
+    f6/43
     s8/311378 311558
-    f6/49
+    f6/44
     s8/311558
-    f6/50
+    f6/45
     s8/311558 311624
-    f6/51
+    f5/23
+    6/
     s8/311624
     f6/ s8/
 
@@ -344,9 +348,9 @@ previous example:
     >>> sfmoc_fov.is_empty()
     False
     >>> sfmoc_fov.min_frequency
-    <Quantity 9.93958512e+14 Hz>
+    <Quantity 9.93276847e+14 Hz>
     >>> sfmoc_fov.max_frequency
-    <Quantity 3.025856e+15 Hz>
+    <Quantity 3.01303312e+15 Hz>
 
 
 General manipulation
