@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.19.0]
+
 ### Changed
 
 * adopt the new convention for F-MOCs [#198]
