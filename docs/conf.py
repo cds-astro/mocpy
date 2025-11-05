@@ -66,7 +66,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
-    "sphinxcontrib.collections",
+    "sphinx_collections",
     # Extension for plotting image in the doc
     "matplotlib.sphinxext.plot_directive",
     # To support Numpy docstrings, we use this extension:
