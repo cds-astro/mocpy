@@ -9,10 +9,7 @@ requires-python = ">=3.8"
 dependencies = [
     "astropy<5.3; python_version == '3.8'",
     "astropy; python_version > '3.8'",
-    "numpy",
-    "matplotlib",     # Used in fill and border
-    "cdshealpix>=0.6.4",     # Used in fill and border
-    "networkx>=2.5",         # Used in get_boundaries
+    "numpy"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -32,6 +29,12 @@ classifiers = [
 keywords=["astronomy", "astrophysics", "HEALPix"]
 
 [project.optional-dependencies]
+# optional for plots
+plots = [
+    "matplotlib",     # Used in fill and border"
+    "cdshealpix>=0.6.4",     # Used in fill and border
+    "networkx>=2.5",         # Used in get_boundaries
+]
 # optional to load FITS from URLs
 query_fits = ["requests"]
 # optional to support astropy regions
@@ -58,7 +61,10 @@ dev = [
     "pytest-cov",
     "requests",
     "regions",
-    "ruff >= 0.5.0"
+    "ruff >= 0.5.0",
+    "matplotlib",     # Used in fill and border"
+    "cdshealpix>=0.6.4",     # Used in fill and border
+    "networkx>=2.5",         # Used in get_boundaries
 ]
 # to run the notebooks
 notebooks = [

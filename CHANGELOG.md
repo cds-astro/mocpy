@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * adopt the new convention for F-MOCs [#198]
+* make `matplotlib`, `cdshealpix`, and `networkx` optional. They're in a new bundle of
+  optional dependencies `plot` [#197]
 
 ## [0.18.0]
 
