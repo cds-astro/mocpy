@@ -1,4 +1,9 @@
-import networkx as nx
+try:
+    import networkx as nx
+
+    _networkx_missing = False
+except ImportError:
+    _networkx_missing = True
 import numpy as np
 
 try:  # noqa: SIM105
@@ -13,6 +18,9 @@ from astropy.coordinates import ICRS, SkyCoord
 class Boundaries:  # noqa: D101
     @staticmethod
     def get(moc, order):  # noqa: D102
+        if _networkx_missing:
+            raise ImportError("networkx is required to use this method.")
+
         boundaries_l = []
 
         # Get the ipixels of the MOC at the deepest order

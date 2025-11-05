@@ -1,13 +1,31 @@
-import cdshealpix
+try:
+    import cdshealpix
+
+    _cdshealpix_missing = False
+except ImportError:
+    _cdshealpix_missing = True
 import numpy as np
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel
-from matplotlib.patches import PathPatch
-from matplotlib.path import Path
+
+try:
+    from matplotlib.patches import PathPatch
+    from matplotlib.path import Path
+
+    _matplotlib_missing = False
+except ImportError:
+    _matplotlib_missing = True
 
 
 def border(moc, ax, wcs, **kw_mpl_pathpatch):
     """Highlight the borders of a MOC in a plot."""
+    if _matplotlib_missing:
+        raise ImportError("matplotlib is required for this method")
+    if _cdshealpix_missing:
+        raise ImportError(
+            "cdshealpix is required for this method. "
+            "Install it with `pip install cdshealpix`"
+        )
     from .utils import _set_wcs, build_plotting_moc
 
     moc_to_plot = build_plotting_moc(moc, wcs)

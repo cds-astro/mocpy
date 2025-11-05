@@ -1,9 +1,23 @@
-import cdshealpix
+try:
+    import cdshealpix
+
+    _cdshealpix_missing = False
+except ImportError:
+    _cdshealpix_missing = True
+
+
 import numpy as np
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.wcs.utils import skycoord_to_pixel
-from matplotlib.patches import PathPatch
-from matplotlib.path import Path
+
+try:
+    from matplotlib.patches import PathPatch
+    from matplotlib.path import Path
+
+    _matplotlib_missing = False
+except ImportError:
+    _matplotlib_missing = True
+
 
 from . import culling_backfacing_cells
 from .utils import _set_wcs, build_plotting_moc
@@ -25,6 +39,13 @@ def compute_healpix_vertices(depth, ipix, wcs):
     -------
     path_vertices, codes : (`np.array`, `np.array`)
     """
+    if _cdshealpix_missing:
+        raise ImportError(
+            "the cdshealpix module is required to compute the HEALPix vertices. "
+            "Install it with `pip install cdshealpix`."
+        )
+    if _matplotlib_missing:
+        raise ImportError("matplotlib is required for this method")
     path_vertices = np.array([])
     codes = np.array([])
 
@@ -95,6 +116,8 @@ def add_patches_to_mpl_axe(patches, ax, wcs, **kw_mpl_pathpatch):
     ax : matplotlib.pyplot.axes
     wcs : astropy.wcs.WCS
     """
+    if _matplotlib_missing:
+        raise ImportError("matplotlib is required for this method")
     first_patch = patches[0]
     vertices_first_patch, codes_first_patch = first_patch
     path_vertices = np.array(vertices_first_patch)
@@ -127,6 +150,8 @@ def fill(moc, ax, wcs, *, optimize=True, **kw_mpl_pathpatch):
         smaller than one pixel as defined by the WCS. It can be useful to deactivate this
         optimization for svg outputs or if you take an insert of a WCS. Default to True.
     """
+    if _matplotlib_missing:
+        raise ImportError("matplotlib is required for this method")
     # Simplify the MOC for plotting purposes:
     # 1. Degrade the MOC if the FOV is enough big so that we cannot see the smallest HEALPix cells.
     # 2. For small FOVs, plot the MOC & POLYGONAL_MOC_FROM_FOV.
