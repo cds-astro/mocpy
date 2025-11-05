@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User documentation &#8212; MOCPy 0.18.0 documentation</title>
+    <title>User documentation &#8212; MOCPy 0.19.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-gallery.css?v=26227f6e" />
     
-    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../_static/documentation_options.js?v=cbfb3150"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.18.0 documentation</a>
+	<a href="../index.html">MOCPy 0.19.0 documentation</a>
 	 &#187;
       </li>
       
@@ -266,7 +266,7 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
   <div>Compute the borders of a MOC</div>
 </a>
 <a class="reference internal" href="../_collections/notebooks/filtering_astropy_table.html">
-  <div><img alt="" src="../_images/_collections_notebooks_filtering_astropy_table_7_1.png"></div>
+  <div><img alt="" src="../_images/_collections_notebooks_filtering_astropy_table_8_1.png"></div>
   <div>Create a MOC from a filtered astropy Table</div>
 </a>
 <a class="reference internal" href="../_collections/notebooks/FITS-image-pixels-intersecting-MOC.html">
@@ -408,7 +408,7 @@ HEALPix cells of the order 0. Creating it from a string looks like:</p>
 </section>
 <section id="get-the-border-s-of-a-moc">
 <h4>Get the border(s) of a MOC<a class="headerlink" href="#get-the-border-s-of-a-moc" title="Link to this heading">¶</a></h4>
-<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
+<p>This example shows how to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundaries</span></code>. The borders are returned as a list of <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html#astropy.coordinates.SkyCoord" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SkyCoord</span></code></a> each defining one border.
 In this example:</p>
 <ol class="arabic simple">
 <li><p>The sky coordinates defining the border of the MOC are projected to the pixel image system.</p></li>
@@ -458,7 +458,10 @@ In this example:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>(<a class="reference download internal" download="" href="../_downloads/25332318407f1ac46a62bba334e523f2/compute_borders.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/25332318407f1ac46a62bba334e523f2/compute_borders.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="../_downloads/3cc924411c768b0cbcd77fd064f3c36c/compute_borders.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/f1541ec3e2176371cc6390b2e35aecf8/compute_borders.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/250b9da8949b1f09de942bc32a9960e4/compute_borders.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="../_images/compute_borders.png" class="plot-directive" src="../_images/compute_borders.png" />
+</figure>
 </section>
 <section id="gravitational-waves-mocs">
 <h4>Gravitational Waves MOCs<a class="headerlink" href="#gravitational-waves-mocs" title="Link to this heading">¶</a></h4>
@@ -616,11 +619,12 @@ then be retrieved from the image for performing some computations on them: e.g. 
 <section id="tmoc-temporal-coverages">
 <h2>TMOC: Temporal coverages<a class="headerlink" href="#tmoc-temporal-coverages" title="Link to this heading">¶</a></h2>
 <p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeMOC</span></code> class represents a temporal coverage.</p>
+<p>Please check the following notebooks if you want to know more about time MOCs.</p>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/tmoc.html">
-  <div><img alt="" src="../_images/_collections_notebooks_tmoc_3_0.png"></div>
-  <div>Loading a TimeMoc from a fits file</div>
+  <div><img alt="" src="../_images/_collections_notebooks_tmoc_16_0.png"></div>
+  <div>Creation and manipulation of time coverages (TMOCs)</div>
 </a>
 </div>
 </div>
@@ -631,10 +635,11 @@ then be retrieved from the image for performing some computations on them: e.g. 
 The standard description is published by the IVOA <a class="reference external" href="http://www.ivoa.net/documents/stmoc/20190515/NOTE-stmoc-1.0-20190515.pdf">here</a>.</p>
 <p>Space-Time coverages allow to:</p>
 <ol class="arabic simple">
-<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> ranges).</p></li>
+<li><p>Retrieve the spatial coverage observed by a mission within a set of time frames (i.e. <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a> ranges).</p></li>
 <li><p>Retrieve the temporal coverage observed by a mission within a spatial coverage.</p></li>
 </ol>
 <p>As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.</p>
+<p>Please check the following notebooks if you want to know more about space-time MOCs.</p>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/STMOC%20from%20time%20ranges.html">
@@ -643,17 +648,18 @@ The standard description is published by the IVOA <a class="reference external" 
 </a>
 <a class="reference internal" href="../_collections/notebooks/Space%20%26%20Time%20coverages.html">
   <div><img alt="" src="../_images/_collections_notebooks_Space_&amp;_Time_coverages_8_0.png"></div>
-  <div># Space &amp; Time coverages</div>
+  <div>Space &amp; Time coverages</div>
 </a>
 </div>
 </div>
 </section>
 <section id="fmoc-frequency-coverages">
 <h2>FMOC: Frequency coverages<a class="headerlink" href="#fmoc-frequency-coverages" title="Link to this heading">¶</a></h2>
+<p>Please check the following notebooks if you want to know more about frequency MOCs.</p>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="../_collections/notebooks/First_Steps_with_FMOCs.html">
-  <div><img alt="" src="../_images/_collections_notebooks_First_Steps_with_FMOCs_6_0.png"></div>
+  <div><img alt="" src="../_images/_collections_notebooks_First_Steps_with_FMOCs_8_0.png"></div>
   <div>First steps with Frequency MOCs</div>
 </a>
 </div>
@@ -661,10 +667,12 @@ The standard description is published by the IVOA <a class="reference external" 
 </section>
 <section id="sfmoc-space-frequency-coverages">
 <h2>SFMOC: Space-Frequency coverages<a class="headerlink" href="#sfmoc-space-frequency-coverages" title="Link to this heading">¶</a></h2>
-<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code> class allows manipulation and generation of
-<strong>Space-Frequency Multi-Order Coverages</strong> (SF-MOCs).</p>
 <section id="creating-sf-moc-instances">
 <h3>Creating SF-MOC instances<a class="headerlink" href="#creating-sf-moc-instances" title="Link to this heading">¶</a></h3>
+<section id="from-a-fits-ascii-json-file">
+<h4>1. From a FITS, ASCII, JSON file<a class="headerlink" href="#from-a-fits-ascii-json-file" title="Link to this heading">¶</a></h4>
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code> class allows manipulation and generation of
+<strong>Space-Frequency Multi-Order Coverages</strong> (SF-MOCs).</p>
 <p>New empty SF-MOC <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.new_empty" title="mocpy.SFMOC.new_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_empty</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
@@ -700,6 +708,9 @@ ASCII strings, one can also directly use <a class="reference internal" href="../
 </pre></div>
 </div>
 <p>Creating SF-MOCs from physical parameters:</p>
+</section>
+<section id="from-frequency-position-points">
+<h4>2. From frequency-position “points”<a class="headerlink" href="#from-frequency-position-points" title="Link to this heading">¶</a></h4>
 <p>In <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequencies_and_positions" title="mocpy.SFMOC.from_frequencies_and_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_frequencies_and_positions</span></code></a>, we give a set of frequency-position
 “points” and the SF-MOC will be built from the cells containing these punctual data at
 the maximum requested order. Use the utility functions
@@ -711,19 +722,22 @@ the maximum requested order. Use the utility functions
 <span class="gp">... </span>    <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">lon</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<span class="go">f25/22879928</span>
+<span class="go">f25/19173961</span>
 <span class="go">s8/311296</span>
-<span class="go">f25/23750246</span>
+<span class="go">f25/20372333</span>
 <span class="go">s8/311316</span>
-<span class="go">f25/24641536</span>
+<span class="go">f25/21570706</span>
 <span class="go">s8/311378</span>
-<span class="go">f25/25493504</span>
+<span class="go">f25/22769078</span>
 <span class="go">s8/311558</span>
-<span class="go">f25/26361856</span>
+<span class="go">f25/23967451</span>
 <span class="go">s8/311624</span>
 <span class="go">f25/ s8/</span>
 </pre></div>
 </div>
+</section>
+<section id="from-frequency-ranges-associated-to-punctual-positions">
+<h4>3. From frequency ranges associated to punctual positions<a class="headerlink" href="#from-frequency-ranges-associated-to-punctual-positions" title="Link to this heading">¶</a></h4>
 <p>With <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_frequency_ranges_and_positions" title="mocpy.SFMOC.from_frequency_ranges_and_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mocpy.SFMOC.from_frequency_ranges_and_positions</span></code></a> we do not get a single cell in
 frequency, bu the cells covering a given frequency band/range:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
@@ -733,25 +747,32 @@ frequency, bu the cells covering a given frequency band/range:</p>
 <span class="gp">... </span>    <span class="n">frequencies_max</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">lon</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">max_order_space</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<span class="go">f6/43-44</span>
+<span class="go">f5/18</span>
+<span class="go">6/</span>
 <span class="go">s8/311296</span>
-<span class="go">f6/45</span>
+<span class="go">f6/38</span>
 <span class="go">s8/311296 311316</span>
-<span class="go">f6/46</span>
+<span class="go">f6/39-40</span>
 <span class="go">s8/311316</span>
-<span class="go">f6/47</span>
+<span class="go">f6/41</span>
+<span class="go">s8/311316 311378</span>
+<span class="go">f6/42</span>
 <span class="go">s8/311378</span>
-<span class="go">f6/48</span>
+<span class="go">f6/43</span>
 <span class="go">s8/311378 311558</span>
-<span class="go">f6/49</span>
+<span class="go">f6/44</span>
 <span class="go">s8/311558</span>
-<span class="go">f6/50</span>
+<span class="go">f6/45</span>
 <span class="go">s8/311558 311624</span>
-<span class="go">f6/51</span>
+<span class="go">f5/23</span>
+<span class="go">6/</span>
 <span class="go">s8/311624</span>
 <span class="go">f6/ s8/</span>
 </pre></div>
 </div>
+</section>
+<section id="from-frequency-ranges-associated-to-space-mocs">
+<h4>4. From frequency ranges associated to Space-MOCs<a class="headerlink" href="#from-frequency-ranges-associated-to-space-mocs" title="Link to this heading">¶</a></h4>
 <p>In <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.from_spatial_coverages" title="mocpy.SFMOC.from_spatial_coverages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_spatial_coverages</span></code></a>, the positions are not punctual anymore. They
 are represented by S-MOCs, which can be built with the <a class="reference internal" href="../stubs/mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></a> module. Let’s for
 example build an SF-MOC from a square observation in two given frequency bands:</p>
@@ -769,6 +790,7 @@ example build an SF-MOC from a square observation in two given frequency bands:<
 </pre></div>
 </div>
 </section>
+</section>
 <section id="utilities">
 <h3>Utilities<a class="headerlink" href="#utilities" title="Link to this heading">¶</a></h3>
 <p>To inspect an <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC" title="mocpy.SFMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SFMOC</span></code></a> instance, one can read its <a class="reference internal" href="../stubs/mocpy.SFMOC.html#mocpy.SFMOC.max_order" title="mocpy.SFMOC.max_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_order</span></code></a>,
@@ -780,9 +802,9 @@ previous example:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">min_frequency</span>
-<span class="go">&lt;Quantity 9.93958512e+14 Hz&gt;</span>
+<span class="go">&lt;Quantity 9.93276847e+14 Hz&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc_fov</span><span class="o">.</span><span class="n">max_frequency</span>
-<span class="go">&lt;Quantity 3.025856e+15 Hz&gt;</span>
+<span class="go">&lt;Quantity 3.01303312e+15 Hz&gt;</span>
 </pre></div>
 </div>
 </section>
@@ -850,7 +872,13 @@ with frequencies within <code class="docutils literal notranslate"><span class="
 <li><a class="reference internal" href="#stmoc-space-time-coverages">STMOC: Space &amp; Time coverages</a></li>
 <li><a class="reference internal" href="#fmoc-frequency-coverages">FMOC: Frequency coverages</a></li>
 <li><a class="reference internal" href="#sfmoc-space-frequency-coverages">SFMOC: Space-Frequency coverages</a><ul>
-<li><a class="reference internal" href="#creating-sf-moc-instances">Creating SF-MOC instances</a></li>
+<li><a class="reference internal" href="#creating-sf-moc-instances">Creating SF-MOC instances</a><ul>
+<li><a class="reference internal" href="#from-a-fits-ascii-json-file">1. From a FITS, ASCII, JSON file</a></li>
+<li><a class="reference internal" href="#from-frequency-position-points">2. From frequency-position “points”</a></li>
+<li><a class="reference internal" href="#from-frequency-ranges-associated-to-punctual-positions">3. From frequency ranges associated to punctual positions</a></li>
+<li><a class="reference internal" href="#from-frequency-ranges-associated-to-space-mocs">4. From frequency ranges associated to Space-MOCs</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#utilities">Utilities</a></li>
 <li><a class="reference internal" href="#general-manipulation">General manipulation</a></li>
 </ul>
@@ -871,7 +899,7 @@ with frequencies within <code class="docutils literal notranslate"><span class="
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 May 2025. <br/>
+    Last built 05 Nov 2025. <br/>
   </p>
 </footer>
   </body>

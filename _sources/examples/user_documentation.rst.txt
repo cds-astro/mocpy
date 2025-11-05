@@ -36,7 +36,6 @@ FITS file on our disk, or from a distant server that already has a pre-calculate
 
 .. nbgallery::
     ../_collections/notebooks/from_fits_and_intersection
-    ../_collections/notebooks/from_vizier_table
 
 Calculating a MOC on the fly from a region of the sky
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,8 +168,8 @@ TMOC: Temporal coverages
 
 The :py:class:`TimeMOC` class represents a temporal coverage.
 
-Gallery of notebooks examples using TMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about time MOCs.
+
 
 .. nbgallery::
     ../_collections/notebooks/tmoc
@@ -190,8 +189,7 @@ Space-Time coverages allow to:
 
 As we do for spatial or temporal coverages, one can also perform the union, intersection or difference between two Space-Time coverages.
 
-Gallery of notebooks examples using STMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about space-time MOCs.
 
 .. nbgallery::
     ../_collections/notebooks/STMOC from time ranges
@@ -201,8 +199,8 @@ Gallery of notebooks examples using STMOCs
 FMOC: Frequency coverages
 *************************
 
-Gallery of notebooks examples using FMOCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please check the following notebooks if you want to know more about frequency MOCs.
+
 
 .. nbgallery::
     ../_collections/notebooks/First_Steps_with_FMOCs
@@ -211,11 +209,14 @@ Gallery of notebooks examples using FMOCs
 SFMOC: Space-Frequency coverages
 ********************************
 
-The `SFMOC` class allows manipulation and generation of
-**Space-Frequency Multi-Order Coverages** (SF-MOCs).
-
 Creating SF-MOC instances
 =========================
+
+1. From a FITS, ASCII, JSON file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `SFMOC` class allows manipulation and generation of
+**Space-Frequency Multi-Order Coverages** (SF-MOCs).
 
 New empty SF-MOC `~mocpy.SFMOC.new_empty`:
 
@@ -253,8 +254,8 @@ ASCII strings, one can also directly use `~mocpy.SFMOC.from_string`:
 
 Creating SF-MOCs from physical parameters:
 
-1. From frequency-position "points"
------------------------------------
+2. From frequency-position "points"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In `~mocpy.SFMOC.from_frequencies_and_positions`, we give a set of frequency-position
 "points" and the SF-MOC will be built from the cells containing these punctual data at
@@ -268,20 +269,20 @@ the maximum requested order. Use the utility functions
     ...     [0.01, 0.1, 1, 10, 100] * u.Hz,
     ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
     ...     max_order_frequency=25, max_order_space=8)
-    f25/22879928
+    f25/19173961
     s8/311296
-    f25/23750246
+    f25/20372333
     s8/311316
-    f25/24641536
+    f25/21570706
     s8/311378
-    f25/25493504
+    f25/22769078
     s8/311558
-    f25/26361856
+    f25/23967451
     s8/311624
     f25/ s8/
 
-2. From frequency ranges associated to punctual positions
----------------------------------------------------------
+3. From frequency ranges associated to punctual positions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With `mocpy.SFMOC.from_frequency_ranges_and_positions` we do not get a single cell in
 frequency, bu the cells covering a given frequency band/range:
@@ -293,26 +294,30 @@ frequency, bu the cells covering a given frequency band/range:
     ...     frequencies_max=[0.1, 1, 10, 100, 1000] * u.Hz,
     ...     lon=[0, 1, 2, 3, 4] * u.deg, lat=[0, 1, 2, 3, 4] * u.deg,
     ...     max_order_frequency=6, max_order_space=8)
-    f6/43-44
+    f5/18
+    6/
     s8/311296
-    f6/45
+    f6/38
     s8/311296 311316
-    f6/46
+    f6/39-40
     s8/311316
-    f6/47
+    f6/41
+    s8/311316 311378
+    f6/42
     s8/311378
-    f6/48
+    f6/43
     s8/311378 311558
-    f6/49
+    f6/44
     s8/311558
-    f6/50
+    f6/45
     s8/311558 311624
-    f6/51
+    f5/23
+    6/
     s8/311624
     f6/ s8/
 
-3. From frequency ranges associated to Space-MOCs
--------------------------------------------------
+4. From frequency ranges associated to Space-MOCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In `~mocpy.SFMOC.from_spatial_coverages`, the positions are not punctual anymore. They
 are represented by S-MOCs, which can be built with the `~mocpy.MOC` module. Let's for
@@ -343,9 +348,9 @@ previous example:
     >>> sfmoc_fov.is_empty()
     False
     >>> sfmoc_fov.min_frequency
-    <Quantity 9.93958512e+14 Hz>
+    <Quantity 9.93276847e+14 Hz>
     >>> sfmoc_fov.max_frequency
-    <Quantity 3.025856e+15 Hz>
+    <Quantity 3.01303312e+15 Hz>
 
 
 General manipulation

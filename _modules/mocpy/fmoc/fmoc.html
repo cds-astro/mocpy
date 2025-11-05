@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.18.0 documentation</title>
+    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.19.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../../_static/documentation_options.js?v=cbfb3150"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.18.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.19.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -87,13 +87,13 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Multi-order frequency coverage class. Experimental.&quot;&quot;&quot;</span>
 
     <span class="c1"># Maximum order of F-MOCs</span>
-    <span class="n">MAX_ORDER</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">59</span><span class="p">)</span>
-    <span class="c1"># Upper limit (exclusive) on a F-MOC index = 2^60</span>
-    <span class="n">MAX_INDEX_EXCLUSIVE</span> <span class="o">=</span> <span class="mi">1152921504606846976</span>
+    <span class="n">MAX_ORDER</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">51</span><span class="p">)</span>
+    <span class="c1"># Upper limit (exclusive) on a F-MOC index = 2^52</span>
+    <span class="n">MAX_INDEX_EXCLUSIVE</span> <span class="o">=</span> <span class="mi">4503599627370496</span>
     <span class="c1"># Smallest value, in Hz, a F-MOC can encode</span>
-    <span class="n">FREQ_MIN_HZ</span> <span class="o">=</span> <span class="mf">5.048_709_793_414_476e-29</span>
+    <span class="n">FREQ_MIN_HZ</span> <span class="o">=</span> <span class="mf">1e-18</span>
     <span class="c1"># Largest value, in Hz, a F-MOC can encode</span>
-    <span class="n">FREQ_MAX_HZ</span> <span class="o">=</span> <span class="mf">5.846_006_549_323_611e48</span>
+    <span class="n">FREQ_MAX_HZ</span> <span class="o">=</span> <span class="mf">1e38</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Is a Frequency Coverage (F-MOC).</span>
@@ -163,9 +163,9 @@
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequency_ranges(10, [1, 0.1, 0.01] * u.Hz, [1.5, 0.5, 0.05] * u.Hz)</span>
 <span class="sd">        &gt;&gt;&gt; print(fmoc.to_hz_ranges())</span>
-<span class="sd">        [[0.00976562 0.05078125]</span>
-<span class="sd">         [0.09375    0.5       ]</span>
-<span class="sd">         [1.         1.5       ]]</span>
+<span class="sd">        [[0.00991046 0.05093675]</span>
+<span class="sd">         [0.09560239 0.52329911]</span>
+<span class="sd">         [0.98217189 1.5261378 ]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
             <span class="n">mocpy</span><span class="o">.</span><span class="n">to_freq_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
@@ -174,16 +174,16 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_depth59_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_depth51_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of ranges this `FrequencyMOC` contains, at the maximum precision.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
-<span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequency_ranges(59, 1 * u.Hz, 1.4 * u.Hz)</span>
-<span class="sd">        &gt;&gt;&gt; print(fmoc.to_depth59_ranges)</span>
-<span class="sd">        [[423338364972826624 425139804823774822]]</span>
+<span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequency_ranges(51, 1 * u.Hz, 1.4 * u.Hz)</span>
+<span class="sd">        &gt;&gt;&gt; print(fmoc.to_depth51_ranges)</span>
+<span class="sd">        [[1447585594511945 1459337418923175]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">to_ranges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span>
 
@@ -212,9 +212,9 @@
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)</span>
 <span class="sd">        &gt;&gt;&gt; fmoc</span>
-<span class="sd">        40/807453851648</span>
+<span class="sd">        40/706828903570</span>
 <span class="sd">        &gt;&gt;&gt; fmoc.degrade_to_order(10)</span>
-<span class="sd">        10/752</span>
+<span class="sd">        10/658</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">new_order</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -248,9 +248,9 @@
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequencies(40, 1 * u.Hz)</span>
 <span class="sd">        &gt;&gt;&gt; fmoc</span>
-<span class="sd">        40/807453851648</span>
+<span class="sd">        40/706828903570</span>
 <span class="sd">        &gt;&gt;&gt; fmoc.refine_to_order(50)</span>
-<span class="sd">        40/807453851648</span>
+<span class="sd">        40/706828903570</span>
 <span class="sd">        50/</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">new_order</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_order</span><span class="p">:</span>
@@ -331,12 +331,12 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="FrequencyMOC.from_depth59_ranges">
-<a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_depth59_ranges">[docs]</a>
+<div class="viewcode-block" id="FrequencyMOC.from_depth51_ranges">
+<a class="viewcode-back" href="../../../stubs/mocpy.FrequencyMOC.html#mocpy.FrequencyMOC.from_depth51_ranges">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_depth59_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_depth51_ranges</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a `FrequencyMOC` from a set of `FrequencyMOC` ranges at order 59.</span>
+<span class="sd">        Create a `FrequencyMOC` from a set of `FrequencyMOC` ranges at order 51.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -352,10 +352,13 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC</span>
-<span class="sd">        &gt;&gt;&gt; FrequencyMOC.from_depth59_ranges(40, [[0, 10000000]])</span>
-<span class="sd">        36/0</span>
-<span class="sd">        38/4</span>
-<span class="sd">        40/</span>
+<span class="sd">        &gt;&gt;&gt; FrequencyMOC.from_depth51_ranges(40, [[0, 10000000]])</span>
+<span class="sd">        28/0</span>
+<span class="sd">        31/8</span>
+<span class="sd">        32/18</span>
+<span class="sd">        36/304</span>
+<span class="sd">        39/2440</span>
+<span class="sd">        40/4882</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ranges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="k">if</span> <span class="n">ranges</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ranges</span>
 
@@ -396,7 +399,7 @@
 <span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; FrequencyMOC.from_frequencies(42, [1e-6, 1e-3, 1] * u.Hz)</span>
-<span class="sd">        42/2544289697882 2887042656632 3229815406592</span>
+<span class="sd">        42/1884877076187 2356096345234 2827315614281</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
         <span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
@@ -430,9 +433,10 @@
 <span class="sd">        &gt;&gt;&gt; from mocpy import FrequencyMOC</span>
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; FrequencyMOC.from_frequency_ranges(10, [10, 40] * u.Hz, [20, 60] * u.Hz)</span>
-<span class="sd">        8/195</span>
-<span class="sd">        9/389 392 397-398</span>
-<span class="sd">        10/798</span>
+<span class="sd">        7/87</span>
+<span class="sd">        8/179-180</span>
+<span class="sd">        9/347 352</span>
+<span class="sd">        10/</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">min_freq</span> <span class="o">=</span> <span class="n">min_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
         <span class="n">min_freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">min_freq</span><span class="p">)</span>
@@ -469,7 +473,7 @@
 <span class="sd">        &gt;&gt;&gt; import astropy.units as u</span>
 <span class="sd">        &gt;&gt;&gt; fmoc = FrequencyMOC.from_frequencies(10, [1, 10] * u.Hz)</span>
 <span class="sd">        &gt;&gt;&gt; print(fmoc.min_freq)</span>
-<span class="sd">        1.0 Hz</span>
+<span class="sd">        0.9821718891880409 Hz</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">first_fmoc_hz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
 
@@ -492,7 +496,7 @@
 <span class="sd">        &gt;&gt;&gt; # corresponds to the high limit of the cell containing 10 Hz</span>
 <span class="sd">        &gt;&gt;&gt; # at order 10</span>
 <span class="sd">        &gt;&gt;&gt; print(fmoc.max_freq)</span>
-<span class="sd">        11.0 Hz</span>
+<span class="sd">        10.090350448414485 Hz</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">mocpy</span><span class="o">.</span><span class="n">last_fmoc_hz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
@@ -527,7 +531,7 @@
 <span class="sd">        &gt;&gt;&gt; # 1Hz and 15Hz.</span>
 <span class="sd">        &gt;&gt;&gt; fmoc.contains(range(1, 15, 1) * u.Hz)</span>
 <span class="sd">        array([ True,  True,  True,  True,  True,  True,  True,  True,  True,</span>
-<span class="sd">               False, False, False, False, False])</span>
+<span class="sd">                True, False, False, False, False])</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
@@ -869,7 +873,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 May 2025. <br/>
+    Last built 05 Nov 2025. <br/>
   </p>
 </footer>
   </body>

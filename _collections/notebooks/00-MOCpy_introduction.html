@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MOCPy introduction &#8212; MOCPy 0.18.0 documentation</title>
+    <title>MOCPy introduction &#8212; MOCPy 0.19.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.18.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.19.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -95,7 +95,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">mocpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">SkyCoord</span>
@@ -117,12 +117,12 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&#39;0.17.1&#39;
+&#39;0.18.0&#39;
 </pre></div></div>
 </div>
 </section>
-<section id="##-Use-astroquery.cds-to-get-spatial-footprints-(MOCs)">
-<h1>## Use astroquery.cds to get spatial footprints (MOCs)<a class="headerlink" href="###-Use-astroquery.cds-to-get-spatial-footprints-(MOCs)" title="Link to this heading">¶</a></h1>
+<section id="Use-astroquery.cds-to-get-spatial-footprints-(MOCs)">
+<h1>Use astroquery.cds to get spatial footprints (MOCs)<a class="headerlink" href="#Use-astroquery.cds-to-get-spatial-footprints-(MOCs)" title="Link to this heading">¶</a></h1>
 <p>MOCs can be retrieved from <code class="docutils literal notranslate"><span class="pre">astroquery.cds</span></code>. <code class="docutils literal notranslate"><span class="pre">astroquery.cds</span></code> offers a Python access API to the MOCServer that stores ~20000 metadata and MOCs of Vizier catalogues and ~500 metadata and MOCs of HiPS image surveys.</p>
 <p><code class="docutils literal notranslate"><span class="pre">astroquery.cds</span></code> documentation <a class="reference external" href="https://astroquery.readthedocs.io/en/latest/cds/cds.html#getting-started">https://astroquery.readthedocs.io/en/latest/cds/cds.html#getting-started</a></p>
 <hr class="docutils" />
@@ -132,10 +132,10 @@
 <li><p>The MOC representing the footprint of SDSS9: ID=’CDS/P/SDSS9/color’</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># HST MOC footprint</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HST MOC footprint</span>
 <span class="c1"># -----------------</span>
 <span class="c1"># We want to retrieve all the HST surveys i.e. the HST surveys covering any region of the sky.</span>
 <span class="n">allsky</span> <span class="o">=</span> <span class="n">CircleSkyRegion</span><span class="p">(</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">),</span> <span class="n">Angle</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">))</span>
@@ -163,7 +163,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">sdss_moc</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">sdss_moc</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -177,8 +177,8 @@ mocpy.moc.moc.MOC
 </pre></div></div>
 </div>
 </section>
-<section id="##-Manipulate-MOCs-using-MOCPy">
-<h1>## Manipulate MOCs using MOCPy<a class="headerlink" href="###-Manipulate-MOCs-using-MOCPy" title="Link to this heading">¶</a></h1>
+<section id="Manipulate-MOCs-using-MOCPy">
+<h1>Manipulate MOCs using MOCPy<a class="headerlink" href="#Manipulate-MOCs-using-MOCPy" title="Link to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">astroquery.cds</span></code> returns mocpy.MOC typed objects. Use MOCPy (see the API of the mocpy.MOC class <a class="reference external" href="https://cds-astro.github.io/mocpy/stubs/mocpy.MOC.html#mocpy.MOC">https://cds-astro.github.io/mocpy/stubs/mocpy.MOC.html#mocpy.MOC</a>) to manipulate them, for example you could:</p>
 <ul class="simple">
 <li><p>Compute their intersection/union</p></li>
@@ -189,7 +189,7 @@ mocpy.moc.moc.MOC
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="n">sdss_and_hst_moc</span> <span class="o">=</span> <span class="n">sdss_moc</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">hst_moc</span><span class="p">)</span>
 <span class="n">sdss_moc</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">)</span>
 <span class="n">sdss_moc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;sdss_moc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -201,13 +201,13 @@ mocpy.moc.moc.MOC
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 12.1 ms, sys: 0 ns, total: 12.1 ms
-Wall time: 11.6 ms
+CPU times: user 9.25 ms, sys: 6.61 ms, total: 15.9 ms
+Wall time: 24 ms
 </pre></div></div>
 </div>
 </section>
-<section id="##-Plot-a-MOC-using-matplotlib">
-<h1>## Plot a MOC using matplotlib<a class="headerlink" href="###-Plot-a-MOC-using-matplotlib" title="Link to this heading">¶</a></h1>
+<section id="Plot-a-MOC-using-matplotlib">
+<h1>Plot a MOC using matplotlib<a class="headerlink" href="#Plot-a-MOC-using-matplotlib" title="Link to this heading">¶</a></h1>
 <p>Let’s see how to plot a MOC using matplotlib. There is an example of that on the MOCPy’s documentation: <a class="reference external" href="https://cds-astro.github.io/mocpy/examples/examples.html#loading-and-plotting-the-moc-of-sdss">https://cds-astro.github.io/mocpy/examples/examples.html#loading-and-plotting-the-moc-of-sdss</a></p>
 <hr class="docutils" />
 <p>We use <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> and<code class="docutils literal notranslate"><span class="pre">MOCPy</span></code> to draw the MOCs of HST and SDSS that we downloaded from <code class="docutils literal notranslate"><span class="pre">astroquery.cds</span></code>.</p>
@@ -227,7 +227,7 @@ Wall time: 11.6 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 
 <span class="n">wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span>
     <span class="p">{</span>
@@ -315,17 +315,17 @@ Wall time: 11.6 ms
 </div>
 </div>
 </section>
-<section id="##-Filter-an-astropy.Table-by-a-MOC">
-<h1>## Filter an astropy.Table by a MOC<a class="headerlink" href="###-Filter-an-astropy.Table-by-a-MOC" title="Link to this heading">¶</a></h1>
+<section id="Filter-an-astropy.Table-by-a-MOC">
+<h1>Filter an astropy.Table by a MOC<a class="headerlink" href="#Filter-an-astropy.Table-by-a-MOC" title="Link to this heading">¶</a></h1>
 <ol class="arabic simple">
 <li><p>Retrieve a catalog table from Vizier (e.g. II/50). Add the columns ‘_RAJ2000’ and ‘_DEJ2000’ to the outputs. MOCPy needs the positions for filtering the table.</p></li>
 <li><p>Filter the table to get only the sources that lie into intersection MOC.</p></li>
 </ol>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
 <span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="c1"># Photometric standard stars (tables II and IV of paper)</span>
 <span class="n">tables</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;II/50&quot;</span><span class="p">)</span>
@@ -333,20 +333,49 @@ Wall time: 11.6 ms
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">table_II50</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+TableList with 1 tables:
+        &#39;0:II/50/ubv&#39; with 20 column(s) and 2036 row(s)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table_II50</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">table_II50</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">idx_inside</span> <span class="o">=</span> <span class="n">sdss_and_hst_moc</span><span class="o">.</span><span class="n">contains_lonlat</span><span class="p">(</span>
+<div class="output_area rendered_html docutils container">
+<div><i>Table length=2036</i>
+<table id="table5055682432" class="table-striped table-bordered table-condensed">
+<thead><tr><th>_RAJ2000</th><th>_DEJ2000</th><th>HD</th><th>m_HD</th><th>Vmag</th><th>u_Vmag</th><th>e_Vmag</th><th>w_Vmag</th><th>B-V</th><th>u_B-V</th><th>e_B-V</th><th>w_B-V</th><th>U-B</th><th>u_U-B</th><th>w_U-B</th><th>S</th><th>Notes</th><th>Simbad</th><th>_RA</th><th>_DE</th></tr></thead>
+<thead><tr><th>deg</th><th>deg</th><th></th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th></th><th></th><th></th><th></th><th>deg</th><th>deg</th></tr></thead>
+<thead><tr><th>float64</th><th>float64</th><th>int32</th><th>str1</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>str1</th><th>str23</th><th>str6</th><th>float64</th><th>float64</th></tr></thead>
+<tr><td>1.3339206</td><td>-5.7076183</td><td>28</td><td></td><td>4.615</td><td></td><td>0.007</td><td>5.20</td><td>1.040</td><td></td><td>0.007</td><td>5.50</td><td>0.89</td><td></td><td>2.50</td><td></td><td></td><td>Simbad</td><td>1.33392</td><td>-5.70762</td></tr>
+<tr><td>2.3526750</td><td>-45.7474261</td><td>496</td><td></td><td>3.875</td><td></td><td>0.005</td><td>2.50</td><td>1.020</td><td></td><td>0.010</td><td>2.70</td><td>0.86</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>2.35267</td><td>-45.74743</td></tr>
+<tr><td>3.6600664</td><td>-18.9328656</td><td>1038</td><td></td><td>4.430</td><td>)</td><td>0.018</td><td>3.50</td><td>1.655</td><td></td><td>0.006</td><td>3.70</td><td>2.00</td><td>:</td><td>3.00</td><td>*</td><td></td><td>Simbad</td><td>3.66007</td><td>-18.93287</td></tr>
+<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+<tr><td>0.4560350</td><td>-3.0275039</td><td>224926</td><td></td><td>5.100</td><td></td><td>--</td><td>1.20</td><td>-0.125</td><td></td><td>--</td><td>1.50</td><td>-0.51</td><td></td><td>1.20</td><td>*</td><td></td><td>Simbad</td><td>0.45603</td><td>-3.02750</td></tr>
+<tr><td>0.6006958</td><td>8.9568236</td><td>224995</td><td></td><td>6.320</td><td></td><td>--</td><td>1.00</td><td>0.180</td><td></td><td>--</td><td>1.00</td><td>0.14</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>0.60070</td><td>8.95682</td></tr>
+<tr><td>0.6237594</td><td>8.4854631</td><td>225003</td><td></td><td>5.690</td><td></td><td>--</td><td>1.00</td><td>0.320</td><td></td><td>--</td><td>1.00</td><td>-0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>0.62376</td><td>8.48546</td></tr>
+</table></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">idx_inside</span> <span class="o">=</span> <span class="n">sdss_and_hst_moc</span><span class="o">.</span><span class="n">contains_lonlat</span><span class="p">(</span>
     <span class="n">table_II50</span><span class="p">[</span><span class="s2">&quot;_RAJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
     <span class="n">table_II50</span><span class="p">[</span><span class="s2">&quot;_DEJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
 <span class="p">)</span>
@@ -356,34 +385,69 @@ Wall time: 11.6 ms
 </pre></div>
 </div>
 </div>
-</section>
-<section id="##-Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin">
-<h1>## Run Aladin-Lite inside a jupyter notebook: ipyaladin<a class="headerlink" href="###-Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin" title="Link to this heading">¶</a></h1>
-<p>Aladin-Lite can be embedded into a jupyter notebook: Follow the readme on GitHub for installing it: <a class="reference external" href="https://github.com/cds-astro/ipyaladin">https://github.com/cds-astro/ipyaladin</a></p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span> <span class="o">=</span> <span class="n">Aladin</span><span class="p">()</span>
+<div class="output_area rendered_html docutils container">
+<div><i>Table length=31</i>
+<table id="table5055684976" class="table-striped table-bordered table-condensed">
+<thead><tr><th>_RAJ2000</th><th>_DEJ2000</th><th>HD</th><th>m_HD</th><th>Vmag</th><th>u_Vmag</th><th>e_Vmag</th><th>w_Vmag</th><th>B-V</th><th>u_B-V</th><th>e_B-V</th><th>w_B-V</th><th>U-B</th><th>u_U-B</th><th>w_U-B</th><th>S</th><th>Notes</th><th>Simbad</th><th>_RA</th><th>_DE</th></tr></thead>
+<thead><tr><th>deg</th><th>deg</th><th></th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th>mag</th><th></th><th></th><th></th><th></th><th></th><th>deg</th><th>deg</th></tr></thead>
+<thead><tr><th>float64</th><th>float64</th><th>int32</th><th>str1</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>str1</th><th>str23</th><th>str6</th><th>float64</th><th>float64</th></tr></thead>
+<tr><td>34.8366364</td><td>-2.9776425</td><td>14386</td><td></td><td>--</td><td>)</td><td>--</td><td>--</td><td>1.600</td><td></td><td>--</td><td>0.70</td><td>--</td><td></td><td>--</td><td></td><td></td><td>Simbad</td><td>34.83664</td><td>-2.97764</td></tr>
+<tr><td>49.8404000</td><td>3.3701978</td><td>20630</td><td></td><td>4.845</td><td></td><td>0.011</td><td>9.70</td><td>0.680</td><td></td><td>0.006</td><td>9.20</td><td>0.20</td><td></td><td>5.75</td><td></td><td></td><td>Simbad</td><td>49.84040</td><td>3.37020</td></tr>
+<tr><td>83.8465175</td><td>-4.8383578</td><td>37018</td><td></td><td>4.590</td><td></td><td>0.009</td><td>4.00</td><td>-0.200</td><td></td><td>0.004</td><td>4.00</td><td>-0.93</td><td></td><td>3.50</td><td></td><td></td><td>Simbad</td><td>83.84652</td><td>-4.83836</td></tr>
+<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+<tr><td>249.0893719</td><td>-2.3245836</td><td>149661</td><td></td><td>5.750</td><td></td><td>--</td><td>1.50</td><td>0.820</td><td></td><td>--</td><td>1.50</td><td>--</td><td></td><td>2.00</td><td>*</td><td></td><td>Simbad</td><td>249.08937</td><td>-2.32458</td></tr>
+<tr><td>268.3091039</td><td>6.1014242</td><td>162917</td><td></td><td>5.770</td><td></td><td>--</td><td>1.00</td><td>0.420</td><td></td><td>--</td><td>1.00</td><td>-0.01</td><td></td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>268.30910</td><td>6.10142</td></tr>
+<tr><td>292.3390033</td><td>-7.0440864</td><td>183344</td><td></td><td>6.600</td><td>)</td><td>--</td><td>1.00</td><td>1.100</td><td>)</td><td>--</td><td>1.00</td><td>0.70</td><td>)</td><td>1.00</td><td>C</td><td></td><td>Simbad</td><td>292.33900</td><td>-7.04409</td></tr>
+</table></div></div>
+</div>
+</section>
+<section id="Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin">
+<h1>Run Aladin-Lite inside a jupyter notebook: ipyaladin<a class="headerlink" href="#Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin" title="Link to this heading">¶</a></h1>
+<p>Aladin-Lite can be embedded into a jupyter notebook: Follow the readme on GitHub for installing it: <a class="reference external" href="https://github.com/cds-astro/ipyaladin">https://github.com/cds-astro/ipyaladin</a></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span> <span class="o">=</span> <span class="n">Aladin</span><span class="p">()</span>
 <span class="n">aladin</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/matthieubaumann/mocpy/mocpy-env/lib/python3.10/site-packages/ipywidgets/widgets/widget.py:680: DeprecationWarning: Deprecated in traitlets 4.1, use the instance .metadata dictionary directly, like x.metadata[key] or x.metadata.get(key, default)
+  if trait.get_metadata(&#39;sync&#39;):
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;messier 51&quot;</span>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "f3c08879c8b441f2ab765812b1e408e7", "version_major": 2, "version_minor": 1}</script></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;messier 51&quot;</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">fov</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">600</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">coo_frame</span> <span class="o">=</span> <span class="s2">&quot;icrs&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">coo_frame</span> <span class="o">=</span> <span class="s2">&quot;icrs&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -397,19 +461,19 @@ Wall time: 11.6 ms
 <li><p>P/Mellinger/color</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="s2">&quot;P/SDSS9/color&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="s2">&quot;P/SDSS9/color&quot;</span>
 </pre></div>
 </div>
 </div>
 <p>Add a MOC in the aladin-lite view!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">add_moc</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">aladin</span><span class="o">.</span><span class="n">add_moc</span><span class="p">(</span>
     <span class="n">sdss_and_hst_moc</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
     <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
@@ -421,20 +485,20 @@ Wall time: 11.6 ms
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add astropy source tables to the aladin lite viewer</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add astropy source tables to the aladin lite viewer</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">sources_inside</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;rhomb&quot;</span><span class="p">)</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">sources_outside</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;cross&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># change the fov and target</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># change the fov and target</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;13 04 4.193 -03 34 13.54&quot;</span>
 <span class="n">aladin</span><span class="o">.</span><span class="n">fov</span> <span class="o">=</span> <span class="mi">11</span>
 </pre></div>
@@ -466,11 +530,11 @@ Wall time: 11.6 ms
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">MOCPy introduction</a></li>
-<li><a class="reference internal" href="###-Use-astroquery.cds-to-get-spatial-footprints-(MOCs)">## Use astroquery.cds to get spatial footprints (MOCs)</a></li>
-<li><a class="reference internal" href="###-Manipulate-MOCs-using-MOCPy">## Manipulate MOCs using MOCPy</a></li>
-<li><a class="reference internal" href="###-Plot-a-MOC-using-matplotlib">## Plot a MOC using matplotlib</a></li>
-<li><a class="reference internal" href="###-Filter-an-astropy.Table-by-a-MOC">## Filter an astropy.Table by a MOC</a></li>
-<li><a class="reference internal" href="###-Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin">## Run Aladin-Lite inside a jupyter notebook: ipyaladin</a></li>
+<li><a class="reference internal" href="#Use-astroquery.cds-to-get-spatial-footprints-(MOCs)">Use astroquery.cds to get spatial footprints (MOCs)</a></li>
+<li><a class="reference internal" href="#Manipulate-MOCs-using-MOCPy">Manipulate MOCs using MOCPy</a></li>
+<li><a class="reference internal" href="#Plot-a-MOC-using-matplotlib">Plot a MOC using matplotlib</a></li>
+<li><a class="reference internal" href="#Filter-an-astropy.Table-by-a-MOC">Filter an astropy.Table by a MOC</a></li>
+<li><a class="reference internal" href="#Run-Aladin-Lite-inside-a-jupyter-notebook:-ipyaladin">Run Aladin-Lite inside a jupyter notebook: ipyaladin</a></li>
 <li><a class="reference internal" href="#Useful-links">Useful links</a></li>
 </ul>
 
@@ -486,7 +550,7 @@ Wall time: 11.6 ms
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 May 2025. <br/>
+    Last built 05 Nov 2025. <br/>
   </p>
 </footer>
   </body>

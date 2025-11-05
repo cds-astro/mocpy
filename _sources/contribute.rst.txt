@@ -113,7 +113,7 @@ This will generate an ``htmlcov`` folder where all the static html files can be 
 Building the documentation
 --------------------------
 
-To see the documentation locally, you'll need to install the additional python dependencies with
+To see the documentation locally, you'll need to install the additional python dependencies with::
 
     pip install .[docs]
 

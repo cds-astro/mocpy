@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title># Space &amp; Time coverages &#8212; MOCPy 0.18.0 documentation</title>
+    <title>Space &amp; Time coverages &#8212; MOCPy 0.19.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,12 +66,12 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.18.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.19.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
       
-      <li># Space &amp; Time coverages</li> 
+      <li>Space &amp; Time coverages</li> 
     </ul>
 </div>
   
@@ -81,8 +81,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="#-Space-&amp;-Time-coverages">
-<h1># Space &amp; Time coverages<a class="headerlink" href="##-Space-&-Time-coverages" title="Link to this heading">¶</a></h1>
+  <section id="Space-&amp;-Time-coverages">
+<h1>Space &amp; Time coverages<a class="headerlink" href="#Space-&-Time-coverages" title="Link to this heading">¶</a></h1>
 <p>This notebook shows:</p>
 <ol class="arabic">
 <li><p>How to <strong>create</strong> Space-Time coverages of the 2MASS image catalog and the XMM_DR8 catalog</p></li>
@@ -97,7 +97,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
@@ -113,7 +113,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
@@ -126,7 +126,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading the data</span>
 <span class="n">two_mass_data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
     <span class="s2">&quot;./../resources/STMOC/2MASS-list-images.fits.gz&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span>
@@ -152,7 +152,7 @@ Number of rows in 2MASS:  4879128
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="c1"># Creation of the STMOC ~ wait around 1 minute</span>
 <span class="n">time_depth</span> <span class="o">=</span> <span class="mi">23</span>
 <span class="n">spatial_depth</span> <span class="o">=</span> <span class="mi">7</span>
@@ -171,15 +171,15 @@ Number of rows in 2MASS:  4879128
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 11.4 s, sys: 17.8 s, total: 29.2 s
-Wall time: 18.5 s
+CPU times: user 3.66 s, sys: 1.34 s, total: 5 s
+Wall time: 1.91 s
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation: &quot;</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation: &quot;</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the last observation: &quot;</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -201,7 +201,7 @@ Time of the last observation:  2001-02-18 03:38:35.462
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">add_to_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">moc</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">add_to_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">moc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a MOC to a plot.&quot;&quot;&quot;</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
 
@@ -263,7 +263,7 @@ Time of the last observation:  2001-02-18 03:38:35.462
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading &amp; preparing the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading &amp; preparing the data</span>
 <span class="n">xmm_dr8_data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;../resources/STMOC/vizier_votable.b64&quot;</span><span class="p">)</span>
 <span class="n">times_xmm</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">&quot;MJD0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">)</span>
 <span class="n">lon_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">&quot;RA_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
@@ -284,7 +284,7 @@ Number of rows in XMM_DR8:  531454
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="c1"># Create the STMOC</span>
 <span class="n">xmm_dr8_stmoc</span> <span class="o">=</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">from_times_positions</span><span class="p">(</span>
     <span class="n">times_xmm</span><span class="p">,</span>
@@ -301,8 +301,8 @@ Number of rows in XMM_DR8:  531454
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-CPU times: user 1.42 s, sys: 353 ms, total: 1.77 s
-Wall time: 728 ms
+CPU times: user 622 ms, sys: 680 ms, total: 1.3 s
+Wall time: 323 ms
 </pre></div></div>
 </div>
 <hr class="docutils" />
@@ -314,7 +314,7 @@ Wall time: 728 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="c1"># Compute their intersection and check that it is not empty</span>
 <span class="n">xmm_inter_2mass</span> <span class="o">=</span> <span class="n">xmm_dr8_stmoc</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">two_mass</span><span class="p">)</span>
 
@@ -330,10 +330,11 @@ Wall time: 728 ms
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Is the MOC intersection empty?: False
 Time of the first observation: 2000-02-18 06:49:16.163
 Time of the last observation: 2000-11-05 03:55:44.532
-CPU times: user 6.84 ms, sys: 221 µs, total: 7.07 ms
-Wall time: 7.01 ms
+CPU times: user 5.56 ms, sys: 1.51 ms, total: 7.06 ms
+Wall time: 7.67 ms
 </pre></div></div>
 </div>
 </section>
@@ -346,7 +347,7 @@ Wall time: 7.01 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
 <span class="c1"># Filtering a 4.8M rows table is quite fast</span>
 <span class="n">mask_xmm</span> <span class="o">=</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">times_xmm</span><span class="p">,</span> <span class="n">lon_xmm</span><span class="p">,</span> <span class="n">lat_xmm</span><span class="p">)</span>
 <span class="n">sources_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="n">mask_xmm</span><span class="p">]</span>
@@ -362,10 +363,10 @@ Wall time: 7.01 ms
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
- 10 sources in XMM
+ 100 sources in XMM
 
-CPU times: user 240 ms, sys: 37.3 ms, total: 278 ms
-Wall time: 278 ms
+CPU times: user 53.8 ms, sys: 37.5 ms, total: 91.3 ms
+Wall time: 98.1 ms
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -373,29 +374,26 @@ Wall time: 278 ms
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
-<div><i>Table length=10</i>
-<table id="table140498205124048" class="table-striped table-bordered table-condensed">
+<div><i>Table length=100</i>
+<table id="table4418672464" class="table-striped table-bordered table-condensed">
 <thead><tr><th>RA_ICRS</th><th>DE_ICRS</th><th>MJD0</th><th>recno</th></tr></thead>
 <thead><tr><th>deg</th><th>deg</th><th>d</th><th></th></tr></thead>
 <thead><tr><th>float64</th><th>float64</th><th>float64</th><th>int32</th></tr></thead>
-<tr><td>89.637991</td><td>-50.397917</td><td>51604.6465</td><td>147242</td></tr>
-<tr><td>89.665918</td><td>-50.524772</td><td>51604.6465</td><td>147293</td></tr>
-<tr><td>89.787931</td><td>-50.275894</td><td>51604.6465</td><td>147436</td></tr>
-<tr><td>89.818302</td><td>-50.509235</td><td>51604.6465</td><td>147462</td></tr>
-<tr><td>89.910377</td><td>-50.361675</td><td>51604.6465</td><td>147530</td></tr>
-<tr><td>89.920087</td><td>-50.386144</td><td>51604.6465</td><td>147542</td></tr>
-<tr><td>89.936948</td><td>-50.444740</td><td>51604.6465</td><td>147560</td></tr>
-<tr><td>89.945907</td><td>-50.465488</td><td>51604.6465</td><td>147577</td></tr>
-<tr><td>89.978749</td><td>-50.510436</td><td>51604.6465</td><td>147634</td></tr>
-<tr><td>89.986374</td><td>-50.533013</td><td>51604.6465</td><td>147640</td></tr>
+<tr><td>54.181699</td><td>0.604013</td><td>51592.5937</td><td>89571</td></tr>
+<tr><td>54.189898</td><td>0.605876</td><td>51592.5937</td><td>89593</td></tr>
+<tr><td>54.197439</td><td>0.589064</td><td>51592.5937</td><td>89616</td></tr>
+<tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+<tr><td>123.063435</td><td>75.918958</td><td>51852.8680</td><td>179052</td></tr>
+<tr><td>123.172708</td><td>76.102680</td><td>51852.8680</td><td>179117</td></tr>
+<tr><td>123.490485</td><td>75.910425</td><td>51852.8680</td><td>179337</td></tr>
 </table></div></div>
 </div>
 <p>One can then use <strong>astroquery.vizier</strong> to get more informations about the filtered sources.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_skycoords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_skycoords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
     <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;RA_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
     <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;DE_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
     <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span>
@@ -412,15 +410,30 @@ Wall time: 278 ms
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><i>Table length=3</i>
+<table id="table5225231648" class="table-striped table-bordered table-condensed">
+<thead><tr><th>_q</th><th>3XMM</th><th>RA_ICRS</th><th>DE_ICRS</th><th>srcML</th><th>Flux8</th><th>e_Flux8</th><th>HR1</th><th>HR2</th><th>HR3</th><th>HR4</th><th>ext</th><th>V</th><th>S</th><th>Nd</th><th>xcatDBdet</th><th>xcatDB</th><th>IRAP</th></tr></thead>
+<thead><tr><th></th><th></th><th>deg</th><th>deg</th><th></th><th>mW / m2</th><th>mW / m2</th><th></th><th></th><th></th><th></th><th>arcsec</th><th></th><th></th><th></th><th></th><th></th><th></th></tr></thead>
+<thead><tr><th>int32</th><th>str16</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>float64</th><th>uint8</th><th>uint8</th><th>int16</th><th>str9</th><th>str6</th><th>str4</th></tr></thead>
+<tr><td>1</td><td>J033643.6+003614</td><td>54.181699</td><td>0.604013</td><td>67.363</td><td>2.6823e-14</td><td>4.2254e-15</td><td>0.192770</td><td>-0.010170</td><td>-0.799786</td><td>-1.000000</td><td>0.000000</td><td>1</td><td>0</td><td>1</td><td>xcatDBdet</td><td>xcatDB</td><td>IRAP</td></tr>
+<tr><td>2</td><td>J033645.5+003621</td><td>54.189898</td><td>0.605876</td><td>52.302</td><td>9.7142e-15</td><td>3.2946e-15</td><td>0.275784</td><td>-0.153472</td><td>-0.562840</td><td>-1.000000</td><td>0.000000</td><td>1</td><td>1</td><td>1</td><td>xcatDBdet</td><td>xcatDB</td><td>IRAP</td></tr>
+<tr><td>3</td><td>J033647.3+003520</td><td>54.197439</td><td>0.589064</td><td>42180</td><td>9.7749e-12</td><td>1.8025e-13</td><td>0.372987</td><td>0.023216</td><td>-0.508756</td><td>-0.779417</td><td>16.185900</td><td>1</td><td>1</td><td>1</td><td>xcatDBdet</td><td>xcatDB</td><td>IRAP</td></tr>
+</table></div></div>
+</div>
 </section>
 <hr class="docutils" />
 <section id="4.-Save-into-a-FITS-file">
 <h3>4. Save into a FITS file<a class="headerlink" href="#4.-Save-into-a-FITS-file" title="Link to this heading">¶</a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;xmm_inter_2mass_stmoc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;xmm_inter_2mass_stmoc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -433,10 +446,10 @@ Wall time: 278 ms
 <li><p>You can change the field of view to zoom in (resp. zoom out) if you want. By reducing the FoV you will be able to vizualize the sources in XMM filtered by the intersection Space-Time coverage.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
@@ -534,10 +547,10 @@ Wall time: 278 ms
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">min_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]))</span> <span class="o">-</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">min_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]))</span> <span class="o">-</span> <span class="mi">1</span>
 <span class="n">max_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
 
 <span class="n">time_slider</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntRangeSlider</span><span class="p">(</span>
@@ -554,16 +567,23 @@ Wall time: 278 ms
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In blue is a region that has been observed by 2MASS and XMM_DR8 at the same time</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># In blue is a region that has been observed by 2MASS and XMM_DR8 at the same time</span>
 <span class="n">time_slider</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
 <span class="n">update</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">time_slider</span><span class="p">,</span> <span class="n">output</span><span class="p">])</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9397dc47f5a04dbda128ca3e88d60e6e", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 </section>
 </section>
@@ -577,7 +597,7 @@ Wall time: 278 ms
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
 <ul>
-<li><a class="reference internal" href="#"># Space &amp; Time coverages</a><ul>
+<li><a class="reference internal" href="#">Space &amp; Time coverages</a><ul>
 <li><a class="reference internal" href="#Query-a-ST-MOC-by-a-time-range">Query a ST-MOC by a time range</a><ul>
 <li><a class="reference internal" href="#2.-Intersection-between-the-2MASS-and-XMM_DR8-Space-Time-coverages">2. Intersection between the <em>2MASS</em> and <em>XMM_DR8</em> Space-Time coverages</a></li>
 <li><a class="reference internal" href="#3.-Filter-catalogs-by-a-Space-Time-coverage">3. Filter catalogs by a Space-Time coverage</a></li>
@@ -601,7 +621,7 @@ Wall time: 278 ms
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 May 2025. <br/>
+    Last built 05 Nov 2025. <br/>
   </p>
 </footer>
   </body>

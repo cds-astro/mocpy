@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>First steps with Frequency MOCs &#8212; MOCPy 0.18.0 documentation</title>
+    <title>First steps with Frequency MOCs &#8212; MOCPy 0.19.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="API: Detailed list of all methods" href="../../api.html" />
-    <link rel="prev" title="# Space &amp; Time coverages" href="Space%20%26%20Time%20coverages.html" />
+    <link rel="prev" title="Space &amp; Time coverages" href="Space%20%26%20Time%20coverages.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
   </head><body>
@@ -60,13 +60,13 @@
 	</a>
       </li>
       <li class="right">
-	<a href="Space%20%26%20Time%20coverages.html" title="# Space &amp; Time coverages">
+	<a href="Space%20%26%20Time%20coverages.html" title="Space &amp; Time coverages">
 	  &laquo; previous
 	</a>
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.18.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.19.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -103,9 +103,41 @@
 </pre></div>
 </div>
 </div>
-<p>We can plot it in frequency or wavelength</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fmoc</span><span class="o">.</span><span class="n">min_freq</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$3593.46 \; \mathrm{Hz}$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fmoc</span><span class="o">.</span><span class="n">max_freq</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$16037500 \; \mathrm{Hz}$</div></div>
+</div>
+<p>We can plot it in frequency or wavelength</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -122,11 +154,11 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_5_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_5_0.png" />
+<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_7_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_7_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -138,12 +170,12 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_6_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_6_0.png" />
+<img alt="../../_images/_collections_notebooks_First_Steps_with_FMOCs_8_0.png" src="../../_images/_collections_notebooks_First_Steps_with_FMOCs_8_0.png" />
 </div>
 </div>
 <p>We create a dictionnary of FMOCs with less and less precise order ranging from 50 to 10.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -154,7 +186,7 @@
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -162,8 +194,17 @@
 we first create an initial FMOC at order 50 and then generate the dictionnary
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_918016/4230462187.py:5: UserWarning: The new order is more precise than the current order, nothing done.
+  fmocs = {n: fmoc.degrade_to_order(n) for n in np.linspace(50, 10, 5, dtype=int)}
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">fmocs</span><span class="p">:</span>
@@ -187,13 +228,13 @@ At order 10, this F-MOC has 1 non overlapping spectral intervals
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">fmocs</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;At order </span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">, the spectrum covers </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">fmocs</span><span class="p">[</span><span class="n">order</span><span class="p">]</span><span class="o">.</span><span class="n">to_hz_ranges</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> Hz&quot;</span>
-        <span class="s2">&quot; to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot; to </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">fmocs</span><span class="p">[</span><span class="n">order</span><span class="p">]</span><span class="o">.</span><span class="n">to_hz_ranges</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -203,11 +244,11 @@ At order 10, this F-MOC has 1 non overlapping spectral intervals
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-At order 50, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz
-At order 40, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz
-At order 30, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz
-At order 20, the spectrum covers 3593 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz
-At order 10, the spectrum covers 3584 Hz to {round(fmocs[order].to_hz_ranges()[-1][1])} Hz
+At order 50, the spectrum covers 3593 Hz to 16037500 Hz
+At order 40, the spectrum covers 3593 Hz to 16037500 Hz
+At order 30, the spectrum covers 3593 Hz to 16037501 Hz
+At order 20, the spectrum covers 3593 Hz to 16037733 Hz
+At order 10, the spectrum covers 3523 Hz to 16253148 Hz
 </pre></div></div>
 </div>
 <p>Next step is FT-MOC, in order to manage the time series of sweep.</p>
@@ -237,7 +278,7 @@ At order 10, the spectrum covers 3584 Hz to {round(fmocs[order].to_hz_ranges()[-
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 26 May 2025. <br/>
+    Last built 05 Nov 2025. <br/>
   </p>
 </footer>
   </body>
