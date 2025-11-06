@@ -38,7 +38,7 @@ jobs:
            pip install maturin
            maturin develop --release
            pip install .[dev,plots]
-           python -m pytest
+           python -m pytest python/mocpy/tests/
          done
 
   test-macos-wheels:
@@ -71,7 +71,7 @@ jobs:
          # Install dependencies
          pip install .[dev,plots]
          # Run tests
-         python -m pytest
+         python -m pytest python/mocpy/tests/
 
   test-windows-wheels:
     runs-on: windows-latest
@@ -101,7 +101,7 @@ jobs:
           # Install dependencies
           pip install .[dev,plots]
           # Run tests
-          python -m pytest -v
+          python -m pytest -v python/mocpy/tests/
           deactivate
 
   test-only-required-dependencies:
