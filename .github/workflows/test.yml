@@ -37,7 +37,7 @@ jobs:
            pip install --upgrade pip
            pip install maturin
            maturin develop --release
-           pip install .[dev]
+           pip install .[dev,plots]
            python -m pytest
          done
 
@@ -69,7 +69,7 @@ jobs:
          maturin build --release --target universal2-apple-darwin
          maturin develop --release
          # Install dependencies
-         pip install .[dev]
+         pip install .[dev,plots]
          # Run tests
          python -m pytest
 
@@ -99,7 +99,7 @@ jobs:
           pip install maturin
           maturin develop --release
           # Install dependencies
-          pip install .[dev]
+          pip install .[dev,plots]
           # Run tests
           python -m pytest -v
           deactivate
