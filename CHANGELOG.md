@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* `cdshealpix` and `matplotlib` are now truly optional [#201]
+
 ## [0.19.0]
 
 ### Changed

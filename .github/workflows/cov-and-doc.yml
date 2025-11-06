@@ -35,7 +35,7 @@ jobs:
           # Build and install mocpy
           maturin develop --release
           # Install pytest-cov, needed to test with coverage
-          pip install .[dev]
+          pip install .[dev,plots]
           pip install pytest-cov
           # Run test with coverage and doctests
           python -m pytest -v -s --doctest-modules python/mocpy --cov-report=term --cov=python/mocpy

@@ -3,7 +3,6 @@ import math
 import re
 
 import astropy.units as u
-import cdshealpix
 import numpy as np
 import pytest
 import regions
@@ -11,6 +10,13 @@ from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord, angular_se
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
 from astropy.table import QTable
+
+try:
+    import matplotlib.pyplot as plt
+
+    _matplotlib_missing = False
+except ImportError:
+    _matplotlib_missing = True
 
 from ..moc import MOC, WCS
 
@@ -499,12 +505,10 @@ def test_serialize_to_str(moc, expected):
 
 
 # --- TESTING MOC plot functions ---#
+@pytest.mark.skipif(_matplotlib_missing, reason="Matplotlib missing")
 def test_mpl_fill():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
     moc = MOC.load(fits_path, "fits")
-
-    import matplotlib.pyplot as plt
-
     fig = plt.figure(111, figsize=(10, 10))
     with WCS(
         fig,
@@ -518,12 +522,10 @@ def test_mpl_fill():
         moc.fill(ax=ax, wcs=wcs, alpha=0.5, color="r")
 
 
+@pytest.mark.skipif(_matplotlib_missing, reason="Matplotlib missing")
 def test_mpl_border():
     fits_path = "resources/P-GALEXGR6-AIS-FUV.fits"
     moc = MOC.load(fits_path, "fits")
-
-    import matplotlib.pyplot as plt
-
     fig = plt.figure(111, figsize=(10, 10))
     with WCS(
         fig,
@@ -540,6 +542,8 @@ def test_mpl_border():
 # --- TESTING MOC features ---#
 @pytest.mark.parametrize("order", [4, 5, 6, 15, 20, 28])
 def test_moc_contains(order):
+    import cdshealpix
+
     # defines 20 random healpix cells of the required order
     size = 20
     healpix_arr = rng.integers(0, 12 * 4**order, size, dtype="uint64", endpoint=False)

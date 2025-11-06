@@ -31,9 +31,15 @@ with contextlib.suppress(ImportError):
 
 from .. import mocpy
 from ..abstract_moc import AbstractMOC
-from .boundaries import Boundaries
-from .plot import border, fill
-from .plot.wcs import WCS
+
+try:
+    from .boundaries import Boundaries
+    from .plot import border, fill
+    from .plot.wcs import WCS
+
+    _missing_plot_dependencies = False
+except ImportError:
+    _missing_plot_dependencies = True
 
 __author__ = "Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau"
 __copyright__ = "CDS, Centre de Données astronomiques de Strasbourg"
@@ -511,6 +517,11 @@ class MOC(AbstractMOC):
         >>> ax = fig.add_subplot(projection=wcs)
         >>> moc.fill(ax, wcs, color='blue')
         """
+        if _missing_plot_dependencies:
+            raise ImportError(
+                "the group of optional dependencies `plot` is required to use this method."
+                " Install it with `pip install mocpy[plot]`."
+            )
         fill.fill(self, ax, wcs, optimize=optimize, **kw_mpl_pathpatch)
 
     def border(self, ax, wcs, **kw_mpl_pathpatch):
@@ -578,6 +589,11 @@ class MOC(AbstractMOC):
         [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
         """
+        if _missing_plot_dependencies:
+            raise ImportError(
+                "The group of optional dependencies `plot` is required to use this method."
+                " Install it with `pip install mocpy[plot]`."
+            )
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
             DeprecationWarning,
@@ -2523,6 +2539,10 @@ class MOC(AbstractMOC):
         frame : `astropy.coordinates.BaseCoordinateFrame`, optional
             Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).
         """
+        if _missing_plot_dependencies:
+            raise ImportError(
+                "the group of optional dependencies `plot` is required to use this method."
+            )
         warnings.warn(
             "This method is deprecated and is no longer tested."
             "Please refer to `MOC.fill` and `MOC.border` methods",
@@ -2700,6 +2720,10 @@ class MOC(AbstractMOC):
         ----------
         y_size : the number of pixels along the y-axis, default value is 300
         """
+        if _missing_plot_dependencies:
+            raise ImportError(
+                "the group of optional dependencies `plot` is required to use this method."
+            )
         import matplotlib.pyplot as plt
 
         plt.axis("off")

@@ -644,15 +644,17 @@ class FrequencyMOC(AbstractMOC):
         >>> fig, ax = plt.subplots(figsize=(15, 1))
         >>> fmoc.plot_frequencies(ax, color="pink", frequency_unit="1 / ks")
         """
+        try:
+            from matplotlib.collections import PatchCollection
+            from matplotlib.patches import Rectangle
+        except ImportError as err:
+            raise ImportError("matplotlib is required to plot a FrequencyMOC.") from err
+
         if u.get_physical_type(u.Unit(frequency_unit)) != "frequency":
             raise TypeError(
                 f"frequency_unit is of type '{u.get_physical_type(u.Unit(frequency_unit))}'"
                 " instead of 'frequency', see astropy.units for more information",
             )
-
-        from matplotlib.collections import PatchCollection
-        from matplotlib.patches import Rectangle
-
         min_freq = self.min_freq.to(frequency_unit).value
         max_freq = self.max_freq.to(frequency_unit).value
 
@@ -697,15 +699,17 @@ class FrequencyMOC(AbstractMOC):
         >>> fig, ax = plt.subplots(figsize=(15, 1))
         >>> fmoc.plot_wavelengths(ax, color="lightblue", length_unit=u.nm)
         """
+        try:
+            from matplotlib.collections import PatchCollection
+            from matplotlib.patches import Rectangle
+        except ImportError as err:
+            raise ImportError("matplotlib is required to plot a FrequencyMOC.") from err
         # Tests the physical type of `length_unit`
         if u.get_physical_type(u.Unit(length_unit)) != "length":
             raise TypeError(
                 f"length_unit is of type '{u.get_physical_type(u.Unit(length_unit))}'"
                 " instead of 'length', see astropy.units for more information",
             )
-
-        from matplotlib.collections import PatchCollection
-        from matplotlib.patches import Rectangle
 
         # get default bonds
         min_lambda = self.max_freq.to(length_unit, equivalencies=u.spectral()).value

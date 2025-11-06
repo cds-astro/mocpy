@@ -694,8 +694,11 @@ class TimeMOC(AbstractMOC):
             all the observation time window is rendered).
 
         """
-        import matplotlib.pyplot as plt
-        from matplotlib.colors import LinearSegmentedColormap
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.colors import LinearSegmentedColormap
+        except ImportError as err:
+            raise ImportError("matplotlib is required to plot a TimeMOC.") from err
 
         if self.empty():
             import warnings
