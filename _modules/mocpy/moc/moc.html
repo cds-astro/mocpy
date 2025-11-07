@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.moc.moc &#8212; MOCPy 0.19.0 documentation</title>
+    <title>mocpy.moc.moc &#8212; MOCPy 0.19.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=cbfb3150"></script>
+    <script src="../../../_static/documentation_options.js?v=6f83b549"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.19.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.19.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -98,9 +98,15 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">mocpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..abstract_moc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractMOC</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boundaries</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">border</span><span class="p">,</span> <span class="n">fill</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boundaries</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">border</span><span class="p">,</span> <span class="n">fill</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.plot.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
+
+    <span class="n">_missing_plot_dependencies</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_missing_plot_dependencies</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Matthieu Baumann, Thomas Boch, Manon Marchand, François-Xavier Pineau&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;CDS, Centre de Données astronomiques de Strasbourg&quot;</span>
@@ -609,6 +615,11 @@
 <span class="sd">        &gt;&gt;&gt; ax = fig.add_subplot(projection=wcs)</span>
 <span class="sd">        &gt;&gt;&gt; moc.fill(ax, wcs, color=&#39;blue&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_missing_plot_dependencies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;the group of optional dependencies `plot` is required to use this method.&quot;</span>
+                <span class="s2">&quot; Install it with `pip install mocpy[plot]`.&quot;</span>
+            <span class="p">)</span>
         <span class="n">fill</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="n">optimize</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_mpl_pathpatch</span><span class="p">)</span></div>
 
 
@@ -682,6 +693,11 @@
 <span class="sd">        [`~astropy.coordinates.SkyCoord`]</span>
 <span class="sd">            A list of `~astropy.coordinates.SkyCoord` each describing one border.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_missing_plot_dependencies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;The group of optional dependencies `plot` is required to use this method.&quot;</span>
+                <span class="s2">&quot; Install it with `pip install mocpy[plot]`.&quot;</span>
+            <span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is not stable. A future more stable algorithm will be implemented!&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
@@ -2738,6 +2754,10 @@
 <span class="sd">        frame : `astropy.coordinates.BaseCoordinateFrame`, optional</span>
 <span class="sd">            Describes the coordinate system the plot will be (ICRS, Galactic are the only coordinate systems supported).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_missing_plot_dependencies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;the group of optional dependencies `plot` is required to use this method.&quot;</span>
+            <span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This method is deprecated and is no longer tested.&quot;</span>
             <span class="s2">&quot;Please refer to `MOC.fill` and `MOC.border` methods&quot;</span><span class="p">,</span>
@@ -2927,6 +2947,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        y_size : the number of pixels along the y-axis, default value is 300</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_missing_plot_dependencies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;the group of optional dependencies `plot` is required to use this method.&quot;</span>
+            <span class="p">)</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
@@ -2973,7 +2997,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 05 Nov 2025. <br/>
+    Last built 07 Nov 2025. <br/>
   </p>
 </footer>
   </body>

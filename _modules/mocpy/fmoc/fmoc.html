@@ -4,14 +4,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.19.0 documentation</title>
+    <title>mocpy.fmoc.fmoc &#8212; MOCPy 0.19.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="../../../_static/documentation_options.js?v=cbfb3150"></script>
+    <script src="../../../_static/documentation_options.js?v=6f83b549"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../../index.html">MOCPy 0.19.0 documentation</a>
+	<a href="../../../index.html">MOCPy 0.19.1 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -760,15 +760,17 @@
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots(figsize=(15, 1))</span>
 <span class="sd">        &gt;&gt;&gt; fmoc.plot_frequencies(ax, color=&quot;pink&quot;, frequency_unit=&quot;1 / ks&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;matplotlib is required to plot a FrequencyMOC.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+
         <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">get_physical_type</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">))</span> <span class="o">!=</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;frequency_unit is of type &#39;</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">get_physical_type</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">))</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
                 <span class="s2">&quot; instead of &#39;frequency&#39;, see astropy.units for more information&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-
-        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
-
         <span class="n">min_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="n">max_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">frequency_unit</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
@@ -816,15 +818,17 @@
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots(figsize=(15, 1))</span>
 <span class="sd">        &gt;&gt;&gt; fmoc.plot_wavelengths(ax, color=&quot;lightblue&quot;, length_unit=u.nm)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;matplotlib is required to plot a FrequencyMOC.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
         <span class="c1"># Tests the physical type of `length_unit`</span>
         <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">get_physical_type</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">length_unit</span><span class="p">))</span> <span class="o">!=</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;length_unit is of type &#39;</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">get_physical_type</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">length_unit</span><span class="p">))</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
                 <span class="s2">&quot; instead of &#39;length&#39;, see astropy.units for more information&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-
-        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PatchCollection</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
 
         <span class="c1"># get default bonds</span>
         <span class="n">min_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_freq</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">length_unit</span><span class="p">,</span> <span class="n">equivalencies</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">spectral</span><span class="p">())</span><span class="o">.</span><span class="n">value</span>
@@ -873,7 +877,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 05 Nov 2025. <br/>
+    Last built 07 Nov 2025. <br/>
   </p>
 </footer>
   </body>
