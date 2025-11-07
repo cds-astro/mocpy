@@ -37,12 +37,8 @@ jobs:
            pip install --upgrade pip
            pip install maturin
            maturin develop --release
-           pip install .[dev]
-           python -m pytest -v -s python/mocpy
-           pip freeze > requirements-uninstall.txt
-           pip uninstall -r requirements-uninstall.txt -y
-           deactivate
-           rm -r mocpy-env/
+           pip install .[dev,plots]
+           python -m pytest python/mocpy/tests/
          done
 
   test-macos-wheels:
@@ -73,14 +69,9 @@ jobs:
          maturin build --release --target universal2-apple-darwin
          maturin develop --release
          # Install dependencies
-         pip install .[dev]
+         pip install .[dev,plots]
          # Run tests
-         python -m pytest -v -s python/mocpy
-         # Clean
-         pip freeze > requirements-uninstall.txt
-         pip uninstall -r requirements-uninstall.txt -y
-         deactivate
-         rm -r mocpy-env/
+         python -m pytest python/mocpy/tests/
 
   test-windows-wheels:
     runs-on: windows-latest
@@ -108,7 +99,29 @@ jobs:
           pip install maturin
           maturin develop --release
           # Install dependencies
-          pip install .[dev]
+          pip install .[dev,plots]
           # Run tests
-          python -m pytest -v -s python\mocpy
+          python -m pytest -v python/mocpy/tests/
+          deactivate
+
+  test-only-required-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the project
+      - name: "Checkout branch ${{ github.head_ref }}"
+        uses: actions/checkout@v4
+      - name: "Set up Pythons"
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+      # Test python code
+      - name: "Test with only required dependencies"
+        run: |
+          pip install virtualenv
+          virtualenv mocpy-env
+          source mocpy-env/bin/activate
+          pip install maturin
+          maturin develop --release
+          pip install .[dev]
+          python -m pytest -v python/mocpy/tests/
           deactivate

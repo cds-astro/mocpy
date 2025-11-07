@@ -28,7 +28,7 @@ jobs:
           # Build and install mocpy
           maturin develop --release
           # Install pytest-cov, needed to test with coverage
-          pip install .[notebooks]
+          pip install .[notebooks,plots]
           # Add the mocpy-env environnement as a jupyter kernel
           python -m ipykernel install --user --name mocpy-env
           # Run the notebooks under that kernel
