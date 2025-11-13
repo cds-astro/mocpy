@@ -9,7 +9,7 @@ use numpy::{
 };
 
 use pyo3::{
-  exceptions::{PyIOError, PyValueError},
+  exceptions::{PyOSError, PyValueError},
   prelude::{pymodule, Bound, PyModule, PyResult, Python},
   types::PyModuleMethods,
   types::{PyBytes, PyTuple},
@@ -194,7 +194,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+      .map_err(|e| PyOSError::new_err(e.to_string()))?;
     // We zip before multi-threading in case `lon_deg.as_slice()` or ``lon_deg.as_slice`` fail
     // (due to non-contiguous arrays).
     let (lon, lat) = match (lon_deg.as_slice(), lat_deg.as_slice()) {
@@ -203,7 +203,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
       pool
@@ -223,7 +223,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             })
             .collect::<Result<Vec<usize>, String>>()
         })
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -241,7 +241,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -275,7 +275,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates and radii must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
       let n_threads = n_threads
@@ -284,7 +284,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(n_threads)
         .build()
-        .map_err(|e| PyIOError::new_err(e.to_string()))?;
+        .map_err(|e| PyOSError::new_err(e.to_string()))?;
       pool
         .install(|| {
           lon
@@ -303,7 +303,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             })
             .collect::<Result<Vec<usize>, String>>()
         })
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -322,7 +322,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -356,7 +356,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates and radii must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(target_arch = "wasm32")]
     {
       // Ignore multi-threading in wasm32
@@ -367,7 +367,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         .zip(r.iter().cloned());
       U64MocStore::get_global_store()
         .from_small_cones(depth, delta_depth, cone_it)
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -382,12 +382,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           .zip(r.iter().cloned());
         U64MocStore::get_global_store()
           .from_small_cones(depth, delta_depth, cone_it)
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       } else {
         let pool = rayon::ThreadPoolBuilder::new()
           .num_threads(n_threads)
           .build()
-          .map_err(|e| PyIOError::new_err(e.to_string()))?;
+          .map_err(|e| PyOSError::new_err(e.to_string()))?;
         pool
           .install(|| {
             let cone_it = lon
@@ -397,7 +397,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
               .zip(r.par_iter().cloned());
             U64MocStore::get_global_store().from_small_cones_par(depth, delta_depth, cone_it)
           })
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       }
     }
   }
@@ -432,7 +432,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates and radii must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(target_arch = "wasm32")]
     {
       // Ignore multi-threading in wasm32
@@ -443,7 +443,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         .zip(r.iter().cloned());
       U64MocStore::get_global_store()
         .from_large_cones(depth, delta_depth, CellSelection::All, cone_it)
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -458,12 +458,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           .zip(r.iter().cloned());
         U64MocStore::get_global_store()
           .from_large_cones(depth, delta_depth, CellSelection::All, cone_it)
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       } else {
         let pool = rayon::ThreadPoolBuilder::new()
           .num_threads(n_threads)
           .build()
-          .map_err(|e| PyIOError::new_err(e.to_string()))?;
+          .map_err(|e| PyOSError::new_err(e.to_string()))?;
         pool
           .install(|| {
             let cone_it = lon
@@ -478,7 +478,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
               cone_it,
             )
           })
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       }
     }
   }
@@ -534,7 +534,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+      .map_err(|e| PyOSError::new_err(e.to_string()))?;
     // We zip before multi-threading in case `lon_deg.as_slice()` or ``lon_deg.as_slice`` fail
     // (due to non-contiguous arrays).
     let (lon, lat) = match (lon_deg.as_slice(), lat_deg.as_slice()) {
@@ -543,7 +543,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
       pool
@@ -564,7 +564,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             })
             .collect::<Result<Vec<usize>, String>>()
         })
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -583,7 +583,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -619,7 +619,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+      .map_err(|e| PyOSError::new_err(e.to_string()))?;
     // We zip before multi-threading in case `lon_deg.as_slice()` or ``lon_deg.as_slice`` fail
     // (due to non-contiguous arrays).
     let (lon, lat) = match (lon_deg.as_slice(), lat_deg.as_slice()) {
@@ -628,14 +628,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     let (a, b, pa) = match (a.as_slice(), b.as_slice(), pa.as_slice()) {
       (Ok(a), Ok(b), Ok(pa)) => Ok((a, b, pa)),
       _ => Err(String::from(
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
       pool
@@ -657,7 +657,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             })
             .collect::<Result<Vec<usize>, String>>()
         })
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -677,7 +677,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -714,14 +714,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     let (a, b, pa) = match (a.as_slice(), b.as_slice(), pa.as_slice()) {
       (Ok(a), Ok(b), Ok(pa)) => Ok((a, b, pa)),
       _ => Err(String::from(
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
 
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -737,12 +737,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         );
         U64MocStore::get_global_store()
           .from_small_boxes(depth, boxes_params_it)
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       } else {
         let pool = rayon::ThreadPoolBuilder::new()
           .num_threads(n_threads)
           .build()
-          .map_err(|e| PyIOError::new_err(e.to_string()))?;
+          .map_err(|e| PyOSError::new_err(e.to_string()))?;
         pool
           .install(|| {
             let boxes_params_it = lon.par_iter().cloned().zip(lat.par_iter().cloned()).zip(
@@ -753,7 +753,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             );
             U64MocStore::get_global_store().from_small_boxes_par(depth, boxes_params_it)
           })
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       }
     }
     #[cfg(target_arch = "wasm32")]
@@ -766,7 +766,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       );
       U64MocStore::get_global_store()
         .from_small_boxes(depth, boxes_params_it)
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -803,14 +803,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
     let (a, b, pa) = match (a.as_slice(), b.as_slice(), pa.as_slice()) {
       (Ok(a), Ok(b), Ok(pa)) => Ok((a, b, pa)),
       _ => Err(String::from(
         "Cone centers coordinates must be contiguous and in standard order.",
       )),
     }
-    .map_err(PyIOError::new_err)?;
+    .map_err(PyOSError::new_err)?;
 
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -826,12 +826,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         );
         U64MocStore::get_global_store()
           .from_large_boxes(depth, CellSelection::All, boxes_params_it)
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       } else {
         let pool = rayon::ThreadPoolBuilder::new()
           .num_threads(n_threads)
           .build()
-          .map_err(|e| PyIOError::new_err(e.to_string()))?;
+          .map_err(|e| PyOSError::new_err(e.to_string()))?;
         pool
           .install(|| {
             let boxes_params_it = lon.par_iter().cloned().zip(lat.par_iter().cloned()).zip(
@@ -846,7 +846,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
               boxes_params_it,
             )
           })
-          .map_err(PyIOError::new_err)
+          .map_err(PyOSError::new_err)
       }
     }
     #[cfg(target_arch = "wasm32")]
@@ -859,7 +859,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       );
       U64MocStore::get_global_store()
         .from_large_boxes(depth, CellSelection::All, boxes_params_it)
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -998,7 +998,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+      .map_err(|e| PyOSError::new_err(e.to_string()))?;
     // We zip before multi-threading a make a Vec because `lon_lat_deg.as_slice` may fails
     let lon_lat_deg = lon_lat_deg
       .iter()
@@ -1011,7 +1011,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         )),
       })
       .collect::<Result<Vec<(&[f64], &[f64])>, String>>()
-      .map_err(PyIOError::new_err)?;
+      .map_err(PyOSError::new_err)?;
     #[cfg(not(target_arch = "wasm32"))]
     {
       pool
@@ -1028,7 +1028,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
             })
             .collect::<Result<Vec<usize>, String>>()
         })
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -1043,7 +1043,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
           )
         })
         .collect::<Result<Vec<usize>, String>>()
-        .map_err(PyIOError::new_err)
+        .map_err(PyOSError::new_err)
     }
   }
 
@@ -1444,19 +1444,19 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Errors
   ///
-  /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+  /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
   fn coverage_st_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn stmoc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_buff(raw_bytes)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Time-Space coverage from an ASCII file (compatible with the MOC v2.0 standard).
@@ -1468,12 +1468,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Errors
   ///
-  /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+  /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
   fn coverage_st_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Time-Space coverage from an JSON file.
@@ -1485,12 +1485,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Errors
   ///
-  /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+  /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
   fn coverage_st_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Time-Space coverage from an ASCII string (compatible with the MOC v2.0 standard).
@@ -1502,12 +1502,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Errors
   ///
-  /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+  /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
   fn coverage_st_from_ascii_str(_py: Python, ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii(&ascii)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Time-Space coverage from an JSON string.
@@ -1519,12 +1519,12 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Errors
   ///
-  /// This method returns a `PyIOError` if the the function fails in writing the FITS file.
+  /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
   #[pyfn(m)]
   fn coverage_st_from_json_str(_py: Python, json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json(&json)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Drop the MOC at the given index.
@@ -1534,7 +1534,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn copy(index: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .copy(index)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Drop the MOC at the given index.
@@ -1544,7 +1544,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn drop(index: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .drop(index)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Computes the depth of a Time-Space coverage
@@ -1561,7 +1561,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn coverage_st_depth(_py: Python, index: usize) -> PyResult<(u8, u8)> {
     U64MocStore::get_global_store()
       .get_stmoc_depths(index)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Returns the minimum time value of the Time-Space
@@ -1659,7 +1659,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn complement(_py: Python, id: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .not(id)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the union between two coverages of same type.
@@ -1672,7 +1672,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn union(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .or(id_left, id_right)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the union between multiple coverages of same type.
@@ -1685,7 +1685,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
       .multi_union(indices)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the intersection between two coverages of same type.
@@ -1698,7 +1698,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn intersection(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .and(id_left, id_right)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the intersection between multiple coverages of same type.
@@ -1711,7 +1711,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
       .multi_intersection(indices)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the difference between two coverages of same type.
@@ -1724,7 +1724,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn symmetric_difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .symmetric_difference(id_left, id_right)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the difference between multiple coverages of same type.
@@ -1737,7 +1737,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
       .multi_symmetric_difference(indices)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Perform the difference between two coverages of same type.
@@ -1750,7 +1750,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .difference(id_left, id_right)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Check the equality between two coverages
@@ -1763,7 +1763,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn check_eq(_py: Python, id_left: usize, id_right: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .eq(id_left, id_right)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Checks whether a coverage is empty.
@@ -1775,7 +1775,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn is_empty(_py: Python, index: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .is_empty(index)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Check if (time, position) tuples are contained into a Time-Space coverage
@@ -1824,7 +1824,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it = it_time.zip(it_lon.zip(it_lat));
     U64MocStore::get_global_store()
       .filter_timepos_approx(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
           .map(|a| a.into_pyarray(py))
@@ -1860,7 +1860,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     U64MocStore::get_global_store()
       .filter_timepos(index, it, |b| b) // in numpy, the mask is reversed (true means do not select)
       .map(|vec_bool| PyArray1::<bool>::from_vec(py, vec_bool).to_owned())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Checks if lon lat coordinates are contained into a Space coverage
@@ -1893,7 +1893,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it_lat = lat.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
       .filter_pos(index, it_lon.zip(it_lat), |b| b)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(lon_shape, vec_bool)
           .map(|a| a.into_pyarray(py))
@@ -1918,7 +1918,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it_time = times.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
       .filter_time_approx(index, it_time, |b| b)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
           .map(|a| a.into_pyarray(py))
@@ -1943,7 +1943,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it_time = times.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
       .filter_time(index, it_time, |b| b)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(time_shape, vec_bool)
           .map(|a| a.into_pyarray(py))
@@ -1968,7 +1968,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it_freq = frequencies.as_array().into_iter().cloned();
     U64MocStore::get_global_store()
       .filter_freq(index, it_freq, |b| b)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
       .and_then(|vec_bool| {
         Array::from_shape_vec(freq_shape, vec_bool)
           .map(|a| a.into_pyarray(py))
@@ -1987,7 +1987,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_fits_buff(index, Some(pre_v2))
       .map(move |b| PyBytes::new(py, &b))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a coverage into a FITS file
@@ -2000,7 +2000,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_fits_file(index: usize, path: String, pre_v2: bool) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_fits_file(index, path, Some(pre_v2))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into an ASCII file.
@@ -2013,7 +2013,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_ascii_file(index: usize, path: String) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_ascii_file(index, path, None)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into an ASCII file.
@@ -2027,7 +2027,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_ascii_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_ascii_file(index, path, Some(fold))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into a ASCII string.
@@ -2040,7 +2040,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_ascii_str(index: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_ascii_str(index, None)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into a ASCII string.
@@ -2054,7 +2054,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_ascii_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_ascii_str(index, Some(fold))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into an JSON file.
@@ -2067,7 +2067,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_json_file(index: usize, path: String) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_json_file(index, path, None)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into an JSON file.
@@ -2081,7 +2081,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_json_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_json_file(index, path, Some(fold))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into a JSON string.
@@ -2094,7 +2094,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_json_str(index: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_json_str(index, None)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Serialize a MOC into a JSON string.
@@ -2108,7 +2108,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn to_json_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_json_str(index, Some(fold))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Create a 1D spatial coverage from the deserialization of a FITS file containing a multi-order map.
@@ -2174,7 +2174,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         !no_split,
         reverse_decent,
       )
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Get the sum of the given multiorder map values that are in the S-MOC
@@ -2221,7 +2221,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn multiordermap_sum_in_smoc_from_file(index: usize, path: String) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .multiordermap_sum_in_moc_from_path(index, path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Get the sum of the value for the UNIQ HEAPix cells which are in
@@ -2268,7 +2268,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       });
     U64MocStore::get_global_store()
       .multiordermap_sum_in_moc(index, it)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Get the sum of the probability for the UNIQ HEAPix cells which are in
@@ -2314,7 +2314,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       });
     U64MocStore::get_global_store()
       .multiordermap_sum_in_moc(index, it)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
@@ -2337,7 +2337,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let pool = rayon::ThreadPoolBuilder::new()
       .num_threads(n_threads)
       .build()
-      .map_err(|e| PyIOError::new_err(e.to_string()))?;
+      .map_err(|e| PyOSError::new_err(e.to_string()))?;
     // Create MOM
     let mom: Vec<(u64, f64)> = uniq
       .as_array()
@@ -2390,7 +2390,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
         comp(mom, indices.as_ref())
       }
     }
-    .map_err(PyIOError::new_err)
+    .map_err(PyOSError::new_err)
     .map(|probas| PyArray1::<f64>::from_vec(py, probas))
   }
 
@@ -2436,7 +2436,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     U64MocStore::get_global_store()
       .multiordermap_filter_in_moc(index, it)
       .map(|(values, weights)| (values.into_pyarray(py), weights.into_pyarray(py)))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Set to 'false' the booleans associated to the UNIQ HEALPix cells
@@ -2460,7 +2460,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let it = uniq.into_iter().cloned().zip(flags.iter_mut());
     U64MocStore::get_global_store()
       .multiordermap_filter_mask_moc(index, it, fully_covered_only)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a spatial MOC from a FITS file.
@@ -2472,14 +2472,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn spatial_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_fits_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn spatial_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_from_fits_buff(raw_bytes)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a spatial MOC from an ASCII file.
@@ -2491,7 +2491,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn spatial_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_ascii_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a spatial MOC from a ASCII string.
@@ -2503,7 +2503,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn spatial_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_ascii(ascii.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a spatial MOC from a JSON file.
@@ -2515,7 +2515,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn spatial_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_json_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a spatial MOC from a JSON string.
@@ -2527,7 +2527,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn spatial_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_json(json.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a time MOC from a FITS file.
@@ -2539,14 +2539,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn time_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn time_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_buff(raw_bytes)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a time MOC from an ASCII file.
@@ -2558,7 +2558,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn time_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_ascii_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a time MOC from a ASCII string.
@@ -2570,7 +2570,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn time_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_ascii(ascii.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a time MOC from a JSON file.
@@ -2582,7 +2582,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn time_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_json_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a time MOC from a JSON string.
@@ -2594,7 +2594,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn time_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_json(json.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Frequency MOC from a FITS file.
@@ -2606,14 +2606,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn frequency_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_fits_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn frequency_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_fits_buff(raw_bytes)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Frequency MOC from an ASCII file.
@@ -2625,7 +2625,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn frequency_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_ascii_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Frequency MOC from a ASCII string.
@@ -2637,7 +2637,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn frequency_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_ascii(ascii.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Frequency MOC from a JSON file.
@@ -2649,7 +2649,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn frequency_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_json_file(path)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Deserialize a Frequency MOC from a JSON string.
@@ -2661,7 +2661,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   fn frequency_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_json(json.as_str())
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Expand the spatial coverage adding an external edge of max_depth pixels
@@ -3121,7 +3121,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     U64MocStore::get_global_store()
       .flatten_to_moc_depth(index)
       .map(move |v| PyArray1::from_vec(py, v))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
   //
 
@@ -3139,35 +3139,35 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     U64MocStore::get_global_store()
       .flatten_to_depth(index, depth)
       .map(move |v| PyArray1::from_vec(py, v))
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn new_empty_smoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_smoc(depth)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn new_empty_tmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_tmoc(depth)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn new_empty_fmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_fmoc(depth)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   #[pyfn(m)]
   fn new_empty_stmoc(depth_time: u8, depth_space: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_stmoc(depth_time, depth_space)
-      .map_err(PyIOError::new_err)
+      .map_err(PyOSError::new_err)
   }
 
   /// Gives the number of cells for a specific depth in a spatial MOC
