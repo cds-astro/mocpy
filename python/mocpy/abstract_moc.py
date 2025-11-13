@@ -547,14 +547,8 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         if isinstance(path_or_url, BytesIO):
             return cls._from_fits_raw_bytes(path_or_url.read())
 
-        # this try except clause is there to support
-        # Windows users with python 3.7 and should be dropped
-        # when we remove support of python 3.7
-        try:
-            if Path(path_or_url).is_file():
-                return cls.load(path_or_url, format="fits")
-        except OSError:
-            pass
+        if Path(path_or_url).is_file():
+            return cls.load(path_or_url, format="fits")
 
         try:
             import requests

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * `cdshealpix` and `matplotlib` are now truly optional [#201]
+* remove exception on OSError in `from_fits` that was hiding true errors [#203]
 
 ## [0.19.0]
 
