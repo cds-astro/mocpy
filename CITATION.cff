@@ -1,0 +1,38 @@
+abstract: MOCPy is a Python library allowing easy creation and manipulation of MOCs
+  (Multi-Order Coverage maps).
+authors:
+- affiliation: "Universit\xE9 de Strasbourg, CNRS, Observatoire astronomique de Strasbourg,\
+    \ UMR 7550, F-67000 Strasbourg, France"
+  family-names: Baumann
+  given-names: Matthieu
+  orcid: 0000-0002-7123-773X
+- affiliation: "Universit\xE9 de Strasbourg, CNRS, Observatoire astronomique de Strasbourg,\
+    \ UMR 7550, F-67000 Strasbourg, France"
+  family-names: Boch
+  given-names: Thomas
+  orcid: 0000-0001-5818-2781
+- affiliation: "Universit\xE9 de Strasbourg, CNRS, Observatoire astronomique de Strasbourg,\
+    \ UMR 7550, F-67000 Strasbourg, France"
+  family-names: Marchand
+  given-names: Manon
+  orcid: 0000-0001-5713-0998
+- affiliation: "Universit\xE9 de Strasbourg, CNRS, Observatoire astronomique de Strasbourg,\
+    \ UMR 7550, F-67000 Strasbourg, France"
+  family-names: Pineau
+  given-names: "Fran\xE7ois-Xavier"
+  orcid: 0000-0002-2335-4499
+cff-version: 1.2.0
+doi: https://doi.org/10.5281/zenodo.7637180
+identifiers:
+- type: swh
+  value: swh:1:dir:f822e7edd32883b1e21d053f19237377499188ca;origin=https://doi.org/10.5281/zenodo.7637180;visit=swh:1:snp:be9a8f4a2744da2a58cd4eaf0a50c982a3cda982;anchor=swh:1:rel:a65f53ac3ae01e626c1f68450d64f6254119a9c7;path=cds-astro-mocpy-e78d81c
+keywords:
+- astronomy
+- moc
+- astrophysics
+license:
+- bsd-3-clause
+message: If you use this software, please cite it using the metadata from this file.
+repository-code: https://github.com/cds-astro/mocpy/
+title: MOCPy
+type: software
