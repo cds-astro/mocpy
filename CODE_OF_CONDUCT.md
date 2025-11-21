@@ -1,0 +1,3 @@
+- MOCPy is a welcoming and respectful environment for all, regardless of level of expertise or any personal characteristics
+- Ask as many questions as needed through the issues, they are very welcome
+- The maintainers and other contributors don't work full time on the project: new features are asked, not demanded

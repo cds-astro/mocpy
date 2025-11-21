@@ -3,111 +3,75 @@
 Contribute
 ==========
 
-For contribution purposes the best thing to do is setting up a python
-environment that will act independently from your current installed
-interpreter and package manager.
+MOCPy is a wrapper around `cds-moc-rust <https://github.com/cds-astro/cds-moc-rust>`__.
+This is why this repository contains both python -- in the ``python`` folder -- and rust
+files -- in the ``src`` folder.
 
-Setting up the environment
---------------------------
+We use `pyO3 bindings <https://pyo3.rs>`__.
 
-Here we highlight two ways to set up an environment.
-Using conda (installed from miniconda or anaconda) or
-using the pip package
-`virtualenv <https://python-guide-pt-br.readthedocs.io/fr/latest/dev/virtualenvs.html>`__ .
-Choose the one you prefer, or your own one.
+Installation
+------------
 
-Using conda
-~~~~~~~~~~~
+We recommend setting up a python virtual environment that will act independently from
+your current installed interpreter and package manager. We suggest the `standard library
+python module venv <https://docs.python.org/3/library/venv.html>`__ or
+`uv venv <https://docs.astral.sh/uv/pip/environments/>` if you don't know where to look.
 
-- Set up the conda environment and activate it::
+You can now install all the necessary packages for developing and testing MOCpy::
 
-    conda create -n mocpy-dev python==3.12.*
-    source activate mocpy-dev
-
-- Once you are done with your developments you can
-  deactivate your conda environment::
-
-    conda deactivate
-
-Using virtualenv
-~~~~~~~~~~~~~~~~
-
-- Go to your home location::
-
-    cd ~
-
-- Set up the virtual environment there::
-
-    virtualenv -p /usr/bin/python3 mocpy-env
-
-``Virtualenv`` will create a directory named ``mocpy-env`` in your home.
-This directory contains a new independent python interpreter
-(in this case, a python3 one, instanciated from /usr/bin/python3)
-along with a new empty pip package manager.
-
-- Activate your virtual environment::
-
-    source ~/mocpy-env/bin/activate
-
-``pip list`` will tell you that there is no package installed and ``python``
-opens a session with the ``mocpy-env`` interpreter.
-
-- You can now install all the necessary pip packages
-  for developing and testing MOCpy::
-
-    pip install .[dev]
-
-- Once you are done with your developments you can deactivate the virtual env::
-
-    deactivate
-
-Pre-commits setup
------------------
-
-- You'll need to install the pre-commits in your ``.git/hooks`` to check your code locally::
-
+    pip install .[dev,plots,notebooks]
     pre-commit install
-
-It will run linting and formatting tests at each of your commits.
-
-Now build package
------------------
-
-- You will need to install `maturin <https://github.com/PyO3/maturin>`__, a tool that builds and publishes crates and rust binaries as python packages::
-
-    pip install maturin
-
-- Move to your root's mocpy location and run maturin::
-
     maturin develop --release
 
-This step will inform you of any issue in the rust part.
+Then, if you edit the Rust part of the library you'll have to run again the
+``maturin develop --release`` and the ``pip install .`` command. If you only edit the
+python part, then ``pip install .`` is enough.
 
-- After a new version of mocpy goes out, if a ``maturin develop --release`` does not actualize your
-  ``Cargo.toml`` file, you might need to before executing the ``maturin`` command again::
+If a ``maturin develop --release`` does not actualize your ``Cargo.toml`` file, try: ::
 
     rm Cargo.lock && cargo clean
+
+And run the ``maturin`` command again.
+
+These commands also install `git hooks
+<https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks>`__` in the repository.
+You will see the hooks run linting and formatting scripts at the pre-commit stage. They:
+
+- trim trailing whitespaces automatically in any files
+- run ``cargofmt`` to format the ``.rs`` files
+- sort requirements  and run ``ruff format`` to format the ``.py`` files
+- clear the metadata of the ``.ipynb`` files
+
+If any of these hooks applied changes to the files you wanted to commit, you can
+``git add`` them again and commit the new versions.
+
 
 Running the python tests
 ------------------------
 
 Once your environment is set up and activated you can run the tests
 
-- To run the automated tests and the doctring examples, go to the repo folder and type::
+To run the automated tests and the docstring examples, go to the repo folder and type::
 
     python -m pytest -v python/mocpy
 
-- To run the tests with coverage report locally::
+To run the tests with coverage report locally::
 
     python -m pytest -v python/mocpy --cov-report=term --cov=python/mocpy
 
-- When contributing to the notebooks::
+You also can have a html output of the coverage with the flag ``--cov-report=html``.
+This will generate an ``htmlcov`` folder where all the static html files can be found.
+
+To be sure that your modifications didn't break the notebooks, do::
 
     python -m pip install .[notebooks]
     python -m pytest --nbmake -n=auto "./notebooks"
 
-You also can have a html output of the coverage with the flag ``--cov-report=html``.
-This will generate an ``htmlcov`` folder where all the static html files can be found.
+Adding a changelog entry
+------------------------
+
+Add a short description of your modification in ``CHANGELOG.md`` under the
+``[unreleased]`` part.
 
 
 Building the documentation
