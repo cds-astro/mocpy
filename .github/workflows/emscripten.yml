@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       - run: pip install pyodide-build
       - shell: bash
         run: |
@@ -29,10 +29,12 @@ jobs:
         # rust version is pinned for compatibility with emscripten 3.1.58
         run: |
           pip install maturin==1.12.4
-          rustup install nightly-2025-02-01
-          rustup default nightly-2025-02-01
+          # rustup install nightly-2025-02-01
+          # rustup default nightly-2025-02-01
+          rustup install nightly
+          rustup default nightly
           rustup target add wasm32-unknown-emscripten
-          maturin build --target wasm32-unknown-emscripten -i 3.12
+          maturin build --target wasm32-unknown-emscripten -i 3.13
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
