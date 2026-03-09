@@ -31,7 +31,7 @@ jobs:
           # For debug purpose (see dependencies)
           cargo tree
           # Install maturin
-          pip install maturin
+          pip install maturin==1.12.4
           # Build and install mocpy
           maturin develop --release
           # Install pytest-cov, needed to test with coverage

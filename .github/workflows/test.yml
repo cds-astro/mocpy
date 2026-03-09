@@ -35,7 +35,7 @@ jobs:
            "${PYBIN}/virtualenv" mocpy-env
            source mocpy-env/bin/activate
            pip install --upgrade pip
-           pip install maturin
+           pip install maturin==1.12.4
            maturin develop --release
            pip install .[dev,plots]
            python -m pytest python/mocpy/tests/
@@ -65,7 +65,7 @@ jobs:
          source mocpy-env/bin/activate
          pip install --upgrade pip
          # Install and use maturin
-         pip install maturin
+         pip install maturin==1.12.4
          maturin build --release --target universal2-apple-darwin
          maturin develop --release
          # Install dependencies
@@ -96,7 +96,7 @@ jobs:
           virtualenv mocpy-env
           .\mocpy-env\Scripts\activate
           # Install and use maturin
-          pip install maturin
+          pip install maturin==1.12.4
           maturin develop --release
           # Install dependencies
           pip install .[dev,plots]
@@ -120,7 +120,7 @@ jobs:
           pip install virtualenv
           virtualenv mocpy-env
           source mocpy-env/bin/activate
-          pip install maturin
+          pip install maturin==1.12.4
           maturin develop --release
           pip install .[dev]
           python -m pytest -v python/mocpy/tests/
