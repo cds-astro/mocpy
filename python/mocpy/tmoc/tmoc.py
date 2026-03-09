@@ -269,7 +269,7 @@ class TimeMOC(AbstractMOC):
         return cls(index)
 
     @classmethod
-    def from_times(cls, times, delta_t=DEFAULT_OBSERVATION_TIME):
+    def from_times(cls, times, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None):
         """
         Create a TimeMOC from a `astropy.time.Time`.
 
@@ -281,6 +281,8 @@ class TimeMOC(AbstractMOC):
             The duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``).
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
@@ -289,12 +291,15 @@ class TimeMOC(AbstractMOC):
         times = times_to_microseconds(times)
         times = np.atleast_1d(times)
 
-        depth = TimeMOC.time_resolution_to_order(delta_t)
-        store_index = mocpy.from_time_in_microsec_since_jd_origin(depth, times)
+        if not order:
+            order = TimeMOC.time_resolution_to_order(delta_t)
+        store_index = mocpy.from_time_in_microsec_since_jd_origin(order, times)
         return cls(store_index)
 
     @classmethod
-    def from_time_ranges(cls, min_times, max_times, delta_t=DEFAULT_OBSERVATION_TIME):
+    def from_time_ranges(
+        cls, min_times, max_times, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
+    ):
         """
         Create a TimeMOC from a range defined by two `astropy.time.Time`.
 
@@ -308,13 +313,16 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``).
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
         `~mocpy.TimeMOC`
         """
-        # degrade the TimeMOC to the order computed from ``delta_t``
-        depth = TimeMOC.time_resolution_to_order(delta_t)
+        if not order:
+            # degrade the TimeMOC to the order computed from ``delta_t``
+            order = TimeMOC.time_resolution_to_order(delta_t)
 
         min_times = times_to_microseconds(min_times)
         min_times = np.atleast_1d(min_times)
@@ -328,7 +336,7 @@ class TimeMOC(AbstractMOC):
             )
 
         store_index = mocpy.from_time_ranges_in_microsec_since_jd_origin(
-            depth,
+            order,
             min_times,
             max_times,
         )
@@ -336,10 +344,7 @@ class TimeMOC(AbstractMOC):
 
     @classmethod
     def from_time_ranges_approx(
-        cls,
-        min_times,
-        max_times,
-        delta_t=DEFAULT_OBSERVATION_TIME,
+        cls, min_times, max_times, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
     ):
         """
         Create a TimeMOC from a range defined by two `astropy.time.Time`.
@@ -356,13 +361,16 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``).
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
         `~mocpy.TimeMOC`
         """
-        # degrade the TimeMOC to the order computed from ``delta_t``
-        depth = TimeMOC.time_resolution_to_order(delta_t)
+        if not order:
+            # degrade the TimeMOC to the order computed from ``delta_t``
+            order = TimeMOC.time_resolution_to_order(delta_t)
 
         min_times = np.asarray(min_times.jd)
         min_times = np.atleast_1d(min_times)
@@ -374,7 +382,7 @@ class TimeMOC(AbstractMOC):
                 f"Mismatch between min_times and max_times of shapes {min_times.shape} and {max_times.shape}",
             )
 
-        store_index = mocpy.from_time_ranges(depth, min_times, max_times)
+        store_index = mocpy.from_time_ranges(order, min_times, max_times)
         return cls(store_index)
 
     @classmethod
@@ -427,9 +435,7 @@ class TimeMOC(AbstractMOC):
         return self_degradation, another_moc_degradation
 
     def intersection_with_timeresolution(
-        self,
-        another_moc,
-        delta_t=DEFAULT_OBSERVATION_TIME,
+        self, another_moc, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
     ):
         """
         Intersection between self and moc.
@@ -445,6 +451,8 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``)
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
@@ -452,12 +460,15 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self & ``moc``
 
         """
-        order_op = TimeMOC.time_resolution_to_order(delta_t)
+        if not order:
+            order = TimeMOC.time_resolution_to_order(delta_t)
 
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).intersection(moc_degraded)
 
-    def union_with_timeresolution(self, another_moc, delta_t=DEFAULT_OBSERVATION_TIME):
+    def union_with_timeresolution(
+        self, another_moc, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
+    ):
         """
         Union between self and moc.
 
@@ -472,6 +483,8 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``)
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
@@ -479,15 +492,14 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self | ``moc``
 
         """
-        order_op = TimeMOC.time_resolution_to_order(delta_t)
+        if not order:
+            order = TimeMOC.time_resolution_to_order(delta_t)
 
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).union(moc_degraded)
 
     def difference_with_timeresolution(
-        self,
-        another_moc,
-        delta_t=DEFAULT_OBSERVATION_TIME,
+        self, another_moc, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
     ):
         """Difference between self and another_moc.
 
@@ -501,6 +513,8 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``)
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
@@ -508,9 +522,10 @@ class TimeMOC(AbstractMOC):
             MOC object whose interval set corresponds to : self - ``moc``
 
         """
-        order_op = TimeMOC.time_resolution_to_order(delta_t)
+        if not order:
+            order = TimeMOC.time_resolution_to_order(delta_t)
 
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order_op)
+        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).difference(moc_degraded)
 
     @property
@@ -521,7 +536,6 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~astropy.time.TimeDelta`
-            total duration of all the observation times of the tmoc
             total duration of all the observation times of the tmoc
 
         """
@@ -602,10 +616,7 @@ class TimeMOC(AbstractMOC):
         return ~mask
 
     def contains_with_timeresolution(
-        self,
-        times,
-        keep_inside=True,
-        delta_t=DEFAULT_OBSERVATION_TIME,
+        self, times, keep_inside=True, *, delta_t=DEFAULT_OBSERVATION_TIME, order=None
     ):
         """
         Get a mask array (e.g. a numpy boolean array) of times being inside (or outside) the TMOC instance.
@@ -621,6 +632,8 @@ class TimeMOC(AbstractMOC):
             the duration of one observation. It is set to 30 min by default. This data is used to compute the
             more efficient TimeMOC order to represent the observations (Best order = the less precise order which
             is able to discriminate two observations separated by ``delta_t``).
+        order : int
+            The order to use for the TimeMOC. If set, the `delta_t` will be ignored.
 
         Returns
         -------
@@ -630,7 +643,7 @@ class TimeMOC(AbstractMOC):
         # the requested order for filtering the astropy observations table is more precise than the order
         # of the TimeMOC object
         current_max_order = self.max_order
-        new_max_order = TimeMOC.time_resolution_to_order(delta_t)
+        new_max_order = order if order else TimeMOC.time_resolution_to_order(delta_t)
         if new_max_order > current_max_order:
             message = (
                 "Requested time resolution filtering cannot be applied.\n"
