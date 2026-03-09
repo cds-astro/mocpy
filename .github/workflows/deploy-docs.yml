@@ -27,7 +27,7 @@ jobs:
           virtualenv mocpy-env
           source mocpy-env/bin/activate
           # - Install maturin
-          pip install maturin
+          pip install maturin==1.12.4
           # - Build and install mocpy
           maturin develop --release
           # - Install dependencies needed to build the docs

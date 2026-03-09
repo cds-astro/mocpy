@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* catch upstream fix in `cds-moc-rust`. The ST-MOC constructors `from_spatial_coverages`
+  and `from_time_ranges_positions` were failing if the oldest time was not coming
+  first [#208]
+
 ## [0.19.1]
 
 ### Fixed

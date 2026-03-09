@@ -24,7 +24,7 @@ jobs:
           # Install pytest and nbmake
           pip install nbmake pytest-xdist
           # Install maturin
-          pip install maturin
+          pip install maturin==1.12.4
           # Build and install mocpy
           maturin develop --release
           # Install pytest-cov, needed to test with coverage

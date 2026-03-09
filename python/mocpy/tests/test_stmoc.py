@@ -1,7 +1,11 @@
+from io import BytesIO
+
 import astropy.units as u
 import cdshealpix
 import numpy as np
 import pytest
+from astropy.coordinates import Latitude, Longitude
+from astropy.io import ascii as asciireader
 from astropy.table import Table
 from astropy.time import Time, TimeDelta
 
@@ -216,6 +220,42 @@ def test_stmoc_from_time_ranges_positions():
     assert stmoc == expected_stmoc
 
 
+gtc = b"""ra,dec,initime,endtime
+34.35979,0.1541809,2017-09-12T05:05:45,2017-09-12T05:05:47
+316.9383,23.462240,2018-07-25T03:17:08,2018-07-25T03:17:10
+140.6590,50.672214,2010-04-04T23:33:56,2010-04-04T23:34:07
+47.87773,-1.081228,2017-09-12T07:42:31,2017-09-12T07:42:33
+31.60651,26.673599,2018-07-29T07:36:19,2018-07-29T07:36:21
+0.876111,45.084111,2018-12-17T21:27:02,2018-12-17T21:27:04
+272.5217,-10.17080,2024-07-23T00:43:50,2024-07-23T00:49:50
+230.4942,68.344963,2015-09-01T01:39:07,2015-09-01T01:59:07
+175.5859,26.759199,2013-01-24T02:45:48,2013-01-24T02:45:51
+149.4454,69.844049,2018-05-07T02:05:39,2018-05-07T02:05:53
+"""
+
+
+def test_shuffling_time_ranges_positions():
+    # from https://github.com/cds-astro/mocpy/issues/206#issuecomment-4006965670
+    bytesio = BytesIO()
+    bytesio.write(gtc)
+    table = asciireader.read(bytesio, format="csv")
+
+    def _get_stmoc(catalog):
+        return STMOC.from_time_ranges_positions(
+            Time(catalog["initime"]),
+            Time(catalog["endtime"]),
+            Longitude(catalog["ra"], unit="deg"),
+            Latitude(catalog["dec"], unit="deg"),
+            time_depth=30,
+            spatial_depth=4,
+        )
+
+    no_sort = _get_stmoc(table)
+    table.sort("initime")
+    sort = _get_stmoc(table)
+    assert no_sort == sort
+
+
 def test_stmoc_from_spatial_coverages():
     times_start = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 3 / TimeMOC.DAY_MICRO_SEC],
@@ -241,3 +281,39 @@ def test_stmoc_from_spatial_coverages():
 
     expected_stmoc = STMOC.from_string("t59/1 60/1 61/8 s28/0")
     assert stmoc == expected_stmoc
+
+
+def test_stmoc_from_spatial_coverages_shuffling():
+    times_start_ordered = Time(["2010-01-01", "2015-01-01", "2020-01-01"])
+    times_end_ordered = Time(["2010-01-02", "2015-01-02", "2020-01-02"])
+    times_start_shuffled = Time(["2015-01-01", "2020-01-01", "2010-01-01"])
+    times_end_shuffled = Time(["2015-01-02", "2020-01-02", "2010-01-02"])
+
+    time_depth = 30
+
+    smocs_ordered = [
+        MOC.from_json({"28": [0]}),
+        MOC.from_json({"28": [5]}),
+        MOC.from_json({"28": [10]}),
+    ]
+
+    smocs_shuffled = [
+        MOC.from_json({"28": [5]}),
+        MOC.from_json({"28": [10]}),
+        MOC.from_json({"28": [0]}),
+    ]
+
+    stmoc_ordered = STMOC.from_spatial_coverages(
+        times_start_ordered,
+        times_end_ordered,
+        smocs_ordered,
+        time_depth=time_depth,
+    )
+
+    stmoc_shuffled = STMOC.from_spatial_coverages(
+        times_start_shuffled,
+        times_end_shuffled,
+        smocs_shuffled,
+        time_depth=time_depth,
+    )
+    assert stmoc_ordered == stmoc_shuffled

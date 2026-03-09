@@ -110,7 +110,7 @@ jobs:
        run: |
          #python3 -m pip install maturin
          pip install --upgrade pip
-         pip install maturin
+         pip install maturin==1.12.4
          #maturin build --release --no-sdist
          #maturin publish --no-sdist --skip-existing
          maturin -V
@@ -145,7 +145,7 @@ jobs:
          #python3 -m pip install maturin
          rustup target add x86_64-apple-darwin
          pip install --upgrade pip
-         pip install maturin
+         pip install maturin==1.12.4
          maturin -V
          maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --target universal2-apple-darwin --skip-existing
          maturin publish --interpreter python${{matrix.python_version}}  --no-sdist --skip-existing

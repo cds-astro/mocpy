@@ -7,7 +7,7 @@ authors = [
   "Manon Marchand <manon.marchand@astro.unistra.fr>",
   "F.-X. Pineau <francois-xavier.pineau@astro.unistra.fr>",
 ]
-edition = "2021"
+edition = "2024"
 license = "BSD-3-Clause"
 readme = "README.md"
 categories = ["algorithms", "science"]
@@ -29,7 +29,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # moc = { version = "0.19", features = ["storage"] }
-moc = { git = 'https://github.com/cds-astro/cds-moc-rust', rev = '8d2d57a1883d54bd3d7df677908cbcf577a0703c', features = ["storage"] }
+moc = { git = 'https://github.com/cds-astro/cds-moc-rust', rev = '147be185a91b04b75b508b2fe8c2f3a9a2d51d6e', features = ["storage"] }
 # moc = { git = 'https://github.com/cds-astro/cds-moc-rust', branch = 'main', features = ["storage"] }
 healpix = { package = "cdshealpix", version = "0.7" }
 # healpix = { package = "cdshealpix", git = 'https://github.com/cds-astro/cds-healpix-rust', branch = 'master' }
