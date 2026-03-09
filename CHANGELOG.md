@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * catch upstream fix in `cds-moc-rust`. The ST-MOC constructors `from_spatial_coverages`
   and `from_time_ranges_positions` were failing if the oldest time was not coming
   first [#208]
+* switch the time scale used in TimeMOCs from TCB to TDB according to the MOC 2.0
+  standard [#207]
 
 ## [0.19.1]
 

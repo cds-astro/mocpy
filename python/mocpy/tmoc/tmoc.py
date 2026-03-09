@@ -35,7 +35,7 @@ def times_to_microseconds(times):
     """
     times_jd = np.asarray(times.jd, dtype=np.uint64)
     times_us = np.asarray(
-        (times - Time(times_jd, format="jd", scale="tdb")).jd * DAY_MICRO_SEC,
+        (times - Time(times_jd, format="jd", scale="tcb")).jd * DAY_MICRO_SEC,
         dtype=np.uint64,
     )
 
@@ -60,7 +60,7 @@ def microseconds_to_times(times_microseconds):
         dtype=np.float64,
     )
 
-    return Time(val=jd1, val2=jd2, format="jd", scale="tdb")
+    return Time(val=jd1, val2=jd2, format="jd", scale="tcb")
 
 
 class TimeMOC(AbstractMOC):
@@ -72,7 +72,7 @@ class TimeMOC(AbstractMOC):
     # Number of microseconds in a day
     DAY_MICRO_SEC = 86400000000.0
     # Default observation time : 30 min
-    DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format="sec", scale="tdb")
+    DEFAULT_OBSERVATION_TIME = TimeDelta(30 * 60, format="sec", scale="tcb")
 
     def __init__(self, store_index):
         """Is a Time Coverage (T-MOC).
@@ -528,7 +528,7 @@ class TimeMOC(AbstractMOC):
         return TimeDelta(
             mocpy.ranges_sum(self.store_index) / 1e6,
             format="sec",
-            scale="tdb",
+            scale="tcb",
         )
 
     @property
@@ -657,7 +657,7 @@ class TimeMOC(AbstractMOC):
             time equivalent to ``order``
 
         """
-        return TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tdb")
+        return TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tcb")
 
     @staticmethod
     def time_resolution_to_order(delta_time):
@@ -731,7 +731,7 @@ class TimeMOC(AbstractMOC):
 
         ax.set_xticks([0, size])
         ax.set_xticklabels(
-            Time([min_jd_time, max_jd], format="jd", scale="tdb").iso,
+            Time([min_jd_time, max_jd], format="jd", scale="tcb").iso,
             rotation=70,
         )
 
@@ -761,7 +761,7 @@ class TimeMOC(AbstractMOC):
 
             text = ax.text(0, 0, "", va="bottom", ha="left")
 
-            time = Time(event.xdata * delta + min_jd_time, format="jd", scale="tdb")
+            time = Time(event.xdata * delta + min_jd_time, format="jd", scale="tcb")
 
             tx = f"{time.iso}"
             text.set_position((event.xdata - 50, 700))

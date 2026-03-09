@@ -91,7 +91,7 @@ def test_serialization():
 
 
 def test_from_times_lonlat():
-    times = Time([2440587.50000], format="mjd", scale="tdb")
+    times = Time([2440587.50000], format="mjd", scale="tcb")
     lon = [0] * u.deg
     lat = [0] * u.deg
 
@@ -148,14 +148,14 @@ def test_min_max_times(stmoc_xmm_dr8):
     tmoc1 = TimeMOC.from_time_ranges(
         min_times=min_time,
         max_times=max_time,
-        delta_t=TimeDelta(1e-6, scale="tdb", format="sec"),
+        delta_t=TimeDelta(1e-6, scale="tcb", format="sec"),
     )
 
-    one_day = TimeDelta(100, scale="tdb", format="jd")
+    one_day = TimeDelta(100, scale="tcb", format="jd")
     tmoc2 = TimeMOC.from_time_ranges(
         min_times=min_time - one_day,
         max_times=max_time + one_day,
-        delta_t=TimeDelta(1e-6, scale="tdb", format="sec"),
+        delta_t=TimeDelta(1e-6, scale="tcb", format="sec"),
     )
 
     smoc1 = stmoc_xmm_dr8.query_by_time(tmoc1)
@@ -169,9 +169,9 @@ def test_query_time(stmoc_xmm_dr8):
 
     min_time = stmoc_xmm_dr8.min_time
     tmoc = TimeMOC.from_time_ranges(
-        min_times=min_time - TimeDelta(100, scale="tdb", format="jd"),
+        min_times=min_time - TimeDelta(100, scale="tcb", format="jd"),
         max_times=min_time,
-        delta_t=TimeDelta(1e-6, scale="tdb", format="sec"),
+        delta_t=TimeDelta(1e-6, scale="tcb", format="sec"),
     )
 
     smoc = stmoc_xmm_dr8.query_by_time(tmoc)
@@ -192,12 +192,12 @@ def test_stmoc_from_time_ranges_positions():
     times_start = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 3 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     times_end = Time(
         [3 / TimeMOC.DAY_MICRO_SEC, 9 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
 
     time_depth = 61
@@ -260,12 +260,12 @@ def test_stmoc_from_spatial_coverages():
     times_start = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 3 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     times_end = Time(
         [3 / TimeMOC.DAY_MICRO_SEC, 9 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
 
     time_depth = 61

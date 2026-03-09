@@ -8,7 +8,7 @@ from ..tmoc import TimeMOC, microseconds_to_times, times_to_microseconds
 
 def test_time_to_microsec_1():
     """Test of the time conversion from `astropy.time` with format isot to microseconds."""
-    t = Time("1999-01-01T00:00:00.123456789", format="isot", scale="tdb")
+    t = Time("1999-01-01T00:00:00.123456789", format="isot", scale="tcb")
     us = times_to_microseconds(t)
     jd = microseconds_to_times(us)
     assert us == 211781908800123456
@@ -17,7 +17,7 @@ def test_time_to_microsec_1():
 
 def test_time_to_microsec_2():
     """Test of the time conversion from `astropy.time` with format iso to microseconds."""
-    t = Time([["1998-01-01", "1999-01-01"]], format="iso", scale="tdb")
+    t = Time([["1998-01-01", "1999-01-01"]], format="iso", scale="tcb")
     us1 = times_to_microseconds(t)
     us2 = np.asarray(t.jd * 86400000000, dtype=np.uint64)
     jd1 = microseconds_to_times(us1)
@@ -88,7 +88,7 @@ def test_n_cells():
 
 
 def test_empty_tmoc():
-    times = Time([], format="jd", scale="tdb")
+    times = Time([], format="jd", scale="tcb")
     tmoc = TimeMOC.from_times(times)
     assert tmoc.empty()
     assert tmoc.total_duration == 0
@@ -111,7 +111,7 @@ def test_simple_tmoc():
     times = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 2 * 1e-6
@@ -119,15 +119,15 @@ def test_simple_tmoc():
 
 
 def test_single_time_tmoc():
-    times = Time(2 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb")
+    times = Time(2 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tcb")
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
     assert tmoc.total_duration.sec == 1 * 1e-6
     assert tmoc.max_order == 61
 
 
 def test_single_range_time_tmoc():
-    min_times = Time(2 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb")
-    max_times = Time(3 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tdb")
+    min_times = Time(2 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tcb")
+    max_times = Time(3 / TimeMOC.DAY_MICRO_SEC, format="jd", scale="tcb")
 
     tmoc = TimeMOC.from_time_ranges(
         min_times,
@@ -149,8 +149,8 @@ def test_tmoc_from_time_ranges():
     # Load HST_SDSSg from a CSV file
     data = astropy_ascii.read("resources/TMOC/HST_SDSSg/uniq-times.csv", format="csv")
     tmoc2 = TimeMOC.from_time_ranges_approx(
-        Time(data["t_min"], format="mjd", scale="tdb"),
-        Time(data["t_max"], format="mjd", scale="tdb"),
+        Time(data["t_min"], format="mjd", scale="tcb"),
+        Time(data["t_max"], format="mjd", scale="tcb"),
         delta_t=TimeMOC.order_to_time_resolution(57),
     )
 
@@ -164,8 +164,8 @@ def test_tmoc_from_time_ranges():
         match=r"Mismatch between min\_times and max\_times of shapes \(0,\) and \(1,\)",
     ):
         TimeMOC.from_time_ranges(
-            Time([], format="jd", scale="tdb"),
-            Time([3], format="jd", scale="tdb"),
+            Time([], format="jd", scale="tcb"),
+            Time([3], format="jd", scale="tcb"),
         )
 
 
@@ -176,8 +176,8 @@ def test_tmoc_from_single_time_range():
     tmoc built from a CSV file containing a list of time intervals.
     """
     tmoc = TimeMOC.from_time_ranges(
-        Time(0, format="mjd", scale="tdb"),
-        Time(3, format="mjd", scale="tdb"),
+        Time(0, format="mjd", scale="tcb"),
+        Time(3, format="mjd", scale="tcb"),
         delta_t=TimeMOC.order_to_time_resolution(61),
     )
     assert tmoc.total_duration.jd == 3
@@ -187,12 +187,12 @@ def test_add_neighbours():
     times = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     times_expected = Time(
         np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC,
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
 
@@ -209,12 +209,12 @@ def test_remove_neighbours():
     times = Time(
         np.array([1, 2, 3, 6, 7, 8]) / TimeMOC.DAY_MICRO_SEC,
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
     times_expected = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
 
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
@@ -232,7 +232,7 @@ def test_add_remove_back_and_forth():
     times = Time(
         [2 / TimeMOC.DAY_MICRO_SEC, 7 / TimeMOC.DAY_MICRO_SEC],
         format="jd",
-        scale="tdb",
+        scale="tcb",
     )
 
     tmoc = TimeMOC.from_times(times, delta_t=TimeMOC.order_to_time_resolution(61))
@@ -247,14 +247,14 @@ def test_add_remove_back_and_forth():
 
 def test_contains():
     tmoc = TimeMOC.from_time_ranges(
-        Time(np.array([0]), format="mjd", scale="tdb"),
-        Time(np.array([1]), format="mjd", scale="tdb"),
+        Time(np.array([0]), format="mjd", scale="tcb"),
+        Time(np.array([1]), format="mjd", scale="tcb"),
         delta_t=TimeMOC.order_to_time_resolution(61),
     )
 
-    times_inside = Time(np.linspace(0, 1, num=100), format="mjd", scale="tdb")
-    times_outside = Time(np.linspace(1.01, 2, num=100), format="mjd", scale="tdb")
-    times_in_and_out = Time(np.linspace(0.9, 2, num=100), format="mjd", scale="tdb")
+    times_inside = Time(np.linspace(0, 1, num=100), format="mjd", scale="tcb")
+    times_outside = Time(np.linspace(1.01, 2, num=100), format="mjd", scale="tcb")
+    times_in_and_out = Time(np.linspace(0.9, 2, num=100), format="mjd", scale="tcb")
 
     assert tmoc.contains_with_timeresolution(times_inside).all()
     assert (~tmoc.contains_with_timeresolution(times_outside)).all()
@@ -265,19 +265,19 @@ def test_contains():
     ("a", "b", "expect"),
     [
         (
-            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([0, 1, 2]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([0, 1, 2]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
         ),
     ],
 )
@@ -291,19 +291,19 @@ def test_union(a, b, expect):
     ("a", "b", "expect"),
     [
         (
-            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([0, 2]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
         ),
     ],
 )
@@ -317,19 +317,19 @@ def test_difference(a, b, expect):
     ("a", "b", "expect"),
     [
         (
-            TimeMOC.from_times(Time(np.array([0, 1, 2]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([0, 1, 2]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([1]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
         ),
         (
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
-            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tdb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
+            TimeMOC.from_times(Time(np.array([]), format="jd", scale="tcb")),
         ),
     ],
 )
