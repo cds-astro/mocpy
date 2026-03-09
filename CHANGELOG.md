@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.20.0]
+
 ### Changed
 
 * add `order` parameter to replace `depth_t` in TimeMOC constructors. `depth_t` became
