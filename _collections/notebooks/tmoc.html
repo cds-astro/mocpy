@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creation and manipulation of time coverages (TMOCs) &#8212; MOCPy 0.19.1 documentation</title>
+    <title>Creation and manipulation of time coverages (TMOCs) &#8212; MOCPy 0.20.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -13,14 +13,14 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=6f83b549"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script type="text/javascript" src="../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.19.1 documentation</a>
+	<a href="../../index.html">MOCPy 0.20.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -85,10 +85,10 @@
 <h1>Creation and manipulation of time coverages (TMOCs)<a class="headerlink" href="#Creation-and-manipulation-of-time-coverages-(TMOCs)" title="Link to this heading">¶</a></h1>
 <p>First import the relevant packages, we will need the TimeMOC class of mocpy and astropy Time/TimeDelta:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">astroquery.vizier</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vizier</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
 </pre></div>
@@ -98,11 +98,11 @@
 <h2>Loading a time coverage (TMOC)<a class="headerlink" href="#Loading-a-time-coverage-(TMOC)" title="Link to this heading">¶</a></h2>
 <p>From a FITS file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span>
-    <span class="s2">&quot;http://alasky.u-strasbg.fr/HST-hips/filter_SDSSr_hips/TMoc.fits&quot;</span><span class="p">,</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">time_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span>
+    <span class="s2">&quot;http://alasky.u-strasbg.fr/OLD_HST-hips/filter_SDSSr_hips/TMoc.fits&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="c1"># Display it</span>
 <span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
@@ -118,10 +118,10 @@
 </div>
 <p>From an astropy table:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
 <span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;II/285&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -140,7 +140,19 @@
  T ANT 978 2443914.3750     --  --  0.802  0.391    --  0.856
  T ANT 978 2443915.4410     --  --  0.861  0.460    --  0.803
  T ANT 978 2444297.4250  9.360  --  0.791  0.431    --  0.840
+ T ANT 978 2444298.4760  9.520  --  0.853  0.463    --  0.903
+ T ANT 978 2444299.4940  9.720  --  0.927  0.484    --  0.953
+ T ANT 978 2444300.4070  9.575  --  0.809  0.441    --  0.872
+ T ANT 978 2444301.4180  8.881  --  0.499  0.309    --  0.608
+ T ANT 978 2444302.4110  9.139  --  0.661  0.392    --  0.754
+ T ANT 976 2451619.3105  9.738  --  0.910     --    --  0.959
    ... ...          ...    ... ...    ...    ...   ...    ...
+NN VUL 950 2445204.2187 14.102  --  1.372     --    --     --
+NN VUL 950 2445205.2265 14.075  --  1.423     --    --     --
+NN VUL 950 2445207.2304 14.110  --  1.455     --    --     --
+NN VUL 950 2445208.2539 14.090  --  1.512     --    --     --
+NN VUL 950 2445209.2070 14.109  --  1.502     --    --     --
+NN VUL 950 2445210.2187 14.141  --  1.553     --    --     --
 NN VUL 950 2445211.2031 14.186  --  1.528     --    --     --
 NN VUL 950 2445212.2304 14.227  --  1.588     --    --     --
 NN VUL 950 2445213.2109 14.293  --  1.574     --    --     --
@@ -149,10 +161,10 @@ Length = 70031 rows
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 <span class="n">table_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_times</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">))</span>
 <span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2nd table of II/285 tmoc&quot;</span><span class="p">)</span>
 
@@ -182,18 +194,18 @@ Time of the first observation: [&#39;1978-05-10 20:09:28.672&#39;]
 Time of the last observation: [&#39;2004-04-22 16:56:36.350&#39;]
 Total duration: 227.42448355555555 jd
 max order: 31
-CPU times: user 183 ms, sys: 6.4 ms, total: 189 ms
-Wall time: 137 ms
+CPU times: user 242 ms, sys: 83.6 ms, total: 325 ms
+Wall time: 331 ms
 </pre></div></div>
 </div>
 </section>
 <section id="Filtering-an-astropy-table-with-a-TimeMoc">
 <h2>Filtering an astropy table with a TimeMoc<a class="headerlink" href="#Filtering-an-astropy-table-with-a-TimeMoc" title="Link to this heading">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># filtering the table through the tmoc created from the HST_SDSSr fits file</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># filtering the table through the tmoc created from the HST_SDSSr fits file</span>
 <span class="n">rows</span> <span class="o">=</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">contains_with_timeresolution</span><span class="p">(</span>
     <span class="n">times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
     <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -214,7 +226,19 @@ Wall time: 137 ms
 2453021.3273
 2453022.4863
 2453022.5731
+2453022.4809
+2453021.3261
+2453022.4907
+2453022.3327
+2453021.3492
+2453021.3520
          ...
+2453022.3057
+2453022.4917
+2453021.3392
+2453022.4856
+2453022.4807
+2453022.6028
 2453022.3294
 2453022.4841
 2453022.5714
@@ -227,12 +251,12 @@ Length = 233 rows
 <h2>Operation between TMOCs<a class="headerlink" href="#Operation-between-TMOCs" title="Link to this heading">¶</a></h2>
 <p>Let’s intersect the two coverages we already have i.e. the one from HST_SDSSr with the one we got from VizieR:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">intersection_with_timeresolution</span><span class="p">(</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">intersection_with_timeresolution</span><span class="p">(</span>
     <span class="n">time_moc</span><span class="p">,</span>
-    <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span>
+    <span class="n">order</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
@@ -279,10 +303,10 @@ HST_SDSSr max order :  41
 </div>
 <p>We can augment and/or diminish a time coverage. This may be useful to see if surveys, even if not coinciding perfectly, may have been done at very close observational times.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">add_neighbours</span><span class="p">()</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">add_neighbours</span><span class="p">()</span>
 <span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) augmented tmoc&quot;</span><span class="p">)</span>
 
 <span class="n">result</span><span class="o">.</span><span class="n">remove_neighbours</span><span class="p">()</span>
@@ -306,10 +330,10 @@ HST_SDSSr max order :  41
 </div>
 <p>Complement of a TimeMoc</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">complemented_tmoc</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">complement</span><span class="p">()</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">complemented_tmoc</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">complement</span><span class="p">()</span>
 <span class="n">complemented_tmoc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
     <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Complement of (HST_SDSSr) INTER (2nd table of II/285)&quot;</span><span class="p">,</span>
     <span class="n">view</span><span class="o">=</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">min_time</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_time</span><span class="p">),</span>
@@ -354,8 +378,8 @@ HST_SDSSr max order :  41
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 07 Nov 2025. <br/>
+    &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 10 Mar 2026. <br/>
   </p>
 </footer>
   </body>

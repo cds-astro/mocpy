@@ -5,21 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to MOCPy’s documentation! &#8212; MOCPy 0.19.1 documentation</title>
+    <title>Welcome to MOCPy’s documentation! &#8212; MOCPy 0.20.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
     
-    <script src="_static/documentation_options.js?v=6f83b549"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/documentation_options.js?v=b52c616d"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <link rel="icon" href="_static/MOCpy-icon.svg"/>
@@ -58,7 +56,7 @@
 	</a>
       </li>
       <li>
-	<a href="#">MOCPy 0.19.1 documentation</a>
+	<a href="#">MOCPy 0.20.0 documentation</a>
 	 &#187;
       </li>
       
@@ -130,14 +128,9 @@ distributed under the BSD-3 license.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contribute.html">Contribute</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contribute.html#setting-up-the-environment">Setting up the environment</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="contribute.html#using-conda">Using conda</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contribute.html#using-virtualenv">Using virtualenv</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="contribute.html#pre-commits-setup">Pre-commits setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contribute.html#now-build-package">Now build package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contribute.html#running-the-python-tests">Running the python tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#adding-a-changelog-entry">Adding a changelog entry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contribute.html#building-the-documentation">Building the documentation</a></li>
 </ul>
 </li>
@@ -157,10 +150,7 @@ respectively the manipulation of spatial, temporal, frequency, and space-time MO
 <img alt="_images/plot_SDSS_r.png" class="plot-directive" src="_images/plot_SDSS_r.png" />
 </figure>
 <p>As well as its time coverage:</p>
-<p>(<a class="reference download internal" download="" href="_downloads/76bfdfa91fbf26eedff1b6df27b80f8a/plot_TMOC_SDSS_r.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/b293c062f78b61a4365d64d11e6ae1cb/plot_TMOC_SDSS_r.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/ea42e356181b52960331609a90e68c48/plot_TMOC_SDSS_r.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/7f8a48764f353069781d546715377951/plot_TMOC_SDSS_r.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default">
-<img alt="_images/plot_TMOC_SDSS_r.png" class="plot-directive" src="_images/plot_TMOC_SDSS_r.png" />
-</figure>
+<p>(<a class="reference download internal" download="" href="_downloads/76bfdfa91fbf26eedff1b6df27b80f8a/plot_TMOC_SDSS_r.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
 <ul class="simple">
 <li><p><span id="id1">[<a class="reference internal" href="#id3" title="Pierre Fernique, Thomas Boch, Tom Donaldson, Daniel Durand , Wil O'Mullane, Martin Reinecke, and Mark Taylor. MOC - HEALPix Multi-Order Coverage map Version 1.0. IVOA Recommendation 02 June 2014, pages 602, Jun 2014. doi:10.5479/ADS/bib/2014ivoa.spec.0602F.">FerniqueBochDonaldson+14</a>]</span></p></li>
 </ul>
@@ -213,8 +203,8 @@ respectively the manipulation of spatial, temporal, frequency, and space-time MO
        rel="nofollow">Page Source</a> &nbsp;
     <a href="#">Back to Top</a></p>
   <p>
-    &copy; Copyright 2025, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 07 Nov 2025. <br/>
+    &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 10 Mar 2026. <br/>
   </p>
 </footer>
   </body>
