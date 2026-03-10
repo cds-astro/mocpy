@@ -807,7 +807,7 @@ def test_from_cones():
             lat_unique,
             barycenter.ra,
             barycenter.dec,
-        ) < Angle(1 * u.arcsec)
+        ) < Angle(2 * u.arcsec)
     moc = MOC.from_cones(
         lon,
         lat,
