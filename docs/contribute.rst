@@ -65,7 +65,7 @@ This will generate an ``htmlcov`` folder where all the static html files can be 
 To be sure that your modifications didn't break the notebooks, do::
 
     python -m pip install .[notebooks]
-    python -m pytest --nbmake -n=auto "./notebooks"
+    python -m pytest --nbmake "./notebooks"
 
 Adding a changelog entry
 ------------------------
