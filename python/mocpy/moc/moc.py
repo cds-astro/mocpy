@@ -797,7 +797,7 @@ class MOC(AbstractMOC):
             catalogs.
         nside : int, optional and deprecated
             It is deprecated in favor of max_depth since version 0.6.0
-            You can switch to maw_depth by calculating max_depht = log2(nside).
+            You can switch to max_depth by calculating max_depth = log2(nside).
 
         Returns
         -------
