@@ -2430,6 +2430,21 @@ class MOC(AbstractMOC):
                 maximum number of row returned
         timeout : float, optional
                 timeout before aborting the query, default to 1000s
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("8/8")
+        >>> moc.query_simbad(select=["main_id", "main_type", "ra", "dec"]) # doctest: +SKIP
+        <Table length=20>
+                 main_id          main_type        ra          dec
+                                                  deg          deg
+                  str47             str24       float64      float64
+        ------------------------- ---------- ------------- ------------
+                 UCAC4 452-003925       Star 44.6443212394 0.3253648570
+          2MASS J02583486+0018256  Low-Mass* 44.6452974235 0.3071523434
+         SDSS J025833.42+001827.8     Galaxy 44.6392515000 0.3077166944
+         SDSS J025834.86+001909.4     Galaxy 44.6452449583 0.3192827222
         """
         return self._query(
             "SIMBAD",
@@ -2466,6 +2481,31 @@ class MOC(AbstractMOC):
                 Defaults to ``astropy_table``.
         timeout : float, optional
                 timeout before aborting the query, default to 1000s
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("8/8")
+        >>> moc.query_vizier_table("I/356/galcand", select=["_RAJ2000", "_DEJ2000", "Source", "Class"])
+        <Table length=14>
+             _RAJ2000          _DEJ2000         Source     Class
+               deg               deg
+             float64           float64          int64      str15
+        ----------------- ----------------- -------------- ------
+         44.6843243031726   0.3791206034138 71227737716736 GALAXY
+         44.7188162775362   0.4228615299936 72950020326912 GALAXY
+         44.7729085577324   0.4505931771995 73431056703232
+         44.7136268288791   0.4730577467229 74491913012736
+         44.7287948285102   0.4925353924758 74633647504896
+         44.5342650132047   0.4027725848738 75045964534784 GALAXY
+         44.5263730061065   0.4071591551830 75110388154496 GALAXY
+         44.6285193604069   0.4605212441601 75561360607616 GALAXY
+         44.5245963539355   0.4362714696582 75973677274624 GALAXY
+         44.5604330887281   0.4596071816413 76420353872128 GALAXY
+         44.6325844046418   0.4818690478764 77279347329280 GALAXY
+         44.6964365662775   0.5070763948648 77622944909184 GALAXY
+         44.7234359415639   0.5170502484962 77691664219008 GALAXY
+         44.6847962277679   0.5404173644997 77996606346240 GALAXY
         """
         return self._query(
             table_id,
