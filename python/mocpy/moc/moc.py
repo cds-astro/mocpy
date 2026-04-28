@@ -2606,12 +2606,31 @@ class MOC(AbstractMOC):
         if result.status_code != 200:
             raise requests.HTTPError(result.text)
 
+        overflow_message = (
+            f"Returned table has the same number of rows than "
+            f"`max_rows` ({max_rows}). Try setting a higher limit."
+        )
+
         if output_format == "astropy_table":
-            return parse_single_table(BytesIO(result.content)).to_table(
+            table = parse_single_table(BytesIO(result.content)).to_table(
                 use_names_over_ids=True
             )
+            if len(table) == max_rows:
+                warnings.warn(overflow_message, stacklevel=2)
+            return table
 
-        return result.text
+        if output_format == "csv":
+            if result.text.count("\n") == max_rows + 1:
+                warnings.warn(overflow_message, stacklevel=2)
+            return result.text
+
+        if output_format == "votable":
+            votable = parse_single_table(BytesIO(result.content))
+            if votable.nrows == max_rows:
+                warnings.warn(overflow_message, stacklevel=2)
+            return votable
+
+        return None
 
     def wcs(
         self,
