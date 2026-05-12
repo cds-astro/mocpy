@@ -2460,7 +2460,7 @@ class MOC(AbstractMOC):
         self,
         table_id: str,
         *,
-        max_rows=10,
+        max_rows=20,
         timeout=1000,
         select: Optional[List[str]] = None,
         output_format: _OUTPUT_FORMATS = "astropy_table",
@@ -2473,11 +2473,11 @@ class MOC(AbstractMOC):
                 corresponds to a VizieR table id
         max_rows : int, optional
                 maximum number of row returned.
-                Defaults to 10.
+                Defaults to 20.
         select: list[str], optional
                 list of columns names to get
         output_format: str
-                format of the output. Can be ``astropy_table``, ``csv``, ``votable``.
+                format of the output. Can be ``astropy_table``, ``csv``, ``votable``, ``raw_votable``.
                 Defaults to ``astropy_table``.
         timeout : float, optional
                 timeout before aborting the query, default to 1000s
@@ -2541,7 +2541,7 @@ class MOC(AbstractMOC):
         match output_format:
             case "csv":
                 output_format_json = {"FullPrecSV": ","}
-            case "votable" | "astropy_table":
+            case "votable" | "astropy_table" | "raw_votable":
                 output_format_json = "VOTableTableData"
             case _:
                 options = get_args(self._OUTPUT_FORMATS)
@@ -2629,6 +2629,9 @@ class MOC(AbstractMOC):
             if votable.nrows == max_rows:
                 warnings.warn(overflow_message, stacklevel=2)
             return votable
+
+        if output_format == "raw_votable":
+            return result.text
 
         return None
 
