@@ -41,4 +41,4 @@ jobs:
 
       - name: compile
         run: |
-          cargo check --all-targets
+          cargo build
