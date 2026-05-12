@@ -1,0 +1,44 @@
+name: check-old-rust-version
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  msrv-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: rustup install
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+
+      - name: get mrsv from Cargo.toml
+        id: rust_version
+        run: |
+          # we look for `rust-version` in [package].
+          VERSION=$(cargo metadata --no-deps --format-version 1 \
+                 | jq -r '.packages[] | select(.source == null) | .rust_version')
+
+          if [[ -z "$VERSION" ]]; then
+            exit 1
+          fi
+          echo "msrv=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: install
+        run: |
+          rustup toolchain install ${{ steps.rust_version.outputs.msrv }} --profile minimal
+          rustup default ${{ steps.rust_version.outputs.msrv }}
+
+      - name: compile
+        run: |
+          cargo build

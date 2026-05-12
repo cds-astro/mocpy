@@ -73,8 +73,9 @@ pip install mocpy[notebooks]
 ## Development installation
 
 Contributions are very welcome. To build and test the library, clone this repository,
-make sure that you've got Rust on your machine (https://www.rust-lang.org/tools/install)
-and do:
+make sure that you've got Rust on your machine (https://www.rust-lang.org/tools/install).
+Check that the Rust version you got is more recent than the minimal version declared in
+`Cargo.toml` under `rust-version` and do:
 
 ```sh
 pip install pre-commit

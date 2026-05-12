@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+* the minimal rust supported version is now explicitly declared in `Cargo.toml`
+
 ## [0.20.0]
 
 ### Changed
