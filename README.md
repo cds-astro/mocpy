@@ -47,8 +47,6 @@ For more information about MOCPy's Rust core, see the [moc crate](https://crates
 
 ## Installation
 
-We strongly recommend to work in an environnement
-
 ### Latest stable version
 
 - from pip `pip install mocpy`
@@ -75,7 +73,7 @@ pip install mocpy[notebooks]
 
 Contributions are very welcome. To build and test the library, clone this repository,
 make sure that you've got Rust on your machine (https://www.rust-lang.org/tools/install).
-Check that the Rust version you got is more recent than the minimal version declared in
+Check that the Rust version you have is more recent than the minimal version declared in
 `Cargo.toml` under `rust-version` and do:
 
 ```sh
@@ -91,7 +89,7 @@ do `maturin develop --release` again. If you only edit the python side, then a
 
 We use pre-commit to keep consistent style conventions between all of us. This means
 that your commits will not pass if they require modifications. If this happens, do the
-required changes, `git add` the files again and attempt to commit as usual.
+required changes, `git add` the files again and attempt to commit again as usual.
 
 To run the tests, do:
 
@@ -99,6 +97,15 @@ To run the tests, do:
 pip install .[dev]
 python -m pytest
 ```
+To check that the documentation builds. Make sure you have pandoc
+(https://pandoc.org/installing.html) and do:
+
+```sh
+pip install .[docs,plots]
+cd docs
+make clean html
+```
+The output will be in `docs/_build/html`.
 
 ## For use in pyodide
 
