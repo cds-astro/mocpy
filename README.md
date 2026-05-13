@@ -1,6 +1,7 @@
 # MOCPy
 
 [![PyPI version](https://badge.fury.io/py/mocpy.svg)](https://badge.fury.io/py/MOCPy)
+[![python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-informational)](https://www.python.org/downloads/ "https://www.python.org/downloads/")
 [![Build/Test status](https://github.com/cds-astro/mocpy/actions/workflows/test.yml/badge.svg)](https://github.com/cds-astro/mocpy/actions/workflows/test.yml)
 [![Doc](https://img.shields.io/badge/Documentation-link-green.svg)](https://cds-astro.github.io/mocpy/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15517957.svg)](https://doi.org/10.5281/zenodo.15517957)
