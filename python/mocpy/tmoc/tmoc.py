@@ -691,25 +691,47 @@ class TimeMOC(AbstractMOC):
         order = 61 - int(np.log2(delta_time.sec * 1e6))
         return np.uint8(order)
 
-    def plot(self, title="TimeMOC", view=(None, None), figsize=(9.5, 5), **kwargs):
+    def plot(
+        self,
+        *,
+        title="TimeMOC",
+        view=(None, None),
+        figsize=(9.5, 5),
+        cmap="Greens",
+        **kwargs,
+    ):
         """
         Plot the TimeMOC in a time window.
 
-        This method uses interactive matplotlib. The user can move its mouse through the plot to see the
-        time (at the mouse position).
+        This method uses interactive matplotlib: hover the plot to see the time in iso.
 
         Parameters
         ----------
         title : str, optional
             The title of the plot. Set to 'TimeMOC' by default.
         view : (`~astropy.time.Time`, `~astropy.time.Time`), optional
-            Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
-            all the observation time window is rendered).
+            Define the view window in which the observations are plotted.
+            Set to (None, None) by default (i.e. all the observation time window
+            is rendered).
+        figsize: tuple[float], optional
+            A tuple of two floats that will define the size of the figure.
+        colors: tuple[str], optional
+            A tuple of two matplotlib colors. The first will be used in the TimeMOC's
+            holes while the second will represent the coverage of the TimeMOC.
+        **kwargs:
+            Any keyword argument that `~matplotlib.pyplot.imshow` accepts.
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time(["2026-01-01", "2026-02-01"])
+        >>> time_max = Time(["2026-01-20", "2026-02-20"])
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.plot() # doctest: +SKIP
         """
         try:
             import matplotlib.pyplot as plt
-            from matplotlib.colors import LinearSegmentedColormap
         except ImportError as err:
             raise ImportError("matplotlib is required to plot a TimeMOC.") from err
 
@@ -762,24 +784,32 @@ class TimeMOC(AbstractMOC):
 
         plt.title(title)
 
-        color_map = LinearSegmentedColormap.from_list("w2r", ["#fffff0", "#aa0000"])
-        color_map.set_under("w")
-        color_map.set_bad("gray")
+        plt.imshow(z, interpolation="bilinear", cmap=cmap, **kwargs)
 
-        plt.imshow(z, interpolation="bilinear", **kwargs)
+        label = ax.text(
+            0,
+            0,
+            "",
+            va="bottom",
+            ha="left",
+            fontsize=9,
+            backgroundcolor="w",
+            visible=False,
+        )
 
         def on_mouse_motion(event):
-            for txt in ax.texts:
-                txt.set_visible(b=False)
-
-            text = ax.text(0, 0, "", va="bottom", ha="left")
+            if event.inaxes is None or event.xdata is None or event.ydata is None:
+                label.set_visible(False)
+                fig1.canvas.draw_idle()
+                return
 
             time = Time(event.xdata * delta + min_jd_time, format="jd", scale="tcb")
 
             tx = f"{time.iso}"
-            text.set_position((event.xdata - 50, 700))
-            text.set_rotation(70)
-            text.set_text(tx)
+            label.set_position((event.xdata - 0.5, event.ydata - 0.5))
+            label.set_text(tx)
+            label.set_visible(True)
+            fig1.canvas.draw_idle()
 
         fig1.canvas.mpl_connect("motion_notify_event", on_mouse_motion)
 

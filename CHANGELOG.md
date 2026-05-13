@@ -16,9 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Changed
+
+* the default `TimeMOC.plot` colormap is now matplotlib's `Greens` to make the inside
+  and outside of the coverage easier to identify [#220]
+
 ### Fixed
 
 * the minimal rust supported version is now explicitly declared in `Cargo.toml`
+* the `TimeMOC.plot` method was raising an error when the mouse was hovering outside of
+  the plot area [#220]
 
 ## [0.20.0]
 
