@@ -2,10 +2,7 @@
 [project]
 name = "mocpy"
 dynamic = ["version"]
-# 3.6 is no longer maintained and no more supported by maturin
-requires-python = ">=3.9"
-# https://numpy.org/neps/nep-0029-deprecation_policy.html
-# https://docs.astropy.org/en/stable/changelog.html
+requires-python = ">=3.9" # update the abi3 declaration in Cargo.toml at the same time
 dependencies = [
     "astropy",
     "numpy"
@@ -102,6 +99,16 @@ profile = "release"
 frozen = false
 # Require Cargo.lock is up to date
 locked = false
+
+[tool.maturin.generate-ci.github.emscripten]
+
+[tool.maturin.generate-ci.github.linux]
+
+[tool.maturin.generate-ci.github.musllinux]
+
+[tool.maturin.generate-ci.github.macos]
+
+[tool.maturin.generate-ci.github.windows]
 
 [tool.ruff]
 fix = true
