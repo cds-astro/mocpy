@@ -47,7 +47,7 @@ features = ["rayon"]
 
 [dependencies.pyo3]
 version = "0.26"
-features = ["extension-module"]
+features = ["abi3-py39"]
 
 [profile.release]
 opt-level = 3
