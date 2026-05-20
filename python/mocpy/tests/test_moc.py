@@ -453,6 +453,77 @@ def test_from_string_as_json():
     assert moc_ascii == moc_json
 
 
+def test_from_elliptical_cone():
+    MOC.from_elliptical_cone(
+        lon=0 * u.deg,
+        lat=0 * u.deg,
+        a=Angle(10, u.deg),
+        b=Angle(5, u.deg),
+        pa=Angle(0, u.deg),
+        max_depth=10,
+    )
+
+
+def test_from_cone():
+    with pytest.raises(ValueError, match="'MOC.from_cone' only works with one cone.*"):
+        MOC.from_cone([2, 4] * u.deg, [5, 6] * u.deg, radius=2 * u.arcmin, max_depth=2)
+
+
+def test_from_cones():
+    # same radius
+    radius = 2 * u.arcmin
+    lon = [2, 4] * u.deg
+    lat = [5, 6] * u.deg
+    cones = MOC.from_cones(lon, lat, radius=radius, max_depth=14)
+    for cone, lon_unique, lat_unique in zip(cones, lon, lat):
+        barycenter = cone.barycenter()
+        assert angular_separation(
+            lon_unique,
+            lat_unique,
+            barycenter.ra,
+            barycenter.dec,
+        ) < Angle(2 * u.arcsec)
+    moc = MOC.from_cones(
+        lon,
+        lat,
+        radius=radius,
+        max_depth=14,
+        union_strategy="small_cones",
+    )
+    assert isinstance(moc, MOC)
+    moc2 = MOC.from_cones(
+        lon,
+        lat,
+        radius=radius,
+        max_depth=14,
+        union_strategy="large_cones",
+    )
+    assert moc == moc2
+    # different radii
+    radii = [5, 6] * u.arcmin
+    cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
+    for cone, radius in zip(cones, radii):
+        # we check their area (Pi simplifies)
+        assert (
+            cone.sky_fraction
+            > (((radius) ** 2).to(u.steradian) / 4 * u.steradian).value
+        )
+    moc = MOC.from_cones(
+        lon,
+        lat,
+        radius=radii,
+        max_depth=14,
+        union_strategy="small_cones",
+    )
+    assert isinstance(moc, MOC)
+    # test error
+    with pytest.raises(ValueError, match="'union_strategy'*"):
+        MOC.from_cones(lon, lat, radius=radii, max_depth=14, union_strategy="big_cones")
+
+
+# ----------- End of from tests -------------- #
+
+
 def test_moc_full_skyfraction():
     moc = MOC.from_json({"0": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]})
     assert moc.sky_fraction == 1.0
@@ -776,74 +847,6 @@ def test_boundaries():
     moc = moc.degrade_to_order(6)
     boundaries_l = moc.get_boundaries()
 """
-
-
-def test_from_elliptical_cone():
-    MOC.from_elliptical_cone(
-        lon=0 * u.deg,
-        lat=0 * u.deg,
-        a=Angle(10, u.deg),
-        b=Angle(5, u.deg),
-        pa=Angle(0, u.deg),
-        max_depth=10,
-    )
-
-
-def test_from_cone():
-    with pytest.raises(ValueError, match="'MOC.from_cone' only works with one cone.*"):
-        MOC.from_cone([2, 4] * u.deg, [5, 6] * u.deg, radius=2 * u.arcmin, max_depth=2)
-
-
-def test_from_cones():
-    # same radius
-    radius = 2 * u.arcmin
-    lon = [2, 4] * u.deg
-    lat = [5, 6] * u.deg
-    cones = MOC.from_cones(lon, lat, radius=radius, max_depth=14)
-    for cone, lon_unique, lat_unique in zip(cones, lon, lat):
-        barycenter = cone.barycenter()
-        assert angular_separation(
-            lon_unique,
-            lat_unique,
-            barycenter.ra,
-            barycenter.dec,
-        ) < Angle(2 * u.arcsec)
-    moc = MOC.from_cones(
-        lon,
-        lat,
-        radius=radius,
-        max_depth=14,
-        union_strategy="small_cones",
-    )
-    assert isinstance(moc, MOC)
-    moc2 = MOC.from_cones(
-        lon,
-        lat,
-        radius=radius,
-        max_depth=14,
-        union_strategy="large_cones",
-    )
-    assert moc == moc2
-    # different radii
-    radii = [5, 6] * u.arcmin
-    cones = MOC.from_cones(lon, lat, radius=radii, max_depth=14)
-    for cone, radius in zip(cones, radii):
-        # we check their area (Pi simplifies)
-        assert (
-            cone.sky_fraction
-            > (((radius) ** 2).to(u.steradian) / 4 * u.steradian).value
-        )
-    moc = MOC.from_cones(
-        lon,
-        lat,
-        radius=radii,
-        max_depth=14,
-        union_strategy="small_cones",
-    )
-    assert isinstance(moc, MOC)
-    # test error
-    with pytest.raises(ValueError, match="'union_strategy'*"):
-        MOC.from_cones(lon, lat, radius=radii, max_depth=14, union_strategy="big_cones")
 
 
 @pytest.fixture
