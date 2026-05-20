@@ -155,7 +155,11 @@ jobs:
             target: wasm32-unknown-emscripten
     steps:
       - uses: actions/checkout@v6
-      - run: pip install pyodide-build
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - run: pip install pyodide-build -U
+      - run: pyodide --version
       - name: Get Emscripten and Python version info
         shell: bash
         run: |
@@ -163,7 +167,7 @@ jobs:
           echo PYTHON_VERSION=$(pyodide config get python_version | cut -d '.' -f 1-2) >> $GITHUB_ENV
           if v=$(pyodide config get pyodide_abi_version 2>/dev/null); then echo PYODIDE_ABI_VERSION=$v >> $GITHUB_ENV; fi
           pip uninstall -y pyodide-build
-      - uses: mymindstorm/setup-emsdk@v14
+      - uses: emscripten-core/setup-emsdk@v16
         with:
           version: ${{ env.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
@@ -171,18 +175,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install pyodide-build
+      - run: emcc -v
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist
-          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
-          rust-toolchain: nightly
-      - name: Build free-threaded wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist -i python3.14t
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           rust-toolchain: nightly
       - name: Upload wheels
