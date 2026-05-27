@@ -189,7 +189,7 @@ class MOC(AbstractMOC):
     MAX_ORDER = np.uint8(29)
 
     # for the query methods
-    _OUTPUT_FORMATS = Literal["csv", "votable", "astropy_table"]
+    _OUTPUT_FORMATS = Literal["csv", "votable", "astropy_table", "raw_votable"]
 
     def __init__(self, store_index):
         """Is a Spatial Coverage (S-MOC).
@@ -2538,17 +2538,15 @@ class MOC(AbstractMOC):
                 "with `pip install requests`."
             ) from err
 
-        match output_format:
-            case "csv":
-                output_format_json = {"FullPrecSV": ","}
-            case "votable" | "astropy_table" | "raw_votable":
-                output_format_json = "VOTableTableData"
-            case _:
-                options = get_args(self._OUTPUT_FORMATS)
-                raise ValueError(
-                    f"'{output_format}' is not in the possible output"
-                    f" formats: {options}"
-                )
+        if output_format == "csv":
+            output_format_json = {"FullPrecSV": ","}
+        elif output_format in ["votable", "astropy_table", "raw_votable"]:
+            output_format_json = "VOTableTableData"
+        else:
+            options = get_args(self._OUTPUT_FORMATS)
+            raise ValueError(
+                f"'{output_format}' is not in the possible output formats: {options}"
+            )
 
         with NamedTemporaryFile(delete_on_close=False) as fp:
             self.save(fp.name, overwrite=True, format="json")
@@ -2615,18 +2613,18 @@ class MOC(AbstractMOC):
             table = parse_single_table(BytesIO(result.content)).to_table(
                 use_names_over_ids=True
             )
-            if len(table) == max_rows:
+            if len(table) == max_rows and max_rows == 20:
                 warnings.warn(overflow_message, stacklevel=2)
             return table
 
         if output_format == "csv":
-            if result.text.count("\n") == max_rows + 1:
+            if max_rows == 20 and result.text.count("\n") == max_rows + 1:
                 warnings.warn(overflow_message, stacklevel=2)
             return result.text
 
         if output_format == "votable":
             votable = parse_single_table(BytesIO(result.content))
-            if votable.nrows == max_rows:
+            if max_rows == 20 and votable.nrows == max_rows:
                 warnings.warn(overflow_message, stacklevel=2)
             return votable
 

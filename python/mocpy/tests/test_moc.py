@@ -9,7 +9,8 @@ import regions
 from astropy.coordinates import Angle, Latitude, Longitude, SkyCoord, angular_separation
 from astropy.io import fits
 from astropy.io.votable import parse_single_table
-from astropy.table import QTable
+from astropy.io.votable.tree import TableElement
+from astropy.table import QTable, Table
 
 try:
     import matplotlib.pyplot as plt
@@ -885,6 +886,51 @@ def test_neighbours(mocs):
     moc2.add_neighbours().remove_neighbours()
     assert moc1 == mocs["moc1"]
     assert moc2 == mocs["moc2"]
+
+
+def test_query_simbad():
+    moc = MOC.from_string("9/0")
+    table = moc.query_simbad(select=["main_id", "main_type", "ra", "dec"])
+    assert len(table) >= 10  # there are 13 results now but SIMBAD could be updated
+
+
+def test_query_vizier_table():
+    moc = MOC.new_empty(max_depth=0).complement()
+    table = moc.query_vizier_table("J/A+A/481/593/table1", max_rows=None)
+    assert len(table) == 512
+    assert isinstance(table, Table)
+
+
+def test_query_vizier_table_exceptions():
+    moc = MOC.new_empty(max_depth=0).complement()
+    # overflow
+    with pytest.warns(UserWarning, match="Returned table has the same number of rows*"):
+        table = moc.query_vizier_table("J/A+A/481/593/table1")
+        assert len(table) == 20
+    # unknown format
+    with pytest.raises(ValueError, match="'blabla' is not in the possible output*"):
+        table = moc.query_vizier_table("J/A+A/481/593/table1", output_format="blabla")
+
+
+def test_output_formats():
+    # default astropy table tested in other tests
+    # csv
+    moc = MOC.new_empty(max_depth=0).complement()
+    table = moc.query_vizier_table(
+        "J/A+A/481/593/table1",
+        select=["RAJ2000", "DEJ2000", "RV"],
+        output_format="csv",
+        max_rows=2,
+    )
+    assert table.startswith("RAJ2000,DEJ2000,RV")
+    # votable
+    table = moc.query_vizier_table(
+        "J/A+A/481/593/table1",
+        select=["RAJ2000", "DEJ2000", "RV"],
+        output_format="votable",
+        max_rows=2,
+    )
+    assert isinstance(table, TableElement)
 
 
 # --- TESTING MOC operations ---#
