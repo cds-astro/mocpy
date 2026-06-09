@@ -2548,7 +2548,7 @@ class MOC(AbstractMOC):
                 f"'{output_format}' is not in the possible output formats: {options}"
             )
 
-        with NamedTemporaryFile(delete_on_close=False) as fp:
+        with NamedTemporaryFile(delete=False) as fp:
             self.save(fp.name, overwrite=True, format="json")
 
             mode = {
