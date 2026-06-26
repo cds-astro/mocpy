@@ -1,11 +1,14 @@
 import contextlib
 import functools
+import json
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
-from io import BytesIO
+from io import BytesIO, StringIO
 from math import log2
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import List, Literal, Optional, get_args
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 
@@ -22,6 +25,7 @@ from astropy.coordinates import (
     SkyCoord,
 )
 from astropy.io import fits
+from astropy.io.votable import parse_single_table
 from astropy.table import Table
 from astropy.utils.data import download_file
 
@@ -183,6 +187,9 @@ class MOC(AbstractMOC):
     # Maximum order (or depth) of a MOC
     # (do not remove since it may be used externally).
     MAX_ORDER = np.uint8(29)
+
+    # for the query methods
+    _OUTPUT_FORMATS = Literal["csv", "votable", "astropy_table", "raw_votable"]
 
     def __init__(self, store_index):
         """Is a Spatial Coverage (S-MOC).
@@ -797,7 +804,7 @@ class MOC(AbstractMOC):
             catalogs.
         nside : int, optional and deprecated
             It is deprecated in favor of max_depth since version 0.6.0
-            You can switch to maw_depth by calculating max_depht = log2(nside).
+            You can switch to max_depth by calculating max_depth = log2(nside).
 
         Returns
         -------
@@ -2402,21 +2409,62 @@ class MOC(AbstractMOC):
 
     # TODO : move this in astroquery.Simbad.query_region
     # See https://github.com/astropy/astroquery/pull/1466
-    def query_simbad(self, max_rows=10000, timeout=1000):
+    def query_simbad(
+        self,
+        *,
+        max_rows=20,
+        timeout=100,
+        select: Optional[List[str]] = None,
+        output_format: _OUTPUT_FORMATS = "astropy_table",
+    ):
         """Query a view of SIMBAD data for SIMBAD objects in the coverage of the MOC instance.
 
         Parameters
         ----------
+        select: list[str], optional
+                list of columns names to get
+        output_format: str
+                format of the output. Can be ``astropy_table``, ``csv``, ``votable``.
+                Defaults to ``astropy_table``.
         max_rows : int, optional
                 maximum number of row returned
         timeout : float, optional
                 timeout before aborting the query, default to 1000s
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("8/8")
+        >>> moc.query_simbad(select=["main_id", "main_type", "ra", "dec"]) # doctest: +SKIP
+        <Table length=20>
+                 main_id          main_type        ra          dec
+                                                  deg          deg
+                  str47             str24       float64      float64
+        ------------------------- ---------- ------------- ------------
+                 UCAC4 452-003925       Star 44.6443212394 0.3253648570
+          2MASS J02583486+0018256  Low-Mass* 44.6452974235 0.3071523434
+         SDSS J025833.42+001827.8     Galaxy 44.6392515000 0.3077166944
+         SDSS J025834.86+001909.4     Galaxy 44.6452449583 0.3192827222
         """
-        return self._query("SIMBAD", max_rows, timeout)
+        return self._query(
+            "SIMBAD",
+            max_rows=max_rows,
+            timeout=timeout,
+            select=select,
+            output_format=output_format,
+        )
 
     # TODO : move this in astroquery.Vizier.query_region
     # See https://github.com/astropy/astroquery/pull/1466
-    def query_vizier_table(self, table_id: str, max_rows=10000, timeout=1000):
+    def query_vizier_table(
+        self,
+        table_id: str,
+        *,
+        max_rows=20,
+        timeout=1000,
+        select: Optional[List[str]] = None,
+        output_format: _OUTPUT_FORMATS = "astropy_table",
+    ):
         """Query a VizieR table for sources in the coverage of the MOC instance.
 
         Parameters
@@ -2424,44 +2472,166 @@ class MOC(AbstractMOC):
         table_id : str
                 corresponds to a VizieR table id
         max_rows : int, optional
-                maximum number of row returned
+                maximum number of row returned.
+                Defaults to 20.
+        select: list[str], optional
+                list of columns names to get
+        output_format: str
+                format of the output. Can be ``astropy_table``, ``csv``, ``votable``, ``raw_votable``.
+                Defaults to ``astropy_table``.
         timeout : float, optional
                 timeout before aborting the query, default to 1000s
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("8/8")
+        >>> moc.query_vizier_table("I/356/galcand", select=["_RAJ2000", "_DEJ2000", "Source", "Class"])
+        <Table length=14>
+             _RAJ2000          _DEJ2000         Source     Class
+               deg               deg
+             float64           float64          int64      str15
+        ----------------- ----------------- -------------- ------
+         44.6843243031726   0.3791206034138 71227737716736 GALAXY
+         44.7188162775362   0.4228615299936 72950020326912 GALAXY
+         44.7729085577324   0.4505931771995 73431056703232
+         44.7136268288791   0.4730577467229 74491913012736
+         44.7287948285102   0.4925353924758 74633647504896
+         44.5342650132047   0.4027725848738 75045964534784 GALAXY
+         44.5263730061065   0.4071591551830 75110388154496 GALAXY
+         44.6285193604069   0.4605212441601 75561360607616 GALAXY
+         44.5245963539355   0.4362714696582 75973677274624 GALAXY
+         44.5604330887281   0.4596071816413 76420353872128 GALAXY
+         44.6325844046418   0.4818690478764 77279347329280 GALAXY
+         44.6964365662775   0.5070763948648 77622944909184 GALAXY
+         44.7234359415639   0.5170502484962 77691664219008 GALAXY
+         44.6847962277679   0.5404173644997 77996606346240 GALAXY
         """
-        return self._query(table_id, max_rows, timeout)
+        return self._query(
+            table_id,
+            max_rows=max_rows,
+            timeout=timeout,
+            select=select,
+            output_format=output_format,
+        )
 
     # TODO : move this in astroquery
-    def _query(self, resource_id, max_rows=100000, timeout=1000):
+    def _query(
+        self,
+        resource_id,
+        *,
+        max_rows=None,
+        select: Optional[List[str]] = None,
+        output_format: _OUTPUT_FORMATS = "astropy_table",
+        timeout=1000,
+    ):
         """
         Query Simbad or a VizieR table.
 
         Find sources in the coverage of the MOC instance.
         """
-        import requests
-        from astropy.io.votable import parse_single_table
+        try:
+            import requests
+        except ImportError as err:
+            raise ImportError(
+                "'request' is neeeded to use query methods. Install it "
+                "with `pip install requests`."
+            ) from err
 
-        moc_file = BytesIO()
-        moc_fits = self.serialize(format="fits", pre_v2=True)
-        moc_fits.writeto(moc_file)
+        if output_format == "csv":
+            output_format_json = {"FullPrecSV": ","}
+        elif output_format in ["votable", "astropy_table", "raw_votable"]:
+            output_format_json = "VOTableTableData"
+        else:
+            options = get_args(self._OUTPUT_FORMATS)
+            raise ValueError(
+                f"'{output_format}' is not in the possible output formats: {options}"
+            )
 
-        r = requests.post(
-            "http://cdsxmatch.u-strasbg.fr/QueryCat/QueryCat",
-            data={
-                "mode": "mocfile",
-                "catName": resource_id,
-                "format": "votable",
-                "limit": max_rows,
-            },
-            files={"moc": moc_file.getvalue()},
-            headers={"User-Agent": "MOCPy"},
-            stream=True,
-            timeout=timeout,
+        with NamedTemporaryFile(delete=False) as fp:
+            self.save(fp.name, overwrite=True, format="json")
+
+            mode = {
+                "Positional": {
+                    "lon": "DEFAULT",
+                    "lat": "DEFAULT",
+                    "force": False,
+                    "geom": {
+                        "HpxMOC": {
+                            "moc_file_path": str(fp.name),
+                            "moc_input_fmt": "Json",
+                        }
+                    },
+                },
+            }
+
+            query_params = {
+                "file": resource_id,
+                "has_header": False,
+                "print_header": True,
+                "recno": False,
+                "output": output_format_json,
+                "cgi": False,
+                "mode": mode,
+            }
+
+            if select is not None:
+                # operators like `-` have to be escaped in column names
+                query_params.update(
+                    {"columns": {"cols": [f"${{{col_name}}}" for col_name in select]}}
+                )
+            if max_rows is not None:
+                query_params.update({"limit": max_rows})
+
+            json_dump = StringIO()
+            json.dump(query_params, json_dump)
+
+            multiparts = {
+                "query_params": json_dump.getvalue(),
+                "query_data": (
+                    fp.name,
+                    Path.open(fp.name, mode="rb"),
+                    "application/octet-stream",
+                ),
+            }
+            result = requests.post(
+                "https://vizcat.cds.unistra.fr/cgi-bin/qat2s.cgi",
+                headers={"user-agent": "mocpy"},
+                files=multiparts,
+                timeout=timeout,
+            )
+
+        if result.status_code != 200:
+            raise requests.HTTPError(result.text)
+
+        overflow_message = (
+            f"Returned table has the same number of rows than "
+            f"`max_rows` ({max_rows}). Try setting a higher limit."
         )
 
-        votable = BytesIO()
-        votable.write(r.content)
+        if output_format == "astropy_table":
+            table = parse_single_table(BytesIO(result.content)).to_table(
+                use_names_over_ids=True
+            )
+            if len(table) == max_rows and max_rows == 20:
+                warnings.warn(overflow_message, stacklevel=2)
+            return table
 
-        return parse_single_table(votable).to_table()
+        if output_format == "csv":
+            if max_rows == 20 and result.text.count("\n") == max_rows + 1:
+                warnings.warn(overflow_message, stacklevel=2)
+            return result.text
+
+        if output_format == "votable":
+            votable = parse_single_table(BytesIO(result.content))
+            if max_rows == 20 and votable.nrows == max_rows:
+                warnings.warn(overflow_message, stacklevel=2)
+            return votable
+
+        if output_format == "raw_votable":
+            return result.text
+
+        return None
 
     def wcs(
         self,
