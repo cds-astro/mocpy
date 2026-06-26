@@ -706,6 +706,13 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
                 mocpy.to_fits_raw(self.store_index, pre_v2),
             )
             hdu = hdulist[1]
+            # The range-encoded 2D MOCs (ST-MOC, SF-MOC) are currently
+            # serialized without a name (TTYPE1) for their range column, unlike
+            # the 1D MOCs. A FITS binary table column without a name cannot be
+            # read by generic FITS readers (e.g. astropy.io.fits, fv), so we add
+            # the range column name when it is missing.
+            if "TFORM1" in hdu.header and "TTYPE1" not in hdu.header:
+                hdu.header["TTYPE1"] = "RANGE"
             if fits_keywords:
                 for key in fits_keywords:
                     hdu.header[key] = fits_keywords[key]
