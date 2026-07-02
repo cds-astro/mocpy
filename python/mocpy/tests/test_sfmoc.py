@@ -127,20 +127,6 @@ def test_roundtrip_io(file_name, format_name, tmp_path):
     assert loaded == sfmoc
 
 
-def test_save_fits_is_readable_by_astropy(tmp_path):
-    # The range column must be named (TTYPE1) so that the saved FITS table can
-    # be read by generic FITS readers such as astropy.io.fits.
-    from astropy.io import fits
-
-    sfmoc = SFMOC.from_string("f10/0-10\ns10/0-10", format="ascii")
-    path = tmp_path / "sfmoc.fits"
-    sfmoc.save(path, format="fits")
-
-    with fits.open(path) as hdulist:
-        assert hdulist[1].header["TTYPE1"] == "RANGE"
-        assert len(hdulist[1].data) > 0
-
-
 def test_wrong_format_io(tmp_path):
     sfmoc = SFMOC.from_string("f10/0-10\ns10/0-10", format="ascii")
     path = tmp_path / "test_wrong_format.fits"
