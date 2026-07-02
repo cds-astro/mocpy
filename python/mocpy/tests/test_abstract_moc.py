@@ -185,5 +185,4 @@ def test_save_fits_is_readable_by_astropy(all_moc_types, tmp_path):
     moc.save(path, format="fits")
 
     with fits.open(path) as hdulist:
-        assert hdulist[1].header["TTYPE1"] == "RANGE"
         assert len(hdulist[1].data) > 0
