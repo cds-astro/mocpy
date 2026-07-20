@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* range-encoded 2D MOCs (ST-MOC, SF-MOC) are now saved with a named range column.
+  The column name (`TTYPE1`) is only recommended (not mandatory) by the FITS standard,
+  but readers such as `astropy.io.fits` and `fv` require it to read the table, so the
+  previous files could not be opened with those tools
 * the minimal rust supported version is now explicitly declared in `Cargo.toml`
 * the `TimeMOC.plot` method was raising an error when the mouse was hovering outside of
   the plot area [#220]

@@ -1,2 +1,7 @@
 *.pyd
 docs/_build
+*.pyc
+target
+*.so
+*.swp
+Cargo.lock
