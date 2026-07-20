@@ -6,7 +6,6 @@
     "contIntegration": "https://github.com/cds-astro/mocpy/tree/master/.github/workflows",
     "dateCreated": "2015-05-28",
     "datePublished": "2015-05-28",
-    "dateModified": "2023-12-04",
     "issueTracker": "https://github.com/cds-astro/mocpy/issues",
     "name": "MOCpy",
     "version": "0.20.0",
@@ -36,7 +35,7 @@
         "MacOS"
     ],
     "softwareRequirements": [
-        "https://github.com/cds-astro/mocpy/blob/master/requirements/environment.yml"
+        "https://github.com/cds-astro/mocpy/blob/master/pyproject.toml"
     ],
     "installUrl": "https://pypi.org/project/mocpy/",
     "isAccessibleForFree": "True",
