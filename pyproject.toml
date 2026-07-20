@@ -148,5 +148,8 @@ convention = "numpy"  # Accepts: "google", "numpy", or "pep257"
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 doctest_optionflags = "NORMALIZE_WHITESPACE"
+markers = [
+    "remote_data: marks tests that require to download a file from a remote server",
+]
 testpaths = ["python", "docs/examples/user_documentation.rst"]
 

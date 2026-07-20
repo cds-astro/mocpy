@@ -97,6 +97,14 @@ To run the tests, do:
 pip install .[dev]
 python -m pytest
 ```
+
+The tests that require to download remote data from external servers don't run by
+default. To execute them, do:
+
+```sh
+python -m pytest --run-remote
+```
+
 To check that the documentation builds. Make sure you have pandoc
 (https://pandoc.org/installing.html) and do:
 

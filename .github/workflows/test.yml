@@ -38,7 +38,7 @@ jobs:
            pip install maturin==1.12.4
            maturin develop --release
            pip install .[dev,plots]
-           python -m pytest python/mocpy/tests/
+           python -m pytest python/mocpy/tests/ --run-remote
          done
 
   test-macos-wheels:
