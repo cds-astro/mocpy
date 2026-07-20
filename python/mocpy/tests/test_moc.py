@@ -294,6 +294,7 @@ def test_from_polygons():
     assert list_mocs == list_mocs_no_skycoord
 
 
+@pytest.mark.remote_data
 def test_from_vizier():
     # deprecated nside should still work (nside=8 means order=3)
     with pytest.warns(
@@ -888,12 +889,14 @@ def test_neighbours(mocs):
     assert moc2 == mocs["moc2"]
 
 
+@pytest.mark.remote_data
 def test_query_simbad():
     moc = MOC.from_string("9/0")
     table = moc.query_simbad(select=["main_id", "main_type", "ra", "dec"])
     assert len(table) >= 10  # there are 13 results now but SIMBAD could be updated
 
 
+@pytest.mark.remote_data
 def test_query_vizier_table():
     moc = MOC.new_empty(max_depth=0).complement()
     table = moc.query_vizier_table("J/A+A/481/593/table1", max_rows=None)
@@ -901,6 +904,7 @@ def test_query_vizier_table():
     assert isinstance(table, Table)
 
 
+@pytest.mark.remote_data
 def test_query_vizier_table_exceptions():
     moc = MOC.new_empty(max_depth=0).complement()
     # overflow
@@ -912,6 +916,7 @@ def test_query_vizier_table_exceptions():
         table = moc.query_vizier_table("J/A+A/481/593/table1", output_format="blabla")
 
 
+@pytest.mark.remote_data
 def test_output_formats():
     # default astropy table tested in other tests
     # csv
