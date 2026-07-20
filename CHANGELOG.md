@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+* the `query_vizier_table` and `query_simbad` now have two new parameters: `select` allows to provide the list of columns we want in the result and `output_format` accepts `astropy_table` (previous behavior, new default) `csv`, `votable` (parsed in an astropy votable object) and `raw_votable` [#213]
+
 ### Changed
 
 * the default `TimeMOC.plot` colormap is now matplotlib's `Greens` to make the inside
