@@ -2590,7 +2590,7 @@ class MOC(AbstractMOC):
                 "query_params": json_dump.getvalue(),
                 "query_data": (
                     fp.name,
-                    Path.open(fp.name, mode="rb"),
+                    Path.open(Path(fp.name), mode="rb"),
                     "application/octet-stream",
                 ),
             }
