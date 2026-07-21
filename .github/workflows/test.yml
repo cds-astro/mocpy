@@ -19,7 +19,7 @@ jobs:
     env: {ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true} # Allow using Node16 actions required for CentOS7
     steps:
      - name: "Checkout branch ${{ github.head_ref }}"
-       uses: actions/checkout@v3
+       uses: actions/checkout@v7
      - name: "Install Rust"
        run: |
          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -49,10 +49,10 @@ jobs:
     steps:
      # Checkout the project
      - name: "Checkout branch ${{ github.head_ref }}"
-       uses: actions/checkout@v4
+       uses: actions/checkout@v7
      # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
      - name: "Set up Python ${{ matrix.python-version }} on MacOS"
-       uses: actions/setup-python@v5
+       uses: actions/setup-python@v7
        with:
          python-version: ${{ matrix.python-version }}
      # Test python code
@@ -81,10 +81,10 @@ jobs:
     steps:
       # Checkout the project
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       # Set up python, see https://docs.github.com/en/actions/guides/building-and-testing-python
       - name: "Set up Python ${{ matrix.python-version }} on Windows"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       # Test python code
@@ -109,9 +109,9 @@ jobs:
     steps:
       # Checkout the project
       - name: "Checkout branch ${{ github.head_ref }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: "Set up Pythons"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: 3.13
       # Test python code
