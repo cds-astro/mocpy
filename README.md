@@ -39,6 +39,28 @@ But also these combinations:
 
 *Rendered with MOCpy!*
 
+## Quick example
+
+```python
+from mocpy import MOC
+import astropy.units as u
+
+# Create a MOC from a cone
+field_of_view = MOC.from_cone(lon=0*u.deg, lat=0*u.deg, radius=10*u.deg, max_depth=7)
+
+# Check if a position is covered
+field_of_view.contains_lonlat(0*u.deg, 0*u.deg)  # True
+
+# Combine MOCs with set operations
+field_of_view2 = MOC.from_cone(lon=8*u.deg, lat=8*u.deg, radius=5*u.deg, max_depth=7)
+coverage = field_of_view | field_of_view2
+
+# Quick preview of the combined field of views
+coverage.display_preview()
+```
+
+![A quick display of the coverage. The two MOCs are combined into one.](./resources/readme_quick_example.png)
+
 ## Other resources
 
 For a command line tool, see the [moc-cli](https://github.com/cds-astro/cds-moc-rust/tree/main/crates/cli).
