@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * the default `TimeMOC.plot` colormap is now matplotlib's `Greens` to make the inside
   and outside of the coverage easier to identify [#220]
+* the optional dependency ``request``'s group is renamed from ``query_fits`` to
+  ``query`` to reflect its new uses in the library [#231]
 
 ### Fixed
 
