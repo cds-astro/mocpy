@@ -1,8 +1,16 @@
 # Enrich using https://www.maturin.rs/metadata.html
 [project]
 name = "mocpy"
+description = "MOCPy allows to create and manipulate MOCs (Multi-Order Coverage maps)"
 dynamic = ["version"]
 requires-python = ">=3.9" # update the abi3 declaration in Cargo.toml at the same time
+authors = [
+  {name = "Matthieu Baumann", email = "matthieu.baumann@astro.unistra.fr"},
+  {name = "Thomas Boch", email = "thomas.boch@astro.unistra.fr"},
+  {name = "Manon Marchand", email = "manon.marchand@astro.unistra.fr"},
+  {name = "F.-X. Pineau", email = "francois-xavier.pineau@astro.unistra.fr"},
+]
+readme = "README.md"
 dependencies = [
     "astropy",
     "numpy"
@@ -23,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 keywords=["astronomy", "astrophysics", "HEALPix"]
+
 
 [project.optional-dependencies]
 # optional for plots
