@@ -533,7 +533,7 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        path : str
+        path_or_url : str
             The path to the FITS file.
         timeout : float
             Timeout for the query, defaults to 1000s

@@ -228,7 +228,7 @@ class FrequencyMOC(AbstractMOC):
         Parameters
         ----------
         max_depth : `int`
-                The resolution of the FrequencyMOC
+            The resolution of the FrequencyMOC
 
 
         Returns
@@ -628,12 +628,10 @@ class FrequencyMOC(AbstractMOC):
         ----------
         ax : `matplotlib.axes._axes.Axes`
         color : `str`, default 'blue'
-               any format supported by matplotlib for colors, see
-               `matplotlib.colors`
-        length_unit : `str` or `astropy.units.core.Unit`, optional
-                     any string or astropy.unit of physical type 'frequency', see
-                     `astropy.units.physical.get_physical_type`
-                     Defaults to Hertz 'Hz'
+            Any format supported by matplotlib for colors, see `matplotlib.colors`
+        frequency_unit : `str` or `astropy.units.core.Unit`, optional
+            Any string or astropy.unit of physical type 'frequency', see
+            `astropy.units.physical.get_physical_type`. Defaults to Hertz 'Hz'
 
         Examples
         --------
@@ -683,12 +681,10 @@ class FrequencyMOC(AbstractMOC):
         ----------
         ax : `matplotlib.axes._axes.Axes`
         color : `str`, default 'blue'
-               any format supported by matplotlib for colors, see
-               `matplotlib.colors`.
+            Any format supported by matplotlib for colors, see `matplotlib.colors`.
         length_unit : `str` or `astropy.units.core.Unit`, default 'm'
-                     any string or astropy.unit of physical type 'length', see
-                     `astropy.units.get_physical_type`
-                     Defaults to meters 'm'
+            Any string or astropy.unit of physical type 'length', see
+            `astropy.units.get_physical_type`. Defaults to meters 'm'.
 
         Examples
         --------

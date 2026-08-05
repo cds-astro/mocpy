@@ -125,7 +125,7 @@ class STMOC(AbstractMOC):
 
         Parameters
         ----------
-        time : `astropy.time.Time`
+        times : `astropy.time.Time`
             The times of each sky coordinates.
         time_depth : int
             Time depth.
