@@ -61,8 +61,8 @@ def from_moc(depth_ipix_d, wcs):
     """Create a new MOC that do not contain the HEALPix cells that are backfacing the projection."""
     if _cdshealpix_missing:
         raise ImportError(
-            "The optional bundle of dependencies `plot` is required to use this method. "
-            "Install it with `pip install mocpy[plot]`."
+            "The optional bundle of dependencies `plots` is required to use this method. "
+            "Install it with `pip install mocpy[plots]`."
         )
     depths = [int(depth_str) for depth_str in depth_ipix_d]
     min_depth = min(depths)
