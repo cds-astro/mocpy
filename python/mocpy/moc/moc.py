@@ -526,8 +526,8 @@ class MOC(AbstractMOC):
         """
         if _missing_plot_dependencies:
             raise ImportError(
-                "the group of optional dependencies `plot` is required to use this method."
-                " Install it with `pip install mocpy[plot]`."
+                "the group of optional dependencies `plots` is required to use this method."
+                " Install it with `pip install mocpy[plots]`."
             )
         fill.fill(self, ax, wcs, optimize=optimize, **kw_mpl_pathpatch)
 
@@ -598,8 +598,8 @@ class MOC(AbstractMOC):
         """
         if _missing_plot_dependencies:
             raise ImportError(
-                "The group of optional dependencies `plot` is required to use this method."
-                " Install it with `pip install mocpy[plot]`."
+                "The group of optional dependencies `plots` is required to use this method."
+                " Install it with `pip install mocpy[plots]`."
             )
         warnings.warn(
             "This method is not stable. A future more stable algorithm will be implemented!",
@@ -2711,7 +2711,7 @@ class MOC(AbstractMOC):
         """
         if _missing_plot_dependencies:
             raise ImportError(
-                "the group of optional dependencies `plot` is required to use this method."
+                "the group of optional dependencies `plots` is required to use this method."
             )
         warnings.warn(
             "This method is deprecated and is no longer tested."
@@ -2892,7 +2892,7 @@ class MOC(AbstractMOC):
         """
         if _missing_plot_dependencies:
             raise ImportError(
-                "the group of optional dependencies `plot` is required to use this method."
+                "the group of optional dependencies `plots` is required to use this method."
             )
         import matplotlib.pyplot as plt
 
