@@ -32,22 +32,86 @@ class STMOC(AbstractMOC):
 
     @property
     def max_depth(self):
-        """Return max depth of MOC."""
+        """Return max depth in time and space of the MOC (alias of max_order).
+
+        Returns
+        -------
+        Tuple
+            The maximum order (temporal, spatial) of the ST-MOC.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> moc = MOC.from_cone(0 * u.deg, 0* u.deg, radius=10 * u.arcmin, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"), [moc])
+        >>> stmoc.max_depth
+        (61, 10)
+        """
         return mocpy.coverage_st_depth(self.store_index)
 
     @property
     def max_order(self):
-        """Is a clone of max_depth, to preserve the api between moc types."""
+        """Return max order in time and space of the Space-Time MOC.
+
+        Returns
+        -------
+        Tuple
+            The maximum order (temporal, spatial) of the ST-MOC.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> moc = MOC.from_cone(0 * u.deg, 0* u.deg, radius=10 * u.arcmin, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"), [moc])
+        >>> stmoc.max_order
+        (61, 10)
+        """
         return self.max_depth
 
     @property
     def max_time(self):
-        """Return STMOC max time."""
+        """Return the maximum time of the ST-MOC.
+
+        Returns
+        -------
+        `astropy.time.Time`
+            The maximum time of the ST-MOC.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> moc = MOC.from_cone(0 * u.deg, 0* u.deg, radius=10 * u.arcmin, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"), [moc])
+        >>> stmoc.max_time.iso
+        '2020-01-01 00:01:30.222'
+        """
         return microseconds_to_times(mocpy.coverage_2d_max_time(self.store_index))
 
     @property
     def min_time(self):
-        """Return STMOC min time."""
+        """Return the minimum time of the ST-MOC.
+
+        Returns
+        -------
+        `astropy.time.Time`
+            The minimum time of the ST-MOC.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> moc = MOC.from_cone(0 * u.deg, 0* u.deg, radius=10 * u.arcmin, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"), [moc])
+        >>> stmoc.min_time.iso
+        '2000-01-01 00:01:15.436'
+        """
         return microseconds_to_times(mocpy.coverage_2d_min_time(self.store_index))
 
     @classmethod
@@ -112,7 +176,19 @@ class STMOC(AbstractMOC):
         return cls(index)
 
     def is_empty(self):
-        """Check whether the Space-Time coverage is empty."""
+        """Check whether the Space-Time coverage is empty.
+
+        Returns
+        -------
+        bool
+            True if the ST-MOC is empty, False otherwise.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> STMOC.new_empty(42, 12).is_empty()
+        True
+        """
         return mocpy.is_empty(self.store_index)
 
     @classmethod
@@ -140,6 +216,20 @@ class STMOC(AbstractMOC):
         -------
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> from astropy.time import Time
+        >>> from astropy import units as u
+        >>> times = Time(["2020-01-01", "2020-01-02"])
+        >>> lon = [0, 10] * u.deg
+        >>> lat = [0, 10] * u.deg
+        >>> stmoc = STMOC.from_times_positions(times, 20, lon, lat, 12)
+        >>> stmoc
+        t20/96608
+        s12/79691776 80048632
+        t20/ s12/
         """
         times = times_to_microseconds(times)
         lon = lon.to_value("rad").astype(np.float64)
@@ -190,10 +280,25 @@ class STMOC(AbstractMOC):
         -------
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
-        """
-        # times_start = times_start.jd.astype(np.float64)
-        # times_end = times_end.jd.astype(np.float64)
 
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> from astropy.time import Time
+        >>> from astropy import units as u
+        >>> time_start = Time(["2020-01-01", "2020-01-02"])
+        >>> time_end = Time(["2020-01-10", "2020-01-12"])
+        >>> lon = [0, 10] * u.deg
+        >>> lat = [0, 10] * u.deg
+        >>> stmoc = STMOC.from_time_ranges_positions(time_start, time_end, lon, lat,
+        ...                                          time_depth=20, spatial_depth=8)
+        >>> stmoc
+        t20/96608
+        s8/311296 312689
+        t20/96609
+        s8/312689
+        t20/ s8/
+        """
         times_start = times_to_microseconds(times_start)
         times_end = times_to_microseconds(times_end)
 
@@ -247,6 +352,17 @@ class STMOC(AbstractMOC):
         -------
         result : `~mocpy.stmoc.STMOC`
             The resulting Spatial-Time Coverage map.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-10")
+        >>> moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.arcmin, max_depth=15)
+        >>> stmoc = STMOC.from_spatial_coverages(time_min, time_max, [moc])
         """
         # accept also when there is a single spatial moc
         times_start = np.atleast_1d(times_start)
@@ -294,6 +410,19 @@ class STMOC(AbstractMOC):
         -------
         `~mocpy.moc.MOC`
             The spatial coverage being observed within the input time ranges
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC, TimeMOC as TMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-10")
+        >>> moc = MOC.from_string("4/4 5/15 20")
+        >>> tmoc = TMOC.from_time_ranges(time_min, time_max)
+        >>> stmoc = STMOC.from_spatial_coverages(time_min, time_max, [moc])
+        >>> stmoc.query_by_time(tmoc)
+        4/4
+        5/15 20
         """
         return MOC.from_stmoc_time_fold(tmoc, self)
 
@@ -313,6 +442,17 @@ class STMOC(AbstractMOC):
         -------
         `~mocpy.tmoc.TimeMOC`
             The time ranges observing in the ``spatial_coverage``
+
+        Examples
+        --------
+        >>> from mocpy import STMOC, MOC, TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-10")
+        >>> moc = MOC.from_string("3/0-1")
+        >>> stmoc = STMOC.from_spatial_coverages(time_min, time_max, [moc])
+        >>> stmoc.query_by_space(moc).max_time.iso
+        array(['2026-01-10 00:01:33.171'], dtype='<U23')
         """
         return TimeMOC.from_stmoc_space_fold(smoc, self)
 
@@ -433,6 +573,20 @@ class STMOC(AbstractMOC):
         -------
         `~mocpy.STMOC`
             The ST-MOC build from the given string.
+
+        Examples
+        --------
+        >>> from mocpy import STMOC
+        >>> stmoc = STMOC.from_string("t20/500-600 s29/ 3/0-1")
+        >>> stmoc
+        t14/8
+        16/36
+        17/63 74
+        18/125
+        20/600
+        s3/0-1
+        29/
+        t20/ s29/
         """
         if format == "ascii":
             index = mocpy.coverage_st_from_ascii_str(value)

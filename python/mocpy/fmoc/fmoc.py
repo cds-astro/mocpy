@@ -509,6 +509,13 @@ class FrequencyMOC(AbstractMOC):
         order : `int`
             The less precise order fulfilling the given ``frequency_precision``.
 
+        Examples
+        --------
+        >>> from mocpy import FrequencyMOC
+        >>> FrequencyMOC.relative_precision_to_order(0.1)
+        np.uint8(10)
+        >>> FrequencyMOC.relative_precision_to_order(1e-4)
+        np.uint8(20)
         """
         order = int(7 - np.log(frequency_precision) / np.log(2))
         if order > FrequencyMOC.MAX_ORDER:

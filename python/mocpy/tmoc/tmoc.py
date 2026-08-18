@@ -32,6 +32,14 @@ def times_to_microseconds(times):
     -------
     `np.array`
         Time in microseconds
+
+    Examples
+    --------
+    >>> from astropy.time import Time
+    >>> from mocpy.tmoc import times_to_microseconds
+    >>> time = Time("2026-08-15")
+    >>> times_to_microseconds(time)
+    np.uint64(212653512093460827)
     """
     times_jd = np.asarray(times.jd, dtype=np.uint64)
     times_us = np.asarray(
@@ -53,6 +61,13 @@ def microseconds_to_times(times_microseconds):
     Returns
     -------
     `astropy.time.Time`
+
+    Examples
+    --------
+    >>> from mocpy.tmoc import microseconds_to_times
+    >>> time = microseconds_to_times(2e17)
+    >>> time.iso
+    '1625-08-24 07:33:20.000'
     """
     jd1 = np.asarray(times_microseconds // DAY_MICRO_SEC, dtype=np.float64)
     jd2 = np.asarray(
@@ -116,12 +131,32 @@ class TimeMOC(AbstractMOC):
         return mocpy.n_cells_tmoc(depth)
 
     def to_time_ranges(self):
-        """Return the time ranges this TimeMOC contains."""
+        """Return the time ranges this TimeMOC contains.
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.from_string("21/193392 22/386779-386780")
+        >>> ranges = tmoc.to_time_ranges()
+        >>> ranges.iso
+        array([['2026-01-01 05:05:39.787', '2026-01-13 22:30:51.415'],
+               ['2026-02-02 00:38:38.856', '2026-02-14 18:03:50.484']],
+              dtype='<U23')
+        """
         return microseconds_to_times(mocpy.to_ranges(self.store_index))
 
     @property
     def to_depth61_ranges(self):
-        """Return the list of ranges this TimeMOC contains, in microsec since JD=0."""
+        """Return the list of ranges this TimeMOC contains, in microsec since JD=0.
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.from_string("61/380000-390000 400000")
+        >>> tmoc.to_depth61_ranges
+        array([[380000, 390001],
+               [400000, 400001]], dtype=uint64)
+        """
         return mocpy.to_ranges(self.store_index)
 
     def degrade_to_order(self, new_order):
@@ -140,6 +175,15 @@ class TimeMOC(AbstractMOC):
         -------
         `~mocpy.TimeMOC`
             The degraded MOC.
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.from_string("20/0 100 500")
+        >>> tmoc.max_order
+        np.uint8(20)
+        >>> tmoc.degrade_to_order(15)
+        15/0 3 15
         """
         if new_order >= self.max_order:
             warnings.warn(
@@ -230,12 +274,21 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        max_depth : int, The resolution of the TimeMOC
-
+        max_depth : int
+            The resolution of the TimeMOC
 
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.new_empty(10)
+        >>> tmoc
+        10/
+        >>> tmoc.empty()
+        True
         """
         index = mocpy.new_empty_tmoc(np.uint8(max_depth))
         return cls(index)
@@ -247,13 +300,30 @@ class TimeMOC(AbstractMOC):
 
         Parameters
         ----------
-        max_depth : int, The resolution of the TimeMOC
+        max_depth : int
+            The resolution of the TimeMOC
         ranges: `~numpy.ndarray`
                  a N x 2 numpy array representing the set of depth 61 ranges.
 
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> import numpy as np
+        >>> ranges = np.array([[0, 1000], [2000, 3000]], dtype=np.uint64)
+        >>> tmoc = TimeMOC.from_depth61_ranges(61, ranges)
+        >>> tmoc
+        52/0 4
+        53/2 10
+        54/6 22
+        55/14
+        56/30 63 92
+        57/125 186
+        58/124 374
+        61/
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
@@ -287,6 +357,16 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time, TimeDelta
+        >>> delta = TimeDelta(1, format="jd")
+        >>> times = Time(["2026-01-01", "2026-01-02", "2026-01-03"])
+        >>> tmoc = TimeMOC.from_times(times, delta_t=delta, order=40)
+        >>> tmoc.min_time[0].iso
+        '2026-01-01 00:01:32.467'
         """
         times = times_to_microseconds(times)
         times = np.atleast_1d(times)
@@ -319,6 +399,16 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time(["2026-01-01", "2026-02-01"])
+        >>> time_max = Time(["2026-01-20", "2026-02-20"])
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.contains(Time(["2026-01-15", "2027-01-01"]))
+        array([ True, False])
         """
         if not order:
             # degrade the TimeMOC to the order computed from ``delta_t``
@@ -367,6 +457,14 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> tmoc = TimeMOC.from_time_ranges_approx(time_min, time_max)
         """
         if not order:
             # degrade the TimeMOC to the order computed from ``delta_t``
@@ -400,6 +498,18 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC, MOC, STMOC
+        >>> import astropy.units as u
+        >>> from astropy.time import Time
+        >>> smoc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.deg, max_depth=10)
+        >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"),
+        ...                                      smoc, time_depth=40)
+        >>> tmoc = TimeMOC.from_stmoc_space_fold(smoc, stmoc)
+        >>> tmoc.min_time[0].iso
+        '2000-01-01 00:01:14.142'
         """
         store_index = mocpy.project_on_stmoc_time_dim(
             smoc.store_index, stmoc.store_index
@@ -459,11 +569,28 @@ class TimeMOC(AbstractMOC):
         `~mocpy.TimeMOC`
             MOC object whose interval set corresponds to : self & ``moc``
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min1 = Time("2026-01-01")
+        >>> time_max1 = Time("2026-01-10")
+        >>> time_min2 = Time("2026-01-05")
+        >>> time_max2 = Time("2026-01-15")
+        >>> tmoc1 = TimeMOC.from_time_ranges(time_min1, time_max1)
+        >>> tmoc2 = TimeMOC.from_time_ranges(time_min2, time_max2)
+        >>> result = tmoc1.intersection_with_timeresolution(tmoc2)
+        >>> result.to_time_ranges().iso
+        array([['2026-01-04 23:45:57.301', '2026-01-10 00:15:48.998']],
+              dtype='<U23')
         """
         if not order:
             order = TimeMOC.time_resolution_to_order(delta_t)
-
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=UserWarning, message="The new order*"
+            )
+            self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).intersection(moc_degraded)
 
     def union_with_timeresolution(
@@ -491,11 +618,29 @@ class TimeMOC(AbstractMOC):
         `~mocpy.TimeMOC`
             MOC object whose interval set corresponds to : self | ``moc``
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min1 = Time("2026-01-01")
+        >>> time_max1 = Time("2026-01-10")
+        >>> time_min2 = Time("2026-01-15")
+        >>> time_max2 = Time("2026-01-20")
+        >>> tmoc1 = TimeMOC.from_time_ranges(time_min1, time_max1)
+        >>> tmoc2 = TimeMOC.from_time_ranges(time_min2, time_max2)
+        >>> result = tmoc1.union_with_timeresolution(tmoc2)
+        >>> result.to_time_ranges().iso
+        array([['2026-01-01 00:01:26.176', '2026-01-10 00:15:48.998'],
+               ['2026-01-14 23:51:59.470', '2026-01-20 00:03:57.425']],
+              dtype='<U23')
         """
         if not order:
             order = TimeMOC.time_resolution_to_order(delta_t)
-
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=UserWarning, message="The new order*"
+            )
+            self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).union(moc_degraded)
 
     def difference_with_timeresolution(
@@ -521,11 +666,29 @@ class TimeMOC(AbstractMOC):
         `~mocpy.TimeMOC`
             MOC object whose interval set corresponds to : self - ``moc``
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min1 = Time("2026-01-01")
+        >>> time_max1 = Time("2026-01-20")
+        >>> time_min2 = Time("2026-01-10")
+        >>> time_max2 = Time("2026-01-15")
+        >>> tmoc1 = TimeMOC.from_time_ranges(time_min1, time_max1)
+        >>> tmoc2 = TimeMOC.from_time_ranges(time_min2, time_max2)
+        >>> result = tmoc1.difference_with_timeresolution(tmoc2)
+        >>> result.to_time_ranges().iso
+        array([['2026-01-01 00:01:26.176', '2026-01-09 23:57:55.256'],
+               ['2026-01-15 00:09:53.211', '2026-01-20 00:03:57.425']],
+              dtype='<U23')
         """
         if not order:
             order = TimeMOC.time_resolution_to_order(delta_t)
-
-        self_degraded, moc_degraded = self._process_degradation(another_moc, order)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=UserWarning, message="The new order*"
+            )
+            self_degraded, moc_degraded = self._process_degradation(another_moc, order)
         return super(TimeMOC, self_degraded).difference(moc_degraded)
 
     @property
@@ -538,6 +701,15 @@ class TimeMOC(AbstractMOC):
         `~astropy.time.TimeDelta`
             total duration of all the observation times of the tmoc
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.total_duration.jd
+        np.float64(19.001750565925924)
         """
         return TimeDelta(
             mocpy.ranges_sum(self.store_index) / 1e6,
@@ -559,6 +731,15 @@ class TimeMOC(AbstractMOC):
         float
             fill percentage (between 0 and 1.)
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> times_min = Time(["2026-01-01", "2026-11-01"])
+        >>> times_max = Time(["2026-01-20", "2026-11-30"])
+        >>> tmoc = TimeMOC.from_time_ranges(times_min, times_max)
+        >>> tmoc.consistency
+        array([0.14420063])
         """
         return self.total_duration.jd / (self.max_time - self.min_time).jd
 
@@ -572,6 +753,15 @@ class TimeMOC(AbstractMOC):
         `astropy.time.Time`
             time of the first observation
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.min_time.iso
+        array(['2026-01-01 00:01:26.176'], dtype='<U23')
         """
         return microseconds_to_times(np.atleast_1d(self.min_index))
 
@@ -585,6 +775,15 @@ class TimeMOC(AbstractMOC):
         `~astropy.time.Time`
             time of the last observation
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.max_time.iso
+        array(['2026-01-20 00:03:57.425'], dtype='<U23')
         """
         return microseconds_to_times(np.atleast_1d(self.max_index))
 
@@ -604,6 +803,16 @@ class TimeMOC(AbstractMOC):
         -------
         `~numpy.array`
             A mask boolean array
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.contains(Time(["2026-01-10", "2026-02-10"]))
+        array([ True, False])
         """
         # the requested order for filtering the astropy observations table is more precise than the order
         # of the TimeMOC object
@@ -639,6 +848,17 @@ class TimeMOC(AbstractMOC):
         -------
         `~numpy.array`
             A mask boolean array
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import Time, TimeDelta
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-20")
+        >>> delta = TimeDelta(2, format="jd")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> tmoc.contains_with_timeresolution(Time(["2026-01-20"]), delta_t=delta)
+        array([ True])
         """
         # the requested order for filtering the astropy observations table is more precise than the order
         # of the TimeMOC object
@@ -669,6 +889,13 @@ class TimeMOC(AbstractMOC):
         `~astropy.time.TimeDelta`
             time equivalent to ``order``
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> TimeMOC.order_to_time_resolution(61)
+        <TimeDelta object: scale='tcb' format='sec' value=1e-06>
+        >>> TimeMOC.order_to_time_resolution(0)
+        <TimeDelta object: scale='tcb' format='sec' value=2305843009213.694>
         """
         return TimeDelta(2 ** (61 - order) / 1e6, format="sec", scale="tcb")
 
@@ -687,6 +914,14 @@ class TimeMOC(AbstractMOC):
         int
             The less precise order which is able to discriminate two observations separated by ``delta_time``.
 
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> from astropy.time import TimeDelta
+        >>> TimeMOC.time_resolution_to_order(TimeDelta(1, format="sec"))
+        np.uint8(42)
+        >>> TimeMOC.time_resolution_to_order(TimeDelta(30 * 60, format="sec"))
+        np.uint8(31)
         """
         order = 61 - int(np.log2(delta_time.sec * 1e6))
         return np.uint8(order)
@@ -873,6 +1108,18 @@ class TimeMOC(AbstractMOC):
         Returns
         -------
         `~mocpy.TimeMOC`
+
+        Examples
+        --------
+        >>> from mocpy import TimeMOC
+        >>> tmoc = TimeMOC.from_string("5/0-10 8/200-300 305")
+        >>> tmoc
+        2/0
+        3/7-8
+        4/4 13
+        5/10 25 36
+        6/74
+        8/300 305
         """
         if format == "ascii":
             index = mocpy.time_moc_from_ascii_str(value)

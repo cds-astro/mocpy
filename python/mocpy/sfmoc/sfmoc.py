@@ -76,17 +76,40 @@ class SFMOC(AbstractMOC):
         -------
         (int, int)
             (max_order_frequency, max_order_space)
+
+        Examples
+        --------
+        >>> from mocpy import SFMOC
+        >>> sfmoc = SFMOC.new_empty(20, 12)
+        >>> sfmoc.max_order
+        (20, 12)
         """
         return mocpy.coverage_sf_depth(self.store_index)
 
     @property
     def min_frequency(self):
-        """Return SFMOC min frequency."""
+        """Return SFMOC min frequency.
+
+        Examples
+        --------
+        >>> from mocpy import SFMOC
+        >>> sfmoc = SFMOC.from_string("f10/600-700 s12/0-10")
+        >>> sfmoc.min_frequency
+        <Quantity 0.02548297 Hz>
+        """
         return mocpy.coverage_sf_min_freq(self.store_index) * u.Hz
 
     @property
     def max_frequency(self):
-        """Return SFMOC max frequency."""
+        """Return SFMOC max frequency.
+
+        Examples
+        --------
+        >>> from mocpy import SFMOC
+        >>> sfmoc = SFMOC.from_string("f10/600-700 s12/0-10")
+        >>> sfmoc.max_frequency
+        <Quantity 14.72206565 Hz>
+        """
         return mocpy.coverage_sf_max_freq(self.store_index) * u.Hz
 
     @classmethod
@@ -526,6 +549,20 @@ class SFMOC(AbstractMOC):
         -------
         `~mocpy.SFMOC`
             The ST-MOC build from the given string.
+
+        Examples
+        --------
+        >>> from mocpy import SFMOC
+        >>> sfmoc = SFMOC.from_string("f10/600-700 s12/0-10")
+        >>> sfmoc  # doctest: +ELLIPSIS
+        f5/19-20
+        6/42
+        7/75 86
+        8/174
+        10/700
+        s11/0-1
+        12/8-10
+        f10/ s12/
         """
         if format == "ascii":
             index = mocpy.coverage_sf_from_ascii_str(value)
