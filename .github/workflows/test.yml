@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 jobs:
   # Linux is specific: because of manylinux, we have to use a docker file
-  test-linux64-wheels:
+  test-linux64-wheels-and-docs:
     runs-on: ubuntu-latest
     # CentOS 7 64 bits Docker Hub image that 'build-linux64-wheels' executes in.
     # See https://github.com/pypa/manylinux for this particular container:
@@ -37,8 +37,13 @@ jobs:
            pip install --upgrade pip
            pip install maturin==1.12.4
            maturin develop --release
-           pip install .[dev,plots]
-           python -m pytest python/mocpy/tests/ --run-remote
+           pip install .[dev,plots,docs]
+           python -m pytest --run-remote
+           # compile the docs too
+           sudo apt-get install pandoc
+           cd ./docs
+           make clean html
+           deactivate
          done
 
   test-macos-wheels:
