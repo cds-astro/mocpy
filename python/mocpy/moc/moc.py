@@ -202,7 +202,14 @@ class MOC(AbstractMOC):
 
     @property
     def max_order(self):
-        """Depth/order of the S-MOC."""
+        """Depth/order of the S-MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.from_string("3/0-1").max_order
+        3
+        """
         return mocpy.get_smoc_depth(self.store_index)
 
     @classmethod
@@ -245,6 +252,16 @@ class MOC(AbstractMOC):
         Returns
         -------
         int
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("3/0-3")
+        >>> moc.split_count()
+        1
+        >>> moc = MOC.from_string("5/0 5/12")
+        >>> moc.split_count()
+        2
         """
         return mocpy.split_count(self.store_index, include_indirect_neighbours)
 
@@ -265,6 +282,18 @@ class MOC(AbstractMOC):
         Notes
         -----
         Use `~mocpy.moc.MOC.split_count` first to ensure the number is not too high
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("3/0-3")
+        >>> len(moc.split())
+        1
+        >>> mocs = MOC.from_string("5/0 5/12").split()
+        >>> mocs[0]
+        5/0
+        >>> mocs[1]
+        5/12
         """
         indices = mocpy.split(self.store_index, include_indirect_neighbours)
         return [MOC(index) for index in indices]
@@ -285,6 +314,13 @@ class MOC(AbstractMOC):
         -------
         `~mocpy.MOC`
             The degraded MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("10/2000-2200")
+        >>> moc.degrade_to_order(5)
+        5/1-2
         """
         if new_order >= self.max_order:
             warnings.warn(
@@ -313,8 +349,6 @@ class MOC(AbstractMOC):
         --------
         >>> from mocpy import MOC
         >>> moc = MOC.from_str("3/10")
-        >>> moc
-        3/10
         >>> moc.refine_to_order(5)
         3/10
         5/
@@ -384,6 +418,19 @@ class MOC(AbstractMOC):
         `~np.ndarray`
             A mask boolean array
 
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import SkyCoord
+        >>> moc = MOC.from_string("0/0-11") # all the sky
+        >>> coords = SkyCoord([0, 180, 90], [0, 0, 0], unit="deg")
+        >>> moc.contains_skycoords(coords)
+        array([ True,  True,  True])
+        >>> moc = MOC.from_string("3/0")
+        >>> coords = SkyCoord([45, 180], [0, 0], unit="deg")
+        >>> moc.contains_skycoords(coords)
+        array([ True, False])
+
         See Also
         --------
         contains_lonlat
@@ -420,6 +467,7 @@ class MOC(AbstractMOC):
         See Also
         --------
         contains_skycoords
+        contains_lonlat
         """
         warnings.warn(
             "This method is deprecated and has been replaced by contains_lonlat",
@@ -595,6 +643,19 @@ class MOC(AbstractMOC):
         -------
         [`~astropy.coordinates.SkyCoord`]
             A list of `~astropy.coordinates.SkyCoord` each describing one border.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import SkyCoord
+        >>> moc = MOC.from_string("3/0-7")
+        >>> boundaries = moc.get_boundaries() # doctest: +SKIP
+        >>> boundaries # doctest: +SKIP
+        [<SkyCoord (ICRS): (ra, dec) in deg
+            [(50.625, 24.62431835), (45.   , 19.47122063), (39.375, 14.47751219),
+             (33.75 ,  9.59406823), (39.375,  4.78019185), (45.   ,  0.        ),
+             (50.625,  4.78019185), (56.25 ,  9.59406823), (61.875, 14.47751219),
+             (67.5  , 19.47122063), (61.875, 24.62431835), (56.25 , 30.        )]>]
         """
         if _missing_plot_dependencies:
             raise ImportError(
@@ -960,6 +1021,15 @@ class MOC(AbstractMOC):
         -------
         `~mocpy.MOC`
             The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import SkyCoord
+        >>> coords = SkyCoord([0, 1, 2], [0, 1, 2], unit="deg")
+        >>> moc = MOC.from_skycoords(coords, max_norder=5)
+        >>> moc # the three coordinates are in the same two cells of order 5
+        5/4864-4865
         """
         return cls.from_lonlat(
             lon=skycoords.icrs.ra,
@@ -989,6 +1059,16 @@ class MOC(AbstractMOC):
         -------
         `~mocpy.MOC`
             The resulting MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import Longitude, Latitude
+        >>> lon = Longitude([0, 1, 2], unit="deg")
+        >>> lat = Latitude([0, 1, 2], unit="deg")
+        >>> moc = MOC.from_lonlat(lon, lat, max_norder=5)
+        >>> moc # the three coordinates are in the same two cells of order 5
+        5/4864-4865
         """
         index = mocpy.from_lonlat(
             max_norder,
@@ -1081,6 +1161,24 @@ class MOC(AbstractMOC):
         In wasm compilations (ex for pyodide), this won't raise an error, but will be
         single-threaded.
 
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> from astropy.table import Table
+        >>> moc1 = MOC.from_str("0/0-11")
+        >>> moc2 = MOC.from_str("0/0-11")
+        >>> # Create a multiorder map
+        >>> uniq = [4 + x for x in range(20)]
+        >>> probdensity = np.arange(20, dtype='float64') / 1000
+        >>> multi_order_map = Table([uniq, probdensity], names=("UNIQ", "PROBDENSITY"))
+        >>> probabilities = MOC.probabilities_in_multiordermap([moc1, moc2], multi_order_map)
+        >>> [round(p, 4) for p in probabilities]
+        [np.float64(0.1016), np.float64(0.1016)]
+
+        See Also
+        --------
+        probability_in_multiordermap: calculates the probability for a single MOC
         """
         if not isinstance(multiordermap, Table):
             raise ValueError(
@@ -1208,6 +1306,22 @@ class MOC(AbstractMOC):
         -------
         Tuple(np.ndarray, np.ndarray)
 
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> from astropy.table import Table
+        >>> all_sky = MOC.from_str("0/0-11")
+        >>> # Create a multiorder map with order 0 cells
+        >>> uniq = [4 + x for x in range(8)]
+        >>> column = np.arange(8, dtype='float64')
+        >>> multi_order_map = Table([uniq, column], names=("UNIQ", "column"))
+        >>> values, weights = all_sky.values_and_weights_in_multiordermap(multi_order_map, "column")
+        >>> values
+        array([0., 1., 2., 3., 4., 5., 6., 7.])
+        >>> weights
+        array([1.04719755, 1.04719755, 1.04719755, 1.04719755, 1.04719755,
+               1.04719755, 1.04719755, 1.04719755])
         """
         index = self.store_index
         return mocpy.multiorder_values_and_weights_in_smoc(
@@ -2024,6 +2138,20 @@ class MOC(AbstractMOC):
         `~mocpy.MOC`
             The resulting MOC
 
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import Angle
+        >>> lon = Angle([0, 10, 10, 0], unit="deg")
+        >>> lat = Angle([0, 0, 10, 10], unit="deg")
+        >>> moc = MOC.from_polygon(lon, lat, max_depth=5)
+        >>> moc
+        4/1131 1134 1216-1217 1219-1222
+        5/4517-4519 4521-4523 4528 4530-4531 4540 4542-4543 4873 4892 4901 4912
+        >>> moc.barycenter()
+        <SkyCoord (ICRS): (ra, dec) in deg
+            (4.92337884, 5.40015256)>
+
         See Also
         --------
         from_polygons
@@ -2215,6 +2343,13 @@ class MOC(AbstractMOC):
         -------
         moc : `~mocpy.MOC`
             The MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.new_empty(max_depth=5)
+        >>> moc.empty()
+        True
         """
         index = mocpy.new_empty_smoc(np.uint8(max_depth))
         return cls(index)
@@ -2242,6 +2377,17 @@ class MOC(AbstractMOC):
         -------
         `~mocpy.MOC`
             The MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> # Create HEALPix cells at order 3
+        >>> ipix = np.array([5, 10, 15, 20, 25], dtype='uint64')
+        >>> depth = np.array([3] * 5, dtype='uint8')
+        >>> moc = MOC.from_healpix_cells(ipix, depth, max_depth=3)
+        >>> moc
+        3/5 10 15 20 25
         """
         if not isinstance(depth, Iterable):
             depth = np.full(len(ipix), depth, dtype=np.uint8)
@@ -2277,6 +2423,17 @@ class MOC(AbstractMOC):
         -------
         moc : `~mocpy.MOC`
             The MOC
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import numpy as np
+        >>> # Create an empty MOC using depth29 ranges
+        >>> ranges = np.zeros((0, 2), dtype='uint64')
+        >>> MOC.from_depth29_ranges(25, np.array([[10000, 20000], [40000, 50000]]))
+        23/3 10-11
+        24/10-11 16-18 39 48
+        25/39 76-78
         """
         ranges = np.zeros((0, 2), dtype=np.uint64) if ranges is None else ranges
 
@@ -2302,6 +2459,20 @@ class MOC(AbstractMOC):
         Returns
         -------
         `~mocpy.MOC`
+
+        Examples
+        --------
+        >>> from mocpy import MOC, TimeMOC, STMOC
+        >>> from astropy.time import Time
+        >>> import astropy.units as u
+        >>> from astropy.coordinates import Angle, Longitude, Latitude
+        >>> time_min = Time("2026-01-01")
+        >>> time_max = Time("2026-01-10")
+        >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
+        >>> moc = MOC.from_cone(0*u.deg, 0*u.deg, radius=10*u.arcmin, max_depth=5)
+        >>> stmoc = STMOC.from_spatial_coverages(time_min, time_max, [moc])
+        >>> MOC.from_stmoc_time_fold(tmoc, stmoc)
+        5/4351 4522 4693 4864
         """
         store_index = mocpy.project_on_stmoc_space_dim(
             tmoc.store_index, stmoc.store_index
@@ -2358,6 +2529,13 @@ class MOC(AbstractMOC):
         spatial_resolution : `~astropy.coordinates.Angle`
             Spatial resolution.
 
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.order_to_spatial_resolution(0)
+        <Angle 1.02332671 rad>
+        >>> MOC.order_to_spatial_resolution(5).to("deg")
+        <Angle 1.83225942 deg>
         """
         return Angle(np.sqrt(np.pi / (3 * 4 ** (order))), unit="rad")
 
@@ -2375,6 +2553,15 @@ class MOC(AbstractMOC):
         -------
         order : int
             The order corresponding to the spatial resolution
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import Angle
+        >>> MOC.spatial_resolution_to_order(Angle(1, "deg"))
+        np.uint8(6)
+        >>> MOC.spatial_resolution_to_order(Angle(5, "arcsec"))
+        np.uint8(16)
         """
         res_rad = spatial_resolution.rad
         order = np.ceil(np.log2(np.pi / (3 * res_rad * res_rad)) / 2)
@@ -2805,6 +2992,10 @@ class MOC(AbstractMOC):
             The format from which the MOC is loaded.
             Possible formats are "fits", "ascii" or "json".
             By default, ``format`` is set to "fits".
+
+        Returns
+        -------
+        `~mocpy.MOC`
         """
         path = str(path)
         if format == "fits":
@@ -2840,6 +3031,16 @@ class MOC(AbstractMOC):
             The format in which the MOC will be serialized before being saved.
             Possible formats are "ascii" or "json".
             By default, ``format`` is set to "ascii".
+
+        Returns
+        -------
+        `~mocpy.MOC`
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> MOC.from_string("3/0-1")
+        3/0-1
         """
         if format == "ascii":
             index = mocpy.spatial_moc_from_ascii_str(value)
@@ -2860,12 +3061,28 @@ class MOC(AbstractMOC):
         The output is not sorted, the order follow the order of HEALPix cells in
         the underlying sorted array of depth29 nested ranges, i.e. the natural order
         of the cells is the underlying z-order curve.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("0/0-11")
+        >>> moc.uniq_hpx
+        array([ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15], dtype=uint64)
         """
         return mocpy.to_uniq_hpx(self.store_index)
 
     @property
     def to_depth29_ranges(self):
-        """Return the list of order 29 HEALPix nested ranges this MOC contains."""
+        """
+        Return the list of order 29 HEALPix nested ranges this MOC contains.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> moc = MOC.from_string("0/0-1")
+        >>> moc.to_depth29_ranges
+        array([[                 0, 576460752303423488]], dtype=uint64)
+        """
         return mocpy.to_ranges(self.store_index)
 
     def to_rgba(self, y_size=300):
@@ -2901,12 +3118,32 @@ class MOC(AbstractMOC):
         plt.show()
 
     def barycenter(self):
-        """Return the Barycenter of the MOC."""
+        """Return the Barycenter of the MOC.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> import astropy.units as u
+        >>> MOC.from_cone(6*u.deg, 15*u.deg,
+        ...               radius=10*u.arcmin, max_depth=13).barycenter()
+        <SkyCoord (ICRS): (ra, dec) in deg
+            (6.00000618, 14.99968594)>
+        """
         lonlat = mocpy.get_barycenter(self.store_index)
         return SkyCoord(lonlat[0], lonlat[1], unit="rad")
 
     def largest_distance_from_coo_to_vertices(self, coo):
-        """Return the largest distance between the given coordinates and vertices of the MOC cells."""
+        """Return the largest distance between the given coordinates and vertices of the MOC cells.
+
+        Examples
+        --------
+        >>> from mocpy import MOC
+        >>> from astropy.coordinates import SkyCoord
+        >>> coo = SkyCoord(0, 0, unit="deg")
+        >>> moc = MOC.from_string("15/600")
+        >>> moc.largest_distance_from_coo_to_vertices(coo).to("deg")
+        <Quantity 44.99314494 deg>
+        """
         angle = mocpy.get_largest_distance_from_coo_to_moc_vertices(
             self.store_index,
             coo.ra.rad,
