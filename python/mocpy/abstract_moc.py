@@ -338,8 +338,8 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         ...                                  delta_t = TimeDelta(1, format='jd')
         ...                                 )
         >>> union = older.union(newer) # == older + newer
-        >>> print(union.min_time.jyear, union.max_time.jyear)
-        [1998.99847987] [2010.00183614]
+        >>> print(round(union.min_time.jyear, 4), round(union.max_time.jyear, 4))
+        1998.9985 2010.0018
         """
         if mocs:
             store_indices = np.array(

@@ -452,7 +452,7 @@ class STMOC(AbstractMOC):
         >>> moc = MOC.from_string("3/0-1")
         >>> stmoc = STMOC.from_spatial_coverages(time_min, time_max, [moc])
         >>> stmoc.query_by_space(moc).max_time.iso
-        array(['2026-01-10 00:01:33.171'], dtype='<U23')
+        '2026-01-10 00:01:33.171'
         """
         return TimeMOC.from_stmoc_space_fold(smoc, self)
 

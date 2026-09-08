@@ -18,7 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* the `query_vizier_table` and `query_simbad` now have two new parameters: `select` allows to provide the list of columns we want in the result and `output_format` accepts `astropy_table` (previous behavior, new default) `csv`, `votable` (parsed in an astropy votable object) and `raw_votable` [#213]
+* the `query_vizier_table` and `query_simbad` now have two new parameters: `select`
+  allows to provide the list of columns we want in the result and `output_format`
+  accepts `astropy_table` (previous behavior, new default) `csv`, `votable` (parsed in
+  an astropy votable object) and `raw_votable` [#213]
 
 ### Changed
 
@@ -26,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and outside of the coverage easier to identify [#220]
 * the optional dependency ``request``'s group is renamed from ``query_fits`` to
   ``query`` to reflect its new uses in the library [#231]
+* :warning: BREAKING: `TimeMOC.mn_time` and `TimeMOC.max_time` now return scalar values
+  again (this was changed in version 0.12 by mistake and not documented in the
+  changelog) [#237]
 
 ### Fixed
 

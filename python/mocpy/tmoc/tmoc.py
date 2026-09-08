@@ -365,7 +365,7 @@ class TimeMOC(AbstractMOC):
         >>> delta = TimeDelta(1, format="jd")
         >>> times = Time(["2026-01-01", "2026-01-02", "2026-01-03"])
         >>> tmoc = TimeMOC.from_times(times, delta_t=delta, order=40)
-        >>> tmoc.min_time[0].iso
+        >>> tmoc.min_time.iso
         '2026-01-01 00:01:32.467'
         """
         times = times_to_microseconds(times)
@@ -508,7 +508,7 @@ class TimeMOC(AbstractMOC):
         >>> stmoc = STMOC.from_spatial_coverages(Time("2000-01-01"), Time("2020-01-01"),
         ...                                      smoc, time_depth=40)
         >>> tmoc = TimeMOC.from_stmoc_space_fold(smoc, stmoc)
-        >>> tmoc.min_time[0].iso
+        >>> tmoc.min_time.iso
         '2000-01-01 00:01:14.142'
         """
         store_index = mocpy.project_on_stmoc_time_dim(
@@ -739,7 +739,7 @@ class TimeMOC(AbstractMOC):
         >>> times_max = Time(["2026-01-20", "2026-11-30"])
         >>> tmoc = TimeMOC.from_time_ranges(times_min, times_max)
         >>> tmoc.consistency
-        array([0.14420063])
+        np.float64(0.14420062695924762)
         """
         return self.total_duration.jd / (self.max_time - self.min_time).jd
 
@@ -761,9 +761,9 @@ class TimeMOC(AbstractMOC):
         >>> time_max = Time("2026-01-20")
         >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
         >>> tmoc.min_time.iso
-        array(['2026-01-01 00:01:26.176'], dtype='<U23')
+        '2026-01-01 00:01:26.176'
         """
-        return microseconds_to_times(np.atleast_1d(self.min_index))
+        return microseconds_to_times(np.atleast_1d(self.min_index))[0]
 
     @property
     def max_time(self):
@@ -783,9 +783,9 @@ class TimeMOC(AbstractMOC):
         >>> time_max = Time("2026-01-20")
         >>> tmoc = TimeMOC.from_time_ranges(time_min, time_max)
         >>> tmoc.max_time.iso
-        array(['2026-01-20 00:03:57.425'], dtype='<U23')
+        '2026-01-20 00:03:57.425'
         """
-        return microseconds_to_times(np.atleast_1d(self.max_index))
+        return microseconds_to_times(np.atleast_1d(self.max_index))[0]
 
     def contains(self, times, keep_inside=True):
         """
