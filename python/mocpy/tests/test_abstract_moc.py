@@ -49,7 +49,7 @@ def path(tmp_path):
 def test_failing_instantiation():
     with pytest.raises(
         TypeError,
-        match="Can't instantiate abstract class AbstractMOC*",
+        match=r"Can't instantiate abstract class AbstractMOC*",
     ):
         AbstractMOC()
 
@@ -67,8 +67,43 @@ def test_failing_save(moc, path):
         moc.save(path, format="fits", overwrite=True, fold=80)
     with pytest.raises(ValueError, match=r"The ``fits_keyword`` argument*"):
         moc.save(path, format="json", fits_keywords={"TEST", "keyword"}, overwrite=True)
+    with pytest.raises(ValueError, match=r"The 'v1_compatible' argument*"):
+        moc.save(path, format="json", v1_compatible=True, overwrite=True)
+    with pytest.warns(
+        DeprecationWarning, match=r"The 'pre_v2' argument is deprecated"
+    ), pytest.raises(ValueError, match=r"The 'v1_compatible' argument*"):
+        moc.save(path, format="json", pre_v2=True, overwrite=True)
     with pytest.raises(ValueError, match=r"'format' should be *"):
         moc.save(path, overwrite=True, format="test")
+
+
+def test_v1_compatible(moc, path):
+    # default writes RANGE
+    moc.save(path, format="fits", overwrite=True)
+    with fits.open(path) as hdulist:
+        assert hdulist[1].header["ORDERING"] == "RANGE"
+    assert moc == moc.load(path, format="fits")
+
+    # v1_compatible=True writes NUNIQ for spatial MOC
+    moc.save(path, format="fits", v1_compatible=True, overwrite=True)
+    with fits.open(path) as hdulist:
+        assert hdulist[1].header["ORDERING"] == "NUNIQ"
+    assert moc == moc.load(path, format="fits")
+
+    # pre_v2=True triggers deprecation warning and writes NUNIQ
+    with pytest.warns(DeprecationWarning, match=r"The 'pre_v2' argument is deprecated"):
+        moc.save(path, format="fits", pre_v2=True, overwrite=True)
+    with fits.open(path) as hdulist:
+        assert hdulist[1].header["ORDERING"] == "NUNIQ"
+
+    # serialize with v1_compatible=True
+    hdul = moc.serialize(format="fits", v1_compatible=True)
+    assert hdul[1].header["ORDERING"] == "NUNIQ"
+
+    # serialize with pre_v2=True triggers deprecation warning
+    with pytest.warns(DeprecationWarning, match=r"The 'pre_v2' argument is deprecated"):
+        hdul_prev2 = moc.serialize(format="fits", pre_v2=True)
+    assert hdul_prev2[1].header["ORDERING"] == "NUNIQ"
 
 
 def test_passing_save(all_moc_types, path):
@@ -125,21 +160,22 @@ def test_passing_save(all_moc_types, path):
 
 
 def test_write(moc, path, mocker):
+    mocked_save = mocker.patch("mocpy.abstract_moc.AbstractMOC.save")
     # test that the deprecation warning is raised
     with pytest.warns(
         DeprecationWarning,
         match=r"This method is deprecated. Use MOC.save*",
     ):
-        mocked_save = mocker.patch("mocpy.abstract_moc.AbstractMOC.save")
         moc.write(path)
-        # test that save was called by write
-        mocked_save.assert_called_once_with(
-            path,
-            "fits",
-            False,  # noqa: FBT003
-            False,  # noqa: FBT003
-            fits_keywords=None,
-        )
+    # test that save was called by write
+    mocked_save.assert_called_once_with(
+        path,
+        "fits",
+        False,  # noqa: FBT003
+        v1_compatible=False,
+        fits_keywords=None,
+        pre_v2=None,
+    )
 
 
 # --------------------------------------------------------operations
@@ -158,9 +194,7 @@ def test_operations(all_moc_types):
     if isinstance(moc, (STMOC, SFMOC)):
         with pytest.raises(
             NotImplementedError,
-            match=(
-                "Symmetric difference is not implemented yet for Space-Time MOCs"
-            ),
+            match=("Symmetric difference is not implemented yet for Space-Time MOCs"),
         ):
             moc.symmetric_difference(moc)
     else:

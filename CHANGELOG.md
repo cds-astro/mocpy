@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   allows to provide the list of columns we want in the result and `output_format`
   accepts `astropy_table` (previous behavior, new default) `csv`, `votable` (parsed in
   an astropy votable object) and `raw_votable` [#213]
+* the `save` and `serialize` methods now accept a `v1_compatible` parameter [#205]
+
+### Deprecated
+
+* the `pre_v2` parameter in `save`, `serialize`, and `write` is deprecated in favor of
+  `v1_compatible` [#205]
 
 ### Changed
 

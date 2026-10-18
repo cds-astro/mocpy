@@ -1,4 +1,5 @@
 import abc
+import warnings
 from collections.abc import Iterable
 from functools import reduce
 from io import BytesIO
@@ -664,9 +665,10 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         path,
         format="fits",  # noqa: A002
         overwrite=False,
-        pre_v2=False,
+        v1_compatible=False,
         fold=0,
         fits_keywords=None,
+        pre_v2=None,
     ):
         """Write the MOC to a file.
 
@@ -683,10 +685,15 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         overwrite : bool, optional
             If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword.
             Default to False.
+        v1_compatible : bool, optional
+            If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+            Default to False (MOC 2.0 standard range-encoded).
         fold: int
             if >0, print ascii or json output with a maximum line width
         fits_keywords: dict, optional
             Additional keywords to add to the FITS header.
+        pre_v2 : bool, optional
+            Deprecated since v0.21.0. Use ``v1_compatible`` instead.
         """
         path = Path(path)
         if path.is_file() and not overwrite:
@@ -694,6 +701,14 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
                 f"File '{path}' already exists! Set ``overwrite`` to "
                 "True if you want to replace it.",
             )
+
+        if pre_v2 is not None:
+            warnings.warn(
+                "The 'pre_v2' argument is deprecated. Use 'v1_compatible' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            v1_compatible = pre_v2
 
         if format == "fits":
             if fold != 0:
@@ -703,9 +718,11 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
             from astropy.io import fits
 
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self.store_index, pre_v2),
+                mocpy.to_fits_raw(self.store_index, v1_compatible),
             )
             hdu = hdulist[1]
+            if "TFORM1" in hdu.header and "TTYPE1" not in hdu.header:
+                hdu.header["TTYPE1"] = "RANGE"
             if fits_keywords:
                 for key in fits_keywords:
                     hdu.header[key] = fits_keywords[key]
@@ -715,6 +732,11 @@ class AbstractMOC(serializer.IO, metaclass=abc.ABCMeta):
         if fits_keywords:
             raise ValueError(
                 "The ``fits_keyword`` argument is only valid when ``fits`` is the output format.",
+            )
+
+        if v1_compatible:
+            raise ValueError(
+                "The 'v1_compatible' argument is only valid when 'fits' is the output format.",
             )
 
         if format == "ascii":
