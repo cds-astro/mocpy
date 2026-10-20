@@ -67,12 +67,6 @@ def test_failing_save(moc, path):
         moc.save(path, format="fits", overwrite=True, fold=80)
     with pytest.raises(ValueError, match=r"The ``fits_keyword`` argument*"):
         moc.save(path, format="json", fits_keywords={"TEST", "keyword"}, overwrite=True)
-    with pytest.raises(ValueError, match=r"The 'v1_compatible' argument*"):
-        moc.save(path, format="json", v1_compatible=True, overwrite=True)
-    with pytest.warns(
-        DeprecationWarning, match=r"The 'pre_v2' argument is deprecated"
-    ), pytest.raises(ValueError, match=r"The 'v1_compatible' argument*"):
-        moc.save(path, format="json", pre_v2=True, overwrite=True)
     with pytest.raises(ValueError, match=r"'format' should be *"):
         moc.save(path, overwrite=True, format="test")
 
@@ -104,6 +98,19 @@ def test_v1_compatible(moc, path):
     with pytest.warns(DeprecationWarning, match=r"The 'pre_v2' argument is deprecated"):
         hdul_prev2 = moc.serialize(format="fits", pre_v2=True)
     assert hdul_prev2[1].header["ORDERING"] == "NUNIQ"
+
+    # non-fits format warns and ignores v1_compatible
+    with pytest.warns(
+        UserWarning,
+        match=r"The 'v1_compatible' argument is only valid when 'fits'",
+    ):
+        moc.save(path, format="json", v1_compatible=True, overwrite=True)
+
+    with pytest.warns(
+        UserWarning,
+        match=r"The 'v1_compatible' argument is only valid when 'fits'",
+    ):
+        moc.serialize(format="json", v1_compatible=True)
 
 
 def test_passing_save(all_moc_types, path):

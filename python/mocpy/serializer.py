@@ -50,8 +50,10 @@ class IO:
             v1_compatible = pre_v2
 
         if format != "fits" and v1_compatible:
-            raise ValueError(
-                "The 'v1_compatible' argument is only valid when 'fits' is the output format.",
+            warnings.warn(
+                "The 'v1_compatible' argument is only valid when 'fits' is the output format. It will be ignored.",
+                UserWarning,
+                stacklevel=2,
             )
 
         if format == "fits":
@@ -59,8 +61,6 @@ class IO:
                 mocpy.to_fits_raw(self.store_index, v1_compatible),
             )
             hdu = hdulist[1]
-            if "TFORM1" in hdu.header and "TTYPE1" not in hdu.header:
-                hdu.header["TTYPE1"] = "RANGE"
             if optional_kw_dict:
                 for key in optional_kw_dict:
                     hdu.header[key] = optional_kw_dict[key]
