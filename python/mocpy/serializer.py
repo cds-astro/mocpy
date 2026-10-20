@@ -1,3 +1,5 @@
+import warnings
+
 from astropy.io import fits
 
 from . import mocpy
@@ -6,7 +8,13 @@ from . import mocpy
 class IO:
     """Input and outputs for MOCs."""
 
-    def serialize(self, format="fits", optional_kw_dict=None, pre_v2=False):
+    def serialize(
+        self,
+        format="fits",
+        optional_kw_dict=None,
+        v1_compatible=False,
+        pre_v2=None,
+    ):
         """
         Serialize the MOC into a specific format.
 
@@ -18,6 +26,11 @@ class IO:
             'fits' by default. The other possible choice is 'json' or 'str'.
         optional_kw_dict : dict
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
+        v1_compatible : bool, optional
+            If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+            Default to False (MOC 2.0 standard range-encoded).
+        pre_v2 : bool, optional
+            Deprecated since v0.21.0. Use ``v1_compatible`` instead.
 
         Returns
         -------
@@ -28,9 +41,24 @@ class IO:
         if format not in formats:
             raise ValueError(f"format should be one of {formats}")
 
+        if pre_v2 is not None:
+            warnings.warn(
+                "The 'pre_v2' argument is deprecated. Use 'v1_compatible' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            v1_compatible = pre_v2
+
+        if format != "fits" and v1_compatible:
+            warnings.warn(
+                "The 'v1_compatible' argument is only valid when 'fits' is the output format. It will be ignored.",
+                UserWarning,
+                stacklevel=2,
+            )
+
         if format == "fits":
             hdulist = fits.HDUList.fromstring(
-                mocpy.to_fits_raw(self.store_index, pre_v2),
+                mocpy.to_fits_raw(self.store_index, v1_compatible),
             )
             hdu = hdulist[1]
             if optional_kw_dict:
@@ -52,7 +80,8 @@ class IO:
         format="fits",
         overwrite=False,
         optional_kw_dict=None,
-        pre_v2=False,
+        v1_compatible=False,
+        pre_v2=None,
     ):
         """
         Write the MOC to a file.
@@ -70,12 +99,22 @@ class IO:
             If the file already exists and you want to overwrite it, then set the  ``overwrite`` keyword. Default to False.
         optional_kw_dict : optional
             Optional keywords arguments added to the FITS header. Only used if ``format`` equals to 'fits'.
+        v1_compatible : bool, optional
+            If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+            Default to False (MOC 2.0 standard range-encoded).
+        pre_v2 : bool, optional
+            Deprecated since v0.21.0. Use ``v1_compatible`` instead.
         """
-        import warnings
-
         warnings.warn(
             'This method is deprecated. Use MOC.save(path, "fits") instead!',
             DeprecationWarning,
             stacklevel=2,
         )
-        self.save(path, format, overwrite, pre_v2, fits_keywords=optional_kw_dict)
+        self.save(
+            path,
+            format,
+            overwrite,
+            v1_compatible=v1_compatible,
+            fits_keywords=optional_kw_dict,
+            pre_v2=pre_v2,
+        )
