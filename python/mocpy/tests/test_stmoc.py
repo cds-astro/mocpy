@@ -65,7 +65,7 @@ def test_n_cells():
     assert STMOC.n_cells(0, "space") == 12
     with pytest.raises(
         ValueError,
-        match="Dimension should be either 'time' of 'space' but 'nothing' was provided.",
+        match=r"Dimension should be either 'time' of 'space' but 'nothing' was provided.",
     ):
         STMOC.n_cells(0, "nothing")
 
