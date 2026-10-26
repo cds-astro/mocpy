@@ -1,36 +1,37 @@
-use std::{f64::consts::FRAC_PI_3, ops::Range};
-
-#[cfg(not(target_arch = "wasm32"))]
-use num_threads::num_threads;
-use numpy::ndarray::Array;
-use numpy::{
-  IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
-  PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
-};
-
-use pyo3::{
-  exceptions::{PyOSError, PyValueError},
-  prelude::{pymodule, Bound, PyModule, PyResult, Python},
-  types::PyModuleMethods,
-  types::{PyBytes, PyTuple},
-  wrap_pyfunction,
-};
-#[cfg(not(target_arch = "wasm32"))]
-use rayon::prelude::*;
-
-use moc::{
-  moc::range::CellSelection,
-  qty::{Frequency, Hpx, MocQty, Time},
-  storage::u64idx::U64MocStore,
-  utils,
-};
-use ndarray::parallel::prelude::IntoParallelRefIterator;
+use pyo3::prelude::*;
 
 mod sfmoc;
 
 #[pymodule]
-fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
-  #[pyfn(m)]
+mod mocpy {
+  use std::{f64::consts::FRAC_PI_3, ops::Range};
+
+  #[cfg(not(target_arch = "wasm32"))]
+  use num_threads::num_threads;
+  use numpy::ndarray::Array;
+  use numpy::{
+    IntoPyArray, Ix2, Ix3, PyArray1, PyArray2, PyArray3, PyArrayDyn, PyArrayMethods,
+    PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArrayDyn, PyUntypedArrayMethods,
+  };
+
+  use pyo3::{
+    exceptions::{PyOSError, PyValueError},
+    prelude::{Bound, PyResult, Python},
+    pyfunction,
+    types::{PyBytes, PyTuple},
+  };
+  #[cfg(not(target_arch = "wasm32"))]
+  use rayon::prelude::*;
+
+  use moc::{
+    moc::range::CellSelection,
+    qty::{Frequency, Hpx, MocQty, Time},
+    storage::u64idx::U64MocStore,
+    utils,
+  };
+  use ndarray::parallel::prelude::IntoParallelRefIterator;
+
+  #[pyfunction]
   fn usize_n_bits() -> u8 {
     (std::mem::size_of::<usize>() as u8) << 3
   }
@@ -42,7 +43,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``depth`` - The depth of the coverage between `[0, <u64>::MAXDEPTH] = [0, 29]`
   /// * ``ranges`` - The coverage ranges.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_hpx_ranges(_py: Python, depth: u8, ranges: PyReadonlyArray2<u64>) -> PyResult<usize> {
     let it = ranges.as_array().into_iter().cloned();
     struct RangeIt<T: Iterator<Item = u64>> {
@@ -70,7 +71,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``depth`` - depth of the MOC
   /// * ``ranges``: PyReadonlyArray2<u64>,
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_array2(depth: u8, ranges: PyReadonlyArray2<u64>) -> PyResult<usize> {
     let it = ranges.as_array().into_iter().cloned();
     struct RangeIt<T: Iterator<Item = u64>> {
@@ -97,7 +98,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``depth`` - depth of the MOC
   /// * ``ranges``: PyReadonlyArray2<u64>,
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_fmoc_ranges_array2(depth: u8, ranges: PyReadonlyArray2<u64>) -> PyResult<usize> {
     let it = ranges.as_array().into_iter().cloned();
     struct RangeIt<T: Iterator<Item = u64>> {
@@ -135,7 +136,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``lon`` and ``lat`` do not have the same length
   /// * ``depth`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 29]`
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_lonlat(
     depth: u8,
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -148,7 +149,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_cone(
     lon_deg: f64,
     lat_deg: f64,
@@ -176,7 +177,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOCs depth
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_same_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -253,7 +254,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOCs depth
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -334,7 +335,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOCs depth
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_small_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -410,7 +411,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `depth`: MOCs depth
   /// * `delta_depth`: precision parameter
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, radius_deg, depth, delta_depth, n_threads=None))]
   fn from_large_cones(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -495,7 +496,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The index in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   pub fn from_box(lon: f64, lat: f64, a: f64, b: f64, angle: f64, depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .from_box(lon, lat, a, b, angle, depth, CellSelection::All)
@@ -515,7 +516,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The MOC indices in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, a, b, angle, depth, n_threads=None))]
   pub fn from_same_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -600,7 +601,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The MOC indices in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -695,7 +696,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The MOC index in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_small_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -784,7 +785,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The MOC index in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_deg, lat_deg, a, b, pa, depth, n_threads=None))]
   pub fn from_large_boxes(
     lon_deg: PyReadonlyArrayDyn<f64>,
@@ -874,7 +875,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// # Output
   /// - The index in the storage
-  #[pyfn(m)]
+  #[pyfunction]
   pub fn from_zone(
     lon_min: f64,
     lat_min: f64,
@@ -914,7 +915,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``r_ext_deg`` contains values in the range `[0, 180]`
   /// * ``r_ext_deg > r_int_deg``
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_ring(
     lon_deg: f64,
     lat_deg: f64,
@@ -936,7 +937,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   pub fn from_elliptical_cone(
     lon_deg: f64,
     lat_deg: f64,
@@ -960,7 +961,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   pub fn from_polygon(
     lon_deg: PyReadonlyArrayDyn<f64>,
     lat_deg: PyReadonlyArrayDyn<f64>,
@@ -982,7 +983,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///   the smallest polygon)
   /// * `depth`: MOC depth
   /// * `n_threads`: number of threads to use (max number of threads if `n_threads=None`.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (lon_lat_deg, complement, depth, n_threads=None))]
   pub fn from_polygons(
     lon_lat_deg: Vec<PyReadonlyArrayDyn<f64>>,
@@ -1047,7 +1048,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     }
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   pub fn from_stcs(stcs_ascii: &str, depth: u8, delta_depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .from_stcs(depth, delta_depth, stcs_ascii)
@@ -1072,7 +1073,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * `no_split`: cells overlapping the `cumul_from` or `cumul_to` values are not recursively split
   /// * `reverse_decent`: perform the recursive decent from the highest cell number to the lowest (to be compatible with Aladin)
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_valued_hpx_cells(
     max_depth: u8,
     uniq: PyReadonlyArrayDyn<u64>,
@@ -1135,7 +1136,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_lonlat_approx(
     times: PyReadonlyArrayDyn<f64>,
     d1: u8,
@@ -1173,7 +1174,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``lon``, ``lat`` and ``times`` do not have the same length.
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_lonlat(
     times: PyReadonlyArrayDyn<u64>,
     d1: u8,
@@ -1219,7 +1220,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_lonlat_approx(
     times_min: PyReadonlyArrayDyn<f64>,
     times_max: PyReadonlyArrayDyn<f64>,
@@ -1261,7 +1262,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_lonlat(
     times_min: PyReadonlyArrayDyn<u64>,
     times_max: PyReadonlyArrayDyn<u64>,
@@ -1310,7 +1311,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_spatial_coverages_approx(
     times_min: PyReadonlyArrayDyn<f64>,
     times_max: PyReadonlyArrayDyn<f64>,
@@ -1364,7 +1365,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``d1`` is not comprised in `[0, <T>::MAXDEPTH] = [0, 61]`
   /// * ``d2`` is not comprised in `[0, <S>::MAXDEPTH] = [0, 29]`
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_spatial_coverages(
     times_min: PyReadonlyArrayDyn<u64>,
     times_max: PyReadonlyArrayDyn<u64>,
@@ -1396,7 +1397,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   }
 
   /// Returns the index of a T-MOC
-  #[pyfn(m)]
+  #[pyfunction]
   fn project_on_stmoc_time_dim(smoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .space_fold(smoc_index, stmoc_index)
@@ -1424,7 +1425,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///   superior to their sup bound.
   ///
   /// This **should** not panic as this code is wrapped around MOCPy
-  #[pyfn(m)]
+  #[pyfunction]
   fn project_on_stmoc_space_dim(tmoc_index: usize, stmoc_index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .time_fold(tmoc_index, stmoc_index)
@@ -1445,14 +1446,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_file(path)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn stmoc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_fits_buff(raw_bytes)
@@ -1469,7 +1470,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii_file(path)
@@ -1486,7 +1487,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json_file(path)
@@ -1503,7 +1504,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_from_ascii_str(_py: Python, ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_ascii(&ascii)
@@ -1520,7 +1521,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// This method returns a `PyOSError` if the the function fails in writing the FITS file.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_from_json_str(_py: Python, json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_stmoc_from_json(&json)
@@ -1530,7 +1531,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// Drop the MOC at the given index.
   ///
   /// This method is automatically called by the Python garbage collector.
-  #[pyfn(m)]
+  #[pyfunction]
   fn copy(index: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .copy(index)
@@ -1540,7 +1541,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// Drop the MOC at the given index.
   ///
   /// This method is automatically called by the Python garbage collector.
-  #[pyfn(m)]
+  #[pyfunction]
   fn drop(index: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .drop(index)
@@ -1557,7 +1558,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// If the Time-Space coverage is empty, the returned
   /// depth is `(0, 0)`.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_st_depth(_py: Python, index: usize) -> PyResult<(u8, u8)> {
     U64MocStore::get_global_store()
       .get_stmoc_depths(index)
@@ -1579,7 +1580,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_2d_min_time_approx(_py: Python, index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .get_1st_axis_min(index)
@@ -1599,7 +1600,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * If the coverage is empty.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_2d_min_time(_py: Python, index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
       .get_1st_axis_min(index)
@@ -1622,7 +1623,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_2d_max_time_approx(_py: Python, index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .get_1st_axis_max(index)
@@ -1642,7 +1643,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * If the coverage is empty.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_2d_max_time(_py: Python, index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
       .get_1st_axis_max(index)
@@ -1655,7 +1656,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``id`` - index of the coverage
-  #[pyfn(m)]
+  #[pyfunction]
   fn complement(_py: Python, id: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .not(id)
@@ -1668,7 +1669,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m)]
+  #[pyfunction]
   fn union(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .or(id_left, id_right)
@@ -1680,7 +1681,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ids`` - indices of the coverages.
-  #[pyfn(m)]
+  #[pyfunction]
   fn multi_union(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
@@ -1694,7 +1695,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m)]
+  #[pyfunction]
   fn intersection(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .and(id_left, id_right)
@@ -1706,7 +1707,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ids`` - indices of the coverages.
-  #[pyfn(m)]
+  #[pyfunction]
   fn multi_intersection(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
@@ -1720,7 +1721,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m)]
+  #[pyfunction]
   fn symmetric_difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .symmetric_difference(id_left, id_right)
@@ -1732,7 +1733,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ids`` - indices of the coverages.
-  #[pyfn(m)]
+  #[pyfunction]
   fn multi_symmetric_difference(_py: Python, ids: PyReadonlyArray1<usize>) -> PyResult<usize> {
     let indices = ids.as_slice()?;
     U64MocStore::get_global_store()
@@ -1746,7 +1747,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m)]
+  #[pyfunction]
   fn difference(_py: Python, id_left: usize, id_right: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .difference(id_left, id_right)
@@ -1759,7 +1760,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``id_left`` - index of the coverage being in the left of the operation.
   /// * ``id_right`` - index of the coverage being in the right of the operation.
-  #[pyfn(m)]
+  #[pyfunction]
   fn check_eq(_py: Python, id_left: usize, id_right: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .eq(id_left, id_right)
@@ -1771,7 +1772,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - The index of the coverage to check the emptiness.
-  #[pyfn(m)]
+  #[pyfunction]
   fn is_empty(_py: Python, index: usize) -> PyResult<bool> {
     U64MocStore::get_global_store()
       .is_empty(index)
@@ -1795,7 +1796,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// Method kept temporarily to ensure backward compatibility.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_2d_contains_approx<'a>(
     py: Python<'a>,
     index: usize,
@@ -1844,7 +1845,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If `lon`, `lat` and `times` do not have the same length
-  #[pyfn(m)]
+  #[pyfunction]
   fn stmoc_contains<'a>(
     py: Python<'a>,
     index: usize,
@@ -1874,7 +1875,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If `lon` and `lat` do not have the same length
-  #[pyfn(m)]
+  #[pyfunction]
   fn filter_pos<'a>(
     py: Python<'a>,
     index: usize,
@@ -1908,7 +1909,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - The index of the Space coverage.
   /// * ``time`` - The time, in JD.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn filter_time_approx<'a>(
     py: Python<'a>,
     index: usize,
@@ -1933,7 +1934,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - The index of the Space coverage.
   /// * ``time`` - The time, in microsec since JD=0.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn filter_time<'a>(
     py: Python<'a>,
     index: usize,
@@ -1958,7 +1959,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - The index of the Space coverage.
   /// * ``frequencies`` - The time, in microsec since JD=0.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn filter_freq<'a>(
     py: Python<'a>,
     index: usize,
@@ -1982,7 +1983,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - The index of the coverage to serialize.
   /// * ``path`` - the path of the output file
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_fits_raw<'a>(py: Python<'a>, index: usize, pre_v2: bool) -> PyResult<Bound<'a, PyBytes>> {
     U64MocStore::get_global_store()
       .to_fits_buff(index, Some(pre_v2))
@@ -1996,7 +1997,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - The index of the coverage to serialize.
   /// * ``path`` - the path of the output file
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_fits_file(index: usize, path: String, pre_v2: bool) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_fits_file(index, path, Some(pre_v2))
@@ -2009,7 +2010,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   ///* ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_ascii_file(index: usize, path: String) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_ascii_file(index, path, None)
@@ -2023,7 +2024,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///* ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
   /// * ``fold`` - value of the fold parameter (to limit line width)
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_ascii_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_ascii_file(index, path, Some(fold))
@@ -2036,7 +2037,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_ascii_str(index: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_ascii_str(index, None)
@@ -2050,7 +2051,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
   /// * ``fold`` - value of the fold parameter (to limit line width)
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_ascii_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_ascii_str(index, Some(fold))
@@ -2063,7 +2064,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_json_file(index: usize, path: String) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_json_file(index, path, None)
@@ -2077,7 +2078,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///* ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
   /// * ``fold`` - value of the fold parameter (to limit line width)
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_json_file_with_fold(index: usize, path: String, fold: usize) -> PyResult<()> {
     U64MocStore::get_global_store()
       .to_json_file(index, path, Some(fold))
@@ -2090,7 +2091,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_json_str(index: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_json_str(index, None)
@@ -2104,7 +2105,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - index in the store of the MOC to be serialized
   /// * ``path`` - The file path
   /// * ``fold`` - value of the fold parameter (to limit line width)
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_json_str_with_fold(index: usize, fold: usize) -> PyResult<String> {
     U64MocStore::get_global_store()
       .to_json_str(index, Some(fold))
@@ -2154,7 +2155,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// ...
   /// END
   /// ```
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_multiordermap_fits_file(
     path: String,
     cumul_from: f64,
@@ -2217,7 +2218,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// ...
   /// END
   /// ```
-  #[pyfn(m)]
+  #[pyfunction]
   fn multiordermap_sum_in_smoc_from_file(index: usize, path: String) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .multiordermap_sum_in_moc_from_path(index, path)
@@ -2239,7 +2240,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * contrary to `multiordermap_sum_in_smoc_from_file`, nothing is known
   /// about the values that are summed, so we do not multiply them by the area
   /// of the cells
-  #[pyfn(m)]
+  #[pyfunction]
   fn multiordermap_sum_in_smoc(
     index: usize,
     uniq: PyReadonlyArrayDyn<u64>,
@@ -2282,7 +2283,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
   /// * ``probdens`` - Probability densities to be converted into probabilities before being summed.
   /// * ``probdens_mask`` - mask on the probability densities.
-  #[pyfn(m)]
+  #[pyfunction]
   fn multiorder_probdens_map_sum_in_smoc(
     index: usize,
     uniq: PyReadonlyArrayDyn<u64>,
@@ -2318,7 +2319,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   }
 
   /// Same as `multiorder_probdens_map_sum_in_smoc` but applied on multiple S-MOCs.
-  #[pyfn(m)]
+  #[pyfunction]
   #[pyo3(signature = (indices, uniq, uniq_mask, probdens, probdens_mask, n_threads=None))]
   fn multi_multiorder_probdens_map_sum_in_smoc<'a>(
     py: Python<'a>,
@@ -2405,7 +2406,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
   /// * ``values`` - Values to be returned.
   /// * ``values_mask`` - mask on the values to be returned.
-  #[pyfn(m)]
+  #[pyfunction]
   fn multiorder_values_and_weights_in_smoc<'a>(
     py: Python<'a>,
     index: usize,
@@ -2448,7 +2449,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``uniq`` - UNIQ HEALPix values.
   /// * ``uniq_mask`` - Mask on the UNIQ HEALPix values.
   /// * `fully_covered_only`: set the boolean to false only if the cell is fully covered (else if it intersects)
-  #[pyfn(m)]
+  #[pyfunction]
   fn multiorder_filter_mask_in_smoc<'a>(
     index: usize,
     uniq: PyReadonlyArrayDyn<'a, u64>,
@@ -2468,14 +2469,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_fits_file(path)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_from_fits_buff(raw_bytes)
@@ -2487,7 +2488,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_ascii_file(path)
@@ -2499,7 +2500,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ascii`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_ascii(ascii.as_str())
@@ -2511,7 +2512,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_json_file(path)
@@ -2523,7 +2524,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``json`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn spatial_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_smoc_from_json(json.as_str())
@@ -2535,14 +2536,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_file(path)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_fits_buff(raw_bytes)
@@ -2554,7 +2555,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_ascii_file(path)
@@ -2566,7 +2567,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ascii`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_ascii(ascii.as_str())
@@ -2578,7 +2579,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_json_file(path)
@@ -2590,7 +2591,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``json`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn time_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_tmoc_from_json(json.as_str())
@@ -2602,14 +2603,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_fits_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_fits_file(path)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_fits_raw_bytes(raw_bytes: &[u8]) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_fits_buff(raw_bytes)
@@ -2621,7 +2622,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_ascii_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_ascii_file(path)
@@ -2633,7 +2634,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ascii`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_ascii_str(ascii: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_ascii(ascii.as_str())
@@ -2645,7 +2646,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``path`` - The file path
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_json_file(path: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_json_file(path)
@@ -2657,7 +2658,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``json`` - The json string
-  #[pyfn(m)]
+  #[pyfunction]
   fn frequency_moc_from_json_str(json: String) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .load_fmoc_from_json(json.as_str())
@@ -2674,7 +2675,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m)]
+  #[pyfunction]
   fn extend(index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .extend(index)
@@ -2688,7 +2689,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///
   /// * ``index`` - The index of the coverage in the store.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn contract(index: usize) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .contract(index)
@@ -2704,7 +2705,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   ///     if `false`, only consider  cells having a common edge as been part of a same MOC
   ///     if `true`, also consider cells having a common vertex as been part of the same MOC
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn split_count(_py: Python, index: usize, include_indirect_neighbours: bool) -> PyResult<u32> {
     if include_indirect_neighbours {
       U64MocStore::get_global_store().split_indirect_count(index)
@@ -2726,7 +2727,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * ``depth`` is not comprised in `[0, Hpx::<T>::MAX_DEPTH] = [0, 29]`
-  #[pyfn(m)]
+  #[pyfunction]
   fn split(index: usize, include_indirect_neighbours: bool) -> PyResult<Vec<usize>> {
     if include_indirect_neighbours {
       U64MocStore::get_global_store().split_indirect(index)
@@ -2743,7 +2744,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - The index of the coverage in the store.
   /// * ``depth`` - The depth to degrade the coverage to.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn degrade(index: usize, depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .degrade(index, depth)
@@ -2757,14 +2758,14 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// * ``index`` - The index of the coverage in the store.
   /// * ``depth`` - The depth to refine the coverage to.
   ///
-  #[pyfn(m)]
+  #[pyfunction]
   fn refine(index: usize, depth: u8) -> PyResult<()> {
     U64MocStore::get_global_store()
       .refine(index, depth)
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn get_barycenter<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyTuple>> {
     U64MocStore::get_global_store()
       .barycenter(index)
@@ -2772,7 +2773,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)?
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn get_largest_distance_from_coo_to_moc_vertices(
     index: usize,
     lon_rad: f64,
@@ -2788,7 +2789,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn get_smoc_depth(index: usize) -> PyResult<u8> {
     U64MocStore::get_global_store()
       .get_smoc_depth(index)
@@ -2800,7 +2801,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn get_tmoc_depth(index: usize) -> PyResult<u8> {
     U64MocStore::get_global_store()
       .get_tmoc_depth(index)
@@ -2812,7 +2813,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn get_fmoc_depth(index: usize) -> PyResult<u8> {
     U64MocStore::get_global_store()
       .get_fmoc_depth(index)
@@ -2824,7 +2825,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn ranges_sum(index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
       .get_ranges_sum(index)
@@ -2836,7 +2837,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn first_index(index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
       .get_1st_axis_min(index)
@@ -2849,7 +2850,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn last_index(index: usize) -> PyResult<u64> {
     U64MocStore::get_global_store()
       .get_1st_axis_max(index)
@@ -2857,7 +2858,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn first_fmoc_hz(index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .get_1st_axis_min(index)
@@ -2869,7 +2870,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn last_fmoc_hz(index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .get_1st_axis_max(index)
@@ -2886,7 +2887,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - Index of the coverage in the store.
-  #[pyfn(m)]
+  #[pyfunction]
   fn coverage_fraction(index: usize) -> PyResult<f64> {
     U64MocStore::get_global_store()
       .get_coverage_percentage(index)
@@ -2899,7 +2900,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_uniq_hpx<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_hpx(index)
@@ -2912,7 +2913,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_uniq_gen<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_gen(index)
@@ -2925,7 +2926,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``ranges`` - The HEALPix cells defined in the **nested** format.
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_uniq_zorder<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .to_uniq_zorder(index)
@@ -2933,7 +2934,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_ranges<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray2<u64>>> {
     U64MocStore::get_global_store()
       .to_ranges(index)
@@ -2945,7 +2946,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       })
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_rgba<'a>(py: Python<'a>, index: usize, size_y: u16) -> PyResult<Bound<'a, PyArray3<u8>>> {
     U64MocStore::get_global_store()
       .to_image(index, size_y)
@@ -2970,7 +2971,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_times`` and ``max_times`` do not match.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_in_microsec_since_jd_origin(
     depth: u8,
     times: PyReadonlyArray1<u64>,
@@ -2997,7 +2998,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_times`` and ``max_times`` do not match.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges(
     depth: u8,
     min_times: PyReadonlyArray1<f64>,
@@ -3024,7 +3025,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_times`` and ``max_times`` do not match.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_time_ranges_in_microsec_since_jd_origin(
     depth: u8,
     min_times: PyReadonlyArray1<u64>,
@@ -3038,7 +3039,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   }
 
   /// Re-create a F-MOC from F-MOC ranges
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_fmoc_ranges(
     depth: u8,
     min_fmoc_range: PyReadonlyArray1<u64>,
@@ -3067,7 +3068,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_freq`` and ``max_freq`` do not match.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_freq_values(depth: u8, freq: PyReadonlyArray1<f64>) -> PyResult<usize> {
     let freq = freq.as_array().into_iter();
     U64MocStore::get_global_store()
@@ -3086,7 +3087,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * If the number of ``min_freq`` and ``max_freq`` do not match.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_freq_ranges(
     depth: u8,
     min_freq: PyReadonlyArray1<f64>,
@@ -3099,7 +3100,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyValueError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn to_freq_ranges<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray2<f64>>> {
     U64MocStore::get_global_store()
       .to_hz_ranges(index)
@@ -3116,7 +3117,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``data`` - The spatial coverage
-  #[pyfn(m)]
+  #[pyfunction]
   fn flatten_to_moc_depth<'a>(py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyArray1<u64>>> {
     U64MocStore::get_global_store()
       .flatten_to_moc_depth(index)
@@ -3130,7 +3131,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``index`` - The index of the coverage.
-  #[pyfn(m)]
+  #[pyfunction]
   fn flatten_to_depth<'a>(
     py: Python<'a>,
     index: usize,
@@ -3142,28 +3143,28 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn new_empty_smoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_smoc(depth)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn new_empty_tmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_tmoc(depth)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn new_empty_fmoc(depth: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_fmoc(depth)
       .map_err(PyOSError::new_err)
   }
 
-  #[pyfn(m)]
+  #[pyfunction]
   fn new_empty_stmoc(depth_time: u8, depth_space: u8) -> PyResult<usize> {
     U64MocStore::get_global_store()
       .new_empty_stmoc(depth_time, depth_space)
@@ -3175,7 +3176,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``depth`` - The depth for which we want to know the corresponding number of healpix cells.
-  #[pyfn(m)]
+  #[pyfunction]
   fn n_cells_smoc(depth: u8) -> u64 {
     Hpx::<u64>::n_cells(depth)
   }
@@ -3185,7 +3186,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``depth`` - The depth for which we want to know the corresponding number of cells.
-  #[pyfn(m)]
+  #[pyfunction]
   fn n_cells_tmoc(depth: u8) -> u64 {
     Time::<u64>::n_cells(depth)
   }
@@ -3195,7 +3196,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Arguments
   ///
   /// * ``depth`` - The depth for which we want to know the corresponding number of cells.
-  #[pyfn(m)]
+  #[pyfunction]
   fn n_cells_fmoc(depth: u8) -> u64 {
     Frequency::<u64>::n_cells(depth)
   }
@@ -3217,7 +3218,7 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   /// # Errors
   ///
   /// * ``depth`` and ``pixels`` have not the same length.
-  #[pyfn(m)]
+  #[pyfunction]
   fn from_healpix_cells(
     depth: u8,
     depths: PyReadonlyArrayDyn<u8>,
@@ -3246,41 +3247,51 @@ fn mocpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
   }
 
   // add sfmoc pyfunctions here
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_depth, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::new_empty_sfmoc, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_min_freq, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_max_freq, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_fits_file, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::sfmoc_from_fits_raw_bytes, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_ascii_file, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_json_file, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_ascii_str, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::coverage_sf_from_json_str, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::from_freq_lonlat, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::from_freq_ranges_lonlat, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(
-    sfmoc::from_frequency_ranges_spatial_coverages,
-    m
-  )?)
-  .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::sfmoc_contains, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::project_on_sfmoc_freq_dim, m)?)
-    .unwrap();
-  m.add_function(wrap_pyfunction!(sfmoc::project_on_sfmoc_space_dim, m)?)
-    .unwrap();
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_depth;
 
-  Ok(())
+  #[pymodule_export]
+  use super::sfmoc::new_empty_sfmoc;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_min_freq;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_max_freq;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_from_fits_file;
+
+  #[pymodule_export]
+  use super::sfmoc::sfmoc_from_fits_raw_bytes;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_from_ascii_file;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_from_ascii_str;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_from_json_file;
+
+  #[pymodule_export]
+  use super::sfmoc::coverage_sf_from_json_str;
+
+  #[pymodule_export]
+  use super::sfmoc::from_freq_lonlat;
+
+  #[pymodule_export]
+  use super::sfmoc::from_freq_ranges_lonlat;
+
+  #[pymodule_export]
+  use super::sfmoc::from_frequency_ranges_spatial_coverages;
+
+  #[pymodule_export]
+  use super::sfmoc::sfmoc_contains;
+
+  #[pymodule_export]
+  use super::sfmoc::project_on_sfmoc_freq_dim;
+
+  #[pymodule_export]
+  use super::sfmoc::project_on_sfmoc_space_dim;
 }
