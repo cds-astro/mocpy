@@ -228,7 +228,7 @@ Loading an SF-MOC from a FITS, JSON or ASCII file `~mocpy.SFMOC.load`:
 
     >>> # we generate a fake ASCII file
     >>> from tempfile import NamedTemporaryFile
-    >>> with NamedTemporaryFile(delete_on_close=False) as tf:
+    >>> with NamedTemporaryFile(delete=False) as tf:
     ...     tf.write(b"f20/0-100 s12/0-100")
     ...     tf.close()
     ...     # and we read it

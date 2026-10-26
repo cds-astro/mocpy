@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.SFMOC &#8212; MOCPy 0.20.0 documentation</title>
+    <title>mocpy.SFMOC &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     
-    <script src="../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API: Detailed list of all methods</a> &#187;</li>
@@ -125,11 +125,11 @@
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>Astropy quantities of physical type <code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
+<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>Astropy quantities of physical type <code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed with a specific frequency.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed with a specific frequency.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed with a specific frequency.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed with a specific frequency.</p>
 </dd>
 </dl>
 </dd>
@@ -215,9 +215,9 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-7&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-3&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/4-7&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-7"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-3"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/4-7"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">,</span> <span class="n">moc3</span><span class="p">)</span> <span class="c1"># should the empty MOC of order 3 (3/)</span>
 <span class="go">3/</span>
 </pre></div>
@@ -270,7 +270,7 @@ in a binary HDU table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
+<dt><strong>path_or_url</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
 </dd>
 <dt><strong>timeout</strong><span class="classifier">float</span></dt><dd><p>Timeout for the query, defaults to 1000s</p>
 </dd>
@@ -292,11 +292,11 @@ in a binary HDU table.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
+<dt><strong>frequencies</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates corresponding to the frequencies.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates corresponding to the frequencies.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates corresponding to the frequencies.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates corresponding to the frequencies.</p>
 </dd>
 <dt><strong>max_order_frequency</strong><span class="classifier">int</span></dt><dd><p>Frequency order. Should be comprised between 0 and 59.</p>
 </dd>
@@ -338,13 +338,13 @@ in a binary HDU table.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>frequencies_min</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
+<dt><strong>frequencies_min</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
 </dd>
-<dt><strong>frequencies_max</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
+<dt><strong>frequencies_max</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
 </dd>
-<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lon</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The longitudes of the sky coordinates observed at a specific time.</p>
 </dd>
-<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
+<dt><strong>lat</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.units.Quantity</span></code></a></span></dt><dd><p>The latitudes of the sky coordinates observed at a specific time.</p>
 </dd>
 <dt><strong>max_order_frequency</strong><span class="classifier">int</span></dt><dd><p>Frequency order.</p>
 </dd>
@@ -424,9 +424,9 @@ in a binary HDU table.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>frequencies_min</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
+<dt><strong>frequencies_min</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
 </dd>
-<dt><strong>frequencies_max</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
+<dt><strong>frequencies_max</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></span></dt><dd><p>An astropy Quantity of physical type ‘frequency’</p>
 </dd>
 <dt><strong>spatial_coverages</strong><span class="classifier">list[<a class="reference internal" href="mocpy.MOC.html#mocpy.MOC" title="mocpy.MOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOC</span></code></a>]</span></dt><dd><p>List of spatial coverages.</p>
 </dd>
@@ -445,7 +445,7 @@ in a binary HDU table.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">SFMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_spatial_coverages</span><span class="p">(</span>
 <span class="gp">... </span>            <span class="n">frequencies_min</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span> <span class="n">frequencies_max</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">,</span>
-<span class="gp">... </span>            <span class="n">spatial_coverages</span><span class="o">=</span><span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;5/14-21&quot;</span><span class="p">)],</span>
+<span class="gp">... </span>            <span class="n">spatial_coverages</span><span class="o">=</span><span class="p">[</span><span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"5/14-21"</span><span class="p">)],</span>
 <span class="gp">... </span>            <span class="n">max_order_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span>
 <span class="go">f5/20</span>
@@ -489,7 +489,7 @@ specification at section 2.3.2.</p>
 </div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">"2/2-25 28 29 4/0 6/"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -516,6 +516,20 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"f10/600-700 s12/0-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span>
+<span class="go">f5/19-20</span>
+<span class="go">6/42</span>
+<span class="go">7/75 86</span>
+<span class="go">8/174</span>
+<span class="go">10/700</span>
+<span class="go">s11/0-1</span>
+<span class="go">12/8-10</span>
+<span class="go">f10/ s12/</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -602,6 +616,13 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt class="sig sig-object py" id="mocpy.SFMOC.max_frequency">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">max_frequency</span></span><a class="headerlink" href="#mocpy.SFMOC.max_frequency" title="Link to this definition">¶</a></dt>
 <dd><p>Return SFMOC max frequency.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"f10/600-700 s12/0-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span><span class="o">.</span><span class="n">max_frequency</span>
+<span class="go">&lt;Quantity 14.72206565 Hz&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -622,12 +643,26 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span><span class="o">.</span><span class="n">max_order</span>
+<span class="go">(20, 12)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.SFMOC.min_frequency">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">min_frequency</span></span><a class="headerlink" href="#mocpy.SFMOC.min_frequency" title="Link to this definition">¶</a></dt>
 <dd><p>Return SFMOC min frequency.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"f10/600-700 s12/0-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span><span class="o">.</span><span class="n">min_frequency</span>
+<span class="go">&lt;Quantity 0.02548297 Hz&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -660,7 +695,7 @@ dimension=’frequency’.</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="s1">&#39;space&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SFMOC</span><span class="o">.</span><span class="n">n_cells</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="s1">'space'</span><span class="p">)</span>
 <span class="go">12</span>
 </pre></div>
 </div>
@@ -714,13 +749,13 @@ dimension=’frequency’.</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">FrequencyMOC</span><span class="p">,</span> <span class="n">SFMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s1">'''</span>
 <span class="gp">... </span><span class="s1">f15/0-10</span>
 <span class="gp">... </span><span class="s1">s12/0-100</span>
 <span class="gp">... </span><span class="s1">f15/11-20</span>
 <span class="gp">... </span><span class="s1">s12/101-200</span>
-<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;15/0-2&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="s1">'''</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FrequencyMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"15/0-2"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">MOC</span><span class="o">.</span><span class="n">from_sfmoc_frequency_fold</span><span class="p">(</span><span class="n">fmoc</span><span class="p">,</span> <span class="n">sfmoc</span><span class="p">)</span>
 <span class="go">9/0</span>
 <span class="go">10/4-5</span>
@@ -752,12 +787,12 @@ spatial coverages fall within the given spatial MOC.</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">SFMOC</span><span class="p">,</span> <span class="n">FrequencyMOC</span> <span class="k">as</span> <span class="n">FMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;f10/0-20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sfmoc</span> <span class="o">=</span> <span class="n">SFMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s1">'''f10/0-20</span>
 <span class="gp">... </span><span class="s1">s12/0-100</span>
 <span class="gp">... </span><span class="s1">f10/21-40</span>
 <span class="gp">... </span><span class="s1">s12/101-200</span>
-<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;12/0-100&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="s1">'''</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"12/0-100"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span> <span class="o">=</span> <span class="n">FMOC</span><span class="o">.</span><span class="n">from_sfmoc_space_fold</span><span class="p">(</span><span class="n">sfmoc</span><span class="p">,</span> <span class="n">moc</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fmoc</span>
 <span class="go">6/0</span>
@@ -805,7 +840,7 @@ spatial coverages fall within the given spatial MOC.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.SFMOC.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fits_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.save" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fits_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.save" title="Link to this definition">¶</a></dt>
 <dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -820,9 +855,14 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword.
 Default to False.</p>
 </dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
 <dt><strong>fold: int</strong></dt><dd><p>if &gt;0, print ascii or json output with a maximum line width</p>
 </dd>
 <dt><strong>fits_keywords: dict, optional</strong></dt><dd><p>Additional keywords to add to the FITS header.</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
 </dd>
 </dl>
 </dd>
@@ -831,7 +871,7 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.SFMOC.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.serialize" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.serialize" title="Link to this definition">¶</a></dt>
 <dd><p>Serialize the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
@@ -841,11 +881,16 @@ Default to False.</p>
 </dd>
 <dt><strong>optional_kw_dict</strong><span class="classifier">dict</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
 </dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -876,8 +921,8 @@ It is not implemented yet for STMOCs</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-1 362-363&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0 2 277 279&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-1 362-363"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0 2 277 279"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
 <span class="go">3/1-2 277 279 362-363</span>
 </pre></div>
@@ -926,17 +971,17 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;1999-01-01T00:00:00.123456789&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2005-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'1999-01-01T00:00:00.123456789'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2005-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'jd'</span><span class="p">)</span>
 <span class="gp">... </span>                                <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">newer</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2000-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2010-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newer</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2000-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2010-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'jd'</span><span class="p">)</span>
 <span class="gp">... </span>                                <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">union</span> <span class="o">=</span> <span class="n">older</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">newer</span><span class="p">)</span> <span class="c1"># == older + newer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="n">union</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">)</span>
-<span class="go">[1998.99847987] [2010.00183614]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="go">1998.9985 2010.0018</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -977,7 +1022,7 @@ AND because the natural ordering of such indices follow the same order as the zo
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.SFMOC.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.write" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.SFMOC.write" title="Link to this definition">¶</a></dt>
 <dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -991,6 +1036,11 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword. Default to False.</p>
 </dd>
 <dt><strong>optional_kw_dict</strong><span class="classifier">optional</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
 </dd>
 </dl>
 </dd>
@@ -1055,7 +1105,6 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -1067,7 +1116,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

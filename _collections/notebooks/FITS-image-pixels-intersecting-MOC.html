@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Overlay the MOC of Spitzer on a 2MASS cutout &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Overlay the MOC of Spitzer on a 2MASS cutout &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -26,7 +26,7 @@
     <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Query the sources of a VizieR table that are in a sky region" href="query_vizier_table.html" />
+    <link rel="next" title="Creation and manipulation of time coverages (TMOCs)" href="tmoc.html" />
     <link rel="prev" title="Create a MOC from a filtered astropy Table" href="filtering_astropy_table.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
@@ -55,7 +55,7 @@
     <h3>Navigation</h3>
     <ul>
       <li class="right">
-	<a href="query_vizier_table.html" title="Query the sources of a VizieR table that are in a sky region">
+	<a href="tmoc.html" title="Creation and manipulation of time coverages (TMOCs)">
 	  next &raquo;
 	</a>
       </li>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -103,7 +103,7 @@
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># load 2MASS cutout covering the galactic plane</span>
 <span class="n">hdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
-    <span class="s2">&quot;http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS</span><span class="si">%2F</span><span class="s2">P</span><span class="si">%2F</span><span class="s2">2MASS</span><span class="si">%2F</span><span class="s2">K&amp;width=1200&amp;height=700&amp;fov=30&amp;projection=TAN&amp;coordsys=galactic&amp;rotation_angle=0.0&amp;object=gal</span><span class="si">%20c</span><span class="s2">enter&amp;format=fits&quot;</span><span class="p">,</span>
+    <span class="s2">"http://alasky.u-strasbg.fr/hips-image-services/hips2fits?hips=CDS</span><span class="si">%2F</span><span class="s2">P</span><span class="si">%2F</span><span class="s2">2MASS</span><span class="si">%2F</span><span class="s2">K&amp;width=1200&amp;height=700&amp;fov=30&amp;projection=TAN&amp;coordsys=galactic&amp;rotation_angle=0.0&amp;object=gal</span><span class="si">%20c</span><span class="s2">enter&amp;format=fits"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -113,7 +113,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># load Spitzer MOC</span>
-<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">&quot;http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits&quot;</span><span class="p">)</span>
+<span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span><span class="s2">"http://skies.esac.esa.int/Spitzer/IRAC1_bright_ISM/Moc.fits"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -132,11 +132,11 @@
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">twomass_wcs</span><span class="p">)</span>
-<span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">twomass_wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">twomass_wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
 <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
     <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-    <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
-    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s2">"lower"</span><span class="p">,</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">"sqrt"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -153,8 +153,8 @@
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># compute skycoords for every pixel of the image</span>
-<span class="n">width</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;NAXIS1&quot;</span><span class="p">]</span>
-<span class="n">height</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;NAXIS2&quot;</span><span class="p">]</span>
+<span class="n">width</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"NAXIS1"</span><span class="p">]</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"NAXIS2"</span><span class="p">]</span>
 
 <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
 <span class="n">skycoords</span> <span class="o">=</span> <span class="n">twomass_wcs</span><span class="o">.</span><span class="n">pixel_to_world</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">)</span>
@@ -197,8 +197,8 @@
 
 <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
     <span class="n">img_test</span><span class="p">,</span>
-    <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
-    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s2">"lower"</span><span class="p">,</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">simple_norm</span><span class="p">(</span><span class="n">hdu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">"sqrt"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -259,7 +259,6 @@
 <li><a class="reference internal" href="#">Overlay the MOC of Spitzer on a 2MASS cutout</a></li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -271,7 +270,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

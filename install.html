@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Install &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Install &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
     
-    <script src="_static/documentation_options.js?v=b52c616d"></script>
+    <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="index.html">MOCPy 0.20.0 documentation</a>
+	<a href="index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       
@@ -83,14 +83,24 @@
 <h2>Stable versions<a class="headerlink" href="#stable-versions" title="Link to this heading">¶</a></h2>
 <p>MOCPy relies on the following mandatory external dependencies :</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://cds-astro.github.io/cds-healpix-python/">cdshealpix</a></p></li>
 <li><p><a class="reference external" href="http://docs.astropy.org/en/stable/">astropy</a></p></li>
-<li><p><a class="reference external" href="https://matplotlib.org/">matplotlib</a></p></li>
-<li><p><a class="reference external" href="http://networkx.github.io/">networkx</a> used in <code class="docutils literal notranslate"><span class="pre">~mocpy.MOC.get_boundaries</span></code></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/">numpy</a></p></li>
 </ul>
-<p>It has an optional dependency to query FITS files by url:</p>
+<p>It has an optional dependencies for different aspects.</p>
+<p>To query different interfaces (ex: FITS files by url, <code class="docutils literal notranslate"><span class="pre">~mocpy.MOC.query_vizier_table</span></code>,
+<code class="docutils literal notranslate"><span class="pre">~mocpy.MOC.query_simbad</span></code>):</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/psf/requests">requests</a></p></li>
+</ul>
+<p>To plot MOCs:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://cds-astro.github.io/cds-healpix-python/">cdshealpix</a></p></li>
+<li><p><a class="reference external" href="http://networkx.github.io/">networkx</a> used in <code class="docutils literal notranslate"><span class="pre">~mocpy.MOC.get_boundaries</span></code></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">matplotlib</a></p></li>
+</ul>
+<p>To create MOCs from astropy regions:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://astropy-regions.readthedocs.io/en/stable/index.html">regions</a></p></li>
 </ul>
 <p>To upgrade the <code class="docutils literal notranslate"><span class="pre">mocpy</span></code> package to the latest version:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mocpy</span> <span class="o">-</span><span class="n">U</span>
@@ -103,7 +113,7 @@
 <p>The documentation contains several examples and notebooks that make use of additional
 optional dependencies. If you want to run these notebooks, you can install <code class="docutils literal notranslate"><span class="pre">mocpy</span></code> and all
 mandatory and optional dependencies for the notebooks with:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;mocpy[notebooks]&quot;</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="s2">"mocpy[notebooks]"</span>
 </pre></div>
 </div>
 </section>
@@ -136,7 +146,6 @@ or directly from the GitHub repository. Once in the source code folder, you’ll
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -148,7 +157,7 @@ or directly from the GitHub repository. Once in the source code folder, you’ll
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

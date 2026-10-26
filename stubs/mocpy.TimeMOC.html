@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mocpy.TimeMOC &#8212; MOCPy 0.20.0 documentation</title>
+    <title>mocpy.TimeMOC &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     
-    <script src="../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@
 	 |
       </li>
       <li>
-	<a href="../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../api.html" accesskey="U">API: Detailed list of all methods</a> &#187;</li>
@@ -138,6 +138,16 @@ a lot of time without big pauses.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-01"</span><span class="p">,</span> <span class="s2">"2026-11-01"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-20"</span><span class="p">,</span> <span class="s2">"2026-11-30"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">times_min</span><span class="p">,</span> <span class="n">times_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">consistency</span>
+<span class="go">np.float64(0.14420062695924762)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -147,7 +157,7 @@ a lot of time without big pauses.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
 If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
@@ -156,11 +166,21 @@ If <code class="docutils literal notranslate"><span class="pre">keep_inside</spa
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="(in NumPy v2.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></a></dt><dd><p>A mask boolean array</p>
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></a></dt><dd><p>A mask boolean array</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-10"</span><span class="p">,</span> <span class="s2">"2026-02-10"</span><span class="p">]))</span>
+<span class="go">array([ True, False])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -170,12 +190,12 @@ If <code class="docutils literal notranslate"><span class="pre">keep_inside</spa
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times to check whether they are contained in the TMOC or not.</p>
 </dd>
 <dt><strong>keep_inside</strong><span class="classifier">bool, optional</span></dt><dd><p>True by default. If so the filtered table contains only observations that are located the MOC.
 If <code class="docutils literal notranslate"><span class="pre">keep_inside</span></code> is False, the filtered table contains all observations lying outside the MOC.</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -185,11 +205,22 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="(in NumPy v2.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></a></dt><dd><p>A mask boolean array</p>
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></a></dt><dd><p>A mask boolean array</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">delta</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"jd"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">contains_with_timeresolution</span><span class="p">(</span><span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-20"</span><span class="p">]),</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">delta</span><span class="p">)</span>
+<span class="go">array([ True])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -228,6 +259,15 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"20/0 100 500"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">max_order</span>
+<span class="go">np.uint8(20)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">degrade_to_order</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="go">15/0 3 15</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -252,9 +292,9 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-7&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-3&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/4-7&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-7"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-3"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc3</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/4-7"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">,</span> <span class="n">moc3</span><span class="p">)</span> <span class="c1"># should the empty MOC of order 3 (3/)</span>
 <span class="go">3/</span>
 </pre></div>
@@ -271,7 +311,7 @@ degraded MOC is set to <code class="docutils literal notranslate"><span class="p
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></a></span></dt><dd><p>the TimeMOC to substract from self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -286,6 +326,22 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-15"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc1</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min1</span><span class="p">,</span> <span class="n">time_max1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc2</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min2</span><span class="p">,</span> <span class="n">time_max2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tmoc1</span><span class="o">.</span><span class="n">difference_with_timeresolution</span><span class="p">(</span><span class="n">tmoc2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">to_time_ranges</span><span class="p">()</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">array([['2026-01-01 00:01:26.176', '2026-01-09 23:57:55.256'],</span>
+<span class="go">       ['2026-01-15 00:09:53.211', '2026-01-20 00:03:57.425']],</span>
+<span class="go">      dtype='&lt;U23')</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -331,7 +387,8 @@ instead of modifying the existing one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>max_depth</strong><span class="classifier">int, The resolution of the TimeMOC</span></dt><dd></dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>The resolution of the TimeMOC</p>
+</dd>
 <dt><strong>ranges: `~numpy.ndarray`</strong></dt><dd><p>a N x 2 numpy array representing the set of depth 61 ranges.</p>
 </dd>
 </dl>
@@ -342,6 +399,22 @@ instead of modifying the existing one.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ranges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span> <span class="p">[</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_depth61_ranges</span><span class="p">(</span><span class="mi">61</span><span class="p">,</span> <span class="n">ranges</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span>
+<span class="go">52/0 4</span>
+<span class="go">53/2 10</span>
+<span class="go">54/6 22</span>
+<span class="go">55/14</span>
+<span class="go">56/30 63 92</span>
+<span class="go">57/125 186</span>
+<span class="go">58/124 374</span>
+<span class="go">61/</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -354,7 +427,7 @@ in a binary HDU table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
+<dt><strong>path_or_url</strong><span class="classifier">str</span></dt><dd><p>The path to the FITS file.</p>
 </dd>
 <dt><strong>timeout</strong><span class="classifier">float</span></dt><dd><p>Timeout for the query, defaults to 1000s</p>
 </dd>
@@ -408,6 +481,18 @@ in a binary HDU table.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span><span class="p">,</span> <span class="n">MOC</span><span class="p">,</span> <span class="n">STMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smoc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_cone</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="mi">0</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stmoc</span> <span class="o">=</span> <span class="n">STMOC</span><span class="o">.</span><span class="n">from_spatial_coverages</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="s2">"2000-01-01"</span><span class="p">),</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2020-01-01"</span><span class="p">),</span>
+<span class="gp">... </span>                                     <span class="n">smoc</span><span class="p">,</span> <span class="n">time_depth</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_stmoc_space_fold</span><span class="p">(</span><span class="n">smoc</span><span class="p">,</span> <span class="n">stmoc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">'2000-01-01 00:01:14.142'</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -439,7 +524,7 @@ specification at section 2.3.2.</p>
 </div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/2-25 28 29 4/0 6/&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">"2/2-25 28 29 4/0 6/"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -465,20 +550,32 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"5/0-10 8/200-300 305"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span>
+<span class="go">2/0</span>
+<span class="go">3/7-8</span>
+<span class="go">4/4 13</span>
+<span class="go">5/10 25 36</span>
+<span class="go">6/74</span>
+<span class="go">8/300 305</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_time_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tcb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
 </dd>
-<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -492,21 +589,31 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-01"</span><span class="p">,</span> <span class="s2">"2026-02-01"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-20"</span><span class="p">,</span> <span class="s2">"2026-02-20"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-15"</span><span class="p">,</span> <span class="s2">"2027-01-01"</span><span class="p">]))</span>
+<span class="go">array([ True, False])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_time_ranges_approx">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_time_ranges_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tcb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_time_ranges_approx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_time_ranges_approx" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a range defined by two <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <p>Uses the following approximation: simple take the JD time and multiply by the number of microseconds in a day.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
+<dt><strong>min_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the left part of the intervals</p>
 </dd>
-<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
+<dt><strong>max_times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>astropy times defining the right part of the intervals</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -520,18 +627,26 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges_approx</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.from_times">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TimeDelta</span> <span class="pre">object:</span> <span class="pre">scale='tcb'</span> <span class="pre">format='sec'</span> <span class="pre">value=1800.0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.from_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.from_times" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
+<dd><p>Create a TimeMOC from a <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Astropy observation times</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></span></dt><dd><p>Astropy observation times</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>The duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.TimeDelta</span></code></a>, optional</span></dt><dd><p>The duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>).</p>
 </dd>
@@ -545,6 +660,16 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">delta</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"jd"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-01"</span><span class="p">,</span> <span class="s2">"2026-01-02"</span><span class="p">,</span> <span class="s2">"2026-01-03"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_times</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">delta</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">'2026-01-01 00:01:32.467'</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -593,7 +718,7 @@ to set a time resolution for performing the tmoc intersection</p>
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></a></span></dt><dd><p>the TimeMOC used for performing the intersection with self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -608,6 +733,21 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-05"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-15"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc1</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min1</span><span class="p">,</span> <span class="n">time_max1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc2</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min2</span><span class="p">,</span> <span class="n">time_max2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tmoc1</span><span class="o">.</span><span class="n">intersection_with_timeresolution</span><span class="p">(</span><span class="n">tmoc2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">to_time_ranges</span><span class="p">()</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">array([['2026-01-04 23:45:57.301', '2026-01-10 00:15:48.998']],</span>
+<span class="go">      dtype='&lt;U23')</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -649,15 +789,25 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.max_time">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">max_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.max_time" title="Link to this definition">¶</a></dt>
-<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation.</p>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc last observation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></dt><dd><p>time of the last observation</p>
+<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a></dt><dd><p>time of the last observation</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">'2026-01-20 00:03:57.425'</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -669,15 +819,25 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.min_time">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">min_time</span></span><a class="headerlink" href="#mocpy.TimeMOC.min_time" title="Link to this definition">¶</a></dt>
-<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation.</p>
+<dd><p>Get the <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a> time of the tmoc first observation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></dt><dd><p>time of the first observation</p>
+<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></a></dt><dd><p>time of the first observation</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">'2026-01-01 00:01:26.176'</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -713,7 +873,8 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>max_depth</strong><span class="classifier">int, The resolution of the TimeMOC</span></dt><dd></dd>
+<dt><strong>max_depth</strong><span class="classifier">int</span></dt><dd><p>The resolution of the TimeMOC</p>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -722,6 +883,15 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">new_empty</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span>
+<span class="go">10/</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">empty</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -737,30 +907,54 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></dt><dd><p>time equivalent to <code class="docutils literal notranslate"><span class="pre">order</span></code></p>
+<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></dt><dd><p>time equivalent to <code class="docutils literal notranslate"><span class="pre">order</span></code></p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="mi">61</span><span class="p">)</span>
+<span class="go">&lt;TimeDelta object: scale='tcb' format='sec' value=1e-06&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">order_to_time_resolution</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">&lt;TimeDelta object: scale='tcb' format='sec' value=2305843009213.694&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TimeMOC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(9.5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.plot" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TimeMOC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(9.5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Greens'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.plot" title="Link to this definition">¶</a></dt>
 <dd><p>Plot the TimeMOC in a time window.</p>
-<p>This method uses interactive matplotlib. The user can move its mouse through the plot to see the
-time (at the mouse position).</p>
+<p>This method uses interactive matplotlib: hover the plot to see the time in iso.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Set to ‘TimeMOC’ by default.</p>
 </dd>
-<dt><strong>view</strong><span class="classifier">(<a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>), optional</span></dt><dd><p>Define the view window in which the observations are plotted. Set to (None, None) by default (i.e.
-all the observation time window is rendered).</p>
+<dt><strong>view</strong><span class="classifier">(<a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>), optional</span></dt><dd><p>Define the view window in which the observations are plotted.
+Set to (None, None) by default (i.e. all the observation time window
+is rendered).</p>
+</dd>
+<dt><strong>figsize: tuple[float], optional</strong></dt><dd><p>A tuple of two floats that will define the size of the figure.</p>
+</dd>
+<dt><strong>colors: tuple[str], optional</strong></dt><dd><p>A tuple of two matplotlib colors. The first will be used in the TimeMOC’s
+holes while the second will represent the coverage of the TimeMOC.</p>
+</dd>
+<dt><strong>**kwargs:</strong></dt><dd><p>Any keyword argument that <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html#matplotlib.pyplot.imshow" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imshow</span></code></a> accepts.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-01"</span><span class="p">,</span> <span class="s2">"2026-02-01"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">([</span><span class="s2">"2026-01-20"</span><span class="p">,</span> <span class="s2">"2026-02-20"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -784,7 +978,7 @@ all the observation time window is rendered).</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;2/0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">"2/0"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span>
 <span class="go">2/0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">refine_to_order</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -811,7 +1005,7 @@ all the observation time window is rendered).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fits_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.save" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fits_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.save" title="Link to this definition">¶</a></dt>
 <dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’, ‘ascii’, or ‘json’, though the json format is not officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -826,9 +1020,14 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword.
 Default to False.</p>
 </dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
 <dt><strong>fold: int</strong></dt><dd><p>if &gt;0, print ascii or json output with a maximum line width</p>
 </dd>
 <dt><strong>fits_keywords: dict, optional</strong></dt><dd><p>Additional keywords to add to the FITS header.</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
 </dd>
 </dl>
 </dd>
@@ -837,7 +1036,7 @@ Default to False.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.serialize" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.serialize" title="Link to this definition">¶</a></dt>
 <dd><p>Serialize the MOC into a specific format.</p>
 <p>Possible formats are FITS, JSON and STRING</p>
 <dl class="field-list">
@@ -847,11 +1046,16 @@ Default to False.</p>
 </dd>
 <dt><strong>optional_kw_dict</strong><span class="classifier">dict</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
 </dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
+<dt><strong>result</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/hdulists.html#astropy.io.fits.HDUList" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.io.fits.HDUList</span></code></a> or JSON dictionary</span></dt><dd><p>The result of the serialization.</p>
 </dd>
 </dl>
 </dd>
@@ -882,8 +1086,8 @@ It is not implemented yet for STMOCs</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0-1 362-363&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;3/0 2 277 279&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0-1 362-363"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moc2</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"3/0 2 277 279"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moc1</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">moc2</span><span class="p">)</span>
 <span class="go">3/1-2 277 279 362-363</span>
 </pre></div>
@@ -897,7 +1101,7 @@ It is not implemented yet for STMOCs</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>delta_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time to convert</p>
+<dt><strong>delta_time</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></span></dt><dd><p>time to convert</p>
 </dd>
 </dl>
 </dd>
@@ -908,12 +1112,29 @@ It is not implemented yet for STMOCs</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDelta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"sec"</span><span class="p">))</span>
+<span class="go">np.uint8(42)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TimeMOC</span><span class="o">.</span><span class="n">time_resolution_to_order</span><span class="p">(</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"sec"</span><span class="p">))</span>
+<span class="go">np.uint8(31)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.to_depth61_ranges">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">to_depth61_ranges</span></span><a class="headerlink" href="#mocpy.TimeMOC.to_depth61_ranges" title="Link to this definition">¶</a></dt>
 <dd><p>Return the list of ranges this TimeMOC contains, in microsec since JD=0.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"61/380000-390000 400000"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">to_depth61_ranges</span>
+<span class="go">array([[380000, 390001],</span>
+<span class="go">       [400000, 400001]], dtype=uint64)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -949,7 +1170,7 @@ current max_order of the T-MOC</p>
 </div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span> <span class="k">as</span> <span class="n">TMOC</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;15/0-100&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"15/0-100"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">to_order</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 <span class="go">9/0</span>
 <span class="go">10/2</span>
@@ -983,6 +1204,16 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt class="sig sig-object py" id="mocpy.TimeMOC.to_time_ranges">
 <span class="sig-name descname"><span class="pre">to_time_ranges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mocpy/tmoc/tmoc.html#TimeMOC.to_time_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mocpy.TimeMOC.to_time_ranges" title="Link to this definition">¶</a></dt>
 <dd><p>Return the time ranges this TimeMOC contains.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"21/193392 22/386779-386780"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ranges</span> <span class="o">=</span> <span class="n">tmoc</span><span class="o">.</span><span class="n">to_time_ranges</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ranges</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">array([['2026-01-01 05:05:39.787', '2026-01-13 22:30:51.415'],</span>
+<span class="go">       ['2026-02-02 00:38:38.856', '2026-02-14 18:03:50.484']],</span>
+<span class="go">      dtype='&lt;U23')</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -992,11 +1223,21 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></dt><dd><p>total duration of all the observation times of the tmoc</p>
+<dt><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a></dt><dd><p>total duration of all the observation times of the tmoc</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min</span><span class="p">,</span> <span class="n">time_max</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc</span><span class="o">.</span><span class="n">total_duration</span><span class="o">.</span><span class="n">jd</span>
+<span class="go">np.float64(19.001750565925924)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1022,17 +1263,17 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeDelta</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;1999-01-01T00:00:00.123456789&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2005-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">older</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'1999-01-01T00:00:00.123456789'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2005-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'jd'</span><span class="p">)</span>
 <span class="gp">... </span>                                <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">newer</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2000-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">&#39;2010-01-01T00:00:00&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newer</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2000-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="s1">'2010-01-01T00:00:00'</span><span class="p">),</span>
+<span class="gp">... </span>                                 <span class="n">delta_t</span> <span class="o">=</span> <span class="n">TimeDelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'jd'</span><span class="p">)</span>
 <span class="gp">... </span>                                <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">union</span> <span class="o">=</span> <span class="n">older</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">newer</span><span class="p">)</span> <span class="c1"># == older + newer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="n">union</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">)</span>
-<span class="go">[1998.99847987] [2010.00183614]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">jyear</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="go">1998.9985 2010.0018</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1048,7 +1289,7 @@ to set a time resolution for performing the tmoc union</p>
 <dd class="field-odd"><dl>
 <dt><strong>another_moc</strong><span class="classifier"><a class="reference internal" href="#mocpy.TimeMOC" title="mocpy.TimeMOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMOC</span></code></a></span></dt><dd><p>the TimeMOC to bind to self</p>
 </dd>
-<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDelta.html#astropy.time.TimeDelta" title="(in Astropy v8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDelta</span></code></a>, optional</span></dt><dd><p>the duration of one observation. It is set to 30 min by default. This data is used to compute the
 more efficient TimeMOC order to represent the observations. (Best order = the less precise order which
 is able to discriminate two observations separated by <code class="docutils literal notranslate"><span class="pre">delta_t</span></code>)</p>
 </dd>
@@ -1063,6 +1304,22 @@ is able to discriminate two observations separated by <code class="docutils lite
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeMOC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-01"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max1</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-10"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_min2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-15"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_max2</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s2">"2026-01-20"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc1</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min1</span><span class="p">,</span> <span class="n">time_max1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmoc2</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span><span class="n">time_min2</span><span class="p">,</span> <span class="n">time_max2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tmoc1</span><span class="o">.</span><span class="n">union_with_timeresolution</span><span class="p">(</span><span class="n">tmoc2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">to_time_ranges</span><span class="p">()</span><span class="o">.</span><span class="n">iso</span>
+<span class="go">array([['2026-01-01 00:01:26.176', '2026-01-10 00:15:48.998'],</span>
+<span class="go">       ['2026-01-14 23:51:59.470', '2026-01-20 00:03:57.425']],</span>
+<span class="go">      dtype='&lt;U23')</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -1101,7 +1358,7 @@ AND because the natural ordering of such indices follow the same order as the zo
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mocpy.TimeMOC.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.write" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_kw_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_compatible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_v2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mocpy.TimeMOC.write" title="Link to this definition">¶</a></dt>
 <dd><p>Write the MOC to a file.</p>
 <p>Format can be ‘fits’ or ‘json’, though only the fits format is officially supported by the IVOA.</p>
 <dl class="field-list simple">
@@ -1115,6 +1372,11 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 <dt><strong>overwrite</strong><span class="classifier">bool, optional</span></dt><dd><p>If the file already exists and you want to overwrite it, then set the  <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> keyword. Default to False.</p>
 </dd>
 <dt><strong>optional_kw_dict</strong><span class="classifier">optional</span></dt><dd><p>Optional keywords arguments added to the FITS header. Only used if <code class="docutils literal notranslate"><span class="pre">format</span></code> equals to ‘fits’.</p>
+</dd>
+<dt><strong>v1_compatible</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, write a v2 MOC that can be read by v1 parsers (using NUNIQ ordering for spatial MOCs).
+Default to False (MOC 2.0 standard range-encoded).</p>
+</dd>
+<dt><strong>pre_v2</strong><span class="classifier">bool, optional</span></dt><dd><p>Deprecated since v0.21.0. Use <code class="docutils literal notranslate"><span class="pre">v1_compatible</span></code> instead.</p>
 </dd>
 </dl>
 </dd>
@@ -1191,7 +1453,6 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -1203,7 +1464,7 @@ By default, <code class="docutils literal notranslate"><span class="pre">format<
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

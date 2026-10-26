@@ -53,7 +53,7 @@ Once your environment is set up and activated you can run the tests
 
 To run the automated tests and the docstring examples, go to the repo folder and type::
 
-    python -m pytest -v python/mocpy
+    python -m pytest -v
 
 To run the tests with coverage report locally::
 
@@ -61,6 +61,10 @@ To run the tests with coverage report locally::
 
 You also can have a html output of the coverage with the flag ``--cov-report=html``.
 This will generate an ``htmlcov`` folder where all the static html files can be found.
+
+Some tests which require remote data download are skipped by default. To run them, do::
+
+    python -m pytest --run-remote
 
 To be sure that your modifications didn't break the notebooks, do::
 

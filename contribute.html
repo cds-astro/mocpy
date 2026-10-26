@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Contribute &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Contribute &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
     
-    <script src="_static/documentation_options.js?v=b52c616d"></script>
+    <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
 	
       </li>
       <li>
-	<a href="index.html">MOCPy 0.20.0 documentation</a>
+	<a href="index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       
@@ -114,7 +114,7 @@ You will see the hooks run linting and formatting scripts at the pre-commit stag
 <h2>Running the python tests<a class="headerlink" href="#running-the-python-tests" title="Link to this heading">¶</a></h2>
 <p>Once your environment is set up and activated you can run the tests</p>
 <p>To run the automated tests and the docstring examples, go to the repo folder and type:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="n">python</span><span class="o">/</span><span class="n">mocpy</span>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span>
 </pre></div>
 </div>
 <p>To run the tests with coverage report locally:</p>
@@ -123,9 +123,13 @@ You will see the hooks run linting and formatting scripts at the pre-commit stag
 </div>
 <p>You also can have a html output of the coverage with the flag <code class="docutils literal notranslate"><span class="pre">--cov-report=html</span></code>.
 This will generate an <code class="docutils literal notranslate"><span class="pre">htmlcov</span></code> folder where all the static html files can be found.</p>
+<p>Some tests which require remote data download are skipped by default. To run them, do:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">remote</span>
+</pre></div>
+</div>
 <p>To be sure that your modifications didn’t break the notebooks, do:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span><span class="p">[</span><span class="n">notebooks</span><span class="p">]</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">--</span><span class="n">nbmake</span> <span class="s2">&quot;./notebooks&quot;</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">--</span><span class="n">nbmake</span> <span class="s2">"./notebooks"</span>
 </pre></div>
 </div>
 </section>
@@ -173,7 +177,6 @@ This will generate an <code class="docutils literal notranslate"><span class="pr
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -185,7 +188,7 @@ This will generate an <code class="docutils literal notranslate"><span class="pr
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

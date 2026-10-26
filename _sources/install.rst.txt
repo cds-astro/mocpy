@@ -6,14 +6,25 @@ Stable versions
 
 MOCPy relies on the following mandatory external dependencies :
 
-- `cdshealpix <https://cds-astro.github.io/cds-healpix-python/>`__
 - `astropy <http://docs.astropy.org/en/stable/>`__
-- `matplotlib <https://matplotlib.org/>`__
-- `networkx <http://networkx.github.io/>`__ used in ``~mocpy.MOC.get_boundaries``
+- `numpy <https://numpy.org/doc/stable/>`__
 
-It has an optional dependency to query FITS files by url:
+It has an optional dependencies for different aspects.
+
+To query different interfaces (ex: FITS files by url, ``~mocpy.MOC.query_vizier_table``,
+``~mocpy.MOC.query_simbad``):
 
 - `requests <https://github.com/psf/requests>`__
+
+To plot MOCs:
+
+- `cdshealpix <https://cds-astro.github.io/cds-healpix-python/>`__
+- `networkx <http://networkx.github.io/>`__ used in ``~mocpy.MOC.get_boundaries``
+- `matplotlib <https://matplotlib.org/>`__
+
+To create MOCs from astropy regions:
+
+- `regions <https://astropy-regions.readthedocs.io/en/stable/index.html>`__
 
 To upgrade the ``mocpy`` package to the latest version::
 

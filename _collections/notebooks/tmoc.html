@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creation and manipulation of time coverages (TMOCs) &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Creation and manipulation of time coverages (TMOCs) &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Space and time MOC" href="STMOC%20from%20time%20ranges.html" />
-    <link rel="prev" title="Query the sources of a VizieR table that are in a sky region" href="query_vizier_table.html" />
+    <link rel="prev" title="Overlay the MOC of Spitzer on a 2MASS cutout" href="FITS-image-pixels-intersecting-MOC.html" />
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
 
   </head><body>
@@ -60,13 +60,13 @@
 	</a>
       </li>
       <li class="right">
-	<a href="query_vizier_table.html" title="Query the sources of a VizieR table that are in a sky region">
+	<a href="FITS-image-pixels-intersecting-MOC.html" title="Overlay the MOC of Spitzer on a 2MASS cutout">
 	  &laquo; previous
 	</a>
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -102,10 +102,10 @@
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">time_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_fits</span><span class="p">(</span>
-    <span class="s2">&quot;http://alasky.u-strasbg.fr/OLD_HST-hips/filter_SDSSr_hips/TMoc.fits&quot;</span><span class="p">,</span>
+    <span class="s2">"http://alasky.u-strasbg.fr/OLD_HST-hips/filter_SDSSr_hips/TMoc.fits"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="c1"># Display it</span>
-<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
+<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"HST_SDSSr tmoc"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -121,9 +121,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"_RAJ2000"</span><span class="p">,</span> <span class="s2">"_DEJ2000"</span><span class="p">])</span>
 <span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;II/285&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">"II/285"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
@@ -165,16 +165,16 @@ Length = 70031 rows
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">time</span>
-<span class="n">table_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_times</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">))</span>
-<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2nd table of II/285 tmoc&quot;</span><span class="p">)</span>
+<span class="n">table_moc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_times</span><span class="p">(</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">"JD"</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"jd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">))</span>
+<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"2nd table of II/285 tmoc"</span><span class="p">)</span>
 
 <span class="c1"># print characteristics such as the time of the first/last observations</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the last observation:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the first observation:"</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the last observation:"</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
 <span class="c1"># the total duration of the observation times</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total duration: </span><span class="si">{</span><span class="n">table_moc</span><span class="o">.</span><span class="n">total_duration</span><span class="o">.</span><span class="n">jd</span><span class="si">}</span><span class="s2"> jd&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total duration: </span><span class="si">{</span><span class="n">table_moc</span><span class="o">.</span><span class="n">total_duration</span><span class="o">.</span><span class="n">jd</span><span class="si">}</span><span class="s2"> jd"</span><span class="p">)</span>
 <span class="c1"># the order of the TimeMoc</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max order:&quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"max order:"</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -192,10 +192,10 @@ Length = 70031 rows
 <div class="highlight"><pre>
 Time of the first observation: [&#39;1978-05-10 20:09:28.672&#39;]
 Time of the last observation: [&#39;2004-04-22 16:56:36.350&#39;]
-Total duration: 227.42448355555555 jd
+Total duration: 227.49904895999998 jd
 max order: 31
-CPU times: user 242 ms, sys: 83.6 ms, total: 325 ms
-Wall time: 331 ms
+CPU times: user 213 ms, sys: 39.8 ms, total: 253 ms
+Wall time: 259 ms
 </pre></div></div>
 </div>
 </section>
@@ -207,11 +207,11 @@ Wall time: 331 ms
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># filtering the table through the tmoc created from the HST_SDSSr fits file</span>
 <span class="n">rows</span> <span class="o">=</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">contains_with_timeresolution</span><span class="p">(</span>
-    <span class="n">times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
+    <span class="n">times</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">"JD"</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"jd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">),</span>
     <span class="n">keep_inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mi">3600</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
+    <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mi">3600</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"sec"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;JD&quot;</span><span class="p">][</span><span class="n">rows</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">"JD"</span><span class="p">][</span><span class="n">rows</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -233,10 +233,10 @@ Wall time: 331 ms
 2453021.3492
 2453021.3520
          ...
-2453022.3057
 2453022.4917
 2453021.3392
 2453022.4856
+2453022.2775
 2453022.4807
 2453022.6028
 2453022.3294
@@ -259,14 +259,14 @@ Length = 233 rows
     <span class="n">order</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;HST_SDSSr tmoc&quot;</span><span class="p">)</span>
-<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2nd table of II/285 tmoc&quot;</span><span class="p">)</span>
-<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) tmoc&quot;</span><span class="p">)</span>
+<span class="n">time_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"HST_SDSSr tmoc"</span><span class="p">)</span>
+<span class="n">table_moc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"2nd table of II/285 tmoc"</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"(HST_SDSSr) INTER (2nd table of II/285) tmoc"</span><span class="p">)</span>
 
 <span class="c1"># print the max order of all the tmocs. Result tmoc must be of order 9</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HST_SDSSr max order : &quot;</span><span class="p">,</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;2nd table of II/285 max order : &quot;</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) max order : &quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"HST_SDSSr max order : "</span><span class="p">,</span> <span class="n">time_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"2nd table of II/285 max order : "</span><span class="p">,</span> <span class="n">table_moc</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"(HST_SDSSr) INTER (2nd table of II/285) max order : "</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_order</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -307,10 +307,10 @@ HST_SDSSr max order :  41
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">add_neighbours</span><span class="p">()</span>
-<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) augmented tmoc&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"(HST_SDSSr) INTER (2nd table of II/285) augmented tmoc"</span><span class="p">)</span>
 
 <span class="n">result</span><span class="o">.</span><span class="n">remove_neighbours</span><span class="p">()</span>
-<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;(HST_SDSSr) INTER (2nd table of II/285) diminished tmoc&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"(HST_SDSSr) INTER (2nd table of II/285) diminished tmoc"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -335,7 +335,7 @@ HST_SDSSr max order :  41
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">complemented_tmoc</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">complement</span><span class="p">()</span>
 <span class="n">complemented_tmoc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Complement of (HST_SDSSr) INTER (2nd table of II/285)&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Complement of (HST_SDSSr) INTER (2nd table of II/285)"</span><span class="p">,</span>
     <span class="n">view</span><span class="o">=</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">min_time</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">max_time</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
@@ -367,7 +367,6 @@ HST_SDSSr max order :  41
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -379,7 +378,7 @@ HST_SDSSr max order :  41
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

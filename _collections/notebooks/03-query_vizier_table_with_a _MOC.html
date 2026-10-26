@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Query the sources of a VizieR table that are in a sky region &#8212; MOCPy 0.21.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="icon" href="../../_static/MOCpy-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">MOC</span><span id="logotext2">py</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../index.html">MOCPy 0.21.0 documentation</a>
+	 &#187;
+      </li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Query-the-sources-of-a-VizieR-table-that-are-in-a-sky-region">
+<h1>Query the sources of a VizieR table that are in a sky region<a class="headerlink" href="#Query-the-sources-of-a-VizieR-table-that-are-in-a-sky-region" title="Link to this heading">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mocpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MOC</span>
+</pre></div>
+</div>
+</div>
+<p>First, we retrieve the MOC for the VizieR table <code class="docutils literal notranslate"><span class="pre">VIII/84/7c</span></code> – see <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2007MNRAS.382.1639H">2007MNRAS.382.1639H</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moc_radio_sources</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_vizier_table</span><span class="p">(</span><span class="s2">"VIII/84/7c"</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moc_radio_sources</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_03-query_vizier_table_with_a__MOC_4_0.png" src="../../_images/_collections_notebooks_03-query_vizier_table_with_a__MOC_4_0.png" />
+</div>
+</div>
+<p>Then, we query the Hipparcos catalogue to get all its sources in the MOC coverage of the radio survey <code class="docutils literal notranslate"><span class="pre">VIII/84/7c</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hipparcos_in_7C_coverage</span> <span class="o">=</span> <span class="n">moc_radio_sources</span><span class="o">.</span><span class="n">query_vizier_table</span><span class="p">(</span>
+    <span class="s2">"I/239/hip_main"</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">100000</span>
+<span class="p">)</span>
+<span class="n">hipparcos_in_7C_coverage</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><i>Table length=12589</i>
+<table id="table140338188785936" class="table-striped table-bordered table-condensed">
+<thead><tr><th>_RAJ2000</th><th>_DEJ2000</th><th>recno</th><th>HIP</th><th>Proxy</th><th>RAhms</th><th>DEdms</th><th>Vmag</th><th>VarFlag</th><th>r_Vmag</th><th>RAICRS</th><th>DEICRS</th><th>AstroRef</th><th>Plx</th><th>pmRA</th><th>pmDE</th><th>e_RAICRS</th><th>e_DEICRS</th><th>e_Plx</th><th>e_pmRA</th><th>e_pmDE</th><th>DE:RA</th><th>Plx:RA</th><th>Plx:DE</th><th>pmRA:RA</th><th>pmRA:DE</th><th>pmRA:Plx</th><th>pmDE:RA</th><th>pmDE:DE</th><th>pmDE:Plx</th><th>pmDE:pmRA</th><th>F1</th><th>F2</th><th>BTmag</th><th>e_BTmag</th><th>VTmag</th><th>e_VTmag</th><th>m_BTmag</th><th>B-V</th><th>e_B-V</th><th>r_B-V</th><th>V-I</th><th>e_V-I</th><th>r_V-I</th><th>CombMag</th><th>Hpmag</th><th>e_Hpmag</th><th>Hpscat</th><th>o_Hpmag</th><th>m_Hpmag</th><th>Hpmax</th><th>HPmin</th><th>Period</th><th>HvarType</th><th>moreVar</th><th>morePhoto</th><th>CCDM</th><th>n_CCDM</th><th>Nsys</th><th>Ncomp</th><th>MultFlag</th><th>Source</th><th>Qual</th><th>m_HIP</th><th>theta</th><th>rho</th><th>e_rho</th><th>dHp</th><th>e_dHp</th><th>Survey</th><th>Chart</th><th>Notes</th><th>HD</th><th>BD</th><th>CoD</th><th>CPD</th><th>(V-I)red</th><th>SpType</th><th>r_SpType</th><th>HIPep</th><th>Erratum</th><th>_RA.icrs</th><th>_DE.icrs</th></tr></thead>
+<thead><tr><th>deg</th><th>deg</th><th></th><th></th><th></th><th></th><th></th><th>mag</th><th></th><th></th><th>deg</th><th>deg</th><th></th><th>mas</th><th>mas / yr</th><th>mas / yr</th><th>mas</th><th>mas</th><th>mas</th><th>mas / yr</th><th>mas / yr</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>%</th><th></th><th>mag</th><th>mag</th><th>mag</th><th>mag</th><th></th><th>mag</th><th>mag</th><th></th><th>mag</th><th>mag</th><th></th><th></th><th>mag</th><th>mag</th><th>mag</th><th></th><th></th><th>mag</th><th>mag</th><th>d</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>deg</th><th>arcsec</th><th>arcsec</th><th>mag</th><th>mag</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>mag</th><th></th><th></th><th></th><th></th><th>deg</th><th>deg</th></tr></thead>
+<thead><tr><th>float64</th><th>float64</th><th>int32</th><th>int32</th><th>str1</th><th>str11</th><th>str11</th><th>float32</th><th>uint8</th><th>str1</th><th>float64</th><th>float64</th><th>str1</th><th>float32</th><th>float64</th><th>float64</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>int16</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>str1</th><th>float32</th><th>float32</th><th>str1</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>int16</th><th>str1</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>str1</th><th>str1</th><th>str10</th><th>str1</th><th>int16</th><th>int16</th><th>str1</th><th>str1</th><th>str1</th><th>str2</th><th>int16</th><th>float32</th><th>float32</th><th>float32</th><th>float32</th><th>str1</th><th>str1</th><th>str1</th><th>int32</th><th>str10</th><th>str10</th><th>str10</th><th>float32</th><th>str12</th><th>str1</th><th>str5</th><th>str7</th><th>float64</th><th>float64</th></tr></thead>
+<tr><td>37.0743886700</td><td>24.5073594500</td><td>11491</td><td>11500</td><td></td><td>02 28 17.85</td><td>+24 30 26.5</td><td>10.32</td><td>--</td><td>H</td><td>37.07438867</td><td>24.50735945</td><td></td><td>3.90</td><td>19.36</td><td>-34.66</td><td>1.44</td><td>1.31</td><td>1.90</td><td>1.80</td><td>1.60</td><td>0.39</td><td>-0.11</td><td>-0.44</td><td>-0.18</td><td>-0.06</td><td>0.00</td><td>-0.17</td><td>-0.56</td><td>0.42</td><td>0.12</td><td>0</td><td>0.46</td><td>10.848</td><td>0.065</td><td>10.410</td><td>0.066</td><td></td><td>0.413</td><td>0.085</td><td>T</td><td>0.48</td><td>0.09</td><td>L</td><td></td><td>10.4147</td><td>0.0027</td><td>0.028</td><td>78</td><td></td><td>10.38</td><td>10.47</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td>G</td><td></td><td>--</td><td>B+23  327</td><td></td><td></td><td>0.72</td><td>G0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>37.07444038</td><td>24.50727521</td></tr>
+<tr><td>37.0737046400</td><td>24.6316972200</td><td>11490</td><td>11499</td><td></td><td>02 28 17.69</td><td>+24 37 54.1</td><td>8.48</td><td>--</td><td>H</td><td>37.07370464</td><td>24.63169722</td><td></td><td>3.95</td><td>-4.88</td><td>-2.20</td><td>1.02</td><td>0.93</td><td>1.49</td><td>1.20</td><td>1.22</td><td>0.41</td><td>0.14</td><td>-0.34</td><td>-0.08</td><td>-0.12</td><td>0.12</td><td>-0.08</td><td>-0.54</td><td>0.55</td><td>0.27</td><td>7</td><td>0.19</td><td>9.793</td><td>0.023</td><td>8.602</td><td>0.015</td><td></td><td>1.020</td><td>0.021</td><td>T</td><td>0.99</td><td>0.02</td><td>L</td><td></td><td>8.6509</td><td>0.0016</td><td>0.013</td><td>81</td><td></td><td>8.64</td><td>8.68</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>S</td><td></td><td></td><td>15283</td><td>B+23  326</td><td></td><td></td><td>0.98</td><td>G5</td><td>S</td><td>HIPep</td><td>Erratum</td><td>37.07369159</td><td>24.63169187</td></tr>
+<tr><td>37.6346422700</td><td>25.2352136800</td><td>11661</td><td>11670</td><td></td><td>02 30 32.31</td><td>+25 14 06.8</td><td>5.88</td><td>--</td><td>H</td><td>37.63464227</td><td>25.23521368</td><td></td><td>19.59</td><td>61.69</td><td>-72.93</td><td>0.72</td><td>0.71</td><td>1.13</td><td>0.82</td><td>0.84</td><td>0.30</td><td>0.12</td><td>-0.52</td><td>0.04</td><td>-0.06</td><td>-0.08</td><td>-0.10</td><td>-0.52</td><td>0.57</td><td>0.12</td><td>0</td><td>3.31</td><td>6.373</td><td>0.005</td><td>5.937</td><td>0.004</td><td></td><td>0.412</td><td>0.006</td><td>T</td><td>0.48</td><td>0.01</td><td>L</td><td></td><td>5.9694</td><td>0.0007</td><td>0.007</td><td>72</td><td></td><td>5.96</td><td>5.98</td><td>--</td><td></td><td></td><td></td><td>02306+2515</td><td>I</td><td>1</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>S</td><td></td><td></td><td>15524</td><td>B+24  358</td><td></td><td></td><td>0.48</td><td>F6IV</td><td>X</td><td>HIPep</td><td>Erratum</td><td>37.63480803</td><td>25.23503642</td></tr>
+<tr><td>34.8542164000</td><td>24.7076913700</td><td>10825</td><td>10833</td><td></td><td>02 19 25.01</td><td>+24 42 27.7</td><td>11.66</td><td>2</td><td>H</td><td>34.85421640</td><td>24.70769137</td><td></td><td>2.47</td><td>-2.48</td><td>-35.78</td><td>2.07</td><td>1.56</td><td>2.55</td><td>2.74</td><td>2.27</td><td>0.31</td><td>0.13</td><td>-0.22</td><td>0.10</td><td>-0.07</td><td>-0.11</td><td>-0.06</td><td>-0.44</td><td>0.22</td><td>0.32</td><td>2</td><td>-0.72</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td>0.288</td><td>0.140</td><td>G</td><td>0.33</td><td>0.18</td><td>R</td><td></td><td>11.7297</td><td>0.0078</td><td>0.073</td><td>108</td><td></td><td>11.63</td><td>11.87</td><td>--</td><td>U</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td>S</td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td>G</td><td></td><td>--</td><td></td><td></td><td></td><td>0.33</td><td>A5</td><td>S</td><td>HIPep</td><td>Erratum</td><td>34.85420976</td><td>24.70760440</td></tr>
+<tr><td>34.1417743900</td><td>24.6060623400</td><td>10599</td><td>10607</td><td></td><td>02 16 34.03</td><td>+24 36 21.8</td><td>8.73</td><td>--</td><td>H</td><td>34.14177439</td><td>24.60606234</td><td></td><td>1.78</td><td>4.37</td><td>7.60</td><td>1.04</td><td>0.79</td><td>1.38</td><td>1.31</td><td>1.34</td><td>0.15</td><td>0.34</td><td>-0.31</td><td>0.20</td><td>-0.22</td><td>0.25</td><td>0.13</td><td>-0.48</td><td>0.51</td><td>0.52</td><td>0</td><td>0.38</td><td>10.061</td><td>0.026</td><td>8.878</td><td>0.016</td><td></td><td>1.014</td><td>0.024</td><td>T</td><td>0.99</td><td>0.02</td><td>L</td><td></td><td>8.8973</td><td>0.0014</td><td>0.010</td><td>79</td><td></td><td>8.88</td><td>8.92</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>13975</td><td>B+23  306</td><td></td><td></td><td>0.95</td><td>G5</td><td>S</td><td>HIPep</td><td>Erratum</td><td>34.14178607</td><td>24.60608081</td></tr>
+<tr><td>34.8955761500</td><td>25.5125399700</td><td>10836</td><td>10845</td><td></td><td>02 19 34.94</td><td>+25 30 45.1</td><td>8.03</td><td>--</td><td>G</td><td>34.89557615</td><td>25.51253997</td><td></td><td>4.67</td><td>11.51</td><td>-6.02</td><td>0.78</td><td>0.67</td><td>1.00</td><td>1.13</td><td>1.07</td><td>0.37</td><td>0.09</td><td>-0.23</td><td>-0.13</td><td>-0.20</td><td>0.07</td><td>-0.12</td><td>-0.57</td><td>0.27</td><td>0.46</td><td>0</td><td>-1.28</td><td>8.089</td><td>0.007</td><td>8.039</td><td>0.009</td><td></td><td>0.060</td><td>0.015</td><td>G</td><td>0.07</td><td>0.01</td><td>H</td><td></td><td>8.0505</td><td>0.0011</td><td>0.010</td><td>109</td><td></td><td>8.04</td><td>8.07</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>S</td><td></td><td></td><td>14333</td><td>B+24  335</td><td></td><td></td><td>0.07</td><td>A0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>34.89560715</td><td>25.51252534</td></tr>
+<tr><td>36.8628574100</td><td>25.6495057000</td><td>11422</td><td>11431</td><td></td><td>02 27 27.09</td><td>+25 38 58.2</td><td>8.72</td><td>--</td><td>H</td><td>36.86285741</td><td>25.64950570</td><td></td><td>1.09</td><td>-20.99</td><td>-5.54</td><td>1.01</td><td>0.71</td><td>1.34</td><td>1.22</td><td>0.95</td><td>0.37</td><td>0.39</td><td>0.03</td><td>-0.09</td><td>0.00</td><td>-0.33</td><td>0.01</td><td>-0.30</td><td>0.02</td><td>0.33</td><td>0</td><td>-0.64</td><td>10.762</td><td>0.052</td><td>8.891</td><td>0.019</td><td></td><td>1.555</td><td>0.044</td><td>T</td><td>1.57</td><td>0.04</td><td>L</td><td></td><td>8.8363</td><td>0.0014</td><td>0.014</td><td>83</td><td></td><td>8.82</td><td>8.86</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>15187</td><td>B+24  351</td><td></td><td></td><td>1.44</td><td>K0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>36.86280082</td><td>25.64949223</td></tr>
+<tr><td>36.7417628100</td><td>26.0409609700</td><td>11396</td><td>11405</td><td></td><td>02 26 58.02</td><td>+26 02 27.5</td><td>6.99</td><td>--</td><td>H</td><td>36.74176281</td><td>26.04096097</td><td></td><td>8.43</td><td>-13.05</td><td>-38.07</td><td>0.77</td><td>0.49</td><td>0.96</td><td>0.96</td><td>0.68</td><td>0.28</td><td>0.32</td><td>-0.12</td><td>0.14</td><td>0.15</td><td>-0.26</td><td>0.15</td><td>-0.11</td><td>0.16</td><td>0.21</td><td>0</td><td>1.06</td><td>7.705</td><td>0.007</td><td>7.072</td><td>0.006</td><td></td><td>0.588</td><td>0.008</td><td>T</td><td>0.66</td><td>0.01</td><td>L</td><td></td><td>7.1176</td><td>0.0009</td><td>0.007</td><td>98</td><td></td><td>7.11</td><td>7.13</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td>S</td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>S</td><td></td><td></td><td>15141</td><td>B+25  398</td><td></td><td></td><td>0.64</td><td>F5</td><td>S</td><td>HIPep</td><td>Erratum</td><td>36.74172751</td><td>26.04086844</td></tr>
+<tr><td>35.5673317000</td><td>26.1573265800</td><td>11042</td><td>11050</td><td></td><td>02 22 16.16</td><td>+26 09 26.4</td><td>8.67</td><td>--</td><td>H</td><td>35.56733170</td><td>26.15732658</td><td></td><td>2.16</td><td>-5.22</td><td>-6.66</td><td>0.90</td><td>0.69</td><td>1.19</td><td>1.18</td><td>0.98</td><td>0.27</td><td>0.21</td><td>-0.20</td><td>-0.06</td><td>-0.02</td><td>-0.28</td><td>-0.03</td><td>-0.42</td><td>0.18</td><td>0.25</td><td>0</td><td>1.14</td><td>10.043</td><td>0.024</td><td>8.810</td><td>0.015</td><td></td><td>1.053</td><td>0.022</td><td>T</td><td>1.02</td><td>0.02</td><td>L</td><td></td><td>8.8338</td><td>0.0017</td><td>0.016</td><td>103</td><td></td><td>8.81</td><td>8.86</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>--</td><td>B+25  387</td><td></td><td></td><td>1.03</td><td>K0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>35.56731756</td><td>26.15731039</td></tr>
+<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+<tr><td>268.6186982300</td><td>39.2394185000</td><td>87599</td><td>87676</td><td></td><td>17 54 28.49</td><td>+39 14 21.9</td><td>9.15</td><td>--</td><td>H</td><td>268.61869823</td><td>39.23941850</td><td></td><td>6.19</td><td>15.73</td><td>25.80</td><td>0.80</td><td>0.78</td><td>0.94</td><td>0.92</td><td>0.91</td><td>-0.02</td><td>-0.09</td><td>-0.07</td><td>0.13</td><td>0.06</td><td>-0.08</td><td>0.06</td><td>0.02</td><td>-0.05</td><td>0.00</td><td>0</td><td>-0.68</td><td>9.512</td><td>0.014</td><td>9.161</td><td>0.015</td><td></td><td>0.333</td><td>0.019</td><td>T</td><td>0.39</td><td>0.03</td><td>L</td><td></td><td>9.2289</td><td>0.0018</td><td>0.020</td><td>127</td><td></td><td>9.19</td><td>9.26</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>--</td><td>B+39 3260</td><td></td><td></td><td>0.45</td><td>F2</td><td>S</td><td>HIPep</td><td>Erratum</td><td>268.61874759</td><td>39.23948121</td></tr>
+<tr><td>269.0500046900</td><td>39.4392046300</td><td>87725</td><td>87802</td><td>H</td><td>17 56 12.00</td><td>+39 26 21.1</td><td>8.04</td><td>--</td><td>H</td><td>269.05000469</td><td>39.43920463</td><td>A</td><td>11.99</td><td>79.85</td><td>-42.82</td><td>0.92</td><td>1.08</td><td>1.05</td><td>0.94</td><td>1.12</td><td>0.04</td><td>0.05</td><td>-0.06</td><td>0.25</td><td>0.09</td><td>-0.12</td><td>0.06</td><td>0.11</td><td>-0.09</td><td>0.13</td><td>1</td><td>-0.39</td><td>8.744</td><td>0.009</td><td>8.180</td><td>0.009</td><td>A</td><td>0.500</td><td>0.495</td><td>G</td><td>0.58</td><td>0.02</td><td>L</td><td>*</td><td>8.1555</td><td>0.0016</td><td>0.015</td><td>131</td><td>*</td><td>8.13</td><td>8.19</td><td>--</td><td>D</td><td></td><td></td><td>17562+3926</td><td>I</td><td>1</td><td>2</td><td>C</td><td></td><td>A</td><td>AB</td><td>303</td><td>1.169</td><td>0.008</td><td>1.92</td><td>0.03</td><td>S</td><td></td><td></td><td>163789</td><td>B+39 3274</td><td></td><td></td><td>0.58</td><td>G0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>269.05025599</td><td>39.43910055</td></tr>
+<tr><td>268.8545331400</td><td>39.4982214700</td><td>87670</td><td>87748</td><td>H</td><td>17 55 25.09</td><td>+39 29 53.6</td><td>8.90</td><td>--</td><td>H</td><td>268.85453314</td><td>39.49822147</td><td>A</td><td>9.49</td><td>-7.05</td><td>-6.42</td><td>1.42</td><td>1.42</td><td>1.50</td><td>1.43</td><td>1.37</td><td>0.07</td><td>0.09</td><td>-0.04</td><td>0.09</td><td>0.06</td><td>-0.06</td><td>0.06</td><td>0.15</td><td>0.08</td><td>0.13</td><td>4</td><td>0.56</td><td>9.396</td><td>0.020</td><td>8.829</td><td>0.019</td><td>*</td><td>0.530</td><td>0.025</td><td>T</td><td>0.60</td><td>0.03</td><td>L</td><td>*</td><td>9.0126</td><td>0.0019</td><td>0.020</td><td>128</td><td>*</td><td>8.98</td><td>9.05</td><td>--</td><td>D</td><td></td><td></td><td>17554+3930</td><td>I</td><td>1</td><td>2</td><td>C</td><td></td><td>A</td><td>AB</td><td>100</td><td>5.569</td><td>0.004</td><td>0.70</td><td>0.02</td><td></td><td></td><td></td><td>--</td><td>B+39 3269</td><td></td><td></td><td>0.54</td><td>G0...</td><td>S</td><td>HIPep</td><td>Erratum</td><td>268.85451093</td><td>39.49820587</td></tr>
+<tr><td>268.5171545000</td><td>39.4636849200</td><td>87557</td><td>87634</td><td>H</td><td>17 54 04.12</td><td>+39 27 49.3</td><td>8.90</td><td>--</td><td>H</td><td>268.51715450</td><td>39.46368492</td><td>A</td><td>8.27</td><td>-4.65</td><td>34.07</td><td>1.27</td><td>1.33</td><td>1.38</td><td>1.30</td><td>1.38</td><td>0.08</td><td>0.06</td><td>0.14</td><td>0.28</td><td>0.06</td><td>-0.05</td><td>0.07</td><td>0.13</td><td>-0.06</td><td>0.08</td><td>2</td><td>0.02</td><td>9.433</td><td>0.021</td><td>8.856</td><td>0.019</td><td>*</td><td>0.539</td><td>0.025</td><td>T</td><td>0.61</td><td>0.03</td><td>L</td><td>*</td><td>9.0170</td><td>0.0021</td><td>0.023</td><td>125</td><td>*</td><td>8.98</td><td>9.05</td><td>--</td><td>D</td><td></td><td></td><td>17541+3928</td><td>I</td><td>1</td><td>2</td><td>C</td><td></td><td>A</td><td>AB</td><td>284</td><td>5.446</td><td>0.013</td><td>2.29</td><td>0.06</td><td>S</td><td></td><td></td><td>--</td><td>B+39 3259</td><td></td><td></td><td>0.59</td><td>F5...</td><td>S</td><td>HIPep</td><td>Erratum</td><td>268.51713986</td><td>39.46376773</td></tr>
+<tr><td>268.3760423500</td><td>39.4532302100</td><td>87504</td><td>87581</td><td></td><td>17 53 30.25</td><td>+39 27 11.6</td><td>9.09</td><td>--</td><td>H</td><td>268.37604235</td><td>39.45323021</td><td></td><td>7.30</td><td>-13.21</td><td>-33.01</td><td>0.80</td><td>0.85</td><td>0.99</td><td>0.93</td><td>1.00</td><td>0.00</td><td>-0.01</td><td>0.16</td><td>0.18</td><td>0.01</td><td>-0.04</td><td>0.03</td><td>0.03</td><td>-0.06</td><td>0.06</td><td>0</td><td>0.04</td><td>9.820</td><td>0.017</td><td>9.162</td><td>0.016</td><td></td><td>0.610</td><td>0.020</td><td>T</td><td>0.68</td><td>0.02</td><td>L</td><td></td><td>9.2158</td><td>0.0019</td><td>0.022</td><td>124</td><td></td><td>9.18</td><td>9.25</td><td>--</td><td>C</td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>--</td><td>B+39 3256</td><td></td><td></td><td>0.63</td><td>F8</td><td>S</td><td>HIPep</td><td>Erratum</td><td>268.37600077</td><td>39.45314998</td></tr>
+<tr><td>270.2924303800</td><td>39.0285044200</td><td>88165</td><td>88243</td><td></td><td>18 01 10.18</td><td>+39 01 42.6</td><td>8.55</td><td>--</td><td>H</td><td>270.29243038</td><td>39.02850442</td><td></td><td>3.95</td><td>2.56</td><td>9.37</td><td>0.71</td><td>0.74</td><td>0.87</td><td>0.77</td><td>0.84</td><td>0.08</td><td>-0.25</td><td>0.00</td><td>0.17</td><td>0.08</td><td>-0.17</td><td>0.08</td><td>0.24</td><td>-0.03</td><td>0.11</td><td>0</td><td>-0.49</td><td>9.783</td><td>0.027</td><td>8.659</td><td>0.018</td><td></td><td>0.968</td><td>0.025</td><td>T</td><td>0.95</td><td>0.02</td><td>L</td><td></td><td>8.7107</td><td>0.0017</td><td>0.020</td><td>125</td><td></td><td>8.68</td><td>8.75</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>164823</td><td>B+39 3300</td><td></td><td></td><td>0.94</td><td>K0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>270.29243839</td><td>39.02852719</td></tr>
+<tr><td>269.9292944000</td><td>39.0019510300</td><td>88035</td><td>88112</td><td></td><td>17 59 43.03</td><td>+39 00 07.0</td><td>9.43</td><td>--</td><td>G</td><td>269.92929440</td><td>39.00195103</td><td></td><td>3.25</td><td>-1.02</td><td>-3.38</td><td>0.76</td><td>0.86</td><td>0.98</td><td>0.84</td><td>0.94</td><td>0.04</td><td>-0.06</td><td>-0.05</td><td>0.10</td><td>-0.01</td><td>-0.25</td><td>-0.02</td><td>0.15</td><td>-0.11</td><td>0.06</td><td>3</td><td>-0.37</td><td>9.485</td><td>0.015</td><td>9.411</td><td>0.019</td><td></td><td>0.054</td><td>0.005</td><td>G</td><td>0.07</td><td>0.00</td><td>H</td><td></td><td>9.4482</td><td>0.0018</td><td>0.023</td><td>118</td><td></td><td>9.41</td><td>9.50</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>--</td><td>B+39 3294</td><td></td><td></td><td>0.07</td><td>A0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>269.92929121</td><td>39.00194281</td></tr>
+<tr><td>269.5437584800</td><td>40.1120807300</td><td>87894</td><td>87971</td><td></td><td>17 58 10.50</td><td>+40 06 43.5</td><td>8.93</td><td>--</td><td>H</td><td>269.54375848</td><td>40.11208073</td><td></td><td>7.34</td><td>-3.89</td><td>-26.68</td><td>0.70</td><td>0.77</td><td>0.85</td><td>0.71</td><td>0.86</td><td>0.08</td><td>-0.09</td><td>-0.03</td><td>-0.04</td><td>0.05</td><td>-0.01</td><td>0.05</td><td>0.16</td><td>-0.01</td><td>0.10</td><td>1</td><td>-0.10</td><td>9.560</td><td>0.018</td><td>8.978</td><td>0.017</td><td></td><td>0.544</td><td>0.022</td><td>T</td><td>0.62</td><td>0.02</td><td>L</td><td></td><td>9.0479</td><td>0.0023</td><td>0.020</td><td>104</td><td></td><td>9.02</td><td>9.09</td><td>--</td><td></td><td></td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>--</td><td>B+40 3254</td><td></td><td></td><td>0.59</td><td>F8</td><td>S</td><td>HIPep</td><td>Erratum</td><td>269.54374612</td><td>40.11201588</td></tr>
+<tr><td>270.2033279500</td><td>41.4798740300</td><td>88133</td><td>88211</td><td></td><td>18 00 48.80</td><td>+41 28 47.5</td><td>8.11</td><td>2</td><td>H</td><td>270.20332795</td><td>41.47987403</td><td></td><td>4.24</td><td>2.94</td><td>-5.68</td><td>0.60</td><td>0.64</td><td>0.72</td><td>0.62</td><td>0.72</td><td>0.09</td><td>0.02</td><td>0.03</td><td>0.02</td><td>0.08</td><td>-0.05</td><td>0.10</td><td>0.00</td><td>0.06</td><td>0.14</td><td>0</td><td>-1.48</td><td>9.673</td><td>0.020</td><td>8.251</td><td>0.011</td><td></td><td>1.201</td><td>0.018</td><td>T</td><td>1.16</td><td>0.02</td><td>L</td><td></td><td>8.2811</td><td>0.0031</td><td>0.025</td><td>103</td><td></td><td>8.24</td><td>8.32</td><td>--</td><td>U</td><td>2</td><td></td><td></td><td></td><td>--</td><td>1</td><td></td><td></td><td></td><td></td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td></td><td></td><td></td><td>164754</td><td>B+41 2955</td><td></td><td></td><td>0.98</td><td>K0</td><td>S</td><td>HIPep</td><td>Erratum</td><td>270.20333749</td><td>41.47986022</td></tr>
+</table></div></div>
+</div>
+<p>We could also restrict the columns with the <code class="docutils literal notranslate"><span class="pre">select</span></code> argument. Finally, we plot the positions of the sources in the table to check if they lie in the MOC coverage</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moc_hipparcos_in_7C_coverage</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span>
+    <span class="n">hipparcos_in_7C_coverage</span><span class="p">[</span><span class="s2">"_RAJ2000"</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">hipparcos_in_7C_coverage</span><span class="p">[</span><span class="s2">"_DEJ2000"</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">max_norder</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">moc_hipparcos_in_7C_coverage</span><span class="o">.</span><span class="n">display_preview</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/_collections_notebooks_03-query_vizier_table_with_a__MOC_8_0.png" src="../../_images/_collections_notebooks_03-query_vizier_table_with_a__MOC_8_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Query the sources of a VizieR table that are in a sky region</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/_collections/notebooks/03-query_vizier_table_with_a _MOC.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
+    Last built 26 Oct 2026. <br/>
+  </p>
+</footer>
+  </body>
+</html>

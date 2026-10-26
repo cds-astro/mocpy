@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Create a MOC from an astropy Table &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Create a MOC from an astropy Table &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -101,9 +101,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;_RAJ2000&quot;</span><span class="p">,</span> <span class="s2">&quot;_DEJ2000&quot;</span><span class="p">])</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span> <span class="o">=</span> <span class="n">Vizier</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"_RAJ2000"</span><span class="p">,</span> <span class="s2">"_DEJ2000"</span><span class="p">])</span>
 <span class="n">viz</span><span class="o">.</span><span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># sets the limit to infinity</span>
-<span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">&quot;I/293/npm2cros&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">get_catalogs</span><span class="p">(</span><span class="s2">"I/293/npm2cros"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
@@ -147,8 +147,8 @@ Length = 46887 rows
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moc</span> <span class="o">=</span> <span class="n">MOC</span><span class="o">.</span><span class="n">from_lonlat</span><span class="p">(</span>
-    <span class="n">table</span><span class="p">[</span><span class="s2">&quot;_RAJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">table</span><span class="p">[</span><span class="s2">&quot;_DEJ2000&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">table</span><span class="p">[</span><span class="s2">"_RAJ2000"</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">table</span><span class="p">[</span><span class="s2">"_DEJ2000"</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
     <span class="n">max_norder</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -162,15 +162,15 @@ Length = 46887 rows
 
 <span class="n">galactic_wcs</span> <span class="o">=</span> <span class="n">WCS</span><span class="p">(</span>
     <span class="p">{</span>
-        <span class="s2">&quot;naxis&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;naxis1&quot;</span><span class="p">:</span> <span class="mi">1620</span><span class="p">,</span>
-        <span class="s2">&quot;naxis2&quot;</span><span class="p">:</span> <span class="mi">810</span><span class="p">,</span>
-        <span class="s2">&quot;crpix1&quot;</span><span class="p">:</span> <span class="mf">810.5</span><span class="p">,</span>
-        <span class="s2">&quot;crpix2&quot;</span><span class="p">:</span> <span class="mf">405.5</span><span class="p">,</span>
-        <span class="s2">&quot;cdelt1&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span>
-        <span class="s2">&quot;cdelt2&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
-        <span class="s2">&quot;ctype1&quot;</span><span class="p">:</span> <span class="s2">&quot;GLON-AIT&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ctype2&quot;</span><span class="p">:</span> <span class="s2">&quot;GLAT-AIT&quot;</span><span class="p">,</span>
+        <span class="s2">"naxis"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">"naxis1"</span><span class="p">:</span> <span class="mi">1620</span><span class="p">,</span>
+        <span class="s2">"naxis2"</span><span class="p">:</span> <span class="mi">810</span><span class="p">,</span>
+        <span class="s2">"crpix1"</span><span class="p">:</span> <span class="mf">810.5</span><span class="p">,</span>
+        <span class="s2">"crpix2"</span><span class="p">:</span> <span class="mf">405.5</span><span class="p">,</span>
+        <span class="s2">"cdelt1"</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="s2">"cdelt2"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="s2">"ctype1"</span><span class="p">:</span> <span class="s2">"GLON-AIT"</span><span class="p">,</span>
+        <span class="s2">"ctype2"</span><span class="p">:</span> <span class="s2">"GLAT-AIT"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -179,13 +179,13 @@ Length = 46887 rows
 <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
     <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
     <span class="n">wcs</span><span class="o">=</span><span class="n">galactic_wcs</span><span class="p">,</span>
-    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span>
-    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"teal"</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="s2">"orange"</span><span class="p">,</span>
     <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">galactic_wcs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">moc</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">galactic_wcs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"k"</span><span class="p">)</span>
 
 <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -211,7 +211,6 @@ Length = 46887 rows
 <li><a class="reference internal" href="#">Create a MOC from an astropy Table</a></li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -223,7 +222,7 @@ Length = 46887 rows
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>

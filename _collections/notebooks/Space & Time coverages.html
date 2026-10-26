@@ -5,15 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Space &amp; Time coverages &#8212; MOCPy 0.20.0 documentation</title>
+    <title>Space &amp; Time coverages &#8212; MOCPy 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/mocpy.css?v=b2680190" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
     
-    <script src="../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,7 +66,7 @@
 	 |
       </li>
       <li>
-	<a href="../../index.html">MOCPy 0.20.0 documentation</a>
+	<a href="../../index.html">MOCPy 0.21.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../../examples/user_documentation.html" accesskey="U">User documentation</a> &#187;</li>
@@ -128,15 +128,15 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading the data</span>
 <span class="n">two_mass_data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-    <span class="s2">&quot;./../resources/STMOC/2MASS-list-images.fits.gz&quot;</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span>
+    <span class="s2">"./../resources/STMOC/2MASS-list-images.fits.gz"</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">"fits"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Definition of the times, longitudes and latitudes</span>
-<span class="n">times_2mass</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">)</span>
-<span class="n">lon_2mass</span> <span class="o">=</span> <span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;ra&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
-<span class="n">lat_2mass</span> <span class="o">=</span> <span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;dec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of rows in 2MASS: &quot;</span><span class="p">,</span> <span class="n">lon_2mass</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">times_2mass</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">"mjd"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"mjd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">)</span>
+<span class="n">lon_2mass</span> <span class="o">=</span> <span class="n">two_mass_data</span><span class="p">[</span><span class="s2">"ra"</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
+<span class="n">lat_2mass</span> <span class="o">=</span> <span class="n">two_mass_data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Number of rows in 2MASS: "</span><span class="p">,</span> <span class="n">lon_2mass</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -179,8 +179,8 @@ Wall time: 1.91 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation: &quot;</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the last observation: &quot;</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the first observation: "</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the last observation: "</span><span class="p">,</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -202,49 +202,49 @@ Time of the last observation:  2001-02-18 03:38:35.462
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">add_to_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">moc</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a MOC to a plot.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Add a MOC to a plot."""</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"dotted"</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;lon&quot;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"lon"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"lat"</span><span class="p">)</span>
 
-    <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#00bb00&quot;</span><span class="p">)</span>
-    <span class="c1"># moc.border(ax=ax, wcs=wcs, linewidth=1, color=&quot;green&quot;)</span>
+    <span class="n">moc</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#00bb00"</span><span class="p">)</span>
+    <span class="c1"># moc.border(ax=ax, wcs=wcs, linewidth=1, color="green")</span>
 
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 
 <span class="n">time_ranges</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">[[</span><span class="s2">&quot;1997-06-03&quot;</span><span class="p">,</span> <span class="s2">&quot;1998-01-01&quot;</span><span class="p">]],</span>
-        <span class="p">[[</span><span class="s2">&quot;1998-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;1999-01-01&quot;</span><span class="p">]],</span>
-        <span class="p">[[</span><span class="s2">&quot;1999-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2000-01-01&quot;</span><span class="p">]],</span>
-        <span class="p">[[</span><span class="s2">&quot;2000-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2001-02-18&quot;</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="s2">"1997-06-03"</span><span class="p">,</span> <span class="s2">"1998-01-01"</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="s2">"1998-01-01"</span><span class="p">,</span> <span class="s2">"1999-01-01"</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="s2">"1999-01-01"</span><span class="p">,</span> <span class="s2">"2000-01-01"</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="s2">"2000-01-01"</span><span class="p">,</span> <span class="s2">"2001-02-18"</span><span class="p">]],</span>
     <span class="p">],</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;iso&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span>
-    <span class="n">out_subfmt</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">"iso"</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">,</span>
+    <span class="n">out_subfmt</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
     <span class="n">fig</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="mi">330</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;galactic&quot;</span><span class="p">),</span>
-    <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;galactic&quot;</span><span class="p">,</span>
+    <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">"galactic"</span><span class="p">),</span>
+    <span class="n">coordsys</span><span class="o">=</span><span class="s2">"galactic"</span><span class="p">,</span>
     <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-    <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
+    <span class="n">projection</span><span class="o">=</span><span class="s2">"AIT"</span><span class="p">,</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
         <span class="n">tmoc</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span>
             <span class="n">min_times</span><span class="o">=</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
             <span class="n">max_times</span><span class="o">=</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-            <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">),</span>
+            <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"sec"</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="n">moc_2mass</span> <span class="o">=</span> <span class="n">two_mass</span><span class="o">.</span><span class="n">query_by_time</span><span class="p">(</span><span class="n">tmoc</span><span class="p">)</span>
-        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;2MASS observations between </span><span class="se">\n</span><span class="si">{</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iso</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">iso</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">id_subplot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;22&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"2MASS observations between </span><span class="se">\n</span><span class="si">{</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iso</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">time_ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">iso</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">id_subplot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">"22"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">add_to_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">id_subplot</span><span class="p">,</span> <span class="n">wcs</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">moc_2mass</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -264,11 +264,11 @@ Time of the last observation:  2001-02-18 03:38:35.462
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading &amp; preparing the data</span>
-<span class="n">xmm_dr8_data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;../resources/STMOC/vizier_votable.b64&quot;</span><span class="p">)</span>
-<span class="n">times_xmm</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">&quot;MJD0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">)</span>
-<span class="n">lon_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">&quot;RA_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
-<span class="n">lat_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">&quot;DE_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of rows in XMM_DR8: &quot;</span><span class="p">,</span> <span class="n">lon_xmm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">xmm_dr8_data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">"../resources/STMOC/vizier_votable.b64"</span><span class="p">)</span>
+<span class="n">times_xmm</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">"MJD0"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"mjd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">)</span>
+<span class="n">lon_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">"RA_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
+<span class="n">lat_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="s2">"DE_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Number of rows in XMM_DR8: "</span><span class="p">,</span> <span class="n">lon_xmm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -318,10 +318,10 @@ Wall time: 323 ms
 <span class="c1"># Compute their intersection and check that it is not empty</span>
 <span class="n">xmm_inter_2mass</span> <span class="o">=</span> <span class="n">xmm_dr8_stmoc</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">two_mass</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Is the MOC intersection empty?:&quot;</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">is_empty</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Is the MOC intersection empty?:"</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">is_empty</span><span class="p">())</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the first observation:&quot;</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time of the last observation:&quot;</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the first observation:"</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">min_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Time of the last observation:"</span><span class="p">,</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">max_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -352,7 +352,7 @@ Wall time: 7.67 ms
 <span class="n">mask_xmm</span> <span class="o">=</span> <span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">times_xmm</span><span class="p">,</span> <span class="n">lon_xmm</span><span class="p">,</span> <span class="n">lat_xmm</span><span class="p">)</span>
 <span class="n">sources_xmm</span> <span class="o">=</span> <span class="n">xmm_dr8_data</span><span class="p">[</span><span class="n">mask_xmm</span><span class="p">]</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sources_xmm</span><span class="p">)</span><span class="si">}</span><span class="s2"> sources in XMM</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sources_xmm</span><span class="p">)</span><span class="si">}</span><span class="s2"> sources in XMM</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">sources_xmm</span>
 </pre></div>
 </div>
@@ -394,17 +394,17 @@ Wall time: 98.1 ms
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_skycoords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
-    <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;RA_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-    <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;DE_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-    <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span>
+    <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">"RA_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">"DE_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span>
     <span class="n">frame</span><span class="o">=</span><span class="n">ICRS</span><span class="p">(),</span>
 <span class="p">)</span>
 
 <span class="c1"># Query the IX/55/xmm3r8s catalog with the three first positions + 0.1 arcsec</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">Vizier</span><span class="o">.</span><span class="n">query_region</span><span class="p">(</span>
     <span class="n">xmm_skycoords</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span>
-    <span class="n">radius</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;arcsec&quot;</span><span class="p">),</span>
-    <span class="n">catalog</span><span class="o">=</span><span class="s2">&quot;IX/55/xmm3r8s&quot;</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="s2">"arcsec"</span><span class="p">),</span>
+    <span class="n">catalog</span><span class="o">=</span><span class="s2">"IX/55/xmm3r8s"</span><span class="p">,</span>
 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">result</span>
 </pre></div>
@@ -433,7 +433,7 @@ Wall time: 98.1 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;xmm_inter_2mass_stmoc.fits&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmm_inter_2mass</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"xmm_inter_2mass_stmoc.fits"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"fits"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -453,7 +453,7 @@ Wall time: 98.1 ms
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define an interactive plot for time MOCs.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Define an interactive plot for time MOCs."""</span>
     <span class="k">global</span> <span class="n">t</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">time_slider</span>
     <span class="k">global</span> <span class="n">last_t1</span><span class="p">,</span> <span class="n">last_t2</span>
     <span class="k">global</span> <span class="n">moc</span>
@@ -464,9 +464,9 @@ Wall time: 98.1 ms
     <span class="n">new_t1</span><span class="p">,</span> <span class="n">new_t2</span> <span class="o">=</span> <span class="n">new_values</span>
 
     <span class="n">tmoc_constraint</span> <span class="o">=</span> <span class="n">TimeMOC</span><span class="o">.</span><span class="n">from_time_ranges</span><span class="p">(</span>
-        <span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="n">new_t1</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
-        <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="n">new_t2</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">),</span>
-        <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;sec&quot;</span><span class="p">),</span>
+        <span class="n">min_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="n">new_t1</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"mjd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">),</span>
+        <span class="n">max_times</span><span class="o">=</span><span class="n">Time</span><span class="p">([</span><span class="n">new_t2</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"mjd"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">),</span>
+        <span class="n">delta_t</span><span class="o">=</span><span class="n">TimeDelta</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">"tdb"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"sec"</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1"># Query the Space-Time coverages with the same time frame</span>
     <span class="c1"># This operation returns a spatial coverage and is pretty fast thanks to</span>
@@ -482,10 +482,10 @@ Wall time: 98.1 ms
         <span class="k">with</span> <span class="n">WCS</span><span class="p">(</span>
             <span class="n">fig</span><span class="p">,</span>
             <span class="n">fov</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
-            <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;galactic&quot;</span><span class="p">),</span>
-            <span class="n">coordsys</span><span class="o">=</span><span class="s2">&quot;galactic&quot;</span><span class="p">,</span>
+            <span class="n">center</span><span class="o">=</span><span class="n">SkyCoord</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">"galactic"</span><span class="p">),</span>
+            <span class="n">coordsys</span><span class="o">=</span><span class="s2">"galactic"</span><span class="p">,</span>
             <span class="n">rotation</span><span class="o">=</span><span class="n">Angle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span>
-            <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;AIT&quot;</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="s2">"AIT"</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">wcs</span><span class="p">:</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">wcs</span><span class="p">)</span>
             <span class="c1"># Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.</span>
@@ -494,54 +494,54 @@ Wall time: 98.1 ms
                 <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
                 <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;2mass&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">"green"</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">"2mass"</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">moc_xmm_dr8</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                 <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
                 <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;xmm_dr8&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">"xmm_dr8"</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">moc_xmm_dr8_inter_2mass</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                 <span class="n">wcs</span><span class="o">=</span><span class="n">wcs</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
                 <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;xmm_dr8 inter 2mass&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">"xmm_dr8 inter 2mass"</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Plot the sources contained into `xmm_inter_2mass`</span>
             <span class="n">skycoords</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
-                <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;RA_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">&quot;DE_ICRS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span>
+                <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">"RA_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">sources_xmm</span><span class="p">[</span><span class="s2">"DE_ICRS"</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span>
                 <span class="n">frame</span><span class="o">=</span><span class="n">ICRS</span><span class="p">(),</span>
             <span class="p">)</span>
             <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="o">.</span><span class="n">to_pixel</span><span class="p">(</span><span class="n">skycoords</span><span class="p">,</span> <span class="n">wcs</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
                 <span class="n">X</span><span class="p">,</span>
                 <span class="n">Y</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">"yellow"</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sources from XMM filtered through </span><span class="se">\n</span><span class="s2">xmm_dr8 inter 2mass&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">"sources from XMM filtered through </span><span class="se">\n</span><span class="s2">xmm_dr8 inter 2mass"</span><span class="p">,</span>
                 <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"lower left"</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;GLON&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;GLAT&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"GLON"</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"GLAT"</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
-            <span class="s2">&quot;Coverage of 2MASS images, XMM_DR8 and their intersection between &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;MJD </span><span class="si">{</span><span class="n">new_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">new_values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">"Coverage of 2MASS images, XMM_DR8 and their intersection between "</span>
+            <span class="sa">f</span><span class="s2">"MJD </span><span class="si">{</span><span class="n">new_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">new_values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"dotted"</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -550,19 +550,19 @@ Wall time: 98.1 ms
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">min_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]))</span> <span class="o">-</span> <span class="mi">1</span>
-<span class="n">max_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">&quot;mjd&quot;</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">min_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">"mjd"</span><span class="p">]))</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">max_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">two_mass_data</span><span class="p">[</span><span class="s2">"mjd"</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
 
 <span class="n">time_slider</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntRangeSlider</span><span class="p">(</span>
     <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">51594</span><span class="p">,</span> <span class="mi">51917</span><span class="p">],</span>
     <span class="nb">min</span><span class="o">=</span><span class="n">min_time</span><span class="p">,</span>
     <span class="nb">max</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
     <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;MJD interval:&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">"MJD interval:"</span><span class="p">,</span>
     <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
-    <span class="n">layout</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="s2">&quot;90%&quot;</span><span class="p">},</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
+    <span class="n">layout</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="s2">"90%"</span><span class="p">},</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -572,7 +572,7 @@ Wall time: 98.1 ms
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># In blue is a region that has been observed by 2MASS and XMM_DR8 at the same time</span>
-<span class="n">time_slider</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">time_slider</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">)</span>
 <span class="n">update</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">time_slider</span><span class="p">,</span> <span class="n">output</span><span class="p">])</span>
 </pre></div>
@@ -609,7 +609,6 @@ Wall time: 98.1 ms
 </li>
 </ul>
 
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -621,7 +620,7 @@ Wall time: 98.1 ms
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2026, Matthieu Baumann &lt;matthieu.baumann@astro.unistra.fr&gt; Thomas Boch &lt;thomas.boch@astro.unistra.fr&gt; Manon Marchand &lt;manon.marchand@astro.unistra.fr&gt; F.-X. Pineau &lt;francois-xavier.pineau@astro.unistra.fr&gt;.<br/>
-    Last built 10 Mar 2026. <br/>
+    Last built 26 Oct 2026. <br/>
   </p>
 </footer>
   </body>
