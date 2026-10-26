@@ -2,8 +2,8 @@
 [project]
 name = "mocpy"
 description = "MOCPy allows to create and manipulate MOCs (Multi-Order Coverage maps)"
-dynamic = ["version"]
-requires-python = ">=3.9" # update the abi3 declaration in Cargo.toml at the same time
+dynamic = ["version", "license"]
+requires-python = ">=3.10" # update the abi3 declaration in Cargo.toml at the same time
 authors = [
   {name = "Matthieu Baumann", email = "matthieu.baumann@astro.unistra.fr"},
   {name = "Thomas Boch", email = "thomas.boch@astro.unistra.fr"},
@@ -23,12 +23,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 keywords=["astronomy", "astrophysics", "HEALPix"]
 
