@@ -31,10 +31,10 @@ def test_n_cells():
     assert SFMOC.n_cells(i, dimension="frequency") == 2 * 2**i
     # test the errors
     with pytest.raises(
-        ValueError, match="The depth should be comprised between 0 and 29, but*"
+        ValueError, match=r"The depth should be comprised between 0 and 29, but*"
     ):
         SFMOC.n_cells(-1, dimension="space")
-    with pytest.raises(ValueError, match="Dimension should be either *"):
+    with pytest.raises(ValueError, match=r"Dimension should be either *"):
         SFMOC.n_cells(0, dimension="blah")
 
 
@@ -43,7 +43,7 @@ def test_shape_mismatch():
     lon = [0, 1, 2] * u.deg
     lat = [0, 1, 2] * u.deg
     with pytest.raises(
-        ValueError, match="Frequencies and positions must have the same lengths."
+        ValueError, match=r"Frequencies and positions must have the same lengths."
     ):
         SFMOC.from_frequencies_and_positions(
             freqs, lon, lat, max_order_frequency=20, max_order_space=12
@@ -70,7 +70,7 @@ def test_from_frequencies_and_positions():
     # errors
     with pytest.raises(
         ValueError,
-        match="Frequencies and positions must be scalar quantities or 1D arrays.",
+        match=r"Frequencies and positions must be scalar quantities or 1D arrays.",
     ):
         SFMOC.from_frequencies_and_positions(
             [[0.01], [0.01]] * u.Hz,
@@ -131,7 +131,7 @@ def test_wrong_format_io(tmp_path):
     sfmoc = SFMOC.from_string("f10/0-10\ns10/0-10", format="ascii")
     path = tmp_path / "test_wrong_format.fits"
     sfmoc.save(path)
-    with pytest.raises(ValueError, match="format should be *"):
+    with pytest.raises(ValueError, match=r"format should be *"):
         SFMOC.load(path, format="blah")
 
 

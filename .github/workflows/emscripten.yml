@@ -35,8 +35,3 @@ jobs:
           rustup default nightly
           rustup target add wasm32-unknown-emscripten
           maturin build --target wasm32-unknown-emscripten -i 3.13
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-wheels
-          path: dist

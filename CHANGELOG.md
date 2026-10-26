@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.21.0]
+
 ### Added
 
 * the `query_vizier_table` and `query_simbad` now have two new parameters: `select`
@@ -38,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * :warning: BREAKING: `TimeMOC.mn_time` and `TimeMOC.max_time` now return scalar values
   again (this was changed in version 0.12 by mistake and not documented in the
   changelog) [#237]
+* the supported python versions are now 3.10 to 3.15
 
 ### Fixed
 
