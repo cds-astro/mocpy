@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -51,7 +51,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i python3.14t
+          args: --release --out dist -i python3.15t
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
       - name: Upload wheels
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -89,7 +89,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i python3.14t
+          args: --release --out dist -i python3.15t
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -126,13 +126,13 @@ jobs:
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14t"
+          python-version: "3.15t"
           architecture: ${{ matrix.platform.python_arch }}
       - name: Build free-threaded wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i python3.14t
+          args: --release --out dist -i python3.15t
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - name: Upload wheels
         uses: actions/upload-artifact@v6
@@ -153,7 +153,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -162,12 +162,12 @@ jobs:
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14t"
+          python-version: "3.15t"
       - name: Build free-threaded wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i python3.14t
+          args: --release --out dist -i python3.15t
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - name: Upload wheels
         uses: actions/upload-artifact@v6
